@@ -3,46 +3,30 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Strategia-X Brand Colors (matching Android app exactly) -->
-    <Color x:Key="PrimaryColor">#AA2024</Color>
-    <Color x:Key="PrimaryDarkColor">#8A1A1D</Color>
-    <Color x:Key="PrimaryLightColor">#C93437</Color>
-    <Color x:Key="SecondaryColor">#8A1A1D</Color>
-    <Color x:Key="AccentColor">#FF7043</Color>
-
-    <!-- Background Colors (AMOLED Dark Theme) -->
-    <Color x:Key="BackgroundColor">#000000</Color>
-    <Color x:Key="BackgroundSecondaryColor">#0F0F0F</Color>
-    <Color x:Key="SurfaceColor">#121212</Color>
-    <Color x:Key="CardColor">#1A1A1A</Color>
-    <Color x:Key="CardBorderColor">#333333</Color>
-    <Color x:Key="ElevatedSurfaceColor">#252525</Color>
-    <Color x:Key="SurfaceLightColor">#2A2A2A</Color>
-
-    <!-- Text Colors -->
-    <Color x:Key="TextPrimaryColor">#FFFFFF</Color>
-    <Color x:Key="TextSecondaryColor">#B3B3B3</Color>
-    <Color x:Key="TextTertiaryColor">#808080</Color>
-    <Color x:Key="TextDisabledColor">#4D4D4D</Color>
+    <!-- ==================== STRATEGIA-X BRAND COLORS ==================== -->
+    <!-- Matching Android app exactly per STYLE_GUIDE.md -->
 
     <!-- Brand Brushes -->
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
-    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
-    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#AA2024"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#8A1A1D"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="#C93437"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#8A1A1D"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#FF7043"/>
 
-    <!-- Background Brushes -->
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}"/>
-    <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource CardBorderColor}"/>
-    <SolidColorBrush x:Key="ElevatedSurfaceBrush" Color="{StaticResource ElevatedSurfaceColor}"/>
+    <!-- Background Brushes (AMOLED Dark Theme) -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="#0F0F0F"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#121212"/>
+    <SolidColorBrush x:Key="CardBrush" Color="#1A1A1A"/>
+    <SolidColorBrush x:Key="CardBorderBrush" Color="#333333"/>
+    <SolidColorBrush x:Key="ElevatedSurfaceBrush" Color="#252525"/>
+    <SolidColorBrush x:Key="SurfaceLightBrush" Color="#2A2A2A"/>
 
     <!-- Text Brushes -->
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
-    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B3B3B3"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#808080"/>
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="#4D4D4D"/>
 
     <!-- Header Gradient (135° angle - matching Android) -->
     <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,1">
@@ -89,13 +73,10 @@
     <SolidColorBrush x:Key="ErrorBrush" Color="#F44336"/>
     <SolidColorBrush x:Key="InfoBrush" Color="#2196F3"/>
 
-    <!-- Chart/Data Accent Colors (matching Android app) -->
-    <Color x:Key="CyanAccentColor">#00BCD4</Color>
-    <Color x:Key="TealAccentColor">#009688</Color>
-    <Color x:Key="GoldAccentColor">#FFD700</Color>
-    <SolidColorBrush x:Key="CyanAccentBrush" Color="{StaticResource CyanAccentColor}"/>
-    <SolidColorBrush x:Key="TealAccentBrush" Color="{StaticResource TealAccentColor}"/>
-    <SolidColorBrush x:Key="GoldAccentBrush" Color="{StaticResource GoldAccentColor}"/>
+    <!-- Chart/Data Accent Brushes (matching Android app) -->
+    <SolidColorBrush x:Key="CyanAccentBrush" Color="#00BCD4"/>
+    <SolidColorBrush x:Key="TealAccentBrush" Color="#009688"/>
+    <SolidColorBrush x:Key="GoldAccentBrush" Color="#FFD700"/>
     <SolidColorBrush x:Key="ChartLineBrush" Color="#00BCD4"/>
 
     <!-- Health Score Brushes -->
