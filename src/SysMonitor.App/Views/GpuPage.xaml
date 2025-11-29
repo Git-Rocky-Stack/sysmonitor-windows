@@ -100,30 +100,52 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource PrimaryBrush}"
-                                    Width="48" Height="48">
+                            <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}"/>
+                                </Border.Background>
                                 <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="GPU CORE" Style="{StaticResource StatLabelStyle}"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="GPU CORE" Style="{StaticResource StatLabelStyle}"/>
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </StackPanel>
                                 <TextBlock Text="Main Temperature" Style="{StaticResource CardSubtitleStyle}"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" HorizontalAlignment="Center">
-                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
-                                       Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Foreground>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}"/>
+                                </TextBlock.Foreground>
                                 <Run Text="{x:Bind ViewModel.GpuTemperature, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
                                 <Run Text="°C" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
 
-                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8"
-                                Background="{StaticResource SurfaceLightBrush}"
-                                HorizontalAlignment="Center">
-                            <TextBlock Text="{x:Bind ViewModel.TempStatus, Mode=OneWay}"
-                                       FontWeight="SemiBold" FontSize="14"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <!-- Status Badge -->
+                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center">
+                            <Border.Background>
+                                <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}" Opacity="0.2"/>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock Text="{x:Bind ViewModel.TempStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </StackPanel>
                         </Border>
                     </Grid>
                 </Border>
@@ -139,29 +161,52 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource WarningBrush}"
-                                    Width="48" Height="48">
+                            <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}"/>
+                                </Border.Background>
                                 <FontIcon Glyph="&#xE7A6;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="HOT SPOT" Style="{StaticResource StatLabelStyle}"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="HOT SPOT" Style="{StaticResource StatLabelStyle}"/>
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </StackPanel>
                                 <TextBlock Text="Junction Temp" Style="{StaticResource CardSubtitleStyle}"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" HorizontalAlignment="Center">
-                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
-                                       Foreground="{StaticResource WarningBrush}">
+                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Foreground>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}"/>
+                                </TextBlock.Foreground>
                                 <Run Text="{x:Bind ViewModel.GpuHotSpot, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
                                 <Run Text="°C" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
 
-                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8"
-                                Background="{StaticResource SurfaceLightBrush}"
-                                HorizontalAlignment="Center">
-                            <TextBlock Text="Peak Heat" FontWeight="SemiBold" FontSize="14"
-                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <!-- Status Badge -->
+                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center">
+                            <Border.Background>
+                                <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}" Opacity="0.2"/>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock Text="{x:Bind ViewModel.HotSpotStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </StackPanel>
                         </Border>
                     </Grid>
                 </Border>
@@ -177,29 +222,52 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource CyanAccentBrush}"
-                                    Width="48" Height="48">
+                            <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}"/>
+                                </Border.Background>
                                 <FontIcon Glyph="&#xE964;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="VRAM" Style="{StaticResource StatLabelStyle}"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="VRAM" Style="{StaticResource StatLabelStyle}"/>
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </StackPanel>
                                 <TextBlock Text="Memory Temp" Style="{StaticResource CardSubtitleStyle}"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" HorizontalAlignment="Center">
-                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
-                                       Foreground="{StaticResource CyanAccentBrush}">
+                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Foreground>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}"/>
+                                </TextBlock.Foreground>
                                 <Run Text="{x:Bind ViewModel.GpuMemoryTemp, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
                                 <Run Text="°C" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
 
-                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8"
-                                Background="{StaticResource SurfaceLightBrush}"
-                                HorizontalAlignment="Center">
-                            <TextBlock Text="Video Memory" FontWeight="SemiBold" FontSize="14"
-                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <!-- Status Badge -->
+                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center">
+                            <Border.Background>
+                                <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}" Opacity="0.2"/>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock Text="{x:Bind ViewModel.MemTempStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </StackPanel>
                         </Border>
                     </Grid>
                 </Border>
