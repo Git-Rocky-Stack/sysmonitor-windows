@@ -228,6 +228,13 @@
         <Setter Property="Height" Value="8"/>
     </Style>
 
+    <Style x:Key="CyanProgressBarStyle" TargetType="ProgressBar">
+        <Setter Property="Foreground" Value="{StaticResource CyanAccentBrush}"/>
+        <Setter Property="Background" Value="{StaticResource ProgressTrackBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Height" Value="8"/>
+    </Style>
+
     <Style x:Key="ThinProgressBarStyle" TargetType="ProgressBar">
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="Background" Value="{StaticResource ProgressTrackBrush}"/>

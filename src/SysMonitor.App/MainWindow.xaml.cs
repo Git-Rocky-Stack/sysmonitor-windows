@@ -10,6 +10,7 @@ public sealed partial class MainWindow : Window
     {
         { "Dashboard", typeof(DashboardPage) },
         { "CpuMonitor", typeof(CpuPage) },
+        { "MemoryMonitor", typeof(MemoryPage) },
         { "Processes", typeof(ProcessesPage) },
         { "Cleaner", typeof(CleanerPage) },
         { "Startup", typeof(StartupPage) },
