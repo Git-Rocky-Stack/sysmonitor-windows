@@ -8,25 +8,21 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner - matching Android app style -->
+            <!-- Page Header Banner - matching Android app style with logo -->
             <Border Style="{StaticResource HeaderBannerStyle}">
-                <StackPanel HorizontalAlignment="Center">
-                    <!-- Logo text like Android -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                        <TextBlock Text="\\strateg\a-" FontSize="12" FontWeight="Light"
-                                   Foreground="{StaticResource TextSecondaryBrush}" FontFamily="Consolas"/>
-                        <TextBlock Text="x" FontSize="12" FontWeight="Light"
-                                   Foreground="{StaticResource PrimaryLightBrush}" FontFamily="Consolas"/>
-                    </StackPanel>
-                    <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8">
-                        <Run Text="STX" Foreground="#808080"/>
-                        <Run Text="." Foreground="{StaticResource PrimaryLightBrush}"/>
-                        <Run Text="1" Foreground="#808080"/>
-                    </TextBlock>
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <!-- STX.1 Home Logo (chrome effect with circuit X) -->
+                    <Image Source="ms-appx:///Assets/Home_Logo.png"
+                           Height="80" HorizontalAlignment="Center"
+                           Stretch="Uniform"/>
+
+                    <!-- SYSTEM MONITOR text below logo -->
                     <TextBlock Text="SYSTEM MONITOR" Style="{StaticResource PageHeaderStyle}"
                                Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+
+                    <!-- Tagline -->
                     <TextBlock Text="Strategic. Excellence. Engineered." Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Center"/>
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Center" Margin="0"/>
                 </StackPanel>
             </Border>
 
@@ -368,11 +364,16 @@
                 </Grid>
             </Border>
 
-            <!-- Footer -->
-            <TextBlock Text="Powered by Strategia-X Technology"
-                       HorizontalAlignment="Center"
-                       Foreground="{StaticResource PrimaryBrush}"
-                       FontSize="12" Margin="0,16,0,0"/>
+            <!-- Footer with Strategia-X branding -->
+            <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">
+                <Image Source="ms-appx:///Assets/Header_Main1.png"
+                       Height="16" HorizontalAlignment="Center"
+                       Stretch="Uniform" Opacity="0.7"/>
+                <TextBlock Text="Powered by Strategia-X Technology"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           FontSize="12"/>
+            </StackPanel>
 
         </StackPanel>
     </ScrollViewer>

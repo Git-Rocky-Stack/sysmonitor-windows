@@ -33,4 +33,17 @@
     <ProjectReference Include="..\SysMonitor.Core\SysMonitor.Core.csproj" />
   </ItemGroup>
 
+  <!-- Brand Assets -->
+  <ItemGroup>
+    <Content Include="Assets\Header_Main1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Home_Logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\STX1_Logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
