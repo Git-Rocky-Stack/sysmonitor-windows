@@ -26,7 +26,7 @@ public partial class ImageToolsViewModel : ObservableObject
     [ObservableProperty] private ImageInfo? _currentImageInfo;
     [ObservableProperty] private bool _hasImageInfo;
     [ObservableProperty] private string _imageDimensions = "";
-    [ObservableProperty] private string _imageFormat = "";
+    [ObservableProperty] private string _imageFormatName = "";
     [ObservableProperty] private string _imageColorDepth = "";
     [ObservableProperty] private string _imageResolution = "";
 
@@ -178,7 +178,7 @@ public partial class ImageToolsViewModel : ObservableObject
             CurrentImageInfo = info;
             HasImageInfo = info != null;
             ImageDimensions = info?.Dimensions ?? "";
-            ImageFormat = info?.Format ?? "";
+            ImageFormatName = info?.Format ?? "";
             ImageColorDepth = info?.ColorDepth ?? "";
             ImageResolution = info?.Resolution ?? "";
         });
@@ -413,7 +413,7 @@ public partial class ImageToolsViewModel : ObservableObject
         HasImageInfo = false;
         CurrentImageInfo = null;
         ImageDimensions = "";
-        ImageFormat = "";
+        ImageFormatName = "";
         ImageColorDepth = "";
         ImageResolution = "";
     }

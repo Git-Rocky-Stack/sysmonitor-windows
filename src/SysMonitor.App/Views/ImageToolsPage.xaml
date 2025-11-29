@@ -111,7 +111,7 @@
 
                             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                                 <TextBlock Text="FORMAT" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ImageFormat, Mode=OneWay}"
+                                <TextBlock Text="{x:Bind ViewModel.ImageFormatName, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="14" Foreground="{StaticResource CyanAccentBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
