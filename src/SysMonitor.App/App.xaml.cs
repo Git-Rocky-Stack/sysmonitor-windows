@@ -48,6 +48,7 @@ public partial class App : Application
                 services.AddTransient<StartupViewModel>();
                 services.AddTransient<SettingsViewModel>();
                 services.AddTransient<CpuViewModel>();
+                services.AddTransient<MemoryViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -56,6 +57,7 @@ public partial class App : Application
                 services.AddTransient<StartupPage>();
                 services.AddTransient<SettingsPage>();
                 services.AddTransient<CpuPage>();
+                services.AddTransient<MemoryPage>();
             })
             .Build();
     }
