@@ -108,6 +108,16 @@
                         <FontIcon Glyph="&#xE83F;" Foreground="{StaticResource PrimaryBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Temperature" Tag="Temperature">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9CA;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="System Info" Tag="SystemInfo">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7F4;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" Padding="24" Background="{StaticResource BackgroundBrush}"/>

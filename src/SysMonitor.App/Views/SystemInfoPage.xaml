@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SysMonitor.App.Views.SystemInfoPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="0,0,0,24" Spacing="16">
+
+            <!-- Page Header Banner -->
+            <Border Style="{StaticResource HeaderBannerStyle}">
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <FontIcon Glyph="&#xE7F4;" FontSize="48" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="SYSTEM INFORMATION" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Hardware and software specifications" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Center" Margin="0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Loading State -->
+            <Border Style="{StaticResource CardStyle}" Padding="32"
+                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center" Spacing="16">
+                    <ProgressRing IsActive="True" Width="48" Height="48"/>
+                    <TextBlock Text="Gathering system information..." Style="{StaticResource CardSubtitleStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Health Score Card -->
+            <Border Style="{StaticResource CardStyle}" Padding="24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Health Icon -->
+                    <Border Grid.Column="0" Width="72" Height="72" CornerRadius="36"
+                            Background="{StaticResource PrimaryBrush}">
+                        <FontIcon Glyph="&#xE8FC;" FontSize="36" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Border>
+
+                    <!-- Health Info -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
+                        <TextBlock Text="SYSTEM HEALTH SCORE" Style="{StaticResource StatLabelStyle}"/>
+                        <TextBlock Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
+                                   FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Based on CPU, Memory, and Disk usage"
+                                   Style="{StaticResource CardSubtitleStyle}"/>
+                    </StackPanel>
+
+                    <!-- Score Value -->
+                    <Border Grid.Column="2" VerticalAlignment="Center" Padding="24,16"
+                            CornerRadius="16" Background="{StaticResource SurfaceLightBrush}">
+                        <TextBlock FontSize="48" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}">
+                            <Run Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"/>
+                            <Run Text="%" FontSize="24"/>
+                        </TextBlock>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Operating System Section -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="OPERATING SYSTEM" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
+            <Border Style="{StaticResource CardStyle}">
+                <Grid RowSpacing="16" ColumnSpacing="32">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- OS Name -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE770;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="OPERATING SYSTEM" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.OsName, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Version -->
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE946;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="VERSION" Style="{StaticResource StatLabelStyle}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{x:Bind ViewModel.OsVersion, Mode=OneWay}"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Build" Style="{StaticResource CardSubtitleStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.OsBuild, Mode=OneWay}"
+                                           Foreground="{StaticResource CyanAccentBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Computer Name -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="COMPUTER NAME" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.ComputerName, Mode=OneWay}"
+                                       Foreground="{StaticResource CyanAccentBrush}" FontFamily="Consolas"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- User Name -->
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE77B;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="USER" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.UserName, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Architecture -->
+                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE950;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="ARCHITECTURE" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.OsArchitecture, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Install Date -->
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE787;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="INSTALLED" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.InstallDate, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Uptime -->
+                    <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource SuccessBrush}">
+                            <FontIcon Glyph="&#xE916;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="SYSTEM UPTIME" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.Uptime, Mode=OneWay}"
+                                       Foreground="{StaticResource SuccessBrush}" FontSize="16" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Processor Section -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="PROCESSOR" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
+            <Border Style="{StaticResource CardStyle}">
+                <Grid RowSpacing="16" ColumnSpacing="32">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- CPU Name -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource PrimaryBrush}"
+                                Width="48" Height="48">
+                            <FontIcon Glyph="&#xE950;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="PROCESSOR" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.CpuName, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" MaxWidth="500"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Cores -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE8F1;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="CORES / THREADS" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="{x:Bind ViewModel.CpuCores, Mode=OneWay}" FontWeight="Bold"/>
+                                <Run Text=" Cores / "/>
+                                <Run Text="{x:Bind ViewModel.CpuThreads, Mode=OneWay}" FontWeight="Bold"/>
+                                <Run Text=" Threads"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Speed -->
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xEC49;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="BASE SPEED" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.CpuSpeed, Mode=OneWay}"
+                                       Foreground="{StaticResource CyanAccentBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Cache L2 -->
+                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="L2 CACHE" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.CpuCacheL2, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Cache L3 -->
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="L3 CACHE" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.CpuCacheL3, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Memory & Storage Section -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="MEMORY &amp; STORAGE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Memory Card -->
+                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource CyanAccentBrush}"
+                                    Width="48" Height="48">
+                                <FontIcon Glyph="&#xE964;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="INSTALLED RAM" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalMemory, Mode=OneWay}"
+                                           FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <ProgressBar Grid.Row="1" Value="{x:Bind ViewModel.MemoryUsagePercent, Mode=OneWay}"
+                                     Maximum="100" Height="8" CornerRadius="4"
+                                     Background="{StaticResource SurfaceLightBrush}"
+                                     Foreground="{StaticResource CyanAccentBrush}"/>
+
+                        <Grid Grid.Row="2" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                <TextBlock Text="{x:Bind ViewModel.UsedMemory, Mode=OneWay}"
+                                           Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                <TextBlock Text="{x:Bind ViewModel.FreeMemory, Mode=OneWay}"
+                                           Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Storage Card -->
+                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource PrimaryBrush}"
+                                    Width="48" Height="48">
+                                <FontIcon Glyph="&#xEDA2;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource StatLabelStyle}">
+                                    <Run Text="TOTAL STORAGE ("/>
+                                    <Run Text="{x:Bind ViewModel.DriveCount, Mode=OneWay}"/>
+                                    <Run Text=" drives)"/>
+                                </TextBlock>
+                                <TextBlock Text="{x:Bind ViewModel.TotalStorage, Mode=OneWay}"
+                                           FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Grid.Row="1" Height="8" CornerRadius="4"
+                                Background="{StaticResource SurfaceLightBrush}"/>
+
+                        <Grid Grid.Row="2" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                <TextBlock Text="{x:Bind ViewModel.UsedStorage, Mode=OneWay}"
+                                           Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                <TextBlock Text="{x:Bind ViewModel.FreeStorage, Mode=OneWay}"
+                                           Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Footer -->
+            <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">
+                <Image Source="ms-appx:///Assets/Header_Main1.png"
+                       Height="16" HorizontalAlignment="Center"
+                       Stretch="Uniform" Opacity="0.7"/>
+                <TextBlock Text="Powered by Strategia-X Technology"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           FontSize="12"/>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
