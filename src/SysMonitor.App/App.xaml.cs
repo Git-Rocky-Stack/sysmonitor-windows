@@ -47,6 +47,7 @@ public partial class App : Application
                 services.AddTransient<CleanerViewModel>();
                 services.AddTransient<StartupViewModel>();
                 services.AddTransient<SettingsViewModel>();
+                services.AddTransient<CpuViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -54,6 +55,7 @@ public partial class App : Application
                 services.AddTransient<CleanerPage>();
                 services.AddTransient<StartupPage>();
                 services.AddTransient<SettingsPage>();
+                services.AddTransient<CpuPage>();
             })
             .Build();
     }
