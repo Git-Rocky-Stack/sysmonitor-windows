@@ -26,6 +26,9 @@
             <converters:BoolToChargingConverter x:Key="BoolToChargingConverter"/>
             <converters:InvertBoolToVisibilityConverter x:Key="InvertBoolToVisibilityConverter"/>
             <converters:BoolToScanButtonConverter x:Key="BoolToScanButtonConverter"/>
+            <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+            <converters:ScanButtonIconConverter x:Key="ScanButtonIconConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

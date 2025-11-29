@@ -176,3 +176,54 @@ public class BoolToScanButtonConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+public class ZeroToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is int intValue)
+            return intValue == 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (value is long longValue)
+            return longValue == 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (value is double doubleValue)
+            return doubleValue == 0 ? Visibility.Visible : Visibility.Collapsed;
+        return Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ScanButtonIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isScanning)
+            return isScanning ? "\uE711" : "\uE72C"; // Cancel : Refresh
+        return "\uE72C";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class InverseBoolConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool boolValue)
+            return !boolValue;
+        return true;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool boolValue)
+            return !boolValue;
+        return false;
+    }
+}

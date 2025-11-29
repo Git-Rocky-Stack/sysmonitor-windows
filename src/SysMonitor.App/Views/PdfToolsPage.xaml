@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SysMonitor.App.Views.PdfToolsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SysMonitor.App.Views"
+    xmlns:vm="using:SysMonitor.App.ViewModels"
+    Background="Transparent">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="24" Spacing="16">
+            <!-- Header -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="PDF Tools" FontSize="28" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="Merge, split, and extract pages from PDF files" FontSize="14" Foreground="#808080" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Mode Selection -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="16" BorderBrush="#1A1A1A" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <RadioButton Content="Merge PDFs" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsMergeMode, Mode=TwoWay}"
+                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Merge"/>
+                    <RadioButton Content="Split PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSplitMode, Mode=TwoWay}"
+                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Split" Margin="16,0,0,0"/>
+                    <RadioButton Content="Extract Pages" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsExtractMode, Mode=TwoWay}"
+                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Extract" Margin="16,0,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Merge Mode -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
+                    Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay}">
+                <StackPanel Spacing="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="PDFs to Merge" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <Button Command="{x:Bind ViewModel.SelectMultiplePdfsCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                                    <TextBlock Text="Add PDFs"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.ClearFilesCommand}">
+                                <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <ListView ItemsSource="{x:Bind ViewModel.SelectedFiles, Mode=OneWay}" MinHeight="150"
+                              Background="Transparent" SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PdfFileDisplay">
+                                <Border Background="#141414" CornerRadius="6" Padding="12" Margin="0,2">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <FontIcon Glyph="&#xEA90;" Foreground="#F44336" FontSize="24" VerticalAlignment="Center"/>
+
+                                        <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind FileName}" FontSize="13" Foreground="White"/>
+                                            <TextBlock FontSize="11" Foreground="#606060">
+                                                <Run Text="{x:Bind PageCount}"/> pages - <Run Text="{x:Bind FileSize}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="2" Command="{Binding DataContext.MoveFileUpCommand, ElementName=ContentArea}"
+                                                CommandParameter="{x:Bind}" Padding="8" Background="Transparent" Margin="4,0">
+                                            <FontIcon Glyph="&#xE74A;" FontSize="12"/>
+                                        </Button>
+                                        <Button Grid.Column="3" Command="{Binding DataContext.RemoveFileCommand, ElementName=ContentArea}"
+                                                CommandParameter="{x:Bind}" Padding="8" Background="Transparent">
+                                            <FontIcon Glyph="&#xE711;" FontSize="12"/>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <Button Command="{x:Bind ViewModel.MergePdfsCommand}" Style="{StaticResource AccentButtonStyle}"
+                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8BB;" FontSize="14"/>
+                            <TextBlock Text="Merge PDFs"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Split/Extract Mode - File Selection -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
+                    Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}">
+                <StackPanel Spacing="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Select PDF File" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                        <Button Grid.Column="1" Command="{x:Bind ViewModel.SelectPdfCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                                <TextBlock Text="Browse"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Selected File Info -->
+                    <Border Background="#141414" CornerRadius="6" Padding="16" Visibility="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <FontIcon Glyph="&#xEA90;" Foreground="#F44336" FontSize="32" VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" Margin="16,0,0,0">
+                                <TextBlock Text="{x:Bind ViewModel.SelectedPdfName, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                                <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
+                                    <TextBlock FontSize="12" Foreground="#808080">
+                                        <Run Text="{x:Bind ViewModel.PageCount, Mode=OneWay}"/> pages
+                                    </TextBlock>
+                                    <TextBlock Text="{x:Bind ViewModel.FileSize, Mode=OneWay}" FontSize="12" Foreground="#808080"/>
+                                    <TextBlock Text="{x:Bind ViewModel.PdfVersion, Mode=OneWay}" FontSize="12" Foreground="#808080"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Split Options -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
+                    Visibility="{x:Bind ViewModel.IsSplitMode, Mode=OneWay}">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Split Options" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+
+                    <RadioButton Content="Split into individual pages" IsChecked="{x:Bind ViewModel.SplitAllPages, Mode=TwoWay}"/>
+                    <RadioButton Content="Split by page range" IsChecked="{x:Bind ViewModel.SplitByRange, Mode=TwoWay}" Margin="0,8,0,0"/>
+
+                    <Grid Visibility="{x:Bind ViewModel.SplitByRange, Mode=OneWay}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="From page:" VerticalAlignment="Center" Foreground="#808080"/>
+                        <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.SplitStartPage, Mode=TwoWay}" Minimum="1"
+                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                        <TextBlock Grid.Column="2" Text="To page:" VerticalAlignment="Center" Foreground="#808080" Margin="16,0,0,0"/>
+                        <NumberBox Grid.Column="3" Value="{x:Bind ViewModel.SplitEndPage, Mode=TwoWay}" Minimum="1"
+                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                    </Grid>
+
+                    <Button Command="{x:Bind ViewModel.SplitPdfCommand}" Style="{StaticResource AccentButtonStyle}"
+                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8C8;" FontSize="14"/>
+                            <TextBlock Text="Split PDF"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Extract Options -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
+                    Visibility="{x:Bind ViewModel.IsExtractMode, Mode=OneWay}">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Extract Pages" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="From page:" VerticalAlignment="Center" Foreground="#808080"/>
+                        <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.ExtractStartPage, Mode=TwoWay}" Minimum="1"
+                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                        <TextBlock Grid.Column="2" Text="To page:" VerticalAlignment="Center" Foreground="#808080" Margin="16,0,0,0"/>
+                        <NumberBox Grid.Column="3" Value="{x:Bind ViewModel.ExtractEndPage, Mode=TwoWay}" Minimum="1"
+                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                    </Grid>
+
+                    <Button Command="{x:Bind ViewModel.ExtractPagesCommand}" Style="{StaticResource AccentButtonStyle}"
+                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8A7;" FontSize="14"/>
+                            <TextBlock Text="Extract Pages"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Processing Status -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="16" BorderBrush="#1A1A1A" BorderThickness="1"
+                    Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <ProgressRing IsActive="True" Width="20" Height="20"/>
+                    <TextBlock Text="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}" Foreground="#808080" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Result -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
+                    Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Operation Complete" FontSize="16" FontWeight="SemiBold" Foreground="#4CAF50"/>
+                        <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" FontSize="13" Foreground="#808080" Margin="0,4,0,0"/>
+                        <TextBlock Text="{x:Bind ViewModel.ResultPath, Mode=OneWay}" FontSize="11" Foreground="#606060" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Command="{x:Bind ViewModel.OpenOutputFolderCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE838;" FontSize="14"/>
+                            <TextBlock Text="Open Folder"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Action Status -->
+            <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay}" CornerRadius="8" Padding="16"
+                    Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}" Opacity="0.9">
+                <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

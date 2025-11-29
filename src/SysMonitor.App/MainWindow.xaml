@@ -140,6 +140,28 @@
                         <FontIcon Glyph="&#xE8B7;" Foreground="{StaticResource CyanAccentBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="PDF Tools" Tag="PdfTools">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEA90;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemSeparator/>
+                <NavigationViewItemHeader Content="WIRELESS"/>
+                <NavigationViewItem Content="Bluetooth" Tag="Bluetooth">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE702;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="WiFi Analyzer" Tag="WiFi">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE701;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Network Mapper" Tag="NetworkMapper">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE968;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" Padding="24" Background="{StaticResource BackgroundBrush}"/>
