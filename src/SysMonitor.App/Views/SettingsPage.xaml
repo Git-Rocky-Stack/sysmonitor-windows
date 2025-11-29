@@ -8,14 +8,28 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="16" Padding="0,0,0,24">
 
-            <!-- Page Header Banner -->
-            <Border Style="{StaticResource HeaderBannerStyle}">
-                <StackPanel>
-                    <TextBlock Text="SETTINGS" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Configure Application Preferences" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF"/>
-                </StackPanel>
+            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
+            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Header text -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="SETTINGS" Style="{StaticResource PageHeaderStyle}"
+                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Configure Application Preferences" Style="{StaticResource PageSubtitleStyle}"
+                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
+                    </StackPanel>
+
+                    <!-- Center: STX.1 Home Logo -->
+                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Stretch="Uniform"/>
+                </Grid>
             </Border>
 
             <!-- Appearance Section -->
@@ -302,9 +316,21 @@
                             <TextBlock Text="Reset settings and clear stored preferences"
                                        Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
-                        <Button Grid.Column="2" Content="CLEAR"
-                                Command="{x:Bind ViewModel.ClearAllDataCommand}"
-                                Style="{StaticResource OutlinedButtonStyle}"/>
+                        <!-- CLEAR with chrome bezel -->
+                        <Border Grid.Column="2" CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="CLEAR"
+                                    Command="{x:Bind ViewModel.ClearAllDataCommand}"
+                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
+                        </Border>
                     </Grid>
 
                     <Border Height="1" Background="{StaticResource SurfaceBrush}"/>
@@ -361,10 +387,34 @@
 
             <!-- Actions -->
             <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                <Button Content="SAVE SETTINGS" Command="{x:Bind ViewModel.SaveSettingsCommand}"
-                        Style="{StaticResource RedButtonStyle}"/>
-                <Button Content="RESET TO DEFAULTS" Command="{x:Bind ViewModel.ResetSettingsCommand}"
-                        Style="{StaticResource OutlinedButtonStyle}"/>
+                <!-- SAVE SETTINGS with chrome bezel -->
+                <Border CornerRadius="26" Padding="2">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#707070" Offset="0.0"/>
+                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                            <GradientStop Color="#505050" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Button Content="SAVE SETTINGS" Command="{x:Bind ViewModel.SaveSettingsCommand}"
+                            Style="{StaticResource RedButtonStyle}"/>
+                </Border>
+                <!-- RESET TO DEFAULTS with chrome bezel -->
+                <Border CornerRadius="26" Padding="2">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#707070" Offset="0.0"/>
+                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                            <GradientStop Color="#505050" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Button Content="RESET TO DEFAULTS" Command="{x:Bind ViewModel.ResetSettingsCommand}"
+                            Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
+                </Border>
             </StackPanel>
 
             <!-- Status Message -->
