@@ -59,6 +59,15 @@
     <SolidColorBrush x:Key="ErrorBrush" Color="#F44336"/>
     <SolidColorBrush x:Key="InfoBrush" Color="#2196F3"/>
 
+    <!-- Chart/Data Accent Colors (matching Android app) -->
+    <Color x:Key="CyanAccentColor">#00BCD4</Color>
+    <Color x:Key="TealAccentColor">#009688</Color>
+    <Color x:Key="GoldAccentColor">#FFD700</Color>
+    <SolidColorBrush x:Key="CyanAccentBrush" Color="{StaticResource CyanAccentColor}"/>
+    <SolidColorBrush x:Key="TealAccentBrush" Color="{StaticResource TealAccentColor}"/>
+    <SolidColorBrush x:Key="GoldAccentBrush" Color="{StaticResource GoldAccentColor}"/>
+    <SolidColorBrush x:Key="ChartLineBrush" Color="#00BCD4"/>
+
     <!-- Health Score Brushes -->
     <SolidColorBrush x:Key="HealthExcellentBrush" Color="#4CAF50"/>
     <SolidColorBrush x:Key="HealthGoodBrush" Color="#8BC34A"/>

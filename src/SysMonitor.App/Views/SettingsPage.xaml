@@ -135,12 +135,23 @@
                             <FontIcon Glyph="&#xE7F4;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="SysMonitor for Windows" Style="{StaticResource CardTitleStyle}" FontSize="18"/>
+                            <!-- Strategia-X branding like Android -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <TextBlock Text="\\strateg\a-" FontSize="10" FontWeight="Light"
+                                           Foreground="{StaticResource TextSecondaryBrush}" FontFamily="Consolas"/>
+                                <TextBlock Text="x" FontSize="10" FontWeight="Light"
+                                           Foreground="{StaticResource PrimaryBrush}" FontFamily="Consolas"/>
+                            </StackPanel>
+                            <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,4">
+                                <Run Text="STX" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <Run Text="." Foreground="{StaticResource PrimaryBrush}"/>
+                                <Run Text="1" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <Run Text=" SYSTEM MONITOR" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </TextBlock>
                             <TextBlock Text="{x:Bind ViewModel.Version, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Text="Windows System Monitor and Optimizer" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                     </StackPanel>
-                    <TextBlock Text="Powered by Strategia-X Technology" Foreground="{StaticResource PrimaryBrush}"
+                    <TextBlock Text="Strategic. Excellence. Engineered." Foreground="{StaticResource PrimaryBrush}"
                                FontSize="12" Margin="0,8,0,0"/>
                 </StackPanel>
             </Border>

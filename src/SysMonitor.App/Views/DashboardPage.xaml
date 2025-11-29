@@ -8,15 +8,122 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner -->
+            <!-- Page Header Banner - matching Android app style -->
             <Border Style="{StaticResource HeaderBannerStyle}">
-                <StackPanel>
-                    <TextBlock Text="DASHBOARD" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="System Overview &amp; Quick Actions" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF"/>
+                <StackPanel HorizontalAlignment="Center">
+                    <!-- Logo text like Android -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
+                        <TextBlock Text="\\strateg\a-" FontSize="12" FontWeight="Light"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontFamily="Consolas"/>
+                        <TextBlock Text="x" FontSize="12" FontWeight="Light"
+                                   Foreground="{StaticResource PrimaryLightBrush}" FontFamily="Consolas"/>
+                    </StackPanel>
+                    <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8">
+                        <Run Text="STX" Foreground="#808080"/>
+                        <Run Text="." Foreground="{StaticResource PrimaryLightBrush}"/>
+                        <Run Text="1" Foreground="#808080"/>
+                    </TextBlock>
+                    <TextBlock Text="SYSTEM MONITOR" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Strategic. Excellence. Engineered." Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
+
+            <!-- Quick Access Section Header -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="QUICK ACCESS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
+            <!-- Quick Access Menu Cards - matching Android app -->
+            <StackPanel Spacing="12">
+                <!-- Process Monitor Card -->
+                <Border Style="{StaticResource RedCardStyle}" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource MenuCardIconStyle}">
+                            <FontIcon Glyph="&#xE8A5;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                            <TextBlock Text="Process Monitor" Style="{StaticResource MenuItemTextStyle}"/>
+                            <TextBlock Text="Real-time app analytics" Style="{StaticResource MenuItemSubtitleStyle}"/>
+                        </StackPanel>
+                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="16"
+                                  Foreground="#AAFFFFFF" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- Network Monitor Card -->
+                <Border Style="{StaticResource RedCardStyle}" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource MenuCardIconStyle}">
+                            <FontIcon Glyph="&#xE774;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                            <TextBlock Text="Network Monitor" Style="{StaticResource MenuItemTextStyle}"/>
+                            <TextBlock Text="Connectivity diagnostics" Style="{StaticResource MenuItemSubtitleStyle}"/>
+                        </StackPanel>
+                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="16"
+                                  Foreground="#AAFFFFFF" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- System Maintenance Card -->
+                <Border Style="{StaticResource RedCardStyle}" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource MenuCardIconStyle}">
+                            <FontIcon Glyph="&#xE90F;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                            <TextBlock Text="System Maintenance" Style="{StaticResource MenuItemTextStyle}"/>
+                            <TextBlock Text="Device optimization" Style="{StaticResource MenuItemSubtitleStyle}"/>
+                        </StackPanel>
+                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="16"
+                                  Foreground="#AAFFFFFF" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- Disk Analyzer Card -->
+                <Border Style="{StaticResource RedCardStyle}" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource MenuCardIconStyle}">
+                            <FontIcon Glyph="&#xEDA2;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                            <TextBlock Text="Disk Analyzer" Style="{StaticResource MenuItemTextStyle}"/>
+                            <TextBlock Text="Storage analysis &amp; cleanup" Style="{StaticResource MenuItemSubtitleStyle}"/>
+                        </StackPanel>
+                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="16"
+                                  Foreground="#AAFFFFFF" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- Health Score Section Header -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="SYSTEM HEALTH" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
 
             <!-- Health Score Hero Card -->
             <Border Style="{StaticResource CardStyle}" Padding="24">
