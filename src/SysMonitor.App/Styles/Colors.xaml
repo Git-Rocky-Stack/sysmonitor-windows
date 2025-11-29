@@ -3,20 +3,69 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Strategia-X Brand Colors -->
+    <Color x:Key="PrimaryColor">#C62828</Color>
+    <Color x:Key="PrimaryDarkColor">#8E0000</Color>
+    <Color x:Key="PrimaryLightColor">#FF5F52</Color>
+    <Color x:Key="SecondaryColor">#B71C1C</Color>
+    <Color x:Key="AccentColor">#EF5350</Color>
+
+    <!-- Background Colors -->
+    <Color x:Key="BackgroundColor">#000000</Color>
+    <Color x:Key="SurfaceColor">#121212</Color>
+    <Color x:Key="CardColor">#1E1E1E</Color>
+    <Color x:Key="CardBorderColor">#333333</Color>
+    <Color x:Key="ElevatedSurfaceColor">#252525</Color>
+
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimaryColor">#FFFFFF</Color>
+    <Color x:Key="TextSecondaryColor">#9E9E9E</Color>
+    <Color x:Key="TextTertiaryColor">#616161</Color>
+
     <!-- Brand Brushes -->
-    <SolidColorBrush x:Key="PrimaryBrush" Color="#0078D4"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="#00B294"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="#FFB900"/>
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+
+    <!-- Background Brushes -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}"/>
+    <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource CardBorderColor}"/>
+    <SolidColorBrush x:Key="ElevatedSurfaceBrush" Color="{StaticResource ElevatedSurfaceColor}"/>
+
+    <!-- Text Brushes -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}"/>
+
+    <!-- Header Gradient -->
+    <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#C62828" Offset="0.0"/>
+        <GradientStop Color="#8E0000" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <!-- Red Card Gradient (for menu items) -->
+    <LinearGradientBrush x:Key="RedCardGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#C62828" Offset="0.0"/>
+        <GradientStop Color="#B71C1C" Offset="1.0"/>
+    </LinearGradientBrush>
 
     <!-- Status Brushes -->
-    <SolidColorBrush x:Key="SuccessBrush" Color="#107C10"/>
-    <SolidColorBrush x:Key="WarningBrush" Color="#FF8C00"/>
-    <SolidColorBrush x:Key="ErrorBrush" Color="#D13438"/>
-    <SolidColorBrush x:Key="InfoBrush" Color="#0078D4"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="#FF9800"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="#F44336"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="#2196F3"/>
 
     <!-- Health Score Brushes -->
-    <SolidColorBrush x:Key="HealthExcellentBrush" Color="#107C10"/>
-    <SolidColorBrush x:Key="HealthGoodBrush" Color="#00B294"/>
-    <SolidColorBrush x:Key="HealthFairBrush" Color="#FFB900"/>
-    <SolidColorBrush x:Key="HealthPoorBrush" Color="#D13438"/>
+    <SolidColorBrush x:Key="HealthExcellentBrush" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="HealthGoodBrush" Color="#8BC34A"/>
+    <SolidColorBrush x:Key="HealthFairBrush" Color="#FF9800"/>
+    <SolidColorBrush x:Key="HealthPoorBrush" Color="#F44336"/>
+
+    <!-- Icon Container Brushes -->
+    <SolidColorBrush x:Key="IconContainerBrush" Color="#2D2D2D"/>
+    <SolidColorBrush x:Key="IconContainerRedBrush" Color="#C62828"/>
 </ResourceDictionary>

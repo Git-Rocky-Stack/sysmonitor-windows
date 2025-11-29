@@ -3,62 +3,158 @@
     x:Class="SysMonitor.App.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{StaticResource BackgroundBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="24" Padding="0,0,0,24">
-            <TextBlock Text="Settings" Style="{StaticResource PageHeaderStyle}"/>
+        <StackPanel Spacing="16" Padding="0,0,0,24">
 
-            <!-- Appearance -->
-            <Border Style="{StaticResource CardStyle}">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Appearance" Style="{StaticResource SectionHeaderStyle}"/>
-                    <ComboBox Header="Theme" SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}" Width="200">
-                        <ComboBoxItem Content="System Default"/>
-                        <ComboBoxItem Content="Light"/>
-                        <ComboBoxItem Content="Dark"/>
-                    </ComboBox>
+            <!-- Page Header Banner -->
+            <Border Style="{StaticResource HeaderBannerStyle}">
+                <StackPanel>
+                    <TextBlock Text="SETTINGS" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Configure Application Preferences" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF"/>
                 </StackPanel>
             </Border>
 
-            <!-- Behavior -->
+            <!-- Appearance Section -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="APPEARANCE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Behavior" Style="{StaticResource SectionHeaderStyle}"/>
-                    <ToggleSwitch Header="Run at Windows startup" IsOn="{x:Bind ViewModel.RunAtStartup, Mode=TwoWay}"/>
-                    <ToggleSwitch Header="Minimize to system tray" IsOn="{x:Bind ViewModel.MinimizeToTray, Mode=TwoWay}"/>
-                    <ToggleSwitch Header="Show notifications" IsOn="{x:Bind ViewModel.ShowNotifications, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerRedStyle}">
+                            <FontIcon Glyph="&#xE790;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <ComboBox Header="Theme" SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}"
+                                  Width="200" Background="{StaticResource SurfaceBrush}">
+                            <ComboBoxItem Content="System Default"/>
+                            <ComboBoxItem Content="Light"/>
+                            <ComboBoxItem Content="Dark"/>
+                        </ComboBox>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!-- Monitoring -->
+            <!-- Behavior Section -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="BEHAVIOR" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
             <Border Style="{StaticResource CardStyle}">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Monitoring" Style="{StaticResource SectionHeaderStyle}"/>
-                    <Slider Header="Refresh interval (seconds)" Minimum="1" Maximum="10" Value="{x:Bind ViewModel.RefreshInterval, Mode=TwoWay}" Width="300"/>
-                    <ToggleSwitch Header="Auto-optimize memory when usage exceeds threshold" IsOn="{x:Bind ViewModel.AutoOptimizeMemory, Mode=TwoWay}"/>
-                    <Slider Header="Memory threshold (%)" Minimum="50" Maximum="95" Value="{x:Bind ViewModel.MemoryThreshold, Mode=TwoWay}" Width="300"
-                            Visibility="{x:Bind ViewModel.AutoOptimizeMemory, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <StackPanel Spacing="20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                            <FontIcon Glyph="&#xE7E8;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <ToggleSwitch Grid.Column="1" Header="Run at Windows startup"
+                                      IsOn="{x:Bind ViewModel.RunAtStartup, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                            <FontIcon Glyph="&#xE921;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <ToggleSwitch Grid.Column="1" Header="Minimize to system tray"
+                                      IsOn="{x:Bind ViewModel.MinimizeToTray, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                            <FontIcon Glyph="&#xE7E7;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <ToggleSwitch Grid.Column="1" Header="Show notifications"
+                                      IsOn="{x:Bind ViewModel.ShowNotifications, Mode=TwoWay}"/>
+                    </Grid>
                 </StackPanel>
             </Border>
 
-            <!-- About -->
+            <!-- Monitoring Section -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="MONITORING" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
             <Border Style="{StaticResource CardStyle}">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="About" Style="{StaticResource SectionHeaderStyle}"/>
-                    <TextBlock Text="SysMonitor for Windows" FontWeight="SemiBold"/>
-                    <TextBlock Text="{x:Bind ViewModel.Version, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                    <TextBlock Text="Windows System Monitor and Optimizer" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <StackPanel Spacing="20">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}">
+                            <FontIcon Glyph="&#xE916;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <Slider Header="Refresh interval (seconds)" Minimum="1" Maximum="10"
+                                Value="{x:Bind ViewModel.RefreshInterval, Mode=TwoWay}" Width="300"/>
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                            <ToggleSwitch Header="Auto-optimize memory when usage exceeds threshold"
+                                          IsOn="{x:Bind ViewModel.AutoOptimizeMemory, Mode=TwoWay}"/>
+                            <Slider Header="Memory threshold (%)" Minimum="50" Maximum="95"
+                                    Value="{x:Bind ViewModel.MemoryThreshold, Mode=TwoWay}" Width="300"
+                                    Visibility="{x:Bind ViewModel.AutoOptimizeMemory, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- About Section -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="ABOUT" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
+                            <FontIcon Glyph="&#xE7F4;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="SysMonitor for Windows" Style="{StaticResource CardTitleStyle}" FontSize="18"/>
+                            <TextBlock Text="{x:Bind ViewModel.Version, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="Windows System Monitor and Optimizer" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock Text="Powered by Strategia-X Technology" Foreground="{StaticResource PrimaryBrush}"
+                               FontSize="12" Margin="0,8,0,0"/>
                 </StackPanel>
             </Border>
 
             <!-- Actions -->
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button Content="Save Settings" Command="{x:Bind ViewModel.SaveSettingsCommand}" Style="{StaticResource AccentButtonStyle}"/>
-                <Button Content="Reset to Defaults" Command="{x:Bind ViewModel.ResetSettingsCommand}"/>
+            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                <Button Content="SAVE SETTINGS" Command="{x:Bind ViewModel.SaveSettingsCommand}"
+                        Style="{StaticResource RedButtonStyle}"/>
+                <Button Content="RESET TO DEFAULTS" Command="{x:Bind ViewModel.ResetSettingsCommand}"
+                        Style="{StaticResource OutlinedButtonStyle}"/>
             </StackPanel>
 
-            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                       Foreground="{StaticResource SuccessBrush}" Margin="0,8,0,0"/>
         </StackPanel>
     </ScrollViewer>
 </Page>
