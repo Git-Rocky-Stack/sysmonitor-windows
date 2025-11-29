@@ -1,0 +1,518 @@
+/**
+ * System Monitor - Component Styles
+ * ==================================
+ * Reference implementation for Windows/Web development
+ * All dimensions use px (Android dp ≈ px at 1x density)
+ */
+
+/* ===== CSS RESET FOR COMPONENTS ===== */
+* {
+  box-sizing: border-box;
+}
+
+/* ===== SPACING SCALE ===== */
+:root {
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  /* Corner Radius Scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+  --transition-slow: 500ms ease;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: #1A1A1A;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+}
+
+.card-elevated {
+  background: #252525;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+}
+
+.card-outlined {
+  background: transparent;
+  border: 1px solid #333333;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+}
+
+/* ===== BUTTONS - PRIMARY (CHROME BEZEL STYLE) ===== */
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  overflow: hidden;
+
+  /* Multi-layer background for chrome effect */
+  background:
+    linear-gradient(90deg, #AA2024, #C93437);
+
+  /* Chrome bezel border effect */
+  box-shadow:
+    /* Outer chrome highlight */
+    0 0 0 1px #606060,
+    0 0 0 2px #A0A0A0,
+    0 0 0 3px #282828,
+    /* Inner shadow for depth */
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+
+  /* Text */
+  color: #FFFFFF;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  text-transform: uppercase;
+
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(90deg, #C93437, #D84548);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* ===== BUTTONS - SECONDARY (OUTLINE) ===== */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 24px;
+  border-radius: 14px;
+  cursor: pointer;
+
+  /* Dark background with red border */
+  background: #1A1A1A;
+  border: 2px solid #AA2024;
+
+  /* Chrome bezel effect */
+  box-shadow:
+    0 0 0 1px #606060,
+    0 0 0 2px #A0A0A0,
+    0 0 0 3px #282828;
+
+  /* Text */
+  color: #AA2024;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  text-transform: uppercase;
+
+  transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  background: #252525;
+  border-color: #C93437;
+  color: #C93437;
+}
+
+/* ===== BUTTONS - TEXT/GHOST ===== */
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+
+  color: #AA2024;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  text-transform: uppercase;
+
+  transition: background var(--transition-fast);
+}
+
+.btn-text:hover {
+  background: rgba(170, 32, 36, 0.1);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #2A2A2A;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #AA2024;
+  border-radius: var(--radius-xs);
+  transition: width var(--transition-normal);
+}
+
+/* Status-colored progress bars */
+.progress-bar-fill.success { background: #4CAF50; }
+.progress-bar-fill.warning { background: #FF9800; }
+.progress-bar-fill.error { background: #F44336; }
+.progress-bar-fill.info { background: #2196F3; }
+
+/* Thin progress bar variant */
+.progress-bar-thin {
+  height: 4px;
+}
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #AA2024;
+  border-radius: var(--radius-xs);
+
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.badge-success { background: #4CAF50; }
+.badge-warning { background: #FF9800; }
+.badge-error { background: #F44336; }
+.badge-info { background: #2196F3; }
+.badge-neutral { background: #666666; }
+
+/* ===== INPUT FIELDS ===== */
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  background: #1A1A1A;
+  border: 1px solid #333333;
+  border-radius: var(--radius-sm);
+
+  color: #FFFFFF;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  font-size: 16px;
+
+  transition: border-color var(--transition-fast);
+}
+
+.input-field::placeholder {
+  color: #808080;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #AA2024;
+  border-width: 2px;
+}
+
+.input-field:disabled {
+  background: #0F0F0F;
+  color: #4D4D4D;
+  cursor: not-allowed;
+}
+
+/* ===== DIVIDERS ===== */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: #333333;
+  margin: var(--spacing-md) 0;
+}
+
+.divider-subtle {
+  background: #1A1A1A;
+}
+
+.divider-strong {
+  background: #4D4D4D;
+}
+
+/* ===== DIALOGS/MODALS ===== */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog {
+  background: #1A1A1A;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  min-width: 280px;
+  max-width: 560px;
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog-title {
+  color: #FFFFFF;
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+}
+
+.dialog-content {
+  color: #B3B3B3;
+  font-size: 14px;
+  line-height: 20px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+/* ===== ICON BUTTON ===== */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  cursor: pointer;
+
+  color: #FFFFFF;
+
+  transition: background var(--transition-fast);
+}
+
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.icon-button.active {
+  background: rgba(170, 32, 36, 0.2);
+  color: #AA2024;
+}
+
+/* ===== METRIC CARD ===== */
+.metric-card {
+  background: #1A1A1A;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.metric-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.metric-card-icon {
+  width: 24px;
+  height: 24px;
+  color: #AA2024;
+}
+
+.metric-card-title {
+  color: #B3B3B3;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.metric-card-value {
+  color: #FFFFFF;
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.metric-card-unit {
+  color: #808080;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+/* ===== NAVIGATION BAR ===== */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 56px;
+  background: #0A0A0A;
+  border-top: 1px solid #1A1A1A;
+}
+
+.navbar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+
+  color: #808080;
+  transition: color var(--transition-fast);
+}
+
+.navbar-item.active {
+  color: #AA2024;
+}
+
+.navbar-item:hover {
+  color: #FFFFFF;
+}
+
+.navbar-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.navbar-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes buttonClick {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 300ms ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 600ms ease-in-out infinite;
+}
+
+/* ===== HEADER GRADIENT ===== */
+.header-gradient {
+  background: linear-gradient(135deg, #AA2024, #FF5252);
+  padding: var(--spacing-lg);
+}
+
+/* ===== CIRCLE INDICATOR ===== */
+.circle-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: #4CAF50;
+}
+
+.circle-indicator.warning { background: #FF9800; }
+.circle-indicator.error { background: #F44336; }
+.circle-indicator.inactive { background: #4D4D4D; }
+
+/* ===== TOGGLE/SWITCH ===== */
+.toggle {
+  position: relative;
+  width: 52px;
+  height: 32px;
+  background: #333333;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.toggle.active {
+  background: #AA2024;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  transition: transform var(--transition-fast);
+}
+
+.toggle.active .toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* ===== SPINNER/DROPDOWN ===== */
+.spinner {
+  width: 100%;
+  padding: 12px 16px;
+  background: #1A1A1A;
+  border: 1px solid #333333;
+  border-radius: var(--radius-sm);
+
+  color: #FFFFFF;
+  font-size: 16px;
+
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23808080' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+  cursor: pointer;
+}

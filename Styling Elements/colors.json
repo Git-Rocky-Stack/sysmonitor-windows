@@ -1,0 +1,220 @@
+{
+  "meta": {
+    "name": "System Monitor Color Palette",
+    "version": "2.0.3",
+    "description": "Complete color palette for System Monitor app"
+  },
+  "brand": {
+    "red": {
+      "default": "#AA2024",
+      "dark": "#8A1A1D",
+      "light": "#C93437"
+    },
+    "accent": "#FF7043"
+  },
+  "accents": {
+    "blue": "#2196F3",
+    "green": "#4CAF50",
+    "orange": "#FF9800",
+    "purple": "#9C27B0",
+    "teal": "#00BCD4"
+  },
+  "darkMode": {
+    "background": {
+      "primary": "#000000",
+      "secondary": "#0F0F0F",
+      "card": "#1A1A1A",
+      "cardElevated": "#252525",
+      "dark": "#0A0A0A"
+    },
+    "surface": {
+      "default": "#1A1A1A",
+      "dark": "#121212",
+      "medium": "#1E1E1E",
+      "light": "#2A2A2A",
+      "elevated": "#2C2C2C"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#B3B3B3",
+      "tertiary": "#808080",
+      "disabled": "#4D4D4D"
+    },
+    "divider": {
+      "default": "#333333",
+      "subtle": "#1A1A1A",
+      "medium": "#333333",
+      "strong": "#4D4D4D"
+    },
+    "overlay": {
+      "default": "rgba(0, 0, 0, 0.5)",
+      "dark": "rgba(0, 0, 0, 0.5)",
+      "medium": "rgba(0, 0, 0, 0.25)",
+      "light": "rgba(0, 0, 0, 0.125)"
+    },
+    "ripple": "rgba(255, 255, 255, 0.25)"
+  },
+  "lightMode": {
+    "background": {
+      "primary": "#FFFFFF",
+      "secondary": "#F5F5F5",
+      "card": "#FFFFFF",
+      "cardElevated": "#FAFAFA",
+      "dark": "#EEEEEE"
+    },
+    "surface": {
+      "default": "#FFFFFF",
+      "dark": "#F5F5F5",
+      "medium": "#FAFAFA",
+      "light": "#FFFFFF",
+      "elevated": "#FFFFFF"
+    },
+    "text": {
+      "primary": "#212121",
+      "secondary": "#757575",
+      "tertiary": "#9E9E9E",
+      "disabled": "#BDBDBD"
+    },
+    "divider": {
+      "default": "#E0E0E0",
+      "subtle": "#F5F5F5",
+      "medium": "#E0E0E0",
+      "strong": "#BDBDBD"
+    },
+    "overlay": {
+      "default": "rgba(0, 0, 0, 0.25)",
+      "dark": "rgba(0, 0, 0, 0.375)",
+      "medium": "rgba(0, 0, 0, 0.1875)",
+      "light": "rgba(0, 0, 0, 0.0625)"
+    },
+    "ripple": "rgba(0, 0, 0, 0.125)"
+  },
+  "status": {
+    "excellent": "#4CAF50",
+    "good": "#8BC34A",
+    "fair": "#FFC107",
+    "warning": "#FF9800",
+    "critical": "#F44336"
+  },
+  "semantic": {
+    "success": {
+      "default": "#4CAF50",
+      "light": "#81C784"
+    },
+    "warning": {
+      "default": "#FF9800",
+      "light": "#FFB74D"
+    },
+    "error": {
+      "default": "#F44336",
+      "light": "#EF5350"
+    },
+    "info": {
+      "default": "#2196F3",
+      "light": "#64B5F6"
+    }
+  },
+  "gradients": {
+    "header": {
+      "start": "#AA2024",
+      "end": "#FF5252",
+      "angle": 135
+    },
+    "primaryButton": {
+      "start": "#AA2024",
+      "end": "#C93437",
+      "angle": 90
+    }
+  },
+  "chart": {
+    "red": "#AA2024",
+    "orange": "#FF7043",
+    "amber": "#FFA726",
+    "yellow": "#FFCA28",
+    "blue": "#2196F3",
+    "cyan": "#00BCD4",
+    "green": "#4CAF50",
+    "purple": "#9C27B0",
+    "grid": {
+      "dark": "#333333",
+      "light": "#E0E0E0"
+    },
+    "background": {
+      "dark": "#0A0A0A",
+      "light": "#FAFAFA"
+    }
+  },
+  "chromeBezel": {
+    "layer1": {
+      "description": "Outer chrome bezel",
+      "gradient": {
+        "angle": 135,
+        "start": "#E8E8E8",
+        "center": "#A0A0A0",
+        "end": "#606060"
+      },
+      "cornerRadius": "14dp"
+    },
+    "layer2": {
+      "description": "Inner highlight",
+      "gradient": {
+        "angle": 315,
+        "start": "#FFFFFF",
+        "center": "#C8C8C8",
+        "end": "#888888"
+      },
+      "cornerRadius": "13dp",
+      "inset": "1dp"
+    },
+    "layer3": {
+      "description": "Dark inner edge",
+      "gradient": {
+        "angle": 135,
+        "start": "#505050",
+        "center": "#383838",
+        "end": "#282828"
+      },
+      "cornerRadius": "12dp",
+      "inset": "2dp"
+    },
+    "layer4Primary": {
+      "description": "Primary button content",
+      "gradient": {
+        "angle": 90,
+        "start": "#AA2024",
+        "end": "#C93437"
+      },
+      "cornerRadius": "10dp",
+      "inset": "3dp"
+    },
+    "layer4Secondary": {
+      "description": "Secondary button content",
+      "background": "#1A1A1A",
+      "border": {
+        "width": "2dp",
+        "color": "#AA2024"
+      },
+      "cornerRadius": "10dp",
+      "inset": "3dp"
+    }
+  },
+  "amoled": {
+    "black": "#000000",
+    "surface": "#0A0A0A",
+    "card": "#111111"
+  },
+  "additional": {
+    "coralRed": "#FF6B6B",
+    "cyan": "#00E5FF",
+    "gold": "#FFD700",
+    "deepOrange": "#FF5722",
+    "darkRed": "#B71C1C",
+    "lightGreen": "#8BC34A",
+    "amber": "#FFC107",
+    "gray": "#9E9E9E",
+    "grayDark": "#666666",
+    "grayMedium": "#888888",
+    "black": "#000000",
+    "white": "#FFFFFF"
+  }
+}

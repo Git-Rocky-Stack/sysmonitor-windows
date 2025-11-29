@@ -1,0 +1,303 @@
+/**
+ * System Monitor - Typography System
+ * ===================================
+ * Based on Material Design 3 type scale
+ * Use Segoe UI (Windows), Roboto (Cross-platform), or system sans-serif
+ */
+
+/* ===== FONT IMPORTS ===== */
+/* Roboto is the recommended font - import if using web */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+/* ===== CSS VARIABLES ===== */
+:root {
+  /* Font Families */
+  --font-primary: 'Roboto', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Roboto Mono', 'Consolas', 'Courier New', monospace;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Base font size (1sp ≈ 1px at default scaling) */
+  --font-size-base: 16px;
+}
+
+/* ===== TYPE SCALE ===== */
+
+/* Display Styles - For hero numbers and large statistics */
+.display-large {
+  font-family: var(--font-primary);
+  font-size: 57px;
+  line-height: 64px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: -0.25px;
+}
+
+.display-medium {
+  font-family: var(--font-primary);
+  font-size: 45px;
+  line-height: 52px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+.display-small {
+  font-family: var(--font-primary);
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* Headline Styles - For page and section titles */
+.headline-large {
+  font-family: var(--font-primary);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+.headline-medium {
+  font-family: var(--font-primary);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+.headline-small {
+  font-family: var(--font-primary);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* Title Styles - For card titles and important labels */
+.title-large {
+  font-family: var(--font-primary);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+.title-medium {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.15px;
+}
+
+.title-small {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.1px;
+}
+
+/* Body Styles - For main content text */
+.body-large {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.5px;
+}
+
+.body-medium {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.25px;
+}
+
+.body-small {
+  font-family: var(--font-primary);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.4px;
+}
+
+/* Label Styles - For buttons, tags, and UI elements */
+.label-large {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.1px;
+}
+
+.label-medium {
+  font-family: var(--font-primary);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.5px;
+}
+
+.label-small {
+  font-family: var(--font-primary);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.5px;
+}
+
+/* ===== SPECIFIC USE CASES ===== */
+
+/* Metric Display - Large numbers for CPU %, Memory, etc. */
+.metric-value {
+  font-family: var(--font-primary);
+  font-size: 48px;
+  line-height: 56px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: -1px;
+}
+
+.metric-unit {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
+/* Card Header */
+.card-title {
+  font-family: var(--font-primary);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+.card-subtitle {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.25px;
+  opacity: 0.7;
+}
+
+/* Button Text */
+.button-text {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.1px;
+  text-transform: uppercase;
+}
+
+.button-text-normal {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.1px;
+  text-transform: none;
+}
+
+/* Navigation */
+.nav-label {
+  font-family: var(--font-primary);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.5px;
+}
+
+/* Data/Code Display */
+.mono-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* Badge/Tag Text */
+.badge-text {
+  font-family: var(--font-primary);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+.text-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.text-light {
+  font-weight: var(--font-weight-light);
+}
+
+/* ===== COLOR APPLICATION ===== */
+
+/* Dark Mode (default) */
+.text-primary {
+  color: #FFFFFF;
+}
+
+.text-secondary {
+  color: #B3B3B3;
+}
+
+.text-tertiary {
+  color: #808080;
+}
+
+.text-disabled {
+  color: #4D4D4D;
+}
+
+.text-accent {
+  color: #AA2024;
+}
+
+.text-success {
+  color: #4CAF50;
+}
+
+.text-warning {
+  color: #FF9800;
+}
+
+.text-error {
+  color: #F44336;
+}
+
+.text-info {
+  color: #2196F3;
+}
