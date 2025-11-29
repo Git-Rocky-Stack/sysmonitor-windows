@@ -104,28 +104,28 @@
 
                             <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                                 <TextBlock Text="DIMENSIONS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.CurrentImageInfo.Dimensions, Mode=OneWay}"
+                                <TextBlock Text="{x:Bind ViewModel.ImageDimensions, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                                 <TextBlock Text="FORMAT" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.CurrentImageInfo.Format, Mode=OneWay}"
+                                <TextBlock Text="{x:Bind ViewModel.ImageFormat, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="14" Foreground="{StaticResource CyanAccentBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                                 <TextBlock Text="COLOR DEPTH" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.CurrentImageInfo.ColorDepth, Mode=OneWay}"
+                                <TextBlock Text="{x:Bind ViewModel.ImageColorDepth, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3" HorizontalAlignment="Center">
                                 <TextBlock Text="RESOLUTION" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.CurrentImageInfo.Resolution, Mode=OneWay}"
+                                <TextBlock Text="{x:Bind ViewModel.ImageResolution, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
