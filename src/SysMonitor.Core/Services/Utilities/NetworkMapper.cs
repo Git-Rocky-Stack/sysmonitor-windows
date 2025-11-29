@@ -40,10 +40,10 @@ public class NetworkMapper : INetworkMapper
         var total = ips.Count;
         var scanned = 0;
 
-        // Parallel ping with limited concurrency
+        // Parallel ping with limited concurrency (reduced from 50 to avoid memory pressure)
         var options = new ParallelOptions
         {
-            MaxDegreeOfParallelism = 50,
+            MaxDegreeOfParallelism = 10,
             CancellationToken = cancellationToken
         };
 

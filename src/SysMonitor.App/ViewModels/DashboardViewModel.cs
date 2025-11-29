@@ -93,7 +93,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     private async Task RefreshLoopAsync(CancellationToken cancellationToken)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
         try
         {
             while (await timer.WaitForNextTickAsync(cancellationToken))
