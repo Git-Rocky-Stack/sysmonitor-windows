@@ -249,7 +249,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
             var items = await _tempFileCleaner.ScanAsync();
             var cleaned = await _tempFileCleaner.CleanAsync(items);
             await RefreshDataAsync();
-            ShowActionStatus($"Cleaned {cleaned.Count} items successfully!", true);
+            ShowActionStatus($"Cleaned {cleaned.FilesDeleted} files successfully!", true);
         }
         catch (Exception ex)
         {
@@ -333,7 +333,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
         sb.AppendLine($"  Name:      {info.OperatingSystem.Name}");
         sb.AppendLine($"  Version:   {info.OperatingSystem.Version}");
-        sb.AppendLine($"  Build:     {info.OperatingSystem.BuildNumber}");
+        sb.AppendLine($"  Build:     {info.OperatingSystem.Build}");
         sb.AppendLine($"  Uptime:    {FormatUptime(info.OperatingSystem.Uptime)}");
         sb.AppendLine();
 
@@ -341,8 +341,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         sb.AppendLine("│ CPU                                                               │");
         sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
         sb.AppendLine($"  Model:     {info.Cpu.Name}");
-        sb.AppendLine($"  Cores:     {info.Cpu.CoreCount} cores / {info.Cpu.ThreadCount} threads");
-        sb.AppendLine($"  Speed:     {info.Cpu.SpeedMHz} MHz");
+        sb.AppendLine($"  Cores:     {info.Cpu.Cores} cores / {info.Cpu.LogicalProcessors} threads");
+        sb.AppendLine($"  Speed:     {info.Cpu.MaxClockSpeedMHz} MHz");
         sb.AppendLine($"  Usage:     {info.Cpu.UsagePercent:F1}%");
         sb.AppendLine($"  Temp:      {cpuTemp:F0}°C ({GetTempStatus(cpuTemp)})");
         sb.AppendLine();
@@ -366,7 +366,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
         foreach (var disk in info.Disks)
         {
-            sb.AppendLine($"  [{disk.DriveLetter}] {disk.Name}");
+            sb.AppendLine($"  [{disk.Name}] {disk.Label}");
             sb.AppendLine($"       Total: {disk.TotalGB:F1} GB | Used: {disk.UsedGB:F1} GB ({disk.UsagePercent:F1}%)");
             sb.AppendLine($"       Free:  {disk.FreeGB:F1} GB");
         }
