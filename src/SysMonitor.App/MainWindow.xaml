@@ -67,6 +67,11 @@
                         <FontIcon Glyph="&#xE80F;" Foreground="{StaticResource PrimaryBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="CPU Monitor" Tag="CpuMonitor">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE950;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Processes" Tag="Processes">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8A5;" Foreground="{StaticResource PrimaryBrush}"/>
