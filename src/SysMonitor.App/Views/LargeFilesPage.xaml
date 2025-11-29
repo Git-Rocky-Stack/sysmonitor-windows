@@ -60,9 +60,21 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
-                            <Button Content="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToScanButtonConverter}}"
-                                    Command="{x:Bind ViewModel.ScanCommand}"
-                                    Style="{StaticResource RedButtonStyle}" Width="140"/>
+                            <!-- SCAN with chrome bezel -->
+                            <Border CornerRadius="26" Padding="2">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#707070" Offset="0.0"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                        <GradientStop Color="#505050" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Button Content="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToScanButtonConverter}}"
+                                        Command="{x:Bind ViewModel.ScanCommand}"
+                                        Style="{StaticResource RedButtonStyle}" Width="140"/>
+                            </Border>
                         </StackPanel>
                     </Grid>
 
@@ -140,21 +152,57 @@
             <!-- Action Buttons -->
             <Border Style="{StaticResource CardStyle}" Padding="16">
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                    <Button Content="SELECT ALL" Command="{x:Bind ViewModel.SelectAllCommand}"
-                            Style="{StaticResource OutlineButtonStyle}"/>
-                    <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"
-                            Style="{StaticResource OutlineButtonStyle}"/>
-                    <Button Content="DELETE SELECTED" Command="{x:Bind ViewModel.DeleteSelectedCommand}"
-                            Style="{StaticResource RedButtonStyle}">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                                    <TextBlock Text="DELETE SELECTED"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
+                    <!-- SELECT ALL with chrome bezel -->
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="SELECT ALL" Command="{x:Bind ViewModel.SelectAllCommand}"
+                                Style="{StaticResource OutlineButtonStyle}" Background="#000000"/>
+                    </Border>
+                    <!-- SELECT NONE with chrome bezel -->
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"
+                                Style="{StaticResource OutlineButtonStyle}" Background="#000000"/>
+                    </Border>
+                    <!-- DELETE SELECTED with chrome bezel -->
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="DELETE SELECTED" Command="{x:Bind ViewModel.DeleteSelectedCommand}"
+                                Style="{StaticResource RedButtonStyle}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                        <TextBlock Text="DELETE SELECTED"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </Border>
                 </StackPanel>
             </Border>
 

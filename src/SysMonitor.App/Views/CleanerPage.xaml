@@ -54,12 +54,36 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                        <Button Content="SCAN" Command="{x:Bind ViewModel.ScanCommand}"
-                                Style="{StaticResource OutlinedButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
-                        <Button Content="CLEAN SELECTED" Command="{x:Bind ViewModel.CleanCommand}"
-                                Style="{StaticResource RedButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
+                        <!-- SCAN with chrome bezel -->
+                        <Border CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="SCAN" Command="{x:Bind ViewModel.ScanCommand}"
+                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
+                                    IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                        </Border>
+                        <!-- CLEAN SELECTED with chrome bezel -->
+                        <Border CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="CLEAN SELECTED" Command="{x:Bind ViewModel.CleanCommand}"
+                                    Style="{StaticResource RedButtonStyle}"
+                                    IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>

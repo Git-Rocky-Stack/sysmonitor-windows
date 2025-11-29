@@ -53,9 +53,21 @@
                                 <Run Text=" processes"/>
                             </TextBlock>
                         </StackPanel>
-                        <Button Content="END TASK" Command="{x:Bind ViewModel.KillProcessCommand}"
-                                Style="{StaticResource RedButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.SelectedProcess, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"/>
+                        <!-- END TASK with chrome bezel -->
+                        <Border CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="END TASK" Command="{x:Bind ViewModel.KillProcessCommand}"
+                                    Style="{StaticResource RedButtonStyle}"
+                                    IsEnabled="{x:Bind ViewModel.SelectedProcess, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
