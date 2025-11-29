@@ -10,6 +10,7 @@
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -24,7 +25,7 @@
 
             <!-- Brand Text Header Logo -->
             <Image Grid.Column="0" Source="ms-appx:///Assets/Header_Main1.png"
-                   Height="24" Margin="16,0,0,0" VerticalAlignment="Center"
+                   Height="29" Margin="16,0,0,0" VerticalAlignment="Center"
                    Stretch="Uniform"/>
 
             <!-- SYSTEM MONITOR text -->
@@ -40,8 +41,21 @@
                        VerticalAlignment="Center" Margin="0,0,16,0"/>
         </Grid>
 
+        <!-- Chrome Divider -->
+        <Border Grid.Row="1" Height="3">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#606060" Offset="0.0"/>
+                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                    <GradientStop Color="#404040" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+
         <!-- Navigation View -->
-        <NavigationView x:Name="NavView" Grid.Row="1"
+        <NavigationView x:Name="NavView" Grid.Row="2"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="True"
                         PaneDisplayMode="Left"
