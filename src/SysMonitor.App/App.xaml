@@ -21,6 +21,7 @@
             <converters:PercentConverter x:Key="PercentConverter"/>
             <converters:GBConverter x:Key="GBConverter"/>
             <converters:MBConverter x:Key="MBConverter"/>
+            <converters:BoolToSuccessBrushConverter x:Key="BoolToSuccessBrushConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
