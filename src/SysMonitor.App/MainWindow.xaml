@@ -123,6 +123,23 @@
                         <FontIcon Glyph="&#xE7F4;" Foreground="{StaticResource PrimaryBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItemSeparator/>
+                <NavigationViewItemHeader Content="UTILITIES"/>
+                <NavigationViewItem Content="Large Files" Tag="LargeFiles">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7B8;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Duplicate Finder" Tag="DuplicateFinder">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8C8;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="File Tools" Tag="FileTools">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8B7;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" Padding="24" Background="{StaticResource BackgroundBrush}"/>

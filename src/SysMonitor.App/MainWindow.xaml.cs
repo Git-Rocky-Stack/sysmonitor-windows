@@ -19,7 +19,11 @@ public sealed partial class MainWindow : Window
         { "Battery", typeof(BatteryPage) },
         { "Temperature", typeof(TemperaturePage) },
         { "SystemInfo", typeof(SystemInfoPage) },
-        { "GpuMonitor", typeof(GpuPage) }
+        { "GpuMonitor", typeof(GpuPage) },
+        // Utilities
+        { "LargeFiles", typeof(LargeFilesPage) },
+        { "DuplicateFinder", typeof(DuplicateFinderPage) },
+        { "FileTools", typeof(FileToolsPage) }
     };
 
     public MainWindow()

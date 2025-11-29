@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SysMonitor.App.Views.LargeFilesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:SysMonitor.App.ViewModels"
+    Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="0,0,0,24" Spacing="16">
+
+            <!-- Page Header Banner -->
+            <Border Style="{StaticResource HeaderBannerStyle}">
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <FontIcon Glyph="&#xE7B8;" FontSize="48" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="LARGE FILE FINDER" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Find and manage space-hogging files" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Center" Margin="0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Scan Controls -->
+            <Border Style="{StaticResource CardStyle}" Padding="24">
+                <Grid RowSpacing="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Path Selection -->
+                    <Grid Grid.Row="0" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0" Text="{x:Bind ViewModel.ScanPath, Mode=TwoWay}"
+                                 PlaceholderText="Select folder to scan..."
+                                 Style="{StaticResource DefaultTextBoxStyle}"/>
+                        <Button Grid.Column="1" Content="BROWSE" Command="{x:Bind ViewModel.BrowseFolderCommand}"
+                                Style="{StaticResource OutlineButtonStyle}"/>
+                    </Grid>
+
+                    <!-- Settings Row -->
+                    <Grid Grid.Row="1" ColumnSpacing="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <TextBlock Text="Minimum Size:" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
+                            <NumberBox Value="{x:Bind ViewModel.MinSizeMB, Mode=TwoWay}"
+                                       Minimum="1" Maximum="10000" SpinButtonPlacementMode="Inline"
+                                       Width="120"/>
+                            <TextBlock Text="MB" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                            <Button Content="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToScanButtonConverter}}"
+                                    Command="{x:Bind ViewModel.ScanCommand}"
+                                    Style="{StaticResource RedButtonStyle}" Width="140"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Progress -->
+                    <StackPanel Grid.Row="2" Spacing="8"
+                                Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ProgressBar Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}"
+                                     Maximum="100" Height="6" CornerRadius="3"
+                                     Background="{StaticResource SurfaceLightBrush}"
+                                     Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"
+                                   Style="{StaticResource CardSubtitleStyle}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Action Feedback -->
+            <Border Background="{StaticResource CardBrush}" CornerRadius="8" Padding="16"
+                    Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20">
+                        <FontIcon.Foreground>
+                            <SolidColorBrush Color="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay}"/>
+                        </FontIcon.Foreground>
+                    </FontIcon>
+                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
+                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- Stats Summary -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="SCAN RESULTS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                    <StackPanel HorizontalAlignment="Center" Spacing="8">
+                        <TextBlock Text="FILES FOUND" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{x:Bind ViewModel.FilesFound, Mode=OneWay}"
+                                   Style="{StaticResource StatValueStyle}" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                    <StackPanel HorizontalAlignment="Center" Spacing="8">
+                        <TextBlock Text="TOTAL SIZE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{x:Bind ViewModel.TotalSize, Mode=OneWay}"
+                                   Style="{StaticResource StatValueStyle}" Foreground="{StaticResource PrimaryBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                    <StackPanel HorizontalAlignment="Center" Spacing="8">
+                        <TextBlock Text="STATUS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"
+                                   Style="{StaticResource CardSubtitleStyle}" FontSize="14"
+                                   HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Action Buttons -->
+            <Border Style="{StaticResource CardStyle}" Padding="16">
+                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                    <Button Content="SELECT ALL" Command="{x:Bind ViewModel.SelectAllCommand}"
+                            Style="{StaticResource OutlineButtonStyle}"/>
+                    <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"
+                            Style="{StaticResource OutlineButtonStyle}"/>
+                    <Button Content="DELETE SELECTED" Command="{x:Bind ViewModel.DeleteSelectedCommand}"
+                            Style="{StaticResource RedButtonStyle}">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                    <TextBlock Text="DELETE SELECTED"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- File List -->
+            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                <TextBlock Text="LARGE FILES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+            </StackPanel>
+
+            <Border Style="{StaticResource CardStyle}" Padding="0" MinHeight="200">
+                <ListView ItemsSource="{x:Bind ViewModel.LargeFiles, Mode=OneWay}"
+                          SelectionMode="None" Background="Transparent">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LargeFileDisplay">
+                            <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8"
+                                    Padding="16" Margin="0,4">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Selection Checkbox -->
+                                    <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                              VerticalAlignment="Center"/>
+
+                                    <!-- File Type Icon -->
+                                    <Border Grid.Column="1" Width="44" Height="44" CornerRadius="8">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{x:Bind FileTypeColor}"/>
+                                        </Border.Background>
+                                        <FontIcon Glyph="{x:Bind FileIcon}" FontSize="20"
+                                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </Border>
+
+                                    <!-- File Info -->
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{x:Bind Directory}" Style="{StaticResource CardSubtitleStyle}"
+                                                   FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+
+                                    <!-- File Type Badge -->
+                                    <Border Grid.Column="3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{x:Bind FileTypeColor}" Opacity="0.2"/>
+                                        </Border.Background>
+                                        <TextBlock Text="{x:Bind FileType}" FontSize="11" FontWeight="SemiBold">
+                                            <TextBlock.Foreground>
+                                                <SolidColorBrush Color="{x:Bind FileTypeColor}"/>
+                                            </TextBlock.Foreground>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <!-- Size -->
+                                    <TextBlock Grid.Column="4" Text="{x:Bind FormattedSize}"
+                                               FontWeight="Bold" FontSize="16"
+                                               Foreground="{StaticResource CyanAccentBrush}"
+                                               VerticalAlignment="Center" MinWidth="80" TextAlignment="Right"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Border>
+
+            <!-- Footer -->
+            <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">
+                <Image Source="ms-appx:///Assets/Header_Main1.png"
+                       Height="16" HorizontalAlignment="Center"
+                       Stretch="Uniform" Opacity="0.7"/>
+                <TextBlock Text="Powered by Strategia-X Technology"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           FontSize="12"/>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
