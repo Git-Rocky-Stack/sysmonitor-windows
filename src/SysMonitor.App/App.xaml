@@ -24,6 +24,7 @@
             <converters:BoolToSuccessBrushConverter x:Key="BoolToSuccessBrushConverter"/>
             <converters:BoolToPluggedInConverter x:Key="BoolToPluggedInConverter"/>
             <converters:BoolToChargingConverter x:Key="BoolToChargingConverter"/>
+            <converters:InvertBoolToVisibilityConverter x:Key="InvertBoolToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
