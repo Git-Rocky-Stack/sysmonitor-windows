@@ -20,6 +20,9 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isCharging;
     [ObservableProperty] private bool _isPluggedIn;
     [ObservableProperty] private string _chargingStatus = "Checking...";
+    [ObservableProperty] private string _chargeStatusColor = "#4CAF50";
+    [ObservableProperty] private string _chargeLevelStatus = "Checking...";
+    [ObservableProperty] private string _chargingStatusColor = "#808080";
 
     // Runtime
     [ObservableProperty] private string _estimatedRuntime = "";
@@ -99,13 +102,25 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
                 IsCharging = batteryInfo.IsCharging;
                 IsPluggedIn = batteryInfo.IsPluggedIn;
 
-                // Status text
+                // Status text and colors
                 if (batteryInfo.IsCharging)
+                {
                     ChargingStatus = "Charging";
+                    ChargingStatusColor = "#4CAF50"; // Green
+                }
                 else if (batteryInfo.IsPluggedIn)
+                {
                     ChargingStatus = "Plugged in, not charging";
+                    ChargingStatusColor = "#00BCD4"; // Cyan
+                }
                 else
+                {
                     ChargingStatus = "On battery power";
+                    ChargingStatusColor = "#FF9800"; // Orange
+                }
+
+                // Charge level status and color
+                (ChargeLevelStatus, ChargeStatusColor) = GetChargeLevelStatus(batteryInfo.ChargePercent);
 
                 // Estimated runtime
                 if (batteryInfo.EstimatedRuntime > TimeSpan.Zero && !batteryInfo.IsPluggedIn)
@@ -155,6 +170,18 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
             "Low" => "#FF5722",     // Deep Orange
             "Critical" => "#F44336", // Red
             _ => "#808080"          // Gray
+        };
+    }
+
+    private static (string status, string color) GetChargeLevelStatus(int percent)
+    {
+        return percent switch
+        {
+            >= 80 => ("Excellent", "#4CAF50"),      // Green
+            >= 50 => ("Good", "#8BC34A"),           // Light green
+            >= 20 => ("Low", "#FF9800"),            // Orange
+            >= 10 => ("Very Low", "#FF5722"),       // Deep orange
+            _ => ("Critical", "#F44336")             // Red
         };
     }
 
