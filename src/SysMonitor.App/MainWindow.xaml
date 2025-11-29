@@ -13,35 +13,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title Bar with Red Accent - Strategia-X Branding -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="56"
-              Background="{StaticResource HeaderGradientBrush}">
+        <!-- Title Bar - AMOLED Pure Black -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="68"
+              Background="#000000">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- STX.1 Logo Image -->
-            <Image Grid.Column="0" Source="ms-appx:///Assets/STX1_Logo.png"
-                   Height="36" Margin="12,0,0,0" VerticalAlignment="Center"
-                   Stretch="Uniform"/>
-
             <!-- Brand Text Header Logo -->
-            <Image Grid.Column="1" Source="ms-appx:///Assets/Header_Main1.png"
-                   Height="24" Margin="12,0,0,0" VerticalAlignment="Center"
+            <Image Grid.Column="0" Source="ms-appx:///Assets/Header_Main1.png"
+                   Height="24" Margin="16,0,0,0" VerticalAlignment="Center"
                    Stretch="Uniform"/>
 
             <!-- SYSTEM MONITOR text -->
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="16,0,0,0">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
                 <TextBlock Text="SYSTEM MONITOR" FontSize="14" FontWeight="Bold"
                            Foreground="{StaticResource TextPrimaryBrush}"
                            CharacterSpacing="100" VerticalAlignment="Center"/>
             </StackPanel>
 
             <!-- Tagline on right -->
-            <TextBlock Grid.Column="3" Text="Strategic. Excellence. Engineered."
+            <TextBlock Grid.Column="2" Text="Strategic. Excellence. Engineered."
                        FontSize="10" Foreground="#AAFFFFFF"
                        VerticalAlignment="Center" Margin="0,0,16,0"/>
         </Grid>
