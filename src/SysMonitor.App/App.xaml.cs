@@ -7,6 +7,7 @@ using SysMonitor.Core.Services;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Optimizers;
+using SysMonitor.Core.Services.Utilities;
 
 namespace SysMonitor.App;
 
@@ -41,6 +42,11 @@ public partial class App : Application
                 services.AddSingleton<IStartupOptimizer, StartupOptimizer>();
                 services.AddSingleton<IMemoryOptimizer, MemoryOptimizer>();
 
+                // Core Services - Utilities
+                services.AddSingleton<ILargeFileFinder, LargeFileFinder>();
+                services.AddSingleton<IDuplicateFinder, DuplicateFinder>();
+                services.AddSingleton<IFileConverter, FileConverter>();
+
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
                 services.AddTransient<ProcessesViewModel>();
@@ -55,6 +61,9 @@ public partial class App : Application
                 services.AddTransient<TemperatureViewModel>();
                 services.AddTransient<SystemInfoViewModel>();
                 services.AddTransient<GpuViewModel>();
+                services.AddTransient<LargeFilesViewModel>();
+                services.AddTransient<DuplicateFinderViewModel>();
+                services.AddTransient<FileToolsViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -70,6 +79,9 @@ public partial class App : Application
                 services.AddTransient<TemperaturePage>();
                 services.AddTransient<SystemInfoPage>();
                 services.AddTransient<GpuPage>();
+                services.AddTransient<LargeFilesPage>();
+                services.AddTransient<DuplicateFinderPage>();
+                services.AddTransient<FileToolsPage>();
             })
             .Build();
     }
