@@ -23,34 +23,21 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Logo Icon -->
-            <Border Grid.Column="0" Background="{StaticResource IconContainerBrush}"
-                    CornerRadius="8" Margin="12,10" Padding="8">
-                <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
-            </Border>
+            <!-- STX.1 Logo Image -->
+            <Image Grid.Column="0" Source="ms-appx:///Assets/STX1_Logo.png"
+                   Height="36" Margin="12,0,0,0" VerticalAlignment="Center"
+                   Stretch="Uniform"/>
 
-            <!-- Brand Text - matching Android app style -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
-                <!-- \\strateg\a-x logo style -->
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="\\strateg\a-" FontSize="11" FontWeight="Light"
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               FontFamily="Consolas"/>
-                    <TextBlock Text="x" FontSize="11" FontWeight="Light"
-                               Foreground="{StaticResource PrimaryBrush}"
-                               FontFamily="Consolas"/>
-                </StackPanel>
-                <!-- STX.1 and SYSTEM MONITOR -->
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock FontSize="12" FontWeight="Bold" VerticalAlignment="Center">
-                        <Run Text="STX" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <Run Text="." Foreground="{StaticResource PrimaryBrush}"/>
-                        <Run Text="1" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </TextBlock>
-                    <TextBlock Text="SYSTEM MONITOR" FontSize="14" FontWeight="Bold"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               CharacterSpacing="100" VerticalAlignment="Center"/>
-                </StackPanel>
+            <!-- Brand Text Header Logo -->
+            <Image Grid.Column="1" Source="ms-appx:///Assets/Header_Main1.png"
+                   Height="24" Margin="12,0,0,0" VerticalAlignment="Center"
+                   Stretch="Uniform"/>
+
+            <!-- SYSTEM MONITOR text -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="16,0,0,0">
+                <TextBlock Text="SYSTEM MONITOR" FontSize="14" FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           CharacterSpacing="100" VerticalAlignment="Center"/>
             </StackPanel>
 
             <!-- Tagline on right -->
