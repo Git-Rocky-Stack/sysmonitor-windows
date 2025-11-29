@@ -161,3 +161,18 @@ public class InvertBoolToVisibilityConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+public class BoolToScanButtonConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isScanning)
+            return isScanning ? "CANCEL" : "SCAN";
+        return "SCAN";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
