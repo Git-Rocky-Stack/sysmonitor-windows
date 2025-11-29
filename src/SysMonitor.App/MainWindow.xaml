@@ -72,6 +72,11 @@
                         <FontIcon Glyph="&#xE950;" Foreground="{StaticResource PrimaryBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="GPU Monitor" Tag="GpuMonitor">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7F4;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Memory Monitor" Tag="MemoryMonitor">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE964;" Foreground="{StaticResource PrimaryBrush}"/>
