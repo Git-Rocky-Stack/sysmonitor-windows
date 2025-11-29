@@ -37,8 +37,16 @@
                 <NavigationViewItem Icon="Delete" Content="Cleaner" Tag="Cleaner"/>
                 <NavigationViewItem Icon="Clock" Content="Startup" Tag="Startup"/>
                 <NavigationViewItemSeparator/>
-                <NavigationViewItem Icon="HardDrive" Content="Disk Analyzer" Tag="DiskAnalyzer"/>
-                <NavigationViewItem Icon="Globe" Content="Network" Tag="Network"/>
+                <NavigationViewItem Content="Disk Analyzer" Tag="DiskAnalyzer">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEDA2;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Network" Tag="Network">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE774;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" Padding="24"/>
