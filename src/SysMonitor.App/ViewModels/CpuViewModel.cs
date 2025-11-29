@@ -33,8 +33,11 @@ public partial class CpuViewModel : ObservableObject, IDisposable
 
     // Usage
     [ObservableProperty] private double _totalUsage;
+    [ObservableProperty] private string _totalUsageStatus = "Idle";
     [ObservableProperty] private double _temperature;
     [ObservableProperty] private bool _hasTemperature;
+    [ObservableProperty] private string _temperatureStatus = "N/A";
+    [ObservableProperty] private string _temperatureColor = "#4CAF50";
 
     // Per-Core Usage
     [ObservableProperty] private ObservableCollection<CoreUsageInfo> _coreUsages = new();
@@ -106,12 +109,14 @@ public partial class CpuViewModel : ObservableObject, IDisposable
 
                 // Update dynamic info
                 TotalUsage = cpuInfo.UsagePercent;
+                TotalUsageStatus = GetUsageStatus(cpuInfo.UsagePercent);
                 CurrentClockSpeedMHz = cpuInfo.CurrentClockSpeedMHz;
                 CurrentClockDisplay = FormatClockSpeed(cpuInfo.CurrentClockSpeedMHz);
 
                 // Temperature
                 Temperature = temperature;
                 HasTemperature = temperature > 0;
+                (TemperatureStatus, TemperatureColor) = GetTemperatureStatus(temperature);
 
                 // Update per-core usages
                 UpdateCoreUsages(cpuInfo.CoreUsages);
@@ -151,6 +156,31 @@ public partial class CpuViewModel : ObservableObject, IDisposable
         return $"{mhz:F0} MHz";
     }
 
+    private static string GetUsageStatus(double usage)
+    {
+        return usage switch
+        {
+            < 20 => "Idle",
+            < 50 => "Light",
+            < 75 => "Moderate",
+            < 90 => "Heavy",
+            _ => "Maximum"
+        };
+    }
+
+    private static (string status, string color) GetTemperatureStatus(double temp)
+    {
+        return temp switch
+        {
+            0 => ("N/A", "#808080"),
+            <= 45 => ("Cool", "#4CAF50"),      // Green
+            <= 65 => ("Normal", "#8BC34A"),    // Light green
+            <= 80 => ("Warm", "#FF9800"),      // Orange
+            <= 90 => ("Hot", "#FF5722"),       // Red-orange
+            _ => ("Critical", "#F44336")        // Red
+        };
+    }
+
     public void Dispose()
     {
         if (_isDisposed) return;
@@ -167,6 +197,21 @@ public partial class CoreUsageInfo : ObservableObject
 {
     [ObservableProperty] private int _coreIndex;
     [ObservableProperty] private double _usage;
+    [ObservableProperty] private string _status = "Idle";
+    [ObservableProperty] private string _statusColor = "#4CAF50";
 
     public string CoreName => $"Core {CoreIndex}";
+
+    partial void OnUsageChanged(double value)
+    {
+        // Update status based on usage level
+        (Status, StatusColor) = value switch
+        {
+            < 20 => ("Idle", "#4CAF50"),       // Green
+            < 50 => ("Light", "#8BC34A"),      // Light green
+            < 75 => ("Moderate", "#FF9800"),   // Orange
+            < 90 => ("Heavy", "#FF5722"),      // Red-orange
+            _ => ("Max", "#F44336")            // Red
+        };
+    }
 }
