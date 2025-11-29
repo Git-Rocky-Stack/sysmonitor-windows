@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SysMonitor.App.Views.BatteryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="0,0,0,24" Spacing="16">
+
+            <!-- Page Header Banner -->
+            <Border Style="{StaticResource HeaderBannerStyle}">
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <FontIcon Glyph="&#xE83F;" FontSize="48" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="BATTERY MONITOR" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Power management analytics" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Center" Margin="0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- No Battery Message -->
+            <Border Style="{StaticResource CardStyle}" Padding="32"
+                    Visibility="{x:Bind ViewModel.NoBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center" Spacing="16">
+                    <FontIcon Glyph="&#xE894;" FontSize="64" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="No Battery Detected" Style="{StaticResource MenuItemTextStyle}"
+                               HorizontalAlignment="Center" FontSize="20"/>
+                    <TextBlock Text="This device does not have a battery or battery information is unavailable."
+                               Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"
+                               TextAlignment="Center" MaxWidth="400"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Battery Content (visible when battery exists) -->
+            <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                <!-- Battery Level Section -->
+                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                    <TextBlock Text="BATTERY LEVEL" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                </StackPanel>
+
+                <!-- Main Battery Card -->
+                <Border Style="{StaticResource CardStyle}" Padding="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Battery Icon -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <Border Width="80" Height="80" CornerRadius="16"
+                                    Background="{StaticResource SuccessBrush}">
+                                <FontIcon Glyph="{x:Bind ViewModel.BatteryIcon, Mode=OneWay}" FontSize="40"
+                                          Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Battery Info -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
+                            <TextBlock Text="{x:Bind ViewModel.ChargingStatus, Mode=OneWay}"
+                                       Style="{StaticResource MenuItemTextStyle}" FontSize="18"/>
+                            <ProgressBar Value="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
+                                         Maximum="100" Style="{StaticResource GreenProgressBarStyle}"
+                                         Margin="0,12,0,0" Height="12"/>
+                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                    <Run Text="Health:"/>
+                                    <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
+                                         Foreground="{StaticResource SuccessBrush}"/>
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}"
+                                           Visibility="{x:Bind ViewModel.HasEstimatedRuntime, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Run Text="Remaining:"/>
+                                    <Run Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"
+                                         Foreground="{StaticResource CyanAccentBrush}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Charge Percent Display -->
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <TextBlock Text="CHARGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Right"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <TextBlock Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
+                                           Style="{StaticResource LargeStatValueStyle}" FontSize="56"
+                                           Foreground="{StaticResource SuccessBrush}"/>
+                                <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,14"
+                                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="24"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Power Status Section -->
+                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                    <TextBlock Text="POWER STATUS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                </StackPanel>
+
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Plugged In Card -->
+                    <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}"
+                                        Background="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToSuccessBrushConverter}}">
+                                    <FontIcon Glyph="&#xE83E;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="POWER SOURCE" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="AC Adapter" Style="{StaticResource CardSubtitleStyle}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                       Text="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToPluggedInConverter}}"
+                                       Foreground="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToSuccessBrushConverter}}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Charging Card -->
+                    <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}"
+                                        Background="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToSuccessBrushConverter}}">
+                                    <FontIcon Glyph="&#xEA93;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="CHARGING" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="Battery Status" Style="{StaticResource CardSubtitleStyle}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                       Text="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToChargingConverter}}"
+                                       Foreground="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToSuccessBrushConverter}}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Estimated Runtime Card -->
+                    <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE916;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="TIME REMAINING" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="Estimated" Style="{StaticResource CardSubtitleStyle}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                       Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"
+                                       Foreground="{StaticResource CyanAccentBrush}"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Battery Health Section -->
+                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
+                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                    <TextBlock Text="BATTERY HEALTH" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                </StackPanel>
+
+                <!-- Health Info Card -->
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid RowSpacing="16" ColumnSpacing="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Health Status -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource SuccessBrush}">
+                                <FontIcon Glyph="&#xE8E1;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="OVERALL HEALTH" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
+                                           Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Current Level -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                            <Border Style="{StaticResource IconContainerStyle}">
+                                <FontIcon Glyph="&#xE83F;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="CURRENT LEVEL" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                    <Run Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"/>
+                                    <Run Text="% charged"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Power Tips Card -->
+                <Border Style="{StaticResource CardStyle}" Padding="20">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE82F;" FontSize="16" Foreground="{StaticResource WarningBrush}"/>
+                            <TextBlock Text="Power Saving Tips" Style="{StaticResource MenuItemTextStyle}"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
+                            • Reduce screen brightness to extend battery life
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
+                            • Close unused applications running in the background
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
+                            • Enable battery saver mode when below 20%
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+
+            <!-- Footer -->
+            <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">
+                <Image Source="ms-appx:///Assets/Header_Main1.png"
+                       Height="16" HorizontalAlignment="Center"
+                       Stretch="Uniform" Opacity="0.7"/>
+                <TextBlock Text="Powered by Strategia-X Technology"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           FontSize="12"/>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
