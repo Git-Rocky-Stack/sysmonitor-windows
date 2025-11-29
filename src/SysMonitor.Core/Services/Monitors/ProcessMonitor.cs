@@ -6,12 +6,15 @@ namespace SysMonitor.Core.Services.Monitors;
 public class ProcessMonitor : IProcessMonitor
 {
     private readonly Dictionary<int, (DateTime time, TimeSpan cpu)> _cpuUsageCache = new();
+    private DateTime _lastCacheCleanup = DateTime.UtcNow;
+    private readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromMinutes(1);
 
     public async Task<List<ProcessInfo>> GetAllProcessesAsync()
     {
         return await Task.Run(() =>
         {
             var processes = new List<ProcessInfo>();
+            var currentProcessIds = new HashSet<int>();
             var systemProcesses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 "System", "Idle", "smss", "csrss", "wininit", "services", "lsass",
@@ -22,6 +25,8 @@ public class ProcessMonitor : IProcessMonitor
             {
                 try
                 {
+                    currentProcessIds.Add(proc.Id);
+
                     var info = new ProcessInfo
                     {
                         Id = proc.Id,
@@ -53,10 +58,30 @@ public class ProcessMonitor : IProcessMonitor
                     processes.Add(info);
                 }
                 catch { }
+                finally
+                {
+                    proc.Dispose();
+                }
             }
+
+            // Clean up CPU cache for dead processes periodically
+            CleanupCpuCache(currentProcessIds);
 
             return processes.OrderByDescending(p => p.MemoryBytes).ToList();
         });
+    }
+
+    private void CleanupCpuCache(HashSet<int> currentProcessIds)
+    {
+        var now = DateTime.UtcNow;
+        if (now - _lastCacheCleanup < _cacheCleanupInterval) return;
+
+        _lastCacheCleanup = now;
+        var deadProcessIds = _cpuUsageCache.Keys.Where(id => !currentProcessIds.Contains(id)).ToList();
+        foreach (var id in deadProcessIds)
+        {
+            _cpuUsageCache.Remove(id);
+        }
     }
 
     private double CalculateCpuUsage(Process proc)
@@ -98,7 +123,7 @@ public class ProcessMonitor : IProcessMonitor
         {
             try
             {
-                var proc = Process.GetProcessById(processId);
+                using var proc = Process.GetProcessById(processId);
                 proc.Kill();
                 return proc.WaitForExit(5000);
             }
@@ -112,7 +137,7 @@ public class ProcessMonitor : IProcessMonitor
         {
             try
             {
-                var proc = Process.GetProcessById(processId);
+                using var proc = Process.GetProcessById(processId);
                 proc.PriorityClass = priority switch
                 {
                     ProcessPriority.Idle => ProcessPriorityClass.Idle,

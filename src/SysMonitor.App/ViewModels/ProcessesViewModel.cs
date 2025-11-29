@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitors;
 using System.Collections.ObjectModel;
@@ -9,7 +10,11 @@ namespace SysMonitor.App.ViewModels;
 public partial class ProcessesViewModel : ObservableObject, IDisposable
 {
     private readonly IProcessMonitor _processMonitor;
-    private System.Timers.Timer? _refreshTimer;
+    private readonly DispatcherQueue _dispatcherQueue;
+    private CancellationTokenSource? _cts;
+    private bool _isDisposed;
+    private readonly object _refreshLock = new();
+    private bool _isRefreshing;
 
     [ObservableProperty] private ObservableCollection<ProcessInfo> _processes = new();
     [ObservableProperty] private ProcessInfo? _selectedProcess;
@@ -22,32 +27,92 @@ public partial class ProcessesViewModel : ObservableObject, IDisposable
     public ProcessesViewModel(IProcessMonitor processMonitor)
     {
         _processMonitor = processMonitor;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
     public async Task InitializeAsync()
     {
         await RefreshProcessesAsync();
-        _refreshTimer = new System.Timers.Timer(3000);
-        _refreshTimer.Elapsed += async (s, e) => await RefreshProcessesAsync();
-        _refreshTimer.Start();
+        StartAutoRefresh();
+    }
+
+    private void StartAutoRefresh()
+    {
+        _cts = new CancellationTokenSource();
+        _ = RefreshLoopAsync(_cts.Token);
+    }
+
+    private async Task RefreshLoopAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(3));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await RefreshProcessesAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when disposed
+        }
     }
 
     private async Task RefreshProcessesAsync()
     {
+        // Prevent overlapping refreshes
+        lock (_refreshLock)
+        {
+            if (_isRefreshing || _isDisposed) return;
+            _isRefreshing = true;
+        }
+
         try
         {
             var allProcesses = await _processMonitor.GetAllProcessesAsync();
-            var filtered = string.IsNullOrEmpty(SearchText)
-                ? allProcesses
-                : allProcesses.Where(p => p.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (_isDisposed) return;
 
-            Processes = new ObservableCollection<ProcessInfo>(filtered);
-            TotalProcesses = allProcesses.Count;
-            TotalCpuUsage = allProcesses.Sum(p => p.CpuUsagePercent);
-            TotalMemoryMB = allProcesses.Sum(p => p.MemoryMB);
-            IsLoading = false;
+            var searchText = SearchText;
+            var filtered = string.IsNullOrEmpty(searchText)
+                ? allProcesses
+                : allProcesses.Where(p => p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            var totalCount = allProcesses.Count;
+            var totalCpu = allProcesses.Sum(p => p.CpuUsagePercent);
+            var totalMem = allProcesses.Sum(p => p.MemoryMB);
+
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                if (_isDisposed) return;
+
+                // Update collection efficiently - clear and re-add instead of recreating
+                Processes.Clear();
+                foreach (var proc in filtered)
+                {
+                    Processes.Add(proc);
+                }
+
+                TotalProcesses = totalCount;
+                TotalCpuUsage = totalCpu;
+                TotalMemoryMB = totalMem;
+                IsLoading = false;
+            });
         }
-        catch { }
+        catch (OperationCanceledException)
+        {
+            // Expected during shutdown
+        }
+        catch (Exception)
+        {
+            // Log in production
+        }
+        finally
+        {
+            lock (_refreshLock)
+            {
+                _isRefreshing = false;
+            }
+        }
     }
 
     [RelayCommand]
@@ -70,7 +135,9 @@ public partial class ProcessesViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        _refreshTimer?.Stop();
-        _refreshTimer?.Dispose();
+        if (_isDisposed) return;
+        _isDisposed = true;
+        _cts?.Cancel();
+        _cts?.Dispose();
     }
 }

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services;
 using SysMonitor.Core.Services.Cleaners;
@@ -12,7 +13,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly ISystemInfoService _systemInfoService;
     private readonly ITempFileCleaner _tempFileCleaner;
     private readonly IMemoryOptimizer _memoryOptimizer;
-    private System.Timers.Timer? _refreshTimer;
+    private readonly DispatcherQueue _dispatcherQueue;
+    private CancellationTokenSource? _cts;
+    private bool _isDisposed;
 
     [ObservableProperty] private int _healthScore = 0;
     [ObservableProperty] private string _healthStatus = "Checking...";
@@ -40,6 +43,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         _systemInfoService = systemInfoService;
         _tempFileCleaner = tempFileCleaner;
         _memoryOptimizer = memoryOptimizer;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
     public async Task InitializeAsync()
@@ -50,51 +54,86 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     private void StartAutoRefresh()
     {
-        _refreshTimer = new System.Timers.Timer(2000);
-        _refreshTimer.Elapsed += async (s, e) => await RefreshDataAsync();
-        _refreshTimer.Start();
+        _cts = new CancellationTokenSource();
+        _ = RefreshLoopAsync(_cts.Token);
+    }
+
+    private async Task RefreshLoopAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await RefreshDataAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when disposed
+        }
     }
 
     private async Task RefreshDataAsync()
     {
+        if (_isDisposed) return;
+
         try
         {
             var info = await _systemInfoService.GetSystemInfoAsync();
+            if (_isDisposed) return;
 
-            HealthScore = info.HealthScore;
-            HealthStatus = info.HealthScore >= 80 ? "Excellent" :
-                          info.HealthScore >= 60 ? "Good" :
-                          info.HealthScore >= 40 ? "Fair" : "Poor";
-
-            CpuUsage = info.Cpu.UsagePercent;
-            MemoryUsage = info.Memory.UsagePercent;
-            MemoryUsedGB = info.Memory.UsedGB;
-            MemoryTotalGB = info.Memory.TotalGB;
-
-            if (info.Disks.Count > 0)
+            // Update UI on dispatcher thread
+            _dispatcherQueue.TryEnqueue(() =>
             {
-                var mainDisk = info.Disks[0];
-                DiskUsage = mainDisk.UsagePercent;
-                DiskUsedGB = mainDisk.UsedGB;
-                DiskTotalGB = mainDisk.TotalGB;
-            }
+                if (_isDisposed) return;
 
-            if (info.Battery != null)
-            {
-                HasBattery = true;
-                BatteryLevel = info.Battery.ChargePercent;
-                IsCharging = info.Battery.IsCharging;
-            }
+                HealthScore = info.HealthScore;
+                HealthStatus = info.HealthScore >= 80 ? "Excellent" :
+                              info.HealthScore >= 60 ? "Good" :
+                              info.HealthScore >= 40 ? "Fair" : "Poor";
 
-            OsName = info.OperatingSystem.Name;
-            Uptime = FormatUptime(info.OperatingSystem.Uptime);
+                CpuUsage = info.Cpu.UsagePercent;
+                MemoryUsage = info.Memory.UsagePercent;
+                MemoryUsedGB = info.Memory.UsedGB;
+                MemoryTotalGB = info.Memory.TotalGB;
 
+                if (info.Disks.Count > 0)
+                {
+                    var mainDisk = info.Disks[0];
+                    DiskUsage = mainDisk.UsagePercent;
+                    DiskUsedGB = mainDisk.UsedGB;
+                    DiskTotalGB = mainDisk.TotalGB;
+                }
+
+                if (info.Battery != null)
+                {
+                    HasBattery = true;
+                    BatteryLevel = info.Battery.ChargePercent;
+                    IsCharging = info.Battery.IsCharging;
+                }
+
+                OsName = info.OperatingSystem.Name;
+                Uptime = FormatUptime(info.OperatingSystem.Uptime);
+
+                IsLoading = false;
+            });
+
+            // Get cleanable space (less critical, can be async)
             var cleanable = await _tempFileCleaner.GetTotalCleanableBytesAsync();
-            CleanableSpaceMB = cleanable / (1024.0 * 1024);
-
-            IsLoading = false;
+            if (!_isDisposed)
+            {
+                _dispatcherQueue.TryEnqueue(() => CleanableSpaceMB = cleanable / (1024.0 * 1024));
+            }
         }
-        catch { }
+        catch (OperationCanceledException)
+        {
+            // Expected during shutdown
+        }
+        catch (Exception)
+        {
+            // Log in production - for now, silently handle
+        }
     }
 
     [RelayCommand]
@@ -139,7 +178,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        _refreshTimer?.Stop();
-        _refreshTimer?.Dispose();
+        if (_isDisposed) return;
+        _isDisposed = true;
+        _cts?.Cancel();
+        _cts?.Dispose();
     }
 }
