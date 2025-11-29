@@ -46,6 +46,10 @@ public partial class App : Application
                 services.AddSingleton<ILargeFileFinder, LargeFileFinder>();
                 services.AddSingleton<IDuplicateFinder, DuplicateFinder>();
                 services.AddSingleton<IFileConverter, FileConverter>();
+                services.AddSingleton<IBluetoothAnalyzer, BluetoothAnalyzer>();
+                services.AddSingleton<IWiFiAnalyzer, WiFiAnalyzer>();
+                services.AddSingleton<IPdfTools, PdfTools>();
+                services.AddSingleton<INetworkMapper, NetworkMapper>();
 
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
@@ -64,6 +68,10 @@ public partial class App : Application
                 services.AddTransient<LargeFilesViewModel>();
                 services.AddTransient<DuplicateFinderViewModel>();
                 services.AddTransient<FileToolsViewModel>();
+                services.AddTransient<BluetoothViewModel>();
+                services.AddTransient<WiFiViewModel>();
+                services.AddTransient<PdfToolsViewModel>();
+                services.AddTransient<NetworkMapperViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -82,6 +90,10 @@ public partial class App : Application
                 services.AddTransient<LargeFilesPage>();
                 services.AddTransient<DuplicateFinderPage>();
                 services.AddTransient<FileToolsPage>();
+                services.AddTransient<BluetoothPage>();
+                services.AddTransient<WiFiPage>();
+                services.AddTransient<PdfToolsPage>();
+                services.AddTransient<NetworkMapperPage>();
             })
             .Build();
     }
