@@ -22,6 +22,10 @@ public partial class DiskViewModel : ObservableObject, IDisposable
     [ObservableProperty] private double _totalFreeGB;
     [ObservableProperty] private double _totalUsagePercent;
 
+    // Total Storage Status
+    [ObservableProperty] private string _totalStorageStatus = "Checking...";
+    [ObservableProperty] private string _totalStorageColor = "#4CAF50";
+
     // State
     [ObservableProperty] private bool _isLoading = true;
     [ObservableProperty] private bool _hasDisks;
@@ -98,6 +102,7 @@ public partial class DiskViewModel : ObservableObject, IDisposable
                         IsSSD = disk.IsSSD,
                         DriveIcon = GetDriveIcon(disk.DriveType, disk.IsSSD),
                         UsageColor = GetUsageColor(disk.UsagePercent),
+                        UsageStatus = GetUsageStatus(disk.UsagePercent),
                         StorageType = disk.IsSSD ? "SSD" : "HDD"
                     });
                 }
@@ -106,6 +111,10 @@ public partial class DiskViewModel : ObservableObject, IDisposable
                 TotalUsedGB = totalUsed;
                 TotalFreeGB = totalFree;
                 TotalUsagePercent = totalStorage > 0 ? (totalUsed / totalStorage) * 100 : 0;
+
+                // Update total storage status
+                (TotalStorageStatus, TotalStorageColor) = GetStorageStatus(TotalUsagePercent);
+
                 HasDisks = Disks.Count > 0;
                 IsLoading = false;
             });
@@ -143,6 +152,28 @@ public partial class DiskViewModel : ObservableObject, IDisposable
         };
     }
 
+    private static (string status, string color) GetStorageStatus(double usagePercent)
+    {
+        return usagePercent switch
+        {
+            >= 90 => ("Critical - Free up space immediately", "#F44336"),
+            >= 75 => ("Warning - Consider cleaning up", "#FF9800"),
+            >= 50 => ("Moderate - Storage usage normal", "#8BC34A"),
+            _ => ("Excellent - Plenty of free space", "#4CAF50")
+        };
+    }
+
+    private static string GetUsageStatus(double usagePercent)
+    {
+        return usagePercent switch
+        {
+            >= 90 => "Critical",
+            >= 75 => "Low Space",
+            >= 50 => "Normal",
+            _ => "Healthy"
+        };
+    }
+
     public void Dispose()
     {
         if (_isDisposed) return;
@@ -165,6 +196,7 @@ public class DiskDisplayInfo
     public bool IsSSD { get; set; }
     public string DriveIcon { get; set; } = string.Empty;
     public string UsageColor { get; set; } = string.Empty;
+    public string UsageStatus { get; set; } = string.Empty;
     public string StorageType { get; set; } = string.Empty;
 
     public string FormattedTotal => $"{TotalGB:F1} GB";
