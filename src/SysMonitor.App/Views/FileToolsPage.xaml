@@ -156,18 +156,30 @@
                                               Width="120"/>
                                 </StackPanel>
 
-                                <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
-                                        Style="{StaticResource RedButtonStyle}" HorizontalAlignment="Stretch"
-                                        IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon Glyph="&#xE81E;" FontSize="14"/>
-                                                <TextBlock Text="COMPRESS"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
+                                <!-- COMPRESS with chrome bezel -->
+                                <Border CornerRadius="26" Padding="2" HorizontalAlignment="Stretch">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#707070" Offset="0.0"/>
+                                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                            <GradientStop Color="#505050" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
+                                            Style="{StaticResource RedButtonStyle}" HorizontalAlignment="Stretch"
+                                            IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
+                                        <Button.ContentTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <FontIcon Glyph="&#xE81E;" FontSize="14"/>
+                                                    <TextBlock Text="COMPRESS"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </Button.ContentTemplate>
+                                    </Button>
+                                </Border>
                             </StackPanel>
                         </Border>
 
