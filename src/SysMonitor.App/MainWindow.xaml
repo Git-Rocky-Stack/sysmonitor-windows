@@ -145,6 +145,11 @@
                         <FontIcon Glyph="&#xEA90;" Foreground="{StaticResource CyanAccentBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Image Tools" Tag="ImageTools">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEB9F;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItemHeader Content="WIRELESS"/>
                 <NavigationViewItem Content="Bluetooth" Tag="Bluetooth">

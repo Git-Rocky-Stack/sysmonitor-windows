@@ -25,6 +25,7 @@ public sealed partial class MainWindow : Window
         { "DuplicateFinder", typeof(DuplicateFinderPage) },
         { "FileTools", typeof(FileToolsPage) },
         { "PdfTools", typeof(PdfToolsPage) },
+        { "ImageTools", typeof(ImageToolsPage) },
         // Wireless
         { "Bluetooth", typeof(BluetoothPage) },
         { "WiFi", typeof(WiFiPage) },

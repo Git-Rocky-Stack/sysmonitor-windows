@@ -50,6 +50,7 @@ public partial class App : Application
                 services.AddSingleton<IWiFiAnalyzer, WiFiAnalyzer>();
                 services.AddSingleton<IPdfTools, PdfTools>();
                 services.AddSingleton<INetworkMapper, NetworkMapper>();
+                services.AddSingleton<IImageTools, ImageTools>();
 
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
@@ -72,6 +73,7 @@ public partial class App : Application
                 services.AddTransient<WiFiViewModel>();
                 services.AddTransient<PdfToolsViewModel>();
                 services.AddTransient<NetworkMapperViewModel>();
+                services.AddTransient<ImageToolsViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -94,6 +96,7 @@ public partial class App : Application
                 services.AddTransient<WiFiPage>();
                 services.AddTransient<PdfToolsPage>();
                 services.AddTransient<NetworkMapperPage>();
+                services.AddTransient<ImageToolsPage>();
             })
             .Build();
     }
