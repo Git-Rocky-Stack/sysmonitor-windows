@@ -9,6 +9,7 @@ public sealed partial class MainWindow : Window
     private readonly Dictionary<string, Type> _pageMap = new()
     {
         { "Dashboard", typeof(DashboardPage) },
+        { "CpuMonitor", typeof(CpuPage) },
         { "Processes", typeof(ProcessesPage) },
         { "Cleaner", typeof(CleanerPage) },
         { "Startup", typeof(StartupPage) },
