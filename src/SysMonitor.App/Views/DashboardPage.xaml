@@ -226,37 +226,63 @@
 
             <!-- Health Score Hero Card -->
             <Border Style="{StaticResource CardStyle}" Padding="24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <StackPanel Spacing="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Health Score Display -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="CURRENT HEALTH SCORE" Style="{StaticResource StatLabelStyle}"
-                                   Margin="0,0,0,8"/>
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"
-                                       Style="{StaticResource LargeStatValueStyle}"/>
-                            <TextBlock Text="%" VerticalAlignment="Bottom" Margin="0,0,0,12"
-                                       Foreground="{StaticResource TextSecondaryBrush}" FontSize="24"/>
+                        <!-- Health Score Display -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="CURRENT HEALTH SCORE" Style="{StaticResource StatLabelStyle}"
+                                       Margin="0,0,0,8"/>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"
+                                           Style="{StaticResource LargeStatValueStyle}"/>
+                                <TextBlock Text="%" VerticalAlignment="Bottom" Margin="0,0,0,12"
+                                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="24"/>
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
+                                       Style="{StaticResource StatusGoodStyle}" FontSize="14"/>
                         </StackPanel>
-                        <TextBlock Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
-                                   Style="{StaticResource StatusGoodStyle}" FontSize="14"/>
-                    </StackPanel>
 
-                    <!-- Quick Actions -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                        <Button Content="QUICK CLEAN" Command="{x:Bind ViewModel.QuickCleanCommand}"
-                                Style="{StaticResource RedButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
-                        <Button Content="OPTIMIZE MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
-                                Style="{StaticResource OutlinedButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
-                    </StackPanel>
-                </Grid>
+                        <!-- Quick Actions -->
+                        <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Button Content="QUICK CLEAN" Command="{x:Bind ViewModel.QuickCleanCommand}"
+                                        Style="{StaticResource RedButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                                <Button Content="BOOST RAM" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
+                                        Style="{StaticResource OutlinedButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                                <Button Command="{x:Bind ViewModel.ExportReportCommand}"
+                                        Style="{StaticResource OutlinedButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                        ToolTipService.ToolTip="Export System Report">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE78C;" FontSize="14"/>
+                                        <TextBlock Text="EXPORT"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Action Status Banner -->
+                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="16,12"
+                            Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <ProgressRing IsActive="{x:Bind ViewModel.IsOptimizing, Mode=OneWay}" Width="20" Height="20"
+                                          Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{StaticResource SuccessBrush}"
+                                      Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                            <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- System Resources Section Header -->
