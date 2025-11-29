@@ -1,5 +1,7 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
 
 namespace SysMonitor.App.Converters;
 
@@ -89,6 +91,24 @@ public class MBConverter : IValueConverter
             return $"{mb:F0} MB";
         }
         return "0 MB";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class BoolToSuccessBrushConverter : IValueConverter
+{
+    private static readonly SolidColorBrush SuccessBrush = new(Windows.UI.Color.FromArgb(255, 76, 175, 80)); // #4CAF50
+    private static readonly SolidColorBrush ErrorBrush = new(Windows.UI.Color.FromArgb(255, 244, 67, 54)); // #F44336
+
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isConnected)
+            return isConnected ? SuccessBrush : ErrorBrush;
+        return ErrorBrush;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
