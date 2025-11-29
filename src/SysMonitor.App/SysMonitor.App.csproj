@@ -13,6 +13,7 @@
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UseRidGraph>true</UseRidGraph>
     <Version>1.0.0</Version>
     <Authors>Rocky Stack</Authors>
     <Company>Rocky Stack</Company>
