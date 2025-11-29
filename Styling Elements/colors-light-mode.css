@@ -1,0 +1,103 @@
+/**
+ * System Monitor - Light Mode Color Palette
+ * ==========================================
+ * Use these CSS variables for Windows/Web development
+ * This is the SECONDARY theme (light mode alternative)
+ */
+
+:root {
+  /* ===== PRIMARY BRAND COLORS (Same in both modes) ===== */
+  --brand-red: #AA2024;
+  --brand-red-dark: #8A1A1D;
+  --brand-red-light: #C93437;
+  --brand-accent: #FF7043;
+
+  /* ===== ACCENT COLORS (Same in both modes) ===== */
+  --accent-blue: #2196F3;
+  --accent-green: #4CAF50;
+  --accent-orange: #FF9800;
+  --accent-purple: #9C27B0;
+  --accent-teal: #00BCD4;
+
+  /* ===== BACKGROUND COLORS ===== */
+  --background-primary: #FFFFFF;
+  --background-secondary: #F5F5F5;
+  --background-card: #FFFFFF;
+  --background-card-elevated: #FAFAFA;
+  --background-dark: #EEEEEE;
+
+  /* ===== SURFACE COLORS ===== */
+  --surface: #FFFFFF;
+  --surface-dark: #F5F5F5;
+  --surface-medium: #FAFAFA;
+  --surface-light: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+
+  /* ===== TEXT COLORS ===== */
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-tertiary: #9E9E9E;
+  --text-disabled: #BDBDBD;
+
+  /* ===== STATUS COLORS (Same in both modes) ===== */
+  --status-excellent: #4CAF50;
+  --status-good: #8BC34A;
+  --status-fair: #FFC107;
+  --status-warning: #FF9800;
+  --status-critical: #F44336;
+
+  /* ===== LEGACY STATUS (Same in both modes) ===== */
+  --success: #4CAF50;
+  --success-light: #81C784;
+  --warning: #FF9800;
+  --warning-light: #FFB74D;
+  --error: #F44336;
+  --error-light: #EF5350;
+  --info: #2196F3;
+  --info-light: #64B5F6;
+
+  /* ===== OVERLAY COLORS ===== */
+  --overlay: rgba(0, 0, 0, 0.25);
+  --overlay-dark: rgba(0, 0, 0, 0.375);
+  --overlay-medium: rgba(0, 0, 0, 0.1875);
+  --overlay-light: rgba(0, 0, 0, 0.0625);
+
+  /* ===== DIVIDER COLORS ===== */
+  --divider: #E0E0E0;
+  --divider-subtle: #F5F5F5;
+  --divider-medium: #E0E0E0;
+  --divider-strong: #BDBDBD;
+
+  /* ===== FUNCTIONAL COLORS ===== */
+  --ripple: rgba(0, 0, 0, 0.125);
+  --focus-ring: rgba(170, 32, 36, 0.3);
+  --selection: rgba(33, 150, 243, 0.2);
+
+  /* ===== GRADIENT COLORS (Same in both modes) ===== */
+  --gradient-start: #AA2024;
+  --gradient-end: #FF5252;
+
+  /* ===== CHART COLORS (Same in both modes) ===== */
+  --chart-red: #AA2024;
+  --chart-orange: #FF7043;
+  --chart-amber: #FFA726;
+  --chart-yellow: #FFCA28;
+  --chart-blue: #2196F3;
+  --chart-cyan: #00BCD4;
+  --chart-green: #4CAF50;
+  --chart-purple: #9C27B0;
+  --chart-grid: #E0E0E0;
+  --chart-background: #FAFAFA;
+
+  /* ===== ADDITIONAL UI COLORS ===== */
+  --coral-red: #FF6B6B;
+  --cyan: #00E5FF;
+  --gold: #FFD700;
+  --deep-orange: #FF5722;
+  --dark-red: #B71C1C;
+  --light-green: #8BC34A;
+  --amber: #FFC107;
+  --gray: #9E9E9E;
+  --gray-dark: #666666;
+  --gray-medium: #888888;
+}
