@@ -44,8 +44,20 @@
                     <!-- Memory Info -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
                         <TextBlock Text="Physical Memory (RAM)" Style="{StaticResource MenuItemTextStyle}" FontSize="16"/>
-                        <TextBlock Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"
-                                   Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0"/>
+                        <!-- Status with Color Indicator -->
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                            <Ellipse Width="10" Height="10" VerticalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock FontSize="13">
+                                <TextBlock.Foreground>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
+                                </TextBlock.Foreground>
+                                <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
                         <ProgressBar Value="{x:Bind ViewModel.UsagePercent, Mode=OneWay}"
                                      Maximum="100" Style="{StaticResource RedProgressBarStyle}"
                                      Margin="0,12,0,0" Height="8"/>
@@ -59,17 +71,70 @@
 
                     <!-- Usage Display -->
                     <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                        <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Right"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
+                            <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock Text="{x:Bind ViewModel.UsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"
                                        Style="{StaticResource LargeStatValueStyle}" FontSize="48"/>
                             <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,12"
                                        Foreground="{StaticResource TextSecondaryBrush}" FontSize="20"/>
                         </StackPanel>
+                        <!-- Status Badge -->
+                        <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right">
+                            <Border.Background>
+                                <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}" Opacity="0.2"/>
+                            </Border.Background>
+                            <TextBlock FontSize="11" FontWeight="SemiBold">
+                                <TextBlock.Foreground>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
+                                </TextBlock.Foreground>
+                                <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
+                            </TextBlock>
+                        </Border>
                         <Button Content="OPTIMIZE MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
                                 Style="{StaticResource RedButtonStyle}" Margin="0,8,0,0"
                                 IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                     </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Action Feedback Banner -->
+            <Border Background="{StaticResource CardBrush}" CornerRadius="8" Padding="16"
+                    Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Status Icon / Progress -->
+                    <Grid Grid.Column="0" Width="32" Height="32">
+                        <ProgressRing IsActive="{x:Bind ViewModel.IsOptimizing, Mode=OneWay}"
+                                      Width="24" Height="24"
+                                      Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="{StaticResource SuccessBrush}"
+                                  Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Status Message -->
+                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
+                               Foreground="{StaticResource TextPrimaryBrush}" FontSize="14"
+                               VerticalAlignment="Center" Margin="12,0,0,0"/>
+
+                    <!-- Bytes Freed Display -->
+                    <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                               Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                               Foreground="{StaticResource CyanAccentBrush}" FontSize="12" FontWeight="SemiBold">
+                        <Run Text="MEMORY OPTIMIZED"/>
+                    </TextBlock>
                 </Grid>
             </Border>
 

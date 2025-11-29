@@ -34,6 +34,12 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isLoading = true;
     [ObservableProperty] private bool _isOptimizing = false;
 
+    // Action Feedback
+    [ObservableProperty] private string _actionStatus = "";
+    [ObservableProperty] private bool _hasActionStatus = false;
+    [ObservableProperty] private bool _isActionSuccess = true;
+    [ObservableProperty] private long _bytesFreed = 0;
+
     public MemoryViewModel(IMemoryMonitor memoryMonitor, IMemoryOptimizer memoryOptimizer)
     {
         _memoryMonitor = memoryMonitor;
@@ -139,15 +145,60 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
         if (IsOptimizing) return;
 
         IsOptimizing = true;
+        ShowActionStatus("Optimizing memory...", true);
+
         try
         {
+            // Capture memory before optimization
+            var beforeMemInfo = await _memoryMonitor.GetMemoryInfoAsync();
+            var beforeUsedBytes = beforeMemInfo.UsedBytes;
+
             await _memoryOptimizer.OptimizeMemoryAsync();
             await RefreshDataAsync();
+
+            // Calculate freed memory
+            var afterMemInfo = await _memoryMonitor.GetMemoryInfoAsync();
+            var freedBytes = beforeUsedBytes - afterMemInfo.UsedBytes;
+            BytesFreed = freedBytes > 0 ? freedBytes : 0;
+
+            if (BytesFreed > 0)
+            {
+                var freedMB = BytesFreed / (1024.0 * 1024);
+                ShowActionStatus($"Freed {freedMB:F1} MB of memory!", true);
+            }
+            else
+            {
+                ShowActionStatus("Memory already optimized!", true);
+            }
+        }
+        catch (Exception)
+        {
+            ShowActionStatus("Optimization failed", false);
         }
         finally
         {
             IsOptimizing = false;
+
+            // Clear status after delay
+            _ = ClearActionStatusAfterDelayAsync();
         }
+    }
+
+    private void ShowActionStatus(string message, bool isSuccess)
+    {
+        ActionStatus = message;
+        IsActionSuccess = isSuccess;
+        HasActionStatus = true;
+    }
+
+    private async Task ClearActionStatusAfterDelayAsync()
+    {
+        await Task.Delay(5000);
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            HasActionStatus = false;
+            ActionStatus = "";
+        });
     }
 
     public void Dispose()
