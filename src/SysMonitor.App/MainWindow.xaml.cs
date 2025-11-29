@@ -15,7 +15,7 @@ public sealed partial class MainWindow : Window
         { "Cleaner", typeof(CleanerPage) },
         { "Startup", typeof(StartupPage) },
         { "DiskAnalyzer", typeof(PlaceholderPage) },
-        { "Network", typeof(PlaceholderPage) },
+        { "Network", typeof(NetworkPage) },
         { "Battery", typeof(PlaceholderPage) }
     };
 
