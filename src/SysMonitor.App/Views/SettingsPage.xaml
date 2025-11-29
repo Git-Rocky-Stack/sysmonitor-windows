@@ -8,14 +8,28 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="16" Padding="0,0,0,24">
 
-            <!-- Page Header Banner -->
-            <Border Style="{StaticResource HeaderBannerStyle}">
-                <StackPanel>
-                    <TextBlock Text="SETTINGS" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Configure Application Preferences" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF"/>
-                </StackPanel>
+            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
+            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Header text -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="SETTINGS" Style="{StaticResource PageHeaderStyle}"
+                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Configure Application Preferences" Style="{StaticResource PageSubtitleStyle}"
+                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
+                    </StackPanel>
+
+                    <!-- Center: STX.1 Home Logo -->
+                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Stretch="Uniform"/>
+                </Grid>
             </Border>
 
             <!-- Appearance Section -->

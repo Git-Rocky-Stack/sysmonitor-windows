@@ -9,15 +9,28 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner -->
-            <Border Style="{StaticResource HeaderBannerStyle}">
-                <StackPanel HorizontalAlignment="Center" Spacing="8">
-                    <FontIcon Glyph="&#xE8C8;" FontSize="48" Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="DUPLICATE FINDER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Find and remove duplicate files" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Center" Margin="0"/>
-                </StackPanel>
+            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
+            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Header text -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="DUPLICATE FINDER" Style="{StaticResource PageHeaderStyle}"
+                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Find and remove duplicate files" Style="{StaticResource PageSubtitleStyle}"
+                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
+                    </StackPanel>
+
+                    <!-- Center: STX.1 Home Logo -->
+                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Stretch="Uniform"/>
+                </Grid>
             </Border>
 
             <!-- Scan Controls -->
