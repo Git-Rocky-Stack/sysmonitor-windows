@@ -13,11 +13,33 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     {
         var networks = new List<WiFiNetworkInfo>();
 
-        await Task.Run(() =>
+        await Task.Run(async () =>
         {
             try
             {
-                // Use netsh to get WiFi networks - most reliable cross-version approach
+                // First, trigger a scan on the wireless interface
+                // This refreshes the cached network list that netsh shows
+                var interfaceName = GetWirelessInterfaceName();
+                if (!string.IsNullOrEmpty(interfaceName))
+                {
+                    var scanStartInfo = new ProcessStartInfo
+                    {
+                        FileName = "netsh",
+                        Arguments = $"wlan scan interface=\"{interfaceName}\"",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    };
+
+                    using var scanProcess = Process.Start(scanStartInfo);
+                    scanProcess?.WaitForExit(3000);
+
+                    // Wait for the scan to complete (networks take time to appear)
+                    await Task.Delay(2000, cancellationToken);
+                }
+
+                // Now get the network list
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "netsh",
@@ -34,6 +56,16 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 process.WaitForExit(5000);
 
                 networks.AddRange(ParseNetshOutput(output));
+
+                // If no networks found from scan, try to at least include the connected network
+                if (networks.Count == 0)
+                {
+                    var connected = GetConnectedNetworkAsFallback();
+                    if (connected != null)
+                    {
+                        networks.Add(connected);
+                    }
+                }
             }
             catch (OperationCanceledException) { throw; }
             catch { }
@@ -41,6 +73,92 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
         // Sort by signal strength (strongest first)
         return networks.OrderByDescending(n => n.SignalStrength).ToList();
+    }
+
+    private static string? GetWirelessInterfaceName()
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "netsh",
+                Arguments = "wlan show interfaces",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process == null) return null;
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit(3000);
+
+            // Parse interface name from output
+            foreach (var line in output.Split('\n'))
+            {
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    var parts = trimmed.Split(':', 2);
+                    if (parts.Length > 1)
+                    {
+                        return parts[1].Trim();
+                    }
+                }
+            }
+        }
+        catch { }
+
+        return null;
+    }
+
+    private WiFiNetworkInfo? GetConnectedNetworkAsFallback()
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "netsh",
+                Arguments = "wlan show interfaces",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process == null) return null;
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit(3000);
+
+            var connectionInfo = ParseConnectionInfo(output);
+            if (connectionInfo == null || !connectionInfo.IsConnected)
+                return null;
+
+            var (quality, color) = GetSignalQuality(connectionInfo.SignalStrength);
+
+            return new WiFiNetworkInfo
+            {
+                Ssid = connectionInfo.Ssid,
+                Bssid = connectionInfo.Bssid,
+                SignalStrength = connectionInfo.SignalStrength,
+                SignalBars = GetSignalBars(connectionInfo.SignalStrength),
+                SignalQuality = quality,
+                SignalColor = color,
+                Channel = connectionInfo.Channel,
+                Band = GetBandFromChannel(connectionInfo.Channel),
+                Security = connectionInfo.Security,
+                IsSecured = !string.IsNullOrEmpty(connectionInfo.Security) &&
+                           !connectionInfo.Security.Equals("Open", StringComparison.OrdinalIgnoreCase),
+                IsConnected = true,
+                FrequencyMHz = GetFrequencyFromChannel(connectionInfo.Channel),
+                NetworkType = "Connected"
+            };
+        }
+        catch { }
+
+        return null;
     }
 
     public async Task<WiFiAdapterInfo?> GetAdapterInfoAsync()
