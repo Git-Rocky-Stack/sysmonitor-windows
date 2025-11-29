@@ -8,7 +8,16 @@
         <Setter Property="Background" Value="{StaticResource CardBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="16"/>
+    </Style>
+
+    <!-- Elevated Card Style -->
+    <Style x:Key="ElevatedCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource ElevatedSurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
         <Setter Property="Padding" Value="16"/>
     </Style>
 
@@ -17,7 +26,7 @@
         <Setter Property="Background" Value="{StaticResource RedCardGradientBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource PrimaryLightBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="CornerRadius" Value="16"/>
         <Setter Property="Padding" Value="16"/>
     </Style>
 
@@ -54,11 +63,20 @@
 
     <!-- Menu Card Icon Style (dark circle with icon like Android menu items) -->
     <Style x:Key="MenuCardIconStyle" TargetType="Border">
-        <Setter Property="Background" Value="#2D2D2D"/>
+        <Setter Property="Background" Value="#2A2A2A"/>
         <Setter Property="CornerRadius" Value="24"/>
         <Setter Property="Width" Value="48"/>
         <Setter Property="Height" Value="48"/>
         <Setter Property="Padding" Value="12"/>
+    </Style>
+
+    <!-- Large Icon Container (for dashboard/hero sections) -->
+    <Style x:Key="LargeIconContainerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource IconContainerBrush}"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Width" Value="64"/>
+        <Setter Property="Height" Value="64"/>
+        <Setter Property="Padding" Value="14"/>
     </Style>
 
     <!-- Page Header Style -->
@@ -198,11 +216,102 @@
     <!-- Progress Bar Styles -->
     <Style x:Key="RedProgressBarStyle" TargetType="ProgressBar">
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="Background" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="Background" Value="{StaticResource ProgressTrackBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Height" Value="8"/>
     </Style>
 
     <Style x:Key="GreenProgressBarStyle" TargetType="ProgressBar">
         <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-        <Setter Property="Background" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="Background" Value="{StaticResource ProgressTrackBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Height" Value="8"/>
+    </Style>
+
+    <Style x:Key="ThinProgressBarStyle" TargetType="ProgressBar">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Background" Value="{StaticResource ProgressTrackBrush}"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="Height" Value="4"/>
+    </Style>
+
+    <!-- ==================== CHROME BEZEL BUTTON STYLES ==================== -->
+    <!-- Primary Chrome Bezel Button (matches Android app's premium button style) -->
+    <!-- WinUI 3 implementation using nested borders for the 4-layer chrome effect -->
+
+    <!-- Chrome Bezel Primary Button - Outer bezel wrapper -->
+    <Style x:Key="ChromeBezelButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource ChromeBezelLayer1Brush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="3"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <!-- Secondary Chrome Bezel Button (outline style with red border) -->
+    <Style x:Key="ChromeBezelSecondaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource ChromeBezelLayer1Brush}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="3"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <!-- Input Field Style (matching Android) -->
+    <Style x:Key="InputFieldStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="12,10"/>
+    </Style>
+
+    <!-- Badge Styles -->
+    <Style x:Key="BadgeStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+    <Style x:Key="BadgeSuccessStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+    <Style x:Key="BadgeWarningStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+    <Style x:Key="BadgeErrorStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+    <Style x:Key="BadgeTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
+
+    <!-- Divider Styles -->
+    <Style x:Key="HorizontalDividerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
+        <Setter Property="Height" Value="1"/>
+        <Setter Property="Margin" Value="0,16"/>
+    </Style>
+
+    <Style x:Key="VerticalDividerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
+        <Setter Property="Width" Value="1"/>
+        <Setter Property="Margin" Value="16,0"/>
     </Style>
 </ResourceDictionary>
