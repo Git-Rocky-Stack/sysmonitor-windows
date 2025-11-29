@@ -285,6 +285,7 @@
                                     </Border.Background>
                                     <Button Content="BOOST RAM" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
                                             Style="{StaticResource OutlinedButtonStyle}"
+                                            Background="#000000"
                                             IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                                 </Border>
                                 <!-- EXPORT with chrome bezel -->
@@ -300,6 +301,7 @@
                                     </Border.Background>
                                     <Button Command="{x:Bind ViewModel.ExportReportCommand}"
                                             Style="{StaticResource OutlinedButtonStyle}"
+                                            Background="#000000"
                                             IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
                                             ToolTipService.ToolTip="Export System Report">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
