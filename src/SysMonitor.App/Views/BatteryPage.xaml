@@ -52,8 +52,10 @@
 
                         <!-- Battery Icon -->
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <Border Width="80" Height="80" CornerRadius="16"
-                                    Background="{StaticResource SuccessBrush}">
+                            <Border Width="80" Height="80" CornerRadius="16">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}"/>
+                                </Border.Background>
                                 <FontIcon Glyph="{x:Bind ViewModel.BatteryIcon, Mode=OneWay}" FontSize="40"
                                           Foreground="{StaticResource TextPrimaryBrush}"/>
                             </Border>
@@ -61,36 +63,79 @@
 
                         <!-- Battery Info -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
-                            <TextBlock Text="{x:Bind ViewModel.ChargingStatus, Mode=OneWay}"
-                                       Style="{StaticResource MenuItemTextStyle}" FontSize="18"/>
+                            <!-- Charging Status with Indicator -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Ellipse Width="10" Height="10" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.ChargingStatusColor, Mode=OneWay}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock FontSize="18" FontWeight="SemiBold">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.ChargingStatusColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                    <Run Text="{x:Bind ViewModel.ChargingStatus, Mode=OneWay}"/>
+                                </TextBlock>
+                            </StackPanel>
                             <ProgressBar Value="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
-                                         Maximum="100" Style="{StaticResource GreenProgressBarStyle}"
-                                         Margin="0,12,0,0" Height="12"/>
+                                         Maximum="100" Height="12" CornerRadius="6" Margin="0,12,0,0"
+                                         Background="{StaticResource SurfaceLightBrush}">
+                                <ProgressBar.Foreground>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}"/>
+                                </ProgressBar.Foreground>
+                            </ProgressBar>
                             <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
-                                <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                    <Run Text="Health:"/>
-                                    <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
-                                         Foreground="{StaticResource SuccessBrush}"/>
-                                </TextBlock>
-                                <TextBlock Style="{StaticResource CardSubtitleStyle}"
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="Health:" Style="{StaticResource CardSubtitleStyle}"/>
+                                    <TextBlock FontWeight="SemiBold">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush Color="{x:Bind ViewModel.HealthColor, Mode=OneWay}"/>
+                                        </TextBlock.Foreground>
+                                        <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="4"
                                            Visibility="{x:Bind ViewModel.HasEstimatedRuntime, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <Run Text="Remaining:"/>
-                                    <Run Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"
-                                         Foreground="{StaticResource CyanAccentBrush}"/>
-                                </TextBlock>
+                                    <TextBlock Text="Remaining:" Style="{StaticResource CardSubtitleStyle}"/>
+                                    <TextBlock Foreground="{StaticResource CyanAccentBrush}" FontWeight="SemiBold">
+                                        <Run Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
 
                         <!-- Charge Percent Display -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                            <TextBlock Text="CHARGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Right"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                <TextBlock Text="CHARGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <TextBlock Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
-                                           Style="{StaticResource LargeStatValueStyle}" FontSize="56"
-                                           Foreground="{StaticResource SuccessBrush}"/>
+                                           Style="{StaticResource LargeStatValueStyle}" FontSize="56">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
                                 <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,14"
                                            Foreground="{StaticResource TextSecondaryBrush}" FontSize="24"/>
                             </StackPanel>
+                            <!-- Charge Level Status Badge -->
+                            <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}" Opacity="0.2"/>
+                                </Border.Background>
+                                <TextBlock FontSize="11" FontWeight="SemiBold">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                    <Run Text="{x:Bind ViewModel.ChargeLevelStatus, Mode=OneWay}"/>
+                                </TextBlock>
+                            </Border>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -199,24 +244,44 @@
 
                         <!-- Health Status -->
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource SuccessBrush}">
+                            <Border Style="{StaticResource IconContainerStyle}">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.HealthColor, Mode=OneWay}"/>
+                                </Border.Background>
                                 <FontIcon Glyph="&#xE8E1;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="OVERALL HEALTH" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
-                                           Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="OVERALL HEALTH" Style="{StaticResource StatLabelStyle}"/>
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{x:Bind ViewModel.HealthColor, Mode=OneWay}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </StackPanel>
+                                <TextBlock FontWeight="SemiBold">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.HealthColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                    <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"/>
+                                </TextBlock>
                             </StackPanel>
                         </StackPanel>
 
                         <!-- Current Level -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource IconContainerStyle}">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}"/>
+                                </Border.Background>
                                 <FontIcon Glyph="&#xE83F;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="CURRENT LEVEL" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <TextBlock FontWeight="SemiBold">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.ChargeStatusColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
                                     <Run Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"/>
                                     <Run Text="% charged"/>
                                 </TextBlock>
