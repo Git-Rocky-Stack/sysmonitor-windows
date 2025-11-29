@@ -17,7 +17,8 @@ public sealed partial class MainWindow : Window
         { "DiskAnalyzer", typeof(DiskPage) },
         { "Network", typeof(NetworkPage) },
         { "Battery", typeof(BatteryPage) },
-        { "Temperature", typeof(TemperaturePage) }
+        { "Temperature", typeof(TemperaturePage) },
+        { "SystemInfo", typeof(SystemInfoPage) }
     };
 
     public MainWindow()
