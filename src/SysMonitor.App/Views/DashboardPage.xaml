@@ -19,14 +19,14 @@
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="SYSTEM MONITOR" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Strategic. Excellence. Engineered." Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
 
                     <!-- Right: STX.1 Home Logo -->
                     <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                           Height="80" VerticalAlignment="Center"
+                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
                            Stretch="Uniform"/>
                 </Grid>
             </Border>
@@ -257,13 +257,13 @@
                         <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Button Content="QUICK CLEAN" Command="{x:Bind ViewModel.QuickCleanCommand}"
-                                        Style="{StaticResource RedButtonStyle}"
+                                        Style="{StaticResource ChromeBezelButtonStyle}"
                                         IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                                 <Button Content="BOOST RAM" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
-                                        Style="{StaticResource OutlinedButtonStyle}"
+                                        Style="{StaticResource ChromeBezelSecondaryButtonStyle}"
                                         IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                                 <Button Command="{x:Bind ViewModel.ExportReportCommand}"
-                                        Style="{StaticResource OutlinedButtonStyle}"
+                                        Style="{StaticResource ChromeBezelSecondaryButtonStyle}"
                                         IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
                                         ToolTipService.ToolTip="Export System Report">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
