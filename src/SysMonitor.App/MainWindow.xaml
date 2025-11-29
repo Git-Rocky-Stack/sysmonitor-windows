@@ -13,29 +13,50 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title Bar with Red Accent -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="48"
+        <!-- Title Bar with Red Accent - Strategia-X Branding -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="56"
               Background="{StaticResource HeaderGradientBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- Logo Icon -->
             <Border Grid.Column="0" Background="{StaticResource IconContainerBrush}"
-                    CornerRadius="6" Margin="12,8" Padding="8">
-                <FontIcon Glyph="&#xE7F4;" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    CornerRadius="8" Margin="12,10" Padding="8">
+                <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
             </Border>
 
-            <!-- Brand Text -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0">
-                <TextBlock Text="SYSMONITOR" FontSize="14" FontWeight="Bold"
-                           Foreground="{StaticResource TextPrimaryBrush}"
-                           CharacterSpacing="100"/>
-                <TextBlock Text="Strategia-X Technology" FontSize="9"
-                           Foreground="#AAFFFFFF" CharacterSpacing="50"/>
+            <!-- Brand Text - matching Android app style -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                <!-- \\strateg\a-x logo style -->
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="\\strateg\a-" FontSize="11" FontWeight="Light"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontFamily="Consolas"/>
+                    <TextBlock Text="x" FontSize="11" FontWeight="Light"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               FontFamily="Consolas"/>
+                </StackPanel>
+                <!-- STX.1 and SYSTEM MONITOR -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock FontSize="12" FontWeight="Bold" VerticalAlignment="Center">
+                        <Run Text="STX" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Run Text="." Foreground="{StaticResource PrimaryBrush}"/>
+                        <Run Text="1" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </TextBlock>
+                    <TextBlock Text="SYSTEM MONITOR" FontSize="14" FontWeight="Bold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               CharacterSpacing="100" VerticalAlignment="Center"/>
+                </StackPanel>
             </StackPanel>
+
+            <!-- Tagline on right -->
+            <TextBlock Grid.Column="3" Text="Strategic. Excellence. Engineered."
+                       FontSize="10" Foreground="#AAFFFFFF"
+                       VerticalAlignment="Center" Margin="0,0,16,0"/>
         </Grid>
 
         <!-- Navigation View -->
