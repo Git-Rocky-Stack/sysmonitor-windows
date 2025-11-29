@@ -51,6 +51,7 @@ public partial class App : Application
                 services.AddTransient<MemoryViewModel>();
                 services.AddTransient<NetworkViewModel>();
                 services.AddTransient<BatteryViewModel>();
+                services.AddTransient<DiskViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -62,6 +63,7 @@ public partial class App : Application
                 services.AddTransient<MemoryPage>();
                 services.AddTransient<NetworkPage>();
                 services.AddTransient<BatteryPage>();
+                services.AddTransient<DiskPage>();
             })
             .Build();
     }
