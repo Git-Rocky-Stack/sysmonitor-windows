@@ -3,7 +3,7 @@
     x:Class="SysMonitor.App.Views.ProcessesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{StaticResource BackgroundBrush}">
 
     <Grid RowSpacing="16">
         <Grid.RowDefinitions>
@@ -12,32 +12,55 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="Process Manager" Style="{StaticResource PageHeaderStyle}"/>
+        <!-- Page Header Banner -->
+        <Border Grid.Row="0" Style="{StaticResource HeaderBannerStyle}">
+            <StackPanel>
+                <TextBlock Text="PROCESS MANAGER" Style="{StaticResource PageHeaderStyle}"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Real-time App Analytics" Style="{StaticResource PageSubtitleStyle}"
+                           Foreground="#AAFFFFFF"/>
+            </StackPanel>
+        </Border>
 
         <!-- Toolbar -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBox PlaceholderText="Search processes..." Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="300" HorizontalAlignment="Left"/>
+                <TextBox PlaceholderText="Search processes..."
+                         Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Width="300" HorizontalAlignment="Left"
+                         Background="{StaticResource SurfaceBrush}"
+                         BorderBrush="{StaticResource CardBorderBrush}"/>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                    <Run Text="{x:Bind ViewModel.TotalProcesses, Mode=OneWay}"/>
-                    <Run Text="processes"/>
-                </TextBlock>
-                <Button Content="End Task" Command="{x:Bind ViewModel.KillProcessCommand}" IsEnabled="{x:Bind ViewModel.SelectedProcess, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"/>
-            </StackPanel>
-        </Grid>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Style="{StaticResource IconContainerRedStyle}" Width="32" Height="32" Padding="6">
+                            <FontIcon Glyph="&#xE8A5;" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+                        <TextBlock VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}">
+                            <Run Text="{x:Bind ViewModel.TotalProcesses, Mode=OneWay}" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold"/>
+                            <Run Text=" processes"/>
+                        </TextBlock>
+                    </StackPanel>
+                    <Button Content="END TASK" Command="{x:Bind ViewModel.KillProcessCommand}"
+                            Style="{StaticResource RedButtonStyle}"
+                            IsEnabled="{x:Bind ViewModel.SelectedProcess, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!-- Process List -->
-        <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.Processes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedProcess, Mode=TwoWay}">
+        <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.Processes, Mode=OneWay}"
+                  SelectedItem="{x:Bind ViewModel.SelectedProcess, Mode=TwoWay}"
+                  Background="Transparent">
             <ListView.HeaderTemplate>
                 <DataTemplate>
-                    <Grid Padding="12,8" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+                    <Grid Padding="16,12" Background="{StaticResource SurfaceBrush}"
+                          BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,0,1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200"/>
                             <ColumnDefinition Width="100"/>
@@ -45,17 +68,22 @@
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Name" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="1" Text="CPU %" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="2" Text="Memory" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="3" Text="PID" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="4" Text="Status" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="0" Text="NAME" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="1" Text="CPU %" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="2" Text="MEMORY" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="3" Text="PID" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="4" Text="STATUS" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
                     </Grid>
                 </DataTemplate>
             </ListView.HeaderTemplate>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="12,8">
+                    <Grid Padding="16,12" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,0,1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200"/>
                             <ColumnDefinition Width="100"/>
@@ -63,11 +91,18 @@
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CpuUsagePercent, Converter={StaticResource PercentConverter}}"/>
-                        <TextBlock Grid.Column="2" Text="{Binding MemoryMB, Converter={StaticResource MBConverter}}"/>
-                        <TextBlock Grid.Column="3" Text="{Binding Id}"/>
-                        <TextBlock Grid.Column="4" Text="{Binding Status}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding Name}" TextTrimming="CharacterEllipsis"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Grid.Column="1" Foreground="{StaticResource PrimaryBrush}">
+                            <Run Text="{Binding CpuUsagePercent, Converter={StaticResource PercentConverter}}"/>
+                            <Run Text="%"/>
+                        </TextBlock>
+                        <TextBlock Grid.Column="2" Foreground="{StaticResource TextSecondaryBrush}">
+                            <Run Text="{Binding MemoryMB, Converter={StaticResource MBConverter}}"/>
+                            <Run Text=" MB"/>
+                        </TextBlock>
+                        <TextBlock Grid.Column="3" Text="{Binding Id}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <TextBlock Grid.Column="4" Text="{Binding Status}" Foreground="{StaticResource SuccessBrush}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
