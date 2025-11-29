@@ -49,20 +49,33 @@
                                    Style="{StaticResource MenuItemTextStyle}" FontSize="16"
                                    TextWrapping="Wrap" MaxWidth="400"/>
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                            <Ellipse Width="10" Height="10" VerticalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.ConnectionStatusColor, Mode=OneWay}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock FontSize="13">
+                                <TextBlock.Foreground>
+                                    <SolidColorBrush Color="{x:Bind ViewModel.ConnectionStatusColor, Mode=OneWay}"/>
+                                </TextBlock.Foreground>
+                                <Run Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"/>
+                            </TextBlock>
+                            <TextBlock Text="|" Style="{StaticResource CardSubtitleStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
                                        Style="{StaticResource CardSubtitleStyle}"/>
-                            <TextBlock Text="|" Style="{StaticResource CardSubtitleStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"
-                                       Foreground="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToSuccessBrushConverter}}"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Status Badge -->
-                    <Border Grid.Column="2" CornerRadius="8" Padding="16,8"
-                            Background="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToSuccessBrushConverter}}"
-                            VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"
-                                   Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                    <Border Grid.Column="2" CornerRadius="8" Padding="16,8" VerticalAlignment="Center">
+                        <Border.Background>
+                            <SolidColorBrush Color="{x:Bind ViewModel.ConnectionStatusColor, Mode=OneWay}"/>
+                        </Border.Background>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Ellipse Width="8" Height="8" Fill="White" VerticalAlignment="Center"/>
+                            <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
                     </Border>
                 </Grid>
             </Border>
@@ -86,6 +99,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
@@ -99,10 +113,32 @@
                         </StackPanel>
 
                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.DownloadSpeedDisplay, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{StaticResource SuccessBrush}"/>
+                                   Style="{StaticResource StatValueStyle}" Margin="0,16,0,4">
+                            <TextBlock.Foreground>
+                                <SolidColorBrush Color="{x:Bind ViewModel.DownloadSpeedColor, Mode=OneWay}"/>
+                            </TextBlock.Foreground>
+                        </TextBlock>
 
-                        <TextBlock Grid.Row="2" Style="{StaticResource CardSubtitleStyle}">
+                        <!-- Speed Status Badge -->
+                        <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8">
+                            <Border.Background>
+                                <SolidColorBrush Color="{x:Bind ViewModel.DownloadSpeedColor, Mode=OneWay}" Opacity="0.2"/>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Ellipse Width="6" Height="6" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.DownloadSpeedColor, Mode=OneWay}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock Text="{x:Bind ViewModel.DownloadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.DownloadSpeedColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}">
                             <Run Text="Total:"/>
                             <Run Text="{x:Bind ViewModel.TotalReceivedDisplay, Mode=OneWay}"/>
                         </TextBlock>
@@ -115,6 +151,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
@@ -129,10 +166,32 @@
                         </StackPanel>
 
                         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UploadSpeedDisplay, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{StaticResource CyanAccentBrush}"/>
+                                   Style="{StaticResource StatValueStyle}" Margin="0,16,0,4">
+                            <TextBlock.Foreground>
+                                <SolidColorBrush Color="{x:Bind ViewModel.UploadSpeedColor, Mode=OneWay}"/>
+                            </TextBlock.Foreground>
+                        </TextBlock>
 
-                        <TextBlock Grid.Row="2" Style="{StaticResource CardSubtitleStyle}">
+                        <!-- Speed Status Badge -->
+                        <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8">
+                            <Border.Background>
+                                <SolidColorBrush Color="{x:Bind ViewModel.UploadSpeedColor, Mode=OneWay}" Opacity="0.2"/>
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Ellipse Width="6" Height="6" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.UploadSpeedColor, Mode=OneWay}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock Text="{x:Bind ViewModel.UploadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{x:Bind ViewModel.UploadSpeedColor, Mode=OneWay}"/>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}">
                             <Run Text="Total:"/>
                             <Run Text="{x:Bind ViewModel.TotalSentDisplay, Mode=OneWay}"/>
                         </TextBlock>

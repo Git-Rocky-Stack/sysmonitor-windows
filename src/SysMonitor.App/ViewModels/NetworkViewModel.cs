@@ -16,6 +16,7 @@ public partial class NetworkViewModel : ObservableObject, IDisposable
     // Connection Status
     [ObservableProperty] private bool _isConnected;
     [ObservableProperty] private string _connectionStatus = "Checking...";
+    [ObservableProperty] private string _connectionStatusColor = "#808080";
     [ObservableProperty] private string _connectionType = "";
     [ObservableProperty] private string _adapterName = "";
 
@@ -28,6 +29,10 @@ public partial class NetworkViewModel : ObservableObject, IDisposable
     [ObservableProperty] private double _uploadSpeedBps;
     [ObservableProperty] private string _downloadSpeedDisplay = "0 B/s";
     [ObservableProperty] private string _uploadSpeedDisplay = "0 B/s";
+    [ObservableProperty] private string _downloadSpeedStatus = "Idle";
+    [ObservableProperty] private string _downloadSpeedColor = "#808080";
+    [ObservableProperty] private string _uploadSpeedStatus = "Idle";
+    [ObservableProperty] private string _uploadSpeedColor = "#808080";
 
     // Data Transferred
     [ObservableProperty] private long _bytesReceived;
@@ -91,6 +96,7 @@ public partial class NetworkViewModel : ObservableObject, IDisposable
                 // Connection Status
                 IsConnected = netInfo.IsConnected;
                 ConnectionStatus = netInfo.IsConnected ? "Connected" : "Disconnected";
+                ConnectionStatusColor = netInfo.IsConnected ? "#4CAF50" : "#F44336";
                 ConnectionType = FormatConnectionType(netInfo.ConnectionType);
                 AdapterName = netInfo.AdapterName;
 
@@ -98,11 +104,13 @@ public partial class NetworkViewModel : ObservableObject, IDisposable
                 IpAddress = netInfo.IpAddress;
                 MacAddress = netInfo.MacAddress;
 
-                // Speed
+                // Speed with status indicators
                 DownloadSpeedBps = netInfo.DownloadSpeedBps;
                 UploadSpeedBps = netInfo.UploadSpeedBps;
                 DownloadSpeedDisplay = FormatSpeed(netInfo.DownloadSpeedBps);
                 UploadSpeedDisplay = FormatSpeed(netInfo.UploadSpeedBps);
+                (DownloadSpeedStatus, DownloadSpeedColor) = GetSpeedStatus(netInfo.DownloadSpeedBps);
+                (UploadSpeedStatus, UploadSpeedColor) = GetSpeedStatus(netInfo.UploadSpeedBps);
 
                 // Data Transferred
                 BytesReceived = netInfo.BytesReceived;
@@ -166,6 +174,19 @@ public partial class NetworkViewModel : ObservableObject, IDisposable
         if (bytes >= 1_000)
             return $"{bytes / 1_000.0:F2} KB";
         return $"{bytes} B";
+    }
+
+    private static (string status, string color) GetSpeedStatus(double bytesPerSecond)
+    {
+        return bytesPerSecond switch
+        {
+            0 => ("Idle", "#808080"),                      // Gray
+            < 100_000 => ("Low", "#FF9800"),               // Orange - <100 KB/s
+            < 1_000_000 => ("Active", "#8BC34A"),          // Light green - <1 MB/s
+            < 10_000_000 => ("Fast", "#4CAF50"),           // Green - <10 MB/s
+            < 100_000_000 => ("Very Fast", "#00BCD4"),     // Cyan - <100 MB/s
+            _ => ("Blazing", "#E91E63")                     // Pink - 100+ MB/s
+        };
     }
 
     public void Dispose()
