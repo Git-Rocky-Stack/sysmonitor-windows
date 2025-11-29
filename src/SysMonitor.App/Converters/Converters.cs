@@ -116,3 +116,33 @@ public class BoolToSuccessBrushConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+public class BoolToPluggedInConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isPluggedIn)
+            return isPluggedIn ? "Plugged In" : "On Battery";
+        return "Unknown";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class BoolToChargingConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isCharging)
+            return isCharging ? "Charging" : "Not Charging";
+        return "Unknown";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}

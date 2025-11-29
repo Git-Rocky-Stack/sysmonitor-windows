@@ -22,6 +22,8 @@
             <converters:GBConverter x:Key="GBConverter"/>
             <converters:MBConverter x:Key="MBConverter"/>
             <converters:BoolToSuccessBrushConverter x:Key="BoolToSuccessBrushConverter"/>
+            <converters:BoolToPluggedInConverter x:Key="BoolToPluggedInConverter"/>
+            <converters:BoolToChargingConverter x:Key="BoolToChargingConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
