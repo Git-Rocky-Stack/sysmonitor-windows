@@ -23,7 +23,12 @@ public sealed partial class MainWindow : Window
         // Utilities
         { "LargeFiles", typeof(LargeFilesPage) },
         { "DuplicateFinder", typeof(DuplicateFinderPage) },
-        { "FileTools", typeof(FileToolsPage) }
+        { "FileTools", typeof(FileToolsPage) },
+        { "PdfTools", typeof(PdfToolsPage) },
+        // Wireless
+        { "Bluetooth", typeof(BluetoothPage) },
+        { "WiFi", typeof(WiFiPage) },
+        { "NetworkMapper", typeof(NetworkMapperPage) }
     };
 
     public MainWindow()
