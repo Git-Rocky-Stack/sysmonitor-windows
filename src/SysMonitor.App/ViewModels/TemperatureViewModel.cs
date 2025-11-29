@@ -50,7 +50,7 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
 
     private async Task RefreshLoopAsync(CancellationToken cancellationToken)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2)); // Temperature updates every 2 seconds
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5)); // Temperature updates every 5 seconds
         try
         {
             while (await timer.WaitForNextTickAsync(cancellationToken))

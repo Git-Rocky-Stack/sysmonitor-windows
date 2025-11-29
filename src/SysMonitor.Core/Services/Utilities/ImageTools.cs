@@ -113,7 +113,7 @@ public class ImageTools : IImageTools
                 progress?.Report(50);
 
                 // Create encoder parameters for quality
-                var encoderParams = new EncoderParameters(1);
+                using var encoderParams = new EncoderParameters(1);
                 encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, (long)quality);
 
                 // Determine output format
@@ -126,6 +126,7 @@ public class ImageTools : IImageTools
                 progress?.Report(75);
 
                 img.Save(outputPath, codec, encoderParams);
+                encoderParams.Param[0].Dispose();
 
                 progress?.Report(100);
 
@@ -191,7 +192,7 @@ public class ImageTools : IImageTools
                     if (targetFormat == ImageFormat.Jpeg)
                     {
                         // Use quality parameter for JPEG
-                        var encoderParams = new EncoderParameters(1);
+                        using var encoderParams = new EncoderParameters(1);
                         encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, (long)quality);
                         var codec = GetEncoderInfo(System.Drawing.Imaging.ImageFormat.Jpeg);
                         if (codec != null)
@@ -202,6 +203,7 @@ public class ImageTools : IImageTools
                         {
                             img.Save(outputPath, format);
                         }
+                        encoderParams.Param[0].Dispose();
                     }
                     else
                     {
@@ -301,9 +303,10 @@ public class ImageTools : IImageTools
                 var codec = GetEncoderInfo(format);
                 if (codec != null)
                 {
-                    var encoderParams = new EncoderParameters(1);
+                    using var encoderParams = new EncoderParameters(1);
                     encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 90L);
                     resized.Save(outputPath, codec, encoderParams);
+                    encoderParams.Param[0].Dispose();
                 }
                 else
                 {

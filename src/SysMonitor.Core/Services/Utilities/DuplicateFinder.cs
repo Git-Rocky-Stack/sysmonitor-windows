@@ -13,13 +13,14 @@ public class DuplicateFinder : IDuplicateFinder
         {
             try
             {
-                // Phase 1: Group files by size (quick filter)
+                // Phase 1: Group files by size (quick filter) - streaming approach
                 progress?.Report(new ScanProgress { Status = "Indexing files by size..." });
 
-                var allFiles = GetAllFiles(path, cancellationToken);
                 var filesBySize = new Dictionary<long, List<string>>();
+                var filesIndexed = 0;
 
-                foreach (var filePath in allFiles)
+                // Stream files instead of loading all at once
+                foreach (var filePath in EnumerateFiles(path, cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -28,10 +29,23 @@ public class DuplicateFinder : IDuplicateFinder
                         var fileInfo = new FileInfo(filePath);
                         if (fileInfo.Length == 0) continue; // Skip empty files
 
-                        if (!filesBySize.ContainsKey(fileInfo.Length))
-                            filesBySize[fileInfo.Length] = [];
+                        if (!filesBySize.TryGetValue(fileInfo.Length, out var list))
+                        {
+                            list = [];
+                            filesBySize[fileInfo.Length] = list;
+                        }
 
-                        filesBySize[fileInfo.Length].Add(filePath);
+                        list.Add(filePath);
+                        filesIndexed++;
+
+                        if (filesIndexed % 500 == 0)
+                        {
+                            progress?.Report(new ScanProgress
+                            {
+                                FilesScanned = filesIndexed,
+                                Status = $"Indexed {filesIndexed} files..."
+                            });
+                        }
                     }
                     catch (UnauthorizedAccessException) { }
                     catch (IOException) { }
@@ -139,9 +153,8 @@ public class DuplicateFinder : IDuplicateFinder
         return bytesFreed;
     }
 
-    private static List<string> GetAllFiles(string path, CancellationToken cancellationToken)
+    private static IEnumerable<string> EnumerateFiles(string path, CancellationToken cancellationToken)
     {
-        var files = new List<string>();
         var directories = new Stack<string>();
         directories.Push(path);
 
@@ -151,10 +164,21 @@ public class DuplicateFinder : IDuplicateFinder
 
             var currentDir = directories.Pop();
 
+            string[] files;
             try
             {
-                files.AddRange(Directory.GetFiles(currentDir));
+                files = Directory.GetFiles(currentDir);
+            }
+            catch (UnauthorizedAccessException) { continue; }
+            catch (IOException) { continue; }
 
+            foreach (var file in files)
+            {
+                yield return file;
+            }
+
+            try
+            {
                 foreach (var subDir in Directory.GetDirectories(currentDir))
                 {
                     var dirName = Path.GetFileName(subDir);
@@ -170,8 +194,6 @@ public class DuplicateFinder : IDuplicateFinder
             catch (UnauthorizedAccessException) { }
             catch (IOException) { }
         }
-
-        return files;
     }
 
     private static string ComputeFileHash(string filePath)

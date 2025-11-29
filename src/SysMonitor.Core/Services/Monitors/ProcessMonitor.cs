@@ -7,7 +7,8 @@ public class ProcessMonitor : IProcessMonitor
 {
     private readonly Dictionary<int, (DateTime time, TimeSpan cpu)> _cpuUsageCache = new();
     private DateTime _lastCacheCleanup = DateTime.UtcNow;
-    private readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromMinutes(1);
+    private readonly TimeSpan _cacheCleanupInterval = TimeSpan.FromSeconds(15);
+    private const int MaxCacheSize = 500;
 
     public async Task<List<ProcessInfo>> GetAllProcessesAsync()
     {
@@ -74,13 +75,33 @@ public class ProcessMonitor : IProcessMonitor
     private void CleanupCpuCache(HashSet<int> currentProcessIds)
     {
         var now = DateTime.UtcNow;
-        if (now - _lastCacheCleanup < _cacheCleanupInterval) return;
+
+        // Force cleanup if cache is too large
+        var forceCleanup = _cpuUsageCache.Count > MaxCacheSize;
+
+        if (!forceCleanup && now - _lastCacheCleanup < _cacheCleanupInterval) return;
 
         _lastCacheCleanup = now;
+
+        // Remove entries for dead processes
         var deadProcessIds = _cpuUsageCache.Keys.Where(id => !currentProcessIds.Contains(id)).ToList();
         foreach (var id in deadProcessIds)
         {
             _cpuUsageCache.Remove(id);
+        }
+
+        // If still over limit, remove oldest entries
+        if (_cpuUsageCache.Count > MaxCacheSize)
+        {
+            var toRemove = _cpuUsageCache
+                .OrderBy(kvp => kvp.Value.time)
+                .Take(_cpuUsageCache.Count - MaxCacheSize)
+                .Select(kvp => kvp.Key)
+                .ToList();
+            foreach (var id in toRemove)
+            {
+                _cpuUsageCache.Remove(id);
+            }
         }
     }
 

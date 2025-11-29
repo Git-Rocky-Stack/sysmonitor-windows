@@ -45,11 +45,10 @@ public class LargeFileFinder : ILargeFileFinder
         {
             try
             {
-                var allFiles = GetAllFiles(path, cancellationToken);
-                var totalFiles = allFiles.Count;
                 var scanned = 0;
 
-                foreach (var filePath in allFiles)
+                // Stream files instead of loading all into memory at once
+                foreach (var filePath in EnumerateFiles(path, cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -73,14 +72,14 @@ public class LargeFileFinder : ILargeFileFinder
                         }
 
                         scanned++;
-                        if (scanned % 100 == 0 || scanned == totalFiles)
+                        if (scanned % 100 == 0)
                         {
                             progress?.Report(new ScanProgress
                             {
                                 FilesScanned = scanned,
-                                TotalFiles = totalFiles,
+                                TotalFiles = 0, // Unknown when streaming
                                 CurrentFile = fileInfo.Name,
-                                Status = $"Scanning: {fileInfo.Name}"
+                                Status = $"Scanning: {fileInfo.Name} ({scanned} files checked)"
                             });
                         }
                     }
@@ -135,9 +134,8 @@ public class LargeFileFinder : ILargeFileFinder
         });
     }
 
-    private static List<string> GetAllFiles(string path, CancellationToken cancellationToken)
+    private static IEnumerable<string> EnumerateFiles(string path, CancellationToken cancellationToken)
     {
-        var files = new List<string>();
         var directories = new Stack<string>();
         directories.Push(path);
 
@@ -147,10 +145,21 @@ public class LargeFileFinder : ILargeFileFinder
 
             var currentDir = directories.Pop();
 
+            string[] files;
             try
             {
-                files.AddRange(Directory.GetFiles(currentDir));
+                files = Directory.GetFiles(currentDir);
+            }
+            catch (UnauthorizedAccessException) { continue; }
+            catch (IOException) { continue; }
 
+            foreach (var file in files)
+            {
+                yield return file;
+            }
+
+            try
+            {
                 foreach (var subDir in Directory.GetDirectories(currentDir))
                 {
                     // Skip system directories
@@ -166,8 +175,6 @@ public class LargeFileFinder : ILargeFileFinder
             catch (UnauthorizedAccessException) { }
             catch (IOException) { }
         }
-
-        return files;
     }
 
     private static string GetFileType(string extension)
