@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="SysMonitor.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SysMonitor.App"
+    xmlns:views="using:SysMonitor.App.Views"
+    Title="SysMonitor - Windows System Monitor &amp; Optimizer">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="48"
+              Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Source="Assets/app-icon.png" Width="24" Height="24" Margin="12,0,0,0"/>
+            <TextBlock Grid.Column="1" Text="SysMonitor" VerticalAlignment="Center" Margin="12,0,0,0"
+                       Style="{StaticResource CaptionTextBlockStyle}"/>
+        </Grid>
+
+        <!-- Navigation View -->
+        <NavigationView x:Name="NavView" Grid.Row="1"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="True"
+                        PaneDisplayMode="Left"
+                        SelectionChanged="NavView_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Icon="Home" Content="Dashboard" Tag="Dashboard"/>
+                <NavigationViewItem Icon="AllApps" Content="Processes" Tag="Processes"/>
+                <NavigationViewItem Icon="Delete" Content="Cleaner" Tag="Cleaner"/>
+                <NavigationViewItem Icon="Clock" Content="Startup" Tag="Startup"/>
+                <NavigationViewItemSeparator/>
+                <NavigationViewItem Icon="HardDrive" Content="Disk Analyzer" Tag="DiskAnalyzer"/>
+                <NavigationViewItem Icon="Globe" Content="Network" Tag="Network"/>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame" Padding="24"/>
+        </NavigationView>
+    </Grid>
+</Window>

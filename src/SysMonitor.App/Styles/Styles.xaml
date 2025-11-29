@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Card Style -->
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="16"/>
+    </Style>
+
+    <!-- Stat Card Style -->
+    <Style x:Key="StatCardStyle" TargetType="Border" BasedOn="{StaticResource CardStyle}">
+        <Setter Property="MinWidth" Value="200"/>
+        <Setter Property="MinHeight" Value="100"/>
+    </Style>
+
+    <!-- Page Header Style -->
+    <Style x:Key="PageHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="28"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Margin" Value="0,0,0,24"/>
+    </Style>
+
+    <!-- Section Header Style -->
+    <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Margin" Value="0,0,0,12"/>
+    </Style>
+
+    <!-- Stat Value Style -->
+    <Style x:Key="StatValueStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="32"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <!-- Stat Label Style -->
+    <Style x:Key="StatLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}"/>
+    </Style>
+</ResourceDictionary>
