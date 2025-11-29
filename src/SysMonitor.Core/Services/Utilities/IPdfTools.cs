@@ -40,6 +40,7 @@ public record PdfInfo
     public int PageCount { get; init; }
     public long FileSizeBytes { get; init; }
     public string FormattedSize { get; init; } = "";
+    public string PdfVersion { get; init; } = "";
     public string Author { get; init; } = "";
     public string Title { get; init; } = "";
     public DateTime? CreatedDate { get; init; }
@@ -49,16 +50,10 @@ public record PdfInfo
 
 public record SplitOptions
 {
-    public SplitMode Mode { get; init; } = SplitMode.SinglePages;
+    public bool SplitAllPages { get; init; } = true;
+    public int StartPage { get; init; } = 1;
+    public int EndPage { get; init; } = 1;
     public int PagesPerFile { get; init; } = 1;
-    public List<(int start, int end)> PageRanges { get; init; } = [];
-}
-
-public enum SplitMode
-{
-    SinglePages,      // Each page to separate file
-    ByPageCount,      // N pages per file
-    ByRanges          // Specific page ranges
 }
 
 // Network Models
@@ -71,7 +66,7 @@ public record NetworkDeviceInfo
     public string DeviceType { get; init; } = "Unknown";
     public string DeviceIcon { get; init; } = "\uE839";
     public bool IsOnline { get; init; }
-    public double ResponseTimeMs { get; init; }
+    public int ResponseTimeMs { get; init; }
     public string ResponseStatus { get; init; } = "";
     public string ResponseColor { get; init; } = "#808080";
     public DateTime LastSeen { get; init; }
@@ -80,10 +75,12 @@ public record NetworkDeviceInfo
 
 public record LocalNetworkInfo
 {
-    public string LocalIp { get; init; } = "";
+    public string LocalIpAddress { get; init; } = "";
     public string SubnetMask { get; init; } = "";
     public string Gateway { get; init; } = "";
-    public string NetworkRange { get; init; } = "";
+    public string MacAddress { get; init; } = "";
+    public string Hostname { get; init; } = "";
+    public string NetworkName { get; init; } = "";
     public string DnsServer { get; init; } = "";
     public string AdapterName { get; init; } = "";
 }
@@ -100,7 +97,8 @@ public record NetworkScanProgress
 {
     public int ScannedCount { get; init; }
     public int TotalCount { get; init; }
-    public string CurrentIp { get; init; } = "";
-    public int DevicesFound { get; init; }
+    public string CurrentTarget { get; init; } = "";
+    public string Status { get; init; } = "";
+    public NetworkDeviceInfo? FoundDevice { get; init; }
     public double PercentComplete => TotalCount > 0 ? ScannedCount * 100.0 / TotalCount : 0;
 }
