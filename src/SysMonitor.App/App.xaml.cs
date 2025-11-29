@@ -54,6 +54,7 @@ public partial class App : Application
                 services.AddTransient<DiskViewModel>();
                 services.AddTransient<TemperatureViewModel>();
                 services.AddTransient<SystemInfoViewModel>();
+                services.AddTransient<GpuViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -68,6 +69,7 @@ public partial class App : Application
                 services.AddTransient<DiskPage>();
                 services.AddTransient<TemperaturePage>();
                 services.AddTransient<SystemInfoPage>();
+                services.AddTransient<GpuPage>();
             })
             .Build();
     }
