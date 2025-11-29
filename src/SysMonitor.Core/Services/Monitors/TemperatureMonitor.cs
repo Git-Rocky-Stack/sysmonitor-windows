@@ -6,25 +6,34 @@ public class TemperatureMonitor : ITemperatureMonitor
 {
     private Computer? _computer;
     private bool _isInitialized;
+    private bool _initializationFailed;
 
     public async Task InitializeAsync()
     {
-        if (_isInitialized) return;
+        if (_isInitialized || _initializationFailed) return;
         await Task.Run(() =>
         {
             try
             {
-                _computer = new Computer
+                var computer = new Computer
                 {
                     IsCpuEnabled = true,
                     IsGpuEnabled = true,
                     IsMotherboardEnabled = true,
                     IsStorageEnabled = true
                 };
-                _computer.Open();
+                computer.Open();
+                _computer = computer;
                 _isInitialized = true;
             }
-            catch { }
+            catch (Exception)
+            {
+                // LibreHardwareMonitor can throw NullReferenceException from Ring0.Open()
+                // when running without admin privileges or when the driver fails to load.
+                // Mark as failed to prevent repeated initialization attempts.
+                _initializationFailed = true;
+                _computer = null;
+            }
         });
     }
 
