@@ -25,6 +25,10 @@ public partial class ImageToolsViewModel : ObservableObject
     // Current Image Info
     [ObservableProperty] private ImageInfo? _currentImageInfo;
     [ObservableProperty] private bool _hasImageInfo;
+    [ObservableProperty] private string _imageDimensions = "";
+    [ObservableProperty] private string _imageFormat = "";
+    [ObservableProperty] private string _imageColorDepth = "";
+    [ObservableProperty] private string _imageResolution = "";
 
     // Compression Options
     [ObservableProperty] private int _compressionQuality = 80;
@@ -173,6 +177,10 @@ public partial class ImageToolsViewModel : ObservableObject
         {
             CurrentImageInfo = info;
             HasImageInfo = info != null;
+            ImageDimensions = info?.Dimensions ?? "";
+            ImageFormat = info?.Format ?? "";
+            ImageColorDepth = info?.ColorDepth ?? "";
+            ImageResolution = info?.Resolution ?? "";
         });
     }
 
@@ -404,6 +412,10 @@ public partial class ImageToolsViewModel : ObservableObject
         HasResult = false;
         HasImageInfo = false;
         CurrentImageInfo = null;
+        ImageDimensions = "";
+        ImageFormat = "";
+        ImageColorDepth = "";
+        ImageResolution = "";
     }
 
     [RelayCommand]
