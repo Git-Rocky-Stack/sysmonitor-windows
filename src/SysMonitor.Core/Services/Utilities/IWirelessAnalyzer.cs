@@ -27,10 +27,12 @@ public record BluetoothDeviceInfo
     public string Name { get; init; } = "Unknown Device";
     public string Address { get; init; } = "";
     public string DeviceType { get; init; } = "Unknown";
-    public string DeviceTypeIcon { get; init; } = "\uE702";
+    public string DeviceIcon { get; init; } = "\uE702";
+    public string DeviceTypeColor { get; init; } = "#808080";
     public int SignalStrength { get; init; } // RSSI in dBm
     public string SignalQuality { get; init; } = "Unknown";
     public string SignalColor { get; init; } = "#808080";
+    public string StatusColor { get; init; } = "#4CAF50";
     public bool IsConnected { get; init; }
     public bool IsPaired { get; init; }
     public DateTime LastSeen { get; init; }
@@ -48,15 +50,15 @@ public record BluetoothAdapterInfo
 // WiFi Models
 public record WiFiNetworkInfo
 {
-    public string SSID { get; init; } = "";
-    public string BSSID { get; init; } = "";
+    public string Ssid { get; init; } = "";
+    public string Bssid { get; init; } = "";
     public int SignalStrength { get; init; } // Percentage 0-100
     public int SignalBars { get; init; } // 1-5 bars
     public string SignalQuality { get; init; } = "Unknown";
     public string SignalColor { get; init; } = "#808080";
     public int Channel { get; init; }
     public string Band { get; init; } = ""; // 2.4 GHz or 5 GHz
-    public string SecurityType { get; init; } = "";
+    public string Security { get; init; } = "";
     public bool IsSecured { get; init; }
     public bool IsConnected { get; init; }
     public double FrequencyMHz { get; init; }
@@ -66,6 +68,7 @@ public record WiFiNetworkInfo
 public record WiFiAdapterInfo
 {
     public string Name { get; init; } = "";
+    public string Description { get; init; } = "";
     public string MacAddress { get; init; } = "";
     public bool IsEnabled { get; init; }
     public string Status { get; init; } = "";
@@ -73,10 +76,13 @@ public record WiFiAdapterInfo
 
 public record WiFiConnectionInfo
 {
-    public string SSID { get; init; } = "";
+    public string Ssid { get; init; } = "";
+    public string Bssid { get; init; } = "";
     public int SignalStrength { get; init; }
+    public int Channel { get; init; }
+    public string Security { get; init; } = "";
+    public int LinkSpeed { get; init; }
     public string IpAddress { get; init; } = "";
-    public double LinkSpeedMbps { get; init; }
-    public string SecurityType { get; init; } = "";
+    public bool IsConnected { get; init; }
     public TimeSpan ConnectionDuration { get; init; }
 }

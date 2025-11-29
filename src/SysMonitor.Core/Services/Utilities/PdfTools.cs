@@ -97,37 +97,24 @@ public class PdfTools : IPdfTools
 
                 // Note: Actual page extraction requires a PDF library
                 // This creates placeholder files to demonstrate the structure
-                switch (options.Mode)
+                if (options.SplitAllPages)
                 {
-                    case SplitMode.SinglePages:
-                        for (int i = 1; i <= info.PageCount; i++)
-                        {
-                            var outPath = Path.Combine(outputDirectory, $"{baseName}_page_{i}.pdf");
-                            File.Copy(inputPath, outPath, true); // Placeholder
-                            outputFiles.Add(outPath);
-                        }
-                        break;
-
-                    case SplitMode.ByPageCount:
-                        var chunks = (int)Math.Ceiling((double)info.PageCount / options.PagesPerFile);
-                        for (int i = 0; i < chunks; i++)
-                        {
-                            var start = i * options.PagesPerFile + 1;
-                            var end = Math.Min((i + 1) * options.PagesPerFile, info.PageCount);
-                            var outPath = Path.Combine(outputDirectory, $"{baseName}_pages_{start}-{end}.pdf");
-                            File.Copy(inputPath, outPath, true); // Placeholder
-                            outputFiles.Add(outPath);
-                        }
-                        break;
-
-                    case SplitMode.ByRanges:
-                        foreach (var (start, end) in options.PageRanges)
-                        {
-                            var outPath = Path.Combine(outputDirectory, $"{baseName}_pages_{start}-{end}.pdf");
-                            File.Copy(inputPath, outPath, true); // Placeholder
-                            outputFiles.Add(outPath);
-                        }
-                        break;
+                    // Split into individual pages
+                    for (int i = 1; i <= info.PageCount; i++)
+                    {
+                        var outPath = Path.Combine(outputDirectory, $"{baseName}_page_{i}.pdf");
+                        File.Copy(inputPath, outPath, true); // Placeholder
+                        outputFiles.Add(outPath);
+                    }
+                }
+                else
+                {
+                    // Split by range
+                    var startPage = Math.Max(1, options.StartPage);
+                    var endPage = Math.Min(info.PageCount, options.EndPage);
+                    var outPath = Path.Combine(outputDirectory, $"{baseName}_pages_{startPage}-{endPage}.pdf");
+                    File.Copy(inputPath, outPath, true); // Placeholder
+                    outputFiles.Add(outPath);
                 }
 
                 return new PdfOperationResult
@@ -247,6 +234,8 @@ public class PdfTools : IPdfTools
             // Try to extract metadata from PDF
             var (title, author) = ExtractBasicMetadata(filePath);
 
+            var pdfVersion = ExtractPdfVersion(filePath);
+
             return new PdfInfo
             {
                 FileName = fileInfo.Name,
@@ -254,6 +243,7 @@ public class PdfTools : IPdfTools
                 PageCount = pageCount,
                 FileSizeBytes = fileInfo.Length,
                 FormattedSize = FormatSize(fileInfo.Length),
+                PdfVersion = pdfVersion,
                 Title = title,
                 Author = author,
                 CreatedDate = fileInfo.CreationTime,
@@ -332,6 +322,25 @@ public class PdfTools : IPdfTools
         {
             return "";
         }
+    }
+
+    private static string ExtractPdfVersion(string filePath)
+    {
+        try
+        {
+            using var stream = File.OpenRead(filePath);
+            var header = new byte[10];
+            stream.Read(header, 0, 10);
+
+            // PDF header format: %PDF-X.Y
+            var headerStr = Encoding.ASCII.GetString(header);
+            if (headerStr.StartsWith("%PDF-"))
+            {
+                return headerStr.Substring(5, 3).Trim(); // e.g., "1.7"
+            }
+        }
+        catch { }
+        return "";
     }
 
     private static string FormatSize(long bytes)
