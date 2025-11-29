@@ -23,9 +23,13 @@ public partial class GpuViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _tempStatus = "N/A";
     [ObservableProperty] private string _tempColor = "#808080";
 
-    // Additional temps
+    // Additional temps with status
     [ObservableProperty] private double _gpuHotSpot;
+    [ObservableProperty] private string _hotSpotStatus = "N/A";
+    [ObservableProperty] private string _hotSpotColor = "#808080";
     [ObservableProperty] private double _gpuMemoryTemp;
+    [ObservableProperty] private string _memTempStatus = "N/A";
+    [ObservableProperty] private string _memTempColor = "#808080";
     [ObservableProperty] private bool _hasHotSpot;
     [ObservableProperty] private bool _hasMemoryTemp;
 
@@ -154,12 +158,14 @@ public partial class GpuViewModel : ObservableObject, IDisposable
                 if (hotSpot.Key != null && hotSpot.Value > 0)
                 {
                     GpuHotSpot = hotSpot.Value;
+                    (HotSpotStatus, HotSpotColor) = GetTempStatus(hotSpot.Value);
                     HasHotSpot = true;
                 }
 
                 if (memTemp.Key != null && memTemp.Value > 0)
                 {
                     GpuMemoryTemp = memTemp.Value;
+                    (MemTempStatus, MemTempColor) = GetTempStatus(memTemp.Value);
                     HasMemoryTemp = true;
                 }
 
