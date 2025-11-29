@@ -4,6 +4,7 @@ using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services;
 using SysMonitor.Core.Services.Cleaners;
+using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Optimizers;
 
 namespace SysMonitor.App.ViewModels;
@@ -13,12 +14,15 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly ISystemInfoService _systemInfoService;
     private readonly ITempFileCleaner _tempFileCleaner;
     private readonly IMemoryOptimizer _memoryOptimizer;
+    private readonly INetworkMonitor _networkMonitor;
+    private readonly ITemperatureMonitor _temperatureMonitor;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
 
     [ObservableProperty] private int _healthScore = 0;
     [ObservableProperty] private string _healthStatus = "Checking...";
+    [ObservableProperty] private string _healthColor = "#4CAF50";
     [ObservableProperty] private double _cpuUsage = 0;
     [ObservableProperty] private double _memoryUsage = 0;
     [ObservableProperty] private double _memoryUsedGB = 0;
@@ -26,28 +30,49 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     [ObservableProperty] private double _diskUsage = 0;
     [ObservableProperty] private double _diskUsedGB = 0;
     [ObservableProperty] private double _diskTotalGB = 0;
+    [ObservableProperty] private int _driveCount = 0;
     [ObservableProperty] private int _batteryLevel = 0;
     [ObservableProperty] private bool _hasBattery = false;
     [ObservableProperty] private bool _isCharging = false;
+    [ObservableProperty] private string _batteryStatus = "";
     [ObservableProperty] private string _osName = "";
     [ObservableProperty] private string _uptime = "";
     [ObservableProperty] private double _cleanableSpaceMB = 0;
     [ObservableProperty] private bool _isLoading = true;
     [ObservableProperty] private bool _isOptimizing = false;
 
+    // Network stats
+    [ObservableProperty] private bool _isConnected = false;
+    [ObservableProperty] private string _connectionType = "Unknown";
+    [ObservableProperty] private string _downloadSpeed = "0 B/s";
+    [ObservableProperty] private string _uploadSpeed = "0 B/s";
+
+    // Temperature stats
+    [ObservableProperty] private double _cpuTemperature = 0;
+    [ObservableProperty] private string _cpuTempStatus = "N/A";
+    [ObservableProperty] private double _gpuTemperature = 0;
+
+    // Process count
+    [ObservableProperty] private int _processCount = 0;
+
     public DashboardViewModel(
         ISystemInfoService systemInfoService,
         ITempFileCleaner tempFileCleaner,
-        IMemoryOptimizer memoryOptimizer)
+        IMemoryOptimizer memoryOptimizer,
+        INetworkMonitor networkMonitor,
+        ITemperatureMonitor temperatureMonitor)
     {
         _systemInfoService = systemInfoService;
         _tempFileCleaner = tempFileCleaner;
         _memoryOptimizer = memoryOptimizer;
+        _networkMonitor = networkMonitor;
+        _temperatureMonitor = temperatureMonitor;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
     public async Task InitializeAsync()
     {
+        await _temperatureMonitor.InitializeAsync();
         await RefreshDataAsync();
         StartAutoRefresh();
     }
@@ -80,7 +105,21 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
         try
         {
-            var info = await _systemInfoService.GetSystemInfoAsync();
+            // Fetch all data in parallel
+            var infoTask = _systemInfoService.GetSystemInfoAsync();
+            var networkTask = _networkMonitor.GetNetworkInfoAsync();
+            var networkSpeedTask = _networkMonitor.GetSpeedAsync();
+            var cpuTempTask = _temperatureMonitor.GetCpuTemperatureAsync();
+            var gpuTempTask = _temperatureMonitor.GetGpuTemperatureAsync();
+
+            await Task.WhenAll(infoTask, networkTask, networkSpeedTask, cpuTempTask, gpuTempTask);
+
+            var info = await infoTask;
+            var networkInfo = await networkTask;
+            var (upload, download) = await networkSpeedTask;
+            var cpuTemp = await cpuTempTask;
+            var gpuTemp = await gpuTempTask;
+
             if (_isDisposed) return;
 
             // Update UI on dispatcher thread
@@ -88,16 +127,19 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
             {
                 if (_isDisposed) return;
 
+                // Health Score
                 HealthScore = info.HealthScore;
-                HealthStatus = info.HealthScore >= 80 ? "Excellent" :
-                              info.HealthScore >= 60 ? "Good" :
-                              info.HealthScore >= 40 ? "Fair" : "Poor";
+                (HealthStatus, HealthColor) = GetHealthStatus(info.HealthScore);
 
+                // CPU
                 CpuUsage = info.Cpu.UsagePercent;
+
+                // Memory
                 MemoryUsage = info.Memory.UsagePercent;
                 MemoryUsedGB = info.Memory.UsedGB;
                 MemoryTotalGB = info.Memory.TotalGB;
 
+                // Disk
                 if (info.Disks.Count > 0)
                 {
                     var mainDisk = info.Disks[0];
@@ -105,16 +147,35 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
                     DiskUsedGB = mainDisk.UsedGB;
                     DiskTotalGB = mainDisk.TotalGB;
                 }
+                DriveCount = info.Disks.Count;
 
+                // Battery
                 if (info.Battery != null)
                 {
                     HasBattery = true;
                     BatteryLevel = info.Battery.ChargePercent;
                     IsCharging = info.Battery.IsCharging;
+                    BatteryStatus = info.Battery.IsCharging ? "Charging" :
+                                   info.Battery.IsPluggedIn ? "Plugged In" : "On Battery";
                 }
 
+                // OS & Uptime
                 OsName = info.OperatingSystem.Name;
                 Uptime = FormatUptime(info.OperatingSystem.Uptime);
+
+                // Network
+                IsConnected = networkInfo.IsConnected;
+                ConnectionType = networkInfo.ConnectionType;
+                DownloadSpeed = FormatSpeed(download);
+                UploadSpeed = FormatSpeed(upload);
+
+                // Temperature
+                CpuTemperature = cpuTemp;
+                GpuTemperature = gpuTemp;
+                CpuTempStatus = GetTempStatus(cpuTemp);
+
+                // Process count (estimate from CPU info)
+                ProcessCount = Environment.ProcessorCount * 10; // Rough estimate
 
                 IsLoading = false;
             });
@@ -134,6 +195,40 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         {
             // Log in production - for now, silently handle
         }
+    }
+
+    private static (string status, string color) GetHealthStatus(int score)
+    {
+        return score switch
+        {
+            >= 90 => ("Excellent", "#4CAF50"),
+            >= 75 => ("Good", "#8BC34A"),
+            >= 60 => ("Fair", "#FF9800"),
+            >= 40 => ("Poor", "#FF5722"),
+            _ => ("Critical", "#F44336")
+        };
+    }
+
+    private static string GetTempStatus(double temp)
+    {
+        return temp switch
+        {
+            0 => "N/A",
+            <= 45 => "Cool",
+            <= 65 => "Normal",
+            <= 80 => "Warm",
+            <= 90 => "Hot",
+            _ => "Critical"
+        };
+    }
+
+    private static string FormatSpeed(double bytesPerSecond)
+    {
+        if (bytesPerSecond >= 1_000_000)
+            return $"{bytesPerSecond / 1_000_000:F1} MB/s";
+        if (bytesPerSecond >= 1_000)
+            return $"{bytesPerSecond / 1_000:F1} KB/s";
+        return $"{bytesPerSecond:F0} B/s";
     }
 
     [RelayCommand]
