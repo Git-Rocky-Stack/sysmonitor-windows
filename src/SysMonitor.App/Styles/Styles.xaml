@@ -175,9 +175,9 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
-    <!-- Outlined Button Style (Pill-shaped) -->
+    <!-- Outlined Button Style (Pill-shaped with solid black background) -->
     <Style x:Key="OutlinedButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Background" Value="#000000"/>
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -188,13 +188,13 @@
 
     <!-- Outline Button Style (Dark background with border - for utility pages) -->
     <Style x:Key="OutlineButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="#1A1A1A"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-        <Setter Property="BorderBrush" Value="#333333"/>
+        <Setter Property="Background" Value="#000000"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="CornerRadius" Value="24"/>
         <Setter Property="Padding" Value="16,8"/>
-        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
     <!-- Export Button Style (for JSON, CSV, PDF buttons like Android) -->
