@@ -13,14 +13,28 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner - matching Android style -->
-        <Border Grid.Row="0" Style="{StaticResource HeaderBannerStyle}">
-            <StackPanel HorizontalAlignment="Center">
-                <TextBlock Text="SYSTEM CLEANER" Style="{StaticResource PageHeaderStyle}"
-                           Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                <TextBlock Text="Remove Temporary Files &amp; Free Up Space" Style="{StaticResource PageSubtitleStyle}"
-                           Foreground="#AAFFFFFF" HorizontalAlignment="Center"/>
-            </StackPanel>
+        <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
+        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Header text -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                    <TextBlock Text="SYSTEM CLEANER" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Remove Temporary Files &amp; Free Up Space" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
+                </StackPanel>
+
+                <!-- Center: STX.1 Home Logo -->
+                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Stretch="Uniform"/>
+            </Grid>
         </Border>
 
         <!-- Cleaning Controls Section -->
