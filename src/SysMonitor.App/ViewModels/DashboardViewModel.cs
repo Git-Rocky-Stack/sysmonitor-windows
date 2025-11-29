@@ -6,6 +6,9 @@ using SysMonitor.Core.Services;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Optimizers;
+using System.Text;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -54,6 +57,11 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     // Process count
     [ObservableProperty] private int _processCount = 0;
+
+    // Action status
+    [ObservableProperty] private string _actionStatus = "";
+    [ObservableProperty] private bool _hasActionStatus = false;
+    [ObservableProperty] private bool _isActionSuccess = true;
 
     public DashboardViewModel(
         ISystemInfoService systemInfoService,
@@ -235,11 +243,17 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private async Task QuickCleanAsync()
     {
         IsOptimizing = true;
+        ShowActionStatus("Cleaning temporary files...", true);
         try
         {
             var items = await _tempFileCleaner.ScanAsync();
-            await _tempFileCleaner.CleanAsync(items);
+            var cleaned = await _tempFileCleaner.CleanAsync(items);
             await RefreshDataAsync();
+            ShowActionStatus($"Cleaned {cleaned.Count} items successfully!", true);
+        }
+        catch (Exception ex)
+        {
+            ShowActionStatus($"Clean failed: {ex.Message}", false);
         }
         finally
         {
@@ -251,14 +265,160 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private async Task OptimizeMemoryAsync()
     {
         IsOptimizing = true;
+        ShowActionStatus("Optimizing memory...", true);
         try
         {
-            await _memoryOptimizer.OptimizeMemoryAsync();
+            var freedMB = await _memoryOptimizer.OptimizeMemoryAsync();
             await RefreshDataAsync();
+            ShowActionStatus($"Freed {freedMB:F0} MB of memory!", true);
+        }
+        catch (Exception ex)
+        {
+            ShowActionStatus($"Optimization failed: {ex.Message}", false);
         }
         finally
         {
             IsOptimizing = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportReportAsync()
+    {
+        IsOptimizing = true;
+        ShowActionStatus("Generating system report...", true);
+        try
+        {
+            var report = await GenerateSystemReportAsync();
+
+            // Create file in Documents folder
+            var documentsFolder = await StorageFolder.GetFolderFromPathAsync(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            var fileName = $"SysMonitor_Report_{timestamp}.txt";
+            var file = await documentsFolder.CreateFileAsync(fileName, CreationCollisionOption.GenerateUniqueName);
+            await FileIO.WriteTextAsync(file, report);
+
+            ShowActionStatus($"Report saved to Documents/{fileName}", true);
+        }
+        catch (Exception ex)
+        {
+            ShowActionStatus($"Export failed: {ex.Message}", false);
+        }
+        finally
+        {
+            IsOptimizing = false;
+        }
+    }
+
+    private async Task<string> GenerateSystemReportAsync()
+    {
+        var sb = new StringBuilder();
+        var info = await _systemInfoService.GetSystemInfoAsync();
+        var networkInfo = await _networkMonitor.GetNetworkInfoAsync();
+        var cpuTemp = await _temperatureMonitor.GetCpuTemperatureAsync();
+        var gpuTemp = await _temperatureMonitor.GetGpuTemperatureAsync();
+
+        sb.AppendLine("╔══════════════════════════════════════════════════════════════════╗");
+        sb.AppendLine("║           STX.1 SYSTEM MONITOR - DIAGNOSTIC REPORT               ║");
+        sb.AppendLine("║                Strategic. Excellence. Engineered.                 ║");
+        sb.AppendLine("╚══════════════════════════════════════════════════════════════════╝");
+        sb.AppendLine();
+        sb.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine($"Health Score: {info.HealthScore}% ({GetHealthStatus(info.HealthScore).status})");
+        sb.AppendLine();
+
+        sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
+        sb.AppendLine("│ OPERATING SYSTEM                                                  │");
+        sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
+        sb.AppendLine($"  Name:      {info.OperatingSystem.Name}");
+        sb.AppendLine($"  Version:   {info.OperatingSystem.Version}");
+        sb.AppendLine($"  Build:     {info.OperatingSystem.BuildNumber}");
+        sb.AppendLine($"  Uptime:    {FormatUptime(info.OperatingSystem.Uptime)}");
+        sb.AppendLine();
+
+        sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
+        sb.AppendLine("│ CPU                                                               │");
+        sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
+        sb.AppendLine($"  Model:     {info.Cpu.Name}");
+        sb.AppendLine($"  Cores:     {info.Cpu.CoreCount} cores / {info.Cpu.ThreadCount} threads");
+        sb.AppendLine($"  Speed:     {info.Cpu.SpeedMHz} MHz");
+        sb.AppendLine($"  Usage:     {info.Cpu.UsagePercent:F1}%");
+        sb.AppendLine($"  Temp:      {cpuTemp:F0}°C ({GetTempStatus(cpuTemp)})");
+        sb.AppendLine();
+
+        sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
+        sb.AppendLine("│ MEMORY                                                            │");
+        sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
+        sb.AppendLine($"  Total:     {info.Memory.TotalGB:F1} GB");
+        sb.AppendLine($"  Used:      {info.Memory.UsedGB:F1} GB ({info.Memory.UsagePercent:F1}%)");
+        sb.AppendLine($"  Available: {info.Memory.AvailableGB:F1} GB");
+        sb.AppendLine();
+
+        sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
+        sb.AppendLine("│ GPU                                                               │");
+        sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
+        sb.AppendLine($"  Temp:      {gpuTemp:F0}°C ({GetTempStatus(gpuTemp)})");
+        sb.AppendLine();
+
+        sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
+        sb.AppendLine("│ STORAGE                                                           │");
+        sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
+        foreach (var disk in info.Disks)
+        {
+            sb.AppendLine($"  [{disk.DriveLetter}] {disk.Name}");
+            sb.AppendLine($"       Total: {disk.TotalGB:F1} GB | Used: {disk.UsedGB:F1} GB ({disk.UsagePercent:F1}%)");
+            sb.AppendLine($"       Free:  {disk.FreeGB:F1} GB");
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
+        sb.AppendLine("│ NETWORK                                                           │");
+        sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
+        sb.AppendLine($"  Status:    {(networkInfo.IsConnected ? "Connected" : "Disconnected")}");
+        sb.AppendLine($"  Type:      {networkInfo.ConnectionType}");
+        sb.AppendLine($"  Adapter:   {networkInfo.AdapterName}");
+        if (!string.IsNullOrEmpty(networkInfo.IpAddress))
+            sb.AppendLine($"  IP:        {networkInfo.IpAddress}");
+        sb.AppendLine();
+
+        if (info.Battery != null)
+        {
+            sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
+            sb.AppendLine("│ BATTERY                                                           │");
+            sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
+            sb.AppendLine($"  Level:     {info.Battery.ChargePercent}%");
+            sb.AppendLine($"  Status:    {(info.Battery.IsCharging ? "Charging" : info.Battery.IsPluggedIn ? "Plugged In" : "On Battery")}");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine("══════════════════════════════════════════════════════════════════");
+        sb.AppendLine("                    End of Diagnostic Report");
+        sb.AppendLine("══════════════════════════════════════════════════════════════════");
+
+        return sb.ToString();
+    }
+
+    private void ShowActionStatus(string message, bool success)
+    {
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            ActionStatus = message;
+            IsActionSuccess = success;
+            HasActionStatus = true;
+        });
+
+        // Auto-clear after 5 seconds (for success messages)
+        if (success && !message.Contains("..."))
+        {
+            Task.Delay(5000).ContinueWith(_ =>
+            {
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    HasActionStatus = false;
+                    ActionStatus = "";
+                });
+            });
         }
     }
 
