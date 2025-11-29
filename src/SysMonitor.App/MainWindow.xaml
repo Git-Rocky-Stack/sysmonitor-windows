@@ -7,22 +7,56 @@
     xmlns:views="using:SysMonitor.App.Views"
     Title="SysMonitor - Windows System Monitor &amp; Optimizer">
 
-    <Grid>
+    <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title Bar -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="48"
-              Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+        <!-- Title Bar with Red Accent - Strategia-X Branding -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="56"
+              Background="{StaticResource HeaderGradientBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <FontIcon Glyph="&#xE7F4;" FontSize="20" Margin="12,0,0,0"/>
-            <TextBlock Grid.Column="1" Text="SysMonitor" VerticalAlignment="Center" Margin="12,0,0,0"
-                       Style="{StaticResource CaptionTextBlockStyle}"/>
+
+            <!-- Logo Icon -->
+            <Border Grid.Column="0" Background="{StaticResource IconContainerBrush}"
+                    CornerRadius="8" Margin="12,10" Padding="8">
+                <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+            </Border>
+
+            <!-- Brand Text - matching Android app style -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                <!-- \\strateg\a-x logo style -->
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="\\strateg\a-" FontSize="11" FontWeight="Light"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontFamily="Consolas"/>
+                    <TextBlock Text="x" FontSize="11" FontWeight="Light"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               FontFamily="Consolas"/>
+                </StackPanel>
+                <!-- STX.1 and SYSTEM MONITOR -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock FontSize="12" FontWeight="Bold" VerticalAlignment="Center">
+                        <Run Text="STX" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Run Text="." Foreground="{StaticResource PrimaryBrush}"/>
+                        <Run Text="1" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </TextBlock>
+                    <TextBlock Text="SYSTEM MONITOR" FontSize="14" FontWeight="Bold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               CharacterSpacing="100" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Tagline on right -->
+            <TextBlock Grid.Column="3" Text="Strategic. Excellence. Engineered."
+                       FontSize="10" Foreground="#AAFFFFFF"
+                       VerticalAlignment="Center" Margin="0,0,16,0"/>
         </Grid>
 
         <!-- Navigation View -->
@@ -30,26 +64,56 @@
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="True"
                         PaneDisplayMode="Left"
+                        Background="{StaticResource BackgroundBrush}"
                         SelectionChanged="NavView_SelectionChanged">
+
+            <NavigationView.Resources>
+                <!-- Customize NavigationView colors for dark theme -->
+                <SolidColorBrush x:Key="NavigationViewContentBackground" Color="#000000"/>
+                <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#121212"/>
+                <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#121212"/>
+            </NavigationView.Resources>
+
             <NavigationView.MenuItems>
-                <NavigationViewItem Icon="Home" Content="Dashboard" Tag="Dashboard"/>
-                <NavigationViewItem Icon="AllApps" Content="Processes" Tag="Processes"/>
-                <NavigationViewItem Icon="Delete" Content="Cleaner" Tag="Cleaner"/>
-                <NavigationViewItem Icon="Clock" Content="Startup" Tag="Startup"/>
+                <NavigationViewItem Content="Dashboard" Tag="Dashboard">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Processes" Tag="Processes">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8A5;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Cleaner" Tag="Cleaner">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE74D;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Startup" Tag="Startup">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7E8;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItem Content="Disk Analyzer" Tag="DiskAnalyzer">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xEDA2;"/>
+                        <FontIcon Glyph="&#xEDA2;" Foreground="{StaticResource PrimaryBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Network" Tag="Network">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE774;"/>
+                        <FontIcon Glyph="&#xE774;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Battery" Tag="Battery">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE83F;" Foreground="{StaticResource PrimaryBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
-            <Frame x:Name="ContentFrame" Padding="24"/>
+            <Frame x:Name="ContentFrame" Padding="24" Background="{StaticResource BackgroundBrush}"/>
         </NavigationView>
     </Grid>
 </Window>
