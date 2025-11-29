@@ -9,15 +9,28 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner -->
-            <Border Style="{StaticResource HeaderBannerStyle}">
-                <StackPanel HorizontalAlignment="Center" Spacing="8">
-                    <FontIcon Glyph="&#xE8C8;" FontSize="48" Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="DUPLICATE FINDER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Find and remove duplicate files" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Center" Margin="0"/>
-                </StackPanel>
+            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
+            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Header text -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="DUPLICATE FINDER" Style="{StaticResource PageHeaderStyle}"
+                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Find and remove duplicate files" Style="{StaticResource PageSubtitleStyle}"
+                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
+                    </StackPanel>
+
+                    <!-- Center: STX.1 Home Logo -->
+                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Stretch="Uniform"/>
+                </Grid>
             </Border>
 
             <!-- Scan Controls -->
@@ -39,12 +52,35 @@
                         <TextBox Grid.Column="0" Text="{x:Bind ViewModel.ScanPath, Mode=TwoWay}"
                                  PlaceholderText="Select folder to scan for duplicates..."
                                  Style="{StaticResource DefaultTextBoxStyle}"/>
-                        <Button Grid.Column="1" Content="BROWSE" Command="{x:Bind ViewModel.BrowseFolderCommand}"
-                                Style="{StaticResource OutlineButtonStyle}"/>
-                        <Button Grid.Column="2"
-                                Content="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToScanButtonConverter}}"
-                                Command="{x:Bind ViewModel.ScanCommand}"
-                                Style="{StaticResource RedButtonStyle}" Width="140"/>
+                        <!-- BROWSE with chrome bezel -->
+                        <Border Grid.Column="1" CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="BROWSE" Command="{x:Bind ViewModel.BrowseFolderCommand}"
+                                    Style="{StaticResource OutlineButtonStyle}" Background="#000000"/>
+                        </Border>
+                        <!-- SCAN with chrome bezel -->
+                        <Border Grid.Column="2" CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToScanButtonConverter}}"
+                                    Command="{x:Bind ViewModel.ScanCommand}"
+                                    Style="{StaticResource RedButtonStyle}" Width="140"/>
+                        </Border>
                     </Grid>
 
                     <!-- Progress -->
@@ -120,17 +156,53 @@
             <!-- Action Buttons -->
             <Border Style="{StaticResource CardStyle}" Padding="16">
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                    <Button Content="SELECT ALL DUPLICATES" Command="{x:Bind ViewModel.SelectAllDuplicatesCommand}"
-                            Style="{StaticResource OutlineButtonStyle}"/>
-                    <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"
-                            Style="{StaticResource OutlineButtonStyle}"/>
-                    <Button Command="{x:Bind ViewModel.DeleteSelectedDuplicatesCommand}"
-                            Style="{StaticResource RedButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                            <TextBlock Text="DELETE SELECTED"/>
-                        </StackPanel>
-                    </Button>
+                    <!-- SELECT ALL DUPLICATES with chrome bezel -->
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="SELECT ALL DUPLICATES" Command="{x:Bind ViewModel.SelectAllDuplicatesCommand}"
+                                Style="{StaticResource OutlineButtonStyle}" Background="#000000"/>
+                    </Border>
+                    <!-- SELECT NONE with chrome bezel -->
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"
+                                Style="{StaticResource OutlineButtonStyle}" Background="#000000"/>
+                    </Border>
+                    <!-- DELETE SELECTED with chrome bezel -->
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Command="{x:Bind ViewModel.DeleteSelectedDuplicatesCommand}"
+                                Style="{StaticResource RedButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                <TextBlock Text="DELETE SELECTED"/>
+                            </StackPanel>
+                        </Button>
+                    </Border>
                 </StackPanel>
             </Border>
 
