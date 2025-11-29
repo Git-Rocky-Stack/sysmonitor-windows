@@ -67,8 +67,9 @@ public class NetworkMapper : INetworkMapper
                     {
                         ScannedCount = scanned,
                         TotalCount = total,
-                        CurrentIp = ip,
-                        DevicesFound = devices.Count
+                        CurrentTarget = ip,
+                        Status = $"Scanning {ip}...",
+                        FoundDevice = device
                     });
                 }
             }
@@ -103,13 +104,16 @@ public class NetworkMapper : INetworkMapper
                                 var mask = addr.IPv4Mask?.ToString() ?? "255.255.255.0";
                                 var gateway = props.GatewayAddresses.FirstOrDefault()?.Address.ToString() ?? "";
                                 var dns = props.DnsAddresses.FirstOrDefault()?.ToString() ?? "";
+                                var mac = string.Join(":", nic.GetPhysicalAddress().GetAddressBytes().Select(b => b.ToString("X2")));
 
                                 return new LocalNetworkInfo
                                 {
-                                    LocalIp = ip,
+                                    LocalIpAddress = ip,
                                     SubnetMask = mask,
                                     Gateway = gateway,
-                                    NetworkRange = CalculateNetworkRange(ip, mask),
+                                    MacAddress = mac,
+                                    Hostname = Environment.MachineName,
+                                    NetworkName = nic.Name,
                                     DnsServer = dns,
                                     AdapterName = nic.Name
                                 };
@@ -169,7 +173,7 @@ public class NetworkMapper : INetworkMapper
                 DeviceType = deviceType.type,
                 DeviceIcon = deviceType.icon,
                 IsOnline = true,
-                ResponseTimeMs = reply.RoundtripTime,
+                ResponseTimeMs = (int)reply.RoundtripTime,
                 ResponseStatus = status,
                 ResponseColor = color,
                 LastSeen = DateTime.Now

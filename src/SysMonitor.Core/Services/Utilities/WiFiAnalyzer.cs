@@ -56,6 +56,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                         return new WiFiAdapterInfo
                         {
                             Name = nic.Name,
+                            Description = nic.Description,
                             MacAddress = FormatMacAddress(nic.GetPhysicalAddress().ToString()),
                             IsEnabled = nic.OperationalStatus == OperationalStatus.Up,
                             Status = nic.OperationalStatus.ToString()
@@ -207,15 +208,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
         return new WiFiNetworkInfo
         {
-            SSID = string.IsNullOrEmpty(ssid) ? "[Hidden Network]" : ssid,
-            BSSID = bssid,
+            Ssid = string.IsNullOrEmpty(ssid) ? "[Hidden Network]" : ssid,
+            Bssid = bssid,
             SignalStrength = signalPercent,
             SignalBars = bars,
             SignalQuality = quality,
             SignalColor = color,
             Channel = channel,
             Band = band,
-            SecurityType = authentication,
+            Security = authentication,
             IsSecured = !authentication.Equals("Open", StringComparison.OrdinalIgnoreCase),
             IsConnected = isConnected,
             FrequencyMHz = GetFrequencyFromChannel(channel),
@@ -228,9 +229,11 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         var lines = output.Split('\n');
 
         string ssid = "";
+        string bssid = "";
         int signal = 0;
         string security = "";
-        double speed = 0;
+        int channel = 0;
+        int speed = 0;
 
         foreach (var rawLine in lines)
         {
@@ -241,12 +244,25 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 var parts = line.Split(':', 2);
                 ssid = parts.Length > 1 ? parts[1].Trim() : "";
             }
+            else if (line.StartsWith("BSSID", StringComparison.OrdinalIgnoreCase))
+            {
+                var parts = line.Split(':', 2);
+                bssid = parts.Length > 1 ? parts[1].Trim() : "";
+            }
             else if (line.StartsWith("Signal", StringComparison.OrdinalIgnoreCase))
             {
                 var match = Regex.Match(line, @"(\d+)%");
                 if (match.Success)
                 {
                     signal = int.Parse(match.Groups[1].Value);
+                }
+            }
+            else if (line.StartsWith("Channel", StringComparison.OrdinalIgnoreCase))
+            {
+                var parts = line.Split(':');
+                if (parts.Length > 1 && int.TryParse(parts[1].Trim(), out var ch))
+                {
+                    channel = ch;
                 }
             }
             else if (line.StartsWith("Authentication", StringComparison.OrdinalIgnoreCase))
@@ -257,8 +273,8 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             else if (line.StartsWith("Receive rate", StringComparison.OrdinalIgnoreCase) ||
                      line.StartsWith("Transmit rate", StringComparison.OrdinalIgnoreCase))
             {
-                var match = Regex.Match(line, @"(\d+\.?\d*)");
-                if (match.Success && double.TryParse(match.Groups[1].Value, out var rate))
+                var match = Regex.Match(line, @"(\d+)");
+                if (match.Success && int.TryParse(match.Groups[1].Value, out var rate))
                 {
                     speed = Math.Max(speed, rate);
                 }
@@ -270,11 +286,14 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
         return new WiFiConnectionInfo
         {
-            SSID = ssid,
+            Ssid = ssid,
+            Bssid = bssid,
             SignalStrength = signal,
+            Channel = channel,
+            Security = security,
+            LinkSpeed = speed,
             IpAddress = GetCurrentIpAddress(),
-            LinkSpeedMbps = speed,
-            SecurityType = security
+            IsConnected = true
         };
     }
 

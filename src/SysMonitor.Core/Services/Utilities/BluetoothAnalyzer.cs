@@ -33,18 +33,21 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
                         continue;
 
                     var deviceType = DetermineDeviceType(name, deviceId);
-                    var (quality, color) = GetSignalQuality(-60); // Default signal strength
+                    var (quality, signalColor) = GetSignalQuality(-60); // Default signal strength
+                    var isConnected = status == "OK";
 
                     devices.Add(new BluetoothDeviceInfo
                     {
                         Name = CleanDeviceName(name),
                         Address = ExtractAddress(deviceId),
                         DeviceType = deviceType.type,
-                        DeviceTypeIcon = deviceType.icon,
+                        DeviceIcon = deviceType.icon,
+                        DeviceTypeColor = deviceType.color,
                         SignalStrength = -60, // WMI doesn't provide RSSI directly
                         SignalQuality = quality,
-                        SignalColor = color,
-                        IsConnected = status == "OK",
+                        SignalColor = signalColor,
+                        StatusColor = isConnected ? "#4CAF50" : "#808080",
+                        IsConnected = isConnected,
                         IsPaired = true, // If visible in WMI, it's paired
                         LastSeen = DateTime.Now
                     });
@@ -106,41 +109,40 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
         }
     }
 
-    private static (string type, string icon) DetermineDeviceType(string name, string deviceId)
+    private static (string type, string icon, string color) DetermineDeviceType(string name, string deviceId)
     {
         var nameLower = name.ToLowerInvariant();
-        var idLower = deviceId.ToLowerInvariant();
 
         if (nameLower.Contains("headphone") || nameLower.Contains("headset") || nameLower.Contains("earphone") ||
             nameLower.Contains("airpod") || nameLower.Contains("earbud"))
-            return ("Headphones", "\uE7F6");
+            return ("Headphones", "\uE7F6", "#9C27B0");
 
         if (nameLower.Contains("speaker") || nameLower.Contains("audio"))
-            return ("Speaker", "\uE7F5");
+            return ("Speaker", "\uE7F5", "#E91E63");
 
         if (nameLower.Contains("keyboard"))
-            return ("Keyboard", "\uE92E");
+            return ("Keyboard", "\uE92E", "#2196F3");
 
         if (nameLower.Contains("mouse"))
-            return ("Mouse", "\uE962");
+            return ("Mouse", "\uE962", "#00BCD4");
 
         if (nameLower.Contains("gamepad") || nameLower.Contains("controller") || nameLower.Contains("xbox"))
-            return ("Controller", "\uE7FC");
+            return ("Controller", "\uE7FC", "#4CAF50");
 
         if (nameLower.Contains("phone") || nameLower.Contains("iphone") || nameLower.Contains("samsung") ||
             nameLower.Contains("pixel") || nameLower.Contains("galaxy"))
-            return ("Phone", "\uE8EA");
+            return ("Phone", "\uE8EA", "#FF9800");
 
         if (nameLower.Contains("watch") || nameLower.Contains("band") || nameLower.Contains("fitbit"))
-            return ("Wearable", "\uE916");
+            return ("Wearable", "\uE916", "#673AB7");
 
         if (nameLower.Contains("printer"))
-            return ("Printer", "\uE749");
+            return ("Printer", "\uE749", "#607D8B");
 
         if (nameLower.Contains("laptop") || nameLower.Contains("computer") || nameLower.Contains("pc"))
-            return ("Computer", "\uE7F8");
+            return ("Computer", "\uE7F8", "#3F51B5");
 
-        return ("Device", "\uE702");
+        return ("Device", "\uE702", "#808080");
     }
 
     private static string CleanDeviceName(string name)
