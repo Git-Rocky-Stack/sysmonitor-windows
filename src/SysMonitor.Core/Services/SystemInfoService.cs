@@ -13,6 +13,7 @@ public class SystemInfoService : ISystemInfoService
     private readonly INetworkMonitor _networkMonitor;
 
     private OsInfo? _cachedOsInfo;
+    private DateTime? _bootTime;
 
     public SystemInfoService(
         ICpuMonitor cpuMonitor,
@@ -97,7 +98,12 @@ public class SystemInfoService : ISystemInfoService
 
     public async Task<OsInfo> GetOsInfoAsync()
     {
-        if (_cachedOsInfo != null) return _cachedOsInfo;
+        // Return cached info with updated uptime
+        if (_cachedOsInfo != null && _bootTime.HasValue)
+        {
+            _cachedOsInfo.Uptime = DateTime.Now - _bootTime.Value;
+            return _cachedOsInfo;
+        }
 
         return await Task.Run(() =>
         {
@@ -128,8 +134,8 @@ public class SystemInfoService : ISystemInfoService
 
                     if (obj["LastBootUpTime"] != null)
                     {
-                        var bootTime = ManagementDateTimeConverter.ToDateTime(obj["LastBootUpTime"].ToString()!);
-                        info.Uptime = DateTime.Now - bootTime;
+                        _bootTime = ManagementDateTimeConverter.ToDateTime(obj["LastBootUpTime"].ToString()!);
+                        info.Uptime = DateTime.Now - _bootTime.Value;
                     }
                     break;
                 }

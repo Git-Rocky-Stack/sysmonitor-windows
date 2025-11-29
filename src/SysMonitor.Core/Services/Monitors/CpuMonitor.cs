@@ -4,13 +4,14 @@ using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Monitors;
 
-public class CpuMonitor : ICpuMonitor
+public class CpuMonitor : ICpuMonitor, IDisposable
 {
     private PerformanceCounter? _cpuCounter;
     private readonly List<PerformanceCounter> _coreCounters = new();
     private CpuInfo? _cachedStaticInfo;
     private DateTime _lastCacheTime = DateTime.MinValue;
     private readonly TimeSpan _cacheDuration = TimeSpan.FromSeconds(30);
+    private bool _isDisposed;
 
     public CpuMonitor()
     {
@@ -121,4 +122,19 @@ public class CpuMonitor : ICpuMonitor
         12 => "ARM64",
         _ => "Unknown"
     };
+
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _cpuCounter?.Dispose();
+        _cpuCounter = null;
+
+        foreach (var counter in _coreCounters)
+        {
+            counter.Dispose();
+        }
+        _coreCounters.Clear();
+    }
 }
