@@ -249,7 +249,7 @@
             </Border>
 
             <!-- Action Status -->
-            <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay}" CornerRadius="8" Padding="16"
+            <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}" CornerRadius="8" Padding="16"
                     Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}" Opacity="0.9">
                 <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
             </Border>
