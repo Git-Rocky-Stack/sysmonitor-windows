@@ -44,6 +44,18 @@ public partial class PdfToolsViewModel : ObservableObject
     [ObservableProperty] private int _extractStartPage = 1;
     [ObservableProperty] private int _extractEndPage = 1;
 
+    // Signature Settings
+    [ObservableProperty] private bool _isSignatureMode;
+    [ObservableProperty] private string _signerName = "";
+    [ObservableProperty] private bool _includeSignatureDate = true;
+    [ObservableProperty] private int _signaturePageNumber = 1;
+    [ObservableProperty] private double _signatureX = 10; // Percentage from left
+    [ObservableProperty] private double _signatureY = 80; // Percentage from top
+    [ObservableProperty] private double _signatureWidth = 150; // Points
+    [ObservableProperty] private bool _hasSignatureImage;
+    [ObservableProperty] private string _signatureImageName = "";
+    private byte[]? _signatureImageBytes;
+
     // Progress & Status
     [ObservableProperty] private bool _isProcessing;
     [ObservableProperty] private string _processingStatus = "";
@@ -402,11 +414,139 @@ public partial class PdfToolsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task SelectSignatureImageAsync()
+    {
+        try
+        {
+            var picker = new FileOpenPicker();
+            picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".bmp");
+
+            var hwnd = GetActiveWindow();
+            if (hwnd != IntPtr.Zero)
+            {
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                _signatureImageBytes = await File.ReadAllBytesAsync(file.Path);
+                SignatureImageName = file.Name;
+                HasSignatureImage = true;
+                ShowAction($"Loaded signature: {file.Name}", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAction($"Failed to load image: {ex.Message}", false);
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSignatureImage()
+    {
+        _signatureImageBytes = null;
+        SignatureImageName = "";
+        HasSignatureImage = false;
+    }
+
+    [RelayCommand]
+    private async Task ApplySignatureAsync()
+    {
+        if (!HasPdfSelected)
+        {
+            ShowAction("Select a PDF file first", false);
+            return;
+        }
+
+        if (!HasSignatureImage && string.IsNullOrWhiteSpace(SignerName))
+        {
+            ShowAction("Add a signature image or enter your name", false);
+            return;
+        }
+
+        if (SignaturePageNumber < 1 || SignaturePageNumber > PageCount)
+        {
+            ShowAction($"Invalid page number. PDF has {PageCount} pages.", false);
+            return;
+        }
+
+        IsProcessing = true;
+        ProcessingStatus = "Adding signature to PDF...";
+
+        try
+        {
+            var picker = new FileSavePicker();
+            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            picker.FileTypeChoices.Add("PDF Document", [".pdf"]);
+            picker.SuggestedFileName = $"{Path.GetFileNameWithoutExtension(SelectedPdfName)}_signed";
+
+            var hwnd = GetActiveWindow();
+            if (hwnd != IntPtr.Zero)
+            {
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSaveFileAsync();
+            if (file == null)
+            {
+                IsProcessing = false;
+                return;
+            }
+
+            var options = new SignatureOptions
+            {
+                SignatureImageBytes = _signatureImageBytes,
+                PageNumber = SignaturePageNumber,
+                X = SignatureX,
+                Y = SignatureY,
+                Width = SignatureWidth,
+                SignerName = SignerName,
+                IncludeDate = IncludeSignatureDate
+            };
+
+            var result = await _pdfTools.AddSignatureAsync(SelectedPdfPath, file.Path, options);
+
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                if (result.Success)
+                {
+                    HasResult = true;
+                    ResultPath = result.OutputPath;
+                    ResultMessage = "Signature added successfully";
+                    ShowAction(ResultMessage, true);
+                }
+                else
+                {
+                    ShowAction($"Signature failed: {result.ErrorMessage}", false);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _dispatcherQueue.TryEnqueue(() => ShowAction($"Error: {ex.Message}", false));
+        }
+        finally
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                IsProcessing = false;
+                ProcessingStatus = "";
+            });
+        }
+    }
+
+    [RelayCommand]
     private void SetMode(string mode)
     {
         IsMergeMode = mode == "Merge";
         IsSplitMode = mode == "Split";
         IsExtractMode = mode == "Extract";
+        IsSignatureMode = mode == "Signature";
     }
 
     private void ShowAction(string message, bool isSuccess)
