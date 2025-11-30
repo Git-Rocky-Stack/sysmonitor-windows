@@ -20,6 +20,7 @@ public partial class CleanerViewModel : ObservableObject
     [ObservableProperty] private int _totalFiles = 0;
     [ObservableProperty] private string _statusMessage = "Click 'Scan' to find cleanable files";
     [ObservableProperty] private double _cleanedMB = 0;
+    [ObservableProperty] private string _formattedTotalSize = "0 MB";
 
     public CleanerViewModel(ITempFileCleaner tempFileCleaner, IBrowserCacheCleaner browserCacheCleaner)
     {
@@ -42,11 +43,13 @@ public partial class CleanerViewModel : ObservableObject
             foreach (var r in tempResults) ScanResults.Add(r);
             foreach (var r in browserResults) ScanResults.Add(r);
 
+            var totalBytes = ScanResults.Sum(r => r.SizeBytes);
             TotalSizeMB = ScanResults.Sum(r => r.SizeMB);
             SelectedSizeMB = ScanResults.Where(r => r.IsSelected).Sum(r => r.SizeMB);
             TotalFiles = ScanResults.Sum(r => r.FileCount);
             HasResults = ScanResults.Count > 0;
-            StatusMessage = $"Found {TotalFiles} files ({TotalSizeMB:F1} MB) that can be cleaned";
+            FormattedTotalSize = FormatSize(totalBytes);
+            StatusMessage = $"Found {TotalFiles:N0} files ({FormattedTotalSize}) that can be cleaned";
         }
         finally
         {
@@ -92,5 +95,16 @@ public partial class CleanerViewModel : ObservableObject
     private void UpdateSelectedSize()
     {
         SelectedSizeMB = ScanResults.Where(r => r.IsSelected).Sum(r => r.SizeMB);
+    }
+
+    private static string FormatSize(long bytes)
+    {
+        if (bytes >= 1_073_741_824)
+            return $"{bytes / 1_073_741_824.0:F2} GB";
+        if (bytes >= 1_048_576)
+            return $"{bytes / 1_048_576.0:F2} MB";
+        if (bytes >= 1024)
+            return $"{bytes / 1024.0:F2} KB";
+        return $"{bytes} B";
     }
 }

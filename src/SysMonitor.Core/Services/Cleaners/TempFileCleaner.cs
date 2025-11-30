@@ -9,6 +9,18 @@ public class TempFileCleaner : ITempFileCleaner
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
     private static extern int SHEmptyRecycleBin(IntPtr hwnd, string? pszRootPath, uint dwFlags);
 
+    // Shell API for querying Recycle Bin size
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SHQueryRecycleBin(string? pszRootPath, ref SHQUERYRBINFO pSHQueryRBInfo);
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    private struct SHQUERYRBINFO
+    {
+        public int cbSize;
+        public long i64Size;
+        public long i64NumItems;
+    }
+
     private const uint SHERB_NOCONFIRMATION = 0x00000001;
     private const uint SHERB_NOPROGRESSUI = 0x00000002;
     private const uint SHERB_NOSOUND = 0x00000004;
@@ -79,42 +91,24 @@ public class TempFileCleaner : ITempFileCleaner
                 catch { }
             }
 
-            // Recycle Bin - scan all drives
+            // Recycle Bin - use Shell API for reliable size query
             try
             {
-                long totalSize = 0;
-                int totalCount = 0;
+                var rbInfo = new SHQUERYRBINFO { cbSize = Marshal.SizeOf<SHQUERYRBINFO>() };
+                var hr = SHQueryRecycleBin(null, ref rbInfo);
 
-                foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady && d.DriveType == DriveType.Fixed))
-                {
-                    var recycleBinPath = Path.Combine(drive.Name, "$Recycle.Bin");
-                    if (Directory.Exists(recycleBinPath))
-                    {
-                        foreach (var dir in Directory.GetDirectories(recycleBinPath))
-                        {
-                            try
-                            {
-                                var (s, c) = GetDirectorySize(dir);
-                                totalSize += s;
-                                totalCount += c;
-                            }
-                            catch { }
-                        }
-                    }
-                }
-
-                if (totalSize > 0)
+                if (hr == 0 && rbInfo.i64Size > 0)
                 {
                     results.Add(new CleanerScanResult
                     {
                         Category = CleanerCategory.RecycleBin,
                         Name = "Recycle Bin",
                         Path = "All Drives",
-                        SizeBytes = totalSize,
-                        FileCount = totalCount,
+                        SizeBytes = rbInfo.i64Size,
+                        FileCount = (int)rbInfo.i64NumItems,
                         IsSelected = true,
                         RiskLevel = CleanerRiskLevel.Safe,
-                        Description = $"{totalCount} items, {FormatSize(totalSize)}"
+                        Description = $"{rbInfo.i64NumItems:N0} items, {FormatSize(rbInfo.i64Size)}"
                     });
                 }
             }
