@@ -10,6 +10,7 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // Battery Presence
     [ObservableProperty] private bool _hasBattery;
@@ -46,6 +47,9 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await RefreshDataAsync();
         StartAutoRefresh();
     }

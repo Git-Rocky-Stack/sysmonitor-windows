@@ -11,6 +11,7 @@ public partial class GpuViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // GPU Info (static)
     [ObservableProperty] private string _gpuName = "";
@@ -45,6 +46,9 @@ public partial class GpuViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await _temperatureMonitor.InitializeAsync();
         await LoadGpuInfoAsync();
         await RefreshDataAsync();

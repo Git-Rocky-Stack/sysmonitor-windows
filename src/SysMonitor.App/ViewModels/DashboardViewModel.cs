@@ -22,6 +22,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     [ObservableProperty] private int _healthScore = 0;
     [ObservableProperty] private string _healthStatus = "Checking...";
@@ -80,6 +81,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await _temperatureMonitor.InitializeAsync();
         await RefreshDataAsync();
         StartAutoRefresh();
