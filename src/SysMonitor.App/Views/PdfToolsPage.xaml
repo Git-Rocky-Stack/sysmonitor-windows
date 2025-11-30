@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     x:Name="ContentArea"
     Background="Transparent">
 
@@ -249,7 +250,7 @@
                             </StackPanel>
                         </Grid>
                         <Border Background="White" CornerRadius="6" Height="150" BorderBrush="#303030" BorderThickness="1">
-                            <InkCanvas x:Name="SignatureInkCanvas"/>
+                            <controls:InkCanvas x:Name="SignatureInkCanvas"/>
                         </Border>
                         <TextBlock Text="Use mouse or touch to draw" FontSize="11" Foreground="#606060" FontStyle="Italic"/>
                     </StackPanel>
