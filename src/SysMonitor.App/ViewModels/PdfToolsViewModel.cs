@@ -44,10 +44,19 @@ public partial class PdfToolsViewModel : ObservableObject
     [ObservableProperty] private int _extractStartPage = 1;
     [ObservableProperty] private int _extractEndPage = 1;
 
+    // Convert to PDF Settings
+    [ObservableProperty] private bool _isConvertMode;
+    [ObservableProperty] private string _convertFilePath = "";
+    [ObservableProperty] private string _convertFileName = "";
+    [ObservableProperty] private bool _hasConvertFile;
+    [ObservableProperty] private string _convertFileType = "";
+
     // Signature Settings
     [ObservableProperty] private bool _isSignatureMode;
     [ObservableProperty] private bool _isDrawSignature = true; // Default to draw mode
     [ObservableProperty] private bool _isUploadSignature;
+    [ObservableProperty] private bool _isTypeSignature; // Type name in cursive font
+    [ObservableProperty] private string _typedSignatureName = ""; // Name to render in cursive
     [ObservableProperty] private string _signerName = "";
     [ObservableProperty] private bool _includeSignatureDate = true;
     [ObservableProperty] private int _signaturePageNumber = 1;
@@ -61,6 +70,10 @@ public partial class PdfToolsViewModel : ObservableObject
     // InkCanvas drawn signature bytes (set from code-behind)
     private byte[]? _drawnSignatureBytes;
     [ObservableProperty] private bool _hasDrawnSignature;
+
+    // Typed signature bytes (rendered cursive text from code-behind)
+    private byte[]? _typedSignatureBytes;
+    [ObservableProperty] private bool _hasTypedSignature;
 
     // Progress & Status
     [ObservableProperty] private bool _isProcessing;
@@ -498,6 +511,15 @@ public partial class PdfToolsViewModel : ObservableObject
                 return;
             }
         }
+        else if (IsTypeSignature)
+        {
+            signatureBytes = _typedSignatureBytes;
+            if (signatureBytes == null && string.IsNullOrWhiteSpace(TypedSignatureName))
+            {
+                ShowAction("Type your name to generate a signature", false);
+                return;
+            }
+        }
         else // Upload mode
         {
             signatureBytes = _signatureImageBytes;
@@ -586,6 +608,149 @@ public partial class PdfToolsViewModel : ObservableObject
         IsSplitMode = mode == "Split";
         IsExtractMode = mode == "Extract";
         IsSignatureMode = mode == "Signature";
+        IsConvertMode = mode == "Convert";
+    }
+
+    [RelayCommand]
+    private async Task SelectConvertFileAsync()
+    {
+        try
+        {
+            var picker = new FileOpenPicker();
+            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            // Image formats
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".bmp");
+            picker.FileTypeFilter.Add(".gif");
+            picker.FileTypeFilter.Add(".tiff");
+            picker.FileTypeFilter.Add(".tif");
+            // Text format
+            picker.FileTypeFilter.Add(".txt");
+
+            var hwnd = GetActiveWindow();
+            if (hwnd != IntPtr.Zero)
+            {
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                ConvertFilePath = file.Path;
+                ConvertFileName = file.Name;
+                HasConvertFile = true;
+
+                var ext = Path.GetExtension(file.Path).ToLowerInvariant();
+                ConvertFileType = ext switch
+                {
+                    ".jpg" or ".jpeg" => "JPEG Image",
+                    ".png" => "PNG Image",
+                    ".bmp" => "Bitmap Image",
+                    ".gif" => "GIF Image",
+                    ".tiff" or ".tif" => "TIFF Image",
+                    ".txt" => "Text File",
+                    _ => "File"
+                };
+
+                ShowAction($"Selected: {file.Name}", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAction($"Failed to select file: {ex.Message}", false);
+        }
+    }
+
+    [RelayCommand]
+    private void ClearConvertFile()
+    {
+        ConvertFilePath = "";
+        ConvertFileName = "";
+        HasConvertFile = false;
+        ConvertFileType = "";
+    }
+
+    [RelayCommand]
+    private async Task ConvertToPdfAsync()
+    {
+        if (!HasConvertFile)
+        {
+            ShowAction("Select a file to convert first", false);
+            return;
+        }
+
+        IsProcessing = true;
+        ProcessingStatus = "Converting to PDF...";
+
+        try
+        {
+            var picker = new FileSavePicker();
+            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            picker.FileTypeChoices.Add("PDF Document", [".pdf"]);
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(ConvertFileName);
+
+            var hwnd = GetActiveWindow();
+            if (hwnd != IntPtr.Zero)
+            {
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSaveFileAsync();
+            if (file == null)
+            {
+                IsProcessing = false;
+                return;
+            }
+
+            var result = await _pdfTools.ConvertToPdfAsync(ConvertFilePath, file.Path);
+
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                if (result.Success)
+                {
+                    HasResult = true;
+                    ResultPath = result.OutputPath;
+                    ResultMessage = $"Converted {ConvertFileName} to PDF";
+                    ShowAction(ResultMessage, true);
+                }
+                else
+                {
+                    ShowAction($"Conversion failed: {result.ErrorMessage}", false);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _dispatcherQueue.TryEnqueue(() => ShowAction($"Error: {ex.Message}", false));
+        }
+        finally
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                IsProcessing = false;
+                ProcessingStatus = "";
+            });
+        }
+    }
+
+    /// <summary>
+    /// Set the typed signature bytes (rendered cursive text from code-behind)
+    /// </summary>
+    public void SetTypedSignatureBytes(byte[]? bytes)
+    {
+        _typedSignatureBytes = bytes;
+        HasTypedSignature = bytes != null && bytes.Length > 0;
+    }
+
+    /// <summary>
+    /// Clear the typed signature
+    /// </summary>
+    public void ClearTypedSignature()
+    {
+        _typedSignatureBytes = null;
+        HasTypedSignature = false;
     }
 
     private void ShowAction(string message, bool isSuccess)
