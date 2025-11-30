@@ -31,6 +31,8 @@
                                  Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Split" Margin="16,0,0,0"/>
                     <RadioButton Content="Extract Pages" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsExtractMode, Mode=TwoWay}"
                                  Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Extract" Margin="16,0,0,0"/>
+                    <RadioButton Content="Add Signature" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSignatureMode, Mode=TwoWay}"
+                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Signature" Margin="16,0,0,0"/>
                 </StackPanel>
             </Border>
 
@@ -103,7 +105,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- Split/Extract Mode - File Selection -->
+            <!-- Split/Extract/Signature Mode - File Selection -->
             <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
                     Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
                 <StackPanel Spacing="16">
@@ -210,6 +212,107 @@
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE8A7;" FontSize="14"/>
                             <TextBlock Text="Extract Pages"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Signature Options -->
+            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
+                    Visibility="{x:Bind ViewModel.IsSignatureMode, Mode=OneWay}">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Add Signature" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+
+                    <!-- Signature Image Selection -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Signature Image (optional)" FontSize="13" Foreground="#808080"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Background="#141414" CornerRadius="6" Padding="12,8" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.SignatureImageName, Mode=OneWay}" Foreground="#808080"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <Button Grid.Column="1" Command="{x:Bind ViewModel.SelectSignatureImageCommand}" Margin="8,0">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8B9;" FontSize="14"/>
+                                    <TextBlock Text="Browse"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Grid.Column="2" Command="{x:Bind ViewModel.ClearSignatureImageCommand}"
+                                    Visibility="{x:Bind ViewModel.HasSignatureImage, Mode=OneWay}">
+                                <FontIcon Glyph="&#xE711;" FontSize="14"/>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Signer Name -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Signer Name" FontSize="13" Foreground="#808080"/>
+                        <TextBox Text="{x:Bind ViewModel.SignerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 PlaceholderText="Enter your name (appears below signature)"/>
+                    </StackPanel>
+
+                    <!-- Include Date -->
+                    <CheckBox Content="Include date" IsChecked="{x:Bind ViewModel.IncludeSignatureDate, Mode=TwoWay}"/>
+
+                    <!-- Page Number -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Page:" VerticalAlignment="Center" Foreground="#808080"/>
+                        <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.SignaturePageNumber, Mode=TwoWay}" Minimum="1"
+                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                    </Grid>
+
+                    <!-- Position Controls -->
+                    <TextBlock Text="Signature Position" FontSize="13" Foreground="#808080" Margin="0,8,0,0"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="50"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="X:" VerticalAlignment="Center" Foreground="#808080"/>
+                        <Slider Grid.Column="1" Value="{x:Bind ViewModel.SignatureX, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="8,0"/>
+                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#606060">
+                            <Run Text="{x:Bind ViewModel.SignatureX, Mode=OneWay}"/><Run Text="%"/>
+                        </TextBlock>
+                        <TextBlock Grid.Column="3" Text="Y:" VerticalAlignment="Center" Foreground="#808080" Margin="16,0,0,0"/>
+                        <Slider Grid.Column="4" Value="{x:Bind ViewModel.SignatureY, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="8,0"/>
+                        <TextBlock Grid.Column="5" VerticalAlignment="Center" Foreground="#606060">
+                            <Run Text="{x:Bind ViewModel.SignatureY, Mode=OneWay}"/><Run Text="%"/>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Signature Width -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="60"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Width:" VerticalAlignment="Center" Foreground="#808080"/>
+                        <Slider Grid.Column="1" Value="{x:Bind ViewModel.SignatureWidth, Mode=TwoWay}" Minimum="50" Maximum="300" Margin="8,0"/>
+                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#606060">
+                            <Run Text="{x:Bind ViewModel.SignatureWidth, Mode=OneWay}"/><Run Text="pt"/>
+                        </TextBlock>
+                    </Grid>
+
+                    <Button Command="{x:Bind ViewModel.ApplySignatureCommand}" Style="{StaticResource AccentButtonStyle}"
+                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xED64;" FontSize="14"/>
+                            <TextBlock Text="Apply Signature"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

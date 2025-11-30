@@ -1,12 +1,12 @@
 using System.Text;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Drawing;
 
 namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfTools : IPdfTools
 {
-    // Note: Full PDF manipulation requires a library like iText7, PdfSharp, or QuestPDF
-    // This implementation provides basic file operations and PDF detection
-
     public async Task<PdfOperationResult> MergePdfsAsync(IEnumerable<string> inputPaths, string outputPath)
     {
         return await Task.Run(() =>
@@ -23,27 +23,22 @@ public class PdfTools : IPdfTools
                     };
                 }
 
-                // Simple concatenation approach - copies binary content
-                // Note: This is a basic approach; proper PDF merging needs a PDF library
-                using var outputStream = File.Create(outputPath);
-
+                using var outputDoc = new PdfDocument();
                 var totalPages = 0;
+
                 foreach (var file in files)
                 {
                     if (!IsValidPdf(file)) continue;
 
-                    var info = GetPdfInfoSync(file);
-                    if (info != null)
-                        totalPages += info.PageCount;
-
-                    // For a proper implementation, use a PDF library
-                    // This copies the first file as base
-                    if (outputStream.Length == 0)
+                    using var inputDoc = PdfReader.Open(file, PdfDocumentOpenMode.Import);
+                    for (int i = 0; i < inputDoc.PageCount; i++)
                     {
-                        using var inputStream = File.OpenRead(file);
-                        inputStream.CopyTo(outputStream);
+                        outputDoc.AddPage(inputDoc.Pages[i]);
+                        totalPages++;
                     }
                 }
+
+                outputDoc.Save(outputPath);
 
                 return new PdfOperationResult
                 {
@@ -79,13 +74,13 @@ public class PdfTools : IPdfTools
                     };
                 }
 
-                var info = GetPdfInfoSync(inputPath);
-                if (info == null || info.PageCount == 0)
+                using var inputDoc = PdfReader.Open(inputPath, PdfDocumentOpenMode.Import);
+                if (inputDoc.PageCount == 0)
                 {
                     return new PdfOperationResult
                     {
                         Success = false,
-                        ErrorMessage = "Could not read PDF"
+                        ErrorMessage = "PDF has no pages"
                     };
                 }
 
@@ -95,25 +90,32 @@ public class PdfTools : IPdfTools
                 var baseName = Path.GetFileNameWithoutExtension(inputPath);
                 var outputFiles = new List<string>();
 
-                // Note: Actual page extraction requires a PDF library
-                // This creates placeholder files to demonstrate the structure
                 if (options.SplitAllPages)
                 {
                     // Split into individual pages
-                    for (int i = 1; i <= info.PageCount; i++)
+                    for (int i = 0; i < inputDoc.PageCount; i++)
                     {
-                        var outPath = Path.Combine(outputDirectory, $"{baseName}_page_{i}.pdf");
-                        File.Copy(inputPath, outPath, true); // Placeholder
+                        using var pageDoc = new PdfDocument();
+                        pageDoc.AddPage(inputDoc.Pages[i]);
+                        var outPath = Path.Combine(outputDirectory, $"{baseName}_page_{i + 1}.pdf");
+                        pageDoc.Save(outPath);
                         outputFiles.Add(outPath);
                     }
                 }
                 else
                 {
                     // Split by range
-                    var startPage = Math.Max(1, options.StartPage);
-                    var endPage = Math.Min(info.PageCount, options.EndPage);
-                    var outPath = Path.Combine(outputDirectory, $"{baseName}_pages_{startPage}-{endPage}.pdf");
-                    File.Copy(inputPath, outPath, true); // Placeholder
+                    var startPage = Math.Max(1, options.StartPage) - 1; // Convert to 0-based
+                    var endPage = Math.Min(inputDoc.PageCount, options.EndPage);
+
+                    using var rangeDoc = new PdfDocument();
+                    for (int i = startPage; i < endPage; i++)
+                    {
+                        rangeDoc.AddPage(inputDoc.Pages[i]);
+                    }
+
+                    var outPath = Path.Combine(outputDirectory, $"{baseName}_pages_{startPage + 1}-{endPage}.pdf");
+                    rangeDoc.Save(outPath);
                     outputFiles.Add(outPath);
                 }
 
@@ -121,7 +123,7 @@ public class PdfTools : IPdfTools
                 {
                     Success = true,
                     OutputPath = outputDirectory,
-                    PagesProcessed = info.PageCount,
+                    PagesProcessed = outputFiles.Count,
                     OutputFiles = outputFiles
                 };
             }
@@ -151,33 +153,114 @@ public class PdfTools : IPdfTools
                     };
                 }
 
-                var info = GetPdfInfoSync(inputPath);
-                if (info == null)
+                using var inputDoc = PdfReader.Open(inputPath, PdfDocumentOpenMode.Import);
+
+                if (startPage < 1 || endPage > inputDoc.PageCount || startPage > endPage)
                 {
                     return new PdfOperationResult
                     {
                         Success = false,
-                        ErrorMessage = "Could not read PDF"
+                        ErrorMessage = $"Invalid page range. PDF has {inputDoc.PageCount} pages."
                     };
                 }
 
-                if (startPage < 1 || endPage > info.PageCount || startPage > endPage)
+                using var outputDoc = new PdfDocument();
+                for (int i = startPage - 1; i < endPage; i++)
                 {
-                    return new PdfOperationResult
-                    {
-                        Success = false,
-                        ErrorMessage = $"Invalid page range. PDF has {info.PageCount} pages."
-                    };
+                    outputDoc.AddPage(inputDoc.Pages[i]);
                 }
 
-                // Note: Actual extraction requires a PDF library
-                File.Copy(inputPath, outputPath, true); // Placeholder
+                outputDoc.Save(outputPath);
 
                 return new PdfOperationResult
                 {
                     Success = true,
                     OutputPath = outputPath,
                     PagesProcessed = endPage - startPage + 1,
+                    OutputFiles = [outputPath]
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddSignatureAsync(string inputPath, string outputPath, SignatureOptions options)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                if (!File.Exists(inputPath) || !IsValidPdf(inputPath))
+                {
+                    return new PdfOperationResult
+                    {
+                        Success = false,
+                        ErrorMessage = "Invalid PDF file"
+                    };
+                }
+
+                using var document = PdfReader.Open(inputPath, PdfDocumentOpenMode.Modify);
+
+                if (options.PageNumber < 1 || options.PageNumber > document.PageCount)
+                {
+                    return new PdfOperationResult
+                    {
+                        Success = false,
+                        ErrorMessage = $"Invalid page number. PDF has {document.PageCount} pages."
+                    };
+                }
+
+                var page = document.Pages[options.PageNumber - 1];
+                using var gfx = XGraphics.FromPdfPage(page);
+
+                // Draw signature image
+                if (options.SignatureImageBytes != null && options.SignatureImageBytes.Length > 0)
+                {
+                    using var ms = new MemoryStream(options.SignatureImageBytes);
+                    var image = XImage.FromStream(ms);
+
+                    // Calculate position (convert from percentage to points)
+                    var x = page.Width.Point * (options.X / 100.0);
+                    var y = page.Height.Point * (options.Y / 100.0);
+
+                    // Scale signature to desired width while maintaining aspect ratio
+                    var targetWidth = options.Width > 0 ? options.Width : 150;
+                    var scale = targetWidth / image.PixelWidth;
+                    var targetHeight = image.PixelHeight * scale;
+
+                    gfx.DrawImage(image, x, y, targetWidth, targetHeight);
+                }
+
+                // Optionally add text (name, date)
+                if (!string.IsNullOrEmpty(options.SignerName))
+                {
+                    var font = new XFont("Arial", 10, XFontStyleEx.Regular);
+                    var textX = page.Width.Point * (options.X / 100.0);
+                    var textY = page.Height.Point * (options.Y / 100.0) + (options.Width > 0 ? options.Width * 0.5 : 75) + 15;
+
+                    gfx.DrawString(options.SignerName, font, XBrushes.Black, textX, textY);
+
+                    if (options.IncludeDate)
+                    {
+                        var dateStr = DateTime.Now.ToString("yyyy-MM-dd");
+                        gfx.DrawString($"Date: {dateStr}", font, XBrushes.Black, textX, textY + 12);
+                    }
+                }
+
+                document.Save(outputPath);
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    OutputPath = outputPath,
+                    PagesProcessed = 1,
                     OutputFiles = [outputPath]
                 };
             }
@@ -229,12 +312,28 @@ public class PdfTools : IPdfTools
                 return null;
 
             var fileInfo = new FileInfo(filePath);
-            var pageCount = EstimatePageCount(filePath);
 
-            // Try to extract metadata from PDF
-            var (title, author) = ExtractBasicMetadata(filePath);
+            // Use PDFsharp to get accurate page count
+            int pageCount;
+            string pdfVersion;
+            string title = "";
+            string author = "";
 
-            var pdfVersion = ExtractPdfVersion(filePath);
+            try
+            {
+                using var doc = PdfReader.Open(filePath, PdfDocumentOpenMode.ReadOnly);
+                pageCount = doc.PageCount;
+                pdfVersion = doc.Version.ToString();
+                title = doc.Info.Title ?? "";
+                author = doc.Info.Author ?? "";
+            }
+            catch
+            {
+                // Fallback to estimation if PDFsharp can't open it
+                pageCount = EstimatePageCount(filePath);
+                pdfVersion = ExtractPdfVersion(filePath);
+                (title, author) = ExtractBasicMetadata(filePath);
+            }
 
             return new PdfInfo
             {
@@ -248,7 +347,7 @@ public class PdfTools : IPdfTools
                 Author = author,
                 CreatedDate = fileInfo.CreationTime,
                 ModifiedDate = fileInfo.LastWriteTime,
-                IsEncrypted = false // Would need PDF parsing to determine
+                IsEncrypted = false
             };
         }
         catch
@@ -261,10 +360,7 @@ public class PdfTools : IPdfTools
     {
         try
         {
-            // Simple heuristic: count /Page objects in PDF
-            // This is approximate - proper counting needs PDF parsing
-            // Use streaming to avoid loading entire file into memory
-            const int bufferSize = 64 * 1024; // 64KB chunks
+            const int bufferSize = 64 * 1024;
             const string searchPattern = "/Type /Page";
             var count = 0;
 
@@ -272,35 +368,14 @@ public class PdfTools : IPdfTools
             using var reader = new StreamReader(stream, Encoding.Latin1, detectEncodingFromByteOrderMarks: false, bufferSize);
 
             var buffer = new char[bufferSize];
-            var overlap = new char[searchPattern.Length];
-            var hasOverlap = false;
             int bytesRead;
 
             while ((bytesRead = reader.Read(buffer, 0, bufferSize)) > 0)
             {
-                // Check overlap from previous chunk
-                if (hasOverlap)
-                {
-                    var combined = new string(overlap) + new string(buffer, 0, Math.Min(searchPattern.Length, bytesRead));
-                    var overlapIndex = 0;
-                    while ((overlapIndex = combined.IndexOf(searchPattern, overlapIndex, StringComparison.Ordinal)) != -1)
-                    {
-                        var nextCharPos = overlapIndex + searchPattern.Length;
-                        var nextChar = nextCharPos < combined.Length ? combined[nextCharPos] : ' ';
-                        if (nextChar != 's' && nextChar != 'S')
-                        {
-                            count++;
-                        }
-                        overlapIndex++;
-                    }
-                }
-
-                // Search current chunk
                 var chunk = new string(buffer, 0, bytesRead);
                 var index = 0;
                 while ((index = chunk.IndexOf(searchPattern, index, StringComparison.Ordinal)) != -1)
                 {
-                    // Make sure it's not /Type /Pages (the parent)
                     var nextCharPos = index + searchPattern.Length;
                     var nextChar = nextCharPos < chunk.Length ? chunk[nextCharPos] : ' ';
                     if (nextChar != 's' && nextChar != 'S')
@@ -308,13 +383,6 @@ public class PdfTools : IPdfTools
                         count++;
                     }
                     index++;
-                }
-
-                // Save overlap for next iteration
-                if (bytesRead >= searchPattern.Length)
-                {
-                    Array.Copy(buffer, bytesRead - searchPattern.Length, overlap, 0, searchPattern.Length);
-                    hasOverlap = true;
                 }
             }
 
@@ -330,37 +398,19 @@ public class PdfTools : IPdfTools
     {
         try
         {
-            // PDF metadata is typically in the first or last portion of the file
-            // Read limited chunks to avoid loading entire file into memory
-            const int chunkSize = 32 * 1024; // 32KB should be enough for metadata
+            const int chunkSize = 32 * 1024;
             var title = "";
             var author = "";
 
             using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var buffer = new byte[chunkSize];
 
-            // Try reading from the beginning (common location for metadata)
             var bytesRead = stream.Read(buffer, 0, chunkSize);
             if (bytesRead > 0)
             {
                 var content = Encoding.Latin1.GetString(buffer, 0, bytesRead);
                 title = ExtractField(content, "/Title");
                 author = ExtractField(content, "/Author");
-            }
-
-            // If not found and file is larger, try reading from near the end
-            if (string.IsNullOrEmpty(title) && string.IsNullOrEmpty(author) && stream.Length > chunkSize * 2)
-            {
-                stream.Seek(-chunkSize, SeekOrigin.End);
-                bytesRead = stream.Read(buffer, 0, chunkSize);
-                if (bytesRead > 0)
-                {
-                    var content = Encoding.Latin1.GetString(buffer, 0, bytesRead);
-                    if (string.IsNullOrEmpty(title))
-                        title = ExtractField(content, "/Title");
-                    if (string.IsNullOrEmpty(author))
-                        author = ExtractField(content, "/Author");
-                }
             }
 
             return (title, author);
@@ -400,11 +450,10 @@ public class PdfTools : IPdfTools
             var header = new byte[10];
             stream.Read(header, 0, 10);
 
-            // PDF header format: %PDF-X.Y
             var headerStr = Encoding.ASCII.GetString(header);
             if (headerStr.StartsWith("%PDF-"))
             {
-                return headerStr.Substring(5, 3).Trim(); // e.g., "1.7"
+                return headerStr.Substring(5, 3).Trim();
             }
         }
         catch { }
@@ -413,12 +462,12 @@ public class PdfTools : IPdfTools
 
     private static string FormatSize(long bytes)
     {
-        if (bytes >= 1_000_000_000)
-            return $"{bytes / 1_000_000_000.0:F2} GB";
-        if (bytes >= 1_000_000)
-            return $"{bytes / 1_000_000.0:F2} MB";
-        if (bytes >= 1_000)
-            return $"{bytes / 1_000.0:F2} KB";
+        if (bytes >= 1_073_741_824)
+            return $"{bytes / 1_073_741_824.0:F2} GB";
+        if (bytes >= 1_048_576)
+            return $"{bytes / 1_048_576.0:F2} MB";
+        if (bytes >= 1024)
+            return $"{bytes / 1024.0:F2} KB";
         return $"{bytes} B";
     }
 }

@@ -62,8 +62,7 @@
                                    Style="{StaticResource CardTitleStyle}"/>
                         <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
                             <Run Text="Total: "/>
-                            <Run Text="{x:Bind ViewModel.TotalSizeMB, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
-                            <Run Text=" MB"/>
+                            <Run Text="{x:Bind ViewModel.FormattedTotalSize, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
                         </TextBlock>
                     </StackPanel>
 
@@ -156,10 +155,8 @@
                             </TextBlock>
 
                             <TextBlock Grid.Column="4" VerticalAlignment="Center"
-                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold">
-                                <Run Text="{Binding SizeMB}"/>
-                                <Run Text=" MB"/>
-                            </TextBlock>
+                                       Text="{Binding FormattedSize}"
+                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"/>
                         </Grid>
                     </Border>
                 </DataTemplate>
