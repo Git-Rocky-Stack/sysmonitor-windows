@@ -51,6 +51,7 @@ public partial class App : Application
                 services.AddSingleton<IPdfTools, PdfTools>();
                 services.AddSingleton<INetworkMapper, NetworkMapper>();
                 services.AddSingleton<IImageTools, ImageTools>();
+                services.AddSingleton<IInstalledProgramsService, InstalledProgramsService>();
 
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
@@ -74,6 +75,7 @@ public partial class App : Application
                 services.AddTransient<PdfToolsViewModel>();
                 services.AddTransient<NetworkMapperViewModel>();
                 services.AddTransient<ImageToolsViewModel>();
+                services.AddTransient<InstalledProgramsViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
