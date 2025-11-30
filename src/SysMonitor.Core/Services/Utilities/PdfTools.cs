@@ -321,7 +321,8 @@ public class PdfTools : IPdfTools
 
             try
             {
-                using var doc = PdfReader.Open(filePath, PdfDocumentOpenMode.ReadOnly);
+                // Use Import mode instead of deprecated ReadOnly
+                using var doc = PdfReader.Open(filePath, PdfDocumentOpenMode.Import);
                 pageCount = doc.PageCount;
                 pdfVersion = doc.Version.ToString();
                 title = doc.Info.Title ?? "";
