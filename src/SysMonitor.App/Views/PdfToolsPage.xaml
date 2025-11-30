@@ -105,7 +105,7 @@
 
             <!-- Split/Extract Mode - File Selection -->
             <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}">
+                    Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
                 <StackPanel Spacing="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
