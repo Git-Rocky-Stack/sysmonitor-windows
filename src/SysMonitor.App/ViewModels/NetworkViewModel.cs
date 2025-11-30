@@ -12,6 +12,7 @@ public partial class NetworkViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // Connection Status
     [ObservableProperty] private bool _isConnected;
@@ -54,6 +55,9 @@ public partial class NetworkViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await RefreshDataAsync();
         StartAutoRefresh();
     }

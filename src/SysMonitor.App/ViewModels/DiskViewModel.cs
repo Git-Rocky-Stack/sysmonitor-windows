@@ -12,6 +12,7 @@ public partial class DiskViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // Disk Collection
     public ObservableCollection<DiskDisplayInfo> Disks { get; } = [];
@@ -38,6 +39,9 @@ public partial class DiskViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await RefreshDataAsync();
         StartAutoRefresh();
     }
