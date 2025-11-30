@@ -6,7 +6,6 @@
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
     x:Name="ContentArea"
-    DataContext="{x:Bind ViewModel}"
     Background="Transparent">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
