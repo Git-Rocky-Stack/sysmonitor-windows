@@ -280,6 +280,134 @@ public class PdfTools : IPdfTools
         return await Task.Run(() => GetPdfInfoSync(filePath));
     }
 
+    public async Task<PdfOperationResult> ConvertToPdfAsync(string inputPath, string outputPath)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                if (!File.Exists(inputPath))
+                {
+                    return new PdfOperationResult
+                    {
+                        Success = false,
+                        ErrorMessage = "Input file not found"
+                    };
+                }
+
+                var extension = Path.GetExtension(inputPath).ToLowerInvariant();
+
+                using var document = new PdfDocument();
+
+                if (IsImageFile(extension))
+                {
+                    // Convert image to PDF
+                    var page = document.AddPage();
+
+                    using var gfx = XGraphics.FromPdfPage(page);
+                    using var image = XImage.FromFile(inputPath);
+
+                    // Calculate scaling to fit the page while maintaining aspect ratio
+                    var pageWidth = page.Width.Point;
+                    var pageHeight = page.Height.Point;
+
+                    var imageWidth = image.PixelWidth;
+                    var imageHeight = image.PixelHeight;
+
+                    // Calculate scale to fit within page with margins
+                    const double margin = 36; // 0.5 inch margins
+                    var availableWidth = pageWidth - (margin * 2);
+                    var availableHeight = pageHeight - (margin * 2);
+
+                    var scaleX = availableWidth / imageWidth;
+                    var scaleY = availableHeight / imageHeight;
+                    var scale = Math.Min(scaleX, scaleY);
+
+                    var scaledWidth = imageWidth * scale;
+                    var scaledHeight = imageHeight * scale;
+
+                    // Center the image on the page
+                    var x = (pageWidth - scaledWidth) / 2;
+                    var y = (pageHeight - scaledHeight) / 2;
+
+                    gfx.DrawImage(image, x, y, scaledWidth, scaledHeight);
+                }
+                else if (extension == ".txt")
+                {
+                    // Convert text file to PDF
+                    var text = File.ReadAllText(inputPath);
+                    var lines = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+                    var font = new XFont("Consolas", 10, XFontStyleEx.Regular);
+                    const double margin = 50;
+                    const double lineHeight = 14;
+
+                    var page = document.AddPage();
+                    var gfx = XGraphics.FromPdfPage(page);
+                    var y = margin;
+                    var maxWidth = page.Width.Point - (margin * 2);
+
+                    foreach (var line in lines)
+                    {
+                        if (y > page.Height.Point - margin)
+                        {
+                            // Add new page
+                            gfx.Dispose();
+                            page = document.AddPage();
+                            gfx = XGraphics.FromPdfPage(page);
+                            y = margin;
+                        }
+
+                        // Truncate long lines
+                        var displayLine = line;
+                        if (!string.IsNullOrEmpty(line))
+                        {
+                            var size = gfx.MeasureString(line, font);
+                            if (size.Width > maxWidth)
+                            {
+                                // Truncate to fit
+                                var ratio = maxWidth / size.Width;
+                                var chars = (int)(line.Length * ratio) - 3;
+                                if (chars > 0)
+                                    displayLine = line.Substring(0, chars) + "...";
+                            }
+                        }
+
+                        gfx.DrawString(displayLine, font, XBrushes.Black, margin, y);
+                        y += lineHeight;
+                    }
+                    gfx.Dispose();
+                }
+                else
+                {
+                    return new PdfOperationResult
+                    {
+                        Success = false,
+                        ErrorMessage = $"Unsupported file format: {extension}"
+                    };
+                }
+
+                document.Save(outputPath);
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    OutputPath = outputPath,
+                    PagesProcessed = document.PageCount,
+                    OutputFiles = [outputPath]
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
     public bool IsValidPdf(string filePath)
     {
         try
@@ -302,6 +430,24 @@ public class PdfTools : IPdfTools
         {
             return false;
         }
+    }
+
+    public bool IsSupportedForConversion(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return false;
+
+        var extension = Path.GetExtension(filePath).ToLowerInvariant();
+        return IsImageFile(extension) || extension == ".txt";
+    }
+
+    private static bool IsImageFile(string extension)
+    {
+        return extension switch
+        {
+            ".jpg" or ".jpeg" or ".png" or ".bmp" or ".gif" or ".tiff" or ".tif" => true,
+            _ => false
+        };
     }
 
     private PdfInfo? GetPdfInfoSync(string filePath)
