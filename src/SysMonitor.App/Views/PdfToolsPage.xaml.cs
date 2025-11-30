@@ -11,5 +11,7 @@ public sealed partial class PdfToolsPage : Page
     {
         ViewModel = App.GetService<PdfToolsViewModel>();
         InitializeComponent();
+        // Set DataContext for {Binding} expressions inside DataTemplates
+        DataContext = ViewModel;
     }
 }

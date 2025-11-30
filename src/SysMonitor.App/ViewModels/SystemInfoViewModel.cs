@@ -10,6 +10,7 @@ public partial class SystemInfoViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // Operating System
     [ObservableProperty] private string _osName = "";
@@ -59,6 +60,9 @@ public partial class SystemInfoViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await RefreshDataAsync();
         StartAutoRefresh();
     }

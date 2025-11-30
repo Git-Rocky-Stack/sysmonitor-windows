@@ -13,6 +13,7 @@ public partial class ProcessesViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
     private readonly object _refreshLock = new();
     private bool _isRefreshing;
 
@@ -32,6 +33,9 @@ public partial class ProcessesViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await RefreshProcessesAsync();
         StartAutoRefresh();
     }
