@@ -1,7 +1,7 @@
 namespace SysMonitor.Core.Services.Utilities;
 
 /// <summary>
-/// Service for PDF operations - merge, split, extract, sign
+/// Service for PDF operations - merge, split, extract, sign, convert
 /// </summary>
 public interface IPdfTools
 {
@@ -9,8 +9,10 @@ public interface IPdfTools
     Task<PdfOperationResult> SplitPdfAsync(string inputPath, string outputDirectory, SplitOptions options);
     Task<PdfOperationResult> ExtractPagesAsync(string inputPath, string outputPath, int startPage, int endPage);
     Task<PdfOperationResult> AddSignatureAsync(string inputPath, string outputPath, SignatureOptions options);
+    Task<PdfOperationResult> ConvertToPdfAsync(string inputPath, string outputPath);
     Task<PdfInfo?> GetPdfInfoAsync(string filePath);
     bool IsValidPdf(string filePath);
+    bool IsSupportedForConversion(string filePath);
 }
 
 /// <summary>
