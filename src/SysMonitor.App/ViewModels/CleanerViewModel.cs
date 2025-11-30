@@ -67,14 +67,25 @@ public partial class CleanerViewModel : ObservableObject
         try
         {
             var selected = ScanResults.Where(r => r.IsSelected).ToList();
-            var tempItems = selected.Where(r => r.Category != CleanerCategory.BrowserCache);
-            var browserItems = selected.Where(r => r.Category == CleanerCategory.BrowserCache);
+            var tempItems = selected.Where(r => r.Category != CleanerCategory.BrowserCache).ToList();
+            var browserItems = selected.Where(r => r.Category == CleanerCategory.BrowserCache).ToList();
 
             var result1 = await _tempFileCleaner.CleanAsync(tempItems);
             var result2 = await _browserCacheCleaner.CleanAsync(browserItems);
 
+            var totalFiles = result1.FilesDeleted + result2.FilesDeleted;
+            var totalErrors = result1.ErrorCount + result2.ErrorCount;
             CleanedMB = result1.MBCleaned + result2.MBCleaned;
-            StatusMessage = $"Cleaned {CleanedMB:F1} MB successfully!";
+
+            // Show comprehensive status with error info
+            if (totalErrors > 0)
+            {
+                StatusMessage = $"Cleaned {CleanedMB:F1} MB ({totalFiles:N0} files). {totalErrors:N0} files skipped (locked/in use).";
+            }
+            else
+            {
+                StatusMessage = $"Cleaned {CleanedMB:F1} MB ({totalFiles:N0} files) successfully!";
+            }
 
             await ScanAsync();
         }
