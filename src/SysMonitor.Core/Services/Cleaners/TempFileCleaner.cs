@@ -72,7 +72,7 @@ public class TempFileCleaner : ITempFileCleaner
                 try
                 {
                     if (!Directory.Exists(path)) continue;
-                    var (size, count) = GetDirectorySize(path);
+                    var (size, count) = GetDirectorySize(path, category);
                     if (size > 0)
                     {
                         results.Add(new CleanerScanResult
@@ -165,6 +165,28 @@ public class TempFileCleaner : ITempFileCleaner
                                 fileInfo.LastWriteTime > DateTime.Now.AddDays(-1))
                                 continue;
 
+                            // Skip thumbnail database files that are often locked by Explorer
+                            if (item.Category == CleanerCategory.Thumbnails)
+                            {
+                                var fileName = fileInfo.Name.ToLowerInvariant();
+                                if (fileName.StartsWith("thumbcache_") && fileName.EndsWith(".db"))
+                                    continue; // These are locked by Explorer
+                                if (fileName == "iconcache_idx.db" || fileName.StartsWith("iconcache_"))
+                                    continue;
+                            }
+
+                            // Skip very recent temp files (might be in active use)
+                            if ((item.Category == CleanerCategory.UserTemp ||
+                                 item.Category == CleanerCategory.WindowsTemp) &&
+                                fileInfo.LastAccessTime > DateTime.Now.AddMinutes(-5))
+                                continue;
+
+                            // Try to remove read-only attribute if set
+                            if (fileInfo.IsReadOnly)
+                            {
+                                fileInfo.IsReadOnly = false;
+                            }
+
                             fileInfo.Delete();
                             result.BytesCleaned += size;
                             result.FilesDeleted++;
@@ -211,7 +233,7 @@ public class TempFileCleaner : ITempFileCleaner
         return results.Sum(r => r.SizeBytes);
     }
 
-    private static (long size, int count) GetDirectorySize(string path)
+    private static (long size, int count) GetDirectorySize(string path, CleanerCategory? category = null)
     {
         long size = 0;
         int count = 0;
@@ -221,7 +243,18 @@ public class TempFileCleaner : ITempFileCleaner
             {
                 try
                 {
-                    size += new FileInfo(file).Length;
+                    var fileInfo = new FileInfo(file);
+
+                    // Skip thumbnail database files that can't be cleaned
+                    if (category == CleanerCategory.Thumbnails)
+                    {
+                        var fileName = fileInfo.Name.ToLowerInvariant();
+                        if ((fileName.StartsWith("thumbcache_") && fileName.EndsWith(".db")) ||
+                            fileName.StartsWith("iconcache_"))
+                            continue;
+                    }
+
+                    size += fileInfo.Length;
                     count++;
                 }
                 catch { }
