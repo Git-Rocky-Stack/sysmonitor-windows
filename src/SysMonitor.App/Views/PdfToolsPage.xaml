@@ -223,9 +223,40 @@
                 <StackPanel Spacing="16">
                     <TextBlock Text="Add Signature" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
 
-                    <!-- Signature Image Selection -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Signature Image (optional)" FontSize="13" Foreground="#808080"/>
+                    <!-- Signature Type Selection -->
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <RadioButton Content="Draw Signature" GroupName="SignatureType"
+                                     IsChecked="{x:Bind ViewModel.IsDrawSignature, Mode=TwoWay}"/>
+                        <RadioButton Content="Upload Image" GroupName="SignatureType"
+                                     IsChecked="{x:Bind ViewModel.IsUploadSignature, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <!-- Draw Signature Canvas -->
+                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsDrawSignature, Mode=OneWay}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Draw your signature below" FontSize="13" Foreground="#808080"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button Click="ClearInkCanvas_Click" ToolTipService.ToolTip="Clear Canvas">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="12"/>
+                                        <TextBlock Text="Clear"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                        <Border Background="White" CornerRadius="6" Height="150" BorderBrush="#303030" BorderThickness="1">
+                            <InkCanvas x:Name="SignatureInkCanvas"/>
+                        </Border>
+                        <TextBlock Text="Use mouse or touch to draw" FontSize="11" Foreground="#606060" FontStyle="Italic"/>
+                    </StackPanel>
+
+                    <!-- Upload Signature Image -->
+                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsUploadSignature, Mode=OneWay}">
+                        <TextBlock Text="Signature Image" FontSize="13" Foreground="#808080"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
