@@ -1,12 +1,14 @@
 using Microsoft.Graphics.Canvas;
 using Microsoft.UI;
-using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using SysMonitor.App.ViewModels;
 using Windows.Foundation;
+using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
-using Windows.UI.Input.Inking;
 
 namespace SysMonitor.App.Views;
 
@@ -14,68 +16,133 @@ public sealed partial class PdfToolsPage : Page
 {
     public PdfToolsViewModel ViewModel { get; }
 
+    private bool _isDrawing;
+    private Point _lastPoint;
+    private readonly List<Line> _drawnLines = new();
+
     public PdfToolsPage()
     {
         ViewModel = App.GetService<PdfToolsViewModel>();
         InitializeComponent();
         // Set DataContext for {Binding} expressions inside DataTemplates
         DataContext = ViewModel;
-
-        // Initialize InkCanvas when loaded
-        Loaded += PdfToolsPage_Loaded;
     }
 
-    private void PdfToolsPage_Loaded(object sender, RoutedEventArgs e)
+    private void SignatureCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        InitializeInkCanvas();
+        _isDrawing = true;
+        _lastPoint = e.GetCurrentPoint(SignatureCanvas).Position;
+        SignatureCanvas.CapturePointer(e.Pointer);
+        e.Handled = true;
     }
 
-    private void InitializeInkCanvas()
+    private void SignatureCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        // Configure the InkCanvas for mouse and touch input
-        var inkPresenter = SignatureInkCanvas.InkPresenter;
+        if (!_isDrawing) return;
 
-        // Enable mouse and touch input (pen is enabled by default)
-        inkPresenter.InputDeviceTypes = CoreInputDeviceTypes.Mouse |
-                                        CoreInputDeviceTypes.Touch |
-                                        CoreInputDeviceTypes.Pen;
+        var currentPoint = e.GetCurrentPoint(SignatureCanvas).Position;
 
-        // Set default drawing attributes for signature
-        var drawingAttributes = inkPresenter.CopyDefaultDrawingAttributes();
-        drawingAttributes.Color = Colors.Black;
-        drawingAttributes.Size = new Size(2, 2);
-        drawingAttributes.IgnorePressure = false;
-        drawingAttributes.FitToCurve = true;
-        inkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
+        // Draw a line from last point to current point
+        var line = new Line
+        {
+            X1 = _lastPoint.X,
+            Y1 = _lastPoint.Y,
+            X2 = currentPoint.X,
+            Y2 = currentPoint.Y,
+            Stroke = new SolidColorBrush(Colors.Black),
+            StrokeThickness = 2,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round
+        };
 
-        // Update ViewModel when strokes change
-        inkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
-        inkPresenter.StrokesErased += InkPresenter_StrokesErased;
+        SignatureCanvas.Children.Add(line);
+        _drawnLines.Add(line);
+        _lastPoint = currentPoint;
+        e.Handled = true;
+
+        // Update ViewModel that we have a drawn signature
+        ViewModel.SetDrawnSignatureBytes(Array.Empty<byte>()); // Placeholder until capture
     }
 
-    private async void InkPresenter_StrokesCollected(InkPresenter sender, InkStrokesCollectedEventArgs args)
+    private async void SignatureCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        await CaptureSignatureToViewModelAsync();
+        if (!_isDrawing) return;
+
+        _isDrawing = false;
+        SignatureCanvas.ReleasePointerCapture(e.Pointer);
+        e.Handled = true;
+
+        // Capture the signature when pointer is released
+        if (_drawnLines.Count > 0)
+        {
+            await CaptureSignatureAsync();
+        }
     }
 
-    private async void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
-    {
-        await CaptureSignatureToViewModelAsync();
-    }
-
-    private async Task CaptureSignatureToViewModelAsync()
+    private async Task CaptureSignatureAsync()
     {
         try
         {
-            var strokes = SignatureInkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-            if (strokes.Count == 0)
+            if (_drawnLines.Count == 0)
             {
                 ViewModel.SetDrawnSignatureBytes(null);
                 return;
             }
 
-            // Render strokes to PNG bytes
-            var bytes = await RenderInkToPngAsync();
+            // Calculate bounds of the drawing
+            double minX = double.MaxValue, minY = double.MaxValue;
+            double maxX = double.MinValue, maxY = double.MinValue;
+
+            foreach (var line in _drawnLines)
+            {
+                minX = Math.Min(minX, Math.Min(line.X1, line.X2));
+                minY = Math.Min(minY, Math.Min(line.Y1, line.Y2));
+                maxX = Math.Max(maxX, Math.Max(line.X1, line.X2));
+                maxY = Math.Max(maxY, Math.Max(line.Y1, line.Y2));
+            }
+
+            // Add padding
+            const int padding = 10;
+            var width = (int)(maxX - minX) + (padding * 2);
+            var height = (int)(maxY - minY) + (padding * 2);
+
+            if (width <= padding * 2 || height <= padding * 2)
+            {
+                ViewModel.SetDrawnSignatureBytes(null);
+                return;
+            }
+
+            // Use Win2D to render the signature
+            using var device = CanvasDevice.GetSharedDevice();
+            using var renderTarget = new CanvasRenderTarget(device, width, height, 96);
+
+            using (var session = renderTarget.CreateDrawingSession())
+            {
+                // Transparent background
+                session.Clear(Colors.Transparent);
+
+                // Draw each line with offset
+                foreach (var line in _drawnLines)
+                {
+                    var x1 = (float)(line.X1 - minX + padding);
+                    var y1 = (float)(line.Y1 - minY + padding);
+                    var x2 = (float)(line.X2 - minX + padding);
+                    var y2 = (float)(line.Y2 - minY + padding);
+
+                    session.DrawLine(x1, y1, x2, y2, Colors.Black, 2);
+                }
+            }
+
+            // Save to PNG bytes
+            using var stream = new InMemoryRandomAccessStream();
+            await renderTarget.SaveAsync(stream, CanvasBitmapFileFormat.Png);
+
+            // Convert to byte array
+            var reader = new DataReader(stream.GetInputStreamAt(0));
+            var bytes = new byte[stream.Size];
+            await reader.LoadAsync((uint)stream.Size);
+            reader.ReadBytes(bytes);
+
             ViewModel.SetDrawnSignatureBytes(bytes);
         }
         catch
@@ -84,76 +151,14 @@ public sealed partial class PdfToolsPage : Page
         }
     }
 
-    private async Task<byte[]?> RenderInkToPngAsync()
-    {
-        var strokeContainer = SignatureInkCanvas.InkPresenter.StrokeContainer;
-        var strokes = strokeContainer.GetStrokes();
-
-        if (strokes.Count == 0)
-            return null;
-
-        // Get the bounding box of all strokes
-        var bounds = strokeContainer.BoundingRect;
-        if (bounds.Width == 0 || bounds.Height == 0)
-            return null;
-
-        // Add some padding
-        const int padding = 10;
-        var width = (int)bounds.Width + (padding * 2);
-        var height = (int)bounds.Height + (padding * 2);
-
-        // Create a CanvasDevice for rendering
-        using var device = CanvasDevice.GetSharedDevice();
-        using var renderTarget = new CanvasRenderTarget(device, width, height, 96);
-
-        // Draw strokes onto the render target with transparent background
-        using (var session = renderTarget.CreateDrawingSession())
-        {
-            // Transparent background
-            session.Clear(Colors.Transparent);
-
-            // Offset strokes to account for bounding box position and padding
-            var offsetX = (float)(-bounds.X + padding);
-            var offsetY = (float)(-bounds.Y + padding);
-
-            // Draw each stroke
-            foreach (var stroke in strokes)
-            {
-                var inkPoints = stroke.GetInkPoints();
-                if (inkPoints.Count < 2) continue;
-
-                var points = new List<System.Numerics.Vector2>();
-                foreach (var point in inkPoints)
-                {
-                    points.Add(new System.Numerics.Vector2(
-                        (float)point.Position.X + offsetX,
-                        (float)point.Position.Y + offsetY));
-                }
-
-                // Draw as connected lines
-                for (int i = 0; i < points.Count - 1; i++)
-                {
-                    session.DrawLine(points[i], points[i + 1], Colors.Black, 2);
-                }
-            }
-        }
-
-        // Save to PNG bytes
-        using var stream = new InMemoryRandomAccessStream();
-        await renderTarget.SaveAsync(stream, CanvasBitmapFileFormat.Png);
-
-        // Convert to byte array
-        var reader = new DataReader(stream.GetInputStreamAt(0));
-        var bytes = new byte[stream.Size];
-        await reader.LoadAsync((uint)stream.Size);
-        reader.ReadBytes(bytes);
-
-        return bytes;
-    }
-
     private void ClearInkCanvas_Click(object sender, RoutedEventArgs e)
     {
-        SignatureInkCanvas.InkPresenter.StrokeContainer.Clear();
+        // Clear all drawn lines from the canvas
+        foreach (var line in _drawnLines)
+        {
+            SignatureCanvas.Children.Remove(line);
+        }
+        _drawnLines.Clear();
         ViewModel.ClearDrawnSignature();
     }
 }
