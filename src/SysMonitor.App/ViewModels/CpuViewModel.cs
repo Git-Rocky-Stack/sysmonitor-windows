@@ -11,6 +11,7 @@ public partial class CpuViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // CPU Identification
     [ObservableProperty] private string _cpuName = "Loading...";
@@ -53,6 +54,9 @@ public partial class CpuViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await RefreshDataAsync();
         StartAutoRefresh();
     }
