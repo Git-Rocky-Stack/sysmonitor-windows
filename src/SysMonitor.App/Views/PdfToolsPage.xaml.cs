@@ -196,7 +196,7 @@ public sealed partial class PdfToolsPage : Page
             {
                 FontFamily = "Segoe Script",
                 FontSize = 48,
-                FontWeight = Windows.UI.Text.FontWeights.Normal,
+                FontWeight = Microsoft.UI.Text.FontWeights.Normal,
                 WordWrapping = CanvasWordWrapping.NoWrap
             };
 
