@@ -46,6 +46,8 @@ public partial class PdfToolsViewModel : ObservableObject
 
     // Signature Settings
     [ObservableProperty] private bool _isSignatureMode;
+    [ObservableProperty] private bool _isDrawSignature = true; // Default to draw mode
+    [ObservableProperty] private bool _isUploadSignature;
     [ObservableProperty] private string _signerName = "";
     [ObservableProperty] private bool _includeSignatureDate = true;
     [ObservableProperty] private int _signaturePageNumber = 1;
@@ -55,6 +57,10 @@ public partial class PdfToolsViewModel : ObservableObject
     [ObservableProperty] private bool _hasSignatureImage;
     [ObservableProperty] private string _signatureImageName = "";
     private byte[]? _signatureImageBytes;
+
+    // InkCanvas drawn signature bytes (set from code-behind)
+    private byte[]? _drawnSignatureBytes;
+    [ObservableProperty] private bool _hasDrawnSignature;
 
     // Progress & Status
     [ObservableProperty] private bool _isProcessing;
@@ -454,6 +460,24 @@ public partial class PdfToolsViewModel : ObservableObject
         HasSignatureImage = false;
     }
 
+    /// <summary>
+    /// Set the drawn signature bytes from InkCanvas (called from code-behind)
+    /// </summary>
+    public void SetDrawnSignatureBytes(byte[]? bytes)
+    {
+        _drawnSignatureBytes = bytes;
+        HasDrawnSignature = bytes != null && bytes.Length > 0;
+    }
+
+    /// <summary>
+    /// Clear the drawn signature
+    /// </summary>
+    public void ClearDrawnSignature()
+    {
+        _drawnSignatureBytes = null;
+        HasDrawnSignature = false;
+    }
+
     [RelayCommand]
     private async Task ApplySignatureAsync()
     {
@@ -463,10 +487,25 @@ public partial class PdfToolsViewModel : ObservableObject
             return;
         }
 
-        if (!HasSignatureImage && string.IsNullOrWhiteSpace(SignerName))
+        // Determine which signature source to use
+        byte[]? signatureBytes = null;
+        if (IsDrawSignature)
         {
-            ShowAction("Add a signature image or enter your name", false);
-            return;
+            signatureBytes = _drawnSignatureBytes;
+            if (signatureBytes == null && string.IsNullOrWhiteSpace(SignerName))
+            {
+                ShowAction("Draw a signature or enter your name", false);
+                return;
+            }
+        }
+        else // Upload mode
+        {
+            signatureBytes = _signatureImageBytes;
+            if (signatureBytes == null && string.IsNullOrWhiteSpace(SignerName))
+            {
+                ShowAction("Upload a signature image or enter your name", false);
+                return;
+            }
         }
 
         if (SignaturePageNumber < 1 || SignaturePageNumber > PageCount)
@@ -500,7 +539,7 @@ public partial class PdfToolsViewModel : ObservableObject
 
             var options = new SignatureOptions
             {
-                SignatureImageBytes = _signatureImageBytes,
+                SignatureImageBytes = signatureBytes,
                 PageNumber = SignaturePageNumber,
                 X = SignatureX,
                 Y = SignatureY,
