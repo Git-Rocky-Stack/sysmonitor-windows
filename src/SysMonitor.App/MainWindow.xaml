@@ -105,6 +105,11 @@
                         <FontIcon Glyph="&#xE7E8;" Foreground="{StaticResource PrimaryBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Installed Programs" Tag="InstalledPrograms">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE74C;" Foreground="{StaticResource PrimaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItem Content="Disk Analyzer" Tag="DiskAnalyzer">
                     <NavigationViewItem.Icon>
