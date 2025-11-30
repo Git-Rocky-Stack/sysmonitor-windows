@@ -30,6 +30,7 @@
             <converters:ScanButtonIconConverter x:Key="ScanButtonIconConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <converters:StringToBrushConverter x:Key="StringToBrushConverter"/>
+            <converters:StringToColorConverter x:Key="StringToColorConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
