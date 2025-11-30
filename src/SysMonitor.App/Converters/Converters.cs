@@ -256,3 +256,32 @@ public class StringToBrushConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+public class StringToColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is string colorString && !string.IsNullOrEmpty(colorString))
+        {
+            try
+            {
+                // Parse hex color string like "#4CAF50" or "#F44336"
+                colorString = colorString.TrimStart('#');
+                if (colorString.Length == 6)
+                {
+                    var r = System.Convert.ToByte(colorString.Substring(0, 2), 16);
+                    var g = System.Convert.ToByte(colorString.Substring(2, 2), 16);
+                    var b = System.Convert.ToByte(colorString.Substring(4, 2), 16);
+                    return Windows.UI.Color.FromArgb(255, r, g, b);
+                }
+            }
+            catch { }
+        }
+        return Windows.UI.Color.FromArgb(255, 128, 128, 128); // Default gray
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
