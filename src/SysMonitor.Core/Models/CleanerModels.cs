@@ -34,6 +34,23 @@ public class CleanerScanResult
     public CleanerRiskLevel RiskLevel { get; set; }
 
     public double SizeMB => SizeBytes / (1024.0 * 1024);
+
+    /// <summary>
+    /// Formatted size string that avoids scientific notation for small values.
+    /// </summary>
+    public string FormattedSize
+    {
+        get
+        {
+            if (SizeBytes >= 1_073_741_824)
+                return $"{SizeBytes / 1_073_741_824.0:F2} GB";
+            if (SizeBytes >= 1_048_576)
+                return $"{SizeBytes / 1_048_576.0:F2} MB";
+            if (SizeBytes >= 1024)
+                return $"{SizeBytes / 1024.0:F2} KB";
+            return $"{SizeBytes} B";
+        }
+    }
 }
 
 public enum CleanerCategory
