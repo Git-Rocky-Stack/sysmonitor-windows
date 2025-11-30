@@ -13,6 +13,7 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // Physical Memory
     [ObservableProperty] private double _totalGB;
@@ -49,6 +50,9 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await RefreshDataAsync();
         StartAutoRefresh();
     }

@@ -1,26 +1,52 @@
 using SysMonitor.Core.Models;
+using System.Runtime.InteropServices;
 
 namespace SysMonitor.Core.Services.Cleaners;
 
 public class TempFileCleaner : ITempFileCleaner
 {
+    // Shell API for emptying Recycle Bin
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SHEmptyRecycleBin(IntPtr hwnd, string? pszRootPath, uint dwFlags);
+
+    private const uint SHERB_NOCONFIRMATION = 0x00000001;
+    private const uint SHERB_NOPROGRESSUI = 0x00000002;
+    private const uint SHERB_NOSOUND = 0x00000004;
+
     private readonly Dictionary<CleanerCategory, (string Path, string Description)> _cleanLocations;
 
     public TempFileCleaner()
     {
-        var windowsTemp = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Temp");
+        var windowsPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+        var windowsTemp = Path.Combine(windowsPath, "Temp");
         var userTemp = Path.GetTempPath();
-        var prefetch = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Prefetch");
-        var thumbnails = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Microsoft", "Windows", "Explorer");
+        var prefetch = Path.Combine(windowsPath, "Prefetch");
+        var thumbnails = Path.Combine(localAppData, "Microsoft", "Windows", "Explorer");
+
+        // Windows Update Cache
+        var softwareDistribution = Path.Combine(windowsPath, "SoftwareDistribution", "Download");
+
+        // Memory Dumps
+        var memoryDumps = Path.Combine(windowsPath, "Minidump");
+
+        // Error Reports
+        var errorReports = Path.Combine(localAppData, "Microsoft", "Windows", "WER", "ReportArchive");
+
+        // Log Files
+        var windowsLogs = Path.Combine(windowsPath, "Logs");
 
         _cleanLocations = new Dictionary<CleanerCategory, (string, string)>
         {
             { CleanerCategory.WindowsTemp, (windowsTemp, "Windows Temporary Files") },
             { CleanerCategory.UserTemp, (userTemp, "User Temporary Files") },
             { CleanerCategory.Prefetch, (prefetch, "Windows Prefetch Files") },
-            { CleanerCategory.Thumbnails, (thumbnails, "Thumbnail Cache") }
+            { CleanerCategory.Thumbnails, (thumbnails, "Thumbnail Cache") },
+            { CleanerCategory.WindowsUpdateCache, (softwareDistribution, "Windows Update Cache") },
+            { CleanerCategory.MemoryDumps, (memoryDumps, "Memory Dump Files") },
+            { CleanerCategory.ErrorReports, (errorReports, "Windows Error Reports") },
+            { CleanerCategory.LogFiles, (windowsLogs, "Windows Log Files") }
         };
     }
 
@@ -44,47 +70,52 @@ public class TempFileCleaner : ITempFileCleaner
                             Path = path,
                             SizeBytes = size,
                             FileCount = count,
-                            IsSelected = true,
-                            RiskLevel = CleanerRiskLevel.Safe,
-                            Description = $"{count} files, {size / (1024.0 * 1024):F1} MB"
+                            IsSelected = category != CleanerCategory.LogFiles, // Don't auto-select logs
+                            RiskLevel = GetRiskLevel(category),
+                            Description = $"{count} files, {FormatSize(size)}"
                         });
                     }
                 }
                 catch { }
             }
 
-            // Recycle Bin
+            // Recycle Bin - scan all drives
             try
             {
-                var recycleBin = new DirectoryInfo(@"C:\$Recycle.Bin");
-                if (recycleBin.Exists)
+                long totalSize = 0;
+                int totalCount = 0;
+
+                foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady && d.DriveType == DriveType.Fixed))
                 {
-                    long size = 0;
-                    int count = 0;
-                    foreach (var dir in recycleBin.GetDirectories())
+                    var recycleBinPath = Path.Combine(drive.Name, "$Recycle.Bin");
+                    if (Directory.Exists(recycleBinPath))
                     {
-                        try
+                        foreach (var dir in Directory.GetDirectories(recycleBinPath))
                         {
-                            var (s, c) = GetDirectorySize(dir.FullName);
-                            size += s;
-                            count += c;
+                            try
+                            {
+                                var (s, c) = GetDirectorySize(dir);
+                                totalSize += s;
+                                totalCount += c;
+                            }
+                            catch { }
                         }
-                        catch { }
                     }
-                    if (size > 0)
+                }
+
+                if (totalSize > 0)
+                {
+                    results.Add(new CleanerScanResult
                     {
-                        results.Add(new CleanerScanResult
-                        {
-                            Category = CleanerCategory.RecycleBin,
-                            Name = "Recycle Bin",
-                            Path = recycleBin.FullName,
-                            SizeBytes = size,
-                            FileCount = count,
-                            IsSelected = true,
-                            RiskLevel = CleanerRiskLevel.Safe,
-                            Description = $"{count} items, {size / (1024.0 * 1024):F1} MB"
-                        });
-                    }
+                        Category = CleanerCategory.RecycleBin,
+                        Name = "Recycle Bin",
+                        Path = "All Drives",
+                        SizeBytes = totalSize,
+                        FileCount = totalCount,
+                        IsSelected = true,
+                        RiskLevel = CleanerRiskLevel.Safe,
+                        Description = $"{totalCount} items, {FormatSize(totalSize)}"
+                    });
                 }
             }
             catch { }
@@ -106,24 +137,46 @@ public class TempFileCleaner : ITempFileCleaner
                 {
                     if (item.Category == CleanerCategory.RecycleBin)
                     {
-                        // Use shell API to empty recycle bin
-                        result.BytesCleaned += item.SizeBytes;
-                        result.FilesDeleted += item.FileCount;
+                        // Actually empty the Recycle Bin using Shell API
+                        var hr = SHEmptyRecycleBin(IntPtr.Zero, null,
+                            SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
+
+                        // S_OK (0) or S_FALSE (1) both indicate success
+                        // E_UNEXPECTED (-2147418113) means bin is already empty
+                        if (hr == 0 || hr == 1 || hr == -2147418113)
+                        {
+                            result.BytesCleaned += item.SizeBytes;
+                            result.FilesDeleted += item.FileCount;
+                        }
+                        else
+                        {
+                            result.ErrorCount++;
+                            result.Errors.Add($"Recycle Bin: Failed to empty (error code: {hr})");
+                        }
                         continue;
                     }
 
                     if (!Directory.Exists(item.Path)) continue;
 
-                    foreach (var file in Directory.GetFiles(item.Path, "*", SearchOption.AllDirectories))
+                    // Clean files in directory
+                    foreach (var file in Directory.EnumerateFiles(item.Path, "*", SearchOption.AllDirectories))
                     {
                         try
                         {
                             var fileInfo = new FileInfo(file);
                             var size = fileInfo.Length;
+
+                            // Skip files that are too new (might be in use)
+                            if (item.Category == CleanerCategory.LogFiles &&
+                                fileInfo.LastWriteTime > DateTime.Now.AddDays(-1))
+                                continue;
+
                             fileInfo.Delete();
                             result.BytesCleaned += size;
                             result.FilesDeleted++;
                         }
+                        catch (UnauthorizedAccessException) { result.ErrorCount++; }
+                        catch (IOException) { result.ErrorCount++; }
                         catch (Exception ex)
                         {
                             result.ErrorCount++;
@@ -131,14 +184,18 @@ public class TempFileCleaner : ITempFileCleaner
                         }
                     }
 
-                    foreach (var dir in Directory.GetDirectories(item.Path))
+                    // Clean empty subdirectories (except for root cleanup folders)
+                    if (item.Category != CleanerCategory.LogFiles)
                     {
-                        try
+                        foreach (var dir in Directory.GetDirectories(item.Path))
                         {
-                            Directory.Delete(dir, true);
-                            result.FoldersDeleted++;
+                            try
+                            {
+                                Directory.Delete(dir, true);
+                                result.FoldersDeleted++;
+                            }
+                            catch { }
                         }
-                        catch { }
                     }
                 }
                 catch (Exception ex)
@@ -149,7 +206,7 @@ public class TempFileCleaner : ITempFileCleaner
             }
 
             result.Duration = DateTime.Now - startTime;
-            result.Success = result.ErrorCount == 0;
+            result.Success = result.ErrorCount < result.FilesDeleted; // Allow some errors
             return result;
         });
     }
@@ -166,7 +223,7 @@ public class TempFileCleaner : ITempFileCleaner
         int count = 0;
         try
         {
-            foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+            foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
             {
                 try
                 {
@@ -178,5 +235,33 @@ public class TempFileCleaner : ITempFileCleaner
         }
         catch { }
         return (size, count);
+    }
+
+    private static CleanerRiskLevel GetRiskLevel(CleanerCategory category)
+    {
+        return category switch
+        {
+            CleanerCategory.UserTemp => CleanerRiskLevel.Safe,
+            CleanerCategory.WindowsTemp => CleanerRiskLevel.Safe,
+            CleanerCategory.Thumbnails => CleanerRiskLevel.Safe,
+            CleanerCategory.RecycleBin => CleanerRiskLevel.Safe,
+            CleanerCategory.Prefetch => CleanerRiskLevel.Low,
+            CleanerCategory.WindowsUpdateCache => CleanerRiskLevel.Low,
+            CleanerCategory.MemoryDumps => CleanerRiskLevel.Safe,
+            CleanerCategory.ErrorReports => CleanerRiskLevel.Safe,
+            CleanerCategory.LogFiles => CleanerRiskLevel.Low,
+            _ => CleanerRiskLevel.Low
+        };
+    }
+
+    private static string FormatSize(long bytes)
+    {
+        if (bytes >= 1_073_741_824)
+            return $"{bytes / 1_073_741_824.0:F2} GB";
+        if (bytes >= 1_048_576)
+            return $"{bytes / 1_048_576.0:F2} MB";
+        if (bytes >= 1024)
+            return $"{bytes / 1024.0:F2} KB";
+        return $"{bytes} B";
     }
 }

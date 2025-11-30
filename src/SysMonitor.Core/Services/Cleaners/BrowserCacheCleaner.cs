@@ -4,21 +4,42 @@ namespace SysMonitor.Core.Services.Cleaners;
 
 public class BrowserCacheCleaner : IBrowserCacheCleaner
 {
-    private record BrowserProfile(string Name, string CachePath);
+    private record BrowserCacheLocation(string BrowserName, string DisplayName, string CachePath);
 
-    private readonly List<BrowserProfile> _browserProfiles;
+    private readonly List<BrowserCacheLocation> _cacheLocations;
 
     public BrowserCacheCleaner()
     {
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-        _browserProfiles = new List<BrowserProfile>
+        _cacheLocations = new List<BrowserCacheLocation>
         {
-            new("Google Chrome", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Cache")),
-            new("Microsoft Edge", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Cache")),
-            new("Mozilla Firefox", Path.Combine(localAppData, "Mozilla", "Firefox", "Profiles")),
-            new("Brave", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "Cache")),
-            new("Opera", Path.Combine(localAppData, "Opera Software", "Opera Stable", "Cache"))
+            // Google Chrome
+            new("Chrome", "Google Chrome Cache", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Cache")),
+            new("Chrome", "Google Chrome Code Cache", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Code Cache")),
+            new("Chrome", "Google Chrome GPU Cache", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "GPUCache")),
+            new("Chrome", "Google Chrome Service Worker", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Service Worker", "CacheStorage")),
+
+            // Microsoft Edge
+            new("Edge", "Microsoft Edge Cache", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Cache")),
+            new("Edge", "Microsoft Edge Code Cache", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Code Cache")),
+            new("Edge", "Microsoft Edge GPU Cache", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "GPUCache")),
+            new("Edge", "Microsoft Edge Service Worker", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Service Worker", "CacheStorage")),
+
+            // Firefox (handled specially in scan)
+            new("Firefox", "Mozilla Firefox Cache", Path.Combine(localAppData, "Mozilla", "Firefox", "Profiles")),
+
+            // Brave
+            new("Brave", "Brave Cache", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "Cache")),
+            new("Brave", "Brave Code Cache", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "Code Cache")),
+            new("Brave", "Brave GPU Cache", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "GPUCache")),
+
+            // Opera
+            new("Opera", "Opera Cache", Path.Combine(localAppData, "Opera Software", "Opera Stable", "Cache")),
+            new("Opera", "Opera Code Cache", Path.Combine(localAppData, "Opera Software", "Opera Stable", "Code Cache")),
+
+            // Vivaldi
+            new("Vivaldi", "Vivaldi Cache", Path.Combine(localAppData, "Vivaldi", "User Data", "Default", "Cache")),
         };
     }
 
@@ -27,33 +48,36 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
         return await Task.Run(() =>
         {
             var results = new List<CleanerScanResult>();
-            foreach (var browser in _browserProfiles)
+            var processedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var location in _cacheLocations)
             {
                 try
                 {
-                    if (!Directory.Exists(browser.CachePath)) continue;
-
-                    // For Firefox, need to find profile folder
-                    if (browser.Name == "Mozilla Firefox")
+                    // Firefox needs special handling for profile folders
+                    if (location.BrowserName == "Firefox")
                     {
-                        foreach (var profile in Directory.GetDirectories(browser.CachePath))
+                        if (!Directory.Exists(location.CachePath)) continue;
+
+                        foreach (var profile in Directory.GetDirectories(location.CachePath))
                         {
                             var cachePath = Path.Combine(profile, "cache2");
-                            if (Directory.Exists(cachePath))
+                            if (Directory.Exists(cachePath) && !processedPaths.Contains(cachePath))
                             {
+                                processedPaths.Add(cachePath);
                                 var (size, count) = GetDirectorySize(cachePath);
                                 if (size > 0)
                                 {
                                     results.Add(new CleanerScanResult
                                     {
                                         Category = CleanerCategory.BrowserCache,
-                                        Name = $"{browser.Name} Cache",
+                                        Name = location.DisplayName,
                                         Path = cachePath,
                                         SizeBytes = size,
                                         FileCount = count,
                                         IsSelected = true,
                                         RiskLevel = CleanerRiskLevel.Safe,
-                                        Description = $"{count} files, {size / (1024.0 * 1024):F1} MB"
+                                        Description = $"{count} files, {FormatSize(size)}"
                                     });
                                 }
                             }
@@ -61,26 +85,32 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                     }
                     else
                     {
-                        var (size, count) = GetDirectorySize(browser.CachePath);
+                        if (!Directory.Exists(location.CachePath)) continue;
+                        if (processedPaths.Contains(location.CachePath)) continue;
+
+                        processedPaths.Add(location.CachePath);
+                        var (size, count) = GetDirectorySize(location.CachePath);
                         if (size > 0)
                         {
                             results.Add(new CleanerScanResult
                             {
                                 Category = CleanerCategory.BrowserCache,
-                                Name = $"{browser.Name} Cache",
-                                Path = browser.CachePath,
+                                Name = location.DisplayName,
+                                Path = location.CachePath,
                                 SizeBytes = size,
                                 FileCount = count,
                                 IsSelected = true,
                                 RiskLevel = CleanerRiskLevel.Safe,
-                                Description = $"{count} files, {size / (1024.0 * 1024):F1} MB"
+                                Description = $"{count} files, {FormatSize(size)}"
                             });
                         }
                     }
                 }
                 catch { }
             }
-            return results;
+
+            // Group results by browser for better organization
+            return results.OrderBy(r => r.Name).ToList();
         });
     }
 
@@ -97,7 +127,7 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                 {
                     if (!Directory.Exists(item.Path)) continue;
 
-                    foreach (var file in Directory.GetFiles(item.Path, "*", SearchOption.AllDirectories))
+                    foreach (var file in Directory.EnumerateFiles(item.Path, "*", SearchOption.AllDirectories))
                     {
                         try
                         {
@@ -107,11 +137,24 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                             result.BytesCleaned += size;
                             result.FilesDeleted++;
                         }
+                        catch (UnauthorizedAccessException) { result.ErrorCount++; }
+                        catch (IOException) { result.ErrorCount++; }
                         catch (Exception ex)
                         {
                             result.ErrorCount++;
                             result.Errors.Add($"{file}: {ex.Message}");
                         }
+                    }
+
+                    // Try to delete empty subdirectories
+                    foreach (var dir in Directory.GetDirectories(item.Path))
+                    {
+                        try
+                        {
+                            Directory.Delete(dir, true);
+                            result.FoldersDeleted++;
+                        }
+                        catch { }
                     }
                 }
                 catch (Exception ex)
@@ -122,7 +165,7 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
             }
 
             result.Duration = DateTime.Now - startTime;
-            result.Success = result.ErrorCount == 0;
+            result.Success = result.ErrorCount < result.FilesDeleted; // Allow some errors
             return result;
         });
     }
@@ -133,7 +176,7 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
         int count = 0;
         try
         {
-            foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+            foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
             {
                 try
                 {
@@ -145,5 +188,16 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
         }
         catch { }
         return (size, count);
+    }
+
+    private static string FormatSize(long bytes)
+    {
+        if (bytes >= 1_073_741_824)
+            return $"{bytes / 1_073_741_824.0:F2} GB";
+        if (bytes >= 1_048_576)
+            return $"{bytes / 1_048_576.0:F2} MB";
+        if (bytes >= 1024)
+            return $"{bytes / 1024.0:F2} KB";
+        return $"{bytes} B";
     }
 }

@@ -263,19 +263,59 @@ public class PdfTools : IPdfTools
         {
             // Simple heuristic: count /Page objects in PDF
             // This is approximate - proper counting needs PDF parsing
-            var content = File.ReadAllText(filePath, Encoding.Latin1);
+            // Use streaming to avoid loading entire file into memory
+            const int bufferSize = 64 * 1024; // 64KB chunks
+            const string searchPattern = "/Type /Page";
             var count = 0;
-            var index = 0;
 
-            while ((index = content.IndexOf("/Type /Page", index, StringComparison.Ordinal)) != -1)
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize);
+            using var reader = new StreamReader(stream, Encoding.Latin1, detectEncodingFromByteOrderMarks: false, bufferSize);
+
+            var buffer = new char[bufferSize];
+            var overlap = new char[searchPattern.Length];
+            var hasOverlap = false;
+            int bytesRead;
+
+            while ((bytesRead = reader.Read(buffer, 0, bufferSize)) > 0)
             {
-                // Make sure it's not /Type /Pages (the parent)
-                var nextChar = index + 11 < content.Length ? content[index + 11] : ' ';
-                if (nextChar != 's' && nextChar != 'S')
+                // Check overlap from previous chunk
+                if (hasOverlap)
                 {
-                    count++;
+                    var combined = new string(overlap) + new string(buffer, 0, Math.Min(searchPattern.Length, bytesRead));
+                    var overlapIndex = 0;
+                    while ((overlapIndex = combined.IndexOf(searchPattern, overlapIndex, StringComparison.Ordinal)) != -1)
+                    {
+                        var nextCharPos = overlapIndex + searchPattern.Length;
+                        var nextChar = nextCharPos < combined.Length ? combined[nextCharPos] : ' ';
+                        if (nextChar != 's' && nextChar != 'S')
+                        {
+                            count++;
+                        }
+                        overlapIndex++;
+                    }
                 }
-                index++;
+
+                // Search current chunk
+                var chunk = new string(buffer, 0, bytesRead);
+                var index = 0;
+                while ((index = chunk.IndexOf(searchPattern, index, StringComparison.Ordinal)) != -1)
+                {
+                    // Make sure it's not /Type /Pages (the parent)
+                    var nextCharPos = index + searchPattern.Length;
+                    var nextChar = nextCharPos < chunk.Length ? chunk[nextCharPos] : ' ';
+                    if (nextChar != 's' && nextChar != 'S')
+                    {
+                        count++;
+                    }
+                    index++;
+                }
+
+                // Save overlap for next iteration
+                if (bytesRead >= searchPattern.Length)
+                {
+                    Array.Copy(buffer, bytesRead - searchPattern.Length, overlap, 0, searchPattern.Length);
+                    hasOverlap = true;
+                }
             }
 
             return Math.Max(count, 1);
@@ -290,10 +330,38 @@ public class PdfTools : IPdfTools
     {
         try
         {
-            var content = File.ReadAllText(filePath, Encoding.Latin1);
+            // PDF metadata is typically in the first or last portion of the file
+            // Read limited chunks to avoid loading entire file into memory
+            const int chunkSize = 32 * 1024; // 32KB should be enough for metadata
+            var title = "";
+            var author = "";
 
-            var title = ExtractField(content, "/Title");
-            var author = ExtractField(content, "/Author");
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var buffer = new byte[chunkSize];
+
+            // Try reading from the beginning (common location for metadata)
+            var bytesRead = stream.Read(buffer, 0, chunkSize);
+            if (bytesRead > 0)
+            {
+                var content = Encoding.Latin1.GetString(buffer, 0, bytesRead);
+                title = ExtractField(content, "/Title");
+                author = ExtractField(content, "/Author");
+            }
+
+            // If not found and file is larger, try reading from near the end
+            if (string.IsNullOrEmpty(title) && string.IsNullOrEmpty(author) && stream.Length > chunkSize * 2)
+            {
+                stream.Seek(-chunkSize, SeekOrigin.End);
+                bytesRead = stream.Read(buffer, 0, chunkSize);
+                if (bytesRead > 0)
+                {
+                    var content = Encoding.Latin1.GetString(buffer, 0, bytesRead);
+                    if (string.IsNullOrEmpty(title))
+                        title = ExtractField(content, "/Title");
+                    if (string.IsNullOrEmpty(author))
+                        author = ExtractField(content, "/Author");
+                }
+            }
 
             return (title, author);
         }
