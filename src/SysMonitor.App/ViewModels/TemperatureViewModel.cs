@@ -11,6 +11,7 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
+    private bool _isInitialized;
 
     // Temperature Collection
     public ObservableCollection<TemperatureDisplayInfo> Temperatures { get; } = [];
@@ -37,6 +38,9 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
 
     public async Task InitializeAsync()
     {
+        if (_isInitialized) return;
+        _isInitialized = true;
+
         await _temperatureMonitor.InitializeAsync();
         await RefreshDataAsync();
         StartAutoRefresh();
