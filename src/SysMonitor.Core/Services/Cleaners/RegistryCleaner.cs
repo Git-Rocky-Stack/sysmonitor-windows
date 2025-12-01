@@ -290,13 +290,10 @@ public class RegistryCleaner : IRegistryCleaner
 
     private void ScanForInvalidCOM(RegistryKey key, string rootName, string keyPath, List<RegistryIssue> issues)
     {
-        // Limit scan to avoid performance issues - check random sample
+        // Scan all COM objects (no sampling - we need consistent results)
         var subKeys = key.GetSubKeyNames();
-        var sampleSize = Math.Min(100, subKeys.Length);
-        var random = new Random();
-        var sample = subKeys.OrderBy(x => random.Next()).Take(sampleSize);
 
-        foreach (var clsid in sample)
+        foreach (var clsid in subKeys)
         {
             try
             {
@@ -328,13 +325,10 @@ public class RegistryCleaner : IRegistryCleaner
 
     private void ScanForInvalidTypeLib(RegistryKey key, string rootName, string keyPath, List<RegistryIssue> issues)
     {
-        // Sample scan for type libraries
+        // Scan all type libraries (no sampling - we need consistent results)
         var subKeys = key.GetSubKeyNames();
-        var sampleSize = Math.Min(50, subKeys.Length);
-        var random = new Random();
-        var sample = subKeys.OrderBy(x => random.Next()).Take(sampleSize);
 
-        foreach (var typeLibId in sample)
+        foreach (var typeLibId in subKeys)
         {
             try
             {
