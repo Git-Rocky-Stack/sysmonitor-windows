@@ -321,7 +321,8 @@
                                 <Canvas x:Name="AnnotationCanvas" Background="Transparent"
                                         PointerPressed="AnnotationCanvas_PointerPressed"
                                         PointerMoved="AnnotationCanvas_PointerMoved"
-                                        PointerReleased="AnnotationCanvas_PointerReleased"/>
+                                        PointerReleased="AnnotationCanvas_PointerReleased"
+                                        DoubleTapped="AnnotationCanvas_DoubleTapped"/>
 
                                 <!-- Drawing Preview (shown while dragging) -->
                                 <Canvas x:Name="PreviewCanvas" Background="Transparent" IsHitTestVisible="False"/>
