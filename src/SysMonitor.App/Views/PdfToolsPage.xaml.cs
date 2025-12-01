@@ -29,6 +29,13 @@ public sealed partial class PdfToolsPage : Page
         DataContext = ViewModel;
     }
 
+    private void OpenPdfEditor_Click(object sender, RoutedEventArgs e)
+    {
+        // Navigate to PDF Editor page
+        var frame = this.Frame;
+        frame?.Navigate(typeof(PdfEditorPage));
+    }
+
     private void SignatureCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         _isDrawing = true;

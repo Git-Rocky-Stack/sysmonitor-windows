@@ -31,6 +31,9 @@
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <converters:StringToBrushConverter x:Key="StringToBrushConverter"/>
             <converters:StringToColorConverter x:Key="StringToColorConverter"/>
+            <converters:BytesToImageConverter x:Key="BytesToImageConverter"/>
+            <converters:GreaterThanOneConverter x:Key="GreaterThanOneConverter"/>
+            <converters:BoolToAccentBrushConverter x:Key="BoolToAccentBrushConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
