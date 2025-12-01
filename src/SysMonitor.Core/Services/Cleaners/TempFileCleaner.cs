@@ -176,9 +176,11 @@ public class TempFileCleaner : ITempFileCleaner
                             }
 
                             // Skip very recent temp files (might be in active use)
+                            // Use LastWriteTime instead of LastAccessTime since antivirus and indexing
+                            // services constantly touch files, making LastAccessTime unreliable
                             if ((item.Category == CleanerCategory.UserTemp ||
                                  item.Category == CleanerCategory.WindowsTemp) &&
-                                fileInfo.LastAccessTime > DateTime.Now.AddMinutes(-5))
+                                fileInfo.LastWriteTime > DateTime.Now.AddMinutes(-5))
                                 continue;
 
                             // Try to remove read-only attribute if set
@@ -260,9 +262,11 @@ public class TempFileCleaner : ITempFileCleaner
                         continue;
 
                     // Skip very recent temp files (matches CleanAsync behavior)
+                    // Use LastWriteTime instead of LastAccessTime since antivirus and indexing
+                    // services constantly touch files, making LastAccessTime unreliable
                     if ((category == CleanerCategory.UserTemp ||
                          category == CleanerCategory.WindowsTemp) &&
-                        fileInfo.LastAccessTime > DateTime.Now.AddMinutes(-5))
+                        fileInfo.LastWriteTime > DateTime.Now.AddMinutes(-5))
                         continue;
 
                     size += fileInfo.Length;
