@@ -1,5 +1,3 @@
-using System.Drawing;
-using System.Drawing.Imaging;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
@@ -8,7 +6,7 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfEditor : IPdfEditor
 {
-    public async Task<PdfDocument?> OpenPdfAsync(string filePath)
+    public async Task<PdfEditorDocument?> OpenPdfAsync(string filePath)
     {
         return await Task.Run(() =>
         {
@@ -19,7 +17,7 @@ public class PdfEditor : IPdfEditor
 
                 using var pdfDoc = PdfReader.Open(filePath, PdfDocumentOpenMode.Import);
 
-                var document = new PdfDocument
+                var document = new PdfEditorDocument
                 {
                     FilePath = filePath,
                     FileName = Path.GetFileName(filePath),
@@ -47,7 +45,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> SavePdfAsync(PdfDocument document, string outputPath)
+    public async Task<PdfOperationResult> SavePdfAsync(PdfEditorDocument document, string outputPath)
     {
         return await Task.Run(() =>
         {
@@ -63,7 +61,7 @@ public class PdfEditor : IPdfEditor
                 }
 
                 using var inputDoc = PdfReader.Open(document.FilePath, PdfDocumentOpenMode.Import);
-                using var outputDoc = new PdfSharp.Pdf.PdfDocument();
+                using var outputDoc = new PdfDocument();
 
                 // Reorder and process pages based on document.Pages
                 foreach (var pageInfo in document.Pages)
@@ -130,38 +128,40 @@ public class PdfEditor : IPdfEditor
                 var width = (int)(page.Width.Point * scale);
                 var height = (int)(page.Height.Point * scale);
 
-                // Create a preview representation
+                // Create a preview representation using PDFsharp XGraphics
                 // Note: Full PDF rendering requires Windows-specific libraries
                 // This creates a simple preview with page info
-                using var bitmap = new Bitmap(Math.Max(width, 200), Math.Max(height, 280));
-                using var graphics = Graphics.FromImage(bitmap);
+                var previewWidth = Math.Max(width, 200);
+                var previewHeight = Math.Max(height, 280);
 
-                graphics.Clear(Color.White);
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                using var image = new XBitmap(previewWidth, previewHeight);
+                using var gfx = XGraphics.FromImage(image);
+
+                // White background
+                gfx.DrawRectangle(XBrushes.White, 0, 0, previewWidth, previewHeight);
 
                 // Draw border
-                using var borderPen = new Pen(Color.LightGray, 1);
-                graphics.DrawRectangle(borderPen, 0, 0, bitmap.Width - 1, bitmap.Height - 1);
+                gfx.DrawRectangle(XPens.LightGray, 0, 0, previewWidth - 1, previewHeight - 1);
 
                 // Draw page number indicator
-                using var font = new Font("Segoe UI", 14, FontStyle.Bold);
-                using var brush = new SolidBrush(Color.FromArgb(100, 0, 0, 0));
+                var font = new XFont("Segoe UI", 14, XFontStyleEx.Bold);
                 var text = $"Page {pageNumber}";
-                var textSize = graphics.MeasureString(text, font);
-                graphics.DrawString(text, font, brush,
-                    (bitmap.Width - textSize.Width) / 2,
-                    (bitmap.Height - textSize.Height) / 2);
+                var textSize = gfx.MeasureString(text, font);
+                gfx.DrawString(text, font, XBrushes.Gray,
+                    (previewWidth - textSize.Width) / 2,
+                    (previewHeight - textSize.Height) / 2);
 
                 // Draw page dimensions
-                using var smallFont = new Font("Segoe UI", 10);
+                var smallFont = new XFont("Segoe UI", 10, XFontStyleEx.Regular);
                 var dimText = $"{(int)page.Width.Point} x {(int)page.Height.Point} pt";
-                var dimSize = graphics.MeasureString(dimText, smallFont);
-                graphics.DrawString(dimText, smallFont, brush,
-                    (bitmap.Width - dimSize.Width) / 2,
-                    (bitmap.Height - textSize.Height) / 2 + textSize.Height + 5);
+                var dimSize = gfx.MeasureString(dimText, smallFont);
+                gfx.DrawString(dimText, smallFont, XBrushes.Gray,
+                    (previewWidth - dimSize.Width) / 2,
+                    (previewHeight + textSize.Height) / 2 + 10);
 
+                // Convert XBitmap to byte array
                 using var ms = new MemoryStream();
-                bitmap.Save(ms, ImageFormat.Png);
+                image.Save(ms, XBitmapFormat.Png);
                 return ms.ToArray();
             }
             catch
@@ -171,7 +171,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> RotatePageAsync(PdfDocument document, int pageNumber, int degrees)
+    public async Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pageNumber, int degrees)
     {
         return await Task.Run(() =>
         {
@@ -210,7 +210,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> DeletePageAsync(PdfDocument document, int pageNumber)
+    public async Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pageNumber)
     {
         return await Task.Run(() =>
         {
@@ -259,7 +259,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> ReorderPagesAsync(PdfDocument document, int[] newOrder)
+    public async Task<PdfOperationResult> ReorderPagesAsync(PdfEditorDocument document, int[] newOrder)
     {
         return await Task.Run(() =>
         {
@@ -304,7 +304,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddTextAnnotationAsync(PdfDocument document, int pageNumber, TextAnnotation annotation)
+    public async Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation)
     {
         return await Task.Run(() =>
         {
@@ -331,7 +331,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddHighlightAsync(PdfDocument document, int pageNumber, HighlightAnnotation highlight)
+    public async Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight)
     {
         return await Task.Run(() =>
         {
@@ -358,7 +358,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddShapeAsync(PdfDocument document, int pageNumber, ShapeAnnotation shape)
+    public async Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape)
     {
         return await Task.Run(() =>
         {
@@ -416,7 +416,7 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, PdfSharp.Pdf.PdfPage page)
+    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, PdfPage page)
     {
         var color = ParseColor(annotation.Color);
 
