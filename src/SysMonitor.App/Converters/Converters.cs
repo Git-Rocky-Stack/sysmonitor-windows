@@ -2,6 +2,8 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Windows.Storage.Streams;
 
 namespace SysMonitor.App.Converters;
 
@@ -278,6 +280,70 @@ public class StringToColorConverter : IValueConverter
             catch { }
         }
         return Windows.UI.Color.FromArgb(255, 128, 128, 128); // Default gray
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class BytesToImageConverter : IValueConverter
+{
+    public object? Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is byte[] bytes && bytes.Length > 0)
+        {
+            try
+            {
+                var image = new BitmapImage();
+                using var stream = new InMemoryRandomAccessStream();
+                using var writer = new DataWriter(stream.GetOutputStreamAt(0));
+                writer.WriteBytes(bytes);
+                _ = writer.StoreAsync().GetResults();
+                _ = stream.FlushAsync().GetResults();
+                stream.Seek(0);
+                _ = image.SetSourceAsync(stream).GetResults();
+                return image;
+            }
+            catch { }
+        }
+        return null;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class GreaterThanOneConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is int intValue)
+            return intValue > 1;
+        if (value is double doubleValue)
+            return doubleValue > 1;
+        return false;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class BoolToAccentBrushConverter : IValueConverter
+{
+    private static readonly SolidColorBrush AccentBrush = new(Windows.UI.Color.FromArgb(48, 244, 67, 54)); // #30F44336
+    private static readonly SolidColorBrush TransparentBrush = new(Colors.Transparent);
+
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isActive && isActive)
+            return AccentBrush;
+        return TransparentBrush;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

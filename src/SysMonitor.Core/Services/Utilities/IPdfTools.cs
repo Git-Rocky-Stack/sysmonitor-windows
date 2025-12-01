@@ -119,3 +119,78 @@ public record NetworkScanProgress
     public NetworkDeviceInfo? FoundDevice { get; init; }
     public double PercentComplete => TotalCount > 0 ? ScannedCount * 100.0 / TotalCount : 0;
 }
+
+// PDF Editor Interface
+public interface IPdfEditor
+{
+    Task<PdfDocument?> OpenPdfAsync(string filePath);
+    Task<PdfOperationResult> SavePdfAsync(PdfDocument document, string outputPath);
+    Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0);
+    Task<PdfOperationResult> RotatePageAsync(PdfDocument document, int pageNumber, int degrees);
+    Task<PdfOperationResult> DeletePageAsync(PdfDocument document, int pageNumber);
+    Task<PdfOperationResult> ReorderPagesAsync(PdfDocument document, int[] newOrder);
+    Task<PdfOperationResult> AddTextAnnotationAsync(PdfDocument document, int pageNumber, TextAnnotation annotation);
+    Task<PdfOperationResult> AddHighlightAsync(PdfDocument document, int pageNumber, HighlightAnnotation highlight);
+    Task<PdfOperationResult> AddShapeAsync(PdfDocument document, int pageNumber, ShapeAnnotation shape);
+    Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
+}
+
+// PDF Editor Models
+public class PdfDocument
+{
+    public string FilePath { get; set; } = "";
+    public string FileName { get; set; } = "";
+    public List<PdfPageInfo> Pages { get; set; } = [];
+    public bool IsModified { get; set; }
+    public List<PdfAnnotation> Annotations { get; set; } = [];
+}
+
+public class PdfPageInfo
+{
+    public int PageNumber { get; set; }
+    public double Width { get; set; }
+    public double Height { get; set; }
+    public int Rotation { get; set; }
+    public byte[]? ThumbnailBytes { get; set; }
+}
+
+public abstract class PdfAnnotation
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public int PageNumber { get; set; }
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Width { get; set; }
+    public double Height { get; set; }
+    public string Color { get; set; } = "#FF0000";
+}
+
+public class TextAnnotation : PdfAnnotation
+{
+    public string Text { get; set; } = "";
+    public double FontSize { get; set; } = 12;
+    public string FontFamily { get; set; } = "Arial";
+    public bool IsBold { get; set; }
+    public bool IsItalic { get; set; }
+}
+
+public class HighlightAnnotation : PdfAnnotation
+{
+    public double Opacity { get; set; } = 0.3;
+}
+
+public class ShapeAnnotation : PdfAnnotation
+{
+    public ShapeType Type { get; set; }
+    public double StrokeWidth { get; set; } = 2;
+    public bool IsFilled { get; set; }
+    public string? FillColor { get; set; }
+}
+
+public enum ShapeType
+{
+    Rectangle,
+    Ellipse,
+    Line,
+    Arrow
+}
