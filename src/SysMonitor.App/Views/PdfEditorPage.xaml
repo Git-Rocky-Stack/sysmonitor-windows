@@ -116,7 +116,7 @@
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
                                 <Border Background="White" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
                                         CornerRadius="4">
-                                    <Image Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay, Converter={StaticResource BytesToImageConverter}}"
+                                    <Image Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay}"
                                            Stretch="None"/>
                                 </Border>
                             </Grid>
