@@ -11,7 +11,7 @@ namespace SysMonitor.App.ViewModels;
 public partial class PdfEditorViewModel : ObservableObject
 {
     private readonly IPdfEditor _pdfEditor;
-    private readonly DispatcherQueue _dispatcherQueue;
+    private DispatcherQueue? _dispatcherQueue;
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetActiveWindow();
@@ -69,7 +69,6 @@ public partial class PdfEditorViewModel : ObservableObject
     {
         _pdfEditor = pdfEditor;
         // Defer DispatcherQueue retrieval until first use - it may not be available during DI construction
-        _dispatcherQueue = null!;
     }
 
     private DispatcherQueue GetDispatcher()
