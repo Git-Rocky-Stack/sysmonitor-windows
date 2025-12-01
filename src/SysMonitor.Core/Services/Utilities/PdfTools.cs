@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
@@ -297,6 +299,20 @@ public class PdfTools : IPdfTools
 
                 var extension = Path.GetExtension(inputPath).ToLowerInvariant();
 
+                // Handle Office documents via COM automation
+                if (IsWordFile(extension))
+                {
+                    return ConvertWordToPdf(inputPath, outputPath);
+                }
+                else if (IsExcelFile(extension))
+                {
+                    return ConvertExcelToPdf(inputPath, outputPath);
+                }
+                else if (IsPowerPointFile(extension))
+                {
+                    return ConvertPowerPointToPdf(inputPath, outputPath);
+                }
+
                 using var document = new PdfDocument();
 
                 if (IsImageFile(extension))
@@ -332,9 +348,10 @@ public class PdfTools : IPdfTools
 
                     gfx.DrawImage(image, x, y, scaledWidth, scaledHeight);
                 }
-                else if (extension == ".txt")
+                else if (extension == ".txt" || extension == ".csv" || extension == ".xml" ||
+                         extension == ".json" || extension == ".md" || extension == ".log")
                 {
-                    // Convert text file to PDF
+                    // Convert text-based files to PDF
                     var text = File.ReadAllText(inputPath);
                     var lines = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
@@ -408,6 +425,189 @@ public class PdfTools : IPdfTools
         });
     }
 
+    private static PdfOperationResult ConvertWordToPdf(string inputPath, string outputPath)
+    {
+        dynamic? wordApp = null;
+        dynamic? doc = null;
+
+        try
+        {
+            var wordType = Type.GetTypeFromProgID("Word.Application");
+            if (wordType == null)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = "Microsoft Word is not installed. Please install Microsoft Office to convert Word documents."
+                };
+            }
+
+            wordApp = Activator.CreateInstance(wordType);
+            wordApp.Visible = false;
+            wordApp.DisplayAlerts = 0; // wdAlertsNone
+
+            doc = wordApp.Documents.Open(inputPath, ReadOnly: true);
+            doc.SaveAs2(outputPath, 17); // 17 = wdFormatPDF
+
+            return new PdfOperationResult
+            {
+                Success = true,
+                OutputPath = outputPath,
+                PagesProcessed = 1,
+                OutputFiles = [outputPath]
+            };
+        }
+        catch (COMException ex)
+        {
+            return new PdfOperationResult
+            {
+                Success = false,
+                ErrorMessage = $"Word conversion failed: {ex.Message}. Ensure Microsoft Word is installed."
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PdfOperationResult
+            {
+                Success = false,
+                ErrorMessage = $"Conversion failed: {ex.Message}"
+            };
+        }
+        finally
+        {
+            try
+            {
+                doc?.Close(false);
+                wordApp?.Quit();
+                if (doc != null) Marshal.ReleaseComObject(doc);
+                if (wordApp != null) Marshal.ReleaseComObject(wordApp);
+            }
+            catch { }
+        }
+    }
+
+    private static PdfOperationResult ConvertExcelToPdf(string inputPath, string outputPath)
+    {
+        dynamic? excelApp = null;
+        dynamic? workbook = null;
+
+        try
+        {
+            var excelType = Type.GetTypeFromProgID("Excel.Application");
+            if (excelType == null)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = "Microsoft Excel is not installed. Please install Microsoft Office to convert Excel documents."
+                };
+            }
+
+            excelApp = Activator.CreateInstance(excelType);
+            excelApp.Visible = false;
+            excelApp.DisplayAlerts = false;
+
+            workbook = excelApp.Workbooks.Open(inputPath, ReadOnly: true);
+            workbook.ExportAsFixedFormat(0, outputPath); // 0 = xlTypePDF
+
+            return new PdfOperationResult
+            {
+                Success = true,
+                OutputPath = outputPath,
+                PagesProcessed = 1,
+                OutputFiles = [outputPath]
+            };
+        }
+        catch (COMException ex)
+        {
+            return new PdfOperationResult
+            {
+                Success = false,
+                ErrorMessage = $"Excel conversion failed: {ex.Message}. Ensure Microsoft Excel is installed."
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PdfOperationResult
+            {
+                Success = false,
+                ErrorMessage = $"Conversion failed: {ex.Message}"
+            };
+        }
+        finally
+        {
+            try
+            {
+                workbook?.Close(false);
+                excelApp?.Quit();
+                if (workbook != null) Marshal.ReleaseComObject(workbook);
+                if (excelApp != null) Marshal.ReleaseComObject(excelApp);
+            }
+            catch { }
+        }
+    }
+
+    private static PdfOperationResult ConvertPowerPointToPdf(string inputPath, string outputPath)
+    {
+        dynamic? pptApp = null;
+        dynamic? presentation = null;
+
+        try
+        {
+            var pptType = Type.GetTypeFromProgID("PowerPoint.Application");
+            if (pptType == null)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = "Microsoft PowerPoint is not installed. Please install Microsoft Office to convert PowerPoint documents."
+                };
+            }
+
+            pptApp = Activator.CreateInstance(pptType);
+            // PowerPoint must be visible to work properly in some cases
+            // pptApp.Visible = true; // Commented out to keep it hidden if possible
+
+            presentation = pptApp.Presentations.Open(inputPath, ReadOnly: true, Untitled: false, WithWindow: false);
+            presentation.SaveAs(outputPath, 32); // 32 = ppSaveAsPDF
+
+            return new PdfOperationResult
+            {
+                Success = true,
+                OutputPath = outputPath,
+                PagesProcessed = 1,
+                OutputFiles = [outputPath]
+            };
+        }
+        catch (COMException ex)
+        {
+            return new PdfOperationResult
+            {
+                Success = false,
+                ErrorMessage = $"PowerPoint conversion failed: {ex.Message}. Ensure Microsoft PowerPoint is installed."
+            };
+        }
+        catch (Exception ex)
+        {
+            return new PdfOperationResult
+            {
+                Success = false,
+                ErrorMessage = $"Conversion failed: {ex.Message}"
+            };
+        }
+        finally
+        {
+            try
+            {
+                presentation?.Close();
+                pptApp?.Quit();
+                if (presentation != null) Marshal.ReleaseComObject(presentation);
+                if (pptApp != null) Marshal.ReleaseComObject(pptApp);
+            }
+            catch { }
+        }
+    }
+
     public bool IsValidPdf(string filePath)
     {
         try
@@ -438,14 +638,51 @@ public class PdfTools : IPdfTools
             return false;
 
         var extension = Path.GetExtension(filePath).ToLowerInvariant();
-        return IsImageFile(extension) || extension == ".txt";
+        return IsImageFile(extension) || IsTextFile(extension) ||
+               IsWordFile(extension) || IsExcelFile(extension) || IsPowerPointFile(extension);
     }
 
     private static bool IsImageFile(string extension)
     {
         return extension switch
         {
-            ".jpg" or ".jpeg" or ".png" or ".bmp" or ".gif" or ".tiff" or ".tif" => true,
+            ".jpg" or ".jpeg" or ".png" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".webp" or ".ico" => true,
+            _ => false
+        };
+    }
+
+    private static bool IsTextFile(string extension)
+    {
+        return extension switch
+        {
+            ".txt" or ".csv" or ".xml" or ".json" or ".md" or ".log" or ".rtf" or ".html" or ".htm" => true,
+            _ => false
+        };
+    }
+
+    private static bool IsWordFile(string extension)
+    {
+        return extension switch
+        {
+            ".doc" or ".docx" or ".odt" or ".rtf" => true,
+            _ => false
+        };
+    }
+
+    private static bool IsExcelFile(string extension)
+    {
+        return extension switch
+        {
+            ".xls" or ".xlsx" or ".xlsm" or ".ods" => true,
+            _ => false
+        };
+    }
+
+    private static bool IsPowerPointFile(string extension)
+    {
+        return extension switch
+        {
+            ".ppt" or ".pptx" or ".odp" => true,
             _ => false
         };
     }
