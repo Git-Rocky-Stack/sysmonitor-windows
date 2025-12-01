@@ -1,11 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Media.Imaging;
 using SysMonitor.App.Helpers;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Storage.Pickers;
+using Windows.Storage.Streams;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -27,7 +30,7 @@ public partial class PdfEditorViewModel : ObservableObject
     // Current Page
     [ObservableProperty] private int _currentPageNumber = 1;
     [ObservableProperty] private PdfPageInfo? _currentPage;
-    [ObservableProperty] private byte[]? _currentPageImage;
+    [ObservableProperty] private BitmapImage? _currentPageImage;
 
     // Page Thumbnails
     public ObservableCollection<PageThumbnailViewModel> PageThumbnails { get; } = [];
@@ -186,7 +189,21 @@ public partial class PdfEditorViewModel : ObservableObject
 
             // Load page image for viewer using Windows PDF renderer
             var imageBytes = await PdfPageRenderer.RenderPageAsync(CurrentDocument.FilePath, CurrentPageNumber, ZoomLevel);
-            CurrentPageImage = imageBytes;
+
+            // Convert bytes to BitmapImage on UI thread (avoids converter deadlock)
+            if (imageBytes != null && imageBytes.Length > 0)
+            {
+                var bitmap = new BitmapImage();
+                using var stream = new InMemoryRandomAccessStream();
+                await stream.WriteAsync(imageBytes.AsBuffer());
+                stream.Seek(0);
+                await bitmap.SetSourceAsync(stream);
+                CurrentPageImage = bitmap;
+            }
+            else
+            {
+                CurrentPageImage = null;
+            }
 
             // Load annotations for this page
             LoadAnnotationsForCurrentPage();
