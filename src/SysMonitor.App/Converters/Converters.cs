@@ -300,10 +300,10 @@ public class BytesToImageConverter : IValueConverter
                 using var stream = new InMemoryRandomAccessStream();
                 using var writer = new DataWriter(stream.GetOutputStreamAt(0));
                 writer.WriteBytes(bytes);
-                _ = writer.StoreAsync().GetResults();
-                _ = stream.FlushAsync().GetResults();
+                writer.StoreAsync().AsTask().GetAwaiter().GetResult();
+                writer.FlushAsync().AsTask().GetAwaiter().GetResult();
                 stream.Seek(0);
-                _ = image.SetSourceAsync(stream).GetResults();
+                image.SetSourceAsync(stream).AsTask().GetAwaiter().GetResult();
                 return image;
             }
             catch { }
