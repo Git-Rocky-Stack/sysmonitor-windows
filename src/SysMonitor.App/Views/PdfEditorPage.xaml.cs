@@ -21,16 +21,41 @@ public sealed partial class PdfEditorPage : Page
     private Shape? _previewShape;
     private TextBox? _textInputBox;
 
+    // Annotation selection state
+    private readonly Dictionary<Guid, FrameworkElement> _annotationElements = new();
+    private Guid? _selectedAnnotationId;
+    private Border? _selectionBorder;
+
     public PdfEditorPage()
     {
         ViewModel = App.GetService<PdfEditorViewModel>();
         InitializeComponent();
+
+        // Handle keyboard events for delete
+        this.KeyDown += Page_KeyDown;
+    }
+
+    // Keyboard handler for Delete key
+    private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Delete && _selectedAnnotationId.HasValue)
+        {
+            DeleteSelectedAnnotation();
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            ClearSelection();
+            e.Handled = true;
+        }
     }
 
     // File Operations
     private async void OpenPdf_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.OpenPdfCommand.ExecuteAsync(null);
+        // Clear annotations when opening new document
+        ClearAnnotationVisuals();
     }
 
     private async void SavePdf_Click(object sender, RoutedEventArgs e)
@@ -42,11 +67,13 @@ public sealed partial class PdfEditorPage : Page
     private async void PreviousPage_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.PreviousPageCommand.ExecuteAsync(null);
+        ClearAnnotationVisuals();
     }
 
     private async void NextPage_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.NextPageCommand.ExecuteAsync(null);
+        ClearAnnotationVisuals();
     }
 
     private async void PageThumbnail_Click(object sender, RoutedEventArgs e)
@@ -54,6 +81,7 @@ public sealed partial class PdfEditorPage : Page
         if (sender is Button button && button.Tag is int pageNumber)
         {
             await ViewModel.NavigateToPageCommand.ExecuteAsync(pageNumber);
+            ClearAnnotationVisuals();
         }
     }
 
@@ -89,14 +117,21 @@ public sealed partial class PdfEditorPage : Page
         if (sender is Button button && button.Tag is string toolName)
         {
             ViewModel.SelectToolCommand.Execute(toolName);
-            UpdateCursor();
         }
     }
 
     private void ClearAnnotations_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ClearAnnotationsCommand.Execute(null);
+        ClearAnnotationVisuals();
+    }
+
+    private void ClearAnnotationVisuals()
+    {
         AnnotationCanvas.Children.Clear();
+        _annotationElements.Clear();
+        _selectedAnnotationId = null;
+        _selectionBorder = null;
     }
 
     // Formatting Controls
@@ -165,15 +200,24 @@ public sealed partial class PdfEditorPage : Page
     // Annotation Canvas Event Handlers
     private void AnnotationCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        if (ViewModel.SelectedTool == AnnotationTool.None)
-            return;
-
         var point = e.GetCurrentPoint(AnnotationCanvas);
         _startPoint = point.Position;
+
+        // In Select mode, try to select an annotation at click position
+        if (ViewModel.SelectedTool == AnnotationTool.None)
+        {
+            TrySelectAnnotationAt(_startPoint);
+            e.Handled = true;
+            return;
+        }
+
         _isDrawing = true;
 
         // Capture pointer for tracking
         AnnotationCanvas.CapturePointer(e.Pointer);
+
+        // Clear any current selection when starting to draw
+        ClearSelection();
 
         // Handle text tool differently - show text input immediately
         if (ViewModel.SelectedTool == AnnotationTool.Text)
@@ -230,11 +274,115 @@ public sealed partial class PdfEditorPage : Page
         e.Handled = true;
     }
 
-    private void UpdateCursor()
+    private void TrySelectAnnotationAt(Point position)
     {
-        // In WinUI 3, cursor changes are handled via ProtectedCursor on the element
-        // For now, we'll use the PointerEntered event approach if needed
-        // The visual feedback from tool selection buttons is sufficient
+        ClearSelection();
+
+        // Find annotation at click position (iterate in reverse to get topmost)
+        foreach (var kvp in _annotationElements.Reverse())
+        {
+            var element = kvp.Value;
+            var left = Canvas.GetLeft(element);
+            var top = Canvas.GetTop(element);
+            var right = left + element.ActualWidth;
+            var bottom = top + element.ActualHeight;
+
+            // For lines, use a larger hit area
+            if (element is Line line)
+            {
+                var lineLeft = left + Math.Min(0, line.X2);
+                var lineTop = top + Math.Min(0, line.Y2);
+                var lineRight = left + Math.Max(0, line.X2);
+                var lineBottom = top + Math.Max(0, line.Y2);
+
+                // Expand hit area for lines
+                if (position.X >= lineLeft - 10 && position.X <= lineRight + 10 &&
+                    position.Y >= lineTop - 10 && position.Y <= lineBottom + 10)
+                {
+                    SelectAnnotation(kvp.Key, element);
+                    return;
+                }
+            }
+            else if (position.X >= left && position.X <= right &&
+                     position.Y >= top && position.Y <= bottom)
+            {
+                SelectAnnotation(kvp.Key, element);
+                return;
+            }
+        }
+    }
+
+    private void SelectAnnotation(Guid id, FrameworkElement element)
+    {
+        _selectedAnnotationId = id;
+
+        // Create selection border
+        var left = Canvas.GetLeft(element);
+        var top = Canvas.GetTop(element);
+
+        double width, height;
+        if (element is Line line)
+        {
+            width = Math.Abs(line.X2) + 10;
+            height = Math.Abs(line.Y2) + 10;
+            left -= 5;
+            top -= 5;
+        }
+        else
+        {
+            width = element.ActualWidth + 4;
+            height = element.ActualHeight + 4;
+            left -= 2;
+            top -= 2;
+        }
+
+        _selectionBorder = new Border
+        {
+            Width = width,
+            Height = height,
+            BorderBrush = new SolidColorBrush(Color.FromArgb(255, 0, 120, 215)),
+            BorderThickness = new Thickness(2),
+            Background = new SolidColorBrush(Color.FromArgb(30, 0, 120, 215)),
+            IsHitTestVisible = false
+        };
+
+        Canvas.SetLeft(_selectionBorder, left);
+        Canvas.SetTop(_selectionBorder, top);
+        AnnotationCanvas.Children.Add(_selectionBorder);
+    }
+
+    private void ClearSelection()
+    {
+        if (_selectionBorder != null)
+        {
+            AnnotationCanvas.Children.Remove(_selectionBorder);
+            _selectionBorder = null;
+        }
+        _selectedAnnotationId = null;
+    }
+
+    private void DeleteSelectedAnnotation()
+    {
+        if (!_selectedAnnotationId.HasValue)
+            return;
+
+        var id = _selectedAnnotationId.Value;
+
+        // Remove visual element
+        if (_annotationElements.TryGetValue(id, out var element))
+        {
+            AnnotationCanvas.Children.Remove(element);
+            _annotationElements.Remove(id);
+        }
+
+        // Remove from ViewModel
+        var annotation = ViewModel.CurrentAnnotations.FirstOrDefault(a => a.Id == id);
+        if (annotation != null)
+        {
+            ViewModel.RemoveAnnotationCommand.Execute(annotation);
+        }
+
+        ClearSelection();
     }
 
     private Shape? CreatePreviewShape()
@@ -246,7 +394,7 @@ public sealed partial class PdfEditorPage : Page
         {
             AnnotationTool.Highlight => new Rectangle
             {
-                Fill = new SolidColorBrush(Color.FromArgb(80, 255, 255, 0)), // Semi-transparent yellow
+                Fill = new SolidColorBrush(Color.FromArgb(80, 255, 255, 0)),
                 Stroke = null,
                 Width = 0,
                 Height = 0
@@ -290,7 +438,6 @@ public sealed partial class PdfEditorPage : Page
         switch (_previewShape)
         {
             case Rectangle rect:
-                // Handle negative dimensions
                 var rectX = width >= 0 ? _startPoint.X : currentPoint.X;
                 var rectY = height >= 0 ? _startPoint.Y : currentPoint.Y;
                 Canvas.SetLeft(rect, rectX);
@@ -329,22 +476,25 @@ public sealed partial class PdfEditorPage : Page
             height = Math.Max(height, 20);
         }
 
-        // Add annotation to the view model
-        await ViewModel.AddAnnotationAtPositionAsync(x, y, width, height);
+        // Add annotation to the view model and get the ID
+        var annotationId = await ViewModel.AddAnnotationAtPositionAsync(x, y, width, height);
 
-        // Add visual annotation to the canvas
-        AddVisualAnnotation(x, y, width, height);
+        // Add visual annotation to the canvas if ID was returned
+        if (annotationId.HasValue)
+        {
+            AddVisualAnnotation(annotationId.Value, x, y, width, height);
+        }
     }
 
-    private void AddVisualAnnotation(double x, double y, double width, double height)
+    private void AddVisualAnnotation(Guid id, double x, double y, double width, double height)
     {
         var color = ParseColor(ViewModel.AnnotationColor);
-        Shape? shape = null;
+        FrameworkElement? element = null;
 
         switch (ViewModel.SelectedTool)
         {
             case AnnotationTool.Highlight:
-                shape = new Rectangle
+                element = new Rectangle
                 {
                     Fill = new SolidColorBrush(Color.FromArgb(80, 255, 255, 0)),
                     Width = width,
@@ -353,7 +503,7 @@ public sealed partial class PdfEditorPage : Page
                 break;
 
             case AnnotationTool.Rectangle:
-                shape = new Rectangle
+                element = new Rectangle
                 {
                     Stroke = new SolidColorBrush(color),
                     StrokeThickness = ViewModel.StrokeWidth,
@@ -363,7 +513,7 @@ public sealed partial class PdfEditorPage : Page
                 break;
 
             case AnnotationTool.Ellipse:
-                shape = new Ellipse
+                element = new Ellipse
                 {
                     Stroke = new SolidColorBrush(color),
                     StrokeThickness = ViewModel.StrokeWidth,
@@ -373,7 +523,7 @@ public sealed partial class PdfEditorPage : Page
                 break;
 
             case AnnotationTool.Line:
-                shape = new Line
+                element = new Line
                 {
                     Stroke = new SolidColorBrush(color),
                     StrokeThickness = ViewModel.StrokeWidth,
@@ -385,8 +535,7 @@ public sealed partial class PdfEditorPage : Page
                 break;
 
             case AnnotationTool.Arrow:
-                // For arrow, create a path or use line with marker
-                shape = new Line
+                var arrowLine = new Line
                 {
                     Stroke = new SolidColorBrush(color),
                     StrokeThickness = ViewModel.StrokeWidth,
@@ -395,16 +544,39 @@ public sealed partial class PdfEditorPage : Page
                     X2 = width,
                     Y2 = height
                 };
-                // Add arrowhead as separate shapes
+                element = arrowLine;
                 AddArrowHead(x + width, y + height, width, height, color);
                 break;
         }
 
-        if (shape != null)
+        if (element != null)
         {
-            Canvas.SetLeft(shape, x);
-            Canvas.SetTop(shape, y);
-            AnnotationCanvas.Children.Add(shape);
+            Canvas.SetLeft(element, x);
+            Canvas.SetTop(element, y);
+
+            // Add click handler for selection
+            element.PointerPressed += (s, e) =>
+            {
+                if (ViewModel.SelectedTool == AnnotationTool.None)
+                {
+                    ClearSelection();
+                    SelectAnnotation(id, element);
+                    e.Handled = true;
+                }
+            };
+
+            // Add double-click handler for text editing
+            element.DoubleTapped += (s, e) =>
+            {
+                if (element is TextBlock textBlock)
+                {
+                    EditTextAnnotation(id, textBlock);
+                    e.Handled = true;
+                }
+            };
+
+            AnnotationCanvas.Children.Add(element);
+            _annotationElements[id] = element;
         }
     }
 
@@ -412,7 +584,7 @@ public sealed partial class PdfEditorPage : Page
     {
         var angle = Math.Atan2(dy, dx);
         var arrowLength = 12;
-        var arrowAngle = Math.PI / 6; // 30 degrees
+        var arrowAngle = Math.PI / 6;
 
         var x1 = tipX - arrowLength * Math.Cos(angle - arrowAngle);
         var y1 = tipY - arrowLength * Math.Sin(angle - arrowAngle);
@@ -433,7 +605,7 @@ public sealed partial class PdfEditorPage : Page
         AnnotationCanvas.Children.Add(path);
     }
 
-    private void ShowTextInput(Point position)
+    private void ShowTextInput(Point position, string existingText = "", Guid? editId = null)
     {
         // Remove any existing text input
         if (_textInputBox != null)
@@ -444,12 +616,14 @@ public sealed partial class PdfEditorPage : Page
         _textInputBox = new TextBox
         {
             Width = 200,
-            Height = 30,
+            MinHeight = 30,
             FontSize = ViewModel.FontSize,
             FontWeight = ViewModel.IsBold ? Microsoft.UI.Text.FontWeights.Bold : Microsoft.UI.Text.FontWeights.Normal,
             FontStyle = ViewModel.IsItalic ? Windows.UI.Text.FontStyle.Italic : Windows.UI.Text.FontStyle.Normal,
             PlaceholderText = "Enter text...",
-            AcceptsReturn = false
+            AcceptsReturn = false,
+            Text = existingText,
+            Tag = editId // Store the ID if we're editing
         };
 
         _textInputBox.KeyDown += TextInputBox_KeyDown;
@@ -460,6 +634,20 @@ public sealed partial class PdfEditorPage : Page
         AnnotationCanvas.Children.Add(_textInputBox);
 
         _textInputBox.Focus(FocusState.Programmatic);
+        _textInputBox.SelectAll();
+    }
+
+    private void EditTextAnnotation(Guid id, TextBlock textBlock)
+    {
+        var x = Canvas.GetLeft(textBlock);
+        var y = Canvas.GetTop(textBlock);
+        var text = textBlock.Text;
+
+        // Hide the text block
+        textBlock.Visibility = Visibility.Collapsed;
+
+        // Show text input with existing text
+        ShowTextInput(new Point(x, y), text, id);
     }
 
     private async void TextInputBox_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -467,11 +655,12 @@ public sealed partial class PdfEditorPage : Page
         if (e.Key == Windows.System.VirtualKey.Enter && _textInputBox != null)
         {
             await FinalizeTextAnnotation();
+            e.Handled = true;
         }
         else if (e.Key == Windows.System.VirtualKey.Escape && _textInputBox != null)
         {
-            AnnotationCanvas.Children.Remove(_textInputBox);
-            _textInputBox = null;
+            CancelTextInput();
+            e.Handled = true;
         }
     }
 
@@ -483,27 +672,65 @@ public sealed partial class PdfEditorPage : Page
         }
         else if (_textInputBox != null)
         {
-            AnnotationCanvas.Children.Remove(_textInputBox);
-            _textInputBox = null;
+            CancelTextInput();
         }
+    }
+
+    private void CancelTextInput()
+    {
+        if (_textInputBox == null) return;
+
+        // If editing, restore the original text block
+        if (_textInputBox.Tag is Guid editId && _annotationElements.TryGetValue(editId, out var element))
+        {
+            if (element is TextBlock tb)
+            {
+                tb.Visibility = Visibility.Visible;
+            }
+        }
+
+        AnnotationCanvas.Children.Remove(_textInputBox);
+        _textInputBox = null;
     }
 
     private async Task FinalizeTextAnnotation()
     {
         if (_textInputBox == null || string.IsNullOrWhiteSpace(_textInputBox.Text))
+        {
+            CancelTextInput();
             return;
+        }
 
         var x = Canvas.GetLeft(_textInputBox);
         var y = Canvas.GetTop(_textInputBox);
         var text = _textInputBox.Text;
+        var editId = _textInputBox.Tag as Guid?;
 
         // Set the annotation text in view model
         ViewModel.AnnotationText = text;
 
-        // Add to view model
-        await ViewModel.AddAnnotationAtPositionAsync(x, y, 200, 30);
+        // If editing existing annotation
+        if (editId.HasValue && _annotationElements.TryGetValue(editId.Value, out var existingElement))
+        {
+            if (existingElement is TextBlock existingTb)
+            {
+                existingTb.Text = text;
+                existingTb.Visibility = Visibility.Visible;
+                AnnotationCanvas.Children.Remove(_textInputBox);
+                _textInputBox = null;
+                return;
+            }
+        }
 
-        // Replace text box with text block
+        // Add to view model and get the ID
+        var annotationId = await ViewModel.AddAnnotationAtPositionAsync(x, y, 200, 30);
+        if (!annotationId.HasValue)
+        {
+            CancelTextInput();
+            return;
+        }
+
+        // Create text block
         var textBlock = new TextBlock
         {
             Text = text,
@@ -516,8 +743,27 @@ public sealed partial class PdfEditorPage : Page
         Canvas.SetLeft(textBlock, x);
         Canvas.SetTop(textBlock, y);
 
+        // Add click handler for selection
+        textBlock.PointerPressed += (s, e) =>
+        {
+            if (ViewModel.SelectedTool == AnnotationTool.None)
+            {
+                ClearSelection();
+                SelectAnnotation(annotationId.Value, textBlock);
+                e.Handled = true;
+            }
+        };
+
+        // Add double-click handler for editing
+        textBlock.DoubleTapped += (s, e) =>
+        {
+            EditTextAnnotation(annotationId.Value, textBlock);
+            e.Handled = true;
+        };
+
         AnnotationCanvas.Children.Remove(_textInputBox);
         AnnotationCanvas.Children.Add(textBlock);
+        _annotationElements[annotationId.Value] = textBlock;
         _textInputBox = null;
     }
 
