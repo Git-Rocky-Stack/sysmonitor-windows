@@ -17,7 +17,7 @@ public partial class PdfEditorViewModel : ObservableObject
     private static extern IntPtr GetActiveWindow();
 
     // Document State
-    [ObservableProperty] private PdfDocument? _currentDocument;
+    [ObservableProperty] private PdfEditorDocument? _currentDocument;
     [ObservableProperty] private bool _hasDocument;
     [ObservableProperty] private bool _isModified;
     [ObservableProperty] private string _documentName = "";
