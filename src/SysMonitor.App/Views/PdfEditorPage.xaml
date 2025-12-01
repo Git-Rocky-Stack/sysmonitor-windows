@@ -5,199 +5,458 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="24">
+    <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Page Header Banner -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
+        <Border Grid.Row="0" Background="#000000" Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
                     <TextBlock Text="PDF EDITOR" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Edit, Annotate &amp; Manage PDF Pages" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left" FontSize="20"/>
+                    <TextBlock Text="{x:Bind ViewModel.DocumentName, Mode=OneWay}" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" FontSize="12"/>
                 </StackPanel>
 
                 <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Height="50" VerticalAlignment="Center" HorizontalAlignment="Right"
                        Stretch="Uniform"/>
             </Grid>
         </Border>
 
+        <!-- Main Toolbar Ribbon -->
+        <Border Grid.Row="1" Background="#1A1A1A" Padding="8,6" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- File Group -->
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <Button Click="OpenPdf_Click" ToolTipService.ToolTip="Open PDF (Ctrl+O)"
+                                Style="{StaticResource OutlinedButtonStyle}" Padding="10,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                                <TextBlock Text="Open" VerticalAlignment="Center" FontSize="12"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Click="SavePdf_Click" ToolTipService.ToolTip="Save PDF (Ctrl+S)"
+                                Style="{StaticResource RedButtonStyle}" Padding="10,8"
+                                IsEnabled="{x:Bind ViewModel.IsModified, Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE74E;" FontSize="14"/>
+                                <TextBlock Text="Save" VerticalAlignment="Center" FontSize="12"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Text="FILE" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <Border Grid.Column="1" Width="1" Background="#333" Margin="0,4"/>
+
+                <!-- Annotation Tools Group -->
+                <StackPanel Grid.Column="2" Spacing="4"
+                            Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <Button Click="SelectTool_Click" Tag="Select" ToolTipService.ToolTip="Select (V)"
+                                Padding="8" Background="{x:Bind ViewModel.IsSelectToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE8B3;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Text" ToolTipService.ToolTip="Text Box (T)"
+                                Padding="8" Background="{x:Bind ViewModel.IsTextToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE8D2;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Highlight" ToolTipService.ToolTip="Highlight (H)"
+                                Padding="8" Background="{x:Bind ViewModel.IsHighlightToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE7E6;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Rectangle" ToolTipService.ToolTip="Rectangle (R)"
+                                Padding="8" Background="{x:Bind ViewModel.IsRectangleToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE739;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Ellipse" ToolTipService.ToolTip="Ellipse (E)"
+                                Padding="8" Background="{x:Bind ViewModel.IsEllipseToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xEA3A;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Line" ToolTipService.ToolTip="Line (L)"
+                                Padding="8" Background="{x:Bind ViewModel.IsLineToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE762;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Arrow" ToolTipService.ToolTip="Arrow (A)"
+                                Padding="8" Background="{x:Bind ViewModel.IsArrowToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE759;" FontSize="14"/>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Text="ANNOTATE" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <Border Grid.Column="3" Width="1" Background="#333" Margin="0,4"
+                        Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                <!-- Format Group (visible when annotation tool selected) -->
+                <StackPanel Grid.Column="4" Spacing="4"
+                            Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <!-- Color Picker -->
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Color:" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
+                            <ComboBox x:Name="ColorPicker" SelectedIndex="0" Width="80" SelectionChanged="ColorPicker_SelectionChanged">
+                                <ComboBoxItem Tag="#FF0000">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="14" Height="14" Background="#FF0000" CornerRadius="2"/>
+                                        <TextBlock Text="Red"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="#0066FF">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="14" Height="14" Background="#0066FF" CornerRadius="2"/>
+                                        <TextBlock Text="Blue"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="#00AA00">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="14" Height="14" Background="#00AA00" CornerRadius="2"/>
+                                        <TextBlock Text="Green"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="#FFAA00">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="14" Height="14" Background="#FFAA00" CornerRadius="2"/>
+                                        <TextBlock Text="Orange"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="#AA00FF">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="14" Height="14" Background="#AA00FF" CornerRadius="2"/>
+                                        <TextBlock Text="Purple"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="#000000">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="14" Height="14" Background="#000000" CornerRadius="2"/>
+                                        <TextBlock Text="Black"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Font Size (for text tool) -->
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Size:" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
+                            <ComboBox x:Name="FontSizePicker" SelectedIndex="2" Width="65" SelectionChanged="FontSize_SelectionChanged">
+                                <ComboBoxItem Content="8" Tag="8"/>
+                                <ComboBoxItem Content="10" Tag="10"/>
+                                <ComboBoxItem Content="12" Tag="12"/>
+                                <ComboBoxItem Content="14" Tag="14"/>
+                                <ComboBoxItem Content="16" Tag="16"/>
+                                <ComboBoxItem Content="18" Tag="18"/>
+                                <ComboBoxItem Content="24" Tag="24"/>
+                                <ComboBoxItem Content="36" Tag="36"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Stroke Width (for shapes) -->
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Stroke:" VerticalAlignment="Center" FontSize="11" Foreground="#AAA"/>
+                            <ComboBox x:Name="StrokeWidthPicker" SelectedIndex="1" Width="60" SelectionChanged="StrokeWidth_SelectionChanged">
+                                <ComboBoxItem Content="1px" Tag="1"/>
+                                <ComboBoxItem Content="2px" Tag="2"/>
+                                <ComboBoxItem Content="3px" Tag="3"/>
+                                <ComboBoxItem Content="4px" Tag="4"/>
+                                <ComboBoxItem Content="6px" Tag="6"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Bold/Italic -->
+                        <StackPanel Orientation="Horizontal" Spacing="2">
+                            <ToggleButton x:Name="BoldToggle" Click="BoldToggle_Click" Padding="8" ToolTipService.ToolTip="Bold">
+                                <FontIcon Glyph="&#xE8DD;" FontSize="14"/>
+                            </ToggleButton>
+                            <ToggleButton x:Name="ItalicToggle" Click="ItalicToggle_Click" Padding="8" ToolTipService.ToolTip="Italic">
+                                <FontIcon Glyph="&#xE8DB;" FontSize="14"/>
+                            </ToggleButton>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock Text="FORMAT" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Zoom Controls (right side) -->
+                <StackPanel Grid.Column="6" Spacing="4"
+                            Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Button Click="ZoomOut_Click" Padding="8" ToolTipService.ToolTip="Zoom Out (-)">
+                            <FontIcon Glyph="&#xE71F;" FontSize="14"/>
+                        </Button>
+                        <Border Background="#252525" CornerRadius="4" Padding="8,4" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind ViewModel.ZoomDisplay, Mode=OneWay}" FontSize="12" MinWidth="40" TextAlignment="Center"/>
+                        </Border>
+                        <Button Click="ZoomIn_Click" Padding="8" ToolTipService.ToolTip="Zoom In (+)">
+                            <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                        </Button>
+                        <Button Click="ZoomReset_Click" Padding="8" ToolTipService.ToolTip="Reset Zoom (0)">
+                            <FontIcon Glyph="&#xE71E;" FontSize="14"/>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Text="ZOOM" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Main Content Area -->
-        <Grid Grid.Row="1" Margin="0,16,0,0">
+        <Grid Grid.Row="2" Margin="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="180"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="220"/>
             </Grid.ColumnDefinitions>
 
             <!-- Left Sidebar - Page Thumbnails -->
-            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,8,0">
-                <StackPanel Spacing="12" Padding="12">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="16"/>
-                        <TextBlock Text="PAGES" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Margin="0"/>
+            <Border Grid.Column="0" Background="#141414" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,1,0">
+                <Grid RowSpacing="8" Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                        <Border Style="{StaticResource AccentBarStyle}" Width="3" Height="14"/>
+                        <TextBlock Text="PAGES" FontSize="11" FontWeight="SemiBold" Foreground="#888"/>
+                        <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}" FontSize="11" Foreground="#666"
+                                   Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     </StackPanel>
 
-                    <TextBlock Text="No document loaded" Style="{StaticResource CardSubtitleStyle}"
-                               Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                    <TextBlock Grid.Row="1" Text="No document" Style="{StaticResource CardSubtitleStyle}" FontSize="11"
+                               Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                               VerticalAlignment="Top"/>
 
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.PageThumbnails, Mode=OneWay}"
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                   Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#202020" CornerRadius="4" Padding="8" Margin="0,2">
-                                    <TextBlock Text="{Binding PageNumber}" Foreground="White" HorizontalAlignment="Center"/>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.PageThumbnails, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Click="PageThumbnail_Click" Tag="{Binding PageNumber}"
+                                            HorizontalAlignment="Stretch" Margin="0,2" Padding="8"
+                                            HorizontalContentAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Border Width="40" Height="52" Background="#252525" CornerRadius="2">
+                                                <TextBlock Text="{Binding PageNumber}" HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" FontSize="14" Foreground="#666"/>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center" Spacing="2">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Page " FontSize="12" Foreground="White"/>
+                                                    <TextBlock Text="{Binding PageNumber}" FontSize="12" Foreground="White"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Rotation}" FontSize="10" Foreground="#666"/>
+                                                    <TextBlock Text="°" FontSize="10" Foreground="#666"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
             </Border>
 
             <!-- Center - PDF Viewer -->
-            <Grid Grid.Column="1" RowSpacing="8">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <Grid Grid.Column="1" Background="#0A0A0A">
+                <!-- Empty State -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16"
+                            Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                    <FontIcon Glyph="&#xEA90;" FontSize="72" Foreground="#404040"/>
+                    <TextBlock Text="No PDF Loaded" Style="{StaticResource CardTitleStyle}"
+                               HorizontalAlignment="Center" FontSize="18"/>
+                    <TextBlock Text="Open a PDF file to start editing"
+                               Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                    <Button Click="OpenPdf_Click" Style="{StaticResource RedButtonStyle}" Padding="24,12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8E5;" FontSize="16"/>
+                            <TextBlock Text="OPEN PDF" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
 
-                <!-- Top Toolbar -->
-                <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="8">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Button Click="OpenPdf_Click" Style="{StaticResource OutlinedButtonStyle}"
-                                Padding="8" ToolTipService.ToolTip="Open PDF">
-                            <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                <!-- PDF Page Display -->
+                <ScrollViewer x:Name="PageScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                              Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                              Background="#1A1A1A">
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40">
+                        <!-- Page Shadow -->
+                        <Border Background="#000" Margin="4,4,0,0" CornerRadius="2" Opacity="0.3"/>
+                        <!-- Page Content -->
+                        <Border Background="White" BorderBrush="#333" BorderThickness="1" CornerRadius="2">
+                            <Image Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay}" Stretch="None"/>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+
+                <!-- Page Navigation Bar -->
+                <Border Background="#202020" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                        CornerRadius="8,8,0,0" Padding="16,8" Margin="0,0,0,0"
+                        Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Click="PreviousPage_Click" Padding="8,4" Background="Transparent"
+                                IsEnabled="{x:Bind ViewModel.CurrentPageNumber, Mode=OneWay, Converter={StaticResource GreaterThanOneConverter}}">
+                            <FontIcon Glyph="&#xE76B;" FontSize="12"/>
                         </Button>
-                        <Button Click="SavePdf_Click" Style="{StaticResource RedButtonStyle}"
-                                Padding="8" ToolTipService.ToolTip="Save PDF"
-                                IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
-                            <FontIcon Glyph="&#xE74E;" FontSize="14"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Page " FontSize="12" Foreground="#AAA"/>
+                            <TextBlock Text="{x:Bind ViewModel.CurrentPageNumber, Mode=OneWay}" FontSize="12" FontWeight="SemiBold"/>
+                            <TextBlock Text=" of " FontSize="12" Foreground="#AAA"/>
+                            <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}" FontSize="12" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <Button Click="NextPage_Click" Padding="8,4" Background="Transparent">
+                            <FontIcon Glyph="&#xE76C;" FontSize="12"/>
                         </Button>
-                        <Border Width="1" Background="{StaticResource DividerBrush}" Margin="8,4"/>
-                        <TextBlock Text="{x:Bind ViewModel.DocumentName, Mode=OneWay}"
-                                   VerticalAlignment="Center" Style="{StaticResource CardTitleStyle}"/>
                     </StackPanel>
                 </Border>
 
-                <!-- PDF Viewer Area -->
-                <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="0">
-                    <Grid>
-                        <!-- Empty State -->
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16"
-                                    Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
-                            <FontIcon Glyph="&#xEA90;" FontSize="64" Foreground="#808080"/>
-                            <TextBlock Text="No PDF Loaded" Style="{StaticResource CardTitleStyle}"
-                                       HorizontalAlignment="Center"/>
-                            <TextBlock Text="Click 'Open' to load a PDF file for editing"
-                                       Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                            <Button Click="OpenPdf_Click" Style="{StaticResource RedButtonStyle}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
-                                    <TextBlock Text="OPEN PDF"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-
-                        <!-- PDF Page Display -->
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                                      Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
-                                <Border Background="White" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
-                                        CornerRadius="4">
-                                    <Image Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay}"
-                                           Stretch="None"/>
-                                </Border>
-                            </Grid>
-                        </ScrollViewer>
-
-                        <!-- Loading Overlay -->
-                        <Border Background="#80000000" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                                <ProgressRing IsActive="True" Width="40" Height="40" Foreground="{StaticResource PrimaryBrush}"/>
-                                <TextBlock Text="{x:Bind ViewModel.LoadingStatus, Mode=OneWay}" Foreground="White"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </Border>
-
-                <!-- Page Navigation -->
-                <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="8"
-                        Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12">
-                        <Button Click="PreviousPage_Click" Padding="8" Background="Transparent">
-                            <FontIcon Glyph="&#xE76B;" FontSize="14"/>
-                        </Button>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Page "/>
-                            <TextBlock Text="{x:Bind ViewModel.CurrentPageNumber, Mode=OneWay}"/>
-                            <TextBlock Text=" of "/>
-                            <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
-                        </StackPanel>
-                        <Button Click="NextPage_Click" Padding="8" Background="Transparent">
-                            <FontIcon Glyph="&#xE76C;" FontSize="14"/>
-                        </Button>
+                <!-- Loading Overlay -->
+                <Border Background="#CC000000" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                        <ProgressRing IsActive="True" Width="48" Height="48" Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="{x:Bind ViewModel.LoadingStatus, Mode=OneWay}" Foreground="White" FontSize="13"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- Right Sidebar - Tools -->
-            <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="8,0,0,0">
-                <StackPanel Spacing="16" Padding="12">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="16"/>
-                        <TextBlock Text="TOOLS" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Margin="0"/>
-                    </StackPanel>
+            <!-- Right Sidebar - Page Tools -->
+            <Border Grid.Column="2" Background="#141414" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="16" Margin="12">
 
-                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Button Click="RotateLeft_Click" HorizontalAlignment="Stretch" Padding="12,8">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <FontIcon Glyph="&#xE7AD;" FontSize="16"/>
-                                <TextBlock Text="Rotate Left" VerticalAlignment="Center"/>
+                        <!-- Page Operations -->
+                        <StackPanel Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Border Style="{StaticResource AccentBarStyle}" Width="3" Height="14"/>
+                                <TextBlock Text="PAGE OPERATIONS" FontSize="11" FontWeight="SemiBold" Foreground="#888"/>
                             </StackPanel>
-                        </Button>
-                        <Button Click="RotateRight_Click" HorizontalAlignment="Stretch" Padding="12,8">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <FontIcon Glyph="&#xE7AD;" FontSize="16" RenderTransformOrigin="0.5,0.5">
-                                    <FontIcon.RenderTransform>
-                                        <ScaleTransform ScaleX="-1"/>
-                                    </FontIcon.RenderTransform>
-                                </FontIcon>
-                                <TextBlock Text="Rotate Right" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Click="DeletePage_Click" HorizontalAlignment="Stretch" Padding="12,8" Background="#30F44336">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <FontIcon Glyph="&#xE74D;" FontSize="16" Foreground="#F44336"/>
-                                <TextBlock Text="Delete Page" VerticalAlignment="Center" Foreground="#F44336"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
 
-                    <TextBlock Text="Open a PDF to access editing tools"
-                               Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap"
-                               Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
-                </StackPanel>
+                            <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Click="RotateLeft_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                            ToolTipService.ToolTip="Rotate page 90° counter-clockwise">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE7AD;" FontSize="14"/>
+                                            <TextBlock Text="Left" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="1" Click="RotateRight_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                            ToolTipService.ToolTip="Rotate page 90° clockwise">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE7AD;" FontSize="14" RenderTransformOrigin="0.5,0.5">
+                                                <FontIcon.RenderTransform>
+                                                    <ScaleTransform ScaleX="-1"/>
+                                                </FontIcon.RenderTransform>
+                                            </FontIcon>
+                                            <TextBlock Text="Right" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Click="MovePageUp_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                            ToolTipService.ToolTip="Move page up in order">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74A;" FontSize="14"/>
+                                            <TextBlock Text="Move Up" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="1" Click="MovePageDown_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                            ToolTipService.ToolTip="Move page down in order">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74B;" FontSize="14"/>
+                                            <TextBlock Text="Move Down" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
+                                <Button Click="DeletePage_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                        Background="#20F44336" ToolTipService.ToolTip="Delete current page">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#F44336"/>
+                                        <TextBlock Text="Delete Page" FontSize="11" Foreground="#F44336"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                            <TextBlock Text="Open a PDF to access tools" FontSize="11" Foreground="#666" TextWrapping="Wrap"
+                                       Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                        </StackPanel>
+
+                        <!-- Current Annotations -->
+                        <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Border Style="{StaticResource AccentBarStyle}" Width="3" Height="14"/>
+                                <TextBlock Text="ANNOTATIONS" FontSize="11" FontWeight="SemiBold" Foreground="#888"/>
+                            </StackPanel>
+
+                            <TextBlock Text="Select an annotation tool from the toolbar to add annotations to the page."
+                                       FontSize="11" Foreground="#666" TextWrapping="Wrap"/>
+
+                            <Button Click="ClearAnnotations_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                    ToolTipService.ToolTip="Remove all annotations from current page">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE894;" FontSize="14"/>
+                                    <TextBlock Text="Clear All Annotations" FontSize="11"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Quick Tips -->
+                        <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Border Style="{StaticResource AccentBarStyle}" Width="3" Height="14"/>
+                                <TextBlock Text="TIPS" FontSize="11" FontWeight="SemiBold" Foreground="#888"/>
+                            </StackPanel>
+
+                            <Border Background="#1A1A1A" CornerRadius="4" Padding="10">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="• Click + drag on page to add annotations" FontSize="10" Foreground="#888" TextWrapping="Wrap"/>
+                                    <TextBlock Text="• Use scroll wheel to navigate pages" FontSize="10" Foreground="#888" TextWrapping="Wrap"/>
+                                    <TextBlock Text="• Ctrl+S to save, Ctrl+Z to undo" FontSize="10" Foreground="#888" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
             </Border>
         </Grid>
 
-        <!-- Status Bar -->
+        <!-- Status Toast -->
         <Border Background="{x:Bind ViewModel.StatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
-                CornerRadius="8" Padding="16" Margin="24"
+                CornerRadius="8" Padding="16,10" Margin="0,0,0,20"
                 Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="1">
-            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
+                VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="2">
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
         </Border>
     </Grid>
 </Page>
