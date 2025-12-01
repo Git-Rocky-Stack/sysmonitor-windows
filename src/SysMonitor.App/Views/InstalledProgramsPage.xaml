@@ -64,16 +64,16 @@
                         <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
                                    Style="{StaticResource CardTitleStyle}"/>
                         <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
-                            <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                <Run Text="Showing: "/>
-                                <Run Text="{x:Bind ViewModel.FilteredCount, Mode=OneWay}" Foreground="{StaticResource PrimaryBrush}"/>
-                                <Run Text=" of "/>
-                                <Run Text="{x:Bind ViewModel.TotalCount, Mode=OneWay}"/>
-                            </TextBlock>
-                            <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                <Run Text="Total Size: "/>
-                                <Run Text="{x:Bind ViewModel.TotalSize, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Showing: " Style="{StaticResource CardSubtitleStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.FilteredCount, Mode=OneWay}" Foreground="{StaticResource PrimaryBrush}"/>
+                                <TextBlock Text=" of " Style="{StaticResource CardSubtitleStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalCount, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Total Size: " Style="{StaticResource CardSubtitleStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalSize, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
 
