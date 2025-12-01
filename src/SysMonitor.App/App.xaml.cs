@@ -49,6 +49,7 @@ public partial class App : Application
                 services.AddSingleton<IBluetoothAnalyzer, BluetoothAnalyzer>();
                 services.AddSingleton<IWiFiAnalyzer, WiFiAnalyzer>();
                 services.AddSingleton<IPdfTools, PdfTools>();
+                services.AddSingleton<IPdfEditor, PdfEditor>();
                 services.AddSingleton<INetworkMapper, NetworkMapper>();
                 services.AddSingleton<IImageTools, ImageTools>();
                 services.AddSingleton<IInstalledProgramsService, InstalledProgramsService>();
@@ -73,6 +74,7 @@ public partial class App : Application
                 services.AddTransient<BluetoothViewModel>();
                 services.AddTransient<WiFiViewModel>();
                 services.AddTransient<PdfToolsViewModel>();
+                services.AddTransient<PdfEditorViewModel>();
                 services.AddTransient<NetworkMapperViewModel>();
                 services.AddTransient<ImageToolsViewModel>();
                 services.AddTransient<InstalledProgramsViewModel>();
@@ -97,8 +99,10 @@ public partial class App : Application
                 services.AddTransient<BluetoothPage>();
                 services.AddTransient<WiFiPage>();
                 services.AddTransient<PdfToolsPage>();
+                services.AddTransient<PdfEditorPage>();
                 services.AddTransient<NetworkMapperPage>();
                 services.AddTransient<ImageToolsPage>();
+                services.AddTransient<InstalledProgramsPage>();
             })
             .Build();
     }

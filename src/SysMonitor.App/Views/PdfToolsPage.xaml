@@ -50,18 +50,30 @@
                     </StackPanel>
 
                     <Border Style="{StaticResource CardStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="16">
-                            <RadioButton Content="Merge PDFs" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsMergeMode, Mode=TwoWay}"
-                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Merge"/>
-                            <RadioButton Content="Split PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSplitMode, Mode=TwoWay}"
-                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Split"/>
-                            <RadioButton Content="Extract Pages" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsExtractMode, Mode=TwoWay}"
-                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Extract"/>
-                            <RadioButton Content="Add Signature" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSignatureMode, Mode=TwoWay}"
-                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Signature"/>
-                            <RadioButton Content="Convert to PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsConvertMode, Mode=TwoWay}"
-                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Convert"/>
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                                <RadioButton Content="Merge PDFs" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsMergeMode, Mode=TwoWay}"
+                                             Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Merge"/>
+                                <RadioButton Content="Split PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSplitMode, Mode=TwoWay}"
+                                             Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Split"/>
+                                <RadioButton Content="Extract Pages" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsExtractMode, Mode=TwoWay}"
+                                             Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Extract"/>
+                                <RadioButton Content="Add Signature" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSignatureMode, Mode=TwoWay}"
+                                             Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Signature"/>
+                                <RadioButton Content="Convert to PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsConvertMode, Mode=TwoWay}"
+                                             Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Convert"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Click="OpenPdfEditor_Click" Style="{StaticResource RedButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE70F;" FontSize="14"/>
+                                    <TextBlock Text="EDIT PDF"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
                     </Border>
                 </StackPanel>
 
