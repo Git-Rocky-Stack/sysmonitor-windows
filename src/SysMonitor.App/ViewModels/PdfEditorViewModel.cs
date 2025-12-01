@@ -69,6 +69,9 @@ public partial class PdfEditorViewModel : ObservableObject
     [ObservableProperty] private double _zoomLevel = 1.0;
     [ObservableProperty] private string _zoomDisplay = "100%";
 
+    // Current page rotation for visual display
+    [ObservableProperty] private int _currentPageRotation = 0;
+
     public PdfEditorViewModel(IPdfEditor pdfEditor)
     {
         _pdfEditor = pdfEditor;
@@ -186,6 +189,9 @@ public partial class PdfEditorViewModel : ObservableObject
         try
         {
             CurrentPage = CurrentDocument.Pages[CurrentPageNumber - 1];
+
+            // Update visual rotation based on page's rotation value
+            CurrentPageRotation = CurrentPage.Rotation;
 
             // Load page image for viewer using Windows PDF renderer
             var imageBytes = await PdfPageRenderer.RenderPageAsync(CurrentDocument.FilePath, CurrentPageNumber, ZoomLevel);

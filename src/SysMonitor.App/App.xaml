@@ -34,6 +34,7 @@
             <converters:BytesToImageConverter x:Key="BytesToImageConverter"/>
             <converters:GreaterThanOneConverter x:Key="GreaterThanOneConverter"/>
             <converters:BoolToAccentBrushConverter x:Key="BoolToAccentBrushConverter"/>
+            <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
