@@ -290,7 +290,13 @@
     </Style>
 
     <!-- Search TextBox Style (for search fields with icon placeholder) -->
-    <Style x:Key="SearchTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputFieldStyle}">
+    <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="12,10"/>
         <Setter Property="PlaceholderForeground" Value="{StaticResource TextTertiaryBrush}"/>
     </Style>
 
