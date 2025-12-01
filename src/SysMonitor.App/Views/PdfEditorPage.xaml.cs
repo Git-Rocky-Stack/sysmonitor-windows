@@ -24,14 +24,6 @@ public sealed partial class PdfEditorPage : Page
         DataContext = ViewModel;
     }
 
-    private void Thumbnail_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
-    {
-        if (sender is FrameworkElement element && element.Tag is int pageNumber)
-        {
-            _ = ViewModel.NavigateToPageCommand.ExecuteAsync(pageNumber);
-        }
-    }
-
     private void ColorButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is string color)
