@@ -254,6 +254,17 @@ public class TempFileCleaner : ITempFileCleaner
                             continue;
                     }
 
+                    // Skip log files modified within 1 day (matches CleanAsync behavior)
+                    if (category == CleanerCategory.LogFiles &&
+                        fileInfo.LastWriteTime > DateTime.Now.AddDays(-1))
+                        continue;
+
+                    // Skip very recent temp files (matches CleanAsync behavior)
+                    if ((category == CleanerCategory.UserTemp ||
+                         category == CleanerCategory.WindowsTemp) &&
+                        fileInfo.LastAccessTime > DateTime.Now.AddMinutes(-5))
+                        continue;
+
                     size += fileInfo.Length;
                     count++;
                 }
