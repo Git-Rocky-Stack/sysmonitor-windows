@@ -13,28 +13,194 @@
 
         <!-- Page Header Banner -->
         <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <StackPanel VerticalAlignment="Center" Spacing="4">
-                <TextBlock Text="PDF EDITOR" Style="{StaticResource PageHeaderStyle}"
-                           Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
-                <TextBlock Text="Edit, Annotate &amp; Manage PDF Pages" Style="{StaticResource PageSubtitleStyle}"
-                           Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                    <TextBlock Text="PDF EDITOR" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Edit, Annotate &amp; Manage PDF Pages" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Stretch="Uniform"/>
+            </Grid>
         </Border>
 
-        <!-- Main Content -->
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,16,0,0">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
-                <FontIcon Glyph="&#xEA90;" FontSize="64" Foreground="{StaticResource TextTertiaryBrush}"/>
-                <TextBlock Text="PDF Editor" Style="{StaticResource CardTitleStyle}" HorizontalAlignment="Center"/>
-                <TextBlock Text="Click below to open a PDF file" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                <Button x:Name="OpenButton" Click="OpenButton_Click" Style="{StaticResource RedButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
-                        <TextBlock Text="OPEN PDF"/>
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Sidebar - Page Thumbnails -->
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,8,0">
+                <StackPanel Spacing="12" Padding="12">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="16"/>
+                        <TextBlock Text="PAGES" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Margin="0"/>
                     </StackPanel>
-                </Button>
-                <TextBlock x:Name="StatusText" Text="" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-            </StackPanel>
+
+                    <TextBlock Text="No document loaded" Style="{StaticResource CardSubtitleStyle}"
+                               Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.PageThumbnails, Mode=OneWay}"
+                                  Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#202020" CornerRadius="4" Padding="8" Margin="0,2">
+                                    <TextBlock Text="{Binding PageNumber}" Foreground="White" HorizontalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Center - PDF Viewer -->
+            <Grid Grid.Column="1" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Top Toolbar -->
+                <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="8">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Button Command="{x:Bind ViewModel.OpenPdfCommand}" Style="{StaticResource OutlinedButtonStyle}"
+                                Padding="8" ToolTipService.ToolTip="Open PDF">
+                            <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                        </Button>
+                        <Button Command="{x:Bind ViewModel.SaveCommand}" Style="{StaticResource RedButtonStyle}"
+                                Padding="8" ToolTipService.ToolTip="Save PDF"
+                                IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE74E;" FontSize="14"/>
+                        </Button>
+                        <Border Width="1" Background="{StaticResource DividerBrush}" Margin="8,4"/>
+                        <TextBlock Text="{x:Bind ViewModel.DocumentName, Mode=OneWay}"
+                                   VerticalAlignment="Center" Style="{StaticResource CardTitleStyle}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- PDF Viewer Area -->
+                <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="0">
+                    <Grid>
+                        <!-- Empty State -->
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16"
+                                    Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                            <FontIcon Glyph="&#xEA90;" FontSize="64" Foreground="{StaticResource TextTertiaryBrush}"/>
+                            <TextBlock Text="No PDF Loaded" Style="{StaticResource CardTitleStyle}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Click 'Open' to load a PDF file for editing"
+                                       Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                            <Button Command="{x:Bind ViewModel.OpenPdfCommand}" Style="{StaticResource RedButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                                    <TextBlock Text="OPEN PDF"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- PDF Page Display -->
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                      Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
+                                <Border Background="White" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                                        CornerRadius="4">
+                                    <Image Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay, Converter={StaticResource BytesToImageConverter}}"
+                                           Stretch="None"/>
+                                </Border>
+                            </Grid>
+                        </ScrollViewer>
+
+                        <!-- Loading Overlay -->
+                        <Border Background="#80000000" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                                <ProgressRing IsActive="True" Width="40" Height="40" Foreground="{StaticResource PrimaryBrush}"/>
+                                <TextBlock Text="{x:Bind ViewModel.LoadingStatus, Mode=OneWay}" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Page Navigation -->
+                <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="8"
+                        Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12">
+                        <Button Command="{x:Bind ViewModel.PreviousPageCommand}" Padding="8" Background="Transparent">
+                            <FontIcon Glyph="&#xE76B;" FontSize="14"/>
+                        </Button>
+                        <TextBlock VerticalAlignment="Center">
+                            <Run Text="Page "/>
+                            <Run Text="{x:Bind ViewModel.CurrentPageNumber, Mode=OneWay}"/>
+                            <Run Text=" of "/>
+                            <Run Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
+                        </TextBlock>
+                        <Button Command="{x:Bind ViewModel.NextPageCommand}" Padding="8" Background="Transparent">
+                            <FontIcon Glyph="&#xE76C;" FontSize="14"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Right Sidebar - Tools -->
+            <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="8,0,0,0">
+                <StackPanel Spacing="16" Padding="12">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="16"/>
+                        <TextBlock Text="TOOLS" Style="{StaticResource SectionHeaderStyle}" FontSize="12" Margin="0"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                        <Button Command="{x:Bind ViewModel.RotateCurrentPageCommand}" CommandParameter="-90"
+                                HorizontalAlignment="Stretch" Padding="12,8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE7AD;" FontSize="16"/>
+                                <TextBlock Text="Rotate Left" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{x:Bind ViewModel.RotateCurrentPageCommand}" CommandParameter="90"
+                                HorizontalAlignment="Stretch" Padding="12,8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE7AD;" FontSize="16" RenderTransformOrigin="0.5,0.5">
+                                    <FontIcon.RenderTransform>
+                                        <ScaleTransform ScaleX="-1"/>
+                                    </FontIcon.RenderTransform>
+                                </FontIcon>
+                                <TextBlock Text="Rotate Right" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{x:Bind ViewModel.DeleteCurrentPageCommand}"
+                                HorizontalAlignment="Stretch" Padding="12,8" Background="#30F44336">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE74D;" FontSize="16" Foreground="#F44336"/>
+                                <TextBlock Text="Delete Page" VerticalAlignment="Center" Foreground="#F44336"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Text="Open a PDF to access editing tools"
+                               Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap"
+                               Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Background="{x:Bind ViewModel.StatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
+                CornerRadius="8" Padding="16" Margin="24"
+                Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"
+                VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="1">
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
         </Border>
     </Grid>
 </Page>
