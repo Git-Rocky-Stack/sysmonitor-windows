@@ -68,7 +68,14 @@ public partial class PdfEditorViewModel : ObservableObject
     public PdfEditorViewModel(IPdfEditor pdfEditor)
     {
         _pdfEditor = pdfEditor;
-        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        // Defer DispatcherQueue retrieval until first use - it may not be available during DI construction
+        _dispatcherQueue = null!;
+    }
+
+    private DispatcherQueue GetDispatcher()
+    {
+        _dispatcherQueue ??= DispatcherQueue.GetForCurrentThread();
+        return _dispatcherQueue;
     }
 
     [RelayCommand]
@@ -142,7 +149,7 @@ public partial class PdfEditorViewModel : ObservableObject
     {
         if (CurrentDocument == null) return;
 
-        _dispatcherQueue.TryEnqueue(() => PageThumbnails.Clear());
+        GetDispatcher().TryEnqueue(() => PageThumbnails.Clear());
 
         foreach (var page in CurrentDocument.Pages)
         {
@@ -161,7 +168,7 @@ public partial class PdfEditorViewModel : ObservableObject
                 thumbnail.ImageBytes = imageBytes;
             }
 
-            _dispatcherQueue.TryEnqueue(() => PageThumbnails.Add(thumbnail));
+            GetDispatcher().TryEnqueue(() => PageThumbnails.Add(thumbnail));
         }
     }
 
@@ -352,7 +359,7 @@ public partial class PdfEditorViewModel : ObservableObject
             var imageBytes = await _pdfEditor.RenderPageToImageAsync(CurrentDocument.FilePath, pageNumber, 0.2);
             if (imageBytes != null)
             {
-                _dispatcherQueue.TryEnqueue(() => thumbnail.ImageBytes = imageBytes);
+                GetDispatcher().TryEnqueue(() => thumbnail.ImageBytes = imageBytes);
             }
         }
     }
@@ -585,7 +592,7 @@ public partial class PdfEditorViewModel : ObservableObject
     private async Task ClearStatusAfterDelayAsync()
     {
         await Task.Delay(4000);
-        _dispatcherQueue.TryEnqueue(() => HasStatusMessage = false);
+        GetDispatcher().TryEnqueue(() => HasStatusMessage = false);
     }
 }
 
