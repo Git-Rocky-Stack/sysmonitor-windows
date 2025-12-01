@@ -289,6 +289,11 @@
         <Setter Property="Padding" Value="12,10"/>
     </Style>
 
+    <!-- Search TextBox Style (for search fields with icon placeholder) -->
+    <Style x:Key="SearchTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputFieldStyle}">
+        <Setter Property="PlaceholderForeground" Value="{StaticResource TextTertiaryBrush}"/>
+    </Style>
+
     <!-- Badge Styles -->
     <Style x:Key="BadgeStyle" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
