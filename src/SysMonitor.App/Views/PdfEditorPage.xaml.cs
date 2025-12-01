@@ -1,16 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SysMonitor.App.ViewModels;
-using System.Runtime.InteropServices;
-using Windows.Storage.Pickers;
 
 namespace SysMonitor.App.Views;
 
 public sealed partial class PdfEditorPage : Page
 {
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetActiveWindow();
-
     public PdfEditorViewModel ViewModel { get; }
 
     public PdfEditorPage()
@@ -21,27 +16,36 @@ public sealed partial class PdfEditorPage : Page
 
     private async void OpenPdf_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            var picker = new FileOpenPicker();
-            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            picker.FileTypeFilter.Add(".pdf");
+        await ViewModel.OpenPdfCommand.ExecuteAsync(null);
+    }
 
-            var hwnd = GetActiveWindow();
-            if (hwnd != IntPtr.Zero)
-            {
-                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-            }
+    private async void SavePdf_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SaveCommand.ExecuteAsync(null);
+    }
 
-            var file = await picker.PickSingleFileAsync();
-            if (file != null)
-            {
-                StatusText.Text = $"Selected: {file.Name}";
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusText.Text = $"Error: {ex.Message}";
-        }
+    private async void PreviousPage_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.PreviousPageCommand.ExecuteAsync(null);
+    }
+
+    private async void NextPage_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.NextPageCommand.ExecuteAsync(null);
+    }
+
+    private async void RotateLeft_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.RotateCurrentPageCommand.ExecuteAsync(-90);
+    }
+
+    private async void RotateRight_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.RotateCurrentPageCommand.ExecuteAsync(90);
+    }
+
+    private async void DeletePage_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.DeleteCurrentPageCommand.ExecuteAsync(null);
     }
 }
