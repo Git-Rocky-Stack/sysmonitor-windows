@@ -301,9 +301,18 @@
                               Background="#1A1A1A">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40">
                         <!-- Page Shadow -->
-                        <Border Background="#000" Margin="4,4,0,0" CornerRadius="2" Opacity="0.3"/>
+                        <Border Background="#000" Margin="4,4,0,0" CornerRadius="2" Opacity="0.3"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="{x:Bind ViewModel.CurrentPageRotation, Mode=OneWay, Converter={StaticResource IntToDoubleConverter}}"/>
+                            </Border.RenderTransform>
+                        </Border>
                         <!-- Page Content -->
-                        <Border Background="White" BorderBrush="#333" BorderThickness="1" CornerRadius="2">
+                        <Border Background="White" BorderBrush="#333" BorderThickness="1" CornerRadius="2"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <RotateTransform Angle="{x:Bind ViewModel.CurrentPageRotation, Mode=OneWay, Converter={StaticResource IntToDoubleConverter}}"/>
+                            </Border.RenderTransform>
                             <Image Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay}" Stretch="None"/>
                         </Border>
                     </Grid>
