@@ -307,13 +307,25 @@
                                 <RotateTransform Angle="{x:Bind ViewModel.CurrentPageRotation, Mode=OneWay, Converter={StaticResource IntToDoubleConverter}}"/>
                             </Border.RenderTransform>
                         </Border>
-                        <!-- Page Content -->
+                        <!-- Page Content with Annotation Canvas -->
                         <Border Background="White" BorderBrush="#333" BorderThickness="1" CornerRadius="2"
                                 RenderTransformOrigin="0.5,0.5">
                             <Border.RenderTransform>
                                 <RotateTransform Angle="{x:Bind ViewModel.CurrentPageRotation, Mode=OneWay, Converter={StaticResource IntToDoubleConverter}}"/>
                             </Border.RenderTransform>
-                            <Image Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay}" Stretch="None"/>
+                            <Grid>
+                                <!-- PDF Page Image -->
+                                <Image x:Name="PageImage" Source="{x:Bind ViewModel.CurrentPageImage, Mode=OneWay}" Stretch="None"/>
+
+                                <!-- Annotation Canvas Overlay -->
+                                <Canvas x:Name="AnnotationCanvas" Background="Transparent"
+                                        PointerPressed="AnnotationCanvas_PointerPressed"
+                                        PointerMoved="AnnotationCanvas_PointerMoved"
+                                        PointerReleased="AnnotationCanvas_PointerReleased"/>
+
+                                <!-- Drawing Preview (shown while dragging) -->
+                                <Canvas x:Name="PreviewCanvas" Background="Transparent" IsHitTestVisible="False"/>
+                            </Grid>
                         </Border>
                     </Grid>
                 </ScrollViewer>
