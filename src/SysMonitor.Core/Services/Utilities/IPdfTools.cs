@@ -123,20 +123,20 @@ public record NetworkScanProgress
 // PDF Editor Interface
 public interface IPdfEditor
 {
-    Task<PdfDocument?> OpenPdfAsync(string filePath);
-    Task<PdfOperationResult> SavePdfAsync(PdfDocument document, string outputPath);
+    Task<PdfEditorDocument?> OpenPdfAsync(string filePath);
+    Task<PdfOperationResult> SavePdfAsync(PdfEditorDocument document, string outputPath);
     Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0);
-    Task<PdfOperationResult> RotatePageAsync(PdfDocument document, int pageNumber, int degrees);
-    Task<PdfOperationResult> DeletePageAsync(PdfDocument document, int pageNumber);
-    Task<PdfOperationResult> ReorderPagesAsync(PdfDocument document, int[] newOrder);
-    Task<PdfOperationResult> AddTextAnnotationAsync(PdfDocument document, int pageNumber, TextAnnotation annotation);
-    Task<PdfOperationResult> AddHighlightAsync(PdfDocument document, int pageNumber, HighlightAnnotation highlight);
-    Task<PdfOperationResult> AddShapeAsync(PdfDocument document, int pageNumber, ShapeAnnotation shape);
+    Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pageNumber, int degrees);
+    Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pageNumber);
+    Task<PdfOperationResult> ReorderPagesAsync(PdfEditorDocument document, int[] newOrder);
+    Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation);
+    Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight);
+    Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape);
     Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
 }
 
 // PDF Editor Models
-public class PdfDocument
+public class PdfEditorDocument
 {
     public string FilePath { get; set; } = "";
     public string FileName { get; set; } = "";
