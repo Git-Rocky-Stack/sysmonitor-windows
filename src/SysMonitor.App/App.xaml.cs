@@ -37,6 +37,7 @@ public partial class App : Application
                 // Core Services - Cleaners
                 services.AddSingleton<ITempFileCleaner, TempFileCleaner>();
                 services.AddSingleton<IBrowserCacheCleaner, BrowserCacheCleaner>();
+                services.AddSingleton<IRegistryCleaner, RegistryCleaner>();
 
                 // Core Services - Optimizers
                 services.AddSingleton<IStartupOptimizer, StartupOptimizer>();
@@ -58,6 +59,7 @@ public partial class App : Application
                 services.AddTransient<DashboardViewModel>();
                 services.AddTransient<ProcessesViewModel>();
                 services.AddTransient<CleanerViewModel>();
+                services.AddTransient<RegistryCleanerViewModel>();
                 services.AddTransient<StartupViewModel>();
                 services.AddTransient<SettingsViewModel>();
                 services.AddTransient<CpuViewModel>();
@@ -83,6 +85,7 @@ public partial class App : Application
                 services.AddTransient<DashboardPage>();
                 services.AddTransient<ProcessesPage>();
                 services.AddTransient<CleanerPage>();
+                services.AddTransient<RegistryCleanerPage>();
                 services.AddTransient<StartupPage>();
                 services.AddTransient<SettingsPage>();
                 services.AddTransient<CpuPage>();
