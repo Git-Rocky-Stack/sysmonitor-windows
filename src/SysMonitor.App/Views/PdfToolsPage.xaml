@@ -6,490 +6,577 @@
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
     x:Name="ContentArea"
-    Background="Transparent">
+    Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="24" Spacing="16">
-            <!-- Header -->
+    <Grid RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Page Header Banner -->
+        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <TextBlock Text="PDF Tools" FontSize="28" FontWeight="SemiBold" Foreground="White"/>
-                    <TextBlock Text="Merge, split, extract, sign and convert files to PDF" FontSize="14" Foreground="#808080" Margin="0,4,0,0"/>
+
+                <!-- Left: Header text -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                    <TextBlock Text="PDF TOOLS" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Merge, Split, Extract, Sign &amp; Convert Files to PDF" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                 </StackPanel>
+
+                <!-- Center: STX.1 Home Logo -->
+                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Stretch="Uniform"/>
             </Grid>
+        </Border>
 
-            <!-- Mode Selection -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="16" BorderBrush="#1A1A1A" BorderThickness="1">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <RadioButton Content="Merge PDFs" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsMergeMode, Mode=TwoWay}"
-                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Merge"/>
-                    <RadioButton Content="Split PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSplitMode, Mode=TwoWay}"
-                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Split" Margin="16,0,0,0"/>
-                    <RadioButton Content="Extract Pages" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsExtractMode, Mode=TwoWay}"
-                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Extract" Margin="16,0,0,0"/>
-                    <RadioButton Content="Add Signature" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSignatureMode, Mode=TwoWay}"
-                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Signature" Margin="16,0,0,0"/>
-                    <RadioButton Content="Convert to PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsConvertMode, Mode=TwoWay}"
-                                 Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Convert" Margin="16,0,0,0"/>
-                </StackPanel>
-            </Border>
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16" Padding="0,16,0,24">
 
-            <!-- Merge Mode -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay}">
-                <StackPanel Spacing="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="PDFs to Merge" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                            <Button Command="{x:Bind ViewModel.SelectMultiplePdfsCommand}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE710;" FontSize="14"/>
-                                    <TextBlock Text="Add PDFs"/>
-                                </StackPanel>
-                            </Button>
-                            <Button Command="{x:Bind ViewModel.ClearFilesCommand}">
-                                <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-
-                    <ListView ItemsSource="{x:Bind ViewModel.SelectedFiles, Mode=OneWay}" MinHeight="150"
-                              Background="Transparent" SelectionMode="None">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:PdfFileDisplay">
-                                <Border Background="#141414" CornerRadius="6" Padding="12" Margin="0,2">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <FontIcon Glyph="&#xEA90;" Foreground="#F44336" FontSize="24" VerticalAlignment="Center"/>
-
-                                        <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
-                                            <TextBlock Text="{x:Bind FileName}" FontSize="13" Foreground="White"/>
-                                            <TextBlock FontSize="11" Foreground="#606060">
-                                                <Run Text="{x:Bind PageCount}"/> pages - <Run Text="{x:Bind FileSize}"/>
-                                            </TextBlock>
-                                        </StackPanel>
-
-                                        <Button Grid.Column="2" Command="{Binding DataContext.MoveFileUpCommand, ElementName=ContentArea}"
-                                                CommandParameter="{x:Bind}" Padding="8" Background="Transparent" Margin="4,0">
-                                            <FontIcon Glyph="&#xE74A;" FontSize="12"/>
-                                        </Button>
-                                        <Button Grid.Column="3" Command="{Binding DataContext.RemoveFileCommand, ElementName=ContentArea}"
-                                                CommandParameter="{x:Bind}" Padding="8" Background="Transparent">
-                                            <FontIcon Glyph="&#xE711;" FontSize="12"/>
-                                        </Button>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-
-                    <Button Command="{x:Bind ViewModel.MergePdfsCommand}" Style="{StaticResource AccentButtonStyle}"
-                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE8BB;" FontSize="14"/>
-                            <TextBlock Text="Merge PDFs"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Border>
-
-            <!-- Split/Extract/Signature Mode - File Selection -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
-                <StackPanel Spacing="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Select PDF File" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-                        <Button Grid.Column="1" Command="{x:Bind ViewModel.SelectPdfCommand}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
-                                <TextBlock Text="Browse"/>
-                            </StackPanel>
-                        </Button>
-                    </Grid>
-
-                    <!-- Selected File Info -->
-                    <Border Background="#141414" CornerRadius="6" Padding="16" Visibility="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <FontIcon Glyph="&#xEA90;" Foreground="#F44336" FontSize="32" VerticalAlignment="Center"/>
-
-                            <StackPanel Grid.Column="1" Margin="16,0,0,0">
-                                <TextBlock Text="{x:Bind ViewModel.SelectedPdfName, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-                                <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
-                                    <TextBlock FontSize="12" Foreground="#808080">
-                                        <Run Text="{x:Bind ViewModel.PageCount, Mode=OneWay}"/> pages
-                                    </TextBlock>
-                                    <TextBlock Text="{x:Bind ViewModel.FileSize, Mode=OneWay}" FontSize="12" Foreground="#808080"/>
-                                    <TextBlock Text="{x:Bind ViewModel.PdfVersion, Mode=OneWay}" FontSize="12" Foreground="#808080"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Border>
-
-            <!-- Split Options -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsSplitMode, Mode=OneWay}">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Split Options" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-
-                    <RadioButton Content="Split into individual pages" IsChecked="{x:Bind ViewModel.SplitAllPages, Mode=TwoWay}"/>
-                    <RadioButton Content="Split by page range" IsChecked="{x:Bind ViewModel.SplitByRange, Mode=TwoWay}" Margin="0,8,0,0"/>
-
-                    <Grid Visibility="{x:Bind ViewModel.SplitByRange, Mode=OneWay}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Text="From page:" VerticalAlignment="Center" Foreground="#808080"/>
-                        <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.SplitStartPage, Mode=TwoWay}" Minimum="1"
-                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
-                        <TextBlock Grid.Column="2" Text="To page:" VerticalAlignment="Center" Foreground="#808080" Margin="16,0,0,0"/>
-                        <NumberBox Grid.Column="3" Value="{x:Bind ViewModel.SplitEndPage, Mode=TwoWay}" Minimum="1"
-                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
-                    </Grid>
-
-                    <Button Command="{x:Bind ViewModel.SplitPdfCommand}" Style="{StaticResource AccentButtonStyle}"
-                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE8C8;" FontSize="14"/>
-                            <TextBlock Text="Split PDF"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Border>
-
-            <!-- Extract Options -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsExtractMode, Mode=OneWay}">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Extract Pages" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Text="From page:" VerticalAlignment="Center" Foreground="#808080"/>
-                        <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.ExtractStartPage, Mode=TwoWay}" Minimum="1"
-                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
-                        <TextBlock Grid.Column="2" Text="To page:" VerticalAlignment="Center" Foreground="#808080" Margin="16,0,0,0"/>
-                        <NumberBox Grid.Column="3" Value="{x:Bind ViewModel.ExtractEndPage, Mode=TwoWay}" Minimum="1"
-                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
-                    </Grid>
-
-                    <Button Command="{x:Bind ViewModel.ExtractPagesCommand}" Style="{StaticResource AccentButtonStyle}"
-                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE8A7;" FontSize="14"/>
-                            <TextBlock Text="Extract Pages"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Border>
-
-            <!-- Signature Options -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsSignatureMode, Mode=OneWay}">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Add Signature" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-
-                    <!-- Signature Type Selection -->
-                    <StackPanel Orientation="Horizontal" Spacing="16">
-                        <RadioButton Content="Draw Signature" GroupName="SignatureType"
-                                     IsChecked="{x:Bind ViewModel.IsDrawSignature, Mode=TwoWay}"/>
-                        <RadioButton Content="Type Signature" GroupName="SignatureType"
-                                     IsChecked="{x:Bind ViewModel.IsTypeSignature, Mode=TwoWay}"/>
-                        <RadioButton Content="Upload Image" GroupName="SignatureType"
-                                     IsChecked="{x:Bind ViewModel.IsUploadSignature, Mode=TwoWay}"/>
+                <!-- Mode Selection Section -->
+                <StackPanel Spacing="12">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="SELECT OPERATION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                     </StackPanel>
 
-                    <!-- Draw Signature Canvas -->
-                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsDrawSignature, Mode=OneWay}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Draw your signature below" FontSize="13" Foreground="#808080"/>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Button Click="ClearInkCanvas_Click" ToolTipService.ToolTip="Clear Canvas">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE74D;" FontSize="12"/>
-                                        <TextBlock Text="Clear"/>
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <RadioButton Content="Merge PDFs" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsMergeMode, Mode=TwoWay}"
+                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Merge"/>
+                            <RadioButton Content="Split PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSplitMode, Mode=TwoWay}"
+                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Split"/>
+                            <RadioButton Content="Extract Pages" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsExtractMode, Mode=TwoWay}"
+                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Extract"/>
+                            <RadioButton Content="Add Signature" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsSignatureMode, Mode=TwoWay}"
+                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Signature"/>
+                            <RadioButton Content="Convert to PDF" GroupName="Mode" IsChecked="{x:Bind ViewModel.IsConvertMode, Mode=TwoWay}"
+                                         Command="{x:Bind ViewModel.SetModeCommand}" CommandParameter="Convert"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Merge Mode -->
+                <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay}">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="MERGE PDFs" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}" Margin="0,0,16,0">
+                                    <FontIcon Glyph="&#xE8BB;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="PDFs to Merge" Style="{StaticResource CardTitleStyle}"/>
+                                    <TextBlock Text="Select multiple PDF files to combine into one" Style="{StaticResource CardSubtitleStyle}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Command="{x:Bind ViewModel.SelectMultiplePdfsCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                                            <TextBlock Text="ADD PDFs"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{x:Bind ViewModel.ClearFilesCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+
+                            <ListView ItemsSource="{x:Bind ViewModel.SelectedFiles, Mode=OneWay}" MinHeight="120"
+                                      Background="Transparent" SelectionMode="None">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="Margin" Value="0,2"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:PdfFileDisplay">
+                                        <Border Style="{StaticResource CardStyle}" Padding="12">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <FontIcon Glyph="&#xEA90;" Foreground="{StaticResource PrimaryBrush}" FontSize="24" VerticalAlignment="Center"/>
+
+                                                <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind FileName}" Style="{StaticResource CardTitleStyle}"/>
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="{x:Bind PageCount}" Style="{StaticResource CardSubtitleStyle}"/>
+                                                        <TextBlock Text="pages" Style="{StaticResource CardSubtitleStyle}"/>
+                                                        <TextBlock Text="-" Style="{StaticResource CardSubtitleStyle}"/>
+                                                        <TextBlock Text="{x:Bind FileSize}" Style="{StaticResource CardSubtitleStyle}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <Button Grid.Column="2" Command="{Binding DataContext.MoveFileUpCommand, ElementName=ContentArea}"
+                                                        CommandParameter="{x:Bind}" Padding="8" Background="Transparent">
+                                                    <FontIcon Glyph="&#xE74A;" FontSize="12"/>
+                                                </Button>
+                                                <Button Grid.Column="3" Command="{Binding DataContext.RemoveFileCommand, ElementName=ContentArea}"
+                                                        CommandParameter="{x:Bind}" Padding="8" Background="Transparent">
+                                                    <FontIcon Glyph="&#xE711;" FontSize="12"/>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <Button Command="{x:Bind ViewModel.MergePdfsCommand}" Style="{StaticResource RedButtonStyle}"
+                                    HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8BB;" FontSize="14"/>
+                                    <TextBlock Text="MERGE PDFs"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Split/Extract/Signature/Convert Mode - File Selection -->
+                <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}"
+                                Visibility="{x:Bind ViewModel.IsConvertMode, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="SELECT PDF FILE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource CardStyle}"
+                            Visibility="{x:Bind ViewModel.IsConvertMode, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                        <StackPanel Spacing="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}" Margin="0,0,16,0">
+                                    <FontIcon Glyph="&#xEA90;" FontSize="20" Foreground="{StaticResource PrimaryBrush}"/>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.SelectedPdfName, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"
+                                               Visibility="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}"/>
+                                    <TextBlock Text="No PDF selected" Style="{StaticResource CardTitleStyle}"
+                                               Visibility="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="16" Visibility="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                                        <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                            <Run Text="{x:Bind ViewModel.PageCount, Mode=OneWay}"/> pages
+                                        </TextBlock>
+                                        <TextBlock Text="{x:Bind ViewModel.FileSize, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
+                                        <TextBlock Text="{x:Bind ViewModel.PdfVersion, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Click Browse to select a PDF file" Style="{StaticResource CardSubtitleStyle}"
+                                               Visibility="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="2" Command="{x:Bind ViewModel.SelectPdfCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                                        <TextBlock Text="BROWSE"/>
                                     </StackPanel>
                                 </Button>
-                            </StackPanel>
-                        </Grid>
-                        <Border Background="White" CornerRadius="6" Height="150" BorderBrush="#303030" BorderThickness="1"
-                                Padding="0">
-                            <Canvas x:Name="SignatureCanvas"
-                                    Background="White"
-                                    PointerPressed="SignatureCanvas_PointerPressed"
-                                    PointerMoved="SignatureCanvas_PointerMoved"
-                                    PointerReleased="SignatureCanvas_PointerReleased"
-                                    PointerExited="SignatureCanvas_PointerReleased"/>
-                        </Border>
-                        <TextBlock Text="Use mouse or touch to draw" FontSize="11" Foreground="#606060" FontStyle="Italic"/>
-                    </StackPanel>
-
-                    <!-- Type Signature (Cursive) -->
-                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsTypeSignature, Mode=OneWay}">
-                        <TextBlock Text="Type your name below (will appear in cursive style)" FontSize="13" Foreground="#808080"/>
-                        <TextBox x:Name="TypedSignatureInput"
-                                 Text="{x:Bind ViewModel.TypedSignatureName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 PlaceholderText="Type your full name..."
-                                 FontSize="16"
-                                 TextChanged="TypedSignatureInput_TextChanged"/>
-                        <Border Background="White" CornerRadius="6" Height="80" BorderBrush="#303030" BorderThickness="1" Padding="16,8">
-                            <TextBlock x:Name="TypedSignaturePreview"
-                                       Text="{x:Bind ViewModel.TypedSignatureName, Mode=OneWay}"
-                                       FontFamily="Segoe Script"
-                                       FontSize="32"
-                                       Foreground="Black"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Left"/>
-                        </Border>
-                        <TextBlock Text="Preview of your signature in cursive style" FontSize="11" Foreground="#606060" FontStyle="Italic"/>
-                    </StackPanel>
-
-                    <!-- Upload Signature Image -->
-                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsUploadSignature, Mode=OneWay}">
-                        <TextBlock Text="Signature Image" FontSize="13" Foreground="#808080"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Background="#141414" CornerRadius="6" Padding="12,8" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.SignatureImageName, Mode=OneWay}" Foreground="#808080"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                            <Button Grid.Column="1" Command="{x:Bind ViewModel.SelectSignatureImageCommand}" Margin="8,0">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE8B9;" FontSize="14"/>
-                                    <TextBlock Text="Browse"/>
-                                </StackPanel>
-                            </Button>
-                            <Button Grid.Column="2" Command="{x:Bind ViewModel.ClearSignatureImageCommand}"
-                                    Visibility="{x:Bind ViewModel.HasSignatureImage, Mode=OneWay}">
-                                <FontIcon Glyph="&#xE711;" FontSize="14"/>
-                            </Button>
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- Signer Name -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Signer Name" FontSize="13" Foreground="#808080"/>
-                        <TextBox Text="{x:Bind ViewModel.SignerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 PlaceholderText="Enter your name (appears below signature)"/>
-                    </StackPanel>
-
-                    <!-- Include Date -->
-                    <CheckBox Content="Include date" IsChecked="{x:Bind ViewModel.IncludeSignatureDate, Mode=TwoWay}"/>
-
-                    <!-- Page Number -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Page:" VerticalAlignment="Center" Foreground="#808080"/>
-                        <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.SignaturePageNumber, Mode=TwoWay}" Minimum="1"
-                                   Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
-                    </Grid>
-
-                    <!-- Position Controls -->
-                    <TextBlock Text="Signature Position" FontSize="13" Foreground="#808080" Margin="0,8,0,0"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="50"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="X:" VerticalAlignment="Center" Foreground="#808080"/>
-                        <Slider Grid.Column="1" Value="{x:Bind ViewModel.SignatureX, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="8,0"/>
-                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#606060">
-                            <Run Text="{x:Bind ViewModel.SignatureX, Mode=OneWay}"/><Run Text="%"/>
-                        </TextBlock>
-                        <TextBlock Grid.Column="3" Text="Y:" VerticalAlignment="Center" Foreground="#808080" Margin="16,0,0,0"/>
-                        <Slider Grid.Column="4" Value="{x:Bind ViewModel.SignatureY, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="8,0"/>
-                        <TextBlock Grid.Column="5" VerticalAlignment="Center" Foreground="#606060">
-                            <Run Text="{x:Bind ViewModel.SignatureY, Mode=OneWay}"/><Run Text="%"/>
-                        </TextBlock>
-                    </Grid>
-
-                    <!-- Signature Width -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="60"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Width:" VerticalAlignment="Center" Foreground="#808080"/>
-                        <Slider Grid.Column="1" Value="{x:Bind ViewModel.SignatureWidth, Mode=TwoWay}" Minimum="50" Maximum="300" Margin="8,0"/>
-                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="#606060">
-                            <Run Text="{x:Bind ViewModel.SignatureWidth, Mode=OneWay}"/><Run Text="pt"/>
-                        </TextBlock>
-                    </Grid>
-
-                    <Button Command="{x:Bind ViewModel.ApplySignatureCommand}" Style="{StaticResource AccentButtonStyle}"
-                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xED64;" FontSize="14"/>
-                            <TextBlock Text="Apply Signature"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Border>
-
-            <!-- Convert to PDF Mode -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsConvertMode, Mode=OneWay}">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="Convert File to PDF" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-
-                    <!-- Supported formats info -->
-                    <Border Background="#141414" CornerRadius="6" Padding="12">
-                        <StackPanel>
-                            <TextBlock Text="Supported file formats:" FontSize="12" Foreground="#808080"/>
-                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                                <Border Background="#1A3A1A" CornerRadius="4" Padding="8,4">
-                                    <TextBlock Text="Images" FontSize="11" Foreground="#4CAF50"/>
-                                </Border>
-                                <TextBlock Text="JPG, PNG, BMP, GIF, TIFF" FontSize="12" Foreground="#606060" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                                <Border Background="#1A2A3A" CornerRadius="4" Padding="8,4">
-                                    <TextBlock Text="Text" FontSize="11" Foreground="#2196F3"/>
-                                </Border>
-                                <TextBlock Text="TXT" FontSize="12" Foreground="#606060" VerticalAlignment="Center"/>
-                            </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Border>
-
-                    <!-- File Selection -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Background="#141414" CornerRadius="6" Padding="12,8" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8A5;" FontSize="16" Foreground="#808080"
-                                          Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
-                                <FontIcon Glyph="&#xE8FB;" FontSize="16" Foreground="#4CAF50"
-                                          Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}"/>
-                                <StackPanel>
-                                    <TextBlock Text="{x:Bind ViewModel.ConvertFileName, Mode=OneWay}"
-                                               Foreground="White" FontWeight="SemiBold"
-                                               Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}"/>
-                                    <TextBlock Text="No file selected"
-                                               Foreground="#606060"
-                                               Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
-                                    <TextBlock Text="{x:Bind ViewModel.ConvertFileType, Mode=OneWay}"
-                                               Foreground="#808080" FontSize="11"
-                                               Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-                        <Button Grid.Column="1" Command="{x:Bind ViewModel.SelectConvertFileCommand}" Margin="8,0">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
-                                <TextBlock Text="Browse"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Grid.Column="2" Command="{x:Bind ViewModel.ClearConvertFileCommand}"
-                                Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}">
-                            <FontIcon Glyph="&#xE711;" FontSize="14"/>
-                        </Button>
-                    </Grid>
-
-                    <Button Command="{x:Bind ViewModel.ConvertToPdfCommand}" Style="{StaticResource AccentButtonStyle}"
-                            HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE8AB;" FontSize="14"/>
-                            <TextBlock Text="Convert to PDF"/>
-                        </StackPanel>
-                    </Button>
                 </StackPanel>
-            </Border>
 
-            <!-- Processing Status -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="16" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <ProgressRing IsActive="True" Width="20" Height="20"/>
-                    <TextBlock Text="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}" Foreground="#808080" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Result -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel>
-                        <TextBlock Text="Operation Complete" FontSize="16" FontWeight="SemiBold" Foreground="#4CAF50"/>
-                        <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" FontSize="13" Foreground="#808080" Margin="0,4,0,0"/>
-                        <TextBlock Text="{x:Bind ViewModel.ResultPath, Mode=OneWay}" FontSize="11" Foreground="#606060" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                <!-- Split Options -->
+                <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsSplitMode, Mode=OneWay}">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="SPLIT OPTIONS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                     </StackPanel>
 
-                    <Button Grid.Column="1" Command="{x:Bind ViewModel.OpenOutputFolderCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE838;" FontSize="14"/>
-                            <TextBlock Text="Open Folder"/>
-                        </StackPanel>
-                    </Button>
-                </Grid>
-            </Border>
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="16">
+                            <RadioButton Content="Split into individual pages" IsChecked="{x:Bind ViewModel.SplitAllPages, Mode=TwoWay}"/>
+                            <RadioButton Content="Split by page range" IsChecked="{x:Bind ViewModel.SplitByRange, Mode=TwoWay}"/>
 
-            <!-- Action Status -->
-            <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}" CornerRadius="8" Padding="16"
-                    Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}" Opacity="0.9">
-                <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
-            </Border>
-        </StackPanel>
-    </ScrollViewer>
+                            <Grid Visibility="{x:Bind ViewModel.SplitByRange, Mode=OneWay}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="From page:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}"/>
+                                <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.SplitStartPage, Mode=TwoWay}" Minimum="1"
+                                           Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                                <TextBlock Grid.Column="2" Text="To page:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}" Margin="16,0,0,0"/>
+                                <NumberBox Grid.Column="3" Value="{x:Bind ViewModel.SplitEndPage, Mode=TwoWay}" Minimum="1"
+                                           Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                            </Grid>
+
+                            <Button Command="{x:Bind ViewModel.SplitPdfCommand}" Style="{StaticResource RedButtonStyle}"
+                                    HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8C8;" FontSize="14"/>
+                                    <TextBlock Text="SPLIT PDF"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Extract Options -->
+                <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsExtractMode, Mode=OneWay}">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="EXTRACT PAGES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="From page:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}"/>
+                                <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.ExtractStartPage, Mode=TwoWay}" Minimum="1"
+                                           Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                                <TextBlock Grid.Column="2" Text="To page:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}" Margin="16,0,0,0"/>
+                                <NumberBox Grid.Column="3" Value="{x:Bind ViewModel.ExtractEndPage, Mode=TwoWay}" Minimum="1"
+                                           Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                            </Grid>
+
+                            <Button Command="{x:Bind ViewModel.ExtractPagesCommand}" Style="{StaticResource RedButtonStyle}"
+                                    HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8A7;" FontSize="14"/>
+                                    <TextBlock Text="EXTRACT PAGES"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Signature Options -->
+                <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsSignatureMode, Mode=OneWay}">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="ADD SIGNATURE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="16">
+                            <!-- Signature Type Selection -->
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <RadioButton Content="Draw Signature" GroupName="SignatureType"
+                                             IsChecked="{x:Bind ViewModel.IsDrawSignature, Mode=TwoWay}"/>
+                                <RadioButton Content="Type Signature" GroupName="SignatureType"
+                                             IsChecked="{x:Bind ViewModel.IsTypeSignature, Mode=TwoWay}"/>
+                                <RadioButton Content="Upload Image" GroupName="SignatureType"
+                                             IsChecked="{x:Bind ViewModel.IsUploadSignature, Mode=TwoWay}"/>
+                            </StackPanel>
+
+                            <!-- Draw Signature Canvas -->
+                            <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsDrawSignature, Mode=OneWay}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Draw your signature below" Style="{StaticResource CardSubtitleStyle}"/>
+                                    <Button Grid.Column="1" Click="ClearInkCanvas_Click" Style="{StaticResource OutlinedButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="12"/>
+                                            <TextBlock Text="CLEAR"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <Border Background="White" CornerRadius="8" Height="150" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
+                                    <Canvas x:Name="SignatureCanvas"
+                                            Background="White"
+                                            PointerPressed="SignatureCanvas_PointerPressed"
+                                            PointerMoved="SignatureCanvas_PointerMoved"
+                                            PointerReleased="SignatureCanvas_PointerReleased"
+                                            PointerExited="SignatureCanvas_PointerReleased"/>
+                                </Border>
+                                <TextBlock Text="Use mouse or touch to draw" Style="{StaticResource CardSubtitleStyle}" FontStyle="Italic"/>
+                            </StackPanel>
+
+                            <!-- Type Signature (Cursive) -->
+                            <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsTypeSignature, Mode=OneWay}">
+                                <TextBlock Text="Type your name below (will appear in cursive style)" Style="{StaticResource CardSubtitleStyle}"/>
+                                <TextBox x:Name="TypedSignatureInput"
+                                         Text="{x:Bind ViewModel.TypedSignatureName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         PlaceholderText="Type your full name..."
+                                         Style="{StaticResource SearchTextBoxStyle}"
+                                         TextChanged="TypedSignatureInput_TextChanged"/>
+                                <Border Background="White" CornerRadius="8" Height="80" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" Padding="16,8">
+                                    <TextBlock x:Name="TypedSignaturePreview"
+                                               Text="{x:Bind ViewModel.TypedSignatureName, Mode=OneWay}"
+                                               FontFamily="Segoe Script"
+                                               FontSize="32"
+                                               Foreground="Black"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Left"/>
+                                </Border>
+                                <TextBlock Text="Preview of your signature in cursive style" Style="{StaticResource CardSubtitleStyle}" FontStyle="Italic"/>
+                            </StackPanel>
+
+                            <!-- Upload Signature Image -->
+                            <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsUploadSignature, Mode=OneWay}">
+                                <TextBlock Text="Signature Image" Style="{StaticResource CardSubtitleStyle}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Style="{StaticResource CardStyle}" Padding="12,8" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.SignatureImageName, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </Border>
+                                    <Button Grid.Column="1" Command="{x:Bind ViewModel.SelectSignatureImageCommand}" Style="{StaticResource OutlinedButtonStyle}" Margin="8,0">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE8B9;" FontSize="14"/>
+                                            <TextBlock Text="BROWSE"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="2" Command="{x:Bind ViewModel.ClearSignatureImageCommand}" Style="{StaticResource OutlinedButtonStyle}"
+                                            Visibility="{x:Bind ViewModel.HasSignatureImage, Mode=OneWay}">
+                                        <FontIcon Glyph="&#xE711;" FontSize="14"/>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Signer Name -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Signer Name" Style="{StaticResource CardSubtitleStyle}"/>
+                                <TextBox Text="{x:Bind ViewModel.SignerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         PlaceholderText="Enter your name (appears below signature)"
+                                         Style="{StaticResource SearchTextBoxStyle}"/>
+                            </StackPanel>
+
+                            <!-- Include Date -->
+                            <CheckBox Content="Include date" IsChecked="{x:Bind ViewModel.IncludeSignatureDate, Mode=TwoWay}"/>
+
+                            <!-- Page Number -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Page:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}"/>
+                                <NumberBox Grid.Column="1" Value="{x:Bind ViewModel.SignaturePageNumber, Mode=TwoWay}" Minimum="1"
+                                           Maximum="{x:Bind ViewModel.PageCount, Mode=OneWay}" SpinButtonPlacementMode="Compact" Margin="8,0"/>
+                            </Grid>
+
+                            <!-- Position Controls -->
+                            <TextBlock Text="Signature Position" Style="{StaticResource CardSubtitleStyle}" Margin="0,8,0,0"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="X:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}"/>
+                                <Slider Grid.Column="1" Value="{x:Bind ViewModel.SignatureX, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="8,0"/>
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}">
+                                    <Run Text="{x:Bind ViewModel.SignatureX, Mode=OneWay}"/><Run Text="%"/>
+                                </TextBlock>
+                                <TextBlock Grid.Column="3" Text="Y:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}" Margin="16,0,0,0"/>
+                                <Slider Grid.Column="4" Value="{x:Bind ViewModel.SignatureY, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="8,0"/>
+                                <TextBlock Grid.Column="5" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}">
+                                    <Run Text="{x:Bind ViewModel.SignatureY, Mode=OneWay}"/><Run Text="%"/>
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- Signature Width -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Width:" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}"/>
+                                <Slider Grid.Column="1" Value="{x:Bind ViewModel.SignatureWidth, Mode=TwoWay}" Minimum="50" Maximum="300" Margin="8,0"/>
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource CardSubtitleStyle}">
+                                    <Run Text="{x:Bind ViewModel.SignatureWidth, Mode=OneWay}"/><Run Text="pt"/>
+                                </TextBlock>
+                            </Grid>
+
+                            <Button Command="{x:Bind ViewModel.ApplySignatureCommand}" Style="{StaticResource RedButtonStyle}"
+                                    HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasPdfSelected, Mode=OneWay}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xED64;" FontSize="14"/>
+                                    <TextBlock Text="APPLY SIGNATURE"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Convert to PDF Mode -->
+                <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsConvertMode, Mode=OneWay}">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="CONVERT TO PDF" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="16">
+                            <!-- Supported formats info -->
+                            <Border Background="{StaticResource CardBrush}" CornerRadius="8" Padding="16" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Supported file formats:" Style="{StaticResource CardTitleStyle}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Background="#30F44336" CornerRadius="4" Padding="8,4">
+                                            <TextBlock Text="Office" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}"/>
+                                        </Border>
+                                        <TextBlock Text="DOC, DOCX, XLS, XLSX, PPT, PPTX (requires MS Office)" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Background="#304CAF50" CornerRadius="4" Padding="8,4">
+                                            <TextBlock Text="Images" FontSize="11" FontWeight="SemiBold" Foreground="#4CAF50"/>
+                                        </Border>
+                                        <TextBlock Text="JPG, PNG, BMP, GIF, TIFF, WebP" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Background="#302196F3" CornerRadius="4" Padding="8,4">
+                                            <TextBlock Text="Text" FontSize="11" FontWeight="SemiBold" Foreground="#2196F3"/>
+                                        </Border>
+                                        <TextBlock Text="TXT, CSV, XML, JSON, MD, HTML" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- File Selection -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}" Margin="0,0,16,0">
+                                    <FontIcon Glyph="&#xE8A5;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"
+                                              Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                                </Border>
+                                <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}" Margin="0,0,16,0"
+                                        Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}">
+                                    <FontIcon Glyph="&#xE8FB;" FontSize="20" Foreground="#4CAF50"/>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.ConvertFileName, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"
+                                               Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}"/>
+                                    <TextBlock Text="No file selected" Style="{StaticResource CardTitleStyle}"
+                                               Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.ConvertFileType, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"
+                                               Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}"/>
+                                    <TextBlock Text="Click Browse to select a file to convert" Style="{StaticResource CardSubtitleStyle}"
+                                               Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="2" Command="{x:Bind ViewModel.SelectConvertFileCommand}" Style="{StaticResource OutlinedButtonStyle}" Margin="8,0">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                                        <TextBlock Text="BROWSE"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Grid.Column="3" Command="{x:Bind ViewModel.ClearConvertFileCommand}" Style="{StaticResource OutlinedButtonStyle}"
+                                        Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}">
+                                    <FontIcon Glyph="&#xE711;" FontSize="14"/>
+                                </Button>
+                            </Grid>
+
+                            <Button Command="{x:Bind ViewModel.ConvertToPdfCommand}" Style="{StaticResource RedButtonStyle}"
+                                    HorizontalAlignment="Stretch" IsEnabled="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8AB;" FontSize="14"/>
+                                    <TextBlock Text="CONVERT TO PDF"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Processing Status -->
+                <Border Style="{StaticResource CardStyle}" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <ProgressRing IsActive="True" Width="20" Height="20" Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Result -->
+                <Border Style="{StaticResource CardStyle}" Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}" Margin="0,0,16,0">
+                            <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="#4CAF50"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Operation Complete" Style="{StaticResource CardTitleStyle}" Foreground="#4CAF50"/>
+                            <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
+                            <TextBlock Text="{x:Bind ViewModel.ResultPath, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" TextTrimming="CharacterEllipsis" Opacity="0.6"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="2" Command="{x:Bind ViewModel.OpenOutputFolderCommand}" Style="{StaticResource OutlinedButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE838;" FontSize="14"/>
+                                <TextBlock Text="OPEN FOLDER"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Action Status -->
+                <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
+                        CornerRadius="8" Padding="16"
+                        Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}" Opacity="0.9">
+                    <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </Page>
