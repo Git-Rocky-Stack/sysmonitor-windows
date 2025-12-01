@@ -618,6 +618,21 @@ public partial class PdfToolsViewModel : ObservableObject
         {
             var picker = new FileOpenPicker();
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+
+            // Microsoft Office formats (requires Office installed)
+            picker.FileTypeFilter.Add(".doc");
+            picker.FileTypeFilter.Add(".docx");
+            picker.FileTypeFilter.Add(".xls");
+            picker.FileTypeFilter.Add(".xlsx");
+            picker.FileTypeFilter.Add(".xlsm");
+            picker.FileTypeFilter.Add(".ppt");
+            picker.FileTypeFilter.Add(".pptx");
+
+            // OpenDocument formats
+            picker.FileTypeFilter.Add(".odt");
+            picker.FileTypeFilter.Add(".ods");
+            picker.FileTypeFilter.Add(".odp");
+
             // Image formats
             picker.FileTypeFilter.Add(".jpg");
             picker.FileTypeFilter.Add(".jpeg");
@@ -626,8 +641,17 @@ public partial class PdfToolsViewModel : ObservableObject
             picker.FileTypeFilter.Add(".gif");
             picker.FileTypeFilter.Add(".tiff");
             picker.FileTypeFilter.Add(".tif");
-            // Text format
+            picker.FileTypeFilter.Add(".webp");
+
+            // Text/markup formats
             picker.FileTypeFilter.Add(".txt");
+            picker.FileTypeFilter.Add(".rtf");
+            picker.FileTypeFilter.Add(".csv");
+            picker.FileTypeFilter.Add(".xml");
+            picker.FileTypeFilter.Add(".json");
+            picker.FileTypeFilter.Add(".md");
+            picker.FileTypeFilter.Add(".html");
+            picker.FileTypeFilter.Add(".htm");
 
             var hwnd = GetActiveWindow();
             if (hwnd != IntPtr.Zero)
@@ -645,16 +669,38 @@ public partial class PdfToolsViewModel : ObservableObject
                 var ext = Path.GetExtension(file.Path).ToLowerInvariant();
                 ConvertFileType = ext switch
                 {
+                    // Office formats
+                    ".doc" or ".docx" => "Word Document",
+                    ".xls" or ".xlsx" or ".xlsm" => "Excel Spreadsheet",
+                    ".ppt" or ".pptx" => "PowerPoint Presentation",
+                    ".odt" => "OpenDocument Text",
+                    ".ods" => "OpenDocument Spreadsheet",
+                    ".odp" => "OpenDocument Presentation",
+                    // Images
                     ".jpg" or ".jpeg" => "JPEG Image",
                     ".png" => "PNG Image",
                     ".bmp" => "Bitmap Image",
                     ".gif" => "GIF Image",
                     ".tiff" or ".tif" => "TIFF Image",
+                    ".webp" => "WebP Image",
+                    // Text
                     ".txt" => "Text File",
+                    ".rtf" => "Rich Text Format",
+                    ".csv" => "CSV File",
+                    ".xml" => "XML File",
+                    ".json" => "JSON File",
+                    ".md" => "Markdown File",
+                    ".html" or ".htm" => "HTML File",
                     _ => "File"
                 };
 
-                ShowAction($"Selected: {file.Name}", true);
+                // Add warning for Office formats
+                var needsOffice = ext is ".doc" or ".docx" or ".xls" or ".xlsx" or ".xlsm" or ".ppt" or ".pptx" or ".odt" or ".ods" or ".odp";
+                var message = needsOffice
+                    ? $"Selected: {file.Name} (requires MS Office)"
+                    : $"Selected: {file.Name}";
+
+                ShowAction(message, true);
             }
         }
         catch (Exception ex)
