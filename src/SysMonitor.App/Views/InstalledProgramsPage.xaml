@@ -173,15 +173,9 @@
 
                                 <!-- Type Badge -->
                                 <Border Grid.Column="2" CornerRadius="4" Padding="8,4" Margin="8,0"
-                                        VerticalAlignment="Center">
-                                    <Border.Background>
-                                        <SolidColorBrush Color="{Binding TypeColor, Converter={StaticResource StringToColorConverter}}" Opacity="0.2"/>
-                                    </Border.Background>
-                                    <TextBlock Text="{Binding TypeDisplay}" FontSize="11" FontWeight="SemiBold">
-                                        <TextBlock.Foreground>
-                                            <SolidColorBrush Color="{Binding TypeColor, Converter={StaticResource StringToColorConverter}}"/>
-                                        </TextBlock.Foreground>
-                                    </TextBlock>
+                                        VerticalAlignment="Center" Background="#30808080">
+                                    <TextBlock Text="{Binding TypeDisplay}" FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{Binding TypeColor, Converter={StaticResource StringToBrushConverter}}"/>
                                 </Border>
 
                                 <!-- Size -->
