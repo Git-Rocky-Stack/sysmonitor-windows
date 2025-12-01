@@ -438,9 +438,11 @@ public partial class PdfEditorViewModel : ObservableObject
         }
     }
 
-    public async Task AddAnnotationAtPositionAsync(double x, double y, double width, double height)
+    public async Task<Guid?> AddAnnotationAtPositionAsync(double x, double y, double width, double height)
     {
-        if (CurrentDocument == null || SelectedTool == AnnotationTool.None) return;
+        if (CurrentDocument == null || SelectedTool == AnnotationTool.None) return null;
+
+        PdfAnnotation? annotation = null;
 
         switch (SelectedTool)
         {
@@ -458,6 +460,7 @@ public partial class PdfEditorViewModel : ObservableObject
                     Color = AnnotationColor
                 };
                 await _pdfEditor.AddTextAnnotationAsync(CurrentDocument, CurrentPageNumber, textAnnotation);
+                annotation = textAnnotation;
                 break;
 
             case AnnotationTool.Highlight:
@@ -471,6 +474,7 @@ public partial class PdfEditorViewModel : ObservableObject
                     Opacity = AnnotationOpacity
                 };
                 await _pdfEditor.AddHighlightAsync(CurrentDocument, CurrentPageNumber, highlight);
+                annotation = highlight;
                 break;
 
             case AnnotationTool.Rectangle:
@@ -495,11 +499,14 @@ public partial class PdfEditorViewModel : ObservableObject
                     }
                 };
                 await _pdfEditor.AddShapeAsync(CurrentDocument, CurrentPageNumber, shape);
+                annotation = shape;
                 break;
         }
 
         IsModified = true;
         LoadAnnotationsForCurrentPage();
+
+        return annotation?.Id;
     }
 
     [RelayCommand]
