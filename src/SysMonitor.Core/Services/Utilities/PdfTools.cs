@@ -443,6 +443,14 @@ public class PdfTools : IPdfTools
             }
 
             wordApp = Activator.CreateInstance(wordType);
+            if (wordApp == null)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = "Failed to create Word application instance."
+                };
+            }
             wordApp.Visible = false;
             wordApp.DisplayAlerts = 0; // wdAlertsNone
 
@@ -504,6 +512,14 @@ public class PdfTools : IPdfTools
             }
 
             excelApp = Activator.CreateInstance(excelType);
+            if (excelApp == null)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = "Failed to create Excel application instance."
+                };
+            }
             excelApp.Visible = false;
             excelApp.DisplayAlerts = false;
 
@@ -565,6 +581,14 @@ public class PdfTools : IPdfTools
             }
 
             pptApp = Activator.CreateInstance(pptType);
+            if (pptApp == null)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = "Failed to create PowerPoint application instance."
+                };
+            }
             // PowerPoint must be visible to work properly in some cases
             // pptApp.Visible = true; // Commented out to keep it hidden if possible
 
