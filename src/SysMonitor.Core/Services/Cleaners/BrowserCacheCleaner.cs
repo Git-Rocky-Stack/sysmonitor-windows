@@ -14,14 +14,14 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
 
         _cacheLocations = new List<BrowserCacheLocation>
         {
-            // Google Chrome
-            new("Chrome", "Google Chrome Cache", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Cache")),
+            // Google Chrome (modern Chromium-based paths with Cache_Data subfolder)
+            new("Chrome", "Google Chrome Cache", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Cache", "Cache_Data")),
             new("Chrome", "Google Chrome Code Cache", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Code Cache")),
             new("Chrome", "Google Chrome GPU Cache", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "GPUCache")),
             new("Chrome", "Google Chrome Service Worker", Path.Combine(localAppData, "Google", "Chrome", "User Data", "Default", "Service Worker", "CacheStorage")),
 
-            // Microsoft Edge
-            new("Edge", "Microsoft Edge Cache", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Cache")),
+            // Microsoft Edge (modern Chromium-based paths with Cache_Data subfolder)
+            new("Edge", "Microsoft Edge Cache", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Cache", "Cache_Data")),
             new("Edge", "Microsoft Edge Code Cache", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Code Cache")),
             new("Edge", "Microsoft Edge GPU Cache", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "GPUCache")),
             new("Edge", "Microsoft Edge Service Worker", Path.Combine(localAppData, "Microsoft", "Edge", "User Data", "Default", "Service Worker", "CacheStorage")),
@@ -29,17 +29,17 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
             // Firefox (handled specially in scan)
             new("Firefox", "Mozilla Firefox Cache", Path.Combine(localAppData, "Mozilla", "Firefox", "Profiles")),
 
-            // Brave
-            new("Brave", "Brave Cache", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "Cache")),
+            // Brave (modern Chromium-based paths with Cache_Data subfolder)
+            new("Brave", "Brave Cache", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "Cache", "Cache_Data")),
             new("Brave", "Brave Code Cache", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "Code Cache")),
             new("Brave", "Brave GPU Cache", Path.Combine(localAppData, "BraveSoftware", "Brave-Browser", "User Data", "Default", "GPUCache")),
 
-            // Opera
-            new("Opera", "Opera Cache", Path.Combine(localAppData, "Opera Software", "Opera Stable", "Cache")),
+            // Opera (modern Chromium-based paths with Cache_Data subfolder)
+            new("Opera", "Opera Cache", Path.Combine(localAppData, "Opera Software", "Opera Stable", "Cache", "Cache_Data")),
             new("Opera", "Opera Code Cache", Path.Combine(localAppData, "Opera Software", "Opera Stable", "Code Cache")),
 
-            // Vivaldi
-            new("Vivaldi", "Vivaldi Cache", Path.Combine(localAppData, "Vivaldi", "User Data", "Default", "Cache")),
+            // Vivaldi (modern Chromium-based paths with Cache_Data subfolder)
+            new("Vivaldi", "Vivaldi Cache", Path.Combine(localAppData, "Vivaldi", "User Data", "Default", "Cache", "Cache_Data")),
         };
     }
 
