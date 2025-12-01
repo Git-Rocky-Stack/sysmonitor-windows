@@ -139,12 +139,12 @@
                         <Button Command="{x:Bind ViewModel.PreviousPageCommand}" Padding="8" Background="Transparent">
                             <FontIcon Glyph="&#xE76B;" FontSize="14"/>
                         </Button>
-                        <TextBlock VerticalAlignment="Center">
-                            <Run Text="Page "/>
-                            <Run Text="{x:Bind ViewModel.CurrentPageNumber, Mode=OneWay}"/>
-                            <Run Text=" of "/>
-                            <Run Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
-                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Page "/>
+                            <TextBlock Text="{x:Bind ViewModel.CurrentPageNumber, Mode=OneWay}"/>
+                            <TextBlock Text=" of "/>
+                            <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
+                        </StackPanel>
                         <Button Command="{x:Bind ViewModel.NextPageCommand}" Padding="8" Background="Transparent">
                             <FontIcon Glyph="&#xE76C;" FontSize="14"/>
                         </Button>
