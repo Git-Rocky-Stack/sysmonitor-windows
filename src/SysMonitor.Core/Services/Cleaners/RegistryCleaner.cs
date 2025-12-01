@@ -500,6 +500,8 @@ public class RegistryCleaner : IRegistryCleaner
 
                     if (root == null) continue;
 
+                    bool operationSucceeded = false;
+
                     // Delete the value or subkey
                     if (issue.Category == RegistryIssueCategory.OrphanedSoftware ||
                         issue.Category == RegistryIssueCategory.InvalidCOM ||
@@ -510,7 +512,16 @@ public class RegistryCleaner : IRegistryCleaner
                         var subKeyName = keyPath.Substring(keyPath.LastIndexOf('\\') + 1);
 
                         using var parentKey = root.OpenSubKey(parentPath, true);
-                        parentKey?.DeleteSubKeyTree(subKeyName, false);
+                        if (parentKey != null)
+                        {
+                            parentKey.DeleteSubKeyTree(subKeyName, false);
+                            operationSucceeded = true;
+                        }
+                        else
+                        {
+                            result.ErrorCount++;
+                            result.Errors.Add($"{issue.Key}: Cannot open key for writing (requires admin)");
+                        }
                     }
                     else if (issue.ValueName == "(all values)")
                     {
@@ -522,17 +533,35 @@ public class RegistryCleaner : IRegistryCleaner
                             {
                                 key.DeleteValue(valueName, false);
                             }
+                            operationSucceeded = true;
+                        }
+                        else
+                        {
+                            result.ErrorCount++;
+                            result.Errors.Add($"{issue.Key}: Cannot open key for writing (requires admin)");
                         }
                     }
                     else
                     {
                         // Delete the specific value
                         using var key = root.OpenSubKey(keyPath, true);
-                        key?.DeleteValue(issue.ValueName, false);
+                        if (key != null)
+                        {
+                            key.DeleteValue(issue.ValueName, false);
+                            operationSucceeded = true;
+                        }
+                        else
+                        {
+                            result.ErrorCount++;
+                            result.Errors.Add($"{issue.Key}: Cannot open key for writing (requires admin)");
+                        }
                     }
 
-                    result.FilesDeleted++; // Using this to count fixed issues
-                    issue.IsFixed = true;
+                    if (operationSucceeded)
+                    {
+                        result.FilesDeleted++; // Using this to count fixed issues
+                        issue.IsFixed = true;
+                    }
                 }
                 catch (UnauthorizedAccessException)
                 {
