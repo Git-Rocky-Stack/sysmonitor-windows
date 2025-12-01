@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.App.Helpers;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
@@ -160,8 +161,8 @@ public partial class PdfEditorViewModel : ObservableObject
                 Rotation = page.Rotation
             };
 
-            // Load thumbnail image
-            var imageBytes = await _pdfEditor.RenderPageToImageAsync(CurrentDocument.FilePath, page.PageNumber, 0.2);
+            // Load thumbnail image using Windows PDF renderer
+            var imageBytes = await PdfPageRenderer.RenderThumbnailAsync(CurrentDocument.FilePath, page.PageNumber, 150);
             if (imageBytes != null)
             {
                 thumbnail.ImageBytes = imageBytes;
@@ -183,8 +184,8 @@ public partial class PdfEditorViewModel : ObservableObject
         {
             CurrentPage = CurrentDocument.Pages[CurrentPageNumber - 1];
 
-            // Load page image for viewer
-            var imageBytes = await _pdfEditor.RenderPageToImageAsync(CurrentDocument.FilePath, CurrentPageNumber, ZoomLevel);
+            // Load page image for viewer using Windows PDF renderer
+            var imageBytes = await PdfPageRenderer.RenderPageAsync(CurrentDocument.FilePath, CurrentPageNumber, ZoomLevel);
             CurrentPageImage = imageBytes;
 
             // Load annotations for this page
@@ -355,7 +356,7 @@ public partial class PdfEditorViewModel : ObservableObject
         var thumbnail = PageThumbnails.FirstOrDefault(t => t.PageNumber == pageNumber);
         if (thumbnail != null)
         {
-            var imageBytes = await _pdfEditor.RenderPageToImageAsync(CurrentDocument.FilePath, pageNumber, 0.2);
+            var imageBytes = await PdfPageRenderer.RenderThumbnailAsync(CurrentDocument.FilePath, pageNumber, 150);
             if (imageBytes != null)
             {
                 GetDispatcher().TryEnqueue(() => thumbnail.ImageBytes = imageBytes);
