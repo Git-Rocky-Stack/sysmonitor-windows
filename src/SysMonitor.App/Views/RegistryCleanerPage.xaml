@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page
-    x:Class="SysMonitor.App.Views.CleanerPage"
+    x:Class="SysMonitor.App.Views.RegistryCleanerPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Background="{StaticResource BackgroundBrush}">
@@ -24,9 +24,9 @@
 
                 <!-- Left: Header text -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="DIRECTORY CLEANER" Style="{StaticResource PageHeaderStyle}"
+                    <TextBlock Text="REGISTRY CLEANER" Style="{StaticResource PageHeaderStyle}"
                                Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Remove Temporary Files &amp; Free Up Space" Style="{StaticResource PageSubtitleStyle}"
+                    <TextBlock Text="Find &amp; Fix Invalid Registry Entries" Style="{StaticResource PageSubtitleStyle}"
                                Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                 </StackPanel>
 
@@ -41,7 +41,7 @@
         <StackPanel Grid.Row="1" Spacing="12">
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
                 <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="CLEANING CONTROLS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                <TextBlock Text="REGISTRY CONTROLS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
             <!-- Status Card -->
@@ -54,15 +54,17 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                        <FontIcon Glyph="&#xE74D;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <FontIcon Glyph="&#xEA99;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
                     </Border>
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
                                    Style="{StaticResource CardTitleStyle}"/>
                         <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
-                            <Run Text="Total: "/>
-                            <Run Text="{x:Bind ViewModel.FormattedTotalSize, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
+                            <Run Text="Issues: "/>
+                            <Run Text="{x:Bind ViewModel.TotalIssues, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
+                            <Run Text=" | Selected: "/>
+                            <Run Text="{x:Bind ViewModel.SelectedIssues, Mode=OneWay}" Foreground="{StaticResource CyanAccentBrush}"/>
                         </TextBlock>
                     </StackPanel>
 
@@ -82,7 +84,7 @@
                                     Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
                                     IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                         </Border>
-                        <!-- CLEAN SELECTED with chrome bezel -->
+                        <!-- FIX SELECTED with chrome bezel -->
                         <Border CornerRadius="26" Padding="2">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -93,11 +95,28 @@
                                     <GradientStop Color="#505050" Offset="1.0"/>
                                 </LinearGradientBrush>
                             </Border.Background>
-                            <Button Content="CLEAN SELECTED" Command="{x:Bind ViewModel.CleanCommand}"
+                            <Button Content="FIX SELECTED" Command="{x:Bind ViewModel.CleanCommand}"
                                     Style="{StaticResource RedButtonStyle}"
                                     IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
                         </Border>
                     </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Info Card -->
+            <Border Style="{StaticResource CardStyle}" Padding="12" Background="#1A1A1A">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <FontIcon Grid.Column="0" Glyph="&#xE946;" FontSize="16"
+                              Foreground="{StaticResource CyanAccentBrush}" Margin="0,0,12,0"/>
+                    <TextBlock Grid.Column="1" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                        <Run Text="Registry cleaning removes invalid entries left behind by uninstalled programs. "/>
+                        <Run Text="A backup is automatically created before any changes are made." Foreground="{StaticResource SuccessBrush}"/>
+                    </TextBlock>
                 </Grid>
             </Border>
         </StackPanel>
@@ -131,8 +150,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
@@ -140,23 +158,25 @@
 
                             <Border Grid.Column="1" Style="{StaticResource IconContainerStyle}"
                                     Width="40" Height="40" Margin="8,0,12,0">
-                                <FontIcon Glyph="&#xE8B7;" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xEA99;" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </Border>
 
                             <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}" Style="{StaticResource CardTitleStyle}"/>
-                                <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"/>
+                                <TextBlock Text="{Binding IssueType}" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="400"/>
+                                <TextBlock Text="{Binding Key}" Style="{StaticResource CardSubtitleStyle}"
+                                           Foreground="{StaticResource TextTertiaryBrush}" FontSize="10"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="400"/>
                             </StackPanel>
 
-                            <TextBlock Grid.Column="3" VerticalAlignment="Center"
-                                       Foreground="{StaticResource TextSecondaryBrush}">
-                                <Run Text="{Binding FileCount}"/>
-                                <Run Text=" files"/>
-                            </TextBlock>
-
-                            <TextBlock Grid.Column="4" VerticalAlignment="Center"
-                                       Text="{Binding FormattedSize}"
-                                       Foreground="{StaticResource WarningBrush}" FontWeight="SemiBold"/>
+                            <!-- Risk Level Badge -->
+                            <Border Grid.Column="3" VerticalAlignment="Center" CornerRadius="8" Padding="8,4"
+                                    Background="#2A2A2A" Margin="8,0,0,0">
+                                <TextBlock FontSize="11" FontWeight="SemiBold">
+                                    <Run Text="{Binding RiskLevel}"/>
+                                </TextBlock>
+                            </Border>
                         </Grid>
                     </Border>
                 </DataTemplate>
