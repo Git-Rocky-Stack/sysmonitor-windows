@@ -278,6 +278,15 @@ public sealed partial class PdfEditorPage : Page
     {
         ClearSelection();
 
+        var hit = FindAnnotationAt(position);
+        if (hit.HasValue)
+        {
+            SelectAnnotation(hit.Value.id, hit.Value.element);
+        }
+    }
+
+    private (Guid id, FrameworkElement element)? FindAnnotationAt(Point position)
+    {
         // Find annotation at click position (iterate in reverse to get topmost)
         foreach (var kvp in _annotationElements.Reverse())
         {
@@ -299,15 +308,33 @@ public sealed partial class PdfEditorPage : Page
                 if (position.X >= lineLeft - 10 && position.X <= lineRight + 10 &&
                     position.Y >= lineTop - 10 && position.Y <= lineBottom + 10)
                 {
-                    SelectAnnotation(kvp.Key, element);
-                    return;
+                    return (kvp.Key, element);
                 }
             }
             else if (position.X >= left && position.X <= right &&
                      position.Y >= top && position.Y <= bottom)
             {
-                SelectAnnotation(kvp.Key, element);
-                return;
+                return (kvp.Key, element);
+            }
+        }
+        return null;
+    }
+
+    private void AnnotationCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        var position = e.GetPosition(AnnotationCanvas);
+        var hit = FindAnnotationAt(position);
+
+        if (hit.HasValue)
+        {
+            var element = hit.Value.element;
+            var id = hit.Value.id;
+
+            // Check if it's a text annotation (Border containing TextBlock)
+            if (element is Border border && border.Child is TextBlock textBlock)
+            {
+                EditTextAnnotation(id, textBlock, border);
+                e.Handled = true;
             }
         }
     }
@@ -554,27 +581,6 @@ public sealed partial class PdfEditorPage : Page
             Canvas.SetLeft(element, x);
             Canvas.SetTop(element, y);
 
-            // Add click handler for selection
-            element.PointerPressed += (s, e) =>
-            {
-                if (ViewModel.SelectedTool == AnnotationTool.None)
-                {
-                    ClearSelection();
-                    SelectAnnotation(id, element);
-                    e.Handled = true;
-                }
-            };
-
-            // Add double-click handler for text editing
-            element.DoubleTapped += (s, e) =>
-            {
-                if (element is TextBlock textBlock)
-                {
-                    EditTextAnnotation(id, textBlock);
-                    e.Handled = true;
-                }
-            };
-
             AnnotationCanvas.Children.Add(element);
             _annotationElements[id] = element;
         }
@@ -637,14 +643,14 @@ public sealed partial class PdfEditorPage : Page
         _textInputBox.SelectAll();
     }
 
-    private void EditTextAnnotation(Guid id, TextBlock textBlock)
+    private void EditTextAnnotation(Guid id, TextBlock textBlock, FrameworkElement container)
     {
-        var x = Canvas.GetLeft(textBlock);
-        var y = Canvas.GetTop(textBlock);
+        var x = Canvas.GetLeft(container);
+        var y = Canvas.GetTop(container);
         var text = textBlock.Text;
 
-        // Hide the text block
-        textBlock.Visibility = Visibility.Collapsed;
+        // Hide the container (Border holding the TextBlock)
+        container.Visibility = Visibility.Collapsed;
 
         // Show text input with existing text
         ShowTextInput(new Point(x, y), text, id);
@@ -680,13 +686,11 @@ public sealed partial class PdfEditorPage : Page
     {
         if (_textInputBox == null) return;
 
-        // If editing, restore the original text block
+        // If editing, restore the original container
         if (_textInputBox.Tag is Guid editId && _annotationElements.TryGetValue(editId, out var element))
         {
-            if (element is TextBlock tb)
-            {
-                tb.Visibility = Visibility.Visible;
-            }
+            // The element is the Border container
+            element.Visibility = Visibility.Visible;
         }
 
         AnnotationCanvas.Children.Remove(_textInputBox);
@@ -712,10 +716,11 @@ public sealed partial class PdfEditorPage : Page
         // If editing existing annotation
         if (editId.HasValue && _annotationElements.TryGetValue(editId.Value, out var existingElement))
         {
-            if (existingElement is TextBlock existingTb)
+            // The existing element is a Border containing a TextBlock
+            if (existingElement is Border existingBorder && existingBorder.Child is TextBlock existingTb)
             {
                 existingTb.Text = text;
-                existingTb.Visibility = Visibility.Visible;
+                existingBorder.Visibility = Visibility.Visible;
                 AnnotationCanvas.Children.Remove(_textInputBox);
                 _textInputBox = null;
                 return;
@@ -740,30 +745,23 @@ public sealed partial class PdfEditorPage : Page
             Foreground = new SolidColorBrush(ParseColor(ViewModel.AnnotationColor))
         };
 
-        Canvas.SetLeft(textBlock, x);
-        Canvas.SetTop(textBlock, y);
-
-        // Add click handler for selection
-        textBlock.PointerPressed += (s, e) =>
+        // Wrap TextBlock in a Border for proper hit-testing
+        // Border with transparent background ensures the entire bounding box is clickable
+        var textContainer = new Border
         {
-            if (ViewModel.SelectedTool == AnnotationTool.None)
-            {
-                ClearSelection();
-                SelectAnnotation(annotationId.Value, textBlock);
-                e.Handled = true;
-            }
+            Child = textBlock,
+            Background = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255)), // Nearly transparent for hit-testing
+            Padding = new Thickness(4),
+            MinWidth = 20,
+            MinHeight = 20
         };
 
-        // Add double-click handler for editing
-        textBlock.DoubleTapped += (s, e) =>
-        {
-            EditTextAnnotation(annotationId.Value, textBlock);
-            e.Handled = true;
-        };
+        Canvas.SetLeft(textContainer, x);
+        Canvas.SetTop(textContainer, y);
 
         AnnotationCanvas.Children.Remove(_textInputBox);
-        AnnotationCanvas.Children.Add(textBlock);
-        _annotationElements[annotationId.Value] = textBlock;
+        AnnotationCanvas.Children.Add(textContainer);
+        _annotationElements[annotationId.Value] = textContainer;
         _textInputBox = null;
     }
 
