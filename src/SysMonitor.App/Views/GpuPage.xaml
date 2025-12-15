@@ -137,8 +137,8 @@
                                 <TextBlock.Foreground>
                                     <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}"/>
                                 </TextBlock.Foreground>
-                                <Run Text="{x:Bind ViewModel.GpuTemperature, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                                <Run Text="°C" FontSize="28" FontWeight="Normal"/>
+                                <Run Text="{x:Bind ViewModel.GpuTemperatureFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
 
@@ -198,8 +198,8 @@
                                 <TextBlock.Foreground>
                                     <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}"/>
                                 </TextBlock.Foreground>
-                                <Run Text="{x:Bind ViewModel.GpuHotSpot, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                                <Run Text="°C" FontSize="28" FontWeight="Normal"/>
+                                <Run Text="{x:Bind ViewModel.GpuHotSpotFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
 
@@ -259,8 +259,8 @@
                                 <TextBlock.Foreground>
                                     <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}"/>
                                 </TextBlock.Foreground>
-                                <Run Text="{x:Bind ViewModel.GpuMemoryTemp, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                                <Run Text="°C" FontSize="28" FontWeight="Normal"/>
+                                <Run Text="{x:Bind ViewModel.GpuMemoryTempFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
 
@@ -300,23 +300,23 @@
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                         <Border Width="12" Height="12" CornerRadius="6" Background="#2196F3"/>
-                        <TextBlock Text="Cool &lt;50°" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                        <TextBlock Text="Cool &lt;122°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                         <Border Width="12" Height="12" CornerRadius="6" Background="#4CAF50"/>
-                        <TextBlock Text="Normal &lt;70°" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                        <TextBlock Text="Normal &lt;158°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                         <Border Width="12" Height="12" CornerRadius="6" Background="#FF9800"/>
-                        <TextBlock Text="Warm &lt;85°" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                        <TextBlock Text="Warm &lt;185°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
                     <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                         <Border Width="12" Height="12" CornerRadius="6" Background="#FF5722"/>
-                        <TextBlock Text="Hot &lt;95°" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                        <TextBlock Text="Hot &lt;203°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
                     <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                         <Border Width="12" Height="12" CornerRadius="6" Background="#F44336"/>
-                        <TextBlock Text="Critical 95°+" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                        <TextBlock Text="Critical 203°F+" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -333,7 +333,7 @@
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE9CA;" Foreground="{StaticResource CyanAccentBrush}" FontSize="18"/>
-                        <TextBlock Text="GPU temperatures below 85°C are ideal for sustained gaming performance"
+                        <TextBlock Text="GPU temperatures below 185°F are ideal for sustained gaming performance"
                                    Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="12">

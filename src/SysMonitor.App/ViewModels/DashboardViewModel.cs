@@ -51,10 +51,17 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _downloadSpeed = "0 B/s";
     [ObservableProperty] private string _uploadSpeed = "0 B/s";
 
-    // Temperature stats
+    // Temperature stats (stored in Celsius from sensor)
     [ObservableProperty] private double _cpuTemperature = 0;
     [ObservableProperty] private string _cpuTempStatus = "N/A";
     [ObservableProperty] private double _gpuTemperature = 0;
+
+    // Fahrenheit display values
+    public double CpuTemperatureFahrenheit => CpuTemperature > 0 ? (CpuTemperature * 1.8) + 32 : 0;
+    public double GpuTemperatureFahrenheit => GpuTemperature > 0 ? (GpuTemperature * 1.8) + 32 : 0;
+
+    partial void OnCpuTemperatureChanged(double value) => OnPropertyChanged(nameof(CpuTemperatureFahrenheit));
+    partial void OnGpuTemperatureChanged(double value) => OnPropertyChanged(nameof(GpuTemperatureFahrenheit));
 
     // Process count
     [ObservableProperty] private int _processCount = 0;
@@ -348,7 +355,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         sb.AppendLine($"  Cores:     {info.Cpu.Cores} cores / {info.Cpu.LogicalProcessors} threads");
         sb.AppendLine($"  Speed:     {info.Cpu.MaxClockSpeedMHz} MHz");
         sb.AppendLine($"  Usage:     {info.Cpu.UsagePercent:F1}%");
-        sb.AppendLine($"  Temp:      {cpuTemp:F0}°C ({GetTempStatus(cpuTemp)})");
+        var cpuTempF = cpuTemp > 0 ? (cpuTemp * 1.8) + 32 : 0;
+        sb.AppendLine($"  Temp:      {cpuTempF:F0}°F ({GetTempStatus(cpuTemp)})");
         sb.AppendLine();
 
         sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
@@ -362,7 +370,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
         sb.AppendLine("│ GPU                                                               │");
         sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
-        sb.AppendLine($"  Temp:      {gpuTemp:F0}°C ({GetTempStatus(gpuTemp)})");
+        var gpuTempF = gpuTemp > 0 ? (gpuTemp * 1.8) + 32 : 0;
+        sb.AppendLine($"  Temp:      {gpuTempF:F0}°F ({GetTempStatus(gpuTemp)})");
         sb.AppendLine();
 
         sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");

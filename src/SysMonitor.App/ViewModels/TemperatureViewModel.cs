@@ -16,13 +16,20 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
     // Temperature Collection
     public ObservableCollection<TemperatureDisplayInfo> Temperatures { get; } = [];
 
-    // Primary Temperatures
+    // Primary Temperatures (stored in Celsius from sensor)
     [ObservableProperty] private double _cpuTemperature;
     [ObservableProperty] private double _gpuTemperature;
     [ObservableProperty] private string _cpuTempStatus = "Normal";
     [ObservableProperty] private string _gpuTempStatus = "Normal";
     [ObservableProperty] private string _cpuTempColor = "#4CAF50";
     [ObservableProperty] private string _gpuTempColor = "#4CAF50";
+
+    // Fahrenheit display values
+    public double CpuTemperatureFahrenheit => CpuTemperature > 0 ? (CpuTemperature * 1.8) + 32 : 0;
+    public double GpuTemperatureFahrenheit => GpuTemperature > 0 ? (GpuTemperature * 1.8) + 32 : 0;
+
+    partial void OnCpuTemperatureChanged(double value) => OnPropertyChanged(nameof(CpuTemperatureFahrenheit));
+    partial void OnGpuTemperatureChanged(double value) => OnPropertyChanged(nameof(GpuTemperatureFahrenheit));
 
     // State
     [ObservableProperty] private bool _isLoading = true;
@@ -130,16 +137,18 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
         }
     }
 
-    private static (string status, string color) GetTempStatus(double temp)
+    private static double CelsiusToFahrenheit(double celsius) => (celsius * 1.8) + 32;
+
+    private static (string status, string color) GetTempStatus(double tempCelsius)
     {
-        return temp switch
+        return tempCelsius switch
         {
             0 => ("N/A", "#808080"),
-            <= 45 => ("Cool", "#2196F3"),      // Blue - Cool
-            <= 65 => ("Normal", "#4CAF50"),    // Green - Normal
-            <= 80 => ("Warm", "#FF9800"),      // Orange - Warm
-            <= 90 => ("Hot", "#FF5722"),       // Deep Orange - Hot
-            _ => ("Critical", "#F44336")        // Red - Critical
+            <= 45 => ("Cool", "#2196F3"),      // Blue - Cool (<113°F)
+            <= 65 => ("Normal", "#4CAF50"),    // Green - Normal (<149°F)
+            <= 80 => ("Warm", "#FF9800"),      // Orange - Warm (<176°F)
+            <= 90 => ("Hot", "#FF5722"),       // Deep Orange - Hot (<194°F)
+            _ => ("Critical", "#F44336")        // Red - Critical (194°F+)
         };
     }
 
@@ -185,6 +194,7 @@ public class TemperatureDisplayInfo
     public string Icon { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
 
-    public string FormattedTemp => Temperature > 0 ? $"{Temperature:F0}°C" : "N/A";
+    public double TemperatureFahrenheit => Temperature > 0 ? (Temperature * 1.8) + 32 : 0;
+    public string FormattedTemp => Temperature > 0 ? $"{TemperatureFahrenheit:F0}°F" : "N/A";
     public string ShortName => Name.Contains(" - ") ? Name.Split(" - ").Last() : Name;
 }
