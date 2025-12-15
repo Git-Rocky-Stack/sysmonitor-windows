@@ -72,6 +72,19 @@
                                 <TextBlock Text="Word" VerticalAlignment="Center" FontSize="12"/>
                             </StackPanel>
                         </Button>
+                        <!-- Print/Compress/Search -->
+                        <Button Click="Print_Click" ToolTipService.ToolTip="Print (Ctrl+P)" Padding="8"
+                                IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE749;" FontSize="14"/>
+                        </Button>
+                        <Button Click="Compress_Click" ToolTipService.ToolTip="Compress PDF" Padding="8"
+                                IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE81E;" FontSize="14"/>
+                        </Button>
+                        <Button Click="Search_Click" ToolTipService.ToolTip="Search (Ctrl+F)" Padding="8"
+                                IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE721;" FontSize="14"/>
+                        </Button>
                         <!-- Undo/Redo -->
                         <Button Click="Undo_Click" ToolTipService.ToolTip="Undo (Ctrl+Z)" Padding="8"
                                 IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}">
@@ -138,6 +151,14 @@
                         <Button Click="SelectTool_Click" Tag="Redaction" ToolTipService.ToolTip="Redact (X)"
                                 Padding="8" Background="{x:Bind ViewModel.IsRedactionToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
                             <FontIcon Glyph="&#xE738;" FontSize="14"/>
+                        </Button>
+                        <Button Click="StampTool_Click" ToolTipService.ToolTip="Add Stamp"
+                                Padding="8" Background="{x:Bind ViewModel.IsStampToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE7C3;" FontSize="14"/>
+                        </Button>
+                        <Button Click="WatermarkTool_Click" ToolTipService.ToolTip="Add Watermark"
+                                Padding="8" Background="{x:Bind ViewModel.IsWatermarkToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
                         </Button>
                     </StackPanel>
                     <TextBlock Text="ANNOTATE" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
@@ -453,6 +474,27 @@
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE74B;" FontSize="14"/>
                                             <TextBlock Text="Move Down" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Click="InsertBlankPage_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                            ToolTipService.ToolTip="Insert blank page after current page">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                                            <TextBlock Text="Insert" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="1" Click="DuplicatePage_Click" HorizontalAlignment="Stretch" Padding="8,10"
+                                            ToolTipService.ToolTip="Duplicate current page">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE8C8;" FontSize="14"/>
+                                            <TextBlock Text="Duplicate" FontSize="11"/>
                                         </StackPanel>
                                     </Button>
                                 </Grid>

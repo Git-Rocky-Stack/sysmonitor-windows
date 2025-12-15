@@ -820,6 +820,15 @@ public class PdfEditor : IPdfEditor
             case SignatureAnnotation sigAnn:
                 DrawSignature(gfx, sigAnn, color);
                 break;
+            case StampAnnotation stampAnn:
+                DrawStamp(gfx, stampAnn, page);
+                break;
+            case WatermarkAnnotation watermarkAnn:
+                DrawWatermark(gfx, watermarkAnn, page);
+                break;
+            case LinkAnnotation linkAnn:
+                DrawLink(gfx, linkAnn);
+                break;
         }
     }
 
@@ -1099,5 +1108,483 @@ public class PdfEditor : IPdfEditor
         catch { }
 
         return XColors.Red;
+    }
+
+    // ==================== NEW FEATURES ====================
+
+    public async Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPageNumber, double width = 612, double height = 792)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                var newPage = new PdfPageInfo
+                {
+                    PageNumber = -1, // Marker for new blank page
+                    Width = width,
+                    Height = height,
+                    Rotation = 0
+                };
+
+                var insertIndex = Math.Max(0, Math.Min(afterPageNumber, document.Pages.Count));
+                document.Pages.Insert(insertIndex, newPage);
+                document.IsModified = true;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    PagesProcessed = document.Pages.Count
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pageNumber)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                var sourcePage = document.Pages.FirstOrDefault(p => p.PageNumber == pageNumber);
+                if (sourcePage == null)
+                {
+                    return new PdfOperationResult { Success = false, ErrorMessage = $"Page {pageNumber} not found" };
+                }
+
+                var duplicatePage = new PdfPageInfo
+                {
+                    PageNumber = sourcePage.PageNumber, // Will copy from original
+                    Width = sourcePage.Width,
+                    Height = sourcePage.Height,
+                    Rotation = sourcePage.Rotation
+                };
+
+                var insertIndex = document.Pages.IndexOf(sourcePage) + 1;
+                document.Pages.Insert(insertIndex, duplicatePage);
+                document.IsModified = true;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    PagesProcessed = document.Pages.Count
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pageNumber, StampAnnotation stamp)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                stamp.PageNumber = pageNumber;
+                document.Annotations.Add(stamp);
+                document.IsModified = true;
+
+                return new PdfOperationResult { Success = true, PagesProcessed = 1 };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                if (watermark.ApplyToAllPages)
+                {
+                    // Add watermark to all pages
+                    foreach (var page in document.Pages)
+                    {
+                        var pageWatermark = new WatermarkAnnotation
+                        {
+                            PageNumber = page.PageNumber,
+                            Type = watermark.Type,
+                            Text = watermark.Text,
+                            ImageData = watermark.ImageData,
+                            Opacity = watermark.Opacity,
+                            Rotation = watermark.Rotation,
+                            FontSize = watermark.FontSize,
+                            ApplyToAllPages = false,
+                            Position = watermark.Position,
+                            Color = watermark.Color,
+                            X = watermark.X,
+                            Y = watermark.Y,
+                            Width = watermark.Width,
+                            Height = watermark.Height
+                        };
+                        document.Annotations.Add(pageWatermark);
+                    }
+                }
+                else
+                {
+                    document.Annotations.Add(watermark);
+                }
+
+                document.IsModified = true;
+                return new PdfOperationResult { Success = true, PagesProcessed = watermark.ApplyToAllPages ? document.Pages.Count : 1 };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pageNumber, LinkAnnotation link)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                link.PageNumber = pageNumber;
+                document.Annotations.Add(link);
+                document.IsModified = true;
+
+                return new PdfOperationResult { Success = true, PagesProcessed = 1 };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
+            }
+        });
+    }
+
+    public async Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false)
+    {
+        return await Task.Run(() =>
+        {
+            var results = new List<PdfSearchResult>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(searchText) || string.IsNullOrEmpty(document.FilePath))
+                    return results;
+
+                using var pdfDoc = PdfReader.Open(document.FilePath, PdfDocumentOpenMode.Import);
+
+                // Note: PdfSharp doesn't have built-in text extraction
+                // This searches through our annotations for now
+                var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+                foreach (var annotation in document.Annotations)
+                {
+                    string? textContent = annotation switch
+                    {
+                        TextAnnotation ta => ta.Text,
+                        StickyNoteAnnotation sn => $"{sn.Title} {sn.Content}",
+                        _ => null
+                    };
+
+                    if (!string.IsNullOrEmpty(textContent) && textContent.Contains(searchText, comparison))
+                    {
+                        results.Add(new PdfSearchResult
+                        {
+                            PageNumber = annotation.PageNumber,
+                            MatchedText = searchText,
+                            ContextBefore = textContent.Length > 20 ? textContent.Substring(0, 20) : textContent,
+                            ContextAfter = "",
+                            X = annotation.X,
+                            Y = annotation.Y,
+                            Width = annotation.Width,
+                            Height = annotation.Height
+                        });
+                    }
+                }
+            }
+            catch { }
+
+            return results;
+        });
+    }
+
+    public async Task<string> ExtractTextAsync(PdfEditorDocument document, int? pageNumber = null)
+    {
+        return await Task.Run(() =>
+        {
+            var textBuilder = new System.Text.StringBuilder();
+
+            try
+            {
+                // Extract text from annotations
+                var annotations = pageNumber.HasValue
+                    ? document.Annotations.Where(a => a.PageNumber == pageNumber.Value)
+                    : document.Annotations;
+
+                foreach (var annotation in annotations)
+                {
+                    var text = annotation switch
+                    {
+                        TextAnnotation ta => ta.Text,
+                        StickyNoteAnnotation sn => $"[Note: {sn.Title}] {sn.Content}",
+                        _ => null
+                    };
+
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        textBuilder.AppendLine(text);
+                    }
+                }
+            }
+            catch { }
+
+            return textBuilder.ToString();
+        });
+    }
+
+    public async Task<PdfOperationResult> CompressPdfAsync(string inputPath, string outputPath, PdfCompressionOptions? options = null)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                options ??= new PdfCompressionOptions();
+
+                if (!File.Exists(inputPath))
+                {
+                    return new PdfOperationResult { Success = false, ErrorMessage = "Input file not found" };
+                }
+
+                var originalSize = new FileInfo(inputPath).Length;
+
+                using var inputDoc = PdfReader.Open(inputPath, PdfDocumentOpenMode.Import);
+                using var outputDoc = new PdfDocument();
+
+                // Copy pages
+                for (int i = 0; i < inputDoc.PageCount; i++)
+                {
+                    outputDoc.AddPage(inputDoc.Pages[i]);
+                }
+
+                // Set compression options
+                outputDoc.Options.FlateEncodeMode = PdfFlateEncodeMode.BestCompression;
+                outputDoc.Options.UseFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Automatic;
+
+                if (options.RemoveMetadata)
+                {
+                    outputDoc.Info.Title = "";
+                    outputDoc.Info.Author = "";
+                    outputDoc.Info.Subject = "";
+                    outputDoc.Info.Keywords = "";
+                }
+
+                outputDoc.Save(outputPath);
+
+                var compressedSize = new FileInfo(outputPath).Length;
+                var savings = originalSize - compressedSize;
+                var savingsPercent = originalSize > 0 ? (savings * 100.0 / originalSize) : 0;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    OutputPath = outputPath,
+                    PagesProcessed = outputDoc.PageCount,
+                    OutputFiles = [outputPath],
+                    ErrorMessage = $"Compressed from {FormatFileSize(originalSize)} to {FormatFileSize(compressedSize)} ({savingsPercent:F1}% reduction)"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
+            }
+        });
+    }
+
+    private static string FormatFileSize(long bytes)
+    {
+        string[] sizes = ["B", "KB", "MB", "GB"];
+        int order = 0;
+        double size = bytes;
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size /= 1024;
+        }
+        return $"{size:F1} {sizes[order]}";
+    }
+
+    // Drawing methods for new annotation types
+    private void DrawStamp(XGraphics gfx, StampAnnotation stamp, PdfPage page)
+    {
+        var stampText = stamp.StampType == StampType.Custom
+            ? stamp.CustomText
+            : GetStampText(stamp.StampType);
+
+        var stampColor = GetStampColor(stamp.StampType);
+        var color = XColor.FromArgb((int)(stamp.Opacity * 255), stampColor.R, stampColor.G, stampColor.B);
+
+        // Save graphics state for rotation
+        var state = gfx.Save();
+
+        // Move origin to stamp center and rotate
+        var centerX = stamp.X + stamp.Width / 2;
+        var centerY = stamp.Y + stamp.Height / 2;
+        gfx.TranslateTransform(centerX, centerY);
+        gfx.RotateTransform(stamp.Rotation);
+        gfx.TranslateTransform(-centerX, -centerY);
+
+        // Draw stamp border
+        if (stamp.ShowBorder)
+        {
+            var pen = new XPen(color, 3) { DashStyle = XDashStyle.Solid };
+            gfx.DrawRectangle(pen, stamp.X, stamp.Y, stamp.Width, stamp.Height);
+
+            // Double border effect
+            var innerPen = new XPen(color, 1);
+            gfx.DrawRectangle(innerPen, stamp.X + 4, stamp.Y + 4, stamp.Width - 8, stamp.Height - 8);
+        }
+
+        // Draw stamp text
+        var fontSize = Math.Min(stamp.Width / stampText.Length * 1.5, stamp.Height * 0.4);
+        var font = new XFont("Arial", fontSize, XFontStyleEx.Bold);
+        var brush = new XSolidBrush(color);
+
+        var textSize = gfx.MeasureString(stampText, font);
+        var textX = stamp.X + (stamp.Width - textSize.Width) / 2;
+        var textY = stamp.Y + (stamp.Height + textSize.Height) / 2 - (stamp.ShowDate ? 10 : 0);
+
+        gfx.DrawString(stampText, font, brush, textX, textY);
+
+        // Draw date if enabled
+        if (stamp.ShowDate)
+        {
+            var dateFont = new XFont("Arial", fontSize * 0.4, XFontStyleEx.Regular);
+            var dateText = DateTime.Now.ToString("MM/dd/yyyy");
+            var dateSize = gfx.MeasureString(dateText, dateFont);
+            var dateX = stamp.X + (stamp.Width - dateSize.Width) / 2;
+            var dateY = textY + 15;
+            gfx.DrawString(dateText, dateFont, brush, dateX, dateY);
+        }
+
+        gfx.Restore(state);
+    }
+
+    private void DrawWatermark(XGraphics gfx, WatermarkAnnotation watermark, PdfPage page)
+    {
+        if (watermark.Type == WatermarkType.Image && watermark.ImageData != null)
+        {
+            try
+            {
+                using var ms = new MemoryStream(watermark.ImageData);
+                var image = XImage.FromStream(ms);
+
+                // Position based on setting
+                var (x, y) = GetWatermarkPosition(watermark.Position, page.Width.Point, page.Height.Point, watermark.Width, watermark.Height);
+
+                var state = gfx.Save();
+                gfx.TranslateTransform(x + watermark.Width / 2, y + watermark.Height / 2);
+                gfx.RotateTransform(watermark.Rotation);
+                gfx.TranslateTransform(-watermark.Width / 2, -watermark.Height / 2);
+
+                // Note: PdfSharp doesn't support opacity for images directly
+                gfx.DrawImage(image, 0, 0, watermark.Width, watermark.Height);
+                gfx.Restore(state);
+            }
+            catch { }
+        }
+        else
+        {
+            // Text watermark
+            var color = ParseColor(watermark.Color);
+            var watermarkColor = XColor.FromArgb((int)(watermark.Opacity * 255), color.R, color.G, color.B);
+
+            var font = new XFont("Arial", watermark.FontSize, XFontStyleEx.Bold);
+            var brush = new XSolidBrush(watermarkColor);
+
+            var textSize = gfx.MeasureString(watermark.Text, font);
+            var (x, y) = GetWatermarkPosition(watermark.Position, page.Width.Point, page.Height.Point, textSize.Width, textSize.Height);
+
+            var state = gfx.Save();
+
+            if (watermark.Position == WatermarkPosition.Diagonal || watermark.Position == WatermarkPosition.Center)
+            {
+                var centerX = page.Width.Point / 2;
+                var centerY = page.Height.Point / 2;
+                gfx.TranslateTransform(centerX, centerY);
+                gfx.RotateTransform(watermark.Rotation);
+                gfx.DrawString(watermark.Text, font, brush, -textSize.Width / 2, textSize.Height / 2);
+            }
+            else
+            {
+                gfx.DrawString(watermark.Text, font, brush, x, y + textSize.Height);
+            }
+
+            gfx.Restore(state);
+        }
+    }
+
+    private static (double x, double y) GetWatermarkPosition(WatermarkPosition position, double pageWidth, double pageHeight, double contentWidth, double contentHeight)
+    {
+        return position switch
+        {
+            WatermarkPosition.TopLeft => (20, 20),
+            WatermarkPosition.TopRight => (pageWidth - contentWidth - 20, 20),
+            WatermarkPosition.BottomLeft => (20, pageHeight - contentHeight - 20),
+            WatermarkPosition.BottomRight => (pageWidth - contentWidth - 20, pageHeight - contentHeight - 20),
+            WatermarkPosition.Center or WatermarkPosition.Diagonal => ((pageWidth - contentWidth) / 2, (pageHeight - contentHeight) / 2),
+            _ => ((pageWidth - contentWidth) / 2, (pageHeight - contentHeight) / 2)
+        };
+    }
+
+    private static string GetStampText(StampType type)
+    {
+        return type switch
+        {
+            StampType.Approved => "APPROVED",
+            StampType.Rejected => "REJECTED",
+            StampType.Confidential => "CONFIDENTIAL",
+            StampType.Draft => "DRAFT",
+            StampType.Final => "FINAL",
+            StampType.Void => "VOID",
+            StampType.Copy => "COPY",
+            StampType.Original => "ORIGINAL",
+            StampType.NotApproved => "NOT APPROVED",
+            StampType.ForReview => "FOR REVIEW",
+            StampType.Urgent => "URGENT",
+            StampType.Completed => "COMPLETED",
+            StampType.Pending => "PENDING",
+            _ => "STAMP"
+        };
+    }
+
+    private static XColor GetStampColor(StampType type)
+    {
+        return type switch
+        {
+            StampType.Approved or StampType.Completed or StampType.Final => XColor.FromArgb(0, 128, 0),      // Green
+            StampType.Rejected or StampType.Void or StampType.NotApproved => XColor.FromArgb(200, 0, 0),    // Red
+            StampType.Confidential or StampType.Urgent => XColor.FromArgb(200, 0, 0),                        // Red
+            StampType.Draft or StampType.ForReview or StampType.Pending => XColor.FromArgb(200, 150, 0),    // Orange/Yellow
+            StampType.Copy or StampType.Original => XColor.FromArgb(0, 0, 180),                              // Blue
+            _ => XColor.FromArgb(128, 128, 128)                                                               // Gray
+        };
+    }
+
+    private void DrawLink(XGraphics gfx, LinkAnnotation link)
+    {
+        // Draw underlined text for the link
+        var font = new XFont("Arial", 12, XFontStyleEx.Underline);
+        var brush = XBrushes.Blue;
+
+        var displayText = !string.IsNullOrEmpty(link.DisplayText) ? link.DisplayText : link.Url;
+        gfx.DrawString(displayText, font, brush, link.X, link.Y);
+
+        // Draw a subtle border to indicate clickable area
+        var borderPen = new XPen(XColors.LightBlue, 0.5) { DashStyle = XDashStyle.Dot };
+        gfx.DrawRectangle(borderPen, link.X - 2, link.Y - 12, link.Width + 4, link.Height + 4);
     }
 }
