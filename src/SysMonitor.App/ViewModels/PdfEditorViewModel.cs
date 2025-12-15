@@ -45,6 +45,17 @@ public partial class PdfEditorViewModel : ObservableObject
     [ObservableProperty] private bool _isEllipseToolActive;
     [ObservableProperty] private bool _isLineToolActive;
     [ObservableProperty] private bool _isArrowToolActive;
+    [ObservableProperty] private bool _isPenToolActive;
+    [ObservableProperty] private bool _isImageToolActive;
+    [ObservableProperty] private bool _isSignatureToolActive;
+    [ObservableProperty] private bool _isStickyNoteToolActive;
+    [ObservableProperty] private bool _isRedactionToolActive;
+
+    // Undo/Redo Stack
+    private readonly Stack<UndoAction> _undoStack = new();
+    private readonly Stack<UndoAction> _redoStack = new();
+    [ObservableProperty] private bool _canUndo;
+    [ObservableProperty] private bool _canRedo;
 
     // Annotation Properties
     [ObservableProperty] private string _annotationColor = "#FF0000";
@@ -398,6 +409,11 @@ public partial class PdfEditorViewModel : ObservableObject
         IsEllipseToolActive = false;
         IsLineToolActive = false;
         IsArrowToolActive = false;
+        IsPenToolActive = false;
+        IsImageToolActive = false;
+        IsSignatureToolActive = false;
+        IsStickyNoteToolActive = false;
+        IsRedactionToolActive = false;
 
         SelectedTool = toolName switch
         {
@@ -408,6 +424,11 @@ public partial class PdfEditorViewModel : ObservableObject
             "Ellipse" => AnnotationTool.Ellipse,
             "Line" => AnnotationTool.Line,
             "Arrow" => AnnotationTool.Arrow,
+            "Pen" => AnnotationTool.Pen,
+            "Image" => AnnotationTool.Image,
+            "Signature" => AnnotationTool.Signature,
+            "StickyNote" => AnnotationTool.StickyNote,
+            "Redaction" => AnnotationTool.Redaction,
             _ => AnnotationTool.None
         };
 
@@ -434,6 +455,21 @@ public partial class PdfEditorViewModel : ObservableObject
                 break;
             case AnnotationTool.Arrow:
                 IsArrowToolActive = true;
+                break;
+            case AnnotationTool.Pen:
+                IsPenToolActive = true;
+                break;
+            case AnnotationTool.Image:
+                IsImageToolActive = true;
+                break;
+            case AnnotationTool.Signature:
+                IsSignatureToolActive = true;
+                break;
+            case AnnotationTool.StickyNote:
+                IsStickyNoteToolActive = true;
+                break;
+            case AnnotationTool.Redaction:
+                IsRedactionToolActive = true;
                 break;
         }
     }
@@ -501,12 +537,257 @@ public partial class PdfEditorViewModel : ObservableObject
                 await _pdfEditor.AddShapeAsync(CurrentDocument, CurrentPageNumber, shape);
                 annotation = shape;
                 break;
+
+            case AnnotationTool.StickyNote:
+                var stickyNote = new StickyNoteAnnotation
+                {
+                    X = x,
+                    Y = y,
+                    Width = Math.Max(width, 150),
+                    Height = Math.Max(height, 100),
+                    Title = "Note",
+                    Content = AnnotationText,
+                    NoteColor = "#FFFF88",
+                    Color = AnnotationColor
+                };
+                await _pdfEditor.AddStickyNoteAsync(CurrentDocument, CurrentPageNumber, stickyNote);
+                annotation = stickyNote;
+                break;
+
+            case AnnotationTool.Redaction:
+                var redaction = new RedactionAnnotation
+                {
+                    X = x,
+                    Y = y,
+                    Width = width,
+                    Height = height,
+                    FillColor = "#000000",
+                    OverlayText = "REDACTED",
+                    Color = "#000000"
+                };
+                await _pdfEditor.AddRedactionAsync(CurrentDocument, CurrentPageNumber, redaction);
+                annotation = redaction;
+                break;
+        }
+
+        if (annotation != null)
+        {
+            // Add to undo stack
+            PushUndoAction(new UndoAction
+            {
+                Type = UndoActionType.AddAnnotation,
+                Annotation = annotation,
+                PageNumber = CurrentPageNumber
+            });
         }
 
         IsModified = true;
         LoadAnnotationsForCurrentPage();
 
         return annotation?.Id;
+    }
+
+    // Special methods for freehand and signature (called from code-behind with point data)
+    public async Task<Guid?> AddFreehandAnnotationAsync(List<PointData> points, double minX, double minY, double maxX, double maxY)
+    {
+        if (CurrentDocument == null) return null;
+
+        var freehand = new FreehandAnnotation
+        {
+            X = minX,
+            Y = minY,
+            Width = maxX - minX,
+            Height = maxY - minY,
+            Points = points,
+            StrokeWidth = StrokeWidth,
+            Color = AnnotationColor
+        };
+
+        await _pdfEditor.AddFreehandAsync(CurrentDocument, CurrentPageNumber, freehand);
+
+        PushUndoAction(new UndoAction
+        {
+            Type = UndoActionType.AddAnnotation,
+            Annotation = freehand,
+            PageNumber = CurrentPageNumber
+        });
+
+        IsModified = true;
+        LoadAnnotationsForCurrentPage();
+        return freehand.Id;
+    }
+
+    public async Task<Guid?> AddSignatureAnnotationAsync(List<List<PointData>> strokes, double x, double y, double width, double height, string signerName)
+    {
+        if (CurrentDocument == null) return null;
+
+        var signature = new SignatureAnnotation
+        {
+            X = x,
+            Y = y,
+            Width = width,
+            Height = height,
+            Strokes = strokes,
+            StrokeWidth = StrokeWidth,
+            SignerName = signerName,
+            Color = AnnotationColor
+        };
+
+        await _pdfEditor.AddSignatureAsync(CurrentDocument, CurrentPageNumber, signature);
+
+        PushUndoAction(new UndoAction
+        {
+            Type = UndoActionType.AddAnnotation,
+            Annotation = signature,
+            PageNumber = CurrentPageNumber
+        });
+
+        IsModified = true;
+        LoadAnnotationsForCurrentPage();
+        return signature.Id;
+    }
+
+    public async Task<Guid?> AddImageAnnotationAsync(byte[] imageData, double x, double y, double width, double height)
+    {
+        if (CurrentDocument == null) return null;
+
+        var imageAnnotation = new ImageAnnotation
+        {
+            X = x,
+            Y = y,
+            Width = width,
+            Height = height,
+            ImageData = imageData,
+            Color = AnnotationColor
+        };
+
+        await _pdfEditor.AddImageAsync(CurrentDocument, CurrentPageNumber, imageAnnotation);
+
+        PushUndoAction(new UndoAction
+        {
+            Type = UndoActionType.AddAnnotation,
+            Annotation = imageAnnotation,
+            PageNumber = CurrentPageNumber
+        });
+
+        IsModified = true;
+        LoadAnnotationsForCurrentPage();
+        return imageAnnotation.Id;
+    }
+
+    private void PushUndoAction(UndoAction action)
+    {
+        _undoStack.Push(action);
+        _redoStack.Clear();
+        CanUndo = _undoStack.Count > 0;
+        CanRedo = false;
+    }
+
+    [RelayCommand]
+    private void Undo()
+    {
+        if (_undoStack.Count == 0 || CurrentDocument == null) return;
+
+        var action = _undoStack.Pop();
+        _redoStack.Push(action);
+
+        switch (action.Type)
+        {
+            case UndoActionType.AddAnnotation:
+                if (action.Annotation != null)
+                {
+                    CurrentDocument.Annotations.Remove(action.Annotation);
+                }
+                break;
+            case UndoActionType.RemoveAnnotation:
+                if (action.Annotation != null)
+                {
+                    CurrentDocument.Annotations.Add(action.Annotation);
+                }
+                break;
+        }
+
+        LoadAnnotationsForCurrentPage();
+        CanUndo = _undoStack.Count > 0;
+        CanRedo = _redoStack.Count > 0;
+        IsModified = true;
+        ShowStatus("Undo successful", true);
+    }
+
+    [RelayCommand]
+    private void Redo()
+    {
+        if (_redoStack.Count == 0 || CurrentDocument == null) return;
+
+        var action = _redoStack.Pop();
+        _undoStack.Push(action);
+
+        switch (action.Type)
+        {
+            case UndoActionType.AddAnnotation:
+                if (action.Annotation != null)
+                {
+                    CurrentDocument.Annotations.Add(action.Annotation);
+                }
+                break;
+            case UndoActionType.RemoveAnnotation:
+                if (action.Annotation != null)
+                {
+                    CurrentDocument.Annotations.Remove(action.Annotation);
+                }
+                break;
+        }
+
+        LoadAnnotationsForCurrentPage();
+        CanUndo = _undoStack.Count > 0;
+        CanRedo = _redoStack.Count > 0;
+        IsModified = true;
+        ShowStatus("Redo successful", true);
+    }
+
+    [RelayCommand]
+    private async Task ExportToWordAsync()
+    {
+        if (CurrentDocument == null) return;
+
+        try
+        {
+            var picker = new FileSavePicker();
+            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            picker.FileTypeChoices.Add("Word Document", [".docx"]);
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(CurrentDocument.FileName) + "_exported";
+
+            var hwnd = GetActiveWindow();
+            if (hwnd != IntPtr.Zero)
+            {
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSaveFileAsync();
+            if (file == null) return;
+
+            IsLoading = true;
+            LoadingStatus = "Exporting to Word...";
+
+            var result = await _pdfEditor.ExportToWordAsync(CurrentDocument, file.Path);
+            if (result.Success)
+            {
+                ShowStatus($"Exported to: {file.Name}", true);
+            }
+            else
+            {
+                ShowStatus($"Export failed: {result.ErrorMessage}", false);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Export error: {ex.Message}", false);
+        }
+        finally
+        {
+            IsLoading = false;
+            LoadingStatus = "";
+        }
     }
 
     [RelayCommand]
@@ -634,7 +915,12 @@ public enum AnnotationTool
     Rectangle,
     Ellipse,
     Line,
-    Arrow
+    Arrow,
+    Pen,
+    Image,
+    Signature,
+    StickyNote,
+    Redaction
 }
 
 public partial class PageThumbnailViewModel : ObservableObject
@@ -673,6 +959,11 @@ public partial class AnnotationViewModel : ObservableObject
         {
             TextAnnotation => ("Text", "\uE8D2"),
             HighlightAnnotation => ("Highlight", "\uE7E6"),
+            FreehandAnnotation => ("Drawing", "\uED63"),
+            ImageAnnotation => ("Image", "\uEB9F"),
+            StickyNoteAnnotation => ("Note", "\uE70B"),
+            RedactionAnnotation => ("Redaction", "\uE738"),
+            SignatureAnnotation => ("Signature", "\uE8FA"),
             ShapeAnnotation shape => shape.Type switch
             {
                 ShapeType.Rectangle => ("Rectangle", "\uE739"),
@@ -684,4 +975,19 @@ public partial class AnnotationViewModel : ObservableObject
             _ => ("Unknown", "\uE712")
         };
     }
+}
+
+public enum UndoActionType
+{
+    AddAnnotation,
+    RemoveAnnotation,
+    ModifyAnnotation
+}
+
+public class UndoAction
+{
+    public UndoActionType Type { get; set; }
+    public PdfAnnotation? Annotation { get; set; }
+    public PdfAnnotation? PreviousState { get; set; }
+    public int PageNumber { get; set; }
 }

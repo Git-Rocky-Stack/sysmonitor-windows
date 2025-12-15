@@ -132,6 +132,12 @@ public interface IPdfEditor
     Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation);
     Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight);
     Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape);
+    Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pageNumber, FreehandAnnotation freehand);
+    Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pageNumber, ImageAnnotation image);
+    Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pageNumber, StickyNoteAnnotation note);
+    Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pageNumber, RedactionAnnotation redaction);
+    Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pageNumber, SignatureAnnotation signature);
+    Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath);
     Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
 }
 
@@ -193,4 +199,72 @@ public enum ShapeType
     Ellipse,
     Line,
     Arrow
+}
+
+/// <summary>
+/// Freehand drawing annotation (pen/pencil tool)
+/// </summary>
+public class FreehandAnnotation : PdfAnnotation
+{
+    public List<PointData> Points { get; set; } = [];
+    public double StrokeWidth { get; set; } = 2;
+    public bool IsSmoothed { get; set; } = true;
+}
+
+/// <summary>
+/// Point data for freehand drawing
+/// </summary>
+public class PointData
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+
+    public PointData() { }
+    public PointData(double x, double y) { X = x; Y = y; }
+}
+
+/// <summary>
+/// Image annotation for inserting images/photos
+/// </summary>
+public class ImageAnnotation : PdfAnnotation
+{
+    public byte[] ImageData { get; set; } = [];
+    public string ImageFormat { get; set; } = "png";
+    public double Opacity { get; set; } = 1.0;
+    public int Rotation { get; set; } = 0;
+}
+
+/// <summary>
+/// Sticky note / comment annotation
+/// </summary>
+public class StickyNoteAnnotation : PdfAnnotation
+{
+    public string Title { get; set; } = "";
+    public string Content { get; set; } = "";
+    public string Author { get; set; } = "";
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
+    public bool IsExpanded { get; set; } = false;
+    public string NoteColor { get; set; } = "#FFFF88"; // Yellow sticky note
+}
+
+/// <summary>
+/// Redaction annotation (black out sensitive content)
+/// </summary>
+public class RedactionAnnotation : PdfAnnotation
+{
+    public bool IsApplied { get; set; } = false;
+    public string FillColor { get; set; } = "#000000";
+    public string OverlayText { get; set; } = ""; // Optional text like "REDACTED"
+}
+
+/// <summary>
+/// Signature annotation (handwritten signature)
+/// </summary>
+public class SignatureAnnotation : PdfAnnotation
+{
+    public List<List<PointData>> Strokes { get; set; } = []; // Multiple strokes for signature
+    public double StrokeWidth { get; set; } = 2;
+    public byte[]? SignatureImageData { get; set; } // Can also be an image
+    public string SignerName { get; set; } = "";
+    public DateTime SignedDate { get; set; } = DateTime.Now;
 }

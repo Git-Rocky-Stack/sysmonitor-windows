@@ -64,8 +64,25 @@
                                 <TextBlock Text="Save" VerticalAlignment="Center" FontSize="12"/>
                             </StackPanel>
                         </Button>
+                        <Button Click="ExportToWord_Click" ToolTipService.ToolTip="Export to Word"
+                                Style="{StaticResource OutlinedButtonStyle}" Padding="10,8"
+                                IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
+                                <TextBlock Text="Word" VerticalAlignment="Center" FontSize="12"/>
+                            </StackPanel>
+                        </Button>
+                        <!-- Undo/Redo -->
+                        <Button Click="Undo_Click" ToolTipService.ToolTip="Undo (Ctrl+Z)" Padding="8"
+                                IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE7A7;" FontSize="14"/>
+                        </Button>
+                        <Button Click="Redo_Click" ToolTipService.ToolTip="Redo (Ctrl+Y)" Padding="8"
+                                IsEnabled="{x:Bind ViewModel.CanRedo, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE7A6;" FontSize="14"/>
+                        </Button>
                     </StackPanel>
-                    <TextBlock Text="FILE" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
+                    <TextBlock Text="FILE / EDIT" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <Border Grid.Column="1" Width="1" Background="#333" Margin="0,4"/>
@@ -77,6 +94,10 @@
                         <Button Click="SelectTool_Click" Tag="Select" ToolTipService.ToolTip="Select (V)"
                                 Padding="8" Background="{x:Bind ViewModel.IsSelectToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
                             <FontIcon Glyph="&#xE8B3;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Pen" ToolTipService.ToolTip="Pen Tool (P)"
+                                Padding="8" Background="{x:Bind ViewModel.IsPenToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xED63;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Text" ToolTipService.ToolTip="Text Box (T)"
                                 Padding="8" Background="{x:Bind ViewModel.IsTextToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
@@ -101,6 +122,22 @@
                         <Button Click="SelectTool_Click" Tag="Arrow" ToolTipService.ToolTip="Arrow (A)"
                                 Padding="8" Background="{x:Bind ViewModel.IsArrowToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
                             <FontIcon Glyph="&#xE759;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="StickyNote" ToolTipService.ToolTip="Sticky Note (N)"
+                                Padding="8" Background="{x:Bind ViewModel.IsStickyNoteToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE70B;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Signature" ToolTipService.ToolTip="Signature (S)"
+                                Padding="8" Background="{x:Bind ViewModel.IsSignatureToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE8FA;" FontSize="14"/>
+                        </Button>
+                        <Button Click="InsertImage_Click" Tag="Image" ToolTipService.ToolTip="Insert Image (I)"
+                                Padding="8" Background="{x:Bind ViewModel.IsImageToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xEB9F;" FontSize="14"/>
+                        </Button>
+                        <Button Click="SelectTool_Click" Tag="Redaction" ToolTipService.ToolTip="Redact (X)"
+                                Padding="8" Background="{x:Bind ViewModel.IsRedactionToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                            <FontIcon Glyph="&#xE738;" FontSize="14"/>
                         </Button>
                     </StackPanel>
                     <TextBlock Text="ANNOTATE" FontSize="9" Foreground="#666" HorizontalAlignment="Center"/>
