@@ -6,13 +6,20 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using SysMonitor.App.ViewModels;
+using SysMonitor.Core.Services.Utilities;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
+using Windows.Storage.Pickers;
 using Windows.UI;
 
 namespace SysMonitor.App.Views;
 
 public sealed partial class PdfEditorPage : Page
 {
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetActiveWindow();
+
     public PdfEditorViewModel ViewModel { get; }
 
     // Annotation drawing state
@@ -20,6 +27,17 @@ public sealed partial class PdfEditorPage : Page
     private Point _startPoint;
     private Shape? _previewShape;
     private TextBox? _textInputBox;
+
+    // Freehand/Signature drawing state
+    private bool _isFreehandDrawing;
+    private Polyline? _currentPolyline;
+    private List<PointData> _freehandPoints = [];
+    private List<List<PointData>> _signatureStrokes = [];
+    private List<Polyline> _signaturePolylines = [];
+
+    // Sticky note input state
+    private bool _isEditingStickyNote;
+    private Border? _stickyNoteInput;
 
     // Annotation selection state
     private readonly Dictionary<Guid, FrameworkElement> _annotationElements = new();
@@ -197,6 +215,73 @@ public sealed partial class PdfEditorPage : Page
         ViewModel.ResetZoomCommand.Execute(null);
     }
 
+    // New button handlers
+    private async void ExportToWord_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.ExportToWordCommand.ExecuteAsync(null);
+    }
+
+    private void Undo_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.UndoCommand.Execute(null);
+        RefreshAnnotationVisuals();
+    }
+
+    private void Redo_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.RedoCommand.Execute(null);
+        RefreshAnnotationVisuals();
+    }
+
+    private async void InsertImage_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileOpenPicker();
+        picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+        picker.FileTypeFilter.Add(".png");
+        picker.FileTypeFilter.Add(".jpg");
+        picker.FileTypeFilter.Add(".jpeg");
+        picker.FileTypeFilter.Add(".gif");
+        picker.FileTypeFilter.Add(".bmp");
+
+        var hwnd = GetActiveWindow();
+        if (hwnd != IntPtr.Zero)
+        {
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+        }
+
+        var file = await picker.PickSingleFileAsync();
+        if (file != null)
+        {
+            var buffer = await Windows.Storage.FileIO.ReadBufferAsync(file);
+            var imageData = new byte[buffer.Length];
+            using var dataReader = Windows.Storage.Streams.DataReader.FromBuffer(buffer);
+            dataReader.ReadBytes(imageData);
+
+            // Add image at center of visible area
+            var annotationId = await ViewModel.AddImageAnnotationAsync(imageData, 100, 100, 200, 150);
+            if (annotationId.HasValue)
+            {
+                AddImageVisual(annotationId.Value, imageData, 100, 100, 200, 150);
+            }
+        }
+    }
+
+    private void RefreshAnnotationVisuals()
+    {
+        ClearAnnotationVisuals();
+        // Reload visuals from current annotations
+        foreach (var annotation in ViewModel.CurrentAnnotations)
+        {
+            AddVisualFromAnnotation(annotation);
+        }
+    }
+
+    private void AddVisualFromAnnotation(AnnotationViewModel annotation)
+    {
+        // Add visual elements for existing annotations
+        // This is a simplified version - full implementation would recreate exact visuals
+    }
+
     // Annotation Canvas Event Handlers
     private void AnnotationCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
@@ -211,21 +296,38 @@ public sealed partial class PdfEditorPage : Page
             return;
         }
 
-        _isDrawing = true;
-
-        // Capture pointer for tracking
-        AnnotationCanvas.CapturePointer(e.Pointer);
-
         // Clear any current selection when starting to draw
         ClearSelection();
+
+        // Handle freehand and signature tools with continuous drawing
+        if (ViewModel.SelectedTool == AnnotationTool.Pen || ViewModel.SelectedTool == AnnotationTool.Signature)
+        {
+            StartFreehandDrawing(point.Position);
+            AnnotationCanvas.CapturePointer(e.Pointer);
+            e.Handled = true;
+            return;
+        }
 
         // Handle text tool differently - show text input immediately
         if (ViewModel.SelectedTool == AnnotationTool.Text)
         {
             ShowTextInput(_startPoint);
-            _isDrawing = false;
+            e.Handled = true;
             return;
         }
+
+        // Handle sticky note tool
+        if (ViewModel.SelectedTool == AnnotationTool.StickyNote)
+        {
+            ShowStickyNoteInput(_startPoint);
+            e.Handled = true;
+            return;
+        }
+
+        _isDrawing = true;
+
+        // Capture pointer for tracking
+        AnnotationCanvas.CapturePointer(e.Pointer);
 
         // Create preview shape
         _previewShape = CreatePreviewShape();
@@ -239,20 +341,226 @@ public sealed partial class PdfEditorPage : Page
         e.Handled = true;
     }
 
+    private void StartFreehandDrawing(Point position)
+    {
+        _isFreehandDrawing = true;
+        _freehandPoints = [new PointData(position.X, position.Y)];
+
+        var color = ParseColor(ViewModel.AnnotationColor);
+        _currentPolyline = new Polyline
+        {
+            Stroke = new SolidColorBrush(color),
+            StrokeThickness = ViewModel.StrokeWidth,
+            StrokeLineJoin = PenLineJoin.Round,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round
+        };
+        _currentPolyline.Points.Add(position);
+
+        AnnotationCanvas.Children.Add(_currentPolyline);
+
+        // For signature tool, track as a stroke
+        if (ViewModel.SelectedTool == AnnotationTool.Signature)
+        {
+            _signaturePolylines.Add(_currentPolyline);
+        }
+    }
+
+    private void ShowStickyNoteInput(Point position)
+    {
+        _isEditingStickyNote = true;
+
+        var noteColor = Color.FromArgb(255, 255, 255, 136); // Yellow
+
+        _stickyNoteInput = new Border
+        {
+            Width = 200,
+            MinHeight = 120,
+            Background = new SolidColorBrush(noteColor),
+            BorderBrush = new SolidColorBrush(Colors.DarkGoldenrod),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(8)
+        };
+
+        var stackPanel = new StackPanel { Spacing = 8 };
+
+        var titleBox = new TextBox
+        {
+            PlaceholderText = "Title",
+            FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+            Background = new SolidColorBrush(Colors.Transparent),
+            BorderThickness = new Thickness(0, 0, 0, 1)
+        };
+
+        var contentBox = new TextBox
+        {
+            PlaceholderText = "Enter note content...",
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            MinHeight = 60,
+            Background = new SolidColorBrush(Colors.Transparent),
+            BorderThickness = new Thickness(0)
+        };
+
+        var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right };
+
+        var saveButton = new Button { Content = "Save", Style = (Style)Resources["AccentButtonStyle"] };
+        saveButton.Click += async (s, args) =>
+        {
+            var title = titleBox.Text;
+            var content = contentBox.Text;
+            if (!string.IsNullOrWhiteSpace(title) || !string.IsNullOrWhiteSpace(content))
+            {
+                ViewModel.AnnotationText = content;
+                var x = Canvas.GetLeft(_stickyNoteInput!);
+                var y = Canvas.GetTop(_stickyNoteInput!);
+                await ViewModel.AddAnnotationAtPositionAsync(x, y, 200, 120);
+                AddStickyNoteVisual(Guid.NewGuid(), title, content, x, y);
+            }
+            CloseStickyNoteInput();
+        };
+
+        var cancelButton = new Button { Content = "Cancel" };
+        cancelButton.Click += (s, args) => CloseStickyNoteInput();
+
+        buttonPanel.Children.Add(cancelButton);
+        buttonPanel.Children.Add(saveButton);
+
+        stackPanel.Children.Add(titleBox);
+        stackPanel.Children.Add(contentBox);
+        stackPanel.Children.Add(buttonPanel);
+
+        _stickyNoteInput.Child = stackPanel;
+
+        Canvas.SetLeft(_stickyNoteInput, position.X);
+        Canvas.SetTop(_stickyNoteInput, position.Y);
+        AnnotationCanvas.Children.Add(_stickyNoteInput);
+
+        titleBox.Focus(FocusState.Programmatic);
+    }
+
+    private void CloseStickyNoteInput()
+    {
+        if (_stickyNoteInput != null)
+        {
+            AnnotationCanvas.Children.Remove(_stickyNoteInput);
+            _stickyNoteInput = null;
+        }
+        _isEditingStickyNote = false;
+    }
+
+    private void AddStickyNoteVisual(Guid id, string title, string content, double x, double y)
+    {
+        var noteColor = Color.FromArgb(255, 255, 255, 136);
+
+        var note = new Border
+        {
+            Width = 150,
+            Height = 100,
+            Background = new SolidColorBrush(noteColor),
+            BorderBrush = new SolidColorBrush(Colors.DarkGoldenrod),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(8)
+        };
+
+        var stack = new StackPanel { Spacing = 4 };
+        stack.Children.Add(new TextBlock
+        {
+            Text = title,
+            FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Colors.Black),
+            TextTrimming = TextTrimming.CharacterEllipsis
+        });
+        stack.Children.Add(new TextBlock
+        {
+            Text = content,
+            FontSize = 10,
+            Foreground = new SolidColorBrush(Colors.Black),
+            TextWrapping = TextWrapping.Wrap,
+            MaxLines = 4,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        });
+
+        note.Child = stack;
+
+        Canvas.SetLeft(note, x);
+        Canvas.SetTop(note, y);
+        AnnotationCanvas.Children.Add(note);
+        _annotationElements[id] = note;
+    }
+
+    private void AddImageVisual(Guid id, byte[] imageData, double x, double y, double width, double height)
+    {
+        var image = new Microsoft.UI.Xaml.Controls.Image
+        {
+            Width = width,
+            Height = height,
+            Stretch = Stretch.Uniform
+        };
+
+        // Load image from bytes
+        _ = LoadImageAsync(image, imageData);
+
+        var border = new Border
+        {
+            Child = image,
+            BorderBrush = new SolidColorBrush(Colors.Gray),
+            BorderThickness = new Thickness(1),
+            Background = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255))
+        };
+
+        Canvas.SetLeft(border, x);
+        Canvas.SetTop(border, y);
+        AnnotationCanvas.Children.Add(border);
+        _annotationElements[id] = border;
+    }
+
+    private async System.Threading.Tasks.Task LoadImageAsync(Microsoft.UI.Xaml.Controls.Image image, byte[] data)
+    {
+        using var stream = new Windows.Storage.Streams.InMemoryRandomAccessStream();
+        await stream.WriteAsync(data.AsBuffer());
+        stream.Seek(0);
+        var bitmap = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage();
+        await bitmap.SetSourceAsync(stream);
+        image.Source = bitmap;
+    }
+
     private void AnnotationCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
+        // Handle freehand drawing
+        if (_isFreehandDrawing && _currentPolyline != null)
+        {
+            var point = e.GetCurrentPoint(AnnotationCanvas);
+            var position = point.Position;
+
+            _currentPolyline.Points.Add(position);
+            _freehandPoints.Add(new PointData(position.X, position.Y));
+            e.Handled = true;
+            return;
+        }
+
         if (!_isDrawing || _previewShape == null)
             return;
 
-        var point = e.GetCurrentPoint(AnnotationCanvas);
-        var currentPoint = point.Position;
-
+        var currentPoint = e.GetCurrentPoint(AnnotationCanvas).Position;
         UpdatePreviewShape(currentPoint);
         e.Handled = true;
     }
 
     private void AnnotationCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
+        // Handle freehand drawing completion
+        if (_isFreehandDrawing)
+        {
+            AnnotationCanvas.ReleasePointerCapture(e.Pointer);
+            FinalizeFreehandDrawing();
+            e.Handled = true;
+            return;
+        }
+
         if (!_isDrawing)
             return;
 
@@ -272,6 +580,94 @@ public sealed partial class PdfEditorPage : Page
 
         _isDrawing = false;
         e.Handled = true;
+    }
+
+    private async void FinalizeFreehandDrawing()
+    {
+        if (_freehandPoints.Count < 2)
+        {
+            // Not enough points for a stroke
+            if (_currentPolyline != null)
+            {
+                AnnotationCanvas.Children.Remove(_currentPolyline);
+            }
+            _isFreehandDrawing = false;
+            _currentPolyline = null;
+            _freehandPoints.Clear();
+            return;
+        }
+
+        // Calculate bounding box
+        var minX = _freehandPoints.Min(p => p.X);
+        var minY = _freehandPoints.Min(p => p.Y);
+        var maxX = _freehandPoints.Max(p => p.X);
+        var maxY = _freehandPoints.Max(p => p.Y);
+
+        if (ViewModel.SelectedTool == AnnotationTool.Pen)
+        {
+            // Save pen stroke as freehand annotation
+            var annotationId = await ViewModel.AddFreehandAnnotationAsync(_freehandPoints.ToList(), minX, minY, maxX, maxY);
+            if (annotationId.HasValue && _currentPolyline != null)
+            {
+                _annotationElements[annotationId.Value] = _currentPolyline;
+            }
+        }
+        else if (ViewModel.SelectedTool == AnnotationTool.Signature)
+        {
+            // Add stroke to signature strokes
+            _signatureStrokes.Add(_freehandPoints.ToList());
+            // Note: Signature is finalized when user clicks Save Signature or changes tool
+        }
+
+        _isFreehandDrawing = false;
+        _currentPolyline = null;
+        _freehandPoints.Clear();
+    }
+
+    // Method to finalize signature (can be called from a "Finish Signature" button)
+    private async void FinalizeSignature()
+    {
+        if (_signatureStrokes.Count == 0) return;
+
+        // Calculate bounding box for all strokes
+        var allPoints = _signatureStrokes.SelectMany(s => s).ToList();
+        if (allPoints.Count == 0) return;
+
+        var minX = allPoints.Min(p => p.X);
+        var minY = allPoints.Min(p => p.Y);
+        var maxX = allPoints.Max(p => p.X);
+        var maxY = allPoints.Max(p => p.Y);
+
+        // Normalize strokes relative to bounding box
+        var normalizedStrokes = _signatureStrokes.Select(stroke =>
+            stroke.Select(p => new PointData(p.X - minX, p.Y - minY)).ToList()
+        ).ToList();
+
+        var signerName = await ShowSignerNameDialog();
+        var annotationId = await ViewModel.AddSignatureAnnotationAsync(normalizedStrokes, minX, minY, maxX - minX, maxY - minY, signerName);
+
+        // Clear signature strokes tracking
+        _signatureStrokes.Clear();
+        _signaturePolylines.Clear();
+    }
+
+    private async Task<string> ShowSignerNameDialog()
+    {
+        var dialog = new ContentDialog
+        {
+            Title = "Sign Document",
+            Content = new TextBox { PlaceholderText = "Enter your name", Width = 300 },
+            PrimaryButtonText = "Sign",
+            CloseButtonText = "Cancel",
+            XamlRoot = this.XamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary && dialog.Content is TextBox textBox)
+        {
+            return textBox.Text;
+        }
+        return "";
     }
 
     private void TrySelectAnnotationAt(Point position)
@@ -451,6 +847,15 @@ public sealed partial class PdfEditorPage : Page
                 X2 = 0,
                 Y2 = 0
             },
+            AnnotationTool.Redaction => new Rectangle
+            {
+                Fill = new SolidColorBrush(Colors.Black),
+                Stroke = new SolidColorBrush(Colors.Red),
+                StrokeThickness = 2,
+                StrokeDashArray = new DoubleCollection { 4, 2 },
+                Width = 0,
+                Height = 0
+            },
             _ => null
         };
     }
@@ -574,6 +979,40 @@ public sealed partial class PdfEditorPage : Page
                 element = arrowLine;
                 AddArrowHead(x + width, y + height, width, height, color);
                 break;
+
+            case AnnotationTool.Redaction:
+                var redactionRect = new Rectangle
+                {
+                    Fill = new SolidColorBrush(Colors.Black),
+                    Width = width,
+                    Height = height
+                };
+                element = redactionRect;
+
+                // Add "REDACTED" text overlay
+                var textBlock = new TextBlock
+                {
+                    Text = "REDACTED",
+                    Foreground = new SolidColorBrush(Colors.White),
+                    FontSize = Math.Min(width / 8, 14),
+                    FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                var container = new Grid
+                {
+                    Width = width,
+                    Height = height
+                };
+                container.Children.Add(redactionRect);
+                container.Children.Add(textBlock);
+                element = null; // Use container instead
+
+                Canvas.SetLeft(container, x);
+                Canvas.SetTop(container, y);
+                AnnotationCanvas.Children.Add(container);
+                _annotationElements[id] = container;
+                return;
         }
 
         if (element != null)

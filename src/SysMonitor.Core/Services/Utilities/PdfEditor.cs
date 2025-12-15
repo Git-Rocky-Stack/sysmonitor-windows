@@ -1,6 +1,12 @@
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using A = DocumentFormat.OpenXml.Drawing;
+using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
+using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
 
 namespace SysMonitor.Core.Services.Utilities;
 
@@ -513,6 +519,246 @@ public class PdfEditor : IPdfEditor
         });
     }
 
+    public async Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pageNumber, FreehandAnnotation freehand)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                freehand.PageNumber = pageNumber;
+                document.Annotations.Add(freehand);
+                document.IsModified = true;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    PagesProcessed = 1
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pageNumber, ImageAnnotation image)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                image.PageNumber = pageNumber;
+                document.Annotations.Add(image);
+                document.IsModified = true;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    PagesProcessed = 1
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pageNumber, StickyNoteAnnotation note)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                note.PageNumber = pageNumber;
+                document.Annotations.Add(note);
+                document.IsModified = true;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    PagesProcessed = 1
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pageNumber, RedactionAnnotation redaction)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                redaction.PageNumber = pageNumber;
+                document.Annotations.Add(redaction);
+                document.IsModified = true;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    PagesProcessed = 1
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pageNumber, SignatureAnnotation signature)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                signature.PageNumber = pageNumber;
+                document.Annotations.Add(signature);
+                document.IsModified = true;
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    PagesProcessed = 1
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
+    public async Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                using var wordDocument = WordprocessingDocument.Create(outputPath, WordprocessingDocumentType.Document);
+                var mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
+                var body = mainPart.Document.AppendChild(new Body());
+
+                // Add document title
+                var titlePara = body.AppendChild(new Paragraph());
+                var titleRun = titlePara.AppendChild(new Run());
+                titleRun.AppendChild(new RunProperties(new Bold(), new FontSize { Val = "36" }));
+                titleRun.AppendChild(new Text(Path.GetFileNameWithoutExtension(document.FileName)));
+
+                // Add page count info
+                var infoPara = body.AppendChild(new Paragraph());
+                var infoRun = infoPara.AppendChild(new Run());
+                infoRun.AppendChild(new Text($"Exported from PDF: {document.FileName}"));
+                body.AppendChild(new Paragraph()); // Empty line
+
+                infoRun = body.AppendChild(new Paragraph()).AppendChild(new Run());
+                infoRun.AppendChild(new Text($"Total Pages: {document.Pages.Count}"));
+                body.AppendChild(new Paragraph()); // Empty line
+
+                // Add page content markers
+                foreach (var page in document.Pages)
+                {
+                    // Page separator
+                    var pagePara = body.AppendChild(new Paragraph());
+                    var pageRun = pagePara.AppendChild(new Run());
+                    pageRun.AppendChild(new RunProperties(new Bold()));
+                    pageRun.AppendChild(new Text($"--- Page {page.PageNumber} ({page.Width:F0} x {page.Height:F0} pt) ---"));
+
+                    // Add annotations for this page
+                    var pageAnnotations = document.Annotations.Where(a => a.PageNumber == page.PageNumber).ToList();
+                    if (pageAnnotations.Any())
+                    {
+                        var annotPara = body.AppendChild(new Paragraph());
+                        var annotRun = annotPara.AppendChild(new Run());
+                        annotRun.AppendChild(new RunProperties(new Italic()));
+                        annotRun.AppendChild(new Text($"Annotations on this page: {pageAnnotations.Count}"));
+
+                        foreach (var annotation in pageAnnotations)
+                        {
+                            var annContent = body.AppendChild(new Paragraph());
+                            var annRun = annContent.AppendChild(new Run());
+
+                            var annotationText = annotation switch
+                            {
+                                TextAnnotation ta => $"  • Text: \"{ta.Text}\"",
+                                StickyNoteAnnotation sn => $"  • Note: {sn.Title} - {sn.Content}",
+                                RedactionAnnotation ra => $"  • [REDACTED CONTENT]",
+                                FreehandAnnotation => $"  • Freehand drawing",
+                                HighlightAnnotation => $"  • Highlighted area",
+                                ShapeAnnotation sa => $"  • Shape: {sa.Type}",
+                                ImageAnnotation => $"  • Inserted image",
+                                SignatureAnnotation sg => $"  • Signature by: {sg.SignerName}",
+                                _ => $"  • Annotation at ({annotation.X:F0}, {annotation.Y:F0})"
+                            };
+
+                            annRun.AppendChild(new Text(annotationText));
+                        }
+                    }
+
+                    body.AppendChild(new Paragraph()); // Empty line between pages
+
+                    // Add page break after each page (except last)
+                    if (page.PageNumber < document.Pages.Count)
+                    {
+                        var breakPara = body.AppendChild(new Paragraph());
+                        breakPara.AppendChild(new Run(new Break { Type = BreakValues.Page }));
+                    }
+                }
+
+                // Add footer note
+                body.AppendChild(new Paragraph());
+                var footerPara = body.AppendChild(new Paragraph());
+                var footerRun = footerPara.AppendChild(new Run());
+                footerRun.AppendChild(new RunProperties(new Italic(), new FontSize { Val = "20" }));
+                footerRun.AppendChild(new Text($"Exported from SysMonitor PDF Editor on {DateTime.Now:yyyy-MM-dd HH:mm:ss}"));
+
+                mainPart.Document.Save();
+
+                return new PdfOperationResult
+                {
+                    Success = true,
+                    OutputPath = outputPath,
+                    PagesProcessed = document.Pages.Count,
+                    OutputFiles = [outputPath]
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PdfOperationResult
+                {
+                    Success = false,
+                    ErrorMessage = ex.Message
+                };
+            }
+        });
+    }
+
     public async Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath)
     {
         return await Task.Run(() =>
@@ -559,6 +805,185 @@ public class PdfEditor : IPdfEditor
             case ShapeAnnotation shapeAnn:
                 DrawShape(gfx, shapeAnn, color);
                 break;
+            case FreehandAnnotation freehand:
+                DrawFreehand(gfx, freehand, color);
+                break;
+            case ImageAnnotation imageAnn:
+                DrawImage(gfx, imageAnn, page);
+                break;
+            case StickyNoteAnnotation noteAnn:
+                DrawStickyNote(gfx, noteAnn);
+                break;
+            case RedactionAnnotation redactAnn:
+                DrawRedaction(gfx, redactAnn);
+                break;
+            case SignatureAnnotation sigAnn:
+                DrawSignature(gfx, sigAnn, color);
+                break;
+        }
+    }
+
+    private void DrawFreehand(XGraphics gfx, FreehandAnnotation annotation, XColor color)
+    {
+        if (annotation.Points.Count < 2) return;
+
+        var pen = new XPen(color, annotation.StrokeWidth)
+        {
+            LineCap = XLineCap.Round,
+            LineJoin = XLineJoin.Round
+        };
+
+        // Draw connected line segments
+        for (int i = 1; i < annotation.Points.Count; i++)
+        {
+            var p1 = annotation.Points[i - 1];
+            var p2 = annotation.Points[i];
+            gfx.DrawLine(pen, p1.X, p1.Y, p2.X, p2.Y);
+        }
+    }
+
+    private void DrawImage(XGraphics gfx, ImageAnnotation annotation, PdfPage page)
+    {
+        if (annotation.ImageData == null || annotation.ImageData.Length == 0) return;
+
+        try
+        {
+            using var ms = new MemoryStream(annotation.ImageData);
+            var image = XImage.FromStream(ms);
+
+            // Apply opacity if needed
+            if (annotation.Opacity < 1.0)
+            {
+                // PdfSharp doesn't directly support opacity for images, draw as-is
+            }
+
+            gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+        }
+        catch
+        {
+            // If image fails to load, draw placeholder
+            gfx.DrawRectangle(XPens.Gray, XBrushes.LightGray, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+            var font = new XFont("Arial", 8, XFontStyleEx.Regular);
+            gfx.DrawString("[Image]", font, XBrushes.Gray, annotation.X + 5, annotation.Y + annotation.Height / 2);
+        }
+    }
+
+    private void DrawStickyNote(XGraphics gfx, StickyNoteAnnotation annotation)
+    {
+        var noteColor = ParseColor(annotation.NoteColor);
+        var brush = new XSolidBrush(noteColor);
+
+        // Draw note background with folded corner effect
+        var path = new XGraphicsPath();
+        var foldSize = 15;
+        path.AddLine(annotation.X, annotation.Y, annotation.X + annotation.Width - foldSize, annotation.Y);
+        path.AddLine(annotation.X + annotation.Width - foldSize, annotation.Y, annotation.X + annotation.Width, annotation.Y + foldSize);
+        path.AddLine(annotation.X + annotation.Width, annotation.Y + foldSize, annotation.X + annotation.Width, annotation.Y + annotation.Height);
+        path.AddLine(annotation.X + annotation.Width, annotation.Y + annotation.Height, annotation.X, annotation.Y + annotation.Height);
+        path.CloseFigure();
+        gfx.DrawPath(brush, path);
+
+        // Draw fold triangle
+        var foldBrush = new XSolidBrush(XColor.FromArgb(50, 0, 0, 0));
+        var foldPath = new XGraphicsPath();
+        foldPath.AddLine(annotation.X + annotation.Width - foldSize, annotation.Y, annotation.X + annotation.Width, annotation.Y + foldSize);
+        foldPath.AddLine(annotation.X + annotation.Width, annotation.Y + foldSize, annotation.X + annotation.Width - foldSize, annotation.Y + foldSize);
+        foldPath.CloseFigure();
+        gfx.DrawPath(foldBrush, foldPath);
+
+        // Draw border
+        gfx.DrawRectangle(XPens.DarkGoldenrod, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+
+        // Draw title
+        var titleFont = new XFont("Arial", 10, XFontStyleEx.Bold);
+        var contentFont = new XFont("Arial", 9, XFontStyleEx.Regular);
+        var textBrush = XBrushes.Black;
+
+        if (!string.IsNullOrEmpty(annotation.Title))
+        {
+            gfx.DrawString(annotation.Title, titleFont, textBrush, annotation.X + 5, annotation.Y + 14);
+        }
+
+        // Draw content (truncated if needed)
+        if (!string.IsNullOrEmpty(annotation.Content))
+        {
+            var contentY = annotation.Y + 28;
+            var lines = annotation.Content.Split('\n').Take(5); // Limit to 5 lines
+            foreach (var line in lines)
+            {
+                var truncated = line.Length > 30 ? line.Substring(0, 27) + "..." : line;
+                gfx.DrawString(truncated, contentFont, textBrush, annotation.X + 5, contentY);
+                contentY += 12;
+            }
+        }
+    }
+
+    private void DrawRedaction(XGraphics gfx, RedactionAnnotation annotation)
+    {
+        var fillColor = ParseColor(annotation.FillColor);
+        var brush = new XSolidBrush(fillColor);
+
+        // Draw solid black rectangle to cover content
+        gfx.DrawRectangle(brush, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+
+        // Draw overlay text if specified (e.g., "REDACTED")
+        if (!string.IsNullOrEmpty(annotation.OverlayText))
+        {
+            var font = new XFont("Arial", 10, XFontStyleEx.Bold);
+            var textBrush = XBrushes.White;
+            var textSize = gfx.MeasureString(annotation.OverlayText, font);
+
+            var textX = annotation.X + (annotation.Width - textSize.Width) / 2;
+            var textY = annotation.Y + (annotation.Height + textSize.Height) / 2;
+
+            gfx.DrawString(annotation.OverlayText, font, textBrush, textX, textY);
+        }
+    }
+
+    private void DrawSignature(XGraphics gfx, SignatureAnnotation annotation, XColor color)
+    {
+        // If signature has image data, draw it
+        if (annotation.SignatureImageData != null && annotation.SignatureImageData.Length > 0)
+        {
+            try
+            {
+                using var ms = new MemoryStream(annotation.SignatureImageData);
+                var image = XImage.FromStream(ms);
+                gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+                return;
+            }
+            catch { }
+        }
+
+        // Draw handwritten signature from strokes
+        if (annotation.Strokes.Count > 0)
+        {
+            var pen = new XPen(color, annotation.StrokeWidth)
+            {
+                LineCap = XLineCap.Round,
+                LineJoin = XLineJoin.Round
+            };
+
+            foreach (var stroke in annotation.Strokes)
+            {
+                if (stroke.Count < 2) continue;
+
+                for (int i = 1; i < stroke.Count; i++)
+                {
+                    var p1 = stroke[i - 1];
+                    var p2 = stroke[i];
+                    // Translate points relative to annotation position
+                    gfx.DrawLine(pen, annotation.X + p1.X, annotation.Y + p1.Y, annotation.X + p2.X, annotation.Y + p2.Y);
+                }
+            }
+        }
+
+        // Draw signer name and date if provided
+        if (!string.IsNullOrEmpty(annotation.SignerName))
+        {
+            var font = new XFont("Arial", 8, XFontStyleEx.Italic);
+            var text = $"{annotation.SignerName} - {annotation.SignedDate:MM/dd/yyyy}";
+            gfx.DrawString(text, font, new XSolidBrush(color), annotation.X, annotation.Y + annotation.Height + 12);
         }
     }
 

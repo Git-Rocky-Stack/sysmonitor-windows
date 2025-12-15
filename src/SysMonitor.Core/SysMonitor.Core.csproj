@@ -21,5 +21,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
     <PackageReference Include="TaskScheduler" Version="2.11.0" />
     <PackageReference Include="PDFsharp" Version="6.1.1" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.2" />
   </ItemGroup>
 </Project>
