@@ -368,3 +368,21 @@ public class IntToDoubleConverter : IValueConverter
         return 0;
     }
 }
+
+public class CelsiusToFahrenheitConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is double celsius && celsius > 0)
+        {
+            var fahrenheit = (celsius * 1.8) + 32;
+            return fahrenheit.ToString("F1");
+        }
+        return "0.0";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}

@@ -56,13 +56,6 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _cpuTempStatus = "N/A";
     [ObservableProperty] private double _gpuTemperature = 0;
 
-    // Fahrenheit display values
-    public double CpuTemperatureFahrenheit => CpuTemperature > 0 ? (CpuTemperature * 1.8) + 32 : 0;
-    public double GpuTemperatureFahrenheit => GpuTemperature > 0 ? (GpuTemperature * 1.8) + 32 : 0;
-
-    partial void OnCpuTemperatureChanged(double value) => OnPropertyChanged(nameof(CpuTemperatureFahrenheit));
-    partial void OnGpuTemperatureChanged(double value) => OnPropertyChanged(nameof(GpuTemperatureFahrenheit));
-
     // Process count
     [ObservableProperty] private int _processCount = 0;
 
