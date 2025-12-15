@@ -73,10 +73,21 @@
                     </StackPanel>
 
                     <!-- Refresh Button -->
-                    <Button Grid.Column="2" Content="REFRESH"
-                            Command="{x:Bind ViewModel.LoadProgramsCommand}"
-                            Style="{StaticResource RedButtonStyle}"
-                            IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                    <Border Grid.Column="2" CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="REFRESH"
+                                Command="{x:Bind ViewModel.LoadProgramsCommand}"
+                                Style="{StaticResource RedButtonStyle}"
+                                IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                    </Border>
                 </Grid>
             </Border>
         </StackPanel>

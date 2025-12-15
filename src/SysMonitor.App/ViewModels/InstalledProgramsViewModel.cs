@@ -82,7 +82,14 @@ public partial class InstalledProgramsViewModel : ObservableObject
 
             if (result.Success)
             {
-                StatusMessage = $"Uninstalled {program.Name} successfully";
+                // For system/store apps, add note about potential restart requirement
+                var isSystemOrStoreApp = program.Type == ProgramType.StoreApp ||
+                                         program.Type == ProgramType.SystemApp;
+
+                StatusMessage = isSystemOrStoreApp
+                    ? $"Uninstalled {program.Name}. Note: If app still appears after refresh, a restart may be required or the app may be protected by Windows."
+                    : $"Uninstalled {program.Name} successfully";
+
                 // Refresh the list after a short delay
                 await Task.Delay(2000);
                 await LoadProgramsAsync();

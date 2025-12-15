@@ -231,7 +231,7 @@
             </StackPanel>
 
             <!-- Health Score Hero Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <Border Style="{StaticResource HeroStatCardStyle}">
                 <StackPanel Spacing="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -345,7 +345,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- CPU Card -->
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                <Border Grid.Column="0" Style="{StaticResource PremiumStatCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -369,12 +369,12 @@
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.CpuUsage, Mode=OneWay}"
-                                     Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
+                                     Maximum="100" Style="{StaticResource PremiumProgressBarStyle}"/>
                     </Grid>
                 </Border>
 
                 <!-- Memory Card -->
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                <Border Grid.Column="1" Style="{StaticResource PremiumStatCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -399,7 +399,7 @@
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.MemoryUsage, Mode=OneWay}"
-                                     Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
+                                     Maximum="100" Style="{StaticResource PremiumProgressBarStyle}"/>
 
                         <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}" Margin="0,8,0,0">
                             <Run Text="{x:Bind ViewModel.MemoryUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
@@ -411,7 +411,7 @@
                 </Border>
 
                 <!-- Disk Card -->
-                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                <Border Grid.Column="2" Style="{StaticResource PremiumStatCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -436,7 +436,7 @@
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.DiskUsage, Mode=OneWay}"
-                                     Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
+                                     Maximum="100" Style="{StaticResource CyanProgressBarStyle}"/>
 
                         <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}" Margin="0,8,0,0">
                             <Run Text="{x:Bind ViewModel.DiskUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
@@ -448,7 +448,7 @@
                 </Border>
 
                 <!-- Battery Card -->
-                <Border Grid.Column="3" Style="{StaticResource StatCardStyle}"
+                <Border Grid.Column="3" Style="{StaticResource PremiumStatCardStyle}"
                         Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid>
                         <Grid.RowDefinitions>
