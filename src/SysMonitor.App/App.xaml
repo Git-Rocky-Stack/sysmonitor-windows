@@ -36,6 +36,8 @@
             <converters:BoolToAccentBrushConverter x:Key="BoolToAccentBrushConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
             <converters:CelsiusToFahrenheitConverter x:Key="CelsiusToFahrenheitConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:ScheduleToVisibilityConverter x:Key="ScheduleToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

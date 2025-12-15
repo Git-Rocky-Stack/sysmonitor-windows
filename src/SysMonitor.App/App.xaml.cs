@@ -13,8 +13,10 @@ namespace SysMonitor.App;
 
 public partial class App : Application
 {
-    private Window? _mainWindow;
+    private static Window? _mainWindow;
     private static IHost? _host;
+
+    public static Window? MainWindow => _mainWindow;
 
     public App()
     {
@@ -38,6 +40,7 @@ public partial class App : Application
                 services.AddSingleton<ITempFileCleaner, TempFileCleaner>();
                 services.AddSingleton<IBrowserCacheCleaner, BrowserCacheCleaner>();
                 services.AddSingleton<IRegistryCleaner, RegistryCleaner>();
+                services.AddSingleton<IBrowserPrivacyCleaner, BrowserPrivacyCleaner>();
 
                 // Core Services - Optimizers
                 services.AddSingleton<IStartupOptimizer, StartupOptimizer>();
@@ -54,6 +57,10 @@ public partial class App : Application
                 services.AddSingleton<INetworkMapper, NetworkMapper>();
                 services.AddSingleton<IImageTools, ImageTools>();
                 services.AddSingleton<IInstalledProgramsService, InstalledProgramsService>();
+                services.AddSingleton<IDriveWiper, DriveWiper>();
+                services.AddSingleton<IHealthCheckService, HealthCheckService>();
+                services.AddSingleton<ISystemRestoreService, SystemRestoreService>();
+                services.AddSingleton<IScheduledCleaningService, ScheduledCleaningService>();
 
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
@@ -80,6 +87,10 @@ public partial class App : Application
                 services.AddTransient<NetworkMapperViewModel>();
                 services.AddTransient<ImageToolsViewModel>();
                 services.AddTransient<InstalledProgramsViewModel>();
+                services.AddTransient<HealthCheckViewModel>();
+                services.AddTransient<BrowserPrivacyViewModel>();
+                services.AddTransient<DriveWiperViewModel>();
+                services.AddTransient<ScheduledCleaningViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -106,6 +117,10 @@ public partial class App : Application
                 services.AddTransient<NetworkMapperPage>();
                 services.AddTransient<ImageToolsPage>();
                 services.AddTransient<InstalledProgramsPage>();
+                services.AddTransient<HealthCheckPage>();
+                services.AddTransient<BrowserPrivacyPage>();
+                services.AddTransient<DriveWiperPage>();
+                services.AddTransient<ScheduledCleaningPage>();
             })
             .Build();
     }
