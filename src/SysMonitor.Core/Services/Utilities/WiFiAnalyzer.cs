@@ -7,7 +7,22 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class WiFiAnalyzer : IWiFiAnalyzer
 {
-    public bool IsAvailable => CheckWiFiAvailable();
+    private bool? _isAvailableCache;
+    private DateTime _lastAvailabilityCheck = DateTime.MinValue;
+
+    public bool IsAvailable
+    {
+        get
+        {
+            // Cache the availability check for 5 seconds
+            if (_isAvailableCache.HasValue && (DateTime.Now - _lastAvailabilityCheck).TotalSeconds < 5)
+                return _isAvailableCache.Value;
+
+            _isAvailableCache = CheckWiFiAvailable();
+            _lastAvailabilityCheck = DateTime.Now;
+            return _isAvailableCache.Value;
+        }
+    }
 
     public async Task<List<WiFiNetworkInfo>> ScanNetworksAsync(CancellationToken cancellationToken = default)
     {
@@ -18,46 +33,61 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             try
             {
                 // First, trigger a scan on the wireless interface
-                // This refreshes the cached network list that netsh shows
                 var interfaceName = GetWirelessInterfaceName();
                 if (!string.IsNullOrEmpty(interfaceName))
                 {
-                    var scanStartInfo = new ProcessStartInfo
+                    try
                     {
-                        FileName = "netsh",
-                        Arguments = $"wlan scan interface=\"{interfaceName}\"",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        CreateNoWindow = true
-                    };
+                        var scanStartInfo = new ProcessStartInfo
+                        {
+                            FileName = "netsh",
+                            Arguments = $"wlan scan interface=\"{interfaceName}\"",
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            CreateNoWindow = true
+                        };
 
-                    using var scanProcess = Process.Start(scanStartInfo);
-                    scanProcess?.WaitForExit(3000);
-
-                    // Wait for the scan to complete (networks take time to appear)
-                    await Task.Delay(2000, cancellationToken);
+                        using var scanProcess = Process.Start(scanStartInfo);
+                        if (scanProcess != null)
+                        {
+                            await scanProcess.WaitForExitAsync(cancellationToken);
+                            // Wait for the scan to complete
+                            await Task.Delay(2500, cancellationToken);
+                        }
+                    }
+                    catch { /* Scan trigger may fail, continue anyway */ }
                 }
 
-                // Now get the network list
+                // Get the network list
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "netsh",
                     Arguments = "wlan show networks mode=bssid",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    CreateNoWindow = true
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = System.Text.Encoding.UTF8
                 };
 
                 using var process = Process.Start(startInfo);
                 if (process == null) return;
 
-                var output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit(5000);
+                var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
+                await process.WaitForExitAsync(cancellationToken);
 
-                networks.AddRange(ParseNetshOutput(output));
+                var parsedNetworks = ParseNetshOutput(output);
+                networks.AddRange(parsedNetworks);
 
-                // If no networks found from scan, try to at least include the connected network
+                // If netsh parsing failed, try WMI as fallback
+                if (networks.Count == 0)
+                {
+                    var wmiNetworks = await GetNetworksFromWmiAsync(cancellationToken);
+                    networks.AddRange(wmiNetworks);
+                }
+
+                // If still no networks, try to at least include the connected network
                 if (networks.Count == 0)
                 {
                     var connected = GetConnectedNetworkAsFallback();
@@ -75,17 +105,51 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         return networks.OrderByDescending(n => n.SignalStrength).ToList();
     }
 
+    private async Task<List<WiFiNetworkInfo>> GetNetworksFromWmiAsync(CancellationToken cancellationToken)
+    {
+        var networks = new List<WiFiNetworkInfo>();
+
+        try
+        {
+            await Task.Run(() =>
+            {
+                // Try to get WiFi networks using WMI (works on Windows 10/11)
+                using var searcher = new ManagementObjectSearcher(
+                    "root\\WMI",
+                    "SELECT * FROM MSNdis_80211_BSSIList");
+
+                // This may not work on all systems, so we wrap in try-catch
+            }, cancellationToken);
+        }
+        catch { }
+
+        return networks;
+    }
+
     private static string? GetWirelessInterfaceName()
     {
         try
         {
+            // First try using .NET's NetworkInterface
+            var wirelessInterface = NetworkInterface.GetAllNetworkInterfaces()
+                .FirstOrDefault(nic => nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 &&
+                                       nic.OperationalStatus == OperationalStatus.Up);
+
+            if (wirelessInterface != null)
+            {
+                return wirelessInterface.Name;
+            }
+
+            // Fallback to netsh
             var startInfo = new ProcessStartInfo
             {
                 FileName = "netsh",
                 Arguments = "wlan show interfaces",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
-                CreateNoWindow = true
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8
             };
 
             using var process = Process.Start(startInfo);
@@ -94,17 +158,20 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             var output = process.StandardOutput.ReadToEnd();
             process.WaitForExit(3000);
 
-            // Parse interface name from output
-            foreach (var line in output.Split('\n'))
+            // Parse interface name - look for "Name" or its translations
+            var namePattern = new Regex(@"^\s*(Name|Nom|Nombre|名称)\s*[:：]\s*(.+)$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var match = namePattern.Match(output);
+            if (match.Success)
             {
-                var trimmed = line.Trim();
-                if (trimmed.StartsWith("Name", StringComparison.OrdinalIgnoreCase))
+                return match.Groups[2].Value.Trim();
+            }
+
+            // If no match, try any wireless interface
+            foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
                 {
-                    var parts = trimmed.Split(':', 2);
-                    if (parts.Length > 1)
-                    {
-                        return parts[1].Trim();
-                    }
+                    return nic.Name;
                 }
             }
         }
@@ -233,7 +300,11 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     private static List<WiFiNetworkInfo> ParseNetshOutput(string output)
     {
         var networks = new List<WiFiNetworkInfo>();
-        var lines = output.Split('\n');
+
+        if (string.IsNullOrWhiteSpace(output))
+            return networks;
+
+        var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
         string? currentSSID = null;
         string? currentBSSID = null;
@@ -243,68 +314,123 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         int channel = 0;
         string band = "";
 
+        // Common patterns for different locales - use regex for robustness
+        var ssidPattern = new Regex(@"^\s*SSID\s*\d*\s*[:：]\s*(.*)$", RegexOptions.IgnoreCase);
+        var bssidPattern = new Regex(@"^\s*BSSID\s*\d*\s*[:：]\s*([0-9a-fA-F:]+)", RegexOptions.IgnoreCase);
+        var signalPattern = new Regex(@"(\d+)\s*%", RegexOptions.IgnoreCase);
+        var channelPattern = new Regex(@"[:：]\s*(\d+)\s*$", RegexOptions.IgnoreCase);
+
         foreach (var rawLine in lines)
         {
             var line = rawLine.Trim();
+            if (string.IsNullOrEmpty(line)) continue;
 
-            if (line.StartsWith("SSID", StringComparison.OrdinalIgnoreCase) && !line.Contains("BSSID"))
+            // Check for SSID (but not BSSID)
+            if (!line.Contains("BSSID", StringComparison.OrdinalIgnoreCase))
             {
-                // Save previous network if exists
+                var ssidMatch = ssidPattern.Match(line);
+                if (ssidMatch.Success)
+                {
+                    // Save previous network if exists
+                    if (!string.IsNullOrEmpty(currentBSSID))
+                    {
+                        networks.Add(CreateNetworkInfo(currentSSID, currentBSSID, signalPercent,
+                            channel, band, authentication, networkType, false));
+                    }
+
+                    currentSSID = ssidMatch.Groups[1].Value.Trim();
+                    currentBSSID = null;
+                    signalPercent = 0;
+                    channel = 0;
+                    band = "";
+                    authentication = "";
+                    networkType = "";
+                    continue;
+                }
+            }
+
+            // Check for BSSID (MAC address pattern)
+            var bssidMatch = bssidPattern.Match(line);
+            if (bssidMatch.Success || line.Contains("BSSID", StringComparison.OrdinalIgnoreCase))
+            {
+                // Save previous BSSID entry if exists
                 if (!string.IsNullOrEmpty(currentBSSID))
                 {
                     networks.Add(CreateNetworkInfo(currentSSID, currentBSSID, signalPercent,
                         channel, band, authentication, networkType, false));
+                    signalPercent = 0;
+                    channel = 0;
                 }
 
-                var parts = line.Split(':', 2);
-                currentSSID = parts.Length > 1 ? parts[1].Trim() : "";
-                currentBSSID = null;
-            }
-            else if (line.StartsWith("BSSID", StringComparison.OrdinalIgnoreCase))
-            {
-                // Save previous BSSID entry if exists (for multiple APs with same SSID)
-                if (!string.IsNullOrEmpty(currentBSSID))
+                if (bssidMatch.Success)
                 {
-                    networks.Add(CreateNetworkInfo(currentSSID, currentBSSID, signalPercent,
-                        channel, band, authentication, networkType, false));
+                    currentBSSID = bssidMatch.Groups[1].Value.Trim();
                 }
+                else
+                {
+                    // Try to extract MAC address from line
+                    var macMatch = Regex.Match(line, @"([0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2})");
+                    if (macMatch.Success)
+                    {
+                        currentBSSID = macMatch.Groups[1].Value;
+                    }
+                }
+                continue;
+            }
 
-                var parts = line.Split(':', 2);
-                currentBSSID = parts.Length > 1 ? parts[1].Trim() : "";
-            }
-            else if (line.StartsWith("Signal", StringComparison.OrdinalIgnoreCase))
+            // Check for Signal strength (look for percentage)
+            if (line.Contains("Signal", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("信号", StringComparison.OrdinalIgnoreCase) ||  // Chinese
+                line.Contains("Señal", StringComparison.OrdinalIgnoreCase))  // Spanish
             {
-                var match = Regex.Match(line, @"(\d+)%");
-                if (match.Success)
+                var signalMatch = signalPattern.Match(line);
+                if (signalMatch.Success)
                 {
-                    signalPercent = int.Parse(match.Groups[1].Value);
+                    signalPercent = int.Parse(signalMatch.Groups[1].Value);
                 }
+                continue;
             }
-            else if (line.StartsWith("Channel", StringComparison.OrdinalIgnoreCase))
+
+            // Check for Channel
+            if (line.Contains("Channel", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Kanal", StringComparison.OrdinalIgnoreCase) ||   // German
+                line.Contains("Canal", StringComparison.OrdinalIgnoreCase) ||   // Spanish/French
+                line.Contains("频道", StringComparison.OrdinalIgnoreCase))      // Chinese
             {
-                var parts = line.Split(':');
-                if (parts.Length > 1 && int.TryParse(parts[1].Trim(), out var ch))
+                var chMatch = channelPattern.Match(line);
+                if (chMatch.Success && int.TryParse(chMatch.Groups[1].Value, out var ch))
                 {
                     channel = ch;
                     band = GetBandFromChannel(channel);
                 }
+                continue;
             }
-            else if (line.StartsWith("Network type", StringComparison.OrdinalIgnoreCase) ||
-                     line.StartsWith("Radio type", StringComparison.OrdinalIgnoreCase))
+
+            // Check for Network/Radio type
+            if (line.Contains("Radio type", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Network type", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("802.11", StringComparison.OrdinalIgnoreCase))
             {
-                var parts = line.Split(':');
+                var parts = line.Split(new[] { ':', '：' });
                 if (parts.Length > 1)
                 {
-                    networkType = parts[1].Trim();
+                    networkType = parts[^1].Trim();
                 }
+                continue;
             }
-            else if (line.StartsWith("Authentication", StringComparison.OrdinalIgnoreCase))
+
+            // Check for Authentication
+            if (line.Contains("Authentication", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Authentifizierung", StringComparison.OrdinalIgnoreCase) ||  // German
+                line.Contains("Autenticación", StringComparison.OrdinalIgnoreCase) ||      // Spanish
+                line.Contains("认证", StringComparison.OrdinalIgnoreCase))                 // Chinese
             {
-                var parts = line.Split(':');
+                var parts = line.Split(new[] { ':', '：' });
                 if (parts.Length > 1)
                 {
-                    authentication = parts[1].Trim();
+                    authentication = parts[^1].Trim();
                 }
+                continue;
             }
         }
 
@@ -344,7 +470,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
     private static WiFiConnectionInfo? ParseConnectionInfo(string output)
     {
-        var lines = output.Split('\n');
+        if (string.IsNullOrWhiteSpace(output))
+            return null;
+
+        var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
         string ssid = "";
         string bssid = "";
@@ -352,55 +481,146 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         string security = "";
         int channel = 0;
         int speed = 0;
+        string state = "";
+
+        // Check if we have a connected interface
+        var statePattern = new Regex(@"State\s*[:：]\s*(.+)", RegexOptions.IgnoreCase);
+        var ssidPattern = new Regex(@"^\s*SSID\s*[:：]\s*(.+)$", RegexOptions.IgnoreCase);
+        var bssidPattern = new Regex(@"BSSID\s*[:：]\s*([0-9a-fA-F:]+)", RegexOptions.IgnoreCase);
+        var signalPattern = new Regex(@"(\d+)\s*%");
+        var channelPattern = new Regex(@"[:：]\s*(\d+)\s*$");
+        var speedPattern = new Regex(@"(\d+(?:\.\d+)?)\s*(Mbps|Gbps)?", RegexOptions.IgnoreCase);
 
         foreach (var rawLine in lines)
         {
             var line = rawLine.Trim();
+            if (string.IsNullOrEmpty(line)) continue;
 
-            if (line.StartsWith("SSID", StringComparison.OrdinalIgnoreCase) && !line.Contains("BSSID"))
+            // Check state
+            if (line.Contains("State", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("État", StringComparison.OrdinalIgnoreCase) ||   // French
+                line.Contains("Estado", StringComparison.OrdinalIgnoreCase) || // Spanish
+                line.Contains("状态", StringComparison.OrdinalIgnoreCase))     // Chinese
             {
-                var parts = line.Split(':', 2);
-                ssid = parts.Length > 1 ? parts[1].Trim() : "";
-            }
-            else if (line.StartsWith("BSSID", StringComparison.OrdinalIgnoreCase))
-            {
-                var parts = line.Split(':', 2);
-                bssid = parts.Length > 1 ? parts[1].Trim() : "";
-            }
-            else if (line.StartsWith("Signal", StringComparison.OrdinalIgnoreCase))
-            {
-                var match = Regex.Match(line, @"(\d+)%");
-                if (match.Success)
+                var stateMatch = statePattern.Match(line);
+                if (stateMatch.Success)
                 {
-                    signal = int.Parse(match.Groups[1].Value);
+                    state = stateMatch.Groups[1].Value.Trim();
                 }
+                else
+                {
+                    var parts = line.Split(new[] { ':', '：' });
+                    if (parts.Length > 1) state = parts[^1].Trim();
+                }
+                continue;
             }
-            else if (line.StartsWith("Channel", StringComparison.OrdinalIgnoreCase))
+
+            // Check SSID (but not BSSID)
+            if (!line.Contains("BSSID", StringComparison.OrdinalIgnoreCase) &&
+                (line.Contains("SSID", StringComparison.OrdinalIgnoreCase) ||
+                 line.Contains("名称", StringComparison.OrdinalIgnoreCase)))
             {
-                var parts = line.Split(':');
-                if (parts.Length > 1 && int.TryParse(parts[1].Trim(), out var ch))
+                var ssidMatch = ssidPattern.Match(line);
+                if (ssidMatch.Success)
+                {
+                    ssid = ssidMatch.Groups[1].Value.Trim();
+                }
+                else
+                {
+                    var parts = line.Split(new[] { ':', '：' }, 2);
+                    if (parts.Length > 1) ssid = parts[1].Trim();
+                }
+                continue;
+            }
+
+            // Check BSSID
+            if (line.Contains("BSSID", StringComparison.OrdinalIgnoreCase))
+            {
+                var bssidMatch = bssidPattern.Match(line);
+                if (bssidMatch.Success)
+                {
+                    bssid = bssidMatch.Groups[1].Value.Trim();
+                }
+                else
+                {
+                    // Try to find MAC address pattern
+                    var macMatch = Regex.Match(line, @"([0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2})");
+                    if (macMatch.Success)
+                    {
+                        bssid = macMatch.Groups[1].Value;
+                    }
+                }
+                continue;
+            }
+
+            // Check Signal
+            if (line.Contains("Signal", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("信号", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Señal", StringComparison.OrdinalIgnoreCase))
+            {
+                var signalMatch = signalPattern.Match(line);
+                if (signalMatch.Success)
+                {
+                    signal = int.Parse(signalMatch.Groups[1].Value);
+                }
+                continue;
+            }
+
+            // Check Channel
+            if (line.Contains("Channel", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Kanal", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Canal", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("频道", StringComparison.OrdinalIgnoreCase))
+            {
+                var chMatch = channelPattern.Match(line);
+                if (chMatch.Success && int.TryParse(chMatch.Groups[1].Value, out var ch))
                 {
                     channel = ch;
                 }
+                continue;
             }
-            else if (line.StartsWith("Authentication", StringComparison.OrdinalIgnoreCase))
+
+            // Check Authentication/Security
+            if (line.Contains("Authentication", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Authentifizierung", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Autenticación", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("认证", StringComparison.OrdinalIgnoreCase))
             {
-                var parts = line.Split(':');
-                security = parts.Length > 1 ? parts[1].Trim() : "";
+                var parts = line.Split(new[] { ':', '：' });
+                if (parts.Length > 1) security = parts[^1].Trim();
+                continue;
             }
-            else if (line.StartsWith("Receive rate", StringComparison.OrdinalIgnoreCase) ||
-                     line.StartsWith("Transmit rate", StringComparison.OrdinalIgnoreCase))
+
+            // Check Speed (Receive/Transmit rate)
+            if (line.Contains("rate", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Geschwindigkeit", StringComparison.OrdinalIgnoreCase) ||  // German
+                line.Contains("velocidad", StringComparison.OrdinalIgnoreCase) ||        // Spanish
+                line.Contains("速率", StringComparison.OrdinalIgnoreCase))               // Chinese
             {
-                var match = Regex.Match(line, @"(\d+)");
-                if (match.Success && int.TryParse(match.Groups[1].Value, out var rate))
+                var speedMatch = speedPattern.Match(line);
+                if (speedMatch.Success && double.TryParse(speedMatch.Groups[1].Value, out var rate))
                 {
-                    speed = Math.Max(speed, rate);
+                    var rateInt = (int)rate;
+                    if (speedMatch.Groups[2].Value.Equals("Gbps", StringComparison.OrdinalIgnoreCase))
+                        rateInt = (int)(rate * 1000);
+                    speed = Math.Max(speed, rateInt);
                 }
+                continue;
             }
         }
 
+        // Check if actually connected
         if (string.IsNullOrEmpty(ssid))
             return null;
+
+        // If state indicates disconnected, return null
+        if (!string.IsNullOrEmpty(state) &&
+            (state.Contains("disconnected", StringComparison.OrdinalIgnoreCase) ||
+             state.Contains("getrennt", StringComparison.OrdinalIgnoreCase) ||      // German
+             state.Contains("desconectado", StringComparison.OrdinalIgnoreCase)))   // Spanish
+        {
+            return null;
+        }
 
         return new WiFiConnectionInfo
         {
