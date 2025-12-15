@@ -35,6 +35,7 @@
             <converters:GreaterThanOneConverter x:Key="GreaterThanOneConverter"/>
             <converters:BoolToAccentBrushConverter x:Key="BoolToAccentBrushConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
+            <converters:CelsiusToFahrenheitConverter x:Key="CelsiusToFahrenheitConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

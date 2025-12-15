@@ -24,13 +24,6 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _cpuTempColor = "#4CAF50";
     [ObservableProperty] private string _gpuTempColor = "#4CAF50";
 
-    // Fahrenheit display values
-    public double CpuTemperatureFahrenheit => CpuTemperature > 0 ? (CpuTemperature * 1.8) + 32 : 0;
-    public double GpuTemperatureFahrenheit => GpuTemperature > 0 ? (GpuTemperature * 1.8) + 32 : 0;
-
-    partial void OnCpuTemperatureChanged(double value) => OnPropertyChanged(nameof(CpuTemperatureFahrenheit));
-    partial void OnGpuTemperatureChanged(double value) => OnPropertyChanged(nameof(GpuTemperatureFahrenheit));
-
     // State
     [ObservableProperty] private bool _isLoading = true;
     [ObservableProperty] private bool _hasTemperatures;

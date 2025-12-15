@@ -137,7 +137,7 @@
                                 <TextBlock.Foreground>
                                     <SolidColorBrush Color="{x:Bind ViewModel.TempColor, Mode=OneWay}"/>
                                 </TextBlock.Foreground>
-                                <Run Text="{x:Bind ViewModel.GpuTemperatureFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="{x:Bind ViewModel.GpuTemperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                                 <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
@@ -198,7 +198,7 @@
                                 <TextBlock.Foreground>
                                     <SolidColorBrush Color="{x:Bind ViewModel.HotSpotColor, Mode=OneWay}"/>
                                 </TextBlock.Foreground>
-                                <Run Text="{x:Bind ViewModel.GpuHotSpotFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="{x:Bind ViewModel.GpuHotSpot, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                                 <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
@@ -259,7 +259,7 @@
                                 <TextBlock.Foreground>
                                     <SolidColorBrush Color="{x:Bind ViewModel.MemTempColor, Mode=OneWay}"/>
                                 </TextBlock.Foreground>
-                                <Run Text="{x:Bind ViewModel.GpuMemoryTempFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="{x:Bind ViewModel.GpuMemoryTemp, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                                 <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>

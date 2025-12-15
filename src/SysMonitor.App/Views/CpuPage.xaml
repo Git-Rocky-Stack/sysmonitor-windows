@@ -283,7 +283,7 @@
                                     <TextBlock.Foreground>
                                         <SolidColorBrush Color="{x:Bind ViewModel.TemperatureColor, Mode=OneWay}"/>
                                     </TextBlock.Foreground>
-                                    <Run Text="{x:Bind ViewModel.TemperatureFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                    <Run Text="{x:Bind ViewModel.Temperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                                     <Run Text="°F"/>
                                 </TextBlock>
                                 <TextBlock FontSize="11" VerticalAlignment="Center"

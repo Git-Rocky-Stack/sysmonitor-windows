@@ -99,7 +99,7 @@
                         <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                             <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
                                        Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="{x:Bind ViewModel.CpuTemperatureFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="{x:Bind ViewModel.CpuTemperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                                 <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
@@ -140,7 +140,7 @@
                         <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                             <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
                                        Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="{x:Bind ViewModel.GpuTemperatureFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                <Run Text="{x:Bind ViewModel.GpuTemperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                                 <Run Text="°F" FontSize="28" FontWeight="Normal"/>
                             </TextBlock>
                         </StackPanel>
