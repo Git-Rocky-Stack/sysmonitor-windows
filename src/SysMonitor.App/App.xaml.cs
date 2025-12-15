@@ -8,6 +8,7 @@ using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Optimizers;
 using SysMonitor.Core.Services.Utilities;
+using SysMonitor.Core.Services.Backup;
 
 namespace SysMonitor.App;
 
@@ -61,6 +62,7 @@ public partial class App : Application
                 services.AddSingleton<IHealthCheckService, HealthCheckService>();
                 services.AddSingleton<ISystemRestoreService, SystemRestoreService>();
                 services.AddSingleton<IScheduledCleaningService, ScheduledCleaningService>();
+                services.AddSingleton<IBackupService, BackupService>();
 
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
@@ -91,6 +93,7 @@ public partial class App : Application
                 services.AddTransient<BrowserPrivacyViewModel>();
                 services.AddTransient<DriveWiperViewModel>();
                 services.AddTransient<ScheduledCleaningViewModel>();
+                services.AddTransient<BackupViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -121,6 +124,7 @@ public partial class App : Application
                 services.AddTransient<BrowserPrivacyPage>();
                 services.AddTransient<DriveWiperPage>();
                 services.AddTransient<ScheduledCleaningPage>();
+                services.AddTransient<BackupPage>();
             })
             .Build();
     }

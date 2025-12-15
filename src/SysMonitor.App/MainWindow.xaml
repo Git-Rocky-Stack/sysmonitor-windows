@@ -137,6 +137,11 @@
                         <FontIcon Glyph="&#xE823;" Foreground="{StaticResource SuccessBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Backup Manager" Tag="Backup">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7B8;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItem Content="Disk Analyzer" Tag="DiskAnalyzer">
                     <NavigationViewItem.Icon>
