@@ -19,7 +19,7 @@ public partial class GpuViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _gpuMemory = "";
     [ObservableProperty] private string _gpuResolution = "";
 
-    // GPU Stats (dynamic)
+    // GPU Stats (dynamic - stored in Celsius from sensor)
     [ObservableProperty] private double _gpuTemperature;
     [ObservableProperty] private string _tempStatus = "N/A";
     [ObservableProperty] private string _tempColor = "#808080";
@@ -33,6 +33,15 @@ public partial class GpuViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _memTempColor = "#808080";
     [ObservableProperty] private bool _hasHotSpot;
     [ObservableProperty] private bool _hasMemoryTemp;
+
+    // Fahrenheit display values
+    public double GpuTemperatureFahrenheit => GpuTemperature > 0 ? (GpuTemperature * 1.8) + 32 : 0;
+    public double GpuHotSpotFahrenheit => GpuHotSpot > 0 ? (GpuHotSpot * 1.8) + 32 : 0;
+    public double GpuMemoryTempFahrenheit => GpuMemoryTemp > 0 ? (GpuMemoryTemp * 1.8) + 32 : 0;
+
+    partial void OnGpuTemperatureChanged(double value) => OnPropertyChanged(nameof(GpuTemperatureFahrenheit));
+    partial void OnGpuHotSpotChanged(double value) => OnPropertyChanged(nameof(GpuHotSpotFahrenheit));
+    partial void OnGpuMemoryTempChanged(double value) => OnPropertyChanged(nameof(GpuMemoryTempFahrenheit));
 
     // State
     [ObservableProperty] private bool _isLoading = true;

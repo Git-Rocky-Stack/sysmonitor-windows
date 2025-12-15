@@ -40,6 +40,10 @@ public partial class CpuViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _temperatureStatus = "N/A";
     [ObservableProperty] private string _temperatureColor = "#4CAF50";
 
+    // Fahrenheit display value
+    public double TemperatureFahrenheit => Temperature > 0 ? (Temperature * 1.8) + 32 : 0;
+    partial void OnTemperatureChanged(double value) => OnPropertyChanged(nameof(TemperatureFahrenheit));
+
     // Per-Core Usage
     [ObservableProperty] private ObservableCollection<CoreUsageInfo> _coreUsages = new();
 

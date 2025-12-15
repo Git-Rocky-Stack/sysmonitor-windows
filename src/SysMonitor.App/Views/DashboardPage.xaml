@@ -94,8 +94,8 @@
                             <TextBlock Text="TEMPERATURE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <TextBlock Grid.Row="1" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}">
-                            <Run Text="{x:Bind ViewModel.CpuTemperature, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                            <Run Text="°C" FontSize="14"/>
+                            <Run Text="{x:Bind ViewModel.CpuTemperatureFahrenheit, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                            <Run Text="°F" FontSize="14"/>
                         </TextBlock>
                         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.CpuTempStatus, Mode=OneWay}"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
