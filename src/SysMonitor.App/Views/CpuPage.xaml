@@ -95,8 +95,8 @@
             <!-- Core Usage Grid -->
             <ItemsRepeater ItemsSource="{x:Bind ViewModel.CoreUsages, Mode=OneWay}">
                 <ItemsRepeater.Layout>
-                    <UniformGridLayout Orientation="Horizontal" MinItemWidth="180" MinItemHeight="100"
-                                       MinColumnSpacing="12" MinRowSpacing="12"/>
+                    <UniformGridLayout Orientation="Horizontal" MinItemWidth="180" MinItemHeight="140"
+                                       MinColumnSpacing="16" MinRowSpacing="16"/>
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="vm:CoreUsageInfo">
