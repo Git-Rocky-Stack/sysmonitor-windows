@@ -29,6 +29,11 @@ public sealed partial class MainWindow : Window
         { "PdfTools", typeof(PdfToolsPage) },
         { "PdfEditor", typeof(PdfEditorPage) },
         { "ImageTools", typeof(ImageToolsPage) },
+        // Maintenance
+        { "HealthCheck", typeof(HealthCheckPage) },
+        { "BrowserPrivacy", typeof(BrowserPrivacyPage) },
+        { "DriveWiper", typeof(DriveWiperPage) },
+        { "ScheduledCleaning", typeof(ScheduledCleaningPage) },
         // Wireless
         { "Bluetooth", typeof(BluetoothPage) },
         { "WiFi", typeof(WiFiPage) },

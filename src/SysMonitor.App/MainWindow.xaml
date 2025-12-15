@@ -116,6 +116,28 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItemSeparator/>
+                <NavigationViewItemHeader Content="MAINTENANCE"/>
+                <NavigationViewItem Content="Health Check" Tag="HealthCheck">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8E1;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Browser Privacy" Tag="BrowserPrivacy">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE72E;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Drive Wiper" Tag="DriveWiper">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE74D;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Scheduled Cleaning" Tag="ScheduledCleaning">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE823;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemSeparator/>
                 <NavigationViewItem Content="Disk Analyzer" Tag="DiskAnalyzer">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xEDA2;" Foreground="{StaticResource PrimaryBrush}"/>
