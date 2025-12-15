@@ -280,6 +280,7 @@ public class InstalledProgramsService : IInstalledProgramsService
 
             if (uninstallString.StartsWith("\""))
             {
+                // Quoted path - extract between quotes
                 var endQuote = uninstallString.IndexOf('"', 1);
                 fileName = uninstallString.Substring(1, endQuote - 1);
                 arguments = uninstallString.Substring(endQuote + 1).Trim();
@@ -297,17 +298,9 @@ public class InstalledProgramsService : IInstalledProgramsService
             }
             else
             {
-                var spaceIndex = uninstallString.IndexOf(' ');
-                if (spaceIndex > 0)
-                {
-                    fileName = uninstallString.Substring(0, spaceIndex);
-                    arguments = uninstallString.Substring(spaceIndex + 1);
-                }
-                else
-                {
-                    fileName = uninstallString;
-                    arguments = "";
-                }
+                // Unquoted path - need to handle paths with spaces like "C:\Program Files\..."
+                // Strategy: Find the .exe extension and split there
+                (fileName, arguments) = ParseUnquotedUninstallString(uninstallString);
             }
 
             var psi = new ProcessStartInfo
@@ -336,6 +329,52 @@ public class InstalledProgramsService : IInstalledProgramsService
                 Message = ex.Message
             };
         }
+    }
+
+    /// <summary>
+    /// Parses an unquoted uninstall string that may contain spaces in the path.
+    /// Example: "C:\Program Files\WinRAR\unins000.exe /SILENT" -> ("C:\Program Files\WinRAR\unins000.exe", "/SILENT")
+    /// </summary>
+    private static (string fileName, string arguments) ParseUnquotedUninstallString(string uninstallString)
+    {
+        // Common executable extensions to look for
+        var exeExtensions = new[] { ".exe", ".msi", ".bat", ".cmd" };
+
+        foreach (var ext in exeExtensions)
+        {
+            var extIndex = uninstallString.IndexOf(ext, StringComparison.OrdinalIgnoreCase);
+            if (extIndex > 0)
+            {
+                var endOfExe = extIndex + ext.Length;
+                var fileName = uninstallString.Substring(0, endOfExe);
+                var arguments = endOfExe < uninstallString.Length
+                    ? uninstallString.Substring(endOfExe).Trim()
+                    : "";
+
+                // Verify the file exists (if it looks like an absolute path)
+                if (fileName.Length > 2 && fileName[1] == ':')
+                {
+                    if (File.Exists(fileName))
+                    {
+                        return (fileName, arguments);
+                    }
+                }
+                else
+                {
+                    // Relative or just executable name
+                    return (fileName, arguments);
+                }
+            }
+        }
+
+        // Fallback: split at first space (original behavior)
+        var spaceIndex = uninstallString.IndexOf(' ');
+        if (spaceIndex > 0)
+        {
+            return (uninstallString.Substring(0, spaceIndex), uninstallString.Substring(spaceIndex + 1));
+        }
+
+        return (uninstallString, "");
     }
 
     private async Task<UninstallResult> UninstallStoreAppAsync(InstalledProgram program)
