@@ -123,12 +123,21 @@ public record NetworkScanProgress
 // PDF Editor Interface
 public interface IPdfEditor
 {
+    // Document Operations
     Task<PdfEditorDocument?> OpenPdfAsync(string filePath);
     Task<PdfOperationResult> SavePdfAsync(PdfEditorDocument document, string outputPath);
     Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0);
+    Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
+    Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath);
+
+    // Page Operations
     Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pageNumber, int degrees);
     Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pageNumber);
     Task<PdfOperationResult> ReorderPagesAsync(PdfEditorDocument document, int[] newOrder);
+    Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPageNumber, double width = 612, double height = 792);
+    Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pageNumber);
+
+    // Annotations
     Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation);
     Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight);
     Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape);
@@ -137,8 +146,16 @@ public interface IPdfEditor
     Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pageNumber, StickyNoteAnnotation note);
     Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pageNumber, RedactionAnnotation redaction);
     Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pageNumber, SignatureAnnotation signature);
-    Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath);
-    Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
+    Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pageNumber, StampAnnotation stamp);
+    Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark);
+    Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pageNumber, LinkAnnotation link);
+
+    // Search
+    Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false);
+    Task<string> ExtractTextAsync(PdfEditorDocument document, int? pageNumber = null);
+
+    // Compression & Optimization
+    Task<PdfOperationResult> CompressPdfAsync(string inputPath, string outputPath, PdfCompressionOptions? options = null);
 }
 
 // PDF Editor Models
@@ -267,4 +284,113 @@ public class SignatureAnnotation : PdfAnnotation
     public byte[]? SignatureImageData { get; set; } // Can also be an image
     public string SignerName { get; set; } = "";
     public DateTime SignedDate { get; set; } = DateTime.Now;
+}
+
+/// <summary>
+/// Stamp annotation (APPROVED, CONFIDENTIAL, DRAFT, etc.)
+/// </summary>
+public class StampAnnotation : PdfAnnotation
+{
+    public StampType StampType { get; set; } = StampType.Approved;
+    public string CustomText { get; set; } = "";
+    public double Rotation { get; set; } = -15; // Slight angle for authentic look
+    public double Opacity { get; set; } = 0.85;
+    public bool ShowDate { get; set; } = true;
+    public bool ShowBorder { get; set; } = true;
+}
+
+/// <summary>
+/// Pre-defined stamp types
+/// </summary>
+public enum StampType
+{
+    Approved,
+    Rejected,
+    Confidential,
+    Draft,
+    Final,
+    Void,
+    Copy,
+    Original,
+    NotApproved,
+    ForReview,
+    Urgent,
+    Completed,
+    Pending,
+    Custom
+}
+
+/// <summary>
+/// Watermark annotation (text or image watermark)
+/// </summary>
+public class WatermarkAnnotation : PdfAnnotation
+{
+    public WatermarkType Type { get; set; } = WatermarkType.Text;
+    public string Text { get; set; } = "CONFIDENTIAL";
+    public byte[]? ImageData { get; set; }
+    public double Opacity { get; set; } = 0.15;
+    public double Rotation { get; set; } = -45;
+    public double FontSize { get; set; } = 72;
+    public bool ApplyToAllPages { get; set; } = true;
+    public WatermarkPosition Position { get; set; } = WatermarkPosition.Center;
+}
+
+/// <summary>
+/// Watermark types
+/// </summary>
+public enum WatermarkType
+{
+    Text,
+    Image
+}
+
+/// <summary>
+/// Watermark position options
+/// </summary>
+public enum WatermarkPosition
+{
+    Center,
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    Diagonal
+}
+
+/// <summary>
+/// Link annotation (hyperlink)
+/// </summary>
+public class LinkAnnotation : PdfAnnotation
+{
+    public string Url { get; set; } = "";
+    public string DisplayText { get; set; } = "";
+    public bool IsInternal { get; set; } = false; // Link to another page in same PDF
+    public int TargetPage { get; set; } = 1;
+}
+
+/// <summary>
+/// Search result in PDF
+/// </summary>
+public record PdfSearchResult
+{
+    public int PageNumber { get; init; }
+    public string MatchedText { get; init; } = "";
+    public string ContextBefore { get; init; } = "";
+    public string ContextAfter { get; init; } = "";
+    public double X { get; init; }
+    public double Y { get; init; }
+    public double Width { get; init; }
+    public double Height { get; init; }
+}
+
+/// <summary>
+/// PDF compression options
+/// </summary>
+public class PdfCompressionOptions
+{
+    public bool CompressImages { get; set; } = true;
+    public int ImageQuality { get; set; } = 75; // 1-100
+    public bool RemoveMetadata { get; set; } = false;
+    public bool RemoveAnnotations { get; set; } = false;
+    public bool OptimizeFonts { get; set; } = true;
 }
