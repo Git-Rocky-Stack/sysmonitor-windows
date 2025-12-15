@@ -34,6 +34,7 @@ public sealed partial class MainWindow : Window
         { "BrowserPrivacy", typeof(BrowserPrivacyPage) },
         { "DriveWiper", typeof(DriveWiperPage) },
         { "ScheduledCleaning", typeof(ScheduledCleaningPage) },
+        { "Backup", typeof(BackupPage) },
         // Wireless
         { "Bluetooth", typeof(BluetoothPage) },
         { "WiFi", typeof(WiFiPage) },
