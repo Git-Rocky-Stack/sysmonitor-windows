@@ -266,6 +266,103 @@ public sealed partial class PdfEditorPage : Page
         }
     }
 
+    // ==================== NEW FEATURE HANDLERS ====================
+
+    private void Print_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.PrintPdfCommand.Execute(null);
+    }
+
+    private async void Compress_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.CompressPdfCommand.ExecuteAsync(null);
+    }
+
+    private void Search_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ToggleSearchPanelCommand.Execute(null);
+    }
+
+    private async void InsertBlankPage_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.InsertBlankPageCommand.ExecuteAsync(null);
+    }
+
+    private async void DuplicatePage_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.DuplicateCurrentPageCommand.ExecuteAsync(null);
+    }
+
+    private void StampTool_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SelectToolCommand.Execute("Stamp");
+
+        // Show stamp type selection flyout
+        var flyout = new MenuFlyout();
+
+        var stampTypes = new[] {
+            ("Approved", StampType.Approved),
+            ("Rejected", StampType.Rejected),
+            ("Confidential", StampType.Confidential),
+            ("Draft", StampType.Draft),
+            ("Final", StampType.Final),
+            ("Void", StampType.Void),
+            ("Copy", StampType.Copy),
+            ("Original", StampType.Original),
+            ("For Review", StampType.ForReview),
+            ("Urgent", StampType.Urgent),
+            ("Completed", StampType.Completed),
+            ("Pending", StampType.Pending)
+        };
+
+        foreach (var (name, type) in stampTypes)
+        {
+            var item = new MenuFlyoutItem { Text = name };
+            item.Click += (s, args) =>
+            {
+                ViewModel.SelectedStampType = type;
+            };
+            flyout.Items.Add(item);
+        }
+
+        if (sender is Button button)
+        {
+            flyout.ShowAt(button);
+        }
+    }
+
+    private async void WatermarkTool_Click(object sender, RoutedEventArgs e)
+    {
+        // Show watermark dialog
+        var dialog = new ContentDialog
+        {
+            Title = "Add Watermark",
+            XamlRoot = this.XamlRoot,
+            PrimaryButtonText = "Add to All Pages",
+            SecondaryButtonText = "Add to Current Page",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary
+        };
+
+        var panel = new StackPanel { Spacing = 12 };
+        var textBox = new TextBox
+        {
+            PlaceholderText = "Watermark text (e.g., CONFIDENTIAL, DRAFT)",
+            Text = "CONFIDENTIAL"
+        };
+        panel.Children.Add(new TextBlock { Text = "Enter watermark text:" });
+        panel.Children.Add(textBox);
+
+        dialog.Content = panel;
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary || result == ContentDialogResult.Secondary)
+        {
+            var text = string.IsNullOrWhiteSpace(textBox.Text) ? "CONFIDENTIAL" : textBox.Text;
+            await ViewModel.AddWatermarkAsync(text, result == ContentDialogResult.Primary);
+        }
+    }
+
     private void RefreshAnnotationVisuals()
     {
         ClearAnnotationVisuals();

@@ -50,6 +50,18 @@ public partial class PdfEditorViewModel : ObservableObject
     [ObservableProperty] private bool _isSignatureToolActive;
     [ObservableProperty] private bool _isStickyNoteToolActive;
     [ObservableProperty] private bool _isRedactionToolActive;
+    [ObservableProperty] private bool _isStampToolActive;
+    [ObservableProperty] private bool _isWatermarkToolActive;
+
+    // Stamp options
+    [ObservableProperty] private StampType _selectedStampType = StampType.Approved;
+    [ObservableProperty] private string _customStampText = "";
+    [ObservableProperty] private bool _stampShowDate = true;
+
+    // Search
+    [ObservableProperty] private string _searchText = "";
+    [ObservableProperty] private bool _isSearchPanelVisible;
+    public ObservableCollection<PdfSearchResult> SearchResults { get; } = [];
 
     // Undo/Redo Stack
     private readonly Stack<UndoAction> _undoStack = new();
@@ -414,6 +426,8 @@ public partial class PdfEditorViewModel : ObservableObject
         IsSignatureToolActive = false;
         IsStickyNoteToolActive = false;
         IsRedactionToolActive = false;
+        IsStampToolActive = false;
+        IsWatermarkToolActive = false;
 
         SelectedTool = toolName switch
         {
@@ -429,6 +443,8 @@ public partial class PdfEditorViewModel : ObservableObject
             "Signature" => AnnotationTool.Signature,
             "StickyNote" => AnnotationTool.StickyNote,
             "Redaction" => AnnotationTool.Redaction,
+            "Stamp" => AnnotationTool.Stamp,
+            "Watermark" => AnnotationTool.Watermark,
             _ => AnnotationTool.None
         };
 
@@ -470,6 +486,12 @@ public partial class PdfEditorViewModel : ObservableObject
                 break;
             case AnnotationTool.Redaction:
                 IsRedactionToolActive = true;
+                break;
+            case AnnotationTool.Stamp:
+                IsStampToolActive = true;
+                break;
+            case AnnotationTool.Watermark:
+                IsWatermarkToolActive = true;
                 break;
         }
     }
@@ -567,6 +589,22 @@ public partial class PdfEditorViewModel : ObservableObject
                 };
                 await _pdfEditor.AddRedactionAsync(CurrentDocument, CurrentPageNumber, redaction);
                 annotation = redaction;
+                break;
+
+            case AnnotationTool.Stamp:
+                var stamp = new StampAnnotation
+                {
+                    X = x,
+                    Y = y,
+                    Width = Math.Max(width, 180),
+                    Height = Math.Max(height, 60),
+                    StampType = SelectedStampType,
+                    CustomText = CustomStampText,
+                    ShowDate = StampShowDate,
+                    Color = AnnotationColor
+                };
+                await _pdfEditor.AddStampAsync(CurrentDocument, CurrentPageNumber, stamp);
+                annotation = stamp;
                 break;
         }
 
@@ -892,6 +930,195 @@ public partial class PdfEditorViewModel : ObservableObject
         _ = LoadCurrentPageAsync();
     }
 
+    // ==================== NEW FEATURES ====================
+
+    [RelayCommand]
+    private async Task InsertBlankPageAsync()
+    {
+        if (CurrentDocument == null) return;
+
+        var result = await _pdfEditor.InsertBlankPageAsync(CurrentDocument, CurrentPageNumber);
+        if (result.Success)
+        {
+            IsModified = true;
+            TotalPages = CurrentDocument.Pages.Count;
+            await LoadThumbnailsAsync();
+            ShowStatus($"Inserted blank page after page {CurrentPageNumber}", true);
+        }
+        else
+        {
+            ShowStatus($"Failed to insert page: {result.ErrorMessage}", false);
+        }
+    }
+
+    [RelayCommand]
+    private async Task DuplicateCurrentPageAsync()
+    {
+        if (CurrentDocument == null) return;
+
+        var result = await _pdfEditor.DuplicatePageAsync(CurrentDocument, CurrentPageNumber);
+        if (result.Success)
+        {
+            IsModified = true;
+            TotalPages = CurrentDocument.Pages.Count;
+            await LoadThumbnailsAsync();
+            ShowStatus($"Duplicated page {CurrentPageNumber}", true);
+        }
+        else
+        {
+            ShowStatus($"Failed to duplicate page: {result.ErrorMessage}", false);
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleSearchPanel()
+    {
+        IsSearchPanelVisible = !IsSearchPanelVisible;
+        if (!IsSearchPanelVisible)
+        {
+            SearchResults.Clear();
+            SearchText = "";
+        }
+    }
+
+    [RelayCommand]
+    private async Task SearchInPdfAsync()
+    {
+        if (CurrentDocument == null || string.IsNullOrWhiteSpace(SearchText)) return;
+
+        IsLoading = true;
+        LoadingStatus = "Searching...";
+
+        try
+        {
+            var results = await _pdfEditor.SearchTextAsync(CurrentDocument, SearchText);
+            SearchResults.Clear();
+            foreach (var result in results)
+            {
+                SearchResults.Add(result);
+            }
+
+            if (SearchResults.Count > 0)
+            {
+                ShowStatus($"Found {SearchResults.Count} result(s)", true);
+            }
+            else
+            {
+                ShowStatus("No results found", false);
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+            LoadingStatus = "";
+        }
+    }
+
+    [RelayCommand]
+    private async Task GoToSearchResultAsync(PdfSearchResult result)
+    {
+        if (result == null) return;
+        await NavigateToPageAsync(result.PageNumber);
+    }
+
+    public async Task AddWatermarkAsync(string text, bool applyToAllPages)
+    {
+        if (CurrentDocument == null) return;
+
+        var watermark = new WatermarkAnnotation
+        {
+            Text = text,
+            Type = WatermarkType.Text,
+            ApplyToAllPages = applyToAllPages,
+            Opacity = 0.15,
+            Rotation = -45,
+            FontSize = 72,
+            Position = WatermarkPosition.Center,
+            Color = "#888888"
+        };
+
+        var result = await _pdfEditor.AddWatermarkAsync(CurrentDocument, watermark);
+        if (result.Success)
+        {
+            IsModified = true;
+            LoadAnnotationsForCurrentPage();
+            ShowStatus(applyToAllPages ? "Watermark added to all pages" : "Watermark added to current page", true);
+        }
+        else
+        {
+            ShowStatus($"Failed to add watermark: {result.ErrorMessage}", false);
+        }
+    }
+
+    [RelayCommand]
+    private async Task CompressPdfAsync()
+    {
+        if (CurrentDocument == null) return;
+
+        try
+        {
+            var picker = new FileSavePicker();
+            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            picker.FileTypeChoices.Add("PDF Document", [".pdf"]);
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(CurrentDocument.FileName) + "_compressed";
+
+            var hwnd = GetActiveWindow();
+            if (hwnd != IntPtr.Zero)
+            {
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            }
+
+            var file = await picker.PickSaveFileAsync();
+            if (file == null) return;
+
+            IsLoading = true;
+            LoadingStatus = "Compressing PDF...";
+
+            var result = await _pdfEditor.CompressPdfAsync(CurrentDocument.FilePath, file.Path);
+            if (result.Success)
+            {
+                // ErrorMessage contains the size info for successful compression
+                ShowStatus(result.ErrorMessage, true);
+            }
+            else
+            {
+                ShowStatus($"Compression failed: {result.ErrorMessage}", false);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Compression error: {ex.Message}", false);
+        }
+        finally
+        {
+            IsLoading = false;
+            LoadingStatus = "";
+        }
+    }
+
+    [RelayCommand]
+    private void PrintPdf()
+    {
+        if (CurrentDocument == null) return;
+
+        try
+        {
+            // Open the PDF with the default system PDF viewer for printing
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = CurrentDocument.FilePath,
+                UseShellExecute = true,
+                Verb = "print"
+            };
+            System.Diagnostics.Process.Start(psi);
+            ShowStatus("Sent to printer", true);
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Print error: {ex.Message}", false);
+        }
+    }
+
     private void ShowStatus(string message, bool isSuccess)
     {
         StatusMessage = message;
@@ -920,7 +1147,9 @@ public enum AnnotationTool
     Image,
     Signature,
     StickyNote,
-    Redaction
+    Redaction,
+    Stamp,
+    Watermark
 }
 
 public partial class PageThumbnailViewModel : ObservableObject
@@ -964,6 +1193,9 @@ public partial class AnnotationViewModel : ObservableObject
             StickyNoteAnnotation => ("Note", "\uE70B"),
             RedactionAnnotation => ("Redaction", "\uE738"),
             SignatureAnnotation => ("Signature", "\uE8FA"),
+            StampAnnotation => ("Stamp", "\uE7C3"),
+            WatermarkAnnotation => ("Watermark", "\uE8A5"),
+            LinkAnnotation => ("Link", "\uE71B"),
             ShapeAnnotation shape => shape.Type switch
             {
                 ShapeType.Rectangle => ("Rectangle", "\uE739"),
