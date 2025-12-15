@@ -349,51 +349,238 @@ public class InstalledProgramsService : IInstalledProgramsService
             };
         }
 
+        // Check if this is a protected system app in C:\Windows\SystemApps
+        if (!string.IsNullOrEmpty(program.InstallLocation) &&
+            program.InstallLocation.Contains(@"\Windows\SystemApps", StringComparison.OrdinalIgnoreCase))
+        {
+            // These apps require elevated PowerShell with special handling
+            return await UninstallProtectedSystemAppAsync(program);
+        }
+
         try
         {
             var packageManager = new PackageManager();
             var operation = packageManager.RemovePackageAsync(program.PackageFullName);
 
-            var result = await operation.AsTask();
+            // Use TaskCompletionSource to properly await the operation
+            var tcs = new TaskCompletionSource<UninstallResult>();
 
-            return new UninstallResult
+            operation.Completed = (asyncInfo, status) =>
             {
-                Success = result.IsRegistered == false,
-                Message = result.ErrorText ?? "Uninstall completed"
+                if (status == Windows.Foundation.AsyncStatus.Completed)
+                {
+                    tcs.SetResult(new UninstallResult
+                    {
+                        Success = true,
+                        Message = "Uninstall completed successfully"
+                    });
+                }
+                else if (status == Windows.Foundation.AsyncStatus.Error)
+                {
+                    var errorText = asyncInfo.GetResults()?.ErrorText ?? "Unknown error";
+                    tcs.SetResult(new UninstallResult
+                    {
+                        Success = false,
+                        Message = $"Uninstall failed: {errorText}"
+                    });
+                }
+                else
+                {
+                    tcs.SetResult(new UninstallResult
+                    {
+                        Success = false,
+                        Message = "Uninstall was cancelled"
+                    });
+                }
             };
-        }
-        catch (Exception ex)
-        {
-            // Try PowerShell as fallback
-            try
+
+            // Wait for completion with timeout
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(60000));
+            if (completedTask == tcs.Task)
             {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powershell.exe",
-                    Arguments = $"-Command \"Get-AppxPackage '{program.PackageFullName}' | Remove-AppxPackage\"",
-                    UseShellExecute = true,
-                    Verb = "runas",
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-
-                using var process = Process.Start(psi);
-                process?.WaitForExit(30000);
-
-                return new UninstallResult
-                {
-                    Success = process?.ExitCode == 0,
-                    Message = process?.ExitCode == 0 ? "Uninstall completed via PowerShell" : "PowerShell uninstall may have failed"
-                };
+                return await tcs.Task;
             }
-            catch
+            else
             {
                 return new UninstallResult
                 {
                     Success = false,
-                    Message = ex.Message
+                    Message = "Uninstall timed out"
                 };
             }
         }
+        catch (UnauthorizedAccessException)
+        {
+            // Access denied - try PowerShell with elevation
+            return await UninstallViaElevatedPowerShellAsync(program);
+        }
+        catch (Exception ex)
+        {
+            // Try PowerShell as fallback for other errors
+            return await UninstallViaElevatedPowerShellAsync(program, ex.Message);
+        }
+    }
+
+    private async Task<UninstallResult> UninstallProtectedSystemAppAsync(InstalledProgram program)
+    {
+        // Extract package name (without version/architecture suffix) for wildcard matching
+        var packageName = program.PackageFullName;
+        var underscoreIndex = packageName.IndexOf('_');
+        if (underscoreIndex > 0)
+        {
+            packageName = packageName.Substring(0, underscoreIndex);
+        }
+
+        // For system apps, we need to:
+        // 1. Remove for current user
+        // 2. Remove provisioned package to prevent reinstall
+        var script = $@"
+$ErrorActionPreference = 'Stop'
+try {{
+    # Remove for current user
+    $pkg = Get-AppxPackage -Name '*{packageName}*' -ErrorAction SilentlyContinue
+    if ($pkg) {{
+        $pkg | Remove-AppxPackage -ErrorAction Stop
+        Write-Output 'SUCCESS: Package removed for current user'
+    }} else {{
+        Write-Output 'WARNING: Package not found for current user'
+    }}
+
+    # Also try to remove provisioned package (prevents reinstall for new users)
+    $provisioned = Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object {{ $_.PackageName -like '*{packageName}*' }}
+    if ($provisioned) {{
+        $provisioned | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+        Write-Output 'SUCCESS: Provisioned package removed'
+    }}
+}} catch {{
+    Write-Output ""ERROR: $($_.Exception.Message)""
+    exit 1
+}}
+";
+
+        return await RunPowerShellScriptAsync(script, "System app removal");
+    }
+
+    private async Task<UninstallResult> UninstallViaElevatedPowerShellAsync(InstalledProgram program, string? previousError = null)
+    {
+        // Extract package name for wildcard matching
+        var packageName = program.PackageFullName;
+        var underscoreIndex = packageName.IndexOf('_');
+        if (underscoreIndex > 0)
+        {
+            packageName = packageName.Substring(0, underscoreIndex);
+        }
+
+        var script = $@"
+$ErrorActionPreference = 'Stop'
+try {{
+    $pkg = Get-AppxPackage -Name '*{packageName}*' -AllUsers -ErrorAction SilentlyContinue
+    if ($pkg) {{
+        $pkg | Remove-AppxPackage -AllUsers -ErrorAction Stop
+        Write-Output 'SUCCESS: Package removed'
+    }} else {{
+        # Try current user only
+        $pkg = Get-AppxPackage -Name '*{packageName}*' -ErrorAction SilentlyContinue
+        if ($pkg) {{
+            $pkg | Remove-AppxPackage -ErrorAction Stop
+            Write-Output 'SUCCESS: Package removed for current user'
+        }} else {{
+            Write-Output 'ERROR: Package not found'
+            exit 1
+        }}
+    }}
+}} catch {{
+    Write-Output ""ERROR: $($_.Exception.Message)""
+    exit 1
+}}
+";
+
+        var result = await RunPowerShellScriptAsync(script, "PowerShell removal");
+
+        // Add context about previous error if any
+        if (!result.Success && !string.IsNullOrEmpty(previousError))
+        {
+            result.Message = $"Initial error: {previousError}. {result.Message}";
+        }
+
+        return result;
+    }
+
+    private async Task<UninstallResult> RunPowerShellScriptAsync(string script, string operationType)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                // Write script to temp file to avoid command line escaping issues
+                var scriptPath = Path.Combine(Path.GetTempPath(), $"sysmon_uninstall_{Guid.NewGuid():N}.ps1");
+                File.WriteAllText(scriptPath, script);
+
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "powershell.exe",
+                        Arguments = $"-ExecutionPolicy Bypass -NoProfile -File \"{scriptPath}\"",
+                        UseShellExecute = true,
+                        Verb = "runas",
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    };
+
+                    using var process = Process.Start(psi);
+                    if (process == null)
+                    {
+                        return new UninstallResult
+                        {
+                            Success = false,
+                            Message = "Failed to start PowerShell process"
+                        };
+                    }
+
+                    process.WaitForExit(60000);
+
+                    if (process.ExitCode == 0)
+                    {
+                        return new UninstallResult
+                        {
+                            Success = true,
+                            Message = $"{operationType} completed successfully"
+                        };
+                    }
+                    else
+                    {
+                        return new UninstallResult
+                        {
+                            Success = false,
+                            ExitCode = process.ExitCode,
+                            Message = $"{operationType} failed (exit code: {process.ExitCode}). The app may be protected by Windows or require a restart."
+                        };
+                    }
+                }
+                finally
+                {
+                    // Clean up temp script file
+                    try { File.Delete(scriptPath); } catch { }
+                }
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+            {
+                // User cancelled UAC prompt
+                return new UninstallResult
+                {
+                    Success = false,
+                    Message = "Uninstall cancelled - administrator privileges required"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new UninstallResult
+                {
+                    Success = false,
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        });
     }
 
     public void OpenInstallLocation(InstalledProgram program)

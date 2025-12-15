@@ -52,8 +52,19 @@
                         <TextBox Grid.Column="0" Text="{x:Bind ViewModel.ScanPath, Mode=TwoWay}"
                                  PlaceholderText="Select folder to scan..."
                                  Style="{StaticResource DefaultTextBoxStyle}"/>
-                        <Button Grid.Column="1" Content="BROWSE" Command="{x:Bind ViewModel.BrowseFolderCommand}"
-                                Style="{StaticResource OutlineButtonStyle}"/>
+                        <Border Grid.Column="1" CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="BROWSE" Command="{x:Bind ViewModel.BrowseFolderCommand}"
+                                    Style="{StaticResource OutlineButtonStyle}" Background="#000000"/>
+                        </Border>
                     </Grid>
 
                     <!-- Settings Row -->

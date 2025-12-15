@@ -49,19 +49,62 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Health Score Circle -->
-                    <Grid Grid.Column="0" Width="100" Height="100" Margin="0,0,24,0">
-                        <Ellipse Stroke="{StaticResource CardBorderBrush}" StrokeThickness="4"/>
-                        <Ellipse Stroke="{StaticResource PrimaryBrush}" StrokeThickness="4"
-                                 StrokeDashArray="4 1" StrokeDashCap="Round"/>
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <TextBlock Text="{x:Bind ViewModel.HealthGrade, Mode=OneWay}"
-                                       FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
-                                       Foreground="{StaticResource PrimaryBrush}"/>
-                            <TextBlock Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"
-                                       FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
-                                       HorizontalAlignment="Center"/>
-                        </StackPanel>
+                    <!-- Premium Health Score Gauge -->
+                    <Grid Grid.Column="0" Width="120" Height="120" Margin="0,0,24,0">
+                        <!-- Outer glow ring -->
+                        <Ellipse StrokeThickness="8" Opacity="0.15">
+                            <Ellipse.Stroke>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#AA2024" Offset="0.7"/>
+                                    <GradientStop Color="Transparent" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Ellipse.Stroke>
+                        </Ellipse>
+                        <!-- Track ring (background) -->
+                        <Ellipse StrokeThickness="6" Margin="8">
+                            <Ellipse.Stroke>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#2A2A2A" Offset="0"/>
+                                    <GradientStop Color="#1A1A1A" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Ellipse.Stroke>
+                        </Ellipse>
+                        <!-- Progress ring (foreground) -->
+                        <Ellipse StrokeThickness="6" StrokeDashCap="Round" Margin="8"
+                                 StrokeDashArray="4 1">
+                            <Ellipse.Stroke>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#AA2024" Offset="0"/>
+                                    <GradientStop Color="#D4383C" Offset="0.5"/>
+                                    <GradientStop Color="#AA2024" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Ellipse.Stroke>
+                        </Ellipse>
+                        <!-- Inner content -->
+                        <Border CornerRadius="50" Margin="20">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#1A1A1A" Offset="0"/>
+                                    <GradientStop Color="#0D0D0D" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.HealthGrade, Mode=OneWay}"
+                                           FontSize="32" FontWeight="Bold" HorizontalAlignment="Center">
+                                    <TextBlock.Foreground>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#D4383C" Offset="0"/>
+                                            <GradientStop Color="#AA2024" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                                <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center">
+                                    <Run Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"/>
+                                    <Run Text="/100"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
                     </Grid>
 
                     <!-- Status Info -->
@@ -127,10 +170,21 @@
                                     Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
                                     IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
                         </Border>
-                        <Button Content="Create Restore Point" Command="{x:Bind ViewModel.CreateRestorePointCommand}"
-                                Style="{StaticResource OutlinedButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.CanCreateRestorePoint, Mode=OneWay}"
-                                HorizontalAlignment="Stretch"/>
+                        <Border CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="Create Restore Point" Command="{x:Bind ViewModel.CreateRestorePointCommand}"
+                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
+                                    IsEnabled="{x:Bind ViewModel.CanCreateRestorePoint, Mode=OneWay}"
+                                    HorizontalAlignment="Stretch"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -149,10 +203,32 @@
                     <TextBlock Text="DETECTED ISSUES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                    <Button Content="Select Fixable" Command="{x:Bind ViewModel.SelectAllFixableCommand}"
-                            Style="{StaticResource OutlinedButtonStyle}"/>
-                    <Button Content="Deselect All" Command="{x:Bind ViewModel.DeselectAllCommand}"
-                            Style="{StaticResource OutlinedButtonStyle}"/>
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="Select Fixable" Command="{x:Bind ViewModel.SelectAllFixableCommand}"
+                                Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
+                    </Border>
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Content="Deselect All" Command="{x:Bind ViewModel.DeselectAllCommand}"
+                                Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
+                    </Border>
                 </StackPanel>
             </Grid>
 

@@ -134,9 +134,20 @@
                     <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
                     <TextBlock Text="FILES TO WIPE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
-                <Button Content="Clear All" Command="{x:Bind ViewModel.ClearAllCommand}"
-                        Style="{StaticResource OutlinedButtonStyle}" HorizontalAlignment="Right"
-                        IsEnabled="{x:Bind ViewModel.HasFiles, Mode=OneWay}"/>
+                <Border CornerRadius="26" Padding="2" HorizontalAlignment="Right">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#707070" Offset="0.0"/>
+                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                            <GradientStop Color="#505050" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Button Content="Clear All" Command="{x:Bind ViewModel.ClearAllCommand}"
+                            Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
+                            IsEnabled="{x:Bind ViewModel.HasFiles, Mode=OneWay}"/>
+                </Border>
             </Grid>
 
             <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.FilesToWipe, Mode=OneWay}" Background="Transparent">
