@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using Windows.Storage.Pickers;
@@ -191,9 +192,9 @@ public partial class DriverDisplayItem : ObservableObject
     public string AgeText { get; }
     public bool IsOutdated { get; }
     public bool IsCritical { get; }
-    public string CriticalBadgeVisibility { get; }
-    public string OutdatedBadgeVisibility { get; }
-    public string ProblemBadgeVisibility { get; }
+    public Visibility CriticalBadgeVisibility { get; }
+    public Visibility OutdatedBadgeVisibility { get; }
+    public Visibility ProblemBadgeVisibility { get; }
 
     public DriverDisplayItem(DriverInfo info)
     {
@@ -226,9 +227,9 @@ public partial class DriverDisplayItem : ObservableObject
         else
             AgeText = $"{info.DaysSinceUpdate / 365} years old";
 
-        // Badge visibility (for XAML binding - returns "Visible" or "Collapsed")
-        CriticalBadgeVisibility = info.IsCritical ? "Visible" : "Collapsed";
-        OutdatedBadgeVisibility = info.IsOutdated ? "Visible" : "Collapsed";
-        ProblemBadgeVisibility = info.HasProblem ? "Visible" : "Collapsed";
+        // Badge visibility (for XAML binding)
+        CriticalBadgeVisibility = info.IsCritical ? Visibility.Visible : Visibility.Collapsed;
+        OutdatedBadgeVisibility = info.IsOutdated ? Visibility.Visible : Visibility.Collapsed;
+        ProblemBadgeVisibility = info.HasProblem ? Visibility.Visible : Visibility.Collapsed;
     }
 }
