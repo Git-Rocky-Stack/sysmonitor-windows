@@ -4,11 +4,14 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace SysMonitor.Core.Services.Utilities;
 
 public class NetworkMapper : INetworkMapper
 {
+    private readonly ILogger<NetworkMapper> _logger;
+
     private static readonly Dictionary<int, string> CommonPorts = new()
     {
         { 21, "FTP" },
@@ -30,6 +33,11 @@ public class NetworkMapper : INetworkMapper
         { 8080, "HTTP Alt" },
         { 8443, "HTTPS Alt" }
     };
+
+    public NetworkMapper(ILogger<NetworkMapper> logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<List<NetworkDeviceInfo>> ScanNetworkAsync(string subnet,
         IProgress<NetworkScanProgress>? progress = null, CancellationToken cancellationToken = default)

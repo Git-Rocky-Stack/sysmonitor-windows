@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Cleaners;
@@ -6,10 +8,12 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
 {
     private record BrowserCacheLocation(string BrowserName, string DisplayName, string CachePath);
 
+    private readonly ILogger<BrowserCacheCleaner> _logger;
     private readonly List<BrowserCacheLocation> _cacheLocations;
 
-    public BrowserCacheCleaner()
+    public BrowserCacheCleaner(ILogger<BrowserCacheCleaner> logger)
     {
+        _logger = logger;
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
         _cacheLocations = new List<BrowserCacheLocation>
@@ -77,7 +81,7 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                                         FileCount = count,
                                         IsSelected = true,
                                         RiskLevel = CleanerRiskLevel.Safe,
-                                        Description = $"{count} files, {FormatSize(size)}"
+                                        Description = $"{count} files, {FormatHelper.FormatSize(size)}"
                                     });
                                 }
                             }
@@ -101,12 +105,15 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                                 FileCount = count,
                                 IsSelected = true,
                                 RiskLevel = CleanerRiskLevel.Safe,
-                                Description = $"{count} files, {FormatSize(size)}"
+                                Description = $"{count} files, {FormatHelper.FormatSize(size)}"
                             });
                         }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Failed to scan browser cache at {Path}", location.CachePath);
+                }
             }
 
             // Group results by browser for better organization
@@ -137,12 +144,21 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                             result.BytesCleaned += size;
                             result.FilesDeleted++;
                         }
-                        catch (UnauthorizedAccessException) { result.ErrorCount++; }
-                        catch (IOException) { result.ErrorCount++; }
+                        catch (UnauthorizedAccessException ex)
+                        {
+                            result.ErrorCount++;
+                            _logger.LogTrace(ex, "Access denied to {File}", file);
+                        }
+                        catch (IOException ex)
+                        {
+                            result.ErrorCount++;
+                            _logger.LogTrace(ex, "IO error for {File}", file);
+                        }
                         catch (Exception ex)
                         {
                             result.ErrorCount++;
                             result.Errors.Add($"{file}: {ex.Message}");
+                            _logger.LogDebug(ex, "Failed to delete {File}", file);
                         }
                     }
 
@@ -154,18 +170,24 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                             Directory.Delete(dir, true);
                             result.FoldersDeleted++;
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            _logger.LogTrace(ex, "Failed to delete directory {Dir}", dir);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     result.Errors.Add($"{item.Path}: {ex.Message}");
                     result.ErrorCount++;
+                    _logger.LogWarning(ex, "Failed to clean browser cache at {Path}", item.Path);
                 }
             }
 
             result.Duration = DateTime.Now - startTime;
             result.Success = result.ErrorCount < result.FilesDeleted; // Allow some errors
+            _logger.LogInformation("Cleaned {FilesDeleted} browser cache files ({BytesCleaned} bytes)",
+                result.FilesDeleted, result.BytesCleaned);
             return result;
         });
     }
@@ -183,21 +205,16 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                     size += new FileInfo(file).Length;
                     count++;
                 }
-                catch { }
+                catch
+                {
+                    // Expected for locked/inaccessible files - silently skip
+                }
             }
         }
-        catch { }
+        catch
+        {
+            // Expected for inaccessible directories - silently skip
+        }
         return (size, count);
-    }
-
-    private static string FormatSize(long bytes)
-    {
-        if (bytes >= 1_073_741_824)
-            return $"{bytes / 1_073_741_824.0:F2} GB";
-        if (bytes >= 1_048_576)
-            return $"{bytes / 1_048_576.0:F2} MB";
-        if (bytes >= 1024)
-            return $"{bytes / 1024.0:F2} KB";
-        return $"{bytes} B";
     }
 }

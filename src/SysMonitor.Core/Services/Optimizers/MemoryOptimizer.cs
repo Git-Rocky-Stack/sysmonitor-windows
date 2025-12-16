@@ -1,15 +1,23 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 
 namespace SysMonitor.Core.Services.Optimizers;
 
 public class MemoryOptimizer : IMemoryOptimizer
 {
+    private readonly ILogger<MemoryOptimizer> _logger;
+
     [DllImport("kernel32.dll")]
     private static extern bool SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
 
     [DllImport("psapi.dll")]
     private static extern bool EmptyWorkingSet(IntPtr hProcess);
+
+    public MemoryOptimizer(ILogger<MemoryOptimizer> logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<long> OptimizeMemoryAsync()
     {
@@ -17,6 +25,7 @@ public class MemoryOptimizer : IMemoryOptimizer
         {
             long totalFreed = 0;
             var currentProcess = Process.GetCurrentProcess();
+            var processesOptimized = 0;
 
             foreach (var proc in Process.GetProcesses())
             {
@@ -28,9 +37,16 @@ public class MemoryOptimizer : IMemoryOptimizer
                     proc.Refresh();
                     var afterMem = proc.WorkingSet64;
                     var freed = beforeMem - afterMem;
-                    if (freed > 0) totalFreed += freed;
+                    if (freed > 0)
+                    {
+                        totalFreed += freed;
+                        processesOptimized++;
+                    }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogTrace(ex, "Failed to optimize memory for process {ProcessId}", proc.Id);
+                }
             }
 
             // Force garbage collection
@@ -38,6 +54,8 @@ public class MemoryOptimizer : IMemoryOptimizer
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
+            _logger.LogInformation("Memory optimization complete: freed {TotalFreed} bytes from {ProcessCount} processes",
+                totalFreed, processesOptimized);
             return totalFreed;
         });
     }
@@ -53,9 +71,15 @@ public class MemoryOptimizer : IMemoryOptimizer
                 EmptyWorkingSet(proc.Handle);
                 proc.Refresh();
                 var afterMem = proc.WorkingSet64;
-                return Math.Max(0, beforeMem - afterMem);
+                var freed = Math.Max(0, beforeMem - afterMem);
+                _logger.LogDebug("Trimmed {Freed} bytes from process {ProcessId}", freed, processId);
+                return freed;
             }
-            catch { return 0L; }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to trim working set for process {ProcessId}", processId);
+                return 0L;
+            }
         });
     }
 
