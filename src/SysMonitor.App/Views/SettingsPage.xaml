@@ -121,10 +121,9 @@
                             <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
                                 <Slider Minimum="1" Maximum="10" Width="250"
                                         Value="{x:Bind ViewModel.RefreshInterval, Mode=TwoWay}"/>
-                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}">
-                                    <Run Text="{x:Bind ViewModel.RefreshInterval, Mode=OneWay}"/>
-                                    <Run Text="seconds"/>
-                                </TextBlock>
+                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"
+                                           Text="{x:Bind ViewModel.RefreshInterval, Mode=OneWay}"/>
+                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" Text=" seconds"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -144,10 +143,9 @@
                                         Visibility="{x:Bind ViewModel.AutoOptimizeMemory, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Slider Minimum="50" Maximum="95" Width="250"
                                         Value="{x:Bind ViewModel.MemoryThreshold, Mode=TwoWay}"/>
-                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}">
-                                    <Run Text="{x:Bind ViewModel.MemoryThreshold, Mode=OneWay}"/>
-                                    <Run Text="%"/>
-                                </TextBlock>
+                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}"
+                                           Text="{x:Bind ViewModel.MemoryThreshold, Mode=OneWay}"/>
+                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}" Text="%"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -268,10 +266,9 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Slider Minimum="10" Maximum="40" Width="150"
                                             Value="{x:Bind ViewModel.BatteryLowWarning, Mode=TwoWay}"/>
-                                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}">
-                                        <Run Text="{x:Bind ViewModel.BatteryLowWarning, Mode=OneWay}"/>
-                                        <Run Text="%"/>
-                                    </TextBlock>
+                                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}"
+                                               Text="{x:Bind ViewModel.BatteryLowWarning, Mode=OneWay}"/>
+                                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}" Text="%"/>
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
@@ -279,10 +276,9 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Slider Minimum="5" Maximum="20" Width="150"
                                             Value="{x:Bind ViewModel.BatteryCriticalWarning, Mode=TwoWay}"/>
-                                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource DangerBrush}">
-                                        <Run Text="{x:Bind ViewModel.BatteryCriticalWarning, Mode=OneWay}"/>
-                                        <Run Text="%"/>
-                                    </TextBlock>
+                                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource DangerBrush}"
+                                               Text="{x:Bind ViewModel.BatteryCriticalWarning, Mode=OneWay}"/>
+                                    <TextBlock VerticalAlignment="Center" Foreground="{StaticResource DangerBrush}" Text="%"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -368,10 +364,10 @@
                                 <Run Text="1" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <Run Text=" SYSTEM MONITOR" Foreground="{StaticResource TextPrimaryBrush}"/>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}">
-                                <Run Text="Version"/>
-                                <Run Text="{x:Bind ViewModel.Version, Mode=OneWay}"/>
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Version " Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{x:Bind ViewModel.Version, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                     <TextBlock Text="Strategic. Excellence. Engineered." Foreground="{StaticResource PrimaryBrush}"
