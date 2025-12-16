@@ -57,8 +57,15 @@ public partial class RegistryCleanerViewModel : ObservableObject
     {
         if (!HasResults) return;
 
+        var selectedCount = ScanResults.Count(r => r.IsSelected);
+        if (selectedCount == 0)
+        {
+            StatusMessage = "No issues selected. Select issues to fix first.";
+            return;
+        }
+
         IsCleaning = true;
-        StatusMessage = "Creating backup and fixing registry issues...";
+        StatusMessage = $"Creating backup and fixing {selectedCount:N0} registry issues...";
 
         try
         {
@@ -71,17 +78,30 @@ public partial class RegistryCleanerViewModel : ObservableObject
             FixedCount = result.FilesDeleted; // FilesDeleted is used to count fixed issues
 
             // Show comprehensive status with error info
-            if (result.ErrorCount > 0)
+            if (FixedCount == 0 && result.ErrorCount > 0)
             {
-                StatusMessage = $"Fixed {FixedCount:N0} issues. {result.ErrorCount:N0} issues require admin rights.";
+                // Nothing was fixed - likely all require admin
+                StatusMessage = $"Could not fix issues. {result.ErrorCount:N0} items require administrator rights. Try running as Admin.";
+            }
+            else if (result.ErrorCount > 0)
+            {
+                StatusMessage = $"Fixed {FixedCount:N0} of {selectedCount:N0} issues. {result.ErrorCount:N0} require admin rights.";
+            }
+            else if (FixedCount > 0)
+            {
+                StatusMessage = $"Successfully fixed {FixedCount:N0} registry issues!";
             }
             else
             {
-                StatusMessage = $"Successfully fixed {FixedCount:N0} registry issues!";
+                StatusMessage = "No changes were needed - issues may have been resolved already.";
             }
 
             // Rescan to update the list
             await ScanAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error during cleanup: {ex.Message}";
         }
         finally
         {
