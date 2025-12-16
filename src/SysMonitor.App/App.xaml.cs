@@ -139,6 +139,7 @@ public partial class App : Application
                 services.AddTransient<ScheduledCleaningViewModel>();
                 services.AddTransient<BackupViewModel>();
                 services.AddTransient<DriverUpdaterViewModel>();
+                services.AddTransient<DonationViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -171,6 +172,7 @@ public partial class App : Application
                 services.AddTransient<ScheduledCleaningPage>();
                 services.AddTransient<BackupPage>();
                 services.AddTransient<DriverUpdaterPage>();
+                services.AddTransient<DonationPage>();
             })
             .Build();
     }

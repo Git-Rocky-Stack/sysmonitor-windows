@@ -39,7 +39,10 @@ public sealed partial class MainWindow : Window
         // Wireless
         { "Bluetooth", typeof(BluetoothPage) },
         { "WiFi", typeof(WiFiPage) },
-        { "NetworkMapper", typeof(NetworkMapperPage) }
+        { "NetworkMapper", typeof(NetworkMapperPage) },
+        // Footer
+        { "Settings", typeof(SettingsPage) },
+        { "Donate", typeof(DonationPage) }
     };
 
     public MainWindow()
@@ -54,12 +57,6 @@ public sealed partial class MainWindow : Window
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.IsSettingsSelected)
-        {
-            ContentFrame.Navigate(typeof(SettingsPage));
-            return;
-        }
-
         if (args.SelectedItemContainer is NavigationViewItem item)
         {
             var tag = item.Tag?.ToString();

@@ -57,7 +57,7 @@
         <!-- Navigation View -->
         <NavigationView x:Name="NavView" Grid.Row="2"
                         IsBackButtonVisible="Collapsed"
-                        IsSettingsVisible="True"
+                        IsSettingsVisible="False"
                         PaneDisplayMode="Left"
                         Background="{StaticResource BackgroundBrush}"
                         SelectionChanged="NavView_SelectionChanged">
@@ -218,6 +218,24 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="Settings" Tag="Settings">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Donate" Tag="Donate">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE719;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="User's Guide" Tag="UserGuide">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE736;" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
 
             <Frame x:Name="ContentFrame" Padding="24" Background="{StaticResource BackgroundBrush}"/>
         </NavigationView>
