@@ -541,3 +541,18 @@ public class BoolToLockGlyphConverter : IValueConverter
     }
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }
+
+public class CountToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is int count)
+            return count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (value is long longCount)
+            return longCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (value is double doubleCount)
+            return doubleCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+        return Visibility.Collapsed;
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}

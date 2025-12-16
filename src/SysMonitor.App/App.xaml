@@ -51,6 +51,7 @@
             <converters:BoolToSuccessColorConverter x:Key="BoolToSuccessColorConverter"/>
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
             <converters:BoolToLockGlyphConverter x:Key="BoolToLockGlyphConverter"/>
+            <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
