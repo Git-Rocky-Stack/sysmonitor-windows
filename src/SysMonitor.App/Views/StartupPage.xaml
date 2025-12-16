@@ -102,48 +102,51 @@
         <!-- Startup Items List -->
         <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.StartupItems, Mode=OneWay}"
                   SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
+                  SelectionMode="Single"
                   Background="Transparent">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="Margin" Value="0,4,0,4"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Background" Value="#1E1E1E"/>
+                    <Setter Property="CornerRadius" Value="8"/>
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource CardStyle}" Padding="12">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="80"/>
-                            </Grid.ColumnDefinitions>
+                    <Grid Padding="12" Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
 
-                            <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}"
-                                    Width="40" Height="40" Margin="0,0,12,0">
-                                <FontIcon Glyph="&#xE8FC;" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            </Border>
+                        <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}"
+                                Width="40" Height="40" Margin="0,0,12,0">
+                            <FontIcon Glyph="&#xE8FC;" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
 
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}" Style="{StaticResource CardTitleStyle}"/>
-                                <TextBlock Text="{Binding Location}" Style="{StaticResource CardSubtitleStyle}"
-                                           TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource CardTitleStyle}"/>
+                            <TextBlock Text="{Binding Location}" Style="{StaticResource CardSubtitleStyle}"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
 
-                            <TextBlock Grid.Column="2" Text="{Binding Publisher}" VerticalAlignment="Center"
-                                       Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Publisher}" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
 
-                            <TextBlock Grid.Column="3" Text="{Binding Impact}" VerticalAlignment="Center"
-                                       Foreground="{StaticResource WarningBrush}"/>
+                        <TextBlock Grid.Column="3" Text="{Binding Impact}" VerticalAlignment="Center"
+                                   Foreground="{StaticResource WarningBrush}"/>
 
-                            <TextBlock Grid.Column="4" VerticalAlignment="Center"
-                                       Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold">
-                                <Run Text="{Binding IsEnabled}"/>
-                            </TextBlock>
-                        </Grid>
-                    </Border>
+                        <Border Grid.Column="4" CornerRadius="4" Padding="8,4" VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Background="{Binding IsEnabled, Converter={StaticResource BoolToSuccessBrushConverter}}">
+                            <TextBlock Text="{Binding IsEnabled}" Foreground="White" FontWeight="SemiBold" FontSize="11"/>
+                        </Border>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
