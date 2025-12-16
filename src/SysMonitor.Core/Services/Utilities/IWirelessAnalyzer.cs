@@ -85,4 +85,6 @@ public record WiFiConnectionInfo
     public string IpAddress { get; init; } = "";
     public bool IsConnected { get; init; }
     public TimeSpan ConnectionDuration { get; init; }
+    public string Band { get; init; } = ""; // 2.4 GHz or 5 GHz
+    public string RadioType { get; init; } = ""; // 802.11ac, 802.11ax, etc.
 }

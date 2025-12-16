@@ -68,7 +68,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
-                    StandardOutputEncoding = System.Text.Encoding.UTF8
+                    StandardOutputEncoding = System.Text.Encoding.GetEncoding(850) // OEM code page
                 };
 
                 using var process = Process.Start(startInfo);
@@ -79,6 +79,31 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
                     var parsedNetworks = ParseNetshOutput(output);
                     networks.AddRange(parsedNetworks);
+                }
+
+                // If no networks found, try alternative method using profile scan
+                if (networks.Count == 0)
+                {
+                    var profileStartInfo = new ProcessStartInfo
+                    {
+                        FileName = "netsh",
+                        Arguments = "wlan show all",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true,
+                        StandardOutputEncoding = System.Text.Encoding.GetEncoding(850)
+                    };
+
+                    using var profileProcess = Process.Start(profileStartInfo);
+                    if (profileProcess != null)
+                    {
+                        var profileOutput = await profileProcess.StandardOutput.ReadToEndAsync(cancellationToken);
+                        await profileProcess.WaitForExitAsync(cancellationToken);
+
+                        var parsedNetworks = ParseNetshOutput(profileOutput);
+                        networks.AddRange(parsedNetworks);
+                    }
                 }
             }
             catch (OperationCanceledException) { throw; }
@@ -161,7 +186,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8
+                StandardOutputEncoding = System.Text.Encoding.GetEncoding(850) // OEM code page
             };
 
             using var process = Process.Start(startInfo);
@@ -205,7 +230,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8
+                StandardOutputEncoding = System.Text.Encoding.GetEncoding(850) // OEM code page for Windows console
             };
 
             using var process = Process.Start(startInfo);
@@ -219,6 +244,13 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 {
                     var (quality, color) = GetSignalQuality(connectionInfo.SignalStrength);
 
+                    // Use parsed band if available, otherwise determine from channel
+                    var band = connectionInfo.Band;
+                    if (string.IsNullOrEmpty(band) || band == "Unknown")
+                    {
+                        band = GetBandFromChannel(connectionInfo.Channel);
+                    }
+
                     return new WiFiNetworkInfo
                     {
                         Ssid = connectionInfo.Ssid,
@@ -228,13 +260,13 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                         SignalQuality = quality,
                         SignalColor = color,
                         Channel = connectionInfo.Channel,
-                        Band = GetBandFromChannel(connectionInfo.Channel),
+                        Band = band,
                         Security = connectionInfo.Security,
                         IsSecured = !string.IsNullOrEmpty(connectionInfo.Security) &&
                                    !connectionInfo.Security.Equals("Open", StringComparison.OrdinalIgnoreCase),
                         IsConnected = true,
                         FrequencyMHz = GetFrequencyFromChannel(connectionInfo.Channel),
-                        NetworkType = "Connected"
+                        NetworkType = connectionInfo.RadioType
                     };
                 }
             }
@@ -346,7 +378,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
-                    StandardOutputEncoding = System.Text.Encoding.UTF8
+                    StandardOutputEncoding = System.Text.Encoding.GetEncoding(850) // OEM code page
                 };
 
                 using var process = Process.Start(startInfo);
@@ -416,7 +448,8 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.GetEncoding(850) // OEM code page
             };
 
             using var process = Process.Start(startInfo);
@@ -476,6 +509,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         string authentication = "";
         int channel = 0;
         string band = "";
+        string radioType = "";
 
         foreach (var rawLine in lines)
         {
@@ -489,6 +523,9 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             var key = line.Substring(0, colonIndex).Trim().ToLowerInvariant();
             var value = line.Substring(colonIndex + 1).Trim();
 
+            // Skip empty values
+            if (string.IsNullOrEmpty(value)) continue;
+
             // Check for SSID (but not BSSID)
             if ((key == "ssid" || key.StartsWith("ssid ") || key.Contains("ssid") && !key.Contains("bssid")))
             {
@@ -499,7 +536,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     if (!string.IsNullOrEmpty(currentBSSID))
                     {
                         networks.Add(CreateNetworkInfo(currentSSID, currentBSSID, signalPercent,
-                            channel, band, authentication, networkType, false));
+                            channel, band, authentication, networkType, radioType, false));
                     }
 
                     currentSSID = value;
@@ -509,6 +546,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     band = "";
                     authentication = "";
                     networkType = "";
+                    radioType = "";
                     continue;
                 }
             }
@@ -516,13 +554,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             // Check for BSSID (MAC address pattern)
             if (key.Contains("bssid"))
             {
-                // Save previous BSSID entry if exists
+                // Save previous BSSID entry if exists (multiple BSSIDs per SSID)
                 if (!string.IsNullOrEmpty(currentBSSID))
                 {
                     networks.Add(CreateNetworkInfo(currentSSID, currentBSSID, signalPercent,
-                        channel, band, authentication, networkType, false));
+                        channel, band, authentication, networkType, radioType, false));
                     signalPercent = 0;
                     channel = 0;
+                    band = "";
+                    radioType = "";
                 }
 
                 // Try to extract MAC address from value
@@ -549,13 +589,35 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 continue;
             }
 
+            // Check for Band directly
+            if (key == "band" || key == "banda" || key == "频带" || key == "frequenzband")
+            {
+                band = value;
+                continue;
+            }
+
+            // Check for Radio type (802.11ac, 802.11ax, etc.)
+            if (key.Contains("radio type") || key.Contains("tipo de radio") || key.Contains("funktyp") || key.Contains("无线电类型"))
+            {
+                radioType = value;
+                // Also determine band from radio type if not yet set
+                if (string.IsNullOrEmpty(band))
+                {
+                    band = GetBandFromRadioType(value);
+                }
+                continue;
+            }
+
             // Check for Channel
             if (key.Contains("channel") || key.Contains("kanal") || key.Contains("canal") || key.Contains("频道"))
             {
                 if (int.TryParse(value, out var ch))
                 {
                     channel = ch;
-                    band = GetBandFromChannel(channel);
+                    if (string.IsNullOrEmpty(band) || band == "Unknown")
+                    {
+                        band = GetBandFromChannel(channel);
+                    }
                 }
                 else
                 {
@@ -563,14 +625,17 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     if (chMatch.Success && int.TryParse(chMatch.Groups[1].Value, out ch))
                     {
                         channel = ch;
-                        band = GetBandFromChannel(channel);
+                        if (string.IsNullOrEmpty(band) || band == "Unknown")
+                        {
+                            band = GetBandFromChannel(channel);
+                        }
                     }
                 }
                 continue;
             }
 
-            // Check for Network/Radio type
-            if (key.Contains("radio type") || key.Contains("network type") || key.Contains("tipo de red") || key.Contains("funktyp"))
+            // Check for Network type
+            if (key.Contains("network type") || key.Contains("tipo de red") || key.Contains("netzwerktyp"))
             {
                 networkType = value;
                 continue;
@@ -588,17 +653,28 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         if (!string.IsNullOrEmpty(currentBSSID))
         {
             networks.Add(CreateNetworkInfo(currentSSID, currentBSSID, signalPercent,
-                channel, band, authentication, networkType, false));
+                channel, band, authentication, networkType, radioType, false));
         }
 
         return networks;
     }
 
     private static WiFiNetworkInfo CreateNetworkInfo(string? ssid, string bssid, int signalPercent,
-        int channel, string band, string authentication, string networkType, bool isConnected)
+        int channel, string band, string authentication, string networkType, string radioType, bool isConnected)
     {
         var (quality, color) = GetSignalQuality(signalPercent);
         var bars = GetSignalBars(signalPercent);
+
+        // Ensure band is determined
+        var finalBand = band;
+        if (string.IsNullOrEmpty(finalBand) || finalBand == "Unknown")
+        {
+            finalBand = GetBandFromChannel(channel);
+        }
+        if (string.IsNullOrEmpty(finalBand) || finalBand == "Unknown")
+        {
+            finalBand = GetBandFromRadioType(radioType);
+        }
 
         return new WiFiNetworkInfo
         {
@@ -609,12 +685,12 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             SignalQuality = quality,
             SignalColor = color,
             Channel = channel,
-            Band = band,
+            Band = finalBand,
             Security = authentication,
-            IsSecured = !authentication.Equals("Open", StringComparison.OrdinalIgnoreCase),
+            IsSecured = !string.IsNullOrEmpty(authentication) && !authentication.Equals("Open", StringComparison.OrdinalIgnoreCase),
             IsConnected = isConnected,
             FrequencyMHz = GetFrequencyFromChannel(channel),
-            NetworkType = networkType
+            NetworkType = !string.IsNullOrEmpty(radioType) ? radioType : networkType
         };
     }
 
@@ -632,6 +708,8 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         int channel = 0;
         int speed = 0;
         string state = "";
+        string band = "";
+        string radioType = "";
 
         foreach (var rawLine in lines)
         {
@@ -644,6 +722,9 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
             var key = line.Substring(0, colonIndex).Trim().ToLowerInvariant();
             var value = line.Substring(colonIndex + 1).Trim();
+
+            // Skip empty values
+            if (string.IsNullOrEmpty(value)) continue;
 
             // Check state
             if (key.Contains("state") || key.Contains("état") || key.Contains("estado") || key.Contains("状态") || key.Contains("zustand"))
@@ -687,6 +768,20 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 {
                     signal = sig;
                 }
+                continue;
+            }
+
+            // Check Band directly (newer Windows versions include this)
+            if (key == "band" || key == "banda" || key == "频带" || key == "frequenzband")
+            {
+                band = value;
+                continue;
+            }
+
+            // Check Radio type (802.11ac, 802.11ax, etc.)
+            if (key.Contains("radio type") || key.Contains("tipo de radio") || key.Contains("funktyp") || key.Contains("无线电类型"))
+            {
+                radioType = value;
                 continue;
             }
 
@@ -749,6 +844,17 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             }
         }
 
+        // Determine band from parsed value, channel, or radio type
+        var determinedBand = band;
+        if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
+        {
+            determinedBand = GetBandFromChannel(channel);
+        }
+        if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
+        {
+            determinedBand = GetBandFromRadioType(radioType);
+        }
+
         return new WiFiConnectionInfo
         {
             Ssid = ssid,
@@ -758,7 +864,9 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             Security = !string.IsNullOrEmpty(security) ? security : "WPA2",
             LinkSpeed = speed,
             IpAddress = GetCurrentIpAddress(),
-            IsConnected = true
+            IsConnected = true,
+            Band = determinedBand,
+            RadioType = radioType
         };
     }
 
@@ -813,12 +921,36 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
     private static string GetBandFromChannel(int channel)
     {
+        if (channel <= 0) return "Unknown";
         return channel <= 14 ? "2.4 GHz" : "5 GHz";
+    }
+
+    private static string GetBandFromRadioType(string radioType)
+    {
+        if (string.IsNullOrEmpty(radioType)) return "Unknown";
+
+        var lower = radioType.ToLowerInvariant();
+
+        // 802.11ac and 802.11ax can be both bands, but ax is often 5GHz
+        // 802.11a is 5 GHz only
+        // 802.11b/g are 2.4 GHz only
+        // 802.11n can be both
+        if (lower.Contains("802.11a") && !lower.Contains("802.11ax"))
+            return "5 GHz";
+        if (lower.Contains("802.11b") || lower.Contains("802.11g"))
+            return "2.4 GHz";
+
+        // For ac/ax/n, we can't determine from radio type alone
+        return "Unknown";
     }
 
     private static double GetFrequencyFromChannel(int channel)
     {
-        if (channel <= 14)
+        if (channel <= 0)
+        {
+            return 0;
+        }
+        else if (channel <= 14)
         {
             // 2.4 GHz band
             return 2412 + (channel - 1) * 5;
