@@ -46,6 +46,12 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isAvailable;
     [ObservableProperty] private string _scanStatus = "Ready";
 
+    // Permission warnings
+    [ObservableProperty] private bool _hasPermissionError;
+    [ObservableProperty] private string _permissionError = "";
+    [ObservableProperty] private bool _requiresLocationPermission;
+    [ObservableProperty] private bool _requiresAdminElevation;
+
     public WiFiViewModel(IWiFiAnalyzer wifiAnalyzer)
     {
         _wifiAnalyzer = wifiAnalyzer;
@@ -131,12 +137,28 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
         ScanStatus = "Scanning for networks...";
         Networks.Clear();
 
+        // Reset permission error state
+        HasPermissionError = false;
+        PermissionError = "";
+        RequiresLocationPermission = false;
+        RequiresAdminElevation = false;
+
         try
         {
             var networks = await _wifiAnalyzer.ScanNetworksAsync(_scanCts.Token);
 
             _dispatcherQueue.TryEnqueue(() =>
             {
+                // Check for permission errors
+                if (!string.IsNullOrEmpty(_wifiAnalyzer.PermissionError))
+                {
+                    HasPermissionError = true;
+                    PermissionError = _wifiAnalyzer.PermissionError;
+                    RequiresLocationPermission = _wifiAnalyzer.RequiresLocationPermission;
+                    RequiresAdminElevation = _wifiAnalyzer.RequiresAdminElevation;
+                    ScanStatus = "Permission required";
+                }
+
                 foreach (var network in networks.OrderByDescending(n => n.SignalStrength))
                 {
                     Networks.Add(new WiFiNetworkDisplay(network));
@@ -147,7 +169,11 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
                 OpenNetworks = Networks.Count(n => !n.IsSecure);
                 Networks24GHz = Networks.Count(n => n.Band == "2.4 GHz");
                 Networks5GHz = Networks.Count(n => n.Band == "5 GHz");
-                ScanStatus = $"Found {NetworksFound} networks";
+
+                if (!HasPermissionError)
+                {
+                    ScanStatus = $"Found {NetworksFound} networks";
+                }
             });
         }
         catch (OperationCanceledException)

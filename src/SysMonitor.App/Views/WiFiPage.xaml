@@ -203,6 +203,48 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Permission Warning Banner -->
+                <Border Background="#331A1A" BorderBrush="#FF5722" BorderThickness="1" CornerRadius="8" Padding="16"
+                        Visibility="{x:Bind ViewModel.HasPermissionError, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <FontIcon Glyph="&#xE7BA;" FontSize="32" Foreground="#FF5722" VerticalAlignment="Top" Margin="0,0,16,0"/>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Text="WINDOWS PERMISSIONS REQUIRED" FontSize="14" FontWeight="Bold" Foreground="#FF5722"/>
+                            <TextBlock Text="Windows 11 requires additional permissions to scan WiFi networks:"
+                                       Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+
+                            <!-- Location Permission -->
+                            <StackPanel Orientation="Horizontal" Spacing="8"
+                                        Visibility="{x:Bind ViewModel.RequiresLocationPermission, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE81D;" FontSize="16" Foreground="#FF9800"/>
+                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap">
+                                    <Run FontWeight="SemiBold">Location Services:</Run>
+                                    <Run Text=" Settings > Privacy &amp; security > Location > Turn ON"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Admin Permission -->
+                            <StackPanel Orientation="Horizontal" Spacing="8"
+                                        Visibility="{x:Bind ViewModel.RequiresAdminElevation, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE7EF;" FontSize="16" Foreground="#FF9800"/>
+                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap">
+                                    <Run FontWeight="SemiBold">Administrator:</Run>
+                                    <Run Text=" Right-click app > Run as administrator"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <TextBlock Text="After enabling permissions, click SCAN again."
+                                       Foreground="{StaticResource TextTertiaryBrush}" FontStyle="Italic" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
                 <!-- Networks List Section -->
                 <StackPanel Spacing="8">
                     <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
