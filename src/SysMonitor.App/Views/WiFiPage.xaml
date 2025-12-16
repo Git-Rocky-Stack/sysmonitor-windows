@@ -27,7 +27,7 @@
                             <TextBlock Text="Scan Networks"/>
                         </StackPanel>
                     </Button>
-                    <Button Command="{x:Bind ViewModel.StopScanCommand}" Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay}">
+                    <Button Command="{x:Bind ViewModel.StopScanCommand}" Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE71A;" FontSize="14"/>
                             <TextBlock Text="Stop"/>
@@ -55,7 +55,7 @@
                             <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{x:Bind ViewModel.MacAddress, Mode=OneWay}" FontSize="11" Foreground="#606060" Margin="0,4,0,0"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Background="{x:Bind ViewModel.AdapterStatusColor, Mode=OneWay}" CornerRadius="4" Padding="12,6" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Background="{x:Bind ViewModel.AdapterStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}" CornerRadius="4" Padding="12,6" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind ViewModel.AdapterStatus, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
                         </Border>
                     </Grid>
@@ -71,13 +71,13 @@
                         <StackPanel>
                             <TextBlock Text="Connected To" FontSize="12" Foreground="#808080"/>
                             <TextBlock Text="{x:Bind ViewModel.ConnectedNetwork, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
-                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0" Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0" Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <TextBlock Text="{x:Bind ViewModel.ConnectionChannel, Mode=OneWay}" FontSize="11" Foreground="#606060"/>
                                 <TextBlock Text="{x:Bind ViewModel.ConnectionSpeed, Mode=OneWay}" FontSize="11" Foreground="#606060"/>
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
-                            <TextBlock FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{x:Bind ViewModel.ConnectionStatusColor, Mode=OneWay}">
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{x:Bind ViewModel.ConnectionStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}">
                                 <Run Text="{x:Bind ViewModel.ConnectionSignal, Mode=OneWay}"/><Run Text="%"/>
                             </TextBlock>
                             <TextBlock Text="Signal" FontSize="11" Foreground="#606060" HorizontalAlignment="Center"/>
@@ -134,7 +134,7 @@
 
             <!-- Scan Status -->
             <Border Background="#0A0A0A" CornerRadius="8" Padding="16" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay}">
+                    Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <ProgressRing IsActive="True" Width="20" Height="20"/>
                     <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="#808080" VerticalAlignment="Center"/>
@@ -167,14 +167,14 @@
 
                                         <!-- Signal Icon -->
                                         <Border Background="#1A1A1A" CornerRadius="8" Width="48" Height="48" VerticalAlignment="Center">
-                                            <FontIcon Glyph="{x:Bind SignalIcon}" Foreground="{x:Bind SignalColor}" FontSize="20"/>
+                                            <FontIcon Glyph="{x:Bind SignalIcon}" Foreground="{x:Bind SignalColor, Converter={StaticResource StringToBrushConverter}}" FontSize="20"/>
                                         </Border>
 
                                         <!-- Network Info -->
                                         <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock Text="{x:Bind Ssid}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
-                                                <FontIcon Glyph="{x:Bind SecurityIcon}" Foreground="{x:Bind SecurityColor}" FontSize="12" VerticalAlignment="Center"/>
+                                                <FontIcon Glyph="{x:Bind SecurityIcon}" Foreground="{x:Bind SecurityColor, Converter={StaticResource StringToBrushConverter}}" FontSize="12" VerticalAlignment="Center"/>
                                             </StackPanel>
                                             <TextBlock FontSize="12" Foreground="#808080" Margin="0,2,0,0">
                                                 <Run Text="{x:Bind Security}"/> - <Run Text="{x:Bind Band}"/>
@@ -196,7 +196,7 @@
 
                                         <!-- Signal Strength -->
                                         <StackPanel Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="60">
-                                            <TextBlock FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{x:Bind SignalColor}">
+                                            <TextBlock FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{x:Bind SignalColor, Converter={StaticResource StringToBrushConverter}}">
                                                 <Run Text="{x:Bind SignalStrength}"/><Run Text="%" FontSize="12"/>
                                             </TextBlock>
                                             <ProgressBar Value="{x:Bind SignalStrength}" Maximum="100" Width="50" Height="4" Margin="0,4,0,0"/>
