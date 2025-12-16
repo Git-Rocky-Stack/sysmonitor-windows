@@ -20,7 +20,7 @@
 
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="TEMPERATURE MONITOR" Style="{StaticResource PageHeaderStyle}"
+                        <TextBlock Text="TEMP MONITOR" Style="{StaticResource PageHeaderStyle}"
                                    Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Real-time thermal monitoring" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
