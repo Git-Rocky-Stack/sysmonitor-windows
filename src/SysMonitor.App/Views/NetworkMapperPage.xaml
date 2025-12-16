@@ -125,7 +125,7 @@
 
                 <!-- Scan Progress -->
                 <Border Background="#0A0A0A" CornerRadius="8" Padding="16" BorderBrush="#1A1A1A" BorderThickness="1"
-                        Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay}">
+                        Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <ProgressRing IsActive="True" Width="20" Height="20"/>
@@ -161,8 +161,8 @@
                                             </Grid.ColumnDefinitions>
 
                                             <!-- Icon -->
-                                            <Border Background="{x:Bind DeviceTypeColor}" CornerRadius="8" Width="48" Height="48" VerticalAlignment="Center" Opacity="0.2">
-                                                <FontIcon Glyph="{x:Bind DeviceIcon}" Foreground="{x:Bind DeviceTypeColor}" FontSize="20"/>
+                                            <Border Background="{x:Bind DeviceTypeColor, Converter={StaticResource StringToBrushConverter}}" CornerRadius="8" Width="48" Height="48" VerticalAlignment="Center" Opacity="0.2">
+                                                <FontIcon Glyph="{x:Bind DeviceIcon}" Foreground="{x:Bind DeviceTypeColor, Converter={StaticResource StringToBrushConverter}}" FontSize="20"/>
                                             </Border>
 
                                             <!-- Device Info -->
@@ -179,7 +179,7 @@
                                             </StackPanel>
 
                                             <!-- Status -->
-                                            <Border Grid.Column="3" Background="{x:Bind StatusColor}" CornerRadius="4" Padding="10,6" VerticalAlignment="Center">
+                                            <Border Grid.Column="3" Background="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}" CornerRadius="4" Padding="10,6" VerticalAlignment="Center">
                                                 <TextBlock Text="{x:Bind StatusText}" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
                                             </Border>
                                         </Grid>
@@ -199,8 +199,8 @@
                 </Border>
 
                 <!-- Action Status -->
-                <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay}" CornerRadius="8" Padding="16"
-                        Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}" Opacity="0.9">
+                <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}" CornerRadius="8" Padding="16"
+                        Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="0.9">
                     <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
                 </Border>
             </StackPanel>
@@ -213,14 +213,14 @@
                     <TextBlock Text="Device Details" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
 
                     <!-- No Selection -->
-                    <StackPanel Visibility="{x:Bind ViewModel.HasSelectedDevice, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}"
+                    <StackPanel Visibility="{x:Bind ViewModel.HasSelectedDevice, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
                                 HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,40,0,0">
                         <FontIcon Glyph="&#xE946;" FontSize="48" Foreground="#404040"/>
                         <TextBlock Text="Select a device to view details" FontSize="13" Foreground="#606060" Margin="0,12,0,0" TextAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Device Selected -->
-                    <StackPanel Visibility="{x:Bind ViewModel.HasSelectedDevice, Mode=OneWay}" Spacing="16">
+                    <StackPanel Visibility="{x:Bind ViewModel.HasSelectedDevice, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Spacing="16">
                         <!-- Basic Info -->
                         <Border Background="#141414" CornerRadius="8" Padding="16">
                             <StackPanel Spacing="12">
@@ -233,7 +233,7 @@
                                         <TextBlock Text="{x:Bind ViewModel.SelectedDevice.Hostname, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
                                         <TextBlock Text="{x:Bind ViewModel.SelectedDevice.DeviceType, Mode=OneWay}" FontSize="12" Foreground="#808080"/>
                                     </StackPanel>
-                                    <Border Grid.Column="1" Background="{x:Bind ViewModel.SelectedDevice.StatusColor, Mode=OneWay}" CornerRadius="4" Padding="8,4">
+                                    <Border Grid.Column="1" Background="{x:Bind ViewModel.SelectedDevice.StatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}" CornerRadius="4" Padding="8,4">
                                         <TextBlock Text="{x:Bind ViewModel.SelectedDevice.StatusText, Mode=OneWay}" FontSize="11" Foreground="White"/>
                                     </Border>
                                 </Grid>
@@ -293,7 +293,7 @@
                         </StackPanel>
 
                         <!-- Port Scan Results -->
-                        <Border Background="#141414" CornerRadius="8" Padding="16" Visibility="{x:Bind ViewModel.IsPortScanning, Mode=OneWay}">
+                        <Border Background="#141414" CornerRadius="8" Padding="16" Visibility="{x:Bind ViewModel.IsPortScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <ProgressRing IsActive="True" Width="16" Height="16"/>
                                 <TextBlock Text="{x:Bind ViewModel.PortScanStatus, Mode=OneWay}" FontSize="12" Foreground="#808080"/>
@@ -314,7 +314,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="{x:Bind Port}" FontSize="13" FontWeight="SemiBold" Foreground="#00BCD4"/>
                                                 <TextBlock Grid.Column="1" Text="{x:Bind Service}" FontSize="12" Foreground="#808080"/>
-                                                <Border Grid.Column="2" Background="{x:Bind StatusColor}" CornerRadius="3" Padding="6,2">
+                                                <Border Grid.Column="2" Background="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}" CornerRadius="3" Padding="6,2">
                                                     <TextBlock Text="{x:Bind Status}" FontSize="10" Foreground="White"/>
                                                 </Border>
                                             </Grid>

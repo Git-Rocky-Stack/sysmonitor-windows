@@ -203,16 +203,11 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
         try
         {
-            // Use PowerShell to run netsh with proper UTF-8 encoding
-            var psScript = @"
-                $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-                netsh wlan show networks mode=bssid
-            ";
-
+            // Use PowerShell to run netsh - simpler command
             var startInfo = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-NoProfile -NonInteractive -Command \"{psScript}\"",
+                Arguments = "-NoProfile -NonInteractive -Command \"netsh wlan show networks mode=bssid\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -464,7 +459,14 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         {
             try
             {
-                // Try PowerShell first - more reliable parsing
+                // Try cmd.exe with UTF-8 code page first - most reliable
+                var cmdInfo = GetConnectionInfoFromCmd();
+                if (cmdInfo != null && cmdInfo.Channel > 0)
+                {
+                    return cmdInfo;
+                }
+
+                // Try PowerShell as second option
                 var psInfo = GetConnectionInfoFromPowerShell();
                 if (psInfo != null && psInfo.Channel > 0)
                 {
@@ -491,14 +493,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     var connectionInfo = ParseConnectionInfo(output);
                     if (connectionInfo != null)
                     {
-                        // If we got PS info but no channel, merge the data
-                        if (psInfo != null && connectionInfo.Channel == 0)
+                        // If we got PS/cmd info but no channel, merge the data
+                        var bestInfo = cmdInfo ?? psInfo;
+                        if (bestInfo != null && connectionInfo.Channel == 0 && bestInfo.Channel > 0)
                         {
                             return connectionInfo with
                             {
-                                Channel = psInfo.Channel,
-                                Band = psInfo.Band,
-                                RadioType = psInfo.RadioType
+                                Channel = bestInfo.Channel,
+                                Band = bestInfo.Band,
+                                RadioType = bestInfo.RadioType
                             };
                         }
                         return connectionInfo;
@@ -548,21 +551,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         });
     }
 
-    private static WiFiConnectionInfo? GetConnectionInfoFromPowerShell()
+    private static WiFiConnectionInfo? GetConnectionInfoFromCmd()
     {
         try
         {
-            // Use PowerShell to run netsh and capture output with proper encoding
-            var psScript = @"
-                $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-                $result = netsh wlan show interfaces
-                $result
-            ";
-
+            // Use cmd.exe with chcp 65001 for UTF-8 output
             var startInfo = new ProcessStartInfo
             {
-                FileName = "powershell.exe",
-                Arguments = $"-NoProfile -NonInteractive -Command \"{psScript}\"",
+                FileName = "cmd.exe",
+                Arguments = "/c chcp 65001 >nul && netsh wlan show interfaces",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -579,152 +576,192 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             if (string.IsNullOrWhiteSpace(output))
                 return null;
 
-            string ssid = "";
-            string bssid = "";
-            int signal = 0;
-            string security = "";
-            int channel = 0;
-            int speed = 0;
-            string state = "";
-            string band = "";
-            string radioType = "";
-
-            var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var rawLine in lines)
-            {
-                var line = rawLine.Trim();
-                if (string.IsNullOrEmpty(line)) continue;
-
-                // Find the colon separator
-                var colonIndex = line.IndexOf(':');
-                if (colonIndex <= 0) continue;
-
-                var key = line.Substring(0, colonIndex).Trim().ToLowerInvariant();
-                var value = line.Substring(colonIndex + 1).Trim();
-
-                if (string.IsNullOrEmpty(value)) continue;
-
-                // State
-                if (key == "state" || key.Contains("state"))
-                {
-                    state = value;
-                    continue;
-                }
-
-                // SSID (not BSSID)
-                if (key == "ssid" && !line.ToLowerInvariant().Contains("bssid"))
-                {
-                    ssid = value;
-                    continue;
-                }
-
-                // BSSID
-                if (key == "bssid")
-                {
-                    bssid = value;
-                    continue;
-                }
-
-                // Signal
-                if (key == "signal")
-                {
-                    var signalMatch = Regex.Match(value, @"(\d+)");
-                    if (signalMatch.Success && int.TryParse(signalMatch.Groups[1].Value, out var sig))
-                    {
-                        signal = sig;
-                    }
-                    continue;
-                }
-
-                // Channel
-                if (key == "channel")
-                {
-                    if (int.TryParse(value, out var ch))
-                    {
-                        channel = ch;
-                    }
-                    continue;
-                }
-
-                // Radio type
-                if (key == "radio type")
-                {
-                    radioType = value;
-                    continue;
-                }
-
-                // Band (newer Windows versions)
-                if (key == "band")
-                {
-                    band = value;
-                    continue;
-                }
-
-                // Authentication
-                if (key == "authentication")
-                {
-                    security = value;
-                    continue;
-                }
-
-                // Receive/Transmit rate
-                if (key.Contains("rate"))
-                {
-                    var speedMatch = Regex.Match(value, @"(\d+(?:[.,]\d+)?)\s*(Mbps|Gbps)?", RegexOptions.IgnoreCase);
-                    if (speedMatch.Success)
-                    {
-                        var rateStr = speedMatch.Groups[1].Value.Replace(',', '.');
-                        if (double.TryParse(rateStr, System.Globalization.NumberStyles.Any,
-                            System.Globalization.CultureInfo.InvariantCulture, out var rate))
-                        {
-                            var rateInt = (int)rate;
-                            if (speedMatch.Groups.Count > 2 &&
-                                speedMatch.Groups[2].Value.Equals("Gbps", StringComparison.OrdinalIgnoreCase))
-                                rateInt = (int)(rate * 1000);
-                            speed = Math.Max(speed, rateInt);
-                        }
-                    }
-                    continue;
-                }
-            }
-
-            // Check if connected
-            if (string.IsNullOrEmpty(ssid))
-                return null;
-
-            // Check state
-            if (!string.IsNullOrEmpty(state) && state.ToLowerInvariant().Contains("disconnect"))
-                return null;
-
-            // Determine band
-            var determinedBand = band;
-            if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
-            {
-                determinedBand = GetBandFromChannel(channel);
-            }
-            if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
-            {
-                determinedBand = GetBandFromRadioType(radioType);
-            }
-
-            return new WiFiConnectionInfo
-            {
-                Ssid = ssid,
-                Bssid = bssid,
-                SignalStrength = signal > 0 ? signal : 75,
-                Channel = channel,
-                Security = !string.IsNullOrEmpty(security) ? security : "WPA2",
-                LinkSpeed = speed,
-                IpAddress = GetCurrentIpAddress(),
-                IsConnected = true,
-                Band = determinedBand,
-                RadioType = radioType
-            };
+            return ParseWiFiInterfaceOutput(output);
         }
         catch { }
 
         return null;
+    }
+
+    private static WiFiConnectionInfo? GetConnectionInfoFromPowerShell()
+    {
+        try
+        {
+            // Use PowerShell to run netsh - simpler command that works reliably
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = "-NoProfile -NonInteractive -Command \"netsh wlan show interfaces\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process == null) return null;
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit(5000);
+
+            if (string.IsNullOrWhiteSpace(output))
+                return null;
+
+            return ParseWiFiInterfaceOutput(output);
+        }
+        catch { }
+
+        return null;
+    }
+
+    private static WiFiConnectionInfo? ParseWiFiInterfaceOutput(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+            return null;
+
+        string ssid = "";
+        string bssid = "";
+        int signal = 0;
+        string security = "";
+        int channel = 0;
+        int speed = 0;
+        string state = "";
+        string band = "";
+        string radioType = "";
+
+        var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var rawLine in lines)
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrEmpty(line)) continue;
+
+            // Find the colon separator (handle multiple colons by taking first)
+            var colonIndex = line.IndexOf(':');
+            if (colonIndex <= 0) continue;
+
+            var key = line.Substring(0, colonIndex).Trim().ToLowerInvariant();
+            var value = line.Substring(colonIndex + 1).Trim();
+
+            if (string.IsNullOrEmpty(value)) continue;
+
+            // State - check various forms
+            if (key == "state" || key.EndsWith("state") || key.Contains("state"))
+            {
+                state = value;
+                continue;
+            }
+
+            // SSID (not BSSID) - check the key doesn't contain 'bssid'
+            if ((key == "ssid" || key.EndsWith("ssid")) && !key.Contains("bssid"))
+            {
+                ssid = value;
+                continue;
+            }
+
+            // BSSID
+            if (key == "bssid" || key.EndsWith("bssid"))
+            {
+                bssid = value;
+                continue;
+            }
+
+            // Signal
+            if (key == "signal" || key.EndsWith("signal"))
+            {
+                var signalMatch = Regex.Match(value, @"(\d+)");
+                if (signalMatch.Success && int.TryParse(signalMatch.Groups[1].Value, out var sig))
+                {
+                    signal = sig;
+                }
+                continue;
+            }
+
+            // Channel
+            if (key == "channel" || key.EndsWith("channel"))
+            {
+                if (int.TryParse(value, out var ch))
+                {
+                    channel = ch;
+                }
+                continue;
+            }
+
+            // Radio type
+            if (key == "radio type" || key.Contains("radio"))
+            {
+                radioType = value;
+                continue;
+            }
+
+            // Band (newer Windows versions)
+            if (key == "band" || key.EndsWith("band"))
+            {
+                band = value;
+                continue;
+            }
+
+            // Authentication
+            if (key == "authentication" || key.Contains("authentication") || key.Contains("auth"))
+            {
+                security = value;
+                continue;
+            }
+
+            // Receive/Transmit rate
+            if (key.Contains("rate") || key.Contains("speed"))
+            {
+                var speedMatch = Regex.Match(value, @"(\d+(?:[.,]\d+)?)\s*(Mbps|Gbps)?", RegexOptions.IgnoreCase);
+                if (speedMatch.Success)
+                {
+                    var rateStr = speedMatch.Groups[1].Value.Replace(',', '.');
+                    if (double.TryParse(rateStr, System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var rate))
+                    {
+                        var rateInt = (int)rate;
+                        if (speedMatch.Groups.Count > 2 &&
+                            speedMatch.Groups[2].Value.Equals("Gbps", StringComparison.OrdinalIgnoreCase))
+                            rateInt = (int)(rate * 1000);
+                        speed = Math.Max(speed, rateInt);
+                    }
+                }
+                continue;
+            }
+        }
+
+        // Check if connected
+        if (string.IsNullOrEmpty(ssid))
+            return null;
+
+        // Check state
+        if (!string.IsNullOrEmpty(state) && state.ToLowerInvariant().Contains("disconnect"))
+            return null;
+
+        // Determine band
+        var determinedBand = band;
+        if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
+        {
+            determinedBand = GetBandFromChannel(channel);
+        }
+        if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
+        {
+            determinedBand = GetBandFromRadioType(radioType);
+        }
+
+        return new WiFiConnectionInfo
+        {
+            Ssid = ssid,
+            Bssid = bssid,
+            SignalStrength = signal > 0 ? signal : 75,
+            Channel = channel,
+            Security = !string.IsNullOrEmpty(security) ? security : "WPA2",
+            LinkSpeed = speed,
+            IpAddress = GetCurrentIpAddress(),
+            IsConnected = true,
+            Band = determinedBand,
+            RadioType = radioType
+        };
     }
 
     private static string? GetConnectedSsidFromProfile()
