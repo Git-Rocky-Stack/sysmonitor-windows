@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Management;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
+using Windows.Devices.WiFi;
+using Windows.Networking.Connectivity;
 
 namespace SysMonitor.Core.Services.Utilities;
 
@@ -28,167 +30,161 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     {
         var networks = new List<WiFiNetworkInfo>();
 
-        await Task.Run(async () =>
+        // Try Windows Runtime API first - most reliable for channel/frequency data
+        try
         {
-            try
+            var winRtNetworks = await GetNetworksFromWinRTAsync(cancellationToken);
+            if (winRtNetworks.Count > 0)
             {
-                // First, trigger a scan on the wireless interface
-                var interfaceName = GetWirelessInterfaceName();
-                if (!string.IsNullOrEmpty(interfaceName))
-                {
-                    try
-                    {
-                        var scanStartInfo = new ProcessStartInfo
-                        {
-                            FileName = "netsh",
-                            Arguments = $"wlan scan interface=\"{interfaceName}\"",
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            CreateNoWindow = true
-                        };
+                networks.AddRange(winRtNetworks);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"WinRT scan failed: {ex.Message}");
+        }
 
-                        using var scanProcess = Process.Start(scanStartInfo);
-                        if (scanProcess != null)
+        // If WinRT didn't work, fallback to netsh methods
+        if (networks.Count == 0)
+        {
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    // First, trigger a scan on the wireless interface
+                    var interfaceName = GetWirelessInterfaceName();
+                    if (!string.IsNullOrEmpty(interfaceName))
+                    {
+                        try
                         {
-                            await scanProcess.WaitForExitAsync(cancellationToken);
-                            // Wait for the scan to complete
-                            await Task.Delay(2500, cancellationToken);
+                            var scanStartInfo = new ProcessStartInfo
+                            {
+                                FileName = "netsh",
+                                Arguments = $"wlan scan interface=\"{interfaceName}\"",
+                                UseShellExecute = false,
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                CreateNoWindow = true
+                            };
+
+                            using var scanProcess = Process.Start(scanStartInfo);
+                            if (scanProcess != null)
+                            {
+                                await scanProcess.WaitForExitAsync(cancellationToken);
+                                // Wait for the scan to complete
+                                await Task.Delay(2500, cancellationToken);
+                            }
                         }
-                    }
-                    catch { /* Scan trigger may fail, continue anyway */ }
-                }
-
-                // Try PowerShell approach first - more reliable encoding
-                var psNetworks = await GetNetworksFromPowerShellAsync(cancellationToken);
-                if (psNetworks.Count > 0)
-                {
-                    networks.AddRange(psNetworks);
-                }
-                else
-                {
-                    // Fallback to direct netsh
-                    var startInfo = new ProcessStartInfo
-                    {
-                        FileName = "netsh",
-                        Arguments = "wlan show networks mode=bssid",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        CreateNoWindow = true,
-                        StandardOutputEncoding = System.Text.Encoding.UTF8
-                    };
-
-                    using var process = Process.Start(startInfo);
-                    if (process != null)
-                    {
-                        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-                        await process.WaitForExitAsync(cancellationToken);
-
-                        var parsedNetworks = ParseNetshOutput(output);
-                        networks.AddRange(parsedNetworks);
+                        catch { /* Scan trigger may fail, continue anyway */ }
                     }
 
-                    // If still no networks, try with OEM encoding
-                    if (networks.Count == 0)
+                    // Try PowerShell approach
+                    var psNetworks = await GetNetworksFromPowerShellAsync(cancellationToken);
+                    if (psNetworks.Count > 0)
                     {
-                        var oemStartInfo = new ProcessStartInfo
+                        networks.AddRange(psNetworks);
+                    }
+                    else
+                    {
+                        // Fallback to direct netsh with cmd.exe UTF-8
+                        var cmdStartInfo = new ProcessStartInfo
                         {
-                            FileName = "netsh",
-                            Arguments = "wlan show networks mode=bssid",
+                            FileName = "cmd.exe",
+                            Arguments = "/c chcp 65001 >nul && netsh wlan show networks mode=bssid",
                             UseShellExecute = false,
                             RedirectStandardOutput = true,
                             RedirectStandardError = true,
                             CreateNoWindow = true,
-                            StandardOutputEncoding = System.Text.Encoding.GetEncoding(850)
+                            StandardOutputEncoding = System.Text.Encoding.UTF8
                         };
 
-                        using var oemProcess = Process.Start(oemStartInfo);
-                        if (oemProcess != null)
+                        using var cmdProcess = Process.Start(cmdStartInfo);
+                        if (cmdProcess != null)
                         {
-                            var oemOutput = await oemProcess.StandardOutput.ReadToEndAsync(cancellationToken);
-                            await oemProcess.WaitForExitAsync(cancellationToken);
+                            var output = await cmdProcess.StandardOutput.ReadToEndAsync(cancellationToken);
+                            await cmdProcess.WaitForExitAsync(cancellationToken);
 
-                            var parsedNetworks = ParseNetshOutput(oemOutput);
+                            var parsedNetworks = ParseNetshOutput(output);
                             networks.AddRange(parsedNetworks);
                         }
                     }
                 }
-            }
-            catch (OperationCanceledException) { throw; }
-            catch { }
+                catch (OperationCanceledException) { throw; }
+                catch { }
+            }, cancellationToken);
+        }
 
-            // Always try to add connected network with accurate channel/band info
-            try
+        // Always try to get accurate connected network info and merge/update
+        try
+        {
+            var connectionInfo = GetConnectionInfoFromCmd() ?? GetConnectionInfoFromPowerShell();
+            if (connectionInfo != null && connectionInfo.IsConnected && connectionInfo.Channel > 0)
             {
-                var connectionInfo = GetConnectionInfoFromPowerShell();
-                if (connectionInfo != null && connectionInfo.IsConnected)
+                var (quality, color) = GetSignalQuality(connectionInfo.SignalStrength);
+                var band = connectionInfo.Band;
+                if (string.IsNullOrEmpty(band) || band == "Unknown")
                 {
-                    var (quality, color) = GetSignalQuality(connectionInfo.SignalStrength);
-                    var band = connectionInfo.Band;
-                    if (string.IsNullOrEmpty(band) || band == "Unknown")
-                    {
-                        band = GetBandFromChannel(connectionInfo.Channel);
-                    }
+                    band = GetBandFromChannel(connectionInfo.Channel);
+                }
 
-                    var connected = new WiFiNetworkInfo
-                    {
-                        Ssid = connectionInfo.Ssid,
-                        Bssid = connectionInfo.Bssid,
-                        SignalStrength = connectionInfo.SignalStrength,
-                        SignalBars = GetSignalBars(connectionInfo.SignalStrength),
-                        SignalQuality = quality,
-                        SignalColor = color,
-                        Channel = connectionInfo.Channel,
-                        Band = band,
-                        Security = connectionInfo.Security,
-                        IsSecured = !string.IsNullOrEmpty(connectionInfo.Security) &&
-                                   !connectionInfo.Security.Equals("Open", StringComparison.OrdinalIgnoreCase),
-                        IsConnected = true,
-                        FrequencyMHz = GetFrequencyFromChannel(connectionInfo.Channel),
-                        NetworkType = connectionInfo.RadioType
-                    };
+                var connected = new WiFiNetworkInfo
+                {
+                    Ssid = connectionInfo.Ssid,
+                    Bssid = connectionInfo.Bssid,
+                    SignalStrength = connectionInfo.SignalStrength,
+                    SignalBars = GetSignalBars(connectionInfo.SignalStrength),
+                    SignalQuality = quality,
+                    SignalColor = color,
+                    Channel = connectionInfo.Channel,
+                    Band = band,
+                    Security = connectionInfo.Security,
+                    IsSecured = !string.IsNullOrEmpty(connectionInfo.Security) &&
+                               !connectionInfo.Security.Equals("Open", StringComparison.OrdinalIgnoreCase),
+                    IsConnected = true,
+                    FrequencyMHz = GetFrequencyFromChannel(connectionInfo.Channel),
+                    NetworkType = connectionInfo.RadioType
+                };
 
-                    // Check if this network is already in the list
-                    var existingNetwork = networks.FirstOrDefault(n =>
-                        n.Ssid.Equals(connected.Ssid, StringComparison.OrdinalIgnoreCase) ||
-                        (!string.IsNullOrEmpty(n.Bssid) && n.Bssid.Equals(connected.Bssid, StringComparison.OrdinalIgnoreCase)));
+                // Check if this network is already in the list
+                var existingNetwork = networks.FirstOrDefault(n =>
+                    n.Ssid.Equals(connected.Ssid, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrEmpty(n.Bssid) && n.Bssid.Equals(connected.Bssid, StringComparison.OrdinalIgnoreCase)));
 
-                    if (existingNetwork == null)
-                    {
-                        networks.Insert(0, connected);
-                    }
-                    else
-                    {
-                        // Update the existing entry with accurate connection info
-                        var index = networks.IndexOf(existingNetwork);
-                        networks[index] = connected;
-                    }
+                if (existingNetwork == null)
+                {
+                    networks.Insert(0, connected);
                 }
                 else
                 {
-                    // Fallback to old method
-                    var connectedFallback = GetConnectedNetworkAsFallback();
-                    if (connectedFallback != null)
-                    {
-                        var existingNetwork = networks.FirstOrDefault(n =>
-                            n.Ssid.Equals(connectedFallback.Ssid, StringComparison.OrdinalIgnoreCase) ||
-                            (!string.IsNullOrEmpty(n.Bssid) && n.Bssid.Equals(connectedFallback.Bssid, StringComparison.OrdinalIgnoreCase)));
+                    // Update the existing entry with accurate connection info
+                    var index = networks.IndexOf(existingNetwork);
+                    networks[index] = connected;
+                }
+            }
+            else
+            {
+                // Fallback to old method
+                var connectedFallback = GetConnectedNetworkAsFallback();
+                if (connectedFallback != null)
+                {
+                    // Mark as connected
+                    var existingNetwork = networks.FirstOrDefault(n =>
+                        n.Ssid.Equals(connectedFallback.Ssid, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrEmpty(n.Bssid) && n.Bssid.Equals(connectedFallback.Bssid, StringComparison.OrdinalIgnoreCase)));
 
-                        if (existingNetwork == null)
-                        {
-                            networks.Insert(0, connectedFallback);
-                        }
-                        else
-                        {
-                            var index = networks.IndexOf(existingNetwork);
-                            networks[index] = connectedFallback with { IsConnected = true };
-                        }
+                    if (existingNetwork == null)
+                    {
+                        networks.Insert(0, connectedFallback);
+                    }
+                    else
+                    {
+                        var index = networks.IndexOf(existingNetwork);
+                        networks[index] = connectedFallback with { IsConnected = true };
                     }
                 }
             }
-            catch { }
-        }, cancellationToken);
+        }
+        catch { }
 
         // Sort by connected first, then by signal strength
         return networks
@@ -230,6 +226,141 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         catch { }
 
         return networks;
+    }
+
+    private async Task<List<WiFiNetworkInfo>> GetNetworksFromWinRTAsync(CancellationToken cancellationToken)
+    {
+        var networks = new List<WiFiNetworkInfo>();
+
+        try
+        {
+            // Request access to WiFi adapter
+            var access = await WiFiAdapter.RequestAccessAsync();
+            if (access != WiFiAccessStatus.Allowed)
+                return networks;
+
+            // Find available WiFi adapters
+            var adapters = await WiFiAdapter.FindAllAdaptersAsync();
+            if (adapters.Count == 0)
+                return networks;
+
+            var adapter = adapters[0];
+
+            // Scan for networks
+            await adapter.ScanAsync();
+
+            // Get the network report
+            var report = adapter.NetworkReport;
+
+            foreach (var network in report.AvailableNetworks)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var ssid = network.Ssid;
+                var bssid = network.Bssid;
+                var signalBars = (int)network.SignalBars;
+                var signalPercent = SignalBarsToPercent(signalBars);
+                var channel = (int)network.ChannelCenterFrequencyInKilohertz / 1000; // Convert kHz to MHz for freq
+                var freqMHz = (int)(network.ChannelCenterFrequencyInKilohertz / 1000);
+                var actualChannel = GetChannelFromFrequency(freqMHz);
+                var band = GetBandFromFrequency(freqMHz);
+                var security = GetSecurityString(network.SecuritySettings.NetworkAuthenticationType);
+                var networkType = network.PhyKind.ToString();
+
+                var (quality, color) = GetSignalQuality(signalPercent);
+
+                networks.Add(new WiFiNetworkInfo
+                {
+                    Ssid = string.IsNullOrEmpty(ssid) ? "[Hidden Network]" : ssid,
+                    Bssid = bssid,
+                    SignalStrength = signalPercent,
+                    SignalBars = signalBars,
+                    SignalQuality = quality,
+                    SignalColor = color,
+                    Channel = actualChannel,
+                    Band = band,
+                    Security = security,
+                    IsSecured = network.SecuritySettings.NetworkAuthenticationType != NetworkAuthenticationType.Open80211,
+                    IsConnected = false,
+                    FrequencyMHz = freqMHz,
+                    NetworkType = networkType
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"WinRT WiFi scan failed: {ex.Message}");
+        }
+
+        return networks;
+    }
+
+    private static int SignalBarsToPercent(int bars)
+    {
+        return bars switch
+        {
+            5 => 100,
+            4 => 80,
+            3 => 60,
+            2 => 40,
+            1 => 20,
+            _ => 0
+        };
+    }
+
+    private static int GetChannelFromFrequency(int freqMHz)
+    {
+        // 2.4 GHz band (2412-2484 MHz)
+        if (freqMHz >= 2412 && freqMHz <= 2484)
+        {
+            if (freqMHz == 2484) return 14; // Japan only
+            return (freqMHz - 2412) / 5 + 1;
+        }
+
+        // 5 GHz band
+        if (freqMHz >= 5170 && freqMHz <= 5825)
+        {
+            return (freqMHz - 5000) / 5;
+        }
+
+        // 6 GHz band (WiFi 6E)
+        if (freqMHz >= 5925 && freqMHz <= 7125)
+        {
+            return (freqMHz - 5950) / 5 + 1;
+        }
+
+        return 0;
+    }
+
+    private static string GetBandFromFrequency(int freqMHz)
+    {
+        if (freqMHz >= 2400 && freqMHz < 2500)
+            return "2.4 GHz";
+        if (freqMHz >= 5000 && freqMHz < 5900)
+            return "5 GHz";
+        if (freqMHz >= 5925 && freqMHz <= 7125)
+            return "6 GHz";
+        return "Unknown";
+    }
+
+    private static string GetSecurityString(NetworkAuthenticationType authType)
+    {
+        return authType switch
+        {
+            NetworkAuthenticationType.None => "None",
+            NetworkAuthenticationType.Unknown => "Unknown",
+            NetworkAuthenticationType.Open80211 => "Open",
+            NetworkAuthenticationType.SharedKey80211 => "WEP",
+            NetworkAuthenticationType.Wpa => "WPA",
+            NetworkAuthenticationType.WpaPsk => "WPA-PSK",
+            NetworkAuthenticationType.WpaNone => "WPA-None",
+            NetworkAuthenticationType.Rsna => "WPA2",
+            NetworkAuthenticationType.RsnaPsk => "WPA2-Personal",
+            NetworkAuthenticationType.Ihv => "IHV",
+            NetworkAuthenticationType.Wpa3Sae => "WPA3-Personal",
+            NetworkAuthenticationType.Owe => "OWE",
+            _ => authType.ToString()
+        };
     }
 
     private async Task<List<WiFiNetworkInfo>> GetNetworksFromWmiAsync(CancellationToken cancellationToken)
