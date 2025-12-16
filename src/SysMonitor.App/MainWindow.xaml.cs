@@ -42,7 +42,8 @@ public sealed partial class MainWindow : Window
         { "NetworkMapper", typeof(NetworkMapperPage) },
         // Footer
         { "Settings", typeof(SettingsPage) },
-        { "Donate", typeof(DonationPage) }
+        { "Donate", typeof(DonationPage) },
+        { "UserGuide", typeof(UserGuidePage) }
     };
 
     public MainWindow()

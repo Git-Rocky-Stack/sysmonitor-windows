@@ -140,6 +140,7 @@ public partial class App : Application
                 services.AddTransient<BackupViewModel>();
                 services.AddTransient<DriverUpdaterViewModel>();
                 services.AddTransient<DonationViewModel>();
+                services.AddTransient<UserGuideViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -173,6 +174,7 @@ public partial class App : Application
                 services.AddTransient<BackupPage>();
                 services.AddTransient<DriverUpdaterPage>();
                 services.AddTransient<DonationPage>();
+                services.AddTransient<UserGuidePage>();
             })
             .Build();
     }
