@@ -29,6 +29,18 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _gpuTempWarning = 80;
     [ObservableProperty] private int _gpuTempCritical = 95;
 
+    // Computed Fahrenheit values for display
+    public string CpuTempWarningF => $"{(CpuTempWarning * 1.8) + 32:F0}";
+    public string CpuTempCriticalF => $"{(CpuTempCritical * 1.8) + 32:F0}";
+    public string GpuTempWarningF => $"{(GpuTempWarning * 1.8) + 32:F0}";
+    public string GpuTempCriticalF => $"{(GpuTempCritical * 1.8) + 32:F0}";
+
+    // Notify Fahrenheit properties when Celsius values change
+    partial void OnCpuTempWarningChanged(int value) => OnPropertyChanged(nameof(CpuTempWarningF));
+    partial void OnCpuTempCriticalChanged(int value) => OnPropertyChanged(nameof(CpuTempCriticalF));
+    partial void OnGpuTempWarningChanged(int value) => OnPropertyChanged(nameof(GpuTempWarningF));
+    partial void OnGpuTempCriticalChanged(int value) => OnPropertyChanged(nameof(GpuTempCriticalF));
+
     [ObservableProperty] private bool _enableBatteryAlerts = true;
     [ObservableProperty] private int _batteryLowWarning = 20;
     [ObservableProperty] private int _batteryCriticalWarning = 10;
