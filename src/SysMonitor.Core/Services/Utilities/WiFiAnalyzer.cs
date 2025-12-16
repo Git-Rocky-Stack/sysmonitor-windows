@@ -30,88 +30,107 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     {
         var networks = new List<WiFiNetworkInfo>();
 
-        // Try Windows Runtime API first - most reliable for channel/frequency data
-        try
+        // ALWAYS use netsh first - it's most reliable for channel/frequency data on unpackaged apps
+        await Task.Run(async () =>
         {
-            var winRtNetworks = await GetNetworksFromWinRTAsync(cancellationToken);
-            if (winRtNetworks.Count > 0)
+            try
             {
-                networks.AddRange(winRtNetworks);
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"WinRT scan failed: {ex.Message}");
-        }
-
-        // If WinRT didn't work, fallback to netsh methods
-        if (networks.Count == 0)
-        {
-            await Task.Run(async () =>
-            {
-                try
+                // First, trigger a scan on the wireless interface
+                var interfaceName = GetWirelessInterfaceName();
+                if (!string.IsNullOrEmpty(interfaceName))
                 {
-                    // First, trigger a scan on the wireless interface
-                    var interfaceName = GetWirelessInterfaceName();
-                    if (!string.IsNullOrEmpty(interfaceName))
+                    try
                     {
-                        try
+                        var scanStartInfo = new ProcessStartInfo
                         {
-                            var scanStartInfo = new ProcessStartInfo
-                            {
-                                FileName = "netsh",
-                                Arguments = $"wlan scan interface=\"{interfaceName}\"",
-                                UseShellExecute = false,
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true,
-                                CreateNoWindow = true
-                            };
-
-                            using var scanProcess = Process.Start(scanStartInfo);
-                            if (scanProcess != null)
-                            {
-                                await scanProcess.WaitForExitAsync(cancellationToken);
-                                // Wait for the scan to complete
-                                await Task.Delay(2500, cancellationToken);
-                            }
-                        }
-                        catch { /* Scan trigger may fail, continue anyway */ }
-                    }
-
-                    // Try PowerShell approach
-                    var psNetworks = await GetNetworksFromPowerShellAsync(cancellationToken);
-                    if (psNetworks.Count > 0)
-                    {
-                        networks.AddRange(psNetworks);
-                    }
-                    else
-                    {
-                        // Fallback to direct netsh with cmd.exe UTF-8
-                        var cmdStartInfo = new ProcessStartInfo
-                        {
-                            FileName = "cmd.exe",
-                            Arguments = "/c chcp 65001 >nul && netsh wlan show networks mode=bssid",
+                            FileName = "netsh",
+                            Arguments = $"wlan scan interface=\"{interfaceName}\"",
                             UseShellExecute = false,
                             RedirectStandardOutput = true,
                             RedirectStandardError = true,
-                            CreateNoWindow = true,
-                            StandardOutputEncoding = System.Text.Encoding.UTF8
+                            CreateNoWindow = true
                         };
 
-                        using var cmdProcess = Process.Start(cmdStartInfo);
-                        if (cmdProcess != null)
+                        using var scanProcess = Process.Start(scanStartInfo);
+                        if (scanProcess != null)
                         {
-                            var output = await cmdProcess.StandardOutput.ReadToEndAsync(cancellationToken);
-                            await cmdProcess.WaitForExitAsync(cancellationToken);
-
-                            var parsedNetworks = ParseNetshOutput(output);
-                            networks.AddRange(parsedNetworks);
+                            await scanProcess.WaitForExitAsync(cancellationToken);
+                            // Wait for the scan to complete
+                            await Task.Delay(2000, cancellationToken);
                         }
                     }
+                    catch { /* Scan trigger may fail, continue anyway */ }
                 }
-                catch (OperationCanceledException) { throw; }
-                catch { }
-            }, cancellationToken);
+
+                // Try direct netsh with cmd.exe UTF-8 first - most reliable
+                var cmdStartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = "/c chcp 65001 >nul && netsh wlan show networks mode=bssid",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = System.Text.Encoding.UTF8
+                };
+
+                using var cmdProcess = Process.Start(cmdStartInfo);
+                if (cmdProcess != null)
+                {
+                    var output = await cmdProcess.StandardOutput.ReadToEndAsync(cancellationToken);
+                    await cmdProcess.WaitForExitAsync(cancellationToken);
+
+                    System.Diagnostics.Debug.WriteLine($"[WiFi] netsh output length: {output?.Length ?? 0}");
+                    if (!string.IsNullOrWhiteSpace(output))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[WiFi] netsh output preview: {output.Substring(0, Math.Min(500, output.Length))}");
+                    }
+
+                    var parsedNetworks = ParseNetshOutput(output ?? "");
+                    System.Diagnostics.Debug.WriteLine($"[WiFi] Parsed {parsedNetworks.Count} networks from netsh");
+
+                    foreach (var net in parsedNetworks)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[WiFi] Network: {net.Ssid}, Ch={net.Channel}, Freq={net.FrequencyMHz}, Band={net.Band}");
+                    }
+
+                    networks.AddRange(parsedNetworks);
+                }
+
+                // If netsh didn't work, try PowerShell approach
+                if (networks.Count == 0)
+                {
+                    var psNetworks = await GetNetworksFromPowerShellAsync(cancellationToken);
+                    if (psNetworks.Count > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[WiFi] PowerShell found {psNetworks.Count} networks");
+                        networks.AddRange(psNetworks);
+                    }
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[WiFi] netsh scan error: {ex.Message}");
+            }
+        }, cancellationToken);
+
+        // Try Windows Runtime API as secondary source (may have better signal strength data)
+        if (networks.Count == 0)
+        {
+            try
+            {
+                var winRtNetworks = await GetNetworksFromWinRTAsync(cancellationToken);
+                if (winRtNetworks.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[WiFi] WinRT found {winRtNetworks.Count} networks");
+                    networks.AddRange(winRtNetworks);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[WiFi] WinRT scan failed: {ex.Message}");
+            }
         }
 
         // Always try to get accurate connected network info and merge/update
@@ -686,6 +705,8 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     {
         try
         {
+            System.Diagnostics.Debug.WriteLine("[WiFi Cmd] Starting netsh wlan show interfaces via cmd...");
+
             // Use cmd.exe with chcp 65001 for UTF-8 output
             var startInfo = new ProcessStartInfo
             {
@@ -699,17 +720,41 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             };
 
             using var process = Process.Start(startInfo);
-            if (process == null) return null;
+            if (process == null)
+            {
+                System.Diagnostics.Debug.WriteLine("[WiFi Cmd] Failed to start process");
+                return null;
+            }
 
             var output = process.StandardOutput.ReadToEnd();
+            var error = process.StandardError.ReadToEnd();
             process.WaitForExit(5000);
 
+            System.Diagnostics.Debug.WriteLine($"[WiFi Cmd] Output length: {output?.Length ?? 0}");
+            if (!string.IsNullOrEmpty(error))
+            {
+                System.Diagnostics.Debug.WriteLine($"[WiFi Cmd] Error: {error}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                // Log first 1000 chars of raw output for debugging
+                var preview = output.Length > 1000 ? output.Substring(0, 1000) : output;
+                System.Diagnostics.Debug.WriteLine($"[WiFi Cmd] Raw output:\n{preview}");
+            }
+
             if (string.IsNullOrWhiteSpace(output))
+            {
+                System.Diagnostics.Debug.WriteLine("[WiFi Cmd] Empty output received");
                 return null;
+            }
 
             return ParseWiFiInterfaceOutput(output);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[WiFi Cmd] Exception: {ex.Message}");
+        }
 
         return null;
     }
@@ -749,7 +794,12 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     private static WiFiConnectionInfo? ParseWiFiInterfaceOutput(string output)
     {
         if (string.IsNullOrWhiteSpace(output))
+        {
+            System.Diagnostics.Debug.WriteLine("[WiFi Interface] Empty output");
             return null;
+        }
+
+        System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Parsing output ({output.Length} chars)");
 
         string ssid = "";
         string bssid = "";
@@ -777,71 +827,91 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
             if (string.IsNullOrEmpty(value)) continue;
 
+            // Debug key fields
+            if (key.Contains("channel") || key.Contains("ssid") || key.Contains("signal") || key.Contains("state") || key.Contains("radio") || key.Contains("band"))
+            {
+                System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Key='{key}' Value='{value}'");
+            }
+
             // State - check various forms
-            if (key == "state" || key.EndsWith("state") || key.Contains("state"))
+            if (key == "state" || key.EndsWith("state") || key.Contains("state") || key.Contains("status") || key.Contains("estado") || key.Contains("état") || key.Contains("zustand"))
             {
                 state = value;
                 continue;
             }
 
             // SSID (not BSSID) - check the key doesn't contain 'bssid'
-            if ((key == "ssid" || key.EndsWith("ssid")) && !key.Contains("bssid"))
+            if ((key == "ssid" || key.EndsWith("ssid") || key.StartsWith("ssid")) && !key.Contains("bssid"))
             {
                 ssid = value;
+                System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Found SSID: {ssid}");
                 continue;
             }
 
             // BSSID
-            if (key == "bssid" || key.EndsWith("bssid"))
+            if (key == "bssid" || key.EndsWith("bssid") || key.Contains("bssid"))
             {
                 bssid = value;
                 continue;
             }
 
             // Signal
-            if (key == "signal" || key.EndsWith("signal"))
+            if (key == "signal" || key.EndsWith("signal") || key.Contains("signal") || key.Contains("señal") || key.Contains("信号"))
             {
                 var signalMatch = Regex.Match(value, @"(\d+)");
                 if (signalMatch.Success && int.TryParse(signalMatch.Groups[1].Value, out var sig))
                 {
                     signal = sig;
+                    System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Signal: {signal}%");
                 }
                 continue;
             }
 
-            // Channel
-            if (key == "channel" || key.EndsWith("channel"))
+            // Channel - be more permissive
+            if (key == "channel" || key.EndsWith("channel") || key.Contains("channel") || key.Contains("kanal") || key.Contains("canal") || key.Contains("频道"))
             {
                 if (int.TryParse(value, out var ch))
                 {
                     channel = ch;
+                    System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Channel: {channel}");
+                }
+                else
+                {
+                    var chMatch = Regex.Match(value, @"(\d+)");
+                    if (chMatch.Success && int.TryParse(chMatch.Groups[1].Value, out ch))
+                    {
+                        channel = ch;
+                        System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Channel (regex): {channel}");
+                    }
                 }
                 continue;
             }
 
             // Radio type
-            if (key == "radio type" || key.Contains("radio"))
+            if (key == "radio type" || key.Contains("radio") || key.Contains("funktyp"))
             {
                 radioType = value;
+                System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Radio type: {radioType}");
                 continue;
             }
 
             // Band (newer Windows versions)
-            if (key == "band" || key.EndsWith("band"))
+            if (key == "band" || key.EndsWith("band") || key.Contains("band") || key.Contains("频带"))
             {
                 band = value;
+                System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Band: {band}");
                 continue;
             }
 
             // Authentication
-            if (key == "authentication" || key.Contains("authentication") || key.Contains("auth"))
+            if (key == "authentication" || key.Contains("authentication") || key.Contains("auth") || key.Contains("认证"))
             {
                 security = value;
                 continue;
             }
 
             // Receive/Transmit rate
-            if (key.Contains("rate") || key.Contains("speed"))
+            if (key.Contains("rate") || key.Contains("speed") || key.Contains("geschwindigkeit") || key.Contains("velocidad"))
             {
                 var speedMatch = Regex.Match(value, @"(\d+(?:[.,]\d+)?)\s*(Mbps|Gbps)?", RegexOptions.IgnoreCase);
                 if (speedMatch.Success)
@@ -863,11 +933,17 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
         // Check if connected
         if (string.IsNullOrEmpty(ssid))
+        {
+            System.Diagnostics.Debug.WriteLine("[WiFi Interface] No SSID found");
             return null;
+        }
 
         // Check state
         if (!string.IsNullOrEmpty(state) && state.ToLowerInvariant().Contains("disconnect"))
+        {
+            System.Diagnostics.Debug.WriteLine("[WiFi Interface] State indicates disconnected");
             return null;
+        }
 
         // Determine band
         var determinedBand = band;
@@ -879,6 +955,8 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         {
             determinedBand = GetBandFromRadioType(radioType);
         }
+
+        System.Diagnostics.Debug.WriteLine($"[WiFi Interface] Final: SSID={ssid}, Channel={channel}, Band={determinedBand}, Signal={signal}");
 
         return new WiFiConnectionInfo
         {
@@ -956,9 +1034,13 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         var networks = new List<WiFiNetworkInfo>();
 
         if (string.IsNullOrWhiteSpace(output))
+        {
+            System.Diagnostics.Debug.WriteLine("[WiFi Parse] Empty output");
             return networks;
+        }
 
         var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Processing {lines.Length} lines");
 
         string? currentSSID = null;
         string? currentBSSID = null;
@@ -984,8 +1066,14 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             // Skip empty values
             if (string.IsNullOrEmpty(value)) continue;
 
+            // Debug output for key lines
+            if (key.Contains("channel") || key.Contains("ssid") || key.Contains("signal"))
+            {
+                System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Key='{key}' Value='{value}'");
+            }
+
             // Check for SSID (but not BSSID)
-            if ((key == "ssid" || key.StartsWith("ssid ") || key.Contains("ssid") && !key.Contains("bssid")))
+            if ((key == "ssid" || key.StartsWith("ssid ") || (key.Contains("ssid") && !key.Contains("bssid"))))
             {
                 // Only process if this is truly SSID, not BSSID
                 if (!key.Contains("bssid"))
@@ -1005,6 +1093,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     authentication = "";
                     networkType = "";
                     radioType = "";
+                    System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Found SSID: {currentSSID}");
                     continue;
                 }
             }
@@ -1033,16 +1122,18 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 {
                     currentBSSID = value;
                 }
+                System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Found BSSID: {currentBSSID}");
                 continue;
             }
 
             // Check for Signal strength (look for percentage)
-            if (key.Contains("signal") || key.Contains("信号") || key.Contains("señal"))
+            if (key.Contains("signal") || key.Contains("信号") || key.Contains("señal") || key.Contains("stärke"))
             {
                 var signalMatch = Regex.Match(value, @"(\d+)\s*%?");
                 if (signalMatch.Success && int.TryParse(signalMatch.Groups[1].Value, out var sig))
                 {
                     signalPercent = sig;
+                    System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Signal: {signalPercent}%");
                 }
                 continue;
             }
@@ -1051,11 +1142,12 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             if (key == "band" || key == "banda" || key == "频带" || key == "frequenzband")
             {
                 band = value;
+                System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Band: {band}");
                 continue;
             }
 
             // Check for Radio type (802.11ac, 802.11ax, etc.)
-            if (key.Contains("radio type") || key.Contains("tipo de radio") || key.Contains("funktyp") || key.Contains("无线电类型"))
+            if (key.Contains("radio") || key.Contains("tipo de radio") || key.Contains("funktyp") || key.Contains("无线电类型"))
             {
                 radioType = value;
                 // Also determine band from radio type if not yet set
@@ -1063,11 +1155,12 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 {
                     band = GetBandFromRadioType(value);
                 }
+                System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Radio type: {radioType}, Band from radio: {band}");
                 continue;
             }
 
-            // Check for Channel
-            if (key.Contains("channel") || key.Contains("kanal") || key.Contains("canal") || key.Contains("频道"))
+            // Check for Channel - be more permissive with matching
+            if (key.Contains("channel") || key.Contains("kanal") || key.Contains("canal") || key.Contains("频道") || key.Contains("kanaal"))
             {
                 if (int.TryParse(value, out var ch))
                 {
@@ -1076,6 +1169,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     {
                         band = GetBandFromChannel(channel);
                     }
+                    System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Channel: {channel}, Band from channel: {band}");
                 }
                 else
                 {
@@ -1087,20 +1181,21 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                         {
                             band = GetBandFromChannel(channel);
                         }
+                        System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Channel (regex): {channel}, Band: {band}");
                     }
                 }
                 continue;
             }
 
             // Check for Network type
-            if (key.Contains("network type") || key.Contains("tipo de red") || key.Contains("netzwerktyp"))
+            if (key.Contains("network type") || key.Contains("tipo de red") || key.Contains("netzwerktyp") || key.Contains("type réseau"))
             {
                 networkType = value;
                 continue;
             }
 
             // Check for Authentication
-            if (key.Contains("authentication") || key.Contains("authentifizierung") || key.Contains("autenticación") || key.Contains("认证"))
+            if (key.Contains("authentication") || key.Contains("authentifizierung") || key.Contains("autenticación") || key.Contains("认证") || key.Contains("authentification"))
             {
                 authentication = value;
                 continue;
@@ -1114,6 +1209,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 channel, band, authentication, networkType, radioType, false));
         }
 
+        System.Diagnostics.Debug.WriteLine($"[WiFi Parse] Total networks parsed: {networks.Count}");
         return networks;
     }
 

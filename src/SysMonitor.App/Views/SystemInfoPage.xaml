@@ -19,7 +19,7 @@
 
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="SYSTEM INFORMATION" Style="{StaticResource PageHeaderStyle}"
+                        <TextBlock Text="SYSTEM INFO" Style="{StaticResource PageHeaderStyle}"
                                    Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Hardware and software specifications" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
