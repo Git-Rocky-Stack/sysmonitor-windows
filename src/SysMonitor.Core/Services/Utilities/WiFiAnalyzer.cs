@@ -12,6 +12,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     private bool? _isAvailableCache;
     private DateTime _lastAvailabilityCheck = DateTime.MinValue;
 
+    // Permission tracking
+    private string _permissionError = "";
+    private bool _requiresLocationPermission;
+    private bool _requiresAdminElevation;
+
+    public string PermissionError => _permissionError;
+    public bool RequiresLocationPermission => _requiresLocationPermission;
+    public bool RequiresAdminElevation => _requiresAdminElevation;
+
     public bool IsAvailable
     {
         get
@@ -29,6 +38,11 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     public async Task<List<WiFiNetworkInfo>> ScanNetworksAsync(CancellationToken cancellationToken = default)
     {
         var networks = new List<WiFiNetworkInfo>();
+
+        // Reset permission flags
+        _permissionError = "";
+        _requiresLocationPermission = false;
+        _requiresAdminElevation = false;
 
         // ALWAYS use netsh first - it's most reliable for channel/frequency data on unpackaged apps
         await Task.Run(async () =>
@@ -84,6 +98,9 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     if (!string.IsNullOrWhiteSpace(output))
                     {
                         System.Diagnostics.Debug.WriteLine($"[WiFi] netsh output preview: {output.Substring(0, Math.Min(500, output.Length))}");
+
+                        // Check for permission errors in the output
+                        CheckForPermissionErrors(output);
                     }
 
                     var parsedNetworks = ParseNetshOutput(output ?? "");
@@ -1026,6 +1043,38 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         catch
         {
             return false;
+        }
+    }
+
+    private void CheckForPermissionErrors(string output)
+    {
+        if (string.IsNullOrEmpty(output))
+            return;
+
+        var errors = new List<string>();
+
+        // Check for location permission requirement (Windows 11)
+        if (output.Contains("location permission", StringComparison.OrdinalIgnoreCase) ||
+            output.Contains("Location services", StringComparison.OrdinalIgnoreCase) ||
+            output.Contains("privacy-location", StringComparison.OrdinalIgnoreCase))
+        {
+            _requiresLocationPermission = true;
+            errors.Add("Location Services must be enabled in Windows Settings");
+        }
+
+        // Check for admin elevation requirement
+        if (output.Contains("requires elevation", StringComparison.OrdinalIgnoreCase) ||
+            output.Contains("Run as administrator", StringComparison.OrdinalIgnoreCase) ||
+            output.Contains("error 5", StringComparison.OrdinalIgnoreCase))
+        {
+            _requiresAdminElevation = true;
+            errors.Add("Administrator privileges required");
+        }
+
+        if (errors.Count > 0)
+        {
+            _permissionError = string.Join(". ", errors) + ".";
+            System.Diagnostics.Debug.WriteLine($"[WiFi] Permission error detected: {_permissionError}");
         }
     }
 

@@ -19,6 +19,22 @@ public interface IWiFiAnalyzer
     Task<WiFiAdapterInfo?> GetAdapterInfoAsync();
     Task<WiFiConnectionInfo?> GetCurrentConnectionAsync();
     bool IsAvailable { get; }
+
+    /// <summary>
+    /// Gets any permission error message from the last scan attempt.
+    /// Empty if no permission issues detected.
+    /// </summary>
+    string PermissionError { get; }
+
+    /// <summary>
+    /// Indicates if location permission is required for WiFi scanning.
+    /// </summary>
+    bool RequiresLocationPermission { get; }
+
+    /// <summary>
+    /// Indicates if admin elevation is required for WiFi scanning.
+    /// </summary>
+    bool RequiresAdminElevation { get; }
 }
 
 // Bluetooth Models
