@@ -82,6 +82,7 @@ public partial class App : Application
                 services.AddSingleton<ISystemRestoreService, SystemRestoreService>();
                 services.AddSingleton<IScheduledCleaningService, ScheduledCleaningService>();
                 services.AddSingleton<IBackupService, BackupService>();
+                services.AddSingleton<IDriverUpdater, DriverUpdater>();
 
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
@@ -113,6 +114,7 @@ public partial class App : Application
                 services.AddTransient<DriveWiperViewModel>();
                 services.AddTransient<ScheduledCleaningViewModel>();
                 services.AddTransient<BackupViewModel>();
+                services.AddTransient<DriverUpdaterViewModel>();
 
                 // Views
                 services.AddTransient<DashboardPage>();
@@ -144,6 +146,7 @@ public partial class App : Application
                 services.AddTransient<DriveWiperPage>();
                 services.AddTransient<ScheduledCleaningPage>();
                 services.AddTransient<BackupPage>();
+                services.AddTransient<DriverUpdaterPage>();
             })
             .Build();
     }

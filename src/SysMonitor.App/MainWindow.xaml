@@ -142,6 +142,11 @@
                         <FontIcon Glyph="&#xE7B8;" Foreground="{StaticResource SuccessBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Driver Updater" Tag="DriverUpdater">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE964;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItem Content="Disk Analyzer" Tag="DiskAnalyzer">
                     <NavigationViewItem.Icon>
