@@ -5,167 +5,231 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:utils="using:SysMonitor.Core.Services.Utilities"
-    Background="Transparent">
+    Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="24" Spacing="16">
-            <!-- Header -->
+    <Grid RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
+        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <TextBlock Text="Bluetooth Analyzer" FontSize="28" FontWeight="SemiBold" Foreground="White"/>
-                    <TextBlock Text="Scan and analyze Bluetooth devices" FontSize="14" Foreground="#808080" Margin="0,4,0,0"/>
+
+                <!-- Left: Header text -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
+                    <TextBlock Text="BLUETOOTH ANALYZER" Style="{StaticResource PageHeaderStyle}"
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Scan &amp; Analyze Bluetooth Devices" Style="{StaticResource PageSubtitleStyle}"
+                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Command="{x:Bind ViewModel.ScanDevicesCommand}" IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}"
-                            Style="{StaticResource AccentButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE72C;" FontSize="14"/>
-                            <TextBlock Text="Scan Devices"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{x:Bind ViewModel.StopScanCommand}" Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay}">
+
+                <!-- Center: STX.1 Home Logo -->
+                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Stretch="Uniform"/>
+
+                <!-- Right: Action Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <!-- SCAN with chrome bezel -->
+                    <Border CornerRadius="26" Padding="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#707070" Offset="0.0"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                <GradientStop Color="#505050" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Command="{x:Bind ViewModel.ScanDevicesCommand}" IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}"
+                                Style="{StaticResource RedButtonStyle}" Background="#000000">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE72C;" FontSize="14"/>
+                                <TextBlock Text="SCAN"/>
+                            </StackPanel>
+                        </Button>
+                    </Border>
+                    <Button Command="{x:Bind ViewModel.StopScanCommand}"
+                            Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Style="{StaticResource OutlinedButtonStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE71A;" FontSize="14"/>
-                            <TextBlock Text="Stop"/>
+                            <TextBlock Text="STOP"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
             </Grid>
+        </Border>
 
-            <!-- Adapter Info Card -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="Bluetooth Adapter" FontSize="12" Foreground="#808080"/>
-                        <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" Foreground="White" Margin="0,4,0,0"/>
-                        <TextBlock Text="{x:Bind ViewModel.AdapterAddress, Mode=OneWay}" FontSize="12" Foreground="#808080" Margin="0,4,0,0"/>
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16" Margin="0,0,0,16">
+
+                <!-- Adapter Info Section -->
+                <StackPanel Spacing="8">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="ADAPTER INFO" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                     </StackPanel>
-                    <Border Grid.Column="1" Background="{x:Bind ViewModel.AdapterStatusColor, Mode=OneWay}" CornerRadius="4" Padding="12,6" VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind ViewModel.AdapterStatus, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
+                                <FontIcon Glyph="&#xE702;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </Border>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.AdapterAddress, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Background="{x:Bind ViewModel.AdapterStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
+                                    CornerRadius="4" Padding="12,6" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.AdapterStatus, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                            </Border>
+                        </Grid>
                     </Border>
-                </Grid>
-            </Border>
-
-            <!-- Stats Cards -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Devices Found -->
-                <Border Background="#0A0A0A" CornerRadius="8" Padding="20" Margin="0,0,8,0" BorderBrush="#1A1A1A" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Devices Found" FontSize="12" Foreground="#808080"/>
-                        <TextBlock Text="{x:Bind ViewModel.DevicesFound, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="#00BCD4" Margin="0,8,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Connected -->
-                <Border Grid.Column="1" Background="#0A0A0A" CornerRadius="8" Padding="20" Margin="4,0" BorderBrush="#1A1A1A" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Connected" FontSize="12" Foreground="#808080"/>
-                        <TextBlock Text="{x:Bind ViewModel.ConnectedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="#4CAF50" Margin="0,8,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Paired -->
-                <Border Grid.Column="2" Background="#0A0A0A" CornerRadius="8" Padding="20" Margin="8,0,0,0" BorderBrush="#1A1A1A" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Paired" FontSize="12" Foreground="#808080"/>
-                        <TextBlock Text="{x:Bind ViewModel.PairedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="#9C27B0" Margin="0,8,0,0"/>
-                    </StackPanel>
-                </Border>
-            </Grid>
-
-            <!-- Scan Status -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="16" BorderBrush="#1A1A1A" BorderThickness="1"
-                    Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <ProgressRing IsActive="True" Width="20" Height="20"/>
-                    <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="#808080" VerticalAlignment="Center"/>
                 </StackPanel>
-            </Border>
 
-            <!-- Devices List -->
-            <Border Background="#0A0A0A" CornerRadius="8" Padding="20" BorderBrush="#1A1A1A" BorderThickness="1" MinHeight="300">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Text="Discovered Devices" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
-
-                    <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
-                              Background="Transparent" SelectionMode="None">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="utils:BluetoothDeviceInfo">
-                                <Border Background="#141414" CornerRadius="6" Padding="16" Margin="0,4">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- Icon -->
-                                        <Border Background="#1A1A1A" CornerRadius="8" Width="48" Height="48" VerticalAlignment="Center">
-                                            <FontIcon Glyph="{x:Bind DeviceIcon}" Foreground="{x:Bind DeviceTypeColor}" FontSize="20"/>
-                                        </Border>
-
-                                        <!-- Device Info -->
-                                        <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
-                                            <TextBlock Text="{x:Bind Name}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
-                                            <TextBlock Text="{x:Bind DeviceType}" FontSize="12" Foreground="#808080" Margin="0,2,0,0"/>
-                                            <TextBlock Text="{x:Bind Address}" FontSize="11" Foreground="#606060" Margin="0,2,0,0"/>
-                                        </StackPanel>
-
-                                        <!-- Signal -->
-                                        <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            <TextBlock Text="Signal" FontSize="11" Foreground="#606060" HorizontalAlignment="Center"/>
-                                            <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,2,0,0"
-                                                       Foreground="{x:Bind SignalColor}">
-                                                <Run Text="{x:Bind SignalStrength}"/><Run Text="%"/>
-                                            </TextBlock>
-                                        </StackPanel>
-
-                                        <!-- Status -->
-                                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                            <Border Background="{x:Bind StatusColor}" CornerRadius="4" Padding="8,4"
-                                                    Visibility="{x:Bind IsConnected}">
-                                                <TextBlock Text="Connected" FontSize="11" Foreground="White"/>
-                                            </Border>
-                                            <Border Background="#FF9800" CornerRadius="4" Padding="8,4"
-                                                    Visibility="{x:Bind IsPaired}">
-                                                <TextBlock Text="Paired" FontSize="11" Foreground="White"/>
-                                            </Border>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-
-                    <!-- Empty State -->
-                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Visibility="{x:Bind ViewModel.DevicesFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
-                        <FontIcon Glyph="&#xE702;" FontSize="48" Foreground="#404040"/>
-                        <TextBlock Text="No Bluetooth devices found" FontSize="14" Foreground="#606060" Margin="0,12,0,0"/>
-                        <TextBlock Text="Click 'Scan Devices' to search for nearby devices" FontSize="12" Foreground="#404040" Margin="0,4,0,0"/>
+                <!-- Stats Section -->
+                <StackPanel Spacing="8">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="STATISTICS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                     </StackPanel>
-                </Grid>
-            </Border>
-        </StackPanel>
-    </ScrollViewer>
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Devices Found -->
+                        <Border Style="{StaticResource CardStyle}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Devices Found" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.DevicesFound, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="#00BCD4" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Connected -->
+                        <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Connected" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.ConnectedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="#4CAF50" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Paired -->
+                        <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Paired" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.PairedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="#9C27B0" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Scan Status -->
+                <Border Style="{StaticResource CardStyle}" Padding="12" Background="#1A1A1A"
+                        Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <ProgressRing IsActive="True" Width="20" Height="20"/>
+                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Devices List Section -->
+                <StackPanel Spacing="8">
+                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                        <TextBlock Text="DISCOVERED DEVICES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource CardStyle}" Padding="0" MinHeight="300">
+                        <Grid>
+                            <ListView ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
+                                      Background="Transparent" SelectionMode="None">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="Padding" Value="12"/>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="utils:BluetoothDeviceInfo">
+                                        <Border Background="#141414" CornerRadius="6" Padding="16">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Icon -->
+                                                <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48" VerticalAlignment="Center">
+                                                    <FontIcon Glyph="{x:Bind DeviceIcon}" Foreground="{x:Bind DeviceTypeColor, Converter={StaticResource StringToBrushConverter}}" FontSize="20"/>
+                                                </Border>
+
+                                                <!-- Device Info -->
+                                                <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind Name}" Style="{StaticResource CardTitleStyle}"/>
+                                                    <TextBlock Text="{x:Bind DeviceType}" Style="{StaticResource CardSubtitleStyle}" Margin="0,2,0,0"/>
+                                                    <TextBlock Text="{x:Bind Address}" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                                </StackPanel>
+
+                                                <!-- Signal -->
+                                                <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <TextBlock Text="Signal" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}" HorizontalAlignment="Center"/>
+                                                    <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,2,0,0"
+                                                               Foreground="{x:Bind SignalColor, Converter={StaticResource StringToBrushConverter}}">
+                                                        <Run Text="{x:Bind SignalStrength}"/><Run Text="%"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <!-- Status -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                    <Border Background="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}" CornerRadius="4" Padding="8,4"
+                                                            Visibility="{x:Bind IsConnected, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <TextBlock Text="Connected" FontSize="11" Foreground="White"/>
+                                                    </Border>
+                                                    <Border Background="#FF9800" CornerRadius="4" Padding="8,4"
+                                                            Visibility="{x:Bind IsPaired, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <TextBlock Text="Paired" FontSize="11" Foreground="White"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <!-- Empty State -->
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Visibility="{x:Bind ViewModel.DevicesFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE702;" FontSize="48" Foreground="#404040"/>
+                                <TextBlock Text="No Bluetooth devices found" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,12,0,0"/>
+                                <TextBlock Text="Click 'SCAN' to search for nearby devices" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </Page>
