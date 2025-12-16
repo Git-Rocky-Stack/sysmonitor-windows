@@ -23,7 +23,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="SCHEDULED CLEANING" Style="{StaticResource PageHeaderStyle}"
+                    <TextBlock Text="SCHEDULED CLEAN" Style="{StaticResource PageHeaderStyle}"
                                Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
                     <TextBlock Text="Automate System Maintenance Tasks" Style="{StaticResource PageSubtitleStyle}"
                                Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
