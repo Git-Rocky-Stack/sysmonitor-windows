@@ -1,0 +1,8 @@
+# Installer output
+output/
+
+# Inno Setup compiled files
+*.~is
+
+# Icon files (optional, may want to track)
+# *.ico

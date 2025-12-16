@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\Users\\User\\Desktop\\Development Projects\\Strategia-Enhanced-App\\sysmonitor-windows\\src\\SysMonitor.App\\bin\\x64\\Release\\net8.0-windows10.0.22621.0\\win-x64\")",
+      "Bash(dir /b \"C:\\Users\\User\\Desktop\\Development Projects\\Strategia-Enhanced-App\\sysmonitor-windows\\src\\SysMonitor.App\\bin\\x64\\Release\\net8.0-windows10.0.22621.0\\win-x64\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File convert-icon.ps1:*)",
+      "Bash(dir:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File build-installer.ps1)",
+      "Bash(winget search:*)",
+      "Bash(winget install:*)",
+      "Bash(reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\" /s /f \"Inno Setup\")",
+      "Bash(findstr:*)",
+      "Bash(powershell:*)",
+      "Bash(explorer \"C:\\Users\\User\\Desktop\\Development Projects\\Strategia-Enhanced-App\\sysmonitor-windows\\installer\\output\")"
+    ]
+  }
+}
