@@ -252,7 +252,7 @@ public partial class BackupViewModel : ObservableObject
     {
         IsWizardMode = false;
         CurrentStep = 0;
-        WizardTitle = "Backup Center";
+        WizardTitle = "BACKUP CENTER";
         WizardSubtitle = "Protect your files with automated backups";
     }
 
@@ -266,7 +266,7 @@ public partial class BackupViewModel : ObservableObject
             4 => ("Backup Options", "Step 4: Configure backup settings"),
             5 => ("Backup in Progress", "Please wait while your files are backed up"),
             6 => ("Backup Complete", LastResult?.Success == true ? "Your backup was successful!" : "Backup completed with errors"),
-            _ => ("Backup Center", "Protect your files with automated backups")
+            _ => ("BACKUP CENTER", "Protect your files with automated backups")
         };
     }
 
