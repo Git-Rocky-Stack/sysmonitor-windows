@@ -468,7 +468,9 @@ public class RegistryCleaner : IRegistryCleaner
             var result = new CleanerResult { Success = true };
             var startTime = DateTime.Now;
 
-            foreach (var issue in issuesToFix.Where(i => i.IsSelected))
+            var issuesToProcess = issuesToFix.Where(i => i.IsSelected).ToList();
+
+            foreach (var issue in issuesToProcess)
             {
                 try
                 {
@@ -492,7 +494,12 @@ public class RegistryCleaner : IRegistryCleaner
                         keyPath = keyPath.Replace("HKEY_CLASSES_ROOT\\", "").Replace("HKCR\\", "");
                     }
 
-                    if (root == null) continue;
+                    if (root == null)
+                    {
+                        result.ErrorCount++;
+                        result.Errors.Add($"{issue.Key}: Unknown registry root");
+                        continue;
+                    }
 
                     bool operationSucceeded = false;
 
@@ -502,32 +509,76 @@ public class RegistryCleaner : IRegistryCleaner
                         issue.Category == RegistryIssueCategory.InvalidTypeLib)
                     {
                         // Delete the entire subkey
-                        var parentPath = keyPath.Substring(0, keyPath.LastIndexOf('\\'));
-                        var subKeyName = keyPath.Substring(keyPath.LastIndexOf('\\') + 1);
+                        var lastBackslash = keyPath.LastIndexOf('\\');
+                        if (lastBackslash <= 0)
+                        {
+                            result.ErrorCount++;
+                            result.Errors.Add($"{issue.Key}: Invalid key path structure");
+                            continue;
+                        }
 
-                        using var parentKey = root.OpenSubKey(parentPath, true);
+                        var parentPath = keyPath.Substring(0, lastBackslash);
+                        var subKeyName = keyPath.Substring(lastBackslash + 1);
+
+                        using var parentKey = root.OpenSubKey(parentPath, writable: true);
                         if (parentKey != null)
                         {
-                            parentKey.DeleteSubKeyTree(subKeyName, false);
-                            operationSucceeded = true;
+                            // Verify subkey exists before trying to delete
+                            var subKeyExists = parentKey.GetSubKeyNames().Contains(subKeyName, StringComparer.OrdinalIgnoreCase);
+                            if (subKeyExists)
+                            {
+                                parentKey.DeleteSubKeyTree(subKeyName, throwOnMissingSubKey: false);
+
+                                // Verify deletion succeeded
+                                var stillExists = parentKey.GetSubKeyNames().Contains(subKeyName, StringComparer.OrdinalIgnoreCase);
+                                if (!stillExists)
+                                {
+                                    operationSucceeded = true;
+                                }
+                                else
+                                {
+                                    result.ErrorCount++;
+                                    result.Errors.Add($"{issue.Key}: Failed to delete subkey (may be protected)");
+                                }
+                            }
+                            else
+                            {
+                                // Already deleted or doesn't exist
+                                operationSucceeded = true;
+                            }
                         }
                         else
                         {
                             result.ErrorCount++;
-                            result.Errors.Add($"{issue.Key}: Cannot open key for writing (requires admin)");
+                            result.Errors.Add($"{issue.Key}: Cannot open parent key for writing (requires admin)");
                         }
                     }
                     else if (issue.ValueName == "(all values)")
                     {
                         // Clear all values in the key (e.g., Recent Docs)
-                        using var key = root.OpenSubKey(keyPath, true);
+                        using var key = root.OpenSubKey(keyPath, writable: true);
                         if (key != null)
                         {
-                            foreach (var valueName in key.GetValueNames())
+                            var valueNames = key.GetValueNames().ToList();
+                            int deletedCount = 0;
+                            foreach (var valueName in valueNames)
                             {
-                                key.DeleteValue(valueName, false);
+                                try
+                                {
+                                    key.DeleteValue(valueName, throwOnMissingValue: false);
+                                    // Verify deletion
+                                    if (key.GetValue(valueName) == null)
+                                    {
+                                        deletedCount++;
+                                    }
+                                }
+                                catch { }
                             }
-                            operationSucceeded = true;
+                            operationSucceeded = deletedCount > 0;
+                            if (deletedCount < valueNames.Count)
+                            {
+                                result.Errors.Add($"{issue.Key}: Deleted {deletedCount}/{valueNames.Count} values");
+                            }
                         }
                         else
                         {
@@ -538,11 +589,32 @@ public class RegistryCleaner : IRegistryCleaner
                     else
                     {
                         // Delete the specific value
-                        using var key = root.OpenSubKey(keyPath, true);
+                        using var key = root.OpenSubKey(keyPath, writable: true);
                         if (key != null)
                         {
-                            key.DeleteValue(issue.ValueName, false);
-                            operationSucceeded = true;
+                            // Check if value exists before trying to delete
+                            var valueExists = key.GetValueNames().Contains(issue.ValueName, StringComparer.OrdinalIgnoreCase);
+                            if (valueExists)
+                            {
+                                key.DeleteValue(issue.ValueName, throwOnMissingValue: false);
+
+                                // Verify deletion succeeded
+                                var stillExists = key.GetValueNames().Contains(issue.ValueName, StringComparer.OrdinalIgnoreCase);
+                                if (!stillExists)
+                                {
+                                    operationSucceeded = true;
+                                }
+                                else
+                                {
+                                    result.ErrorCount++;
+                                    result.Errors.Add($"{issue.Key}\\{issue.ValueName}: Failed to delete value");
+                                }
+                            }
+                            else
+                            {
+                                // Already deleted or doesn't exist
+                                operationSucceeded = true;
+                            }
                         }
                         else
                         {
@@ -560,7 +632,12 @@ public class RegistryCleaner : IRegistryCleaner
                 catch (UnauthorizedAccessException)
                 {
                     result.ErrorCount++;
-                    result.Errors.Add($"{issue.Key}: Access denied");
+                    result.Errors.Add($"{issue.Key}: Access denied (requires admin)");
+                }
+                catch (System.Security.SecurityException)
+                {
+                    result.ErrorCount++;
+                    result.Errors.Add($"{issue.Key}: Security exception (requires admin)");
                 }
                 catch (Exception ex)
                 {
@@ -570,7 +647,7 @@ public class RegistryCleaner : IRegistryCleaner
             }
 
             result.Duration = DateTime.Now - startTime;
-            result.Success = result.ErrorCount < result.FilesDeleted;
+            result.Success = result.FilesDeleted > 0;
             return result;
         });
     }

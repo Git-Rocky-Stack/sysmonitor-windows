@@ -38,6 +38,17 @@
             <converters:CelsiusToFahrenheitConverter x:Key="CelsiusToFahrenheitConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <converters:ScheduleToVisibilityConverter x:Key="ScheduleToVisibilityConverter"/>
+
+            <!-- Wizard Step Converters -->
+            <converters:IntEqualsOneToVisibilityConverter x:Key="IntEqualsOneToVisibilityConverter"/>
+            <converters:IntEqualsTwoToVisibilityConverter x:Key="IntEqualsTwoToVisibilityConverter"/>
+            <converters:IntEqualsThreeToVisibilityConverter x:Key="IntEqualsThreeToVisibilityConverter"/>
+            <converters:IntEqualsFourToVisibilityConverter x:Key="IntEqualsFourToVisibilityConverter"/>
+            <converters:IntEqualsFiveToVisibilityConverter x:Key="IntEqualsFiveToVisibilityConverter"/>
+            <converters:IntEqualsSixToVisibilityConverter x:Key="IntEqualsSixToVisibilityConverter"/>
+            <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter"/>
+            <converters:BoolToSuccessGlyphConverter x:Key="BoolToSuccessGlyphConverter"/>
+            <converters:BoolToSuccessColorConverter x:Key="BoolToSuccessColorConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
