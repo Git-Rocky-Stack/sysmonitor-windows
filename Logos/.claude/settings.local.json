@@ -5,7 +5,9 @@
       "Bash(dotnet build:*)",
       "Bash(dotnet publish:*)",
       "Bash(powershell -Command \"Compress-Archive -Path ''publish/installer-build/*'' -DestinationPath ''publish/STX1-SystemMonitor-1.0.0-Portable-x64.zip'' -Force\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(copy:*)",
+      "Bash(powershell -Command:*)"
     ]
   }
 }
