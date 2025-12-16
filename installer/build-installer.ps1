@@ -1,146 +1,117 @@
-# SysMonitor Installer Build Script (PowerShell)
-# ============================================
+# STX1 System Monitor - Installer Build Script
+# This script builds the installer using Inno Setup
 
-$ErrorActionPreference = "Stop"
-
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "         SysMonitor Installer Build Script" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host ""
-
-# Find Inno Setup - check multiple possible locations
-$isccPaths = @(
-    "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
-    "C:\Program Files\Inno Setup 6\ISCC.exe",
-    "C:\Program Files (x86)\Inno Setup 5\ISCC.exe",
-    "C:\Program Files\Inno Setup 5\ISCC.exe",
-    "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",
-    "$env:USERPROFILE\scoop\apps\innosetup\current\ISCC.exe",
-    "$env:ProgramData\chocolatey\lib\InnoSetup\tools\ISCC.exe"
+param(
+    [switch]$InstallInnoSetup,
+    [switch]$SkipPublish
 )
 
-Write-Host "Searching for Inno Setup..." -ForegroundColor White
+$ErrorActionPreference = "Stop"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$RootDir = Split-Path -Parent $ScriptDir
 
-$isccPath = $null
-foreach ($path in $isccPaths) {
-    Write-Host "  Checking: $path" -ForegroundColor Gray
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "  STX1 System Monitor - Installer Builder" -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Step 1: Publish the application if not skipped
+if (-not $SkipPublish) {
+    Write-Host "Step 1: Publishing application..." -ForegroundColor Yellow
+    Push-Location $RootDir
+    try {
+        dotnet publish src/SysMonitor.App/SysMonitor.App.csproj `
+            -c Release `
+            -r win-x64 `
+            -p:Platform=x64 `
+            --self-contained true `
+            -o publish/installer-build
+        
+        if ($LASTEXITCODE -ne 0) {
+            throw "Publish failed!"
+        }
+        Write-Host "  Published successfully!" -ForegroundColor Green
+    }
+    finally {
+        Pop-Location
+    }
+}
+else {
+    Write-Host "Step 1: Skipping publish (using existing build)" -ForegroundColor Yellow
+}
+
+# Step 2: Check for Inno Setup
+Write-Host ""
+Write-Host "Step 2: Checking for Inno Setup..." -ForegroundColor Yellow
+
+$InnoSetupPaths = @(
+    "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+    "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+)
+
+$ISCC = $null
+foreach ($path in $InnoSetupPaths) {
     if (Test-Path $path) {
-        $isccPath = $path
+        $ISCC = $path
         break
     }
 }
 
-# If not found in standard locations, search Program Files
-if (-not $isccPath) {
-    Write-Host "  Searching Program Files..." -ForegroundColor Gray
-    $searchPaths = @("C:\Program Files", "C:\Program Files (x86)")
-    foreach ($searchPath in $searchPaths) {
-        $found = Get-ChildItem -Path $searchPath -Filter "ISCC.exe" -Recurse -ErrorAction SilentlyContinue -Depth 3 | Select-Object -First 1
-        if ($found) {
-            $isccPath = $found.FullName
-            break
+if (-not $ISCC) {
+    Write-Host "  Inno Setup 6 not found!" -ForegroundColor Red
+    
+    if ($InstallInnoSetup) {
+        Write-Host "  Downloading Inno Setup..." -ForegroundColor Yellow
+        $installerUrl = "https://jrsoftware.org/download.php/is.exe"
+        $installerPath = "$env:TEMP\innosetup_installer.exe"
+        
+        Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+        Write-Host "  Installing Inno Setup (requires admin)..." -ForegroundColor Yellow
+        Start-Process -FilePath $installerPath -ArgumentList "/VERYSILENT", "/NORESTART" -Wait -Verb RunAs
+        Remove-Item $installerPath -Force
+        
+        # Check again
+        foreach ($path in $InnoSetupPaths) {
+            if (Test-Path $path) {
+                $ISCC = $path
+                break
+            }
         }
     }
-}
-
-if (-not $isccPath) {
-    Write-Host ""
-    Write-Host "[ERROR] Inno Setup not found!" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Please install Inno Setup 6 from:" -ForegroundColor Yellow
-    Write-Host "https://jrsoftware.org/isdl.php" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "Or via winget:" -ForegroundColor Yellow
-    Write-Host "winget install JRSoftware.InnoSetup" -ForegroundColor White
-    Write-Host ""
-    Write-Host "After installation, you may need to restart your terminal." -ForegroundColor Yellow
-    Write-Host ""
-    Read-Host "Press Enter to exit"
-    exit 1
-}
-
-Write-Host "[OK] Found Inno Setup at: $isccPath" -ForegroundColor Green
-Write-Host ""
-
-# Check required files
-Write-Host "Checking required files..." -ForegroundColor White
-
-$requiredFiles = @("LICENSE.rtf", "README_BEFORE.txt", "README_AFTER.txt", "SysMonitor.iss")
-foreach ($file in $requiredFiles) {
-    if (-not (Test-Path $file)) {
-        Write-Host "[ERROR] $file not found!" -ForegroundColor Red
-        Read-Host "Press Enter to exit"
+    
+    if (-not $ISCC) {
+        Write-Host ""
+        Write-Host "Please install Inno Setup 6 from: https://jrsoftware.org/isdl.php" -ForegroundColor Yellow
+        Write-Host "Or run this script with -InstallInnoSetup parameter" -ForegroundColor Yellow
         exit 1
     }
-    Write-Host "[OK] $file" -ForegroundColor Green
 }
 
-if (-not (Test-Path "installer_icon.ico")) {
-    Write-Host "[WARNING] installer_icon.ico not found - using default icon" -ForegroundColor Yellow
-    Write-Host "         Create a 256x256 .ico file for a custom installer icon" -ForegroundColor Yellow
-}
+Write-Host "  Found: $ISCC" -ForegroundColor Green
 
-# Check/build application
-$buildPath = "..\src\SysMonitor.App\bin\x64\Release\net8.0-windows10.0.22621.0\win-x64"
-$exePath = Join-Path $buildPath "SysMonitor.App.exe"
-
-if (-not (Test-Path $exePath)) {
-    Write-Host ""
-    Write-Host "[WARNING] Release build not found!" -ForegroundColor Yellow
-    Write-Host "Building application first..." -ForegroundColor White
-    Write-Host ""
-
-    Push-Location ..
-    try {
-        & dotnet publish src\SysMonitor.App\SysMonitor.App.csproj -c Release -r win-x64 --self-contained true
-        if ($LASTEXITCODE -ne 0) {
-            throw "Build failed"
-        }
-    }
-    catch {
-        Write-Host "[ERROR] Build failed!" -ForegroundColor Red
-        Pop-Location
-        Read-Host "Press Enter to exit"
-        exit 1
-    }
-    Pop-Location
-
-    Write-Host ""
-    Write-Host "[OK] Build completed successfully" -ForegroundColor Green
-}
-
-Write-Host "[OK] Application build found" -ForegroundColor Green
+# Step 3: Build the installer
 Write-Host ""
+Write-Host "Step 3: Building installer..." -ForegroundColor Yellow
 
-# Create output directory
-if (-not (Test-Path "output")) {
-    New-Item -ItemType Directory -Path "output" | Out-Null
-}
+$issFile = Join-Path $ScriptDir "SysMonitorSetup.iss"
+& $ISCC $issFile
 
-# Compile installer
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "Compiling installer..." -ForegroundColor White
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host ""
-
-& $isccPath "SysMonitor.iss"
-
-if ($LASTEXITCODE -ne 0) {
+if ($LASTEXITCODE -eq 0) {
     Write-Host ""
-    Write-Host "[ERROR] Installer compilation failed!" -ForegroundColor Red
-    Read-Host "Press Enter to exit"
+    Write-Host "============================================" -ForegroundColor Green
+    Write-Host "  Installer built successfully!" -ForegroundColor Green
+    Write-Host "============================================" -ForegroundColor Green
+    Write-Host ""
+    
+    $outputFile = Join-Path $RootDir "publish\installer\STX1-SystemMonitor-Setup-1.0.0.exe"
+    if (Test-Path $outputFile) {
+        $fileInfo = Get-Item $outputFile
+        Write-Host "Output: $outputFile" -ForegroundColor Cyan
+        Write-Host "Size: $([math]::Round($fileInfo.Length / 1MB, 2)) MB" -ForegroundColor Cyan
+    }
+}
+else {
+    Write-Host ""
+    Write-Host "ERROR: Installer build failed!" -ForegroundColor Red
     exit 1
 }
-
-Write-Host ""
-Write-Host "============================================================" -ForegroundColor Green
-Write-Host "[SUCCESS] Installer created successfully!" -ForegroundColor Green
-Write-Host ""
-Write-Host "Output: $PWD\output\SysMonitor_Setup_1.0.0.exe" -ForegroundColor White
-Write-Host "============================================================" -ForegroundColor Green
-Write-Host ""
-
-# Open output folder
-Start-Process explorer.exe -ArgumentList "output"
-
-Read-Host "Press Enter to exit"
