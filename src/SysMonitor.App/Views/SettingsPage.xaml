@@ -358,12 +358,12 @@
                                 <TextBlock Text="x" FontSize="10" FontWeight="Light"
                                            Foreground="{StaticResource PrimaryBrush}" FontFamily="Consolas"/>
                             </StackPanel>
-                            <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,4">
-                                <Run Text="STX" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <Run Text="." Foreground="{StaticResource PrimaryBrush}"/>
-                                <Run Text="1" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <Run Text=" SYSTEM MONITOR" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <TextBlock Text="STX" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="." FontSize="14" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
+                                <TextBlock Text="1" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text=" SYSTEM MONITOR" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Version " Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{x:Bind ViewModel.Version, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}"/>
