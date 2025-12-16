@@ -373,12 +373,20 @@ public class CelsiusToFahrenheitConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        if (value is double celsius && celsius > 0)
+        double celsius = 0;
+        if (value is double d)
+            celsius = d;
+        else if (value is int i)
+            celsius = i;
+        else if (value is float f)
+            celsius = f;
+
+        if (celsius > 0)
         {
             var fahrenheit = (celsius * 1.8) + 32;
-            return fahrenheit.ToString("F1");
+            return fahrenheit.ToString("F0");
         }
-        return "0.0";
+        return "32";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

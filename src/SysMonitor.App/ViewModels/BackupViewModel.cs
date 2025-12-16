@@ -21,7 +21,7 @@ public partial class BackupViewModel : ObservableObject
 
     [ObservableProperty] private int _currentStep = 0; // 0=Home, 1=SelectType, 2=SelectSource, 3=SelectDest, 4=Options, 5=Running, 6=Complete
     [ObservableProperty] private bool _isWizardMode;
-    [ObservableProperty] private string _wizardTitle = "Backup Center";
+    [ObservableProperty] private string _wizardTitle = "BACKUP MANAGER";
     [ObservableProperty] private string _wizardSubtitle = "Protect your files with automated backups";
 
     // ==================== BACKUP JOB CONFIG ====================
