@@ -188,7 +188,9 @@ public class HealthCheckService : IHealthCheckService
                 TotalTasks = totalTasks
             });
 
-            report.RegistryIssues = await _registryCleaner.ScanAsync();
+            var allRegistryIssues = await _registryCleaner.ScanAsync();
+            // Filter out protected registry keys - only show actionable issues in Health Check
+            report.RegistryIssues = allRegistryIssues.Where(i => !i.IsProtected).ToList();
             report.RegistryIssueCount = report.RegistryIssues.Count;
             tasksCompleted++;
 
@@ -318,7 +320,7 @@ public class HealthCheckService : IHealthCheckService
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 3. Fix Registry Issues (safe ones only)
+            // 3. Fix Registry Issues (safe, non-protected ones only)
             progress?.Report(new HealthCheckProgress
             {
                 CurrentTask = "Fixing registry issues...",
@@ -327,14 +329,22 @@ public class HealthCheckService : IHealthCheckService
             });
 
             var safeRegistryIssues = report.RegistryIssues
-                .Where(r => r.RiskLevel == CleanerRiskLevel.Safe || r.RiskLevel == CleanerRiskLevel.Low)
+                .Where(r => !r.IsProtected && (r.RiskLevel == CleanerRiskLevel.Safe || r.RiskLevel == CleanerRiskLevel.Low))
                 .ToList();
 
             if (safeRegistryIssues.Any())
             {
+                // Mark them as selected for cleaning
+                foreach (var issue in safeRegistryIssues)
+                {
+                    issue.IsSelected = true;
+                }
                 var registryResult = await _registryCleaner.CleanAsync(safeRegistryIssues);
-                result.RegistryIssuesFixed = safeRegistryIssues.Count - registryResult.ErrorCount;
-                result.Actions.Add($"Fixed {result.RegistryIssuesFixed} registry issues");
+                result.RegistryIssuesFixed = registryResult.FilesDeleted; // FilesDeleted tracks successful fixes
+                if (result.RegistryIssuesFixed > 0)
+                {
+                    result.Actions.Add($"Fixed {result.RegistryIssuesFixed} registry issues");
+                }
             }
             tasksCompleted++;
 
