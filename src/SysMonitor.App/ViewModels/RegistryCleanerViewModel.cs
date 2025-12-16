@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Cleaners;
 using System.Collections.ObjectModel;
+using System;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -65,31 +66,94 @@ public partial class RegistryCleanerViewModel : ObservableObject
         }
 
         IsCleaning = true;
-        StatusMessage = $"Creating backup and fixing {selectedCount:N0} registry issues...";
 
         try
         {
             // Create backup first
+            StatusMessage = "Creating registry backup...";
             LastBackupPath = await _registryCleaner.BackupRegistryAsync();
 
             var selected = ScanResults.Where(r => r.IsSelected).ToList();
-            var result = await _registryCleaner.CleanAsync(selected);
 
-            FixedCount = result.FilesDeleted; // FilesDeleted is used to count fixed issues
+            // Check if any issues require elevation (HKLM/HKCR keys)
+            var requiresElevation = ElevatedRegistryHelper.RequiresElevation(selected);
+            var isAlreadyElevated = ElevatedRegistryHelper.IsRunningElevated();
 
-            // Show comprehensive status with error info
-            if (FixedCount == 0 && result.ErrorCount > 0)
+            int totalFixed = 0;
+            int totalErrors = 0;
+
+            if (requiresElevation && !isAlreadyElevated)
             {
-                // Nothing was fixed - likely all require admin
-                StatusMessage = $"Could not fix issues. {result.ErrorCount:N0} items require administrator rights. Try running as Admin.";
+                // Separate issues into elevated (HKLM/HKCR) and non-elevated (HKCU)
+                var elevatedIssues = selected.Where(i =>
+                    i.Key.StartsWith("HKEY_LOCAL_MACHINE", StringComparison.OrdinalIgnoreCase) ||
+                    i.Key.StartsWith("HKLM", StringComparison.OrdinalIgnoreCase) ||
+                    i.Key.StartsWith("HKEY_CLASSES_ROOT", StringComparison.OrdinalIgnoreCase) ||
+                    i.Key.StartsWith("HKCR", StringComparison.OrdinalIgnoreCase)).ToList();
+
+                var nonElevatedIssues = selected.Where(i =>
+                    i.Key.StartsWith("HKEY_CURRENT_USER", StringComparison.OrdinalIgnoreCase) ||
+                    i.Key.StartsWith("HKCU", StringComparison.OrdinalIgnoreCase)).ToList();
+
+                // First, clean non-elevated issues normally
+                if (nonElevatedIssues.Count > 0)
+                {
+                    StatusMessage = $"Fixing {nonElevatedIssues.Count:N0} user registry issues...";
+                    var normalResult = await _registryCleaner.CleanAsync(nonElevatedIssues);
+                    totalFixed += normalResult.FilesDeleted;
+                    totalErrors += normalResult.ErrorCount;
+                }
+
+                // Then, clean elevated issues with UAC prompt
+                if (elevatedIssues.Count > 0)
+                {
+                    StatusMessage = $"Requesting admin rights for {elevatedIssues.Count:N0} system registry issues...";
+
+                    var elevatedResult = await ElevatedRegistryHelper.RunElevatedCleanAsync(elevatedIssues);
+
+                    if (elevatedResult.WasCancelled)
+                    {
+                        StatusMessage = totalFixed > 0
+                            ? $"Fixed {totalFixed:N0} user issues. Elevation cancelled - {elevatedIssues.Count:N0} system issues skipped."
+                            : "Elevation cancelled by user. No system registry issues were fixed.";
+                        await ScanAsync();
+                        return;
+                    }
+
+                    if (elevatedResult.Success)
+                    {
+                        totalFixed += elevatedResult.FixedCount;
+                        totalErrors += elevatedResult.ErrorCount;
+                    }
+                    else
+                    {
+                        totalErrors += elevatedIssues.Count;
+                    }
+                }
             }
-            else if (result.ErrorCount > 0)
+            else
             {
-                StatusMessage = $"Fixed {FixedCount:N0} of {selectedCount:N0} issues. {result.ErrorCount:N0} require admin rights.";
+                // Either no elevation needed, or already running as admin
+                StatusMessage = $"Fixing {selectedCount:N0} registry issues...";
+                var result = await _registryCleaner.CleanAsync(selected);
+                totalFixed = result.FilesDeleted;
+                totalErrors = result.ErrorCount;
             }
-            else if (FixedCount > 0)
+
+            FixedCount = totalFixed;
+
+            // Show comprehensive status
+            if (totalFixed == 0 && totalErrors > 0)
             {
-                StatusMessage = $"Successfully fixed {FixedCount:N0} registry issues!";
+                StatusMessage = $"Could not fix issues. {totalErrors:N0} errors occurred.";
+            }
+            else if (totalErrors > 0)
+            {
+                StatusMessage = $"Fixed {totalFixed:N0} of {selectedCount:N0} issues. {totalErrors:N0} could not be fixed.";
+            }
+            else if (totalFixed > 0)
+            {
+                StatusMessage = $"Successfully fixed {totalFixed:N0} registry issues!";
             }
             else
             {
