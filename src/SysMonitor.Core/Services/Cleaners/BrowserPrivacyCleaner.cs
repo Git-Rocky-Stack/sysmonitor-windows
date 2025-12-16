@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Logging;
+using SysMonitor.Core.Helpers;
+
 namespace SysMonitor.Core.Services.Cleaners;
 
 public interface IBrowserPrivacyCleaner
@@ -68,10 +71,12 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
 {
     private readonly record struct BrowserProfile(string Name, string BasePath, string Icon);
 
+    private readonly ILogger<BrowserPrivacyCleaner> _logger;
     private readonly List<BrowserProfile> _browsers;
 
-    public BrowserPrivacyCleaner()
+    public BrowserPrivacyCleaner(ILogger<BrowserPrivacyCleaner> logger)
     {
+        _logger = logger;
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var roamingAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
@@ -109,10 +114,14 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                         ScanChromiumBrowser(browser, items);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Failed to scan browser {Browser}", browser.Name);
+                }
             }
         }, cancellationToken);
 
+        _logger.LogDebug("Found {Count} browser privacy items", items.Count);
         return items.OrderBy(i => i.BrowserName).ThenBy(i => i.DataType).ToList();
     }
 
@@ -135,7 +144,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = "Website cookies and tracking data",
                 Path = cookiesPath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 IsSelected = false,
                 RiskLevel = PrivacyRiskLevel.Medium
             });
@@ -155,7 +164,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = "Visited websites and search history",
                 Path = historyPath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 IsSelected = false,
                 RiskLevel = PrivacyRiskLevel.Low
             });
@@ -175,7 +184,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = $"{count} cached files",
                 Path = cachePath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 ItemCount = count,
                 IsSelected = true,
                 RiskLevel = PrivacyRiskLevel.Safe
@@ -196,7 +205,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = "Stored login credentials (WARNING: Cannot be recovered!)",
                 Path = loginDataPath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 IsSelected = false,
                 RiskLevel = PrivacyRiskLevel.High
             });
@@ -216,7 +225,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = "Saved form data, addresses, payment methods",
                 Path = autofillPath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 IsSelected = false,
                 RiskLevel = PrivacyRiskLevel.High
             });
@@ -237,7 +246,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = "Open tabs and windows data",
                 Path = sessionPath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 ItemCount = count,
                 IsSelected = false,
                 RiskLevel = PrivacyRiskLevel.Low
@@ -258,7 +267,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = "Website local data storage",
                 Path = localStoragePath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 ItemCount = count,
                 IsSelected = false,
                 RiskLevel = PrivacyRiskLevel.Medium
@@ -279,7 +288,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 Description = "Offline website data and push notifications",
                 Path = swPath,
                 SizeBytes = size,
-                FormattedSize = FormatSize(size),
+                FormattedSize = FormatHelper.FormatSize(size),
                 ItemCount = count,
                 IsSelected = true,
                 RiskLevel = PrivacyRiskLevel.Safe
@@ -310,7 +319,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     Description = "Website cookies and tracking data",
                     Path = cookiesPath,
                     SizeBytes = size,
-                    FormattedSize = FormatSize(size),
+                    FormattedSize = FormatHelper.FormatSize(size),
                     IsSelected = false,
                     RiskLevel = PrivacyRiskLevel.Medium
                 });
@@ -330,7 +339,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     Description = "Visited websites, bookmarks, and search history",
                     Path = historyPath,
                     SizeBytes = size,
-                    FormattedSize = FormatSize(size),
+                    FormattedSize = FormatHelper.FormatSize(size),
                     IsSelected = false,
                     RiskLevel = PrivacyRiskLevel.Low
                 });
@@ -350,7 +359,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     Description = $"{count} cached files",
                     Path = cachePath,
                     SizeBytes = size,
-                    FormattedSize = FormatSize(size),
+                    FormattedSize = FormatHelper.FormatSize(size),
                     ItemCount = count,
                     IsSelected = true,
                     RiskLevel = PrivacyRiskLevel.Safe
@@ -371,7 +380,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     Description = "Stored login credentials (WARNING: Cannot be recovered!)",
                     Path = loginsPath,
                     SizeBytes = size,
-                    FormattedSize = FormatSize(size),
+                    FormattedSize = FormatHelper.FormatSize(size),
                     IsSelected = false,
                     RiskLevel = PrivacyRiskLevel.High
                 });
@@ -391,7 +400,7 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     Description = "Saved form entries and autofill data",
                     Path = formHistoryPath,
                     SizeBytes = size,
-                    FormattedSize = FormatSize(size),
+                    FormattedSize = FormatHelper.FormatSize(size),
                     IsSelected = false,
                     RiskLevel = PrivacyRiskLevel.Medium
                 });
@@ -433,7 +442,11 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                                 File.Delete(file);
                                 result.ItemsDeleted++;
                             }
-                            catch { result.ErrorCount++; }
+                            catch (Exception ex)
+                            {
+                                result.ErrorCount++;
+                                _logger.LogTrace(ex, "Failed to delete file during privacy clean");
+                            }
                         }
 
                         result.BytesCleaned += size;
@@ -448,12 +461,15 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 {
                     result.ErrorCount++;
                     result.Errors.Add($"{item.BrowserName} - {item.DisplayName}: {ex.Message}");
+                    _logger.LogWarning(ex, "Failed to clean {Browser} - {Item}", item.BrowserName, item.DisplayName);
                 }
             }
         }, cancellationToken);
 
         result.Duration = DateTime.Now - startTime;
         result.Success = result.ErrorCount < result.ItemsDeleted;
+        _logger.LogInformation("Privacy clean complete: {ItemsDeleted} items deleted, {BytesCleaned} bytes freed",
+            result.ItemsDeleted, result.BytesCleaned);
         return result;
     }
 
@@ -494,19 +510,17 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     size += new FileInfo(file).Length;
                     count++;
                 }
-                catch { }
+                catch
+                {
+                    // Expected for locked/inaccessible files - silently skip
+                }
             }
         }
-        catch { }
+        catch
+        {
+            // Expected for inaccessible directories - silently skip
+        }
 
         return (size, count);
-    }
-
-    private static string FormatSize(long bytes)
-    {
-        if (bytes >= 1_073_741_824) return $"{bytes / 1_073_741_824.0:F2} GB";
-        if (bytes >= 1_048_576) return $"{bytes / 1_048_576.0:F2} MB";
-        if (bytes >= 1024) return $"{bytes / 1024.0:F2} KB";
-        return $"{bytes} B";
     }
 }

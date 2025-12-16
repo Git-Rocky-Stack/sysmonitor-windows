@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
 using System.Runtime.InteropServices;
 
@@ -25,10 +27,12 @@ public class TempFileCleaner : ITempFileCleaner
     private const uint SHERB_NOPROGRESSUI = 0x00000002;
     private const uint SHERB_NOSOUND = 0x00000004;
 
+    private readonly ILogger<TempFileCleaner> _logger;
     private readonly Dictionary<CleanerCategory, (string Path, string Description)> _cleanLocations;
 
-    public TempFileCleaner()
+    public TempFileCleaner(ILogger<TempFileCleaner> logger)
     {
+        _logger = logger;
         var windowsPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
@@ -84,11 +88,14 @@ public class TempFileCleaner : ITempFileCleaner
                             FileCount = count,
                             IsSelected = category != CleanerCategory.LogFiles, // Don't auto-select logs
                             RiskLevel = GetRiskLevel(category),
-                            Description = $"{count} files, {FormatSize(size)}"
+                            Description = $"{count} files, {FormatHelper.FormatSize(size)}"
                         });
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Failed to scan {Category} at {Path}", category, path);
+                }
             }
 
             // Recycle Bin - use Shell API for reliable size query
@@ -108,11 +115,14 @@ public class TempFileCleaner : ITempFileCleaner
                         FileCount = (int)rbInfo.i64NumItems,
                         IsSelected = true,
                         RiskLevel = CleanerRiskLevel.Safe,
-                        Description = $"{rbInfo.i64NumItems:N0} items, {FormatSize(rbInfo.i64Size)}"
+                        Description = $"{rbInfo.i64NumItems:N0} items, {FormatHelper.FormatSize(rbInfo.i64Size)}"
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to query Recycle Bin");
+            }
 
             return results;
         });
@@ -193,12 +203,21 @@ public class TempFileCleaner : ITempFileCleaner
                             result.BytesCleaned += size;
                             result.FilesDeleted++;
                         }
-                        catch (UnauthorizedAccessException) { result.ErrorCount++; }
-                        catch (IOException) { result.ErrorCount++; }
+                        catch (UnauthorizedAccessException ex)
+                        {
+                            result.ErrorCount++;
+                            _logger.LogTrace(ex, "Access denied to {File}", file);
+                        }
+                        catch (IOException ex)
+                        {
+                            result.ErrorCount++;
+                            _logger.LogTrace(ex, "IO error for {File}", file);
+                        }
                         catch (Exception ex)
                         {
                             result.ErrorCount++;
                             result.Errors.Add($"{file}: {ex.Message}");
+                            _logger.LogDebug(ex, "Failed to delete {File}", file);
                         }
                     }
 
@@ -212,7 +231,10 @@ public class TempFileCleaner : ITempFileCleaner
                                 Directory.Delete(dir, true);
                                 result.FoldersDeleted++;
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                _logger.LogTrace(ex, "Failed to delete directory {Dir}", dir);
+                            }
                         }
                     }
                 }
@@ -220,11 +242,14 @@ public class TempFileCleaner : ITempFileCleaner
                 {
                     result.Errors.Add($"{item.Path}: {ex.Message}");
                     result.ErrorCount++;
+                    _logger.LogWarning(ex, "Failed to clean {Category} at {Path}", item.Category, item.Path);
                 }
             }
 
             result.Duration = DateTime.Now - startTime;
             result.Success = result.ErrorCount < result.FilesDeleted; // Allow some errors
+            _logger.LogInformation("Cleaned {FilesDeleted} files ({BytesCleaned} bytes) with {ErrorCount} errors",
+                result.FilesDeleted, result.BytesCleaned, result.ErrorCount);
             return result;
         });
     }
@@ -272,10 +297,16 @@ public class TempFileCleaner : ITempFileCleaner
                     size += fileInfo.Length;
                     count++;
                 }
-                catch { }
+                catch
+                {
+                    // Expected for locked/inaccessible files during scan - silently skip
+                }
             }
         }
-        catch { }
+        catch
+        {
+            // Expected for inaccessible directories - silently skip
+        }
         return (size, count);
     }
 
@@ -294,16 +325,5 @@ public class TempFileCleaner : ITempFileCleaner
             CleanerCategory.LogFiles => CleanerRiskLevel.Low,
             _ => CleanerRiskLevel.Low
         };
-    }
-
-    private static string FormatSize(long bytes)
-    {
-        if (bytes >= 1_073_741_824)
-            return $"{bytes / 1_073_741_824.0:F2} GB";
-        if (bytes >= 1_048_576)
-            return $"{bytes / 1_048_576.0:F2} MB";
-        if (bytes >= 1024)
-            return $"{bytes / 1024.0:F2} KB";
-        return $"{bytes} B";
     }
 }

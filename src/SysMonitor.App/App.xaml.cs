@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
+using Serilog;
 using SysMonitor.App.ViewModels;
 using SysMonitor.App.Views;
 using SysMonitor.Core.Services;
@@ -41,9 +43,31 @@ public partial class App : Application
         }
 
         InitializeComponent();
+
+        // Configure Serilog
+        var logPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SysMonitor", "Logs", "sysmonitor-.log");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Debug()
+            .WriteTo.File(logPath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+
         _host = Host.CreateDefaultBuilder()
+            .UseSerilog()
             .ConfigureServices((context, services) =>
             {
+                // Add logging
+                services.AddLogging(builder =>
+                {
+                    builder.ClearProviders();
+                    builder.AddSerilog(dispose: true);
+                });
                 // Core Services - Monitors
                 services.AddSingleton<ICpuMonitor, CpuMonitor>();
                 services.AddSingleton<IMemoryMonitor, MemoryMonitor>();

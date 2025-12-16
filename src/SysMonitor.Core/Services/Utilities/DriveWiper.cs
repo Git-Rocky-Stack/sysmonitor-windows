@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 
 namespace SysMonitor.Core.Services.Utilities;
 
@@ -44,7 +45,13 @@ public class WipeResult
 
 public class DriveWiper : IDriveWiper
 {
+    private readonly ILogger<DriveWiper> _logger;
     private const int BufferSize = 1024 * 1024; // 1MB buffer
+
+    public DriveWiper(ILogger<DriveWiper> logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<WipeResult> SecureDeleteFileAsync(string filePath, WipeMethod method = WipeMethod.DoD3Pass,
         IProgress<double>? progress = null, CancellationToken cancellationToken = default)

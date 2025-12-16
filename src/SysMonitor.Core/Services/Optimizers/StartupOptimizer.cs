@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using SysMonitor.Core.Models;
 
@@ -5,6 +6,7 @@ namespace SysMonitor.Core.Services.Optimizers;
 
 public class StartupOptimizer : IStartupOptimizer
 {
+    private readonly ILogger<StartupOptimizer> _logger;
     private readonly (RegistryKey Root, string Path, string Name)[] _startupLocations =
     {
         (Registry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "HKCU Run"),
@@ -12,6 +14,11 @@ public class StartupOptimizer : IStartupOptimizer
         (Registry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", "HKCU RunOnce"),
         (Registry.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", "HKLM RunOnce")
     };
+
+    public StartupOptimizer(ILogger<StartupOptimizer> logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<List<StartupItem>> GetStartupItemsAsync()
     {
@@ -44,10 +51,16 @@ public class StartupOptimizer : IStartupOptimizer
                                 Impact = EstimateImpact(command)
                             });
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            _logger.LogTrace(ex, "Failed to read startup value {ValueName}", valueName);
+                        }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Failed to read startup location {Location}", locationName);
+                }
             }
 
             // Startup folder items
@@ -69,10 +82,14 @@ public class StartupOptimizer : IStartupOptimizer
                             Impact = StartupImpact.Medium
                         });
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.LogTrace(ex, "Failed to read startup folder item {File}", file);
+                    }
                 }
             }
 
+            _logger.LogDebug("Found {Count} startup items", items.Count);
             return items;
         });
     }
@@ -86,11 +103,16 @@ public class StartupOptimizer : IStartupOptimizer
                 if (item.Type == StartupItemType.Registry)
                 {
                     // Move from disabled to enabled registry key
+                    _logger.LogInformation("Enabled startup item {Name}", item.Name);
                     return true;
                 }
                 return false;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to enable startup item {Name}", item.Name);
+                return false;
+            }
         });
     }
 
@@ -111,6 +133,7 @@ public class StartupOptimizer : IStartupOptimizer
                         using var disabledKey = root.CreateSubKey(disabledPath);
                         disabledKey?.SetValue(item.Name, item.Command);
                         key.DeleteValue(item.Name, false);
+                        _logger.LogInformation("Disabled startup item {Name}", item.Name);
                         return true;
                     }
                 }
@@ -120,11 +143,16 @@ public class StartupOptimizer : IStartupOptimizer
                     Directory.CreateDirectory(disabledFolder);
                     var newPath = Path.Combine(disabledFolder, Path.GetFileName(item.FilePath));
                     File.Move(item.FilePath, newPath);
+                    _logger.LogInformation("Disabled startup folder item {Name}", item.Name);
                     return true;
                 }
                 return false;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to disable startup item {Name}", item.Name);
+                return false;
+            }
         });
     }
 
@@ -139,6 +167,7 @@ public class StartupOptimizer : IStartupOptimizer
                     var (root, path) = GetRegistryLocation(item.Location);
                     using var key = root.OpenSubKey(path, true);
                     key?.DeleteValue(item.Name, false);
+                    _logger.LogInformation("Deleted startup registry item {Name}", item.Name);
                     return true;
                 }
                 else if (item.Type == StartupItemType.StartupFolder)
@@ -146,12 +175,17 @@ public class StartupOptimizer : IStartupOptimizer
                     if (File.Exists(item.FilePath))
                     {
                         File.Delete(item.FilePath);
+                        _logger.LogInformation("Deleted startup folder item {Name}", item.Name);
                         return true;
                     }
                 }
                 return false;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to delete startup item {Name}", item.Name);
+                return false;
+            }
         });
     }
 

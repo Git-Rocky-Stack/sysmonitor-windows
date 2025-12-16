@@ -1,11 +1,13 @@
 using System.Diagnostics;
 using System.Management;
+using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Monitors;
 
 public class CpuMonitor : ICpuMonitor, IDisposable
 {
+    private readonly ILogger<CpuMonitor> _logger;
     private PerformanceCounter? _cpuCounter;
     private readonly List<PerformanceCounter> _coreCounters = new();
     private CpuInfo? _cachedStaticInfo;
@@ -13,8 +15,9 @@ public class CpuMonitor : ICpuMonitor, IDisposable
     private readonly TimeSpan _cacheDuration = TimeSpan.FromSeconds(30);
     private bool _isDisposed;
 
-    public CpuMonitor()
+    public CpuMonitor(ILogger<CpuMonitor> logger)
     {
+        _logger = logger;
         try
         {
             _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
@@ -28,7 +31,10 @@ public class CpuMonitor : ICpuMonitor, IDisposable
                 _coreCounters.Add(counter);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to initialize performance counters");
+        }
     }
 
     public async Task<CpuInfo> GetCpuInfoAsync()
@@ -60,7 +66,10 @@ public class CpuMonitor : ICpuMonitor, IDisposable
                     break;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to query WMI for CPU info");
+            }
 
             info.UsagePercent = GetCurrentUsage();
             info.CoreUsages = GetCurrentCoreUsages();
@@ -72,8 +81,15 @@ public class CpuMonitor : ICpuMonitor, IDisposable
 
     private double GetCurrentUsage()
     {
-        try { return _cpuCounter?.NextValue() ?? 0; }
-        catch { return 0; }
+        try
+        {
+            return _cpuCounter?.NextValue() ?? 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogTrace(ex, "Failed to read CPU usage counter");
+            return 0;
+        }
     }
 
     private List<double> GetCurrentCoreUsages()
@@ -81,8 +97,14 @@ public class CpuMonitor : ICpuMonitor, IDisposable
         var usages = new List<double>();
         foreach (var counter in _coreCounters)
         {
-            try { usages.Add(counter.NextValue()); }
-            catch { usages.Add(0); }
+            try
+            {
+                usages.Add(counter.NextValue());
+            }
+            catch
+            {
+                usages.Add(0);
+            }
         }
         return usages;
     }
@@ -105,7 +127,10 @@ public class CpuMonitor : ICpuMonitor, IDisposable
                     return (temp - 2732) / 10.0;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogTrace(ex, "Failed to read CPU temperature from WMI");
+            }
             return 0;
         });
     }
