@@ -68,8 +68,101 @@ public class RegistryCleaner : IRegistryCleaner
             // Scan for orphaned recent document entries
             ScanRecentDocs(issues);
 
-            return issues.OrderBy(i => i.Category).ThenBy(i => i.Key).ToList();
+            // Check protection status for all issues
+            foreach (var issue in issues)
+            {
+                CheckProtectionStatus(issue);
+            }
+
+            return issues.OrderBy(i => i.IsProtected).ThenBy(i => i.Category).ThenBy(i => i.Key).ToList();
         });
+    }
+
+    private void CheckProtectionStatus(RegistryIssue issue)
+    {
+        try
+        {
+            var keyPath = issue.Key;
+            RegistryKey? root = null;
+
+            if (keyPath.StartsWith("HKEY_CURRENT_USER\\") || keyPath.StartsWith("HKCU\\"))
+            {
+                root = Registry.CurrentUser;
+                keyPath = keyPath.Replace("HKEY_CURRENT_USER\\", "").Replace("HKCU\\", "");
+            }
+            else if (keyPath.StartsWith("HKEY_LOCAL_MACHINE\\") || keyPath.StartsWith("HKLM\\"))
+            {
+                root = Registry.LocalMachine;
+                keyPath = keyPath.Replace("HKEY_LOCAL_MACHINE\\", "").Replace("HKLM\\", "");
+            }
+            else if (keyPath.StartsWith("HKEY_CLASSES_ROOT\\") || keyPath.StartsWith("HKCR\\"))
+            {
+                root = Registry.ClassesRoot;
+                keyPath = keyPath.Replace("HKEY_CLASSES_ROOT\\", "").Replace("HKCR\\", "");
+            }
+
+            if (root == null)
+            {
+                issue.IsProtected = true;
+                issue.ProtectionReason = "Unknown registry root";
+                issue.IsSelected = false;
+                return;
+            }
+
+            // For subkey deletions, check the parent key
+            if (issue.Category == RegistryIssueCategory.OrphanedSoftware ||
+                issue.Category == RegistryIssueCategory.InvalidCOM ||
+                issue.Category == RegistryIssueCategory.InvalidTypeLib)
+            {
+                var lastBackslash = keyPath.LastIndexOf('\\');
+                if (lastBackslash <= 0)
+                {
+                    issue.IsProtected = true;
+                    issue.ProtectionReason = "Invalid key path";
+                    issue.IsSelected = false;
+                    return;
+                }
+
+                var parentPath = keyPath.Substring(0, lastBackslash);
+                using var parentKey = root.OpenSubKey(parentPath, writable: true);
+                if (parentKey == null)
+                {
+                    issue.IsProtected = true;
+                    issue.ProtectionReason = "Protected by Windows (TrustedInstaller)";
+                    issue.IsSelected = false;
+                }
+            }
+            else
+            {
+                // For value deletions, check the key itself
+                using var key = root.OpenSubKey(keyPath, writable: true);
+                if (key == null)
+                {
+                    issue.IsProtected = true;
+                    issue.ProtectionReason = "Protected by Windows (TrustedInstaller)";
+                    issue.IsSelected = false;
+                }
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            issue.IsProtected = true;
+            issue.ProtectionReason = "Access denied (requires elevation)";
+            issue.IsSelected = false;
+        }
+        catch (System.Security.SecurityException)
+        {
+            issue.IsProtected = true;
+            issue.ProtectionReason = "Protected by security policy";
+            issue.IsSelected = false;
+        }
+        catch
+        {
+            // If we can't determine, assume it might be protected
+            issue.IsProtected = true;
+            issue.ProtectionReason = "Unable to verify access";
+            issue.IsSelected = false;
+        }
     }
 
     private void ScanRegistryKey(RegistryKey root, string keyPath, string description,

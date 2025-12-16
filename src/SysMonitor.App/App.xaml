@@ -49,6 +49,8 @@
             <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter"/>
             <converters:BoolToSuccessGlyphConverter x:Key="BoolToSuccessGlyphConverter"/>
             <converters:BoolToSuccessColorConverter x:Key="BoolToSuccessColorConverter"/>
+            <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
+            <converters:BoolToLockGlyphConverter x:Key="BoolToLockGlyphConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

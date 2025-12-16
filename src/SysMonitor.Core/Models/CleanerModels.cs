@@ -91,6 +91,8 @@ public class RegistryIssue
     public CleanerRiskLevel RiskLevel { get; set; }
     public bool IsSelected { get; set; } = true;
     public bool IsFixed { get; set; }
+    public bool IsProtected { get; set; }
+    public string ProtectionReason { get; set; } = string.Empty;
 }
 
 public enum RegistryIssueCategory

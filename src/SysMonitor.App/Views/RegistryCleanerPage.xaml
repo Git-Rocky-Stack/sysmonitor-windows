@@ -144,7 +144,8 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource CardStyle}" Padding="12">
+                    <Border Style="{StaticResource CardStyle}" Padding="12"
+                            Opacity="{Binding IsProtected, Converter={StaticResource BoolToOpacityConverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -154,20 +155,34 @@
                             </Grid.ColumnDefinitions>
 
                             <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      IsEnabled="{Binding IsProtected, Converter={StaticResource InvertBoolConverter}}"
                                       VerticalAlignment="Center"/>
 
                             <Border Grid.Column="1" Style="{StaticResource IconContainerStyle}"
                                     Width="40" Height="40" Margin="8,0,12,0">
-                                <FontIcon Glyph="&#xEA99;" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <!-- Show lock icon if protected, registry icon otherwise -->
+                                <FontIcon FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"
+                                          Glyph="{Binding IsProtected, Converter={StaticResource BoolToLockGlyphConverter}}"/>
                             </Border>
 
                             <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding IssueType}" Style="{StaticResource CardTitleStyle}"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding IssueType}" Style="{StaticResource CardTitleStyle}"/>
+                                    <!-- Protected badge -->
+                                    <Border CornerRadius="4" Padding="6,2" Background="#442222"
+                                            Visibility="{Binding IsProtected, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock Text="PROTECTED" FontSize="9" FontWeight="Bold" Foreground="#FF6666"/>
+                                    </Border>
+                                </StackPanel>
                                 <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"
                                            TextTrimming="CharacterEllipsis" MaxWidth="400"/>
                                 <TextBlock Text="{Binding Key}" Style="{StaticResource CardSubtitleStyle}"
                                            Foreground="{StaticResource TextTertiaryBrush}" FontSize="10"
                                            TextTrimming="CharacterEllipsis" MaxWidth="400"/>
+                                <!-- Protection reason -->
+                                <TextBlock Text="{Binding ProtectionReason}" FontSize="10" Foreground="#FF9966"
+                                           Visibility="{Binding IsProtected, Converter={StaticResource BoolToVisibilityConverter}}"
+                                           Margin="0,2,0,0"/>
                             </StackPanel>
 
                             <!-- Risk Level Badge -->
