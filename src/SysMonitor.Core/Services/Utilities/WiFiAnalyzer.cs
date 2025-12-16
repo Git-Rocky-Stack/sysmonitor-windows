@@ -59,62 +59,96 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     catch { /* Scan trigger may fail, continue anyway */ }
                 }
 
-                // Get the network list
-                var startInfo = new ProcessStartInfo
+                // Try PowerShell approach first - more reliable encoding
+                var psNetworks = await GetNetworksFromPowerShellAsync(cancellationToken);
+                if (psNetworks.Count > 0)
                 {
-                    FileName = "netsh",
-                    Arguments = "wlan show networks mode=bssid",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = System.Text.Encoding.GetEncoding(850) // OEM code page
-                };
-
-                using var process = Process.Start(startInfo);
-                if (process != null)
-                {
-                    var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-                    await process.WaitForExitAsync(cancellationToken);
-
-                    var parsedNetworks = ParseNetshOutput(output);
-                    networks.AddRange(parsedNetworks);
+                    networks.AddRange(psNetworks);
                 }
-
-                // If no networks found, try alternative method using profile scan
-                if (networks.Count == 0)
+                else
                 {
-                    var profileStartInfo = new ProcessStartInfo
+                    // Fallback to direct netsh
+                    var startInfo = new ProcessStartInfo
                     {
                         FileName = "netsh",
-                        Arguments = "wlan show all",
+                        Arguments = "wlan show networks mode=bssid",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         CreateNoWindow = true,
-                        StandardOutputEncoding = System.Text.Encoding.GetEncoding(850)
+                        StandardOutputEncoding = System.Text.Encoding.UTF8
                     };
 
-                    using var profileProcess = Process.Start(profileStartInfo);
-                    if (profileProcess != null)
+                    using var process = Process.Start(startInfo);
+                    if (process != null)
                     {
-                        var profileOutput = await profileProcess.StandardOutput.ReadToEndAsync(cancellationToken);
-                        await profileProcess.WaitForExitAsync(cancellationToken);
+                        var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
+                        await process.WaitForExitAsync(cancellationToken);
 
-                        var parsedNetworks = ParseNetshOutput(profileOutput);
+                        var parsedNetworks = ParseNetshOutput(output);
                         networks.AddRange(parsedNetworks);
+                    }
+
+                    // If still no networks, try with OEM encoding
+                    if (networks.Count == 0)
+                    {
+                        var oemStartInfo = new ProcessStartInfo
+                        {
+                            FileName = "netsh",
+                            Arguments = "wlan show networks mode=bssid",
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            CreateNoWindow = true,
+                            StandardOutputEncoding = System.Text.Encoding.GetEncoding(850)
+                        };
+
+                        using var oemProcess = Process.Start(oemStartInfo);
+                        if (oemProcess != null)
+                        {
+                            var oemOutput = await oemProcess.StandardOutput.ReadToEndAsync(cancellationToken);
+                            await oemProcess.WaitForExitAsync(cancellationToken);
+
+                            var parsedNetworks = ParseNetshOutput(oemOutput);
+                            networks.AddRange(parsedNetworks);
+                        }
                     }
                 }
             }
             catch (OperationCanceledException) { throw; }
             catch { }
 
-            // Always try to add connected network if not already in list
+            // Always try to add connected network with accurate channel/band info
             try
             {
-                var connected = GetConnectedNetworkAsFallback();
-                if (connected != null)
+                var connectionInfo = GetConnectionInfoFromPowerShell();
+                if (connectionInfo != null && connectionInfo.IsConnected)
                 {
+                    var (quality, color) = GetSignalQuality(connectionInfo.SignalStrength);
+                    var band = connectionInfo.Band;
+                    if (string.IsNullOrEmpty(band) || band == "Unknown")
+                    {
+                        band = GetBandFromChannel(connectionInfo.Channel);
+                    }
+
+                    var connected = new WiFiNetworkInfo
+                    {
+                        Ssid = connectionInfo.Ssid,
+                        Bssid = connectionInfo.Bssid,
+                        SignalStrength = connectionInfo.SignalStrength,
+                        SignalBars = GetSignalBars(connectionInfo.SignalStrength),
+                        SignalQuality = quality,
+                        SignalColor = color,
+                        Channel = connectionInfo.Channel,
+                        Band = band,
+                        Security = connectionInfo.Security,
+                        IsSecured = !string.IsNullOrEmpty(connectionInfo.Security) &&
+                                   !connectionInfo.Security.Equals("Open", StringComparison.OrdinalIgnoreCase),
+                        IsConnected = true,
+                        FrequencyMHz = GetFrequencyFromChannel(connectionInfo.Channel),
+                        NetworkType = connectionInfo.RadioType
+                    };
+
                     // Check if this network is already in the list
                     var existingNetwork = networks.FirstOrDefault(n =>
                         n.Ssid.Equals(connected.Ssid, StringComparison.OrdinalIgnoreCase) ||
@@ -122,13 +156,34 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
                     if (existingNetwork == null)
                     {
-                        networks.Insert(0, connected); // Add at top
+                        networks.Insert(0, connected);
                     }
                     else
                     {
-                        // Update the existing entry to mark it as connected
+                        // Update the existing entry with accurate connection info
                         var index = networks.IndexOf(existingNetwork);
-                        networks[index] = connected with { IsConnected = true };
+                        networks[index] = connected;
+                    }
+                }
+                else
+                {
+                    // Fallback to old method
+                    var connectedFallback = GetConnectedNetworkAsFallback();
+                    if (connectedFallback != null)
+                    {
+                        var existingNetwork = networks.FirstOrDefault(n =>
+                            n.Ssid.Equals(connectedFallback.Ssid, StringComparison.OrdinalIgnoreCase) ||
+                            (!string.IsNullOrEmpty(n.Bssid) && n.Bssid.Equals(connectedFallback.Bssid, StringComparison.OrdinalIgnoreCase)));
+
+                        if (existingNetwork == null)
+                        {
+                            networks.Insert(0, connectedFallback);
+                        }
+                        else
+                        {
+                            var index = networks.IndexOf(existingNetwork);
+                            networks[index] = connectedFallback with { IsConnected = true };
+                        }
                     }
                 }
             }
@@ -140,6 +195,46 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             .OrderByDescending(n => n.IsConnected)
             .ThenByDescending(n => n.SignalStrength)
             .ToList();
+    }
+
+    private static async Task<List<WiFiNetworkInfo>> GetNetworksFromPowerShellAsync(CancellationToken cancellationToken)
+    {
+        var networks = new List<WiFiNetworkInfo>();
+
+        try
+        {
+            // Use PowerShell to run netsh with proper UTF-8 encoding
+            var psScript = @"
+                $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                netsh wlan show networks mode=bssid
+            ";
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-NoProfile -NonInteractive -Command \"{psScript}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process != null)
+            {
+                var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
+                await process.WaitForExitAsync(cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(output))
+                {
+                    networks = ParseNetshOutput(output);
+                }
+            }
+        }
+        catch { }
+
+        return networks;
     }
 
     private async Task<List<WiFiNetworkInfo>> GetNetworksFromWmiAsync(CancellationToken cancellationToken)
@@ -369,7 +464,14 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         {
             try
             {
-                // First try netsh
+                // Try PowerShell first - more reliable parsing
+                var psInfo = GetConnectionInfoFromPowerShell();
+                if (psInfo != null && psInfo.Channel > 0)
+                {
+                    return psInfo;
+                }
+
+                // Fallback to netsh with default encoding
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "netsh",
@@ -377,8 +479,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = System.Text.Encoding.GetEncoding(850) // OEM code page
+                    CreateNoWindow = true
                 };
 
                 using var process = Process.Start(startInfo);
@@ -390,6 +491,16 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     var connectionInfo = ParseConnectionInfo(output);
                     if (connectionInfo != null)
                     {
+                        // If we got PS info but no channel, merge the data
+                        if (psInfo != null && connectionInfo.Channel == 0)
+                        {
+                            return connectionInfo with
+                            {
+                                Channel = psInfo.Channel,
+                                Band = psInfo.Band,
+                                RadioType = psInfo.RadioType
+                            };
+                        }
                         return connectionInfo;
                     }
                 }
@@ -435,6 +546,185 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
             return null;
         });
+    }
+
+    private static WiFiConnectionInfo? GetConnectionInfoFromPowerShell()
+    {
+        try
+        {
+            // Use PowerShell to run netsh and capture output with proper encoding
+            var psScript = @"
+                $OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $result = netsh wlan show interfaces
+                $result
+            ";
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-NoProfile -NonInteractive -Command \"{psScript}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process == null) return null;
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit(5000);
+
+            if (string.IsNullOrWhiteSpace(output))
+                return null;
+
+            string ssid = "";
+            string bssid = "";
+            int signal = 0;
+            string security = "";
+            int channel = 0;
+            int speed = 0;
+            string state = "";
+            string band = "";
+            string radioType = "";
+
+            var lines = output.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine.Trim();
+                if (string.IsNullOrEmpty(line)) continue;
+
+                // Find the colon separator
+                var colonIndex = line.IndexOf(':');
+                if (colonIndex <= 0) continue;
+
+                var key = line.Substring(0, colonIndex).Trim().ToLowerInvariant();
+                var value = line.Substring(colonIndex + 1).Trim();
+
+                if (string.IsNullOrEmpty(value)) continue;
+
+                // State
+                if (key == "state" || key.Contains("state"))
+                {
+                    state = value;
+                    continue;
+                }
+
+                // SSID (not BSSID)
+                if (key == "ssid" && !line.ToLowerInvariant().Contains("bssid"))
+                {
+                    ssid = value;
+                    continue;
+                }
+
+                // BSSID
+                if (key == "bssid")
+                {
+                    bssid = value;
+                    continue;
+                }
+
+                // Signal
+                if (key == "signal")
+                {
+                    var signalMatch = Regex.Match(value, @"(\d+)");
+                    if (signalMatch.Success && int.TryParse(signalMatch.Groups[1].Value, out var sig))
+                    {
+                        signal = sig;
+                    }
+                    continue;
+                }
+
+                // Channel
+                if (key == "channel")
+                {
+                    if (int.TryParse(value, out var ch))
+                    {
+                        channel = ch;
+                    }
+                    continue;
+                }
+
+                // Radio type
+                if (key == "radio type")
+                {
+                    radioType = value;
+                    continue;
+                }
+
+                // Band (newer Windows versions)
+                if (key == "band")
+                {
+                    band = value;
+                    continue;
+                }
+
+                // Authentication
+                if (key == "authentication")
+                {
+                    security = value;
+                    continue;
+                }
+
+                // Receive/Transmit rate
+                if (key.Contains("rate"))
+                {
+                    var speedMatch = Regex.Match(value, @"(\d+(?:[.,]\d+)?)\s*(Mbps|Gbps)?", RegexOptions.IgnoreCase);
+                    if (speedMatch.Success)
+                    {
+                        var rateStr = speedMatch.Groups[1].Value.Replace(',', '.');
+                        if (double.TryParse(rateStr, System.Globalization.NumberStyles.Any,
+                            System.Globalization.CultureInfo.InvariantCulture, out var rate))
+                        {
+                            var rateInt = (int)rate;
+                            if (speedMatch.Groups.Count > 2 &&
+                                speedMatch.Groups[2].Value.Equals("Gbps", StringComparison.OrdinalIgnoreCase))
+                                rateInt = (int)(rate * 1000);
+                            speed = Math.Max(speed, rateInt);
+                        }
+                    }
+                    continue;
+                }
+            }
+
+            // Check if connected
+            if (string.IsNullOrEmpty(ssid))
+                return null;
+
+            // Check state
+            if (!string.IsNullOrEmpty(state) && state.ToLowerInvariant().Contains("disconnect"))
+                return null;
+
+            // Determine band
+            var determinedBand = band;
+            if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
+            {
+                determinedBand = GetBandFromChannel(channel);
+            }
+            if (string.IsNullOrEmpty(determinedBand) || determinedBand == "Unknown")
+            {
+                determinedBand = GetBandFromRadioType(radioType);
+            }
+
+            return new WiFiConnectionInfo
+            {
+                Ssid = ssid,
+                Bssid = bssid,
+                SignalStrength = signal > 0 ? signal : 75,
+                Channel = channel,
+                Security = !string.IsNullOrEmpty(security) ? security : "WPA2",
+                LinkSpeed = speed,
+                IpAddress = GetCurrentIpAddress(),
+                IsConnected = true,
+                Band = determinedBand,
+                RadioType = radioType
+            };
+        }
+        catch { }
+
+        return null;
     }
 
     private static string? GetConnectedSsidFromProfile()
