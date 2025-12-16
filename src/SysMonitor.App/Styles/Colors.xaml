@@ -72,6 +72,7 @@
     <SolidColorBrush x:Key="WarningBrush" Color="#FF9800"/>
     <SolidColorBrush x:Key="ErrorBrush" Color="#F44336"/>
     <SolidColorBrush x:Key="InfoBrush" Color="#2196F3"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="#F44336"/>
 
     <!-- Chart/Data Accent Brushes (matching Android app) -->
     <SolidColorBrush x:Key="CyanAccentBrush" Color="#00BCD4"/>
