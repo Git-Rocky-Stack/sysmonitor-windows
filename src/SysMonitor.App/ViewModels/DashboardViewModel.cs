@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services;
+using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Monitoring;
@@ -21,6 +22,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly INetworkMonitor _networkMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
     private readonly IPerformanceMonitor _performanceMonitor;
+    private readonly IAlertService _alertService;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
@@ -72,7 +74,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         IMemoryOptimizer memoryOptimizer,
         INetworkMonitor networkMonitor,
         ITemperatureMonitor temperatureMonitor,
-        IPerformanceMonitor performanceMonitor)
+        IPerformanceMonitor performanceMonitor,
+        IAlertService alertService)
     {
         _systemInfoService = systemInfoService;
         _tempFileCleaner = tempFileCleaner;
@@ -80,6 +83,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         _networkMonitor = networkMonitor;
         _temperatureMonitor = temperatureMonitor;
         _performanceMonitor = performanceMonitor;
+        _alertService = alertService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
@@ -107,6 +111,16 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
                 await RefreshDataAsync();
+
+                // Check thresholds and trigger alerts if needed
+                try
+                {
+                    await _alertService.CheckThresholdsAsync();
+                }
+                catch
+                {
+                    // Alerts are non-critical, continue even if they fail
+                }
             }
         }
         catch (OperationCanceledException)

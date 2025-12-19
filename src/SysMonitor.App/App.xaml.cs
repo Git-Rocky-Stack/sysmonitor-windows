@@ -12,6 +12,9 @@ using SysMonitor.Core.Services.Optimizers;
 using SysMonitor.Core.Services.Utilities;
 using SysMonitor.Core.Services.Backup;
 using SysMonitor.Core.Services.Monitoring;
+using SysMonitor.Core.Services.History;
+using SysMonitor.Core.Services.Alerts;
+using SysMonitor.App.Services;
 
 namespace SysMonitor.App;
 
@@ -201,6 +204,17 @@ public partial class App : Application
                 services.AddSingleton<PerformanceMonitor>();
                 services.AddSingleton<IPerformanceMonitor>(sp => sp.GetRequiredService<PerformanceMonitor>());
 
+                // History Service (SQLite-based metric storage)
+                services.AddSingleton<HistoryService>();
+                services.AddSingleton<IHistoryService>(sp => sp.GetRequiredService<HistoryService>());
+
+                // Alert Service (threshold monitoring and notifications)
+                services.AddSingleton<AlertService>();
+                services.AddSingleton<IAlertService>(sp => sp.GetRequiredService<AlertService>());
+
+                // Tray Icon Service (system tray integration)
+                services.AddSingleton<TrayIconService>();
+
                 // ViewModels (Transient - created on demand per page navigation)
                 services.AddTransient<DashboardViewModel>();
                 services.AddTransient<ProcessesViewModel>();
@@ -235,6 +249,7 @@ public partial class App : Application
                 services.AddTransient<DonationViewModel>();
                 services.AddTransient<UserGuideViewModel>();
                 services.AddTransient<PerformanceViewModel>();
+                services.AddTransient<HistoryViewModel>();
 
                 // Views (Transient - created on demand per navigation)
                 services.AddTransient<DashboardPage>();
@@ -270,6 +285,7 @@ public partial class App : Application
                 services.AddTransient<DonationPage>();
                 services.AddTransient<UserGuidePage>();
                 services.AddTransient<PerformancePage>();
+                services.AddTransient<HistoryPage>();
             })
             .Build();
     }
