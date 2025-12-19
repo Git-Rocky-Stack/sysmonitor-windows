@@ -63,6 +63,11 @@ public partial class App : Application
 
         InitializeComponent();
 
+        // Set up global exception handlers
+        AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+        UnhandledException += OnAppUnhandledException;
+
         // Configure Serilog
         var logPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -284,5 +289,36 @@ public partial class App : Application
             throw new InvalidOperationException($"Service {typeof(T).Name} not found.");
         }
         return service;
+    }
+
+    private static void OnUnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+    {
+        var exception = e.ExceptionObject as Exception;
+        Log.Fatal(exception, "AppDomain UnhandledException - IsTerminating: {IsTerminating}", e.IsTerminating);
+        Log.CloseAndFlush();
+    }
+
+    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        Log.Error(e.Exception, "UnobservedTaskException");
+        e.SetObserved(); // Prevent crash
+    }
+
+    private void OnAppUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        Log.Fatal(e.Exception, "App UnhandledException: {Message}", e.Message);
+        Log.CloseAndFlush();
+
+        // Write to a crash file for immediate visibility
+        try
+        {
+            var crashPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                $"SysMonitor_Crash_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+            File.WriteAllText(crashPath, $"Crash at {DateTime.Now}\n\nMessage: {e.Message}\n\nException:\n{e.Exception}");
+        }
+        catch { }
+
+        e.Handled = false; // Let it crash but we've logged it
     }
 }

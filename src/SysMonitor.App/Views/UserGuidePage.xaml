@@ -160,6 +160,11 @@
                                 <Run FontWeight="SemiBold">Temperature</Run>
                                 <Run> - CPU/GPU thermal monitoring</Run>
                             </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="&#xE9D9; " FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource PrimaryBrush}"/>
+                                <Run FontWeight="SemiBold">Performance</Run>
+                                <Run> - App operation metrics and timing</Run>
+                            </TextBlock>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -273,6 +278,94 @@
                 </StackPanel>
             </Border>
 
+            <!-- Performance Monitoring -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource WarningBrush}" Width="40" Height="40">
+                            <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="White"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Performance Monitoring" FontSize="16" FontWeight="Bold"
+                                       Foreground="{StaticResource WarningBrush}"/>
+                            <TextBlock Text="Track application operation metrics" FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="22">
+                        The Performance page provides real-time insights into how STX.1 System Monitor operates internally.
+                        Monitor operation timing, identify bottlenecks, and export metrics for analysis.
+                    </TextBlock>
+
+                    <Grid ColumnSpacing="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">System Overview</Run>
+                                <Run> - Memory usage, GC pressure, frame rate</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Operation Metrics</Run>
+                                <Run> - Count, average, min, max timing</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Percentiles</Run>
+                                <Run> - P95 and P99 latency tracking</Run>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Status Indicators</Run>
+                                <Run> - Excellent/Good/Fair/Poor/Critical</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Pause/Resume</Run>
+                                <Run> - Control monitoring on demand</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Export CSV</Run>
+                                <Run> - Save metrics for external analysis</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Performance Thresholds -->
+                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Performance Thresholds" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Background="#4CAF50" Width="12" Height="12" CornerRadius="3"/>
+                                    <TextBlock Text="Excellent (&lt;16ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Background="#8BC34A" Width="12" Height="12" CornerRadius="3"/>
+                                    <TextBlock Text="Good (&lt;50ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Background="#FF9800" Width="12" Height="12" CornerRadius="3"/>
+                                    <TextBlock Text="Fair (&lt;100ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Background="#FF5722" Width="12" Height="12" CornerRadius="3"/>
+                                    <TextBlock Text="Poor (&lt;200ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Background="#F44336" Width="12" Height="12" CornerRadius="3"/>
+                                    <TextBlock Text="Critical (&gt;200ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- ==================== TIPS & BEST PRACTICES ==================== -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
                 <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
@@ -372,81 +465,90 @@
                 </StackPanel>
             </Border>
 
-            <!-- Changelog Card -->
+            <!-- Changelog Card - v2.0.1 -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{StaticResource CyanAccentBrush}"/>
-                        <TextBlock Text="Release Notes - v1.0.0" FontSize="16" FontWeight="Bold"
+                        <TextBlock Text="Release Notes - v2.0.1" FontSize="16" FontWeight="Bold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <Border Background="{StaticResource SuccessBrush}" CornerRadius="4" Padding="8,2">
-                            <TextBlock Text="INITIAL RELEASE" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                        <Border Background="{StaticResource WarningBrush}" CornerRadius="4" Padding="8,2">
+                            <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
                         </Border>
                     </StackPanel>
 
-                    <!-- New Features -->
+                    <!-- New in v2.0.1 -->
                     <StackPanel Spacing="8">
-                        <TextBlock Text="New Features" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                        <TextBlock Text="New in v2.0.1" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Performance Monitor page - track app operation metrics in real-time</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> System overview cards: Memory usage, GC pressure, frame rate, tracked ops</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Operation metrics table: count, avg, min, max, P95, P99 timing</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Performance status indicators (Excellent/Good/Fair/Poor/Critical)</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Pause/Resume monitoring and Clear metrics controls</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Export metrics to CSV for external analysis</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Performance tracking integrated across all major operations</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Window icon added to title bar</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Global crash logging with detailed exception reporting</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{StaticResource SurfaceBrush}"/>
+
+                    <!-- v1.0.0 Features -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Features from v1.0.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
                                 <Run> Complete system monitoring dashboard with real-time stats</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> CPU, GPU, Memory, Disk, Network, and Battery monitoring</Run>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> CPU, GPU, Memory, Disk, Network, Battery, and Temperature monitoring</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Temperature monitoring with configurable alerts</Run>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> Directory and Registry cleaning tools with Browser privacy cleaner</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Directory and Registry cleaning tools</Run>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> Startup manager, Large file finder, Duplicate file detector</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Browser privacy cleaner (Chrome, Firefox, Edge)</Run>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> PDF and Image tools, WiFi analyzer, Bluetooth scanner, Network mapper</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Startup program manager</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Large file finder and duplicate file detector</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> PDF and Image tools (merge, split, convert, compress)</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> WiFi analyzer and Bluetooth device scanner</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Network mapper for LAN device discovery</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Secure drive wiper with multiple overwrite passes</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> System health check with scoring</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Backup manager with restore points</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Scheduled automated cleaning</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Driver update checker</Run>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> Secure drive wiper, Health check, Backup manager, Scheduled cleaning</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>

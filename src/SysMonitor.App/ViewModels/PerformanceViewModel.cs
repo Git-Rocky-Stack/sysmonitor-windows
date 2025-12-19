@@ -33,6 +33,12 @@ public partial class PerformanceViewModel : ObservableObject, IDisposable
         _isInitialized = true;
 
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        if (_dispatcherQueue == null)
+        {
+            System.Diagnostics.Debug.WriteLine("PerformanceViewModel: DispatcherQueue is null!");
+            return;
+        }
+
         await RefreshMetricsAsync();
         StartMonitoring();
     }

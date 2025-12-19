@@ -9,34 +9,110 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner -->
+            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
             <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="PERFORMANCE MONITOR" Style="{StaticResource PageHeaderStyle}"
+                        <TextBlock Text="PERFORMANCE" Style="{StaticResource PageHeaderStyle}"
                                    Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Real-time application performance metrics" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
 
-                    <!-- Right: Controls -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                        <Button Content="{x:Bind ViewModel.IsMonitoring, Mode=OneWay, Converter={StaticResource BoolToMonitoringTextConverter}}"
-                                Command="{x:Bind ViewModel.ToggleMonitoringCommand}"
-                                Style="{StaticResource AccentButtonStyle}"/>
-                        <Button Content="Clear" Command="{x:Bind ViewModel.ClearMetricsCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}"/>
-                        <Button Content="Export CSV" Command="{x:Bind ViewModel.ExportMetricsCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}"/>
-                    </StackPanel>
+                    <!-- Center: STX.1 Home Logo -->
+                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
+                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Stretch="Uniform"/>
                 </Grid>
             </Border>
+
+            <!-- Monitoring Controls Section -->
+            <StackPanel Spacing="12">
+                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
+                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
+                    <TextBlock Text="MONITORING CONTROLS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                </StackPanel>
+
+                <!-- Controls Card -->
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
+                            <FontIcon Glyph="&#xE9D9;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource CardTitleStyle}">
+                                <Run Text="Status: "/>
+                                <Run Text="{x:Bind ViewModel.IsMonitoring, Mode=OneWay, Converter={StaticResource BoolToMonitoringTextConverter}}"
+                                     Foreground="{StaticResource SuccessBrush}"/>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
+                                <Run Text="Tracked Operations: "/>
+                                <Run Text="{x:Bind ViewModel.Metrics.Count, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                            <!-- Pause/Resume with chrome bezel -->
+                            <Border CornerRadius="26" Padding="2">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#707070" Offset="0.0"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                        <GradientStop Color="#505050" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Button Content="{x:Bind ViewModel.IsMonitoring, Mode=OneWay, Converter={StaticResource BoolToMonitoringTextConverter}}"
+                                        Command="{x:Bind ViewModel.ToggleMonitoringCommand}"
+                                        Style="{StaticResource RedButtonStyle}"/>
+                            </Border>
+                            <!-- Clear with chrome bezel -->
+                            <Border CornerRadius="26" Padding="2">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#707070" Offset="0.0"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                        <GradientStop Color="#505050" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Button Content="Clear" Command="{x:Bind ViewModel.ClearMetricsCommand}"
+                                        Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
+                            </Border>
+                            <!-- Export CSV with chrome bezel -->
+                            <Border CornerRadius="26" Padding="2">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#707070" Offset="0.0"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                        <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                        <GradientStop Color="#505050" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Button Content="Export CSV" Command="{x:Bind ViewModel.ExportMetricsCommand}"
+                                        Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
 
             <!-- System Overview Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
