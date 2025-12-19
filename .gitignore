@@ -6,6 +6,7 @@
 x64/
 x86/
 ARM64/
+publish/
 
 # Visual Studio
 .vs/
@@ -42,3 +43,6 @@ Desktop.ini
 .DS_Store
 /Android App (Reference)
 aab-extracted/
+
+# Misc
+nul
