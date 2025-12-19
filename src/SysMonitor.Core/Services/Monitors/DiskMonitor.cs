@@ -1,10 +1,28 @@
+using System.Collections.Concurrent;
 using System.Management;
 using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Monitors;
 
+/// <summary>
+/// Optimized disk monitor with WMI query caching.
+///
+/// PERFORMANCE OPTIMIZATIONS:
+/// 1. Caches SSD detection results (disk type doesn't change at runtime)
+/// 2. Uses concurrent dictionary for thread-safe cache access
+/// 3. Separates static disk info from dynamic space info
+/// 4. Lazy WMI query execution only when needed
+/// </summary>
 public class DiskMonitor : IDiskMonitor
 {
+    // Cache for SSD detection results (drive type never changes at runtime)
+    private static readonly ConcurrentDictionary<string, bool> SsdCache = new(StringComparer.OrdinalIgnoreCase);
+
+    // Cache for all physical disk media types (queried once)
+    private static readonly Lazy<Dictionary<string, bool>> PhysicalDiskCache = new(
+        () => LoadPhysicalDiskInfo(),
+        LazyThreadSafetyMode.ExecutionAndPublication);
+
     public async Task<List<DiskInfo>> GetAllDisksAsync()
     {
         return await Task.Run(() =>
@@ -25,7 +43,7 @@ public class DiskMonitor : IDiskMonitor
                         FreeBytes = drive.AvailableFreeSpace,
                         UsedBytes = drive.TotalSize - drive.AvailableFreeSpace,
                         UsagePercent = (1 - (double)drive.AvailableFreeSpace / drive.TotalSize) * 100,
-                        IsSSD = IsSSD(drive.Name)
+                        IsSSD = IsSSDCached(drive.Name)
                     });
                 }
                 catch { }
@@ -45,21 +63,82 @@ public class DiskMonitor : IDiskMonitor
         return await Task.FromResult((0.0, 0.0));
     }
 
-    private static bool IsSSD(string driveLetter)
+    /// <summary>
+    /// OPTIMIZATION: Cached SSD detection using pre-loaded physical disk info.
+    /// WMI query runs only once per application lifetime.
+    /// </summary>
+    private static bool IsSSDCached(string driveLetter)
     {
+        var normalizedLetter = driveLetter.TrimEnd(':', '\\').ToUpperInvariant();
+
+        // Check instance cache first
+        if (SsdCache.TryGetValue(normalizedLetter, out var cachedResult))
+        {
+            return cachedResult;
+        }
+
+        // Check physical disk cache
+        var physicalDisks = PhysicalDiskCache.Value;
+        if (physicalDisks.TryGetValue(normalizedLetter, out var isSsd))
+        {
+            SsdCache[normalizedLetter] = isSsd;
+            return isSsd;
+        }
+
+        // Fallback: assume not SSD if we can't determine
+        SsdCache[normalizedLetter] = false;
+        return false;
+    }
+
+    /// <summary>
+    /// OPTIMIZATION: Loads all physical disk info in a single WMI query.
+    /// This is more efficient than querying for each drive separately.
+    /// </summary>
+    private static Dictionary<string, bool> LoadPhysicalDiskInfo()
+    {
+        var result = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
         try
         {
-            string letter = driveLetter.TrimEnd(':', '\\');
-            using var searcher = new ManagementObjectSearcher(
-                $"SELECT MediaType FROM MSFT_PhysicalDisk WHERE DeviceId IN (SELECT DiskNumber FROM MSFT_Partition WHERE DriveLetter='{letter}')");
-            searcher.Scope.Path = new ManagementPath(@"\\.\root\Microsoft\Windows\Storage");
-            foreach (ManagementObject obj in searcher.Get())
+            // Query all physical disks and their partitions in one go
+            using var diskSearcher = new ManagementObjectSearcher(
+                @"\\.\root\Microsoft\Windows\Storage",
+                "SELECT DeviceId, MediaType FROM MSFT_PhysicalDisk");
+
+            var diskMediaTypes = new Dictionary<string, int>();
+            foreach (ManagementObject disk in diskSearcher.Get())
             {
-                int mediaType = Convert.ToInt32(obj["MediaType"]);
-                return mediaType == 4;
+                var deviceId = disk["DeviceId"]?.ToString();
+                var mediaType = Convert.ToInt32(disk["MediaType"] ?? 0);
+                if (deviceId != null)
+                {
+                    diskMediaTypes[deviceId] = mediaType;
+                }
+            }
+
+            // Query partitions to map drive letters to physical disks
+            using var partitionSearcher = new ManagementObjectSearcher(
+                @"\\.\root\Microsoft\Windows\Storage",
+                "SELECT DiskNumber, DriveLetter FROM MSFT_Partition WHERE DriveLetter IS NOT NULL");
+
+            foreach (ManagementObject partition in partitionSearcher.Get())
+            {
+                var driveLetter = partition["DriveLetter"]?.ToString();
+                var diskNumber = partition["DiskNumber"]?.ToString();
+
+                if (!string.IsNullOrEmpty(driveLetter) && !string.IsNullOrEmpty(diskNumber))
+                {
+                    // MediaType 4 = SSD, 3 = HDD
+                    var isSsd = diskMediaTypes.TryGetValue(diskNumber, out var mediaType) && mediaType == 4;
+                    result[driveLetter] = isSsd;
+                }
             }
         }
-        catch { }
-        return false;
+        catch
+        {
+            // WMI query failed - return empty dictionary
+        }
+
+        return result;
     }
 }

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Cleaners;
+using SysMonitor.Core.Services.Monitoring;
 using System.Collections.ObjectModel;
 
 namespace SysMonitor.App.ViewModels;
@@ -10,6 +11,7 @@ public partial class CleanerViewModel : ObservableObject
 {
     private readonly ITempFileCleaner _tempFileCleaner;
     private readonly IBrowserCacheCleaner _browserCacheCleaner;
+    private readonly IPerformanceMonitor _performanceMonitor;
 
     [ObservableProperty] private ObservableCollection<CleanerScanResult> _scanResults = new();
     [ObservableProperty] private bool _isScanning = false;
@@ -22,10 +24,11 @@ public partial class CleanerViewModel : ObservableObject
     [ObservableProperty] private double _cleanedMB = 0;
     [ObservableProperty] private string _formattedTotalSize = "0 MB";
 
-    public CleanerViewModel(ITempFileCleaner tempFileCleaner, IBrowserCacheCleaner browserCacheCleaner)
+    public CleanerViewModel(ITempFileCleaner tempFileCleaner, IBrowserCacheCleaner browserCacheCleaner, IPerformanceMonitor performanceMonitor)
     {
         _tempFileCleaner = tempFileCleaner;
         _browserCacheCleaner = browserCacheCleaner;
+        _performanceMonitor = performanceMonitor;
     }
 
     [RelayCommand]
@@ -34,6 +37,8 @@ public partial class CleanerViewModel : ObservableObject
         IsScanning = true;
         StatusMessage = "Scanning...";
         ScanResults.Clear();
+
+        using var _ = _performanceMonitor.TrackOperation("Cleaner.Scan");
 
         try
         {
@@ -63,6 +68,8 @@ public partial class CleanerViewModel : ObservableObject
         if (!HasResults) return;
         IsCleaning = true;
         StatusMessage = "Cleaning...";
+
+        using var _ = _performanceMonitor.TrackOperation("Cleaner.Clean");
 
         try
         {

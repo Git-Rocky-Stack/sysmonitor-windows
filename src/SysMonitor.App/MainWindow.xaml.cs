@@ -41,6 +41,7 @@ public sealed partial class MainWindow : Window
         { "WiFi", typeof(WiFiPage) },
         { "NetworkMapper", typeof(NetworkMapperPage) },
         // Footer
+        { "Performance", typeof(PerformancePage) },
         { "Settings", typeof(SettingsPage) },
         { "Donate", typeof(DonationPage) },
         { "UserGuide", typeof(UserGuidePage) }

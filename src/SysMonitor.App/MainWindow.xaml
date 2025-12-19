@@ -220,6 +220,11 @@
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="Performance" Tag="Performance">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9D9;" Foreground="{StaticResource WarningBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Settings" Tag="Settings">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE713;" Foreground="{StaticResource TextSecondaryBrush}"/>

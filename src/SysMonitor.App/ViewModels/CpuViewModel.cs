@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Monitors;
+using SysMonitor.Core.Services.Monitoring;
 using System.Collections.ObjectModel;
 
 namespace SysMonitor.App.ViewModels;
@@ -8,6 +9,7 @@ namespace SysMonitor.App.ViewModels;
 public partial class CpuViewModel : ObservableObject, IDisposable
 {
     private readonly ICpuMonitor _cpuMonitor;
+    private readonly IPerformanceMonitor _performanceMonitor;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
@@ -46,9 +48,10 @@ public partial class CpuViewModel : ObservableObject, IDisposable
     // State
     [ObservableProperty] private bool _isLoading = true;
 
-    public CpuViewModel(ICpuMonitor cpuMonitor)
+    public CpuViewModel(ICpuMonitor cpuMonitor, IPerformanceMonitor performanceMonitor)
     {
         _cpuMonitor = cpuMonitor;
+        _performanceMonitor = performanceMonitor;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
@@ -86,6 +89,8 @@ public partial class CpuViewModel : ObservableObject, IDisposable
     private async Task RefreshDataAsync()
     {
         if (_isDisposed) return;
+
+        using var _ = _performanceMonitor.TrackOperation("Cpu.Refresh");
 
         try
         {

@@ -5,6 +5,7 @@ using SysMonitor.Core.Models;
 using SysMonitor.Core.Services;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Monitors;
+using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.Optimizers;
 using System.Text;
 using Windows.Storage;
@@ -19,6 +20,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly IMemoryOptimizer _memoryOptimizer;
     private readonly INetworkMonitor _networkMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
+    private readonly IPerformanceMonitor _performanceMonitor;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
@@ -69,13 +71,15 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         ITempFileCleaner tempFileCleaner,
         IMemoryOptimizer memoryOptimizer,
         INetworkMonitor networkMonitor,
-        ITemperatureMonitor temperatureMonitor)
+        ITemperatureMonitor temperatureMonitor,
+        IPerformanceMonitor performanceMonitor)
     {
         _systemInfoService = systemInfoService;
         _tempFileCleaner = tempFileCleaner;
         _memoryOptimizer = memoryOptimizer;
         _networkMonitor = networkMonitor;
         _temperatureMonitor = temperatureMonitor;
+        _performanceMonitor = performanceMonitor;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
@@ -114,6 +118,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private async Task RefreshDataAsync()
     {
         if (_isDisposed) return;
+
+        using var _ = _performanceMonitor.TrackOperation("Dashboard.Refresh");
 
         try
         {
@@ -248,6 +254,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     {
         IsOptimizing = true;
         ShowActionStatus("Cleaning temporary files...", true);
+
+        using var _ = _performanceMonitor.TrackOperation("Dashboard.QuickClean");
+
         try
         {
             var items = await _tempFileCleaner.ScanAsync();
@@ -270,6 +279,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     {
         IsOptimizing = true;
         ShowActionStatus("Optimizing memory...", true);
+
+        using var _ = _performanceMonitor.TrackOperation("Dashboard.OptimizeMemory");
+
         try
         {
             var freedMB = await _memoryOptimizer.OptimizeMemoryAsync();
