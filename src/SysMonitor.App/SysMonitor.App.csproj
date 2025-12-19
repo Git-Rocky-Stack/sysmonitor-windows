@@ -14,7 +14,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseRidGraph>true</UseRidGraph>
-    <Version>1.0.0</Version>
+    <Version>2.0.1</Version>
     <Authors>Rocky Stack</Authors>
     <Company>Rocky Stack</Company>
     <Product>SysMonitor for Windows</Product>
@@ -42,6 +42,9 @@
 
   <!-- Brand Assets -->
   <ItemGroup>
+    <Content Include="app.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\Header_Main1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

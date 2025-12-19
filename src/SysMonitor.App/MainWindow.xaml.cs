@@ -1,6 +1,9 @@
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SysMonitor.App.Views;
+using WinRT.Interop;
 
 namespace SysMonitor.App;
 
@@ -52,9 +55,26 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         Title = "SysMonitor - Windows System Monitor & Optimizer";
 
+        // Set window icon
+        SetWindowIcon();
+
         // Navigate to dashboard on startup
         ContentFrame.Navigate(typeof(DashboardPage));
         NavView.SelectedItem = NavView.MenuItems[0];
+    }
+
+    private void SetWindowIcon()
+    {
+        var hWnd = WindowNative.GetWindowHandle(this);
+        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+        var appWindow = AppWindow.GetFromWindowId(windowId);
+
+        // Set the icon from the app.ico file
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
+        if (File.Exists(iconPath))
+        {
+            appWindow.SetIcon(iconPath);
+        }
     }
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
