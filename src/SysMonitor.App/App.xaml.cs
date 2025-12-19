@@ -37,7 +37,6 @@ public partial class App : Application
 {
     private static Window? _mainWindow;
     private static IHost? _host;
-    private static bool _isElevatedMode = false;
 
     public static Window? MainWindow => _mainWindow;
 
@@ -47,7 +46,6 @@ public partial class App : Application
         var args = Environment.GetCommandLineArgs();
         if (args.Length >= 4 && args[1] == "--fix-registry")
         {
-            _isElevatedMode = true;
             // Run elevated registry cleaning and exit
             var inputFile = args[2];
             var outputFile = args[3];

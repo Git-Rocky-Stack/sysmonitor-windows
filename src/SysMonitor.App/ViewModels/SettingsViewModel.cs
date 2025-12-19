@@ -289,7 +289,7 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             // Clear local settings
-            _localSettings.Values.Clear();
+            _localSettings?.Values.Clear();
 
             // Reload defaults
             LoadSettings();
