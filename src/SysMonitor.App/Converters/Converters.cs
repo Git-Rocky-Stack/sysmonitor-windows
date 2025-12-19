@@ -556,3 +556,46 @@ public class CountToVisibilityConverter : IValueConverter
     }
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }
+
+public class DoubleToStringConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is double d)
+            return d.ToString("F2");
+        return "0.00";
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}
+
+public class StatusToBackgroundConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is string status)
+        {
+            return status switch
+            {
+                "Excellent" => new SolidColorBrush(ColorHelper.FromArgb(255, 76, 175, 80)),   // Green
+                "Good" => new SolidColorBrush(ColorHelper.FromArgb(255, 139, 195, 74)),      // Light Green
+                "Fair" => new SolidColorBrush(ColorHelper.FromArgb(255, 255, 152, 0)),       // Orange
+                "Poor" => new SolidColorBrush(ColorHelper.FromArgb(255, 255, 87, 34)),       // Deep Orange
+                "Critical" => new SolidColorBrush(ColorHelper.FromArgb(255, 244, 67, 54)),   // Red
+                _ => new SolidColorBrush(ColorHelper.FromArgb(255, 158, 158, 158))           // Gray
+            };
+        }
+        return new SolidColorBrush(ColorHelper.FromArgb(255, 158, 158, 158));
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}
+
+public class BoolToMonitoringTextConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isMonitoring)
+            return isMonitoring ? "Pause" : "Resume";
+        return "Pause";
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}

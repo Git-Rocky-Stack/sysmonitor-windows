@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
@@ -11,6 +12,7 @@ namespace SysMonitor.App.ViewModels;
 public partial class LargeFilesViewModel : ObservableObject, IDisposable
 {
     private readonly ILargeFileFinder _largeFileFinder;
+    private readonly IPerformanceMonitor _performanceMonitor;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _scanCts;
     private bool _isDisposed;
@@ -41,9 +43,10 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _selectedFilter = "All";
     public string[] FileTypeFilters { get; } = ["All", "Video", "Image", "Audio", "Archive", "Document", "Executable", "Other"];
 
-    public LargeFilesViewModel(ILargeFileFinder largeFileFinder)
+    public LargeFilesViewModel(ILargeFileFinder largeFileFinder, IPerformanceMonitor performanceMonitor)
     {
         _largeFileFinder = largeFileFinder;
+        _performanceMonitor = performanceMonitor;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
@@ -99,6 +102,8 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
         LargeFiles.Clear();
         TotalSizeBytes = 0;
         FilesFound = 0;
+
+        using var _ = _performanceMonitor.TrackOperation("LargeFiles.Scan");
 
         try
         {

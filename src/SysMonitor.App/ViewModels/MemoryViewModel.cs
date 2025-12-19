@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Monitors;
+using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.Optimizers;
 
 namespace SysMonitor.App.ViewModels;
@@ -10,6 +11,7 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
 {
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly IMemoryOptimizer _memoryOptimizer;
+    private readonly IPerformanceMonitor _performanceMonitor;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
@@ -41,10 +43,11 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isActionSuccess = true;
     [ObservableProperty] private long _bytesFreed = 0;
 
-    public MemoryViewModel(IMemoryMonitor memoryMonitor, IMemoryOptimizer memoryOptimizer)
+    public MemoryViewModel(IMemoryMonitor memoryMonitor, IMemoryOptimizer memoryOptimizer, IPerformanceMonitor performanceMonitor)
     {
         _memoryMonitor = memoryMonitor;
         _memoryOptimizer = memoryOptimizer;
+        _performanceMonitor = performanceMonitor;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
@@ -82,6 +85,8 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
     private async Task RefreshDataAsync()
     {
         if (_isDisposed) return;
+
+        using var _ = _performanceMonitor.TrackOperation("Memory.Refresh");
 
         try
         {
@@ -150,6 +155,8 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
 
         IsOptimizing = true;
         ShowActionStatus("Optimizing memory...", true);
+
+        using var perfTracker = _performanceMonitor.TrackOperation("Memory.Optimize");
 
         try
         {

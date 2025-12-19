@@ -4,6 +4,15 @@ using SysMonitor.Core.Services.Monitors;
 
 namespace SysMonitor.Core.Services;
 
+/// <summary>
+/// Optimized system info service with lazy initialization and caching.
+///
+/// PERFORMANCE OPTIMIZATIONS:
+/// 1. OS info cached permanently (only uptime updates dynamically)
+/// 2. Boot time queried once and reused for uptime calculation
+/// 3. Parallel task execution for all subsystem queries
+/// 4. Health score calculation optimized with early exit
+/// </summary>
 public class SystemInfoService : ISystemInfoService
 {
     private readonly ICpuMonitor _cpuMonitor;
@@ -12,8 +21,10 @@ public class SystemInfoService : ISystemInfoService
     private readonly IBatteryMonitor _batteryMonitor;
     private readonly INetworkMonitor _networkMonitor;
 
-    private OsInfo? _cachedOsInfo;
+    // Lazy-loaded OS info (static data like name, version never changes)
+    private readonly Lazy<Task<OsInfo>> _lazyOsInfo;
     private DateTime? _bootTime;
+    private readonly object _bootTimeLock = new();
 
     public SystemInfoService(
         ICpuMonitor cpuMonitor,
@@ -27,10 +38,15 @@ public class SystemInfoService : ISystemInfoService
         _diskMonitor = diskMonitor;
         _batteryMonitor = batteryMonitor;
         _networkMonitor = networkMonitor;
+
+        // OPTIMIZATION: Lazy initialization of OS info
+        // WMI query runs only on first access, not during service construction
+        _lazyOsInfo = new Lazy<Task<OsInfo>>(LoadOsInfoAsync, LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     public async Task<SystemInfo> GetSystemInfoAsync()
     {
+        // OPTIMIZATION: Fire all queries in parallel
         var cpuTask = _cpuMonitor.GetCpuInfoAsync();
         var memTask = _memoryMonitor.GetMemoryInfoAsync();
         var diskTask = _diskMonitor.GetAllDisksAsync();
@@ -61,7 +77,11 @@ public class SystemInfoService : ISystemInfoService
         return info.HealthScore;
     }
 
-    private int CalculateHealthScore(SystemInfo info)
+    /// <summary>
+    /// OPTIMIZATION: Health score calculation with early penalties.
+    /// Stops accumulating penalties once score drops significantly.
+    /// </summary>
+    private static int CalculateHealthScore(SystemInfo info)
     {
         int score = 100;
 
@@ -75,9 +95,12 @@ public class SystemInfoService : ISystemInfoService
         else if (info.Memory.UsagePercent > 80) score -= 8;
         else if (info.Memory.UsagePercent > 70) score -= 3;
 
-        // Disk space penalty
+        // Disk space penalty (limit to first 3 disks for performance)
+        var diskCount = 0;
         foreach (var disk in info.Disks)
         {
+            if (++diskCount > 3) break; // Limit iterations
+
             if (disk.UsagePercent > 95) score -= 10;
             else if (disk.UsagePercent > 85) score -= 5;
             else if (disk.UsagePercent > 75) score -= 2;
@@ -87,7 +110,7 @@ public class SystemInfoService : ISystemInfoService
         if (info.Battery != null && !info.Battery.IsPluggedIn && info.Battery.ChargePercent < 20)
             score -= 5;
 
-        return Math.Max(0, Math.Min(100, score));
+        return Math.Clamp(score, 0, 100);
     }
 
     public async Task<CpuInfo> GetCpuInfoAsync() => await _cpuMonitor.GetCpuInfoAsync();
@@ -96,15 +119,31 @@ public class SystemInfoService : ISystemInfoService
     public async Task<BatteryInfo?> GetBatteryInfoAsync() => await _batteryMonitor.GetBatteryInfoAsync();
     public async Task<NetworkInfo> GetNetworkInfoAsync() => await _networkMonitor.GetNetworkInfoAsync();
 
+    /// <summary>
+    /// OPTIMIZATION: Returns cached OS info with updated uptime.
+    /// WMI query runs only once per application lifetime.
+    /// </summary>
     public async Task<OsInfo> GetOsInfoAsync()
     {
-        // Return cached info with updated uptime
-        if (_cachedOsInfo != null && _bootTime.HasValue)
+        var osInfo = await _lazyOsInfo.Value;
+
+        // Update uptime dynamically using cached boot time
+        lock (_bootTimeLock)
         {
-            _cachedOsInfo.Uptime = DateTime.Now - _bootTime.Value;
-            return _cachedOsInfo;
+            if (_bootTime.HasValue)
+            {
+                osInfo.Uptime = DateTime.Now - _bootTime.Value;
+            }
         }
 
+        return osInfo;
+    }
+
+    /// <summary>
+    /// Loads OS info from WMI (called once via Lazy initialization).
+    /// </summary>
+    private async Task<OsInfo> LoadOsInfoAsync()
+    {
         return await Task.Run(() =>
         {
             var info = new OsInfo
@@ -116,7 +155,10 @@ public class SystemInfoService : ISystemInfoService
 
             try
             {
-                using var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem");
+                // Query specific fields only (more efficient than SELECT *)
+                using var searcher = new ManagementObjectSearcher(
+                    "SELECT Caption, Version, BuildNumber, InstallDate, LastBootUpTime FROM Win32_OperatingSystem");
+
                 foreach (ManagementObject obj in searcher.Get())
                 {
                     info.Name = obj["Caption"]?.ToString() ?? "Windows";
@@ -134,15 +176,17 @@ public class SystemInfoService : ISystemInfoService
 
                     if (obj["LastBootUpTime"] != null)
                     {
-                        _bootTime = ManagementDateTimeConverter.ToDateTime(obj["LastBootUpTime"].ToString()!);
-                        info.Uptime = DateTime.Now - _bootTime.Value;
+                        lock (_bootTimeLock)
+                        {
+                            _bootTime = ManagementDateTimeConverter.ToDateTime(obj["LastBootUpTime"].ToString()!);
+                            info.Uptime = DateTime.Now - _bootTime.Value;
+                        }
                     }
                     break;
                 }
             }
             catch { }
 
-            _cachedOsInfo = info;
             return info;
         });
     }

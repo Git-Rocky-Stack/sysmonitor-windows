@@ -52,6 +52,9 @@
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
             <converters:BoolToLockGlyphConverter x:Key="BoolToLockGlyphConverter"/>
             <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+            <converters:DoubleToStringConverter x:Key="DoubleToStringConverter"/>
+            <converters:StatusToBackgroundConverter x:Key="StatusToBackgroundConverter"/>
+            <converters:BoolToMonitoringTextConverter x:Key="BoolToMonitoringTextConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
