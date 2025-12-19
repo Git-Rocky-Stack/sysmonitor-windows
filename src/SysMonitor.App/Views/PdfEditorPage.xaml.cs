@@ -36,7 +36,6 @@ public sealed partial class PdfEditorPage : Page
     private List<Polyline> _signaturePolylines = [];
 
     // Sticky note input state
-    private bool _isEditingStickyNote;
     private Border? _stickyNoteInput;
 
     // Annotation selection state
@@ -465,8 +464,6 @@ public sealed partial class PdfEditorPage : Page
 
     private void ShowStickyNoteInput(Point position)
     {
-        _isEditingStickyNote = true;
-
         var noteColor = Color.FromArgb(255, 255, 255, 136); // Yellow
 
         _stickyNoteInput = new Border
@@ -544,7 +541,6 @@ public sealed partial class PdfEditorPage : Page
             AnnotationCanvas.Children.Remove(_stickyNoteInput);
             _stickyNoteInput = null;
         }
-        _isEditingStickyNote = false;
     }
 
     private void AddStickyNoteVisual(Guid id, string title, string content, double x, double y)
