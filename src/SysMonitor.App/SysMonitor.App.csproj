@@ -14,7 +14,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseRidGraph>true</UseRidGraph>
-    <Version>2.0.1</Version>
+    <Version>2.1.0</Version>
     <Authors>Rocky Stack</Authors>
     <Company>Rocky Stack</Company>
     <Product>SysMonitor for Windows</Product>
@@ -23,6 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LiveChartsCore.Behaviours" Version="2.0.0-rc2" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240627000" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />

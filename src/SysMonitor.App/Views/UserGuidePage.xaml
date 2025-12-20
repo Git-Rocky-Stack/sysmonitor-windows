@@ -278,6 +278,124 @@
                 </StackPanel>
             </Border>
 
+            <!-- System Tray & Alerts -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource WarningBrush}" Width="40" Height="40">
+                            <FontIcon Glyph="&#xE7E8;" FontSize="18" Foreground="White"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="System Tray &amp; Alerts" FontSize="16" FontWeight="Bold"
+                                       Foreground="{StaticResource WarningBrush}"/>
+                            <TextBlock Text="Background monitoring with notifications" FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="22">
+                        STX.1 runs quietly in the system tray, providing live stats and alerts without interrupting your work.
+                        Configure thresholds in Settings and receive toast notifications when temperatures or memory usage exceed limits.
+                    </TextBlock>
+
+                    <Grid ColumnSpacing="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Live Tooltip</Run>
+                                <Run> - Hover over tray icon for CPU/RAM stats</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Minimize to Tray</Run>
+                                <Run> - Close button hides to tray (configurable)</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Quick Menu</Run>
+                                <Run> - Right-click tray icon for navigation</Run>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Temperature Alerts</Run>
+                                <Run> - CPU (75°C/90°C) and GPU warnings</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Memory Alerts</Run>
+                                <Run> - Notification when RAM exceeds 80%</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Smart Cooldown</Run>
+                                <Run> - 5-minute delay prevents notification spam</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Historical Data & Graphs -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource WarningBrush}" Width="40" Height="40">
+                            <FontIcon Glyph="&#xE81C;" FontSize="18" Foreground="White"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Historical Data &amp; Graphs" FontSize="16" FontWeight="Bold"
+                                       Foreground="{StaticResource WarningBrush}"/>
+                            <TextBlock Text="30-day performance trends" FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="22">
+                        The History page displays interactive charts showing CPU, Memory, and Temperature trends over time.
+                        Data is automatically recorded every 30 seconds and stored locally for up to 30 days.
+                    </TextBlock>
+
+                    <Grid ColumnSpacing="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">CPU Usage Chart</Run>
+                                <Run> - Track processor load over time</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Memory Chart</Run>
+                                <Run> - Monitor RAM usage patterns</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Temperature Chart</Run>
+                                <Run> - CPU and GPU thermal trends</Run>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Time Ranges</Run>
+                                <Run> - 1 hour, 24 hours, 7 days, 30 days</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Interactive Charts</Run>
+                                <Run> - Zoom and pan with LiveCharts2</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Auto-Purge</Run>
+                                <Run> - Old data cleaned automatically</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Performance Monitoring -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
@@ -465,57 +583,74 @@
                 </StackPanel>
             </Border>
 
-            <!-- Changelog Card - v2.0.1 -->
+            <!-- Changelog Card - v2.1.0 -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{StaticResource CyanAccentBrush}"/>
-                        <TextBlock Text="Release Notes - v2.0.1" FontSize="16" FontWeight="Bold"
+                        <TextBlock Text="Release Notes - v2.1.0" FontSize="16" FontWeight="Bold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                         <Border Background="{StaticResource WarningBrush}" CornerRadius="4" Padding="8,2">
                             <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
                         </Border>
                     </StackPanel>
 
-                    <!-- New in v2.0.1 -->
+                    <!-- New in v2.1.0 -->
                     <StackPanel Spacing="8">
-                        <TextBlock Text="New in v2.0.1" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                        <TextBlock Text="New in v2.1.0" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Performance Monitor page - track app operation metrics in real-time</Run>
+                                <Run> System Tray Mode - minimize to tray with live CPU/RAM stats tooltip</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> System overview cards: Memory usage, GC pressure, frame rate, tracked ops</Run>
+                                <Run> Right-click tray menu for quick navigation to Dashboard, CPU, Memory, History</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Operation metrics table: count, avg, min, max, P95, P99 timing</Run>
+                                <Run> Real-time alerts with toast notifications for temperature/memory thresholds</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Performance status indicators (Excellent/Good/Fair/Poor/Critical)</Run>
+                                <Run> Smart 5-minute cooldown prevents notification spam</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Pause/Resume monitoring and Clear metrics controls</Run>
+                                <Run> History page with interactive LiveCharts2 graphs for CPU, Memory, Temperature</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Export metrics to CSV for external analysis</Run>
+                                <Run> 30-day historical data storage with SQLite (auto-purge old data)</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Performance tracking integrated across all major operations</Run>
+                                <Run> Time range selector: 1 hour, 24 hours, 7 days, 30 days</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Window icon added to title bar</Run>
+                                <Run> Background metric recording every 30 seconds</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Global crash logging with detailed exception reporting</Run>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{StaticResource SurfaceBrush}"/>
+
+                    <!-- v2.0.1 Features -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Features from v2.0.1" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> Performance Monitor page with operation metrics and timing</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> System overview cards, P95/P99 percentiles, CSV export</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> Window icon and global crash logging</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>
