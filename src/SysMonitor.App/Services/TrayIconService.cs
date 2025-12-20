@@ -97,7 +97,10 @@ public class TrayIconService : IDisposable
         menuFlyout.Items.Add(new MenuFlyoutSeparator());
 
         var exitItem = new MenuFlyoutItem { Text = "Exit" };
-        exitItem.Command = new RelayCommand(() => ExitRequested?.Invoke(this, EventArgs.Empty));
+        exitItem.Command = new RelayCommand(() =>
+        {
+            _dispatcherQueue.TryEnqueue(() => ExitRequested?.Invoke(this, EventArgs.Empty));
+        });
         menuFlyout.Items.Add(exitItem);
 
         _trayIcon.ContextFlyout = menuFlyout;

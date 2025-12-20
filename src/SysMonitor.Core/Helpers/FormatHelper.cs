@@ -100,4 +100,14 @@ public static class FormatHelper
 
         return showUnit ? $"{celsius:F0}°C" : $"{celsius:F0}";
     }
+
+    /// <summary>
+    /// Converts Celsius to Fahrenheit.
+    /// </summary>
+    /// <param name="celsius">Temperature in Celsius.</param>
+    /// <returns>Temperature in Fahrenheit.</returns>
+    public static double CelsiusToFahrenheit(double celsius)
+    {
+        return (celsius * 1.8) + 32;
+    }
 }

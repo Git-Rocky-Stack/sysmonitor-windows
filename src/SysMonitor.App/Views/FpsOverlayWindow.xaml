@@ -1,0 +1,330 @@
+<Window
+    x:Class="SysMonitor.App.Views.FpsOverlayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="FPS Overlay">
+
+    <Grid x:Name="RootGrid"
+          PointerPressed="RootGrid_PointerPressed"
+          PointerMoved="RootGrid_PointerMoved"
+          PointerReleased="RootGrid_PointerReleased">
+
+        <!-- Outer Chrome Bezel -->
+        <Border CornerRadius="12" Padding="3">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#FF808080" Offset="0.0"/>
+                    <GradientStop Color="#FFD0D0D0" Offset="0.15"/>
+                    <GradientStop Color="#FFFFFFFF" Offset="0.3"/>
+                    <GradientStop Color="#FFE8E8E8" Offset="0.5"/>
+                    <GradientStop Color="#FFA0A0A0" Offset="0.7"/>
+                    <GradientStop Color="#FF606060" Offset="0.85"/>
+                    <GradientStop Color="#FF404040" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+
+            <!-- Inner Chrome Ring -->
+            <Border CornerRadius="10" Padding="2">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FF505050" Offset="0.0"/>
+                        <GradientStop Color="#FF909090" Offset="0.3"/>
+                        <GradientStop Color="#FF707070" Offset="0.7"/>
+                        <GradientStop Color="#FF404040" Offset="1.0"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <!-- Carbon Fiber Background -->
+                <Border CornerRadius="8">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FF1A1A1A" Offset="0.0"/>
+                            <GradientStop Color="#FF2D2D2D" Offset="0.25"/>
+                            <GradientStop Color="#FF1A1A1A" Offset="0.5"/>
+                            <GradientStop Color="#FF2D2D2D" Offset="0.75"/>
+                            <GradientStop Color="#FF1A1A1A" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Grid>
+                        <!-- Main Content -->
+                        <StackPanel Padding="14,12" Spacing="8">
+
+                            <!-- Header: FPS Display (Large) -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- FPS Label -->
+                                <TextBlock Grid.Column="0" Text="FPS"
+                                           FontSize="11" FontWeight="Bold"
+                                           Foreground="#80FFFFFF" VerticalAlignment="Bottom"
+                                           Margin="0,0,6,2"/>
+
+                                <!-- FPS Value -->
+                                <TextBlock x:Name="FpsText" Grid.Column="1"
+                                           Text="---"
+                                           FontSize="32" FontWeight="Black"
+                                           FontFamily="Consolas"
+                                           HorizontalAlignment="Center">
+                                    <TextBlock.Foreground>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#FF00FF00" Offset="0.0"/>
+                                            <GradientStop Color="#FF00CC00" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+
+                                <!-- Status LED with glow effect -->
+                                <Grid Grid.Column="2" Width="16" Height="16" VerticalAlignment="Center">
+                                    <!-- Outer glow -->
+                                    <Ellipse x:Name="StatusLedGlow" Fill="#FF00FF00" Opacity="0.4" Margin="-2"/>
+                                    <!-- Main LED -->
+                                    <Ellipse x:Name="StatusLed" Fill="#FF00FF00" Margin="2"/>
+                                    <!-- Highlight -->
+                                    <Ellipse Fill="Transparent" Stroke="#60FFFFFF" StrokeThickness="1" Margin="2"/>
+                                </Grid>
+                            </Grid>
+
+                            <!-- Separator Line -->
+                            <Border Height="1" Margin="0,2">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#00FFFFFF" Offset="0.0"/>
+                                        <GradientStop Color="#40FFFFFF" Offset="0.3"/>
+                                        <GradientStop Color="#40FFFFFF" Offset="0.7"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <!-- CPU Row with LED Bar -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="CPU"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="#CCFFFFFF" VerticalAlignment="Center"/>
+
+                                <!-- LED Bar -->
+                                <Grid Grid.Column="1" Height="10" Margin="4,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="CpuLed0" Grid.Column="0" Background="#FF00AA00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed1" Grid.Column="1" Background="#FF00CC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed2" Grid.Column="2" Background="#FF00EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed3" Grid.Column="3" Background="#FF88EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed4" Grid.Column="4" Background="#FFCCEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed5" Grid.Column="5" Background="#FFFFEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed6" Grid.Column="6" Background="#FFFFCC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed7" Grid.Column="7" Background="#FFFF9900" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed8" Grid.Column="8" Background="#FFFF6600" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="CpuLed9" Grid.Column="9" Background="#FFFF0000" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                </Grid>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock x:Name="CpuTempText" Text="--"
+                                               FontSize="10" FontWeight="SemiBold"
+                                               Foreground="#FFFFA500" FontFamily="Consolas"/>
+                                    <TextBlock Text="C" FontSize="8" Foreground="#80FFA500"
+                                               VerticalAlignment="Top" Margin="1,1,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- GPU Row with LED Bar -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="GPU"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="#CCFFFFFF" VerticalAlignment="Center"/>
+
+                                <!-- LED Bar -->
+                                <Grid Grid.Column="1" Height="10" Margin="4,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="GpuLed0" Grid.Column="0" Background="#FF00AA00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed1" Grid.Column="1" Background="#FF00CC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed2" Grid.Column="2" Background="#FF00EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed3" Grid.Column="3" Background="#FF88EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed4" Grid.Column="4" Background="#FFCCEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed5" Grid.Column="5" Background="#FFFFEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed6" Grid.Column="6" Background="#FFFFCC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed7" Grid.Column="7" Background="#FFFF9900" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed8" Grid.Column="8" Background="#FFFF6600" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="GpuLed9" Grid.Column="9" Background="#FFFF0000" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                </Grid>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock x:Name="GpuTempText" Text="--"
+                                               FontSize="10" FontWeight="SemiBold"
+                                               Foreground="#FF00BFFF" FontFamily="Consolas"/>
+                                    <TextBlock Text="C" FontSize="8" Foreground="#8000BFFF"
+                                               VerticalAlignment="Top" Margin="1,1,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- RAM Row with LED Bar -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="55"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="RAM"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="#CCFFFFFF" VerticalAlignment="Center"/>
+
+                                <!-- LED Bar -->
+                                <Grid Grid.Column="1" Height="10" Margin="4,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="RamLed0" Grid.Column="0" Background="#FF00AA00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed1" Grid.Column="1" Background="#FF00CC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed2" Grid.Column="2" Background="#FF00EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed3" Grid.Column="3" Background="#FF88EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed4" Grid.Column="4" Background="#FFCCEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed5" Grid.Column="5" Background="#FFFFEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed6" Grid.Column="6" Background="#FFFFCC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed7" Grid.Column="7" Background="#FFFF9900" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed8" Grid.Column="8" Background="#FFFF6600" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="RamLed9" Grid.Column="9" Background="#FFFF0000" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                </Grid>
+
+                                <TextBlock x:Name="RamText" Grid.Column="2"
+                                           Text="--/-- GB"
+                                           FontSize="9" FontWeight="SemiBold"
+                                           Foreground="#FFDA70D6" FontFamily="Consolas"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Power Row with Digital Readout -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="55"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="PWR"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="#CCFFFFFF" VerticalAlignment="Center"/>
+
+                                <!-- Power LED Bar -->
+                                <Grid Grid.Column="1" Height="10" Margin="4,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="PwrLed0" Grid.Column="0" Background="#FF00AA00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed1" Grid.Column="1" Background="#FF00CC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed2" Grid.Column="2" Background="#FF00EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed3" Grid.Column="3" Background="#FF88EE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed4" Grid.Column="4" Background="#FFCCEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed5" Grid.Column="5" Background="#FFFFEE00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed6" Grid.Column="6" Background="#FFFFCC00" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed7" Grid.Column="7" Background="#FFFF9900" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed8" Grid.Column="8" Background="#FFFF6600" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                    <Border x:Name="PwrLed9" Grid.Column="9" Background="#FFFF0000" CornerRadius="1" Margin="0.5,0" Opacity="0.2"/>
+                                </Grid>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock x:Name="PowerText" Text="--"
+                                               FontSize="10" FontWeight="SemiBold"
+                                               Foreground="#FF00FFFF" FontFamily="Consolas"/>
+                                    <TextBlock Text="W" FontSize="8" Foreground="#8000FFFF"
+                                               VerticalAlignment="Top" Margin="1,1,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Fan Speed Row -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="55"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="FAN"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="#CCFFFFFF" VerticalAlignment="Center"/>
+
+                                <!-- Fan indicator dots (spinning animation style) -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                            VerticalAlignment="Center" HorizontalAlignment="Left" Margin="4,0">
+                                    <Border x:Name="FanDot0" Width="6" Height="6" CornerRadius="3"
+                                            Background="#FF00FF00" Margin="1,0" Opacity="0.3"/>
+                                    <Border x:Name="FanDot1" Width="6" Height="6" CornerRadius="3"
+                                            Background="#FF00FF00" Margin="1,0" Opacity="0.3"/>
+                                    <Border x:Name="FanDot2" Width="6" Height="6" CornerRadius="3"
+                                            Background="#FF00FF00" Margin="1,0" Opacity="0.3"/>
+                                    <Border x:Name="FanDot3" Width="6" Height="6" CornerRadius="3"
+                                            Background="#FFFFCC00" Margin="1,0" Opacity="0.3"/>
+                                    <Border x:Name="FanDot4" Width="6" Height="6" CornerRadius="3"
+                                            Background="#FFFF6600" Margin="1,0" Opacity="0.3"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock x:Name="FanText" Text="----"
+                                               FontSize="10" FontWeight="SemiBold"
+                                               Foreground="#FF98FB98" FontFamily="Consolas"/>
+                                    <TextBlock Text="RPM" FontSize="6" Foreground="#8098FB98"
+                                               VerticalAlignment="Bottom" Margin="2,0,0,1"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Bottom Status Bar -->
+                            <Border Height="1" Margin="0,4,0,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#00FFFFFF" Offset="0.0"/>
+                                        <GradientStop Color="#30FFFFFF" Offset="0.5"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <!-- Drag Handle Indicator -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Opacity="0.4">
+                                <Border Width="4" Height="4" CornerRadius="2" Background="#FFFFFF"/>
+                                <Border Width="4" Height="4" CornerRadius="2" Background="#FFFFFF"/>
+                                <Border Width="4" Height="4" CornerRadius="2" Background="#FFFFFF"/>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Border>
+        </Border>
+    </Grid>
+</Window>

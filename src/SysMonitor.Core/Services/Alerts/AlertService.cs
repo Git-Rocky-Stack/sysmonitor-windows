@@ -1,3 +1,4 @@
+using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Services.Monitors;
 using System.Collections.Concurrent;
 using System.Text.Json;
@@ -71,14 +72,14 @@ public class AlertService : IAlertService
                 {
                     TriggerAlert(AlertType.CpuTempCritical, AlertSeverity.Critical,
                         "CPU Temperature Critical!",
-                        $"CPU temperature is {cpuTemp:F0}°C (threshold: {cpuCritical}°C)",
+                        $"CPU temperature is {FormatHelper.CelsiusToFahrenheit(cpuTemp):F0}°F (threshold: {FormatHelper.CelsiusToFahrenheit(cpuCritical):F0}°F)",
                         cpuTemp, cpuCritical);
                 }
                 else if (cpuTemp >= cpuWarning)
                 {
                     TriggerAlert(AlertType.CpuTempWarning, AlertSeverity.Warning,
                         "CPU Temperature Warning",
-                        $"CPU temperature is {cpuTemp:F0}°C (threshold: {cpuWarning}°C)",
+                        $"CPU temperature is {FormatHelper.CelsiusToFahrenheit(cpuTemp):F0}°F (threshold: {FormatHelper.CelsiusToFahrenheit(cpuWarning):F0}°F)",
                         cpuTemp, cpuWarning);
                 }
                 else
@@ -103,14 +104,14 @@ public class AlertService : IAlertService
                 {
                     TriggerAlert(AlertType.GpuTempCritical, AlertSeverity.Critical,
                         "GPU Temperature Critical!",
-                        $"GPU temperature is {gpuTemp:F0}°C (threshold: {gpuCritical}°C)",
+                        $"GPU temperature is {FormatHelper.CelsiusToFahrenheit(gpuTemp):F0}°F (threshold: {FormatHelper.CelsiusToFahrenheit(gpuCritical):F0}°F)",
                         gpuTemp, gpuCritical);
                 }
                 else if (gpuTemp >= gpuWarning)
                 {
                     TriggerAlert(AlertType.GpuTempWarning, AlertSeverity.Warning,
                         "GPU Temperature Warning",
-                        $"GPU temperature is {gpuTemp:F0}°C (threshold: {gpuWarning}°C)",
+                        $"GPU temperature is {FormatHelper.CelsiusToFahrenheit(gpuTemp):F0}°F (threshold: {FormatHelper.CelsiusToFahrenheit(gpuWarning):F0}°F)",
                         gpuTemp, gpuWarning);
                 }
                 else

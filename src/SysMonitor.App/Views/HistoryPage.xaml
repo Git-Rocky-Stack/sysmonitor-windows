@@ -119,7 +119,7 @@
             <StackPanel Spacing="12">
                 <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
                     <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="TEMPERATURE (°C)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                    <TextBlock Text="TEMPERATURE (°F)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
                 <Border Style="{StaticResource CardStyle}" MinHeight="200">

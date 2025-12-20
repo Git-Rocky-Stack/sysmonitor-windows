@@ -50,5 +50,10 @@ public interface ITemperatureMonitor
     Task<Dictionary<string, double>> GetAllTemperaturesAsync();
     Task<double> GetCpuTemperatureAsync();
     Task<double> GetGpuTemperatureAsync();
+    Task<Dictionary<string, double>> GetAllFanSpeedsAsync();
+    Task<Dictionary<string, double>> GetAllPowerReadingsAsync();
+    Task<Dictionary<string, double>> GetAllLoadSensorsAsync();
+    Task<double> GetTotalSystemPowerAsync();
+    Task<List<string>> GetAllSensorsDiagnosticAsync();
     void Dispose();
 }

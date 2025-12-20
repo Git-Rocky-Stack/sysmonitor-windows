@@ -55,9 +55,9 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
     {
         new Axis
         {
-            MinLimit = 0,
-            MaxLimit = 100,
-            Labeler = value => $"{value:F0}°C",
+            MinLimit = 50,
+            MaxLimit = 220,
+            Labeler = value => $"{value:F0}°F",
             TextSize = 10,
             LabelsPaint = new SolidColorPaint(SKColors.Gray)
         }
@@ -185,8 +185,9 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
 
     private void UpdateTemperatureChart(List<MetricSnapshot> cpuTemp, List<MetricSnapshot> gpuTemp)
     {
-        var cpuValues = cpuTemp.Select(d => new DateTimePoint(d.Timestamp.ToLocalTime(), d.Value)).ToList();
-        var gpuValues = gpuTemp.Select(d => new DateTimePoint(d.Timestamp.ToLocalTime(), d.Value)).ToList();
+        // Convert Celsius to Fahrenheit: F = (C * 1.8) + 32
+        var cpuValues = cpuTemp.Select(d => new DateTimePoint(d.Timestamp.ToLocalTime(), (d.Value * 1.8) + 32)).ToList();
+        var gpuValues = gpuTemp.Select(d => new DateTimePoint(d.Timestamp.ToLocalTime(), (d.Value * 1.8) + 32)).ToList();
 
         var series = new ObservableCollection<ISeries>();
 
