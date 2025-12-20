@@ -14,6 +14,7 @@ using SysMonitor.Core.Services.Backup;
 using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.History;
 using SysMonitor.Core.Services.Alerts;
+using SysMonitor.Core.Services.GameMode;
 using SysMonitor.App.Services;
 
 namespace SysMonitor.App;
@@ -212,6 +213,10 @@ public partial class App : Application
                 services.AddSingleton<AlertService>();
                 services.AddSingleton<IAlertService>(sp => sp.GetRequiredService<AlertService>());
 
+                // Game Mode Service (gaming optimization)
+                services.AddSingleton<GameModeService>();
+                services.AddSingleton<IGameModeService>(sp => sp.GetRequiredService<GameModeService>());
+
                 // Tray Icon Service (system tray integration)
                 services.AddSingleton<TrayIconService>();
 
@@ -250,6 +255,7 @@ public partial class App : Application
                 services.AddTransient<UserGuideViewModel>();
                 services.AddTransient<PerformanceViewModel>();
                 services.AddTransient<HistoryViewModel>();
+                services.AddTransient<GameModeViewModel>();
 
                 // Views (Transient - created on demand per navigation)
                 services.AddTransient<DashboardPage>();
@@ -286,6 +292,7 @@ public partial class App : Application
                 services.AddTransient<UserGuidePage>();
                 services.AddTransient<PerformancePage>();
                 services.AddTransient<HistoryPage>();
+                services.AddTransient<GameModePage>();
             })
             .Build();
     }

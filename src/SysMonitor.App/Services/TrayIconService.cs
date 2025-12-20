@@ -63,44 +63,41 @@ public class TrayIconService : IDisposable
             }
         }
 
-        // Create context menu
-        _trayIcon.ContextMenuMode = H.NotifyIcon.ContextMenuMode.PopupMenu;
-
         // Set up left click to show window
         _trayIcon.LeftClickCommand = new RelayCommand(() =>
         {
             _dispatcherQueue.TryEnqueue(() => ShowWindowRequested?.Invoke(this, EventArgs.Empty));
         });
 
-        // Build context menu using GeneratedContextMenuPopup
+        // Build context menu using Commands for better compatibility
         var menuFlyout = new MenuFlyout();
 
         var openItem = new MenuFlyoutItem { Text = "Open SysMonitor" };
-        openItem.Click += (s, e) => _dispatcherQueue.TryEnqueue(() => ShowWindowRequested?.Invoke(this, EventArgs.Empty));
+        openItem.Command = new RelayCommand(() => ShowWindowRequested?.Invoke(this, EventArgs.Empty));
         menuFlyout.Items.Add(openItem);
 
         menuFlyout.Items.Add(new MenuFlyoutSeparator());
 
         var dashboardItem = new MenuFlyoutItem { Text = "Dashboard" };
-        dashboardItem.Click += (s, e) => NavigateTo("Dashboard");
+        dashboardItem.Command = new RelayCommand(() => NavigateTo("Dashboard"));
         menuFlyout.Items.Add(dashboardItem);
 
         var cpuItem = new MenuFlyoutItem { Text = "CPU Monitor" };
-        cpuItem.Click += (s, e) => NavigateTo("CpuMonitor");
+        cpuItem.Command = new RelayCommand(() => NavigateTo("CpuMonitor"));
         menuFlyout.Items.Add(cpuItem);
 
         var memoryItem = new MenuFlyoutItem { Text = "Memory Monitor" };
-        memoryItem.Click += (s, e) => NavigateTo("MemoryMonitor");
+        memoryItem.Command = new RelayCommand(() => NavigateTo("MemoryMonitor"));
         menuFlyout.Items.Add(memoryItem);
 
         var historyItem = new MenuFlyoutItem { Text = "History" };
-        historyItem.Click += (s, e) => NavigateTo("History");
+        historyItem.Command = new RelayCommand(() => NavigateTo("History"));
         menuFlyout.Items.Add(historyItem);
 
         menuFlyout.Items.Add(new MenuFlyoutSeparator());
 
         var exitItem = new MenuFlyoutItem { Text = "Exit" };
-        exitItem.Click += (s, e) => _dispatcherQueue.TryEnqueue(() => ExitRequested?.Invoke(this, EventArgs.Empty));
+        exitItem.Command = new RelayCommand(() => ExitRequested?.Invoke(this, EventArgs.Empty));
         menuFlyout.Items.Add(exitItem);
 
         _trayIcon.ContextFlyout = menuFlyout;

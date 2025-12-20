@@ -37,6 +37,7 @@ public sealed partial class MainWindow : Window
         { "ImageTools", typeof(ImageToolsPage) },
         // Maintenance
         { "HealthCheck", typeof(HealthCheckPage) },
+        { "GameMode", typeof(GameModePage) },
         { "BrowserPrivacy", typeof(BrowserPrivacyPage) },
         { "DriveWiper", typeof(DriveWiperPage) },
         { "ScheduledCleaning", typeof(ScheduledCleaningPage) },

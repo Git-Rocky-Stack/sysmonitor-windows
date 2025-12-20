@@ -55,6 +55,8 @@
             <converters:DoubleToStringConverter x:Key="DoubleToStringConverter"/>
             <converters:StatusToBackgroundConverter x:Key="StatusToBackgroundConverter"/>
             <converters:BoolToMonitoringTextConverter x:Key="BoolToMonitoringTextConverter"/>
+            <converters:GameModeIconConverter x:Key="GameModeIconConverter"/>
+            <converters:GameModeTextConverter x:Key="GameModeTextConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

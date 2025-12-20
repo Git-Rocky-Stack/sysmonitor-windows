@@ -122,6 +122,11 @@
                         <FontIcon Glyph="&#xE8E1;" Foreground="{StaticResource SuccessBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Game Mode" Tag="GameMode">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7FC;" Foreground="{StaticResource SuccessBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Browser Privacy" Tag="BrowserPrivacy">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE72E;" Foreground="{StaticResource SuccessBrush}"/>

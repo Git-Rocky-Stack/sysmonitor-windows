@@ -14,7 +14,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseRidGraph>true</UseRidGraph>
-    <Version>2.1.0</Version>
+    <Version>2.1.1</Version>
     <Authors>Rocky Stack</Authors>
     <Company>Rocky Stack</Company>
     <Product>SysMonitor for Windows</Product>
