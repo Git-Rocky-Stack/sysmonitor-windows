@@ -190,7 +190,19 @@ public sealed partial class MainWindow : Window
     private void ExitApplication()
     {
         _isExiting = true;
+
+        // Dispose tray icon first
+        try
+        {
+            _trayService?.Dispose();
+        }
+        catch { }
+
+        // Close window
         Close();
+
+        // Force exit the application
+        Application.Current.Exit();
     }
 
     private void NavigateToPage(string tag)

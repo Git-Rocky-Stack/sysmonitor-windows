@@ -234,17 +234,18 @@
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Game Mode" FontSize="16" FontWeight="Bold"
                                        Foreground="{StaticResource SuccessBrush}"/>
-                            <TextBlock Text="One-click gaming optimization" FontSize="12"
+                            <TextBlock Text="Advanced gaming optimization suite" FontSize="12"
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
                     </StackPanel>
 
                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="22">
-                        Game Mode optimizes your system for gaming with a single click. It closes background
-                        applications, switches to High Performance power plan, and frees up RAM for maximum
-                        gaming performance.
+                        Game Mode is a comprehensive gaming optimization suite with four powerful features:
+                        Auto Game Mode, Performance Profiles, FPS Overlay, and RAM Cache. Optimize your
+                        system for maximum gaming performance with intelligent automation and real-time monitoring.
                     </TextBlock>
 
+                    <!-- Core Features -->
                     <Grid ColumnSpacing="24">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -268,11 +269,80 @@
                                 <Run> - Optimizes memory for gaming</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Easy Toggle</Run>
-                                <Run> - Enable/disable with one click</Run>
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Session Stats</Run>
+                                <Run> - Shows processes killed and RAM freed</Run>
                             </TextBlock>
                         </StackPanel>
                     </Grid>
+
+                    <!-- Advanced Features -->
+                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Advanced Features" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"/>
+
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Spacing="8">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" FontSize="12">Auto Game Mode</TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
+                                            Automatically enables Game Mode when games are detected. Includes 50+ predefined games plus custom game support.
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}" FontSize="12">Performance Profiles</TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
+                                            Save and switch between optimization presets: Maximum Performance, Balanced Gaming, or Streaming Mode.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="8">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" FontSize="12">FPS Overlay (F1 HUD)</TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
+                                            F1 Telemetry-style overlay showing FPS, CPU/GPU temps (°F), usage %, RAM, power draw, and fan speed. Drag to reposition.
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource CyanAccentBrush}" FontSize="12">RAM Cache</TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
+                                            Redirect temp files to RAM for faster I/O. Configurable sizes: 512MB, 1GB, 2GB, or 4GB.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- System Monitoring -->
+                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Real-time System Monitoring" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"/>
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
+                                        <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Fan Speeds</Run>
+                                        <Run> - CPU and system fan RPM (requires hardware sensor support)</Run>
+                                    </TextBlock>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
+                                        <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Power Draw</Run>
+                                        <Run> - CPU, GPU, and total system wattage</Run>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
 
                     <!-- Target Apps Info -->
                     <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="12">
@@ -385,7 +455,7 @@
                         <StackPanel Grid.Column="1" Spacing="8">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Temperature Alerts</Run>
-                                <Run> - CPU (75°C/90°C) and GPU warnings</Run>
+                                <Run> - CPU (167°F/194°F) and GPU warnings</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Memory Alerts</Run>
@@ -646,40 +716,73 @@
                 </StackPanel>
             </Border>
 
-            <!-- Changelog Card - v2.1.1 -->
+            <!-- Changelog Card - v2.2.0 -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{StaticResource CyanAccentBrush}"/>
-                        <TextBlock Text="Release Notes - v2.1.1" FontSize="16" FontWeight="Bold"
+                        <TextBlock Text="Release Notes - v2.2.0" FontSize="16" FontWeight="Bold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                         <Border Background="{StaticResource WarningBrush}" CornerRadius="4" Padding="8,2">
                             <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
                         </Border>
                     </StackPanel>
 
-                    <!-- New in v2.1.1 -->
+                    <!-- New in v2.2.0 -->
                     <StackPanel Spacing="8">
-                        <TextBlock Text="New in v2.1.1" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                        <TextBlock Text="New in v2.2.0" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Advanced Game Mode with 4 powerful features</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Auto Game Mode - Auto-detect games and enable optimization</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Performance Profiles - Save/switch between optimization presets</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> FPS Overlay - F1 Telemetry HUD with real-time stats (drag to reposition)</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> RAM Cache - Redirect temp files to RAM for faster I/O</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Fan speed and power draw monitoring widgets</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Hardware sensor diagnostic viewer</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> Admin rights built-in for full hardware sensor access</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                                <Run> All temperatures now display in Fahrenheit (°F)</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{StaticResource SurfaceBrush}"/>
+
+                    <!-- v2.1.1 Features -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Features from v2.1.1" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
                                 <Run> Game Mode - One-click gaming optimization</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Closes background apps (browsers, Discord, Spotify, etc.)</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Sets Windows High Performance power plan automatically</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> RAM optimization integrated into Game Mode activation</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
                                 <Run> Session stats showing processes killed and memory freed</Run>
                             </TextBlock>
                         </StackPanel>

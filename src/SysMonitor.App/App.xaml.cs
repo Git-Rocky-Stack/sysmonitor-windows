@@ -217,6 +217,22 @@ public partial class App : Application
                 services.AddSingleton<GameModeService>();
                 services.AddSingleton<IGameModeService>(sp => sp.GetRequiredService<GameModeService>());
 
+                // Auto Game Mode Service (automatic game detection)
+                services.AddSingleton<AutoGameModeService>();
+                services.AddSingleton<IAutoGameModeService>(sp => sp.GetRequiredService<AutoGameModeService>());
+
+                // Profile Service (performance profiles)
+                services.AddSingleton<ProfileService>();
+                services.AddSingleton<IProfileService>(sp => sp.GetRequiredService<ProfileService>());
+
+                // RAM Cache Service (fast temp storage)
+                services.AddSingleton<RamCacheService>();
+                services.AddSingleton<IRamCacheService>(sp => sp.GetRequiredService<RamCacheService>());
+
+                // FPS Overlay Service (real-time stats overlay)
+                services.AddSingleton<FpsOverlayService>();
+                services.AddSingleton<IFpsOverlayService>(sp => sp.GetRequiredService<FpsOverlayService>());
+
                 // Tray Icon Service (system tray integration)
                 services.AddSingleton<TrayIconService>();
 
