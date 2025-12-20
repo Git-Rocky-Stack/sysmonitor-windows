@@ -224,6 +224,69 @@
                 </StackPanel>
             </Border>
 
+            <!-- Game Mode -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource SuccessBrush}" Width="40" Height="40">
+                            <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="White"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Game Mode" FontSize="16" FontWeight="Bold"
+                                       Foreground="{StaticResource SuccessBrush}"/>
+                            <TextBlock Text="One-click gaming optimization" FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="22">
+                        Game Mode optimizes your system for gaming with a single click. It closes background
+                        applications, switches to High Performance power plan, and frees up RAM for maximum
+                        gaming performance.
+                    </TextBlock>
+
+                    <Grid ColumnSpacing="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Close Background Apps</Run>
+                                <Run> - Kills browsers, Discord, Spotify, etc.</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">High Performance Mode</Run>
+                                <Run> - Sets Windows power plan automatically</Run>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Free Up RAM</Run>
+                                <Run> - Optimizes memory for gaming</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Easy Toggle</Run>
+                                <Run> - Enable/disable with one click</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Target Apps Info -->
+                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Apps Closed by Game Mode:" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
+                                Chrome, Firefox, Edge, Opera, Brave, Discord, Slack, Teams, Skype, Zoom, Telegram,
+                                Spotify, iTunes, OneDrive, Dropbox, Google Drive Sync, Steam Web Helper
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- Utilities -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
@@ -583,53 +646,66 @@
                 </StackPanel>
             </Border>
 
-            <!-- Changelog Card - v2.1.0 -->
+            <!-- Changelog Card - v2.1.1 -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{StaticResource CyanAccentBrush}"/>
-                        <TextBlock Text="Release Notes - v2.1.0" FontSize="16" FontWeight="Bold"
+                        <TextBlock Text="Release Notes - v2.1.1" FontSize="16" FontWeight="Bold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                         <Border Background="{StaticResource WarningBrush}" CornerRadius="4" Padding="8,2">
                             <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
                         </Border>
                     </StackPanel>
 
-                    <!-- New in v2.1.0 -->
+                    <!-- New in v2.1.1 -->
                     <StackPanel Spacing="8">
-                        <TextBlock Text="New in v2.1.0" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                        <TextBlock Text="New in v2.1.1" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> System Tray Mode - minimize to tray with live CPU/RAM stats tooltip</Run>
+                                <Run> Game Mode - One-click gaming optimization</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Right-click tray menu for quick navigation to Dashboard, CPU, Memory, History</Run>
+                                <Run> Closes background apps (browsers, Discord, Spotify, etc.)</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Real-time alerts with toast notifications for temperature/memory thresholds</Run>
+                                <Run> Sets Windows High Performance power plan automatically</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Smart 5-minute cooldown prevents notification spam</Run>
+                                <Run> RAM optimization integrated into Game Mode activation</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> History page with interactive LiveCharts2 graphs for CPU, Memory, Temperature</Run>
+                                <Run> Session stats showing processes killed and memory freed</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> 30-day historical data storage with SQLite (auto-purge old data)</Run>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{StaticResource SurfaceBrush}"/>
+
+                    <!-- v2.1.0 Features -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Features from v2.1.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> System Tray Mode with live CPU/RAM stats tooltip</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Time range selector: 1 hour, 24 hours, 7 days, 30 days</Run>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> Right-click tray menu, real-time alerts with toast notifications</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> Background metric recording every 30 seconds</Run>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> History page with interactive LiveCharts2 graphs</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="•"/>
+                                <Run> 30-day historical data storage with SQLite</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>

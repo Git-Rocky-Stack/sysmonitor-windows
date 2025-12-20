@@ -599,3 +599,25 @@ public class BoolToMonitoringTextConverter : IValueConverter
     }
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }
+
+public class GameModeIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isEnabled)
+            return isEnabled ? "\uE711" : "\uE768"; // Stop : Play
+        return "\uE768";
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}
+
+public class GameModeTextConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is bool isEnabled)
+            return isEnabled ? "DISABLE" : "ENABLE GAME MODE";
+        return "ENABLE GAME MODE";
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}
