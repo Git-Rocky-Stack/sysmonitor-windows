@@ -105,6 +105,9 @@ public class TrayIconService : IDisposable
 
         _trayIcon.ContextFlyout = menuFlyout;
 
+        // Force create to show the icon in the tray
+        _trayIcon.ForceCreate();
+
         // Start tooltip update loop
         _cts = new CancellationTokenSource();
         _updateTask = UpdateTooltipLoopAsync(_cts.Token);
