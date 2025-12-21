@@ -2,17 +2,17 @@
 ; Created by Rocky Stack / Strategia
 ; ============================================
 
-#define MyAppName "SysMonitor for Windows"
-#define MyAppVersion "1.0.0"
-#define MyAppPublisher "Rocky Stack"
-#define MyAppURL "https://rockystack.com"
+#define MyAppName "STX.1 System Monitor"
+#define MyAppVersion "2.2.0"
+#define MyAppPublisher "Rocky Stack / Strategia-X"
+#define MyAppURL "https://github.com/Git-Rocky-Stack/sysmonitor-windows"
 #define MyAppExeName "SysMonitor.App.exe"
 #define MyAppAssocName "SysMonitor Configuration"
 #define MyAppAssocExt ".sysmon"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
-; Path to your published build output (adjust if needed)
-#define SourcePath "..\src\SysMonitor.App\bin\x64\Release\net8.0-windows10.0.22621.0\win-x64"
+; Path to your published build output
+#define SourcePath "..\publish\release-folder"
 
 [Setup]
 ; Basic installer info
@@ -40,7 +40,7 @@ InfoAfterFile=README_AFTER.txt
 
 ; Output settings
 OutputDir=output
-OutputBaseFilename=SysMonitor_Setup_{#MyAppVersion}
+OutputBaseFilename=STX1-SystemMonitor-v{#MyAppVersion}-Setup
 SetupIconFile=installer_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
@@ -60,7 +60,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 VersionInfoVersion={#MyAppVersion}
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} Setup
-VersionInfoCopyright=Copyright (C) 2024 {#MyAppPublisher}
+VersionInfoCopyright=Copyright (C) 2024-2025 {#MyAppPublisher}
 VersionInfoProductName={#MyAppName}
 VersionInfoProductVersion={#MyAppVersion}
 
@@ -104,8 +104,8 @@ Root: HKLM; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\{#MyAppExeName}"" --minimized"; Flags: uninsdeletevalue; Tasks: startupicon
 
 [Run]
-; Option to launch after install
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+; Option to launch after install (shellexec needed for UAC elevation)
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent shellexec
 
 [UninstallDelete]
 ; Clean up app data folder on uninstall (optional - user data)
