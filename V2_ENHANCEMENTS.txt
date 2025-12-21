@@ -1,0 +1,204 @@
+================================================================================
+         STX.1 SYSTEM MONITOR - V2 COMPLETE ENHANCEMENT LIST
+================================================================================
+
+================================================================================
+v2.2.0 - Advanced Game Mode, FPS Overlay & Fahrenheit Temps
+================================================================================
+
+NEW FEATURES
+------------
+
+* Auto Game Mode - Automatically enables Game Mode when games are detected
+  - 50+ predefined popular games (Valorant, CS2, GTA5, Fortnite, Apex Legends, etc.)
+  - Custom game support - add your own games
+  - Background process monitoring with 2-second scan interval
+
+* Performance Profiles - Save and switch between optimization presets
+  - Maximum Performance (kills all background apps)
+  - Balanced Gaming (keeps essential apps)
+  - Streaming Mode (keeps Discord/OBS)
+
+* FPS Overlay (F1 HUD) - F1 Telemetry-style real-time stats overlay
+  - FPS, CPU/GPU temps (F), CPU/GPU usage %, RAM usage
+  - Power draw (CPU/GPU/Total wattage)
+  - Fan speed indicators
+  - Drag to reposition anywhere on screen
+  - Chrome bezel racing-inspired design
+  - Always-on-top transparent window
+
+* RAM Cache - Redirect temp files to RAM for faster I/O
+  - Configurable sizes: 512MB, 1GB, 2GB, 4GB
+  - Usage monitoring with progress bar
+  - Automatic cleanup on disable
+
+* System Monitoring Widgets (Game Mode page)
+  - Fan Speed monitoring - CPU and system fan RPM
+  - Power Draw monitoring - CPU, GPU, and total wattage
+  - Hardware Sensor Diagnostic Viewer - view all available sensors
+
+IMPROVEMENTS
+------------
+* Admin Rights Built-in - App runs as administrator automatically
+* Fahrenheit Temperatures - All temperature displays now use F
+* Tray Exit Fixed - System tray Exit menu properly closes the application
+* Updated User Guide - Comprehensive documentation for all features
+
+
+================================================================================
+v2.1.1 - Game Mode
+================================================================================
+
+NEW FEATURES
+------------
+
+* Game Mode - One-click gaming optimization
+  - Closes background apps (browsers, Discord, Spotify, Teams, Slack, etc.)
+  - Sets Windows High Performance power plan automatically
+  - RAM optimization integrated into activation
+  - Session stats showing processes killed and memory freed
+  - Easy toggle enable/disable
+
+TARGET APPS CLOSED
+------------------
+Chrome, Firefox, Edge, Opera, Brave, Discord, Slack, Teams, Skype, Zoom,
+Telegram, Spotify, iTunes, OneDrive, Dropbox, Google Drive Sync, Steam Web Helper
+
+
+================================================================================
+v2.1.0 - System Tray, Alerts & Historical Graphs
+================================================================================
+
+NEW FEATURES
+------------
+
+* System Tray Mode
+  - Live stats tooltip - hover for CPU/RAM usage
+  - Minimize to tray - close button hides to tray (configurable)
+  - Quick access menu - right-click for navigation
+  - One-click restore - left-click to show window
+
+* Real-time Alerts with toast notifications
+  - Temperature alerts - CPU (167F/194F warning/critical), GPU (176F/203F)
+  - Memory alert - notification when RAM exceeds 80%
+  - Battery alerts - low (20%) and critical (10%) warnings
+  - Smart cooldown - 5-minute delay prevents notification spam
+
+* Historical Data & Graphs
+  - 30-day history - automatic metric recording every 30 seconds
+  - SQLite storage - efficient local database with auto-purge
+  - Interactive charts - LiveCharts2 graphs for CPU, Memory, Temperature
+  - Time range selector - 1 hour, 24 hours, 7 days, 30 days views
+
+TECHNICAL
+---------
+* H.NotifyIcon.WinUI for system tray integration
+* Entity Framework Core with SQLite for historical data
+* LiveCharts2 for interactive charting
+
+
+================================================================================
+v2.0.1 - Performance Monitor & Improvements
+================================================================================
+
+NEW FEATURES
+------------
+
+* Performance Monitor Page - Track application operation metrics
+  - System overview cards: Memory usage, GC pressure, frame rate, tracked operations
+  - Operation metrics table with count, average, min, max, P95, P99 timing
+  - Performance status indicators (Excellent/Good/Fair/Poor/Critical)
+  - Pause/Resume monitoring controls
+  - Clear metrics functionality
+  - Export metrics to CSV for external analysis
+
+* Window Icon - App icon displays in Windows title bar
+* Global Crash Logging - Detailed exception reporting with crash files saved to Desktop
+
+UI IMPROVEMENTS
+---------------
+* Chrome bezel styling on action buttons
+* Performance page follows app design patterns with centered logo header
+
+TECHNICAL
+---------
+* Performance tracking integrated across all major operations
+
+
+================================================================================
+v2.0.0 / v1.0.0 - Foundation Release
+================================================================================
+
+SYSTEM MONITORING
+-----------------
+* Dashboard - Real-time system overview with all key metrics
+* CPU Monitor - Processor usage, cores, threads, performance graphs
+* GPU Monitor - Graphics card stats, temperature, VRAM usage
+* Memory Monitor - RAM usage with optimization options
+* Disk Analyzer - Storage space, drive health, usage breakdown
+* Network Monitor - Upload/download speeds in real-time
+* Battery Monitor - Charge level, status, health info
+* Temperature Monitor - CPU/GPU thermal monitoring with LibreHardwareMonitor
+* System Info - Detailed hardware and OS information
+
+CLEANUP & OPTIMIZATION
+----------------------
+* Directory Cleaner - Remove temp files, cache, and junk
+* Registry Cleaner - Fix broken registry entries safely
+* Browser Privacy - Clear browsing data, cookies, history
+* Startup Manager - Control which apps run at boot
+* Drive Wiper - Secure file deletion (unrecoverable)
+* Scheduled Cleaning - Automate cleanup tasks
+* Health Check - Comprehensive system analysis
+
+UTILITIES & TOOLS
+-----------------
+* Large Files Finder - Find space-hogging files quickly
+* Duplicate Finder - Locate and remove duplicate files
+* File Tools - Batch rename, format conversion
+* PDF Tools - Merge, split, convert PDFs
+* PDF Editor - Edit PDF documents
+* Image Tools - Resize, compress, convert images
+* Backup Manager - System backup and restore
+
+WIRELESS & NETWORK
+------------------
+* WiFi Analyzer - Scan and analyze wireless networks
+* Bluetooth Scanner - Discover Bluetooth devices
+* Network Mapper - Discover devices on your network
+
+PROCESS MANAGEMENT
+------------------
+* Process Manager - View and manage running processes
+* Installed Programs - View and uninstall applications
+* Driver Updater - Check for driver updates
+
+TECHNICAL FOUNDATION
+--------------------
+* Framework: .NET 8.0 + WinUI 3
+* Architecture: x64 (64-bit)
+* Target OS: Windows 10/11 (Build 22621+)
+* MVVM pattern with CommunityToolkit.Mvvm
+* LibreHardwareMonitor for hardware sensors
+* Modern dark theme UI with STX.1 branding
+
+
+================================================================================
+SUMMARY STATISTICS
+================================================================================
+
+Version   | New Features | Description
+----------|--------------|------------------------------------------
+v2.2.0    | 12+          | Advanced Game Mode, FPS Overlay, Fahrenheit
+v2.1.1    | 5            | Game Mode
+v2.1.0    | 8            | System Tray, Alerts, History Graphs
+v2.0.1    | 4            | Performance Monitor
+v1.0.0    | 30+          | Foundation Release
+
+TOTAL V2 ENHANCEMENTS: 50+ major features and improvements
+
+
+================================================================================
+                    Developed by Rocky Stack / Strategia-X
+                     Strategic. Excellence. Engineered.
+================================================================================
