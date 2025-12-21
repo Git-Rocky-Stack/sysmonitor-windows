@@ -1,0 +1,80 @@
+
+Skip to content
+Navigation Menu
+Git-Rocky-Stack
+sysmonitor-windows
+
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+
+    Settings
+
+    Releases v2.0.1 
+
+v2.0.1: Performance Monitor & Improvements Latest
+@Git-Rocky-Stack Git-Rocky-Stack released this 9 minutes ago
+v2.0.1
+205723b
+What's New in v2.0.1
+🚀 New Features
+
+    Performance Monitor Page - Track application operation metrics in real-time
+        System overview cards: Memory usage, GC pressure, frame rate, tracked operations
+        Operation metrics table with count, average, min, max, P95, P99 timing
+        Performance status indicators (Excellent/Good/Fair/Poor/Critical)
+        Pause/Resume monitoring and Clear metrics controls
+        Export metrics to CSV for external analysis
+
+    Window Icon - App icon now displays in the Windows title bar
+
+    Global Crash Logging - Detailed exception reporting with crash files saved to Desktop
+
+🎨 UI Improvements
+
+    Chrome bezel styling on Performance page action buttons for consistency
+    Performance page layout follows app design patterns with centered logo header
+
+📚 Documentation
+
+    Updated User Guide with Performance Monitor documentation
+    Updated release notes section with v2.0.1 changes
+
+🛠️ Technical
+
+    Performance tracking integrated across all major operations (Dashboard, Memory, CPU, Cleaner, Large Files, Processes)
+    Version bumped to 2.0.1
+
+Full Changelog: v1.0.0...v2.0.1
+Assets 2
+
+    Source code (zip)
+    15 minutes ago
+    Source code (tar.gz)
+    15 minutes ago
+
+Source code (zip)
+15 minutes ago
+Assets 2
+
+    Source code (zip)
+    15 minutes ago
+    Source code (tar.gz)
+    15 minutes ago
+
+Footer
+© 2025 GitHub, Inc.
+Footer navigation
+
+    Terms
+    Privacy
+    Security
+    Status
+    Community
+    Docs
+    Contact
+
