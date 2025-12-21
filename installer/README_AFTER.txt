@@ -19,9 +19,8 @@ TIPS FOR BEST RESULTS:
 
 NEED HELP?
 ----------
-* Documentation: https://rockystack.com/sysmonitor/docs
-* Support: https://rockystack.com/support
-* Email: support@rockystack.com
+* Documentation: https://www.strategia-x.com/windows-app.html
+* Email: support@strategia-x.com
 
 IMPORTANT NOTES:
 ----------------
@@ -32,5 +31,6 @@ IMPORTANT NOTES:
 Thank you for choosing SysMonitor!
 
 ============================================================
-             (C) 2024 Rocky Stack - All Rights Reserved
+        (C) 2024-2025 Strategia-X - All Rights Reserved
+            https://www.strategia-x.com/
 ============================================================
