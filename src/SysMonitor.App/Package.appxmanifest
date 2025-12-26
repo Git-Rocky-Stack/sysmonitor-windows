@@ -7,14 +7,14 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="StrategiaX.STX1SystemMonitor"
-    Publisher="CN=Strategia-X"
+    Name="Strategia-X.STX-1ULTIMATESystemMonitor"
+    Publisher="CN=3733E780-6A80-442B-A884-5A837B47BF2A"
     Version="2.2.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="a1b2c3d4-e5f6-7890-abcd-ef1234567890" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>STX.1 System Monitor</DisplayName>
+    <DisplayName>STX-1 ULTIMATE System Monitor</DisplayName>
     <PublisherDisplayName>Strategia-X</PublisherDisplayName>
     <Logo>Assets\StoreLogo\StoreLogo.png</Logo>
   </Properties>
@@ -34,7 +34,7 @@
       EntryPoint="$targetentrypoint$">
 
       <uap:VisualElements
-        DisplayName="STX.1 System Monitor"
+        DisplayName="STX-1 ULTIMATE System Monitor"
         Description="Professional Windows system monitoring and optimization. Real-time hardware telemetry, Game Mode with FPS overlay, smart alerts, and comprehensive optimization tools."
         BackgroundColor="#D40000"
         Square150x150Logo="Assets\StoreLogo\Square150x150Logo.png"
