@@ -9,7 +9,6 @@
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
-    <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -17,9 +16,27 @@
     <Version>2.2.0</Version>
     <Authors>Rocky Stack</Authors>
     <Company>Rocky Stack</Company>
-    <Product>SysMonitor for Windows</Product>
-    <Description>Windows System Monitor and Optimizer</Description>
+    <Product>STX.1 System Monitor</Product>
+    <Description>Professional Windows system monitoring and optimization with Game Mode, FPS overlay, and real-time alerts.</Description>
     <ApplicationIcon>app.ico</ApplicationIcon>
+
+    <!-- MSIX Package Settings -->
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
+  </PropertyGroup>
+
+  <!-- Default: Unpackaged for development -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <WindowsPackageType>None</WindowsPackageType>
+  </PropertyGroup>
+
+  <!-- MSIX Packaged for Release/Store -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <WindowsPackageType>MSIX</WindowsPackageType>
+    <AppxPackageDir>$(SolutionDir)publish\msix\</AppxPackageDir>
+    <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+    <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+    <PackageCertificateThumbprint>52E78D80039EF8DC26D9EFD64A381B93133A8154</PackageCertificateThumbprint>
   </PropertyGroup>
 
   <ItemGroup>
@@ -58,6 +75,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\DonateQR.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Store Logo Assets -->
+  <ItemGroup>
+    <Content Include="Assets\StoreLogo\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

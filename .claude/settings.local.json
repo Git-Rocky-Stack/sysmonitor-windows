@@ -87,7 +87,19 @@
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages/builds/latest --jq \".status\")",
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages --jq \"{url: .html_url, cname: .cname, https_enforced: .https_enforced, status: .status}\")",
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages -X PUT -F https_enforced=true -F cname=stx-1.com -F build_type=legacy -F source[branch]=master -F source[path]=/)",
-      "WebFetch(domain:stx-1.com)"
+      "WebFetch(domain:stx-1.com)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release view v2.2.0 --repo Git-Rocky-Stack/sysmonitor-windows --json assets --jq \".assets[] | {name, state, size, url}\")",
+      "Bash(curl:*)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release delete-asset v2.2.0 STX1-SystemMonitor-v2.2.0-Setup.exe --repo Git-Rocky-Stack/sysmonitor-windows --yes)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release upload v2.2.0 \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\sysmonitor-windows\\\\installer\\\\output\\\\STX1-SystemMonitor-v2.2.0-Setup.exe\" --repo Git-Rocky-Stack/sysmonitor-windows)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo view Git-Rocky-Stack/sysmonitor-windows --json visibility,isPrivate)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo edit Git-Rocky-Stack/sysmonitor-windows --visibility public)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo edit Git-Rocky-Stack/sysmonitor-windows --visibility public --accept-visibility-change-consequences)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo view Git-Rocky-Stack/sysmonitor-windows --json visibility)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release view v2.2.0 --repo Git-Rocky-Stack/sysmonitor-windows --json body --jq \".body\")",
+      "Bash(del \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\stx1-website\\\\update-guide.ps1\")",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release upload v2.2.0 \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\sysmonitor-windows\\\\src\\\\SysMonitor.App\\\\publish\\\\msix\\\\STX1-SystemMonitor-v2.2.0-MSIX.zip\" --repo Git-Rocky-Stack/sysmonitor-windows)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release view v2.2.0 --repo Git-Rocky-Stack/sysmonitor-windows --json assets --jq \".assets[] | {name, size}\")"
     ]
   }
 }
