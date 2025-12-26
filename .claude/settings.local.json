@@ -72,7 +72,22 @@
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release list --repo Git-Rocky-Stack/sysmonitor-windows --limit 10)",
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release list --repo Git-Rocky-Stack/sysmonitor-windows --limit 20)",
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release view v2.2.0 --repo Git-Rocky-Stack/sysmonitor-windows --json assets --jq \".assets[] | {name, state, size}\")",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(git lfs install:*)",
+      "Bash(git lfs track:*)",
+      "WebFetch(domain:www.ferrari.com)",
+      "Bash(start \"\" \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\stx1-website\\\\index.html\")",
+      "WebSearch",
+      "Bash(git init:*)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo create stx1-website --public --description \"STX.1 System Monitor - Ferrari-inspired luxury website\" --source . --push)",
+      "Bash(ls:*)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" repo edit Git-Rocky-Stack/stx1-website --enable-pages)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages -X POST -f build_type=legacy -f source[branch]=master -f source[path]=/)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages/builds/latest)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages/builds/latest --jq \".status\")",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages --jq \"{url: .html_url, cname: .cname, https_enforced: .https_enforced, status: .status}\")",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/Git-Rocky-Stack/stx1-website/pages -X PUT -F https_enforced=true -F cname=stx-1.com -F build_type=legacy -F source[branch]=master -F source[path]=/)",
+      "WebFetch(domain:stx-1.com)"
     ]
   }
 }
