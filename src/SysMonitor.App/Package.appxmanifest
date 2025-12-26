@@ -8,14 +8,14 @@
 
   <Identity
     Name="StrategiaX.STX1SystemMonitor"
-    Publisher="CN=Rocky Stack"
+    Publisher="CN=Strategia-X"
     Version="2.2.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="a1b2c3d4-e5f6-7890-abcd-ef1234567890" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>STX.1 System Monitor</DisplayName>
-    <PublisherDisplayName>Rocky Stack</PublisherDisplayName>
+    <PublisherDisplayName>Strategia-X</PublisherDisplayName>
     <Logo>Assets\StoreLogo\StoreLogo.png</Logo>
   </Properties>
 
