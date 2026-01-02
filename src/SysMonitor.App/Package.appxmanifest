@@ -9,7 +9,7 @@
   <Identity
     Name="Strategia-X.STX-1ULTIMATESystemMonitor"
     Publisher="CN=3733E780-6A80-442B-A884-5A837B47BF2A"
-    Version="2.2.0.0" />
+    Version="2.2.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="a1b2c3d4-e5f6-7890-abcd-ef1234567890" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
