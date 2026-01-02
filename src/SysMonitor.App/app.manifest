@@ -15,8 +15,9 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- requireAdministrator: Required for LibreHardwareMonitor to read hardware sensors -->
-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+        <!-- asInvoker: Required for MSIX/Microsoft Store deployment -->
+        <!-- Note: Hardware sensors (temps, fans, power) require running as admin separately -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>
   </trustInfo>

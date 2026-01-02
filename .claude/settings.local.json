@@ -100,7 +100,12 @@
       "Bash(del \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\stx1-website\\\\update-guide.ps1\")",
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release upload v2.2.0 \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\sysmonitor-windows\\\\src\\\\SysMonitor.App\\\\publish\\\\msix\\\\STX1-SystemMonitor-v2.2.0-MSIX.zip\" --repo Git-Rocky-Stack/sysmonitor-windows)",
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release view v2.2.0 --repo Git-Rocky-Stack/sysmonitor-windows --json assets --jq \".assets[] | {name, size}\")",
-      "WebFetch(domain:www.strategia-x.com)"
+      "WebFetch(domain:www.strategia-x.com)",
+      "Bash(start \"\" \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\sysmonitor-windows\\\\src\\\\SysMonitor.App\\\\bin\\\\x64\\\\Release\\\\net8.0-windows10.0.22621.0\\\\SysMonitor.App.exe\")",
+      "Bash(cmd /c copy \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\sysmonitor-windows\\\\src\\\\SysMonitor.App\\\\publish\\\\msix\\\\SysMonitor.App_2.2.0.0_Test\\\\SysMonitor.App_2.2.0.0_x64.msix\" \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\sysmonitor-windows\\\\publish\\\\STX1-SystemMonitor-v2.2.0-Store.msix\")",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release upload v2.2.0 \"C:\\\\Users\\\\User\\\\Desktop\\\\Development Projects\\\\Strategia-Enhanced-App\\\\sysmonitor-windows\\\\publish\\\\STX1-SystemMonitor-v2.2.0-Store.msix\" --repo Git-Rocky-Stack/sysmonitor-windows --clobber)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" release view v2.2.0 --repo Git-Rocky-Stack/sysmonitor-windows --json assets --jq \".assets[] | .name\")",
+      "Bash(git pull:*)"
     ]
   }
 }
