@@ -372,7 +372,7 @@
                     </StackPanel>
                     <TextBlock Text="Strategic. Excellence. Engineered." Foreground="{StaticResource PrimaryBrush}"
                                FontSize="12" Margin="0,8,0,0"/>
-                    <TextBlock Text="© 2024 Strategia-X. All rights reserved."
+                    <TextBlock Text="© 2024-2025 Rocky Stack. All rights reserved."
                                Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                 </StackPanel>
             </Border>
