@@ -1,10 +1,10 @@
 ; SysMonitor for Windows - Inno Setup Script
-; Created by Rocky Stack / Strategia
+; Created by Rocky Stack
 ; ============================================
 
 #define MyAppName "STX.1 System Monitor"
 #define MyAppVersion "2.2.0"
-#define MyAppPublisher "Rocky Stack / Strategia-X"
+#define MyAppPublisher "Rocky Stack"
 #define MyAppURL "https://github.com/Git-Rocky-Stack/sysmonitor-windows"
 #define MyAppExeName "SysMonitor.App.exe"
 #define MyAppAssocName "SysMonitor Configuration"
