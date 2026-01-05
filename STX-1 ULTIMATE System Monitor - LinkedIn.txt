@@ -1,0 +1,38 @@
+STX-1 ULTIMATE System Monitor is now LIVE on the Microsoft Store!
+
+I'm thrilled to announce that STX-1 ULTIMATE System Monitor is officially available for download—completely free.
+
+Why free?
+
+Throughout my career, I've relied on countless utilities built by generous developers who asked for nothing in return. From the diagnostic tools that saved me during late-night troubleshooting sessions to the monitoring apps that helped me keep systems running smoothly—these tools shaped who I am as a professional.
+
+...And then there are the family, friends, and neighbors who've asked for a fix over the years. 
+The "my laptop is running slow" calls. The "I think I have a virus" texts. 
+
+This is my way of paying it forward.
+
+What is STX-1?
+
+A professional Windows system monitoring and optimization suite built for power users and gamers who demand more from their hardware.
+
+Key Features:
+
+  → Real-time CPU, GPU, RAM, and disk monitoring
+  → Temperature tracking to keep your system healthy
+  → Network throughput analysis
+  → Game Mode that automatically optimizes your system for peak gaming performance
+  → F1-style FPS Overlay for real-time telemetry without leaving your game
+  → Sleek, Ferrari-inspired interface
+
+Why I built this:
+
+After spending almost 25 years in the IT space; most system monitors are either too technical or too basic - or lack essential functionality and would require the use of several separate programs to offer a comprehensive toolkit. STX-1 bridges that gap; delivering professional-grade hardware telemetry in a clean, intuitive dashboard that anyone can use.
+
+Whether you're a gamer pushing for every frame, a content creator monitoring render performance, or a power user who wants full visibility into their system—STX-1 has you covered.
+
+Download free from the Microsoft Store:
+https://apps.microsoft.com/store/detail/9PMQCS3V61FG?cid=DevShareMCLPCS
+
+I'd love to hear your feedback. Drop a comment or send me a message with your thoughts!
+
+#Windows #SystemMonitor #Gaming #PCGaming #Software #MicrosoftStore #AppLaunch #Indiedev #TechTools #StrategiaX
