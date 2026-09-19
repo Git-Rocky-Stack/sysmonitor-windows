@@ -282,7 +282,7 @@ public class BackupService : IBackupService
                 FilePath = finalBackupPath,
                 Type = job.Type,
                 CreatedDate = DateTime.Now,
-                SizeBytes = new FileInfo(finalBackupPath).Length,
+                SizeBytes = GetBackupSize(finalBackupPath),
                 FileCount = processedFiles,
                 IsEncrypted = isEncrypted,
                 IsVerified = job.VerifyAfterBackup,
@@ -1142,6 +1142,12 @@ public class BackupService : IBackupService
 
         await Task.Run(() => ZipFile.CreateFromDirectory(sourcePath, zipPath, level, false), cancellationToken);
     }
+
+    /// <summary>Size on disk of a backup: the archive file, or every file in an uncompressed backup folder.</summary>
+    private static long GetBackupSize(string backupPath) =>
+        Directory.Exists(backupPath)
+            ? new DirectoryInfo(backupPath).EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length)
+            : new FileInfo(backupPath).Length;
 
     private async Task SaveManifestAsync(BackupManifest manifest, string path)
     {
