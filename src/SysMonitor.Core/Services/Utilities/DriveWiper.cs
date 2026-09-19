@@ -41,6 +41,15 @@ public class WipeResult
     public int PassesCompleted { get; set; }
     public TimeSpan Duration { get; set; }
     public string? ErrorMessage { get; set; }
+
+    /// <summary>Regular files that were overwritten and deleted.</summary>
+    public int FilesWiped { get; set; }
+
+    /// <summary>Symbolic links and junctions that were removed without touching their targets.</summary>
+    public int LinksRemoved { get; set; }
+
+    /// <summary>Files, links, or folders that could not be wiped or removed.</summary>
+    public List<string> FailedPaths { get; } = new();
 }
 
 public class DriveWiper : IDriveWiper
@@ -67,45 +76,19 @@ public class DriveWiper : IDriveWiper
                 return result;
             }
 
-            var fileInfo = new FileInfo(filePath);
-            var fileSize = fileInfo.Length;
-            var passes = GetPassCount(method);
-
-            // Remove read-only attribute if set
-            if (fileInfo.IsReadOnly)
-                fileInfo.IsReadOnly = false;
-
-            // Overwrite file content
-            for (int pass = 1; pass <= passes; pass++)
+            // Opening a symbolic link opens its target, so a link must never be overwritten:
+            // that would destroy a file the user did not select.
+            if (File.GetAttributes(filePath).HasFlag(FileAttributes.ReparsePoint))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var pattern = GetWipePattern(method, pass);
-                var passProgress = new Progress<double>(p =>
-                {
-                    var overallProgress = ((pass - 1) + p) / passes;
-                    progress?.Report(overallProgress);
-                });
-                await OverwriteFileAsync(filePath, fileSize, pattern, passProgress, cancellationToken);
-                result.PassesCompleted = pass;
+                result.ErrorMessage = "The selected file is a symbolic link or other reparse point; its target was not wiped.";
+                return result;
             }
 
-            // Truncate file to 0 bytes
-            await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
-            {
-                fs.SetLength(0);
-            }
-
-            // Rename file to random name before deletion (obscures original name)
-            var directory = Path.GetDirectoryName(filePath) ?? "";
-            var randomName = Path.Combine(directory, Guid.NewGuid().ToString("N"));
-            File.Move(filePath, randomName);
-
-            // Finally delete
-            File.Delete(randomName);
-
+            var (bytesWiped, passes) = await WipeRegularFileAsync(filePath, method, progress, cancellationToken);
             result.Success = true;
-            result.BytesWiped = fileSize * passes;
+            result.FilesWiped = 1;
+            result.BytesWiped = bytesWiped;
+            result.PassesCompleted = passes;
         }
         catch (OperationCanceledException)
         {
@@ -113,6 +96,7 @@ public class DriveWiper : IDriveWiper
         }
         catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Secure delete failed for {FilePath}", filePath);
             result.ErrorMessage = ex.Message;
         }
 
@@ -128,46 +112,97 @@ public class DriveWiper : IDriveWiper
 
         try
         {
-            if (!Directory.Exists(directoryPath))
+            var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directoryPath));
+            if (!Directory.Exists(root))
             {
                 result.ErrorMessage = "Directory not found";
                 return result;
             }
 
-            var files = Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories);
-            var totalFiles = files.Length;
-            var processedFiles = 0;
+            if (new DirectoryInfo(root).Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                result.ErrorMessage = "The selected folder is a link to another location; select the target folder itself. Nothing was wiped.";
+                return result;
+            }
 
-            foreach (var file in files)
+            if (IsProtectedLocation(root))
+            {
+                result.ErrorMessage = "Wiping the system drive root or Windows, Program Files, or ProgramData folders is not allowed. Nothing was wiped.";
+                return result;
+            }
+
+            var plan = BuildWipePlan(root, result.FailedPaths);
+
+            for (int i = 0; i < plan.Files.Count; i++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var fileProgress = new Progress<double>(p =>
-                {
-                    var overallProgress = (processedFiles + p) / totalFiles;
-                    progress?.Report(overallProgress);
-                });
+                var file = plan.Files[i];
+                var filesDone = i;
+                var fileProgress = new Progress<double>(p => progress?.Report((filesDone + p) / plan.Files.Count));
 
-                var fileResult = await SecureDeleteFileAsync(file, method, fileProgress, cancellationToken);
-
-                if (fileResult.Success)
+                try
                 {
-                    result.BytesWiped += fileResult.BytesWiped;
-                    result.PassesCompleted = fileResult.PassesCompleted;
+                    var (bytesWiped, passes) = await WipeRegularFileAsync(file, method, fileProgress, cancellationToken);
+                    result.FilesWiped++;
+                    result.BytesWiped += bytesWiped;
+                    result.PassesCompleted = passes;
                 }
-
-                processedFiles++;
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Could not wipe {FilePath}", file);
+                    result.FailedPaths.Add(file);
+                }
             }
 
-            // Delete empty directories
-            foreach (var dir in Directory.GetDirectories(directoryPath, "*", SearchOption.AllDirectories).Reverse())
+            // Remove links themselves; their targets are outside the selection and are never touched.
+            foreach (var (linkPath, isDirectory) in plan.Links)
             {
-                try { Directory.Delete(dir); } catch { }
+                try
+                {
+                    if (isDirectory)
+                        Directory.Delete(linkPath); // non-recursive: removes only the junction/symlink
+                    else
+                        File.Delete(linkPath);
+                    result.LinksRemoved++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Could not remove link {LinkPath}", linkPath);
+                    result.FailedPaths.Add(linkPath);
+                }
             }
 
-            try { Directory.Delete(directoryPath); } catch { }
+            // Folders were collected parent-first; delete children first. Folders that still hold
+            // items which could not be wiped cannot be removed and are reported.
+            for (int i = plan.Directories.Count - 1; i >= 0; i--)
+            {
+                try
+                {
+                    Directory.Delete(plan.Directories[i]);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Could not remove folder {DirectoryPath}", plan.Directories[i]);
+                    result.FailedPaths.Add(plan.Directories[i]);
+                }
+            }
 
-            result.Success = true;
+            result.Success = result.FailedPaths.Count == 0;
+            if (!result.Success)
+            {
+                result.ErrorMessage =
+                    $"{result.FailedPaths.Count} item(s) could not be wiped or removed (first: {result.FailedPaths[0]}). " +
+                    $"{result.FilesWiped} file(s) were wiped.";
+            }
+
+            _logger.LogInformation(
+                "Secure delete of {Root}: {FilesWiped} files wiped, {LinksRemoved} links removed without following, {Failed} failures",
+                root, result.FilesWiped, result.LinksRemoved, result.FailedPaths.Count);
         }
         catch (OperationCanceledException)
         {
@@ -175,11 +210,134 @@ public class DriveWiper : IDriveWiper
         }
         catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Secure delete failed for folder {DirectoryPath}", directoryPath);
             result.ErrorMessage = ex.Message;
         }
 
         result.Duration = DateTime.Now - startTime;
         return result;
+    }
+
+    /// <summary>
+    /// Lists everything under <paramref name="root"/> without following symbolic links or junctions.
+    /// Reparse points are returned as links to be removed, never descended into or opened.
+    /// </summary>
+    internal static WipePlan BuildWipePlan(string root, List<string> failedPaths)
+    {
+        var plan = new WipePlan();
+        var options = new EnumerationOptions
+        {
+            RecurseSubdirectories = false,
+            AttributesToSkip = 0,          // include hidden and system items
+            IgnoreInaccessible = false,    // unreadable folders are reported, not silently skipped
+            ReturnSpecialDirectories = false
+        };
+
+        var pending = new Stack<string>();
+        pending.Push(root);
+
+        while (pending.Count > 0)
+        {
+            var directory = pending.Pop();
+            plan.Directories.Add(directory);
+
+            try
+            {
+                foreach (var entry in new DirectoryInfo(directory).EnumerateFileSystemInfos("*", options))
+                {
+                    if (!IsWithin(root, entry.FullName))
+                        throw new InvalidOperationException($"Enumeration left the selected folder: {entry.FullName}");
+
+                    var isDirectory = entry.Attributes.HasFlag(FileAttributes.Directory);
+                    if (entry.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                        plan.Links.Add((entry.FullName, isDirectory));
+                    else if (isDirectory)
+                        pending.Push(entry.FullName);
+                    else
+                        plan.Files.Add(entry.FullName);
+                }
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            {
+                failedPaths.Add(directory);
+            }
+        }
+
+        return plan;
+    }
+
+    private static bool IsWithin(string root, string path)
+    {
+        var prefix = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
+        return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// True for the system drive root and for the Windows, Program Files, and ProgramData folders
+    /// (or anything inside them), which a file wiper must never target.
+    /// </summary>
+    internal static bool IsProtectedLocation(string fullPath)
+    {
+        var path = Path.TrimEndingDirectorySeparator(fullPath);
+        var systemRoot = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+        if (!string.IsNullOrEmpty(systemRoot) &&
+            string.Equals(path, Path.TrimEndingDirectorySeparator(systemRoot), StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var protectedFolders = new[]
+        {
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
+        };
+
+        return protectedFolders
+            .Where(folder => !string.IsNullOrEmpty(folder))
+            .Select(Path.TrimEndingDirectorySeparator)
+            .Any(folder => string.Equals(path, folder, StringComparison.OrdinalIgnoreCase) || IsWithin(folder, path));
+    }
+
+    internal sealed class WipePlan
+    {
+        public List<string> Files { get; } = new();
+        public List<(string Path, bool IsDirectory)> Links { get; } = new();
+        public List<string> Directories { get; } = new();
+    }
+
+    /// <summary>Overwrites a regular (non-link) file with every pass, then renames and deletes it.</summary>
+    private static async Task<(long BytesWiped, int Passes)> WipeRegularFileAsync(string filePath, WipeMethod method,
+        IProgress<double>? progress, CancellationToken cancellationToken)
+    {
+        var fileInfo = new FileInfo(filePath);
+        var fileSize = fileInfo.Length;
+        var passes = GetPassCount(method);
+
+        if (fileInfo.IsReadOnly)
+            fileInfo.IsReadOnly = false;
+
+        for (int pass = 1; pass <= passes; pass++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var pattern = GetWipePattern(method, pass);
+            var completedPasses = pass - 1;
+            var passProgress = new Progress<double>(p => progress?.Report((completedPasses + p) / passes));
+            await OverwriteFileAsync(filePath, fileSize, pattern, passProgress, cancellationToken);
+        }
+
+        // Truncate, rename to a random name (obscures the original name), then delete.
+        await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
+        {
+            fs.SetLength(0);
+        }
+
+        var directory = Path.GetDirectoryName(filePath) ?? "";
+        var randomName = Path.Combine(directory, Guid.NewGuid().ToString("N"));
+        File.Move(filePath, randomName);
+        File.Delete(randomName);
+
+        return (fileSize * passes, passes);
     }
 
     public async Task<WipeResult> WipeFreeSpaceAsync(string driveLetter, WipeMethod method = WipeMethod.SinglePass,

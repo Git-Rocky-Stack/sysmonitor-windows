@@ -151,6 +151,7 @@ public partial class DriveWiperViewModel : ObservableObject
         TotalFiles = FilesToWipe.Count;
         var successCount = 0;
         var errorCount = 0;
+        var linksRemoved = 0;
 
         try
         {
@@ -175,6 +176,8 @@ public partial class DriveWiperViewModel : ObservableObject
                     result = await _driveWiper.SecureDeleteFileAsync(file.Path, SelectedMethod, progress);
                 }
 
+                linksRemoved += result.LinksRemoved;
+
                 if (result.Success)
                 {
                     successCount++;
@@ -192,13 +195,17 @@ public partial class DriveWiperViewModel : ObservableObject
             Progress = 100;
             CurrentFile = "";
 
+            var linkNote = linksRemoved > 0
+                ? $" {linksRemoved} link(s) were removed; the files they pointed to were not touched."
+                : "";
+
             if (errorCount == 0)
             {
-                StatusMessage = $"Successfully wiped {successCount} items using {SelectedMethod}";
+                StatusMessage = $"Successfully wiped {successCount} items using {SelectedMethod}.{linkNote}";
             }
             else
             {
-                StatusMessage = $"Wiped {successCount} items, {errorCount} failed";
+                StatusMessage = $"Wiped {successCount} items, {errorCount} failed.{linkNote}";
             }
         }
         catch (Exception ex)
