@@ -447,6 +447,12 @@ public partial class BackupViewModel : ObservableObject
             return;
         }
 
+        if (EnableEncryption && string.IsNullOrEmpty(EncryptionPassword))
+        {
+            ShowStatus("Enter a password to encrypt the backup", false);
+            return;
+        }
+
         if (EnableEncryption && EncryptionPassword != ConfirmPassword)
         {
             ShowStatus("Passwords do not match", false);
@@ -593,7 +599,13 @@ public partial class BackupViewModel : ObservableObject
     // ==================== BACKUP HISTORY ACTIONS ====================
 
     [RelayCommand]
-    private async Task RestoreBackupAsync(BackupArchiveViewModel archive)
+    private Task RestoreBackupAsync(BackupArchiveViewModel archive) => RestoreBackupWithPasswordAsync(archive, null);
+
+    /// <summary>
+    /// Restores a backup; <paramref name="password"/> is required for encrypted backups
+    /// (the page prompts for it before calling this).
+    /// </summary>
+    public async Task RestoreBackupWithPasswordAsync(BackupArchiveViewModel archive, string? password)
     {
         if (archive?.Archive == null) return;
 
@@ -619,7 +631,8 @@ public partial class BackupViewModel : ObservableObject
             {
                 RestoreToOriginalLocation = false,
                 AlternateDestination = folder.Path,
-                OverwriteExisting = true
+                OverwriteExisting = true,
+                Password = password
             };
 
             var progress = new Progress<BackupProgress>(p =>

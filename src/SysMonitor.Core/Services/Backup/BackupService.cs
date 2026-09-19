@@ -19,10 +19,16 @@ public class BackupService : IBackupService
     public bool IsBackupInProgress => _isBackupInProgress;
 
     public BackupService()
-    {
-        _backupMetadataFolder = Path.Combine(
+        : this(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "Backups");
+            "SysMonitor", "Backups"))
+    {
+    }
+
+    /// <summary>Uses <paramref name="metadataFolder"/> for the backup catalog (tests use an isolated folder).</summary>
+    internal BackupService(string metadataFolder)
+    {
+        _backupMetadataFolder = metadataFolder;
         Directory.CreateDirectory(_backupMetadataFolder);
     }
 
@@ -60,6 +66,16 @@ public class BackupService : IBackupService
                     Success = false,
                     Status = BackupStatus.Failed,
                     Message = "No source paths specified"
+                };
+            }
+
+            if (job.EnableEncryption && string.IsNullOrEmpty(job.EncryptionPassword))
+            {
+                return new BackupResult
+                {
+                    Success = false,
+                    Status = BackupStatus.Failed,
+                    Message = "Encryption is enabled but no password was provided"
                 };
             }
 
@@ -227,6 +243,7 @@ public class BackupService : IBackupService
             }
 
             // Apply encryption if requested
+            var isEncrypted = false;
             if (job.EnableEncryption && !string.IsNullOrEmpty(job.EncryptionPassword))
             {
                 progress?.Report(new BackupProgress
@@ -239,10 +256,20 @@ public class BackupService : IBackupService
                     TotalFiles = totalFiles
                 });
 
+                // Encryption works on a single file, so an uncompressed backup folder is packed into a zip first.
+                if (Directory.Exists(finalBackupPath))
+                {
+                    var packedPath = finalBackupPath + ".zip";
+                    await CompressBackupAsync(finalBackupPath, packedPath, BackupCompression.None, _currentBackupCts.Token);
+                    Directory.Delete(finalBackupPath, true);
+                    finalBackupPath = packedPath;
+                }
+
                 var encryptedPath = finalBackupPath + ".enc";
-                await EncryptFileAsync(finalBackupPath, encryptedPath, job.EncryptionPassword, _currentBackupCts.Token);
+                await BackupEncryption.EncryptFileAsync(finalBackupPath, encryptedPath, job.EncryptionPassword, _currentBackupCts.Token);
                 File.Delete(finalBackupPath);
                 finalBackupPath = encryptedPath;
+                isEncrypted = true;
             }
 
             stopwatch.Stop();
@@ -257,7 +284,7 @@ public class BackupService : IBackupService
                 CreatedDate = DateTime.Now,
                 SizeBytes = new FileInfo(finalBackupPath).Length,
                 FileCount = processedFiles,
-                IsEncrypted = job.EnableEncryption,
+                IsEncrypted = isEncrypted,
                 IsVerified = job.VerifyAfterBackup,
                 Description = job.Description,
                 SourcePaths = job.SourcePaths,
@@ -545,33 +572,72 @@ public class BackupService : IBackupService
         var stopwatch = Stopwatch.StartNew();
         var processedFiles = 0;
         var errors = new List<BackupError>();
+        string? decryptedArchivePath = null;
+        string? tempExtractPath = null;
 
         try
         {
             var sourcePath = archive.FilePath;
 
             // Decrypt if needed
-            if (archive.IsEncrypted)
+            if (archive.IsEncrypted || sourcePath.EndsWith(".enc", StringComparison.OrdinalIgnoreCase))
             {
-                return new BackupResult
+                if (string.IsNullOrEmpty(options.Password))
                 {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = "Encrypted backups require password - use DecryptBackup first"
-                };
+                    return new BackupResult
+                    {
+                        Success = false,
+                        Status = BackupStatus.Failed,
+                        Message = "This backup is encrypted. Enter its password to restore it."
+                    };
+                }
+
+                progress?.Report(new BackupProgress
+                {
+                    Status = BackupStatus.Running,
+                    CurrentOperation = "Decrypting backup..."
+                });
+
+                decryptedArchivePath = Path.Combine(Path.GetTempPath(), $"restore_{Guid.NewGuid():N}.zip");
+                try
+                {
+                    await BackupEncryption.DecryptFileAsync(sourcePath, decryptedArchivePath, options.Password, cancellationToken);
+                }
+                catch (BackupPasswordException ex)
+                {
+                    return new BackupResult { Success = false, Status = BackupStatus.Failed, Message = ex.Message };
+                }
+
+                sourcePath = decryptedArchivePath;
             }
 
             // Extract if compressed
             string extractPath;
             if (sourcePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
             {
-                extractPath = Path.Combine(Path.GetTempPath(), $"restore_{Guid.NewGuid()}");
+                tempExtractPath = Path.Combine(Path.GetTempPath(), $"restore_{Guid.NewGuid():N}");
+                extractPath = tempExtractPath;
                 progress?.Report(new BackupProgress
                 {
                     Status = BackupStatus.Running,
                     CurrentOperation = "Extracting backup archive..."
                 });
-                ZipFile.ExtractToDirectory(sourcePath, extractPath);
+
+                try
+                {
+                    ZipFile.ExtractToDirectory(sourcePath, extractPath);
+                }
+                catch (InvalidDataException) when (decryptedArchivePath != null)
+                {
+                    // Legacy encrypted backups have no authentication tag; a wrong password can
+                    // decrypt to bytes that are not a valid archive.
+                    return new BackupResult
+                    {
+                        Success = false,
+                        Status = BackupStatus.Failed,
+                        Message = "Incorrect password, or the backup file has been altered or damaged."
+                    };
+                }
             }
             else
             {
@@ -647,12 +713,6 @@ public class BackupService : IBackupService
                 }
             }
 
-            // Cleanup temp extraction
-            if (sourcePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-            {
-                try { Directory.Delete(extractPath, true); } catch { }
-            }
-
             stopwatch.Stop();
 
             return new BackupResult
@@ -679,6 +739,18 @@ public class BackupService : IBackupService
                 StartTime = startTime,
                 EndTime = DateTime.Now
             };
+        }
+        finally
+        {
+            // Temporary plaintext copies are removed whether the restore succeeded or not.
+            if (tempExtractPath != null && Directory.Exists(tempExtractPath))
+            {
+                try { Directory.Delete(tempExtractPath, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            }
+            if (decryptedArchivePath != null)
+            {
+                try { File.Delete(decryptedArchivePath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            }
         }
     }
 
@@ -1069,32 +1141,6 @@ public class BackupService : IBackupService
         };
 
         await Task.Run(() => ZipFile.CreateFromDirectory(sourcePath, zipPath, level, false), cancellationToken);
-    }
-
-    private static async Task EncryptFileAsync(string inputPath, string outputPath, string password, CancellationToken cancellationToken)
-    {
-        var key = DeriveKey(password);
-        var iv = RandomNumberGenerator.GetBytes(16);
-
-        await using var inputStream = File.OpenRead(inputPath);
-        await using var outputStream = File.Create(outputPath);
-
-        // Write IV first
-        await outputStream.WriteAsync(iv, cancellationToken);
-
-        using var aes = Aes.Create();
-        aes.Key = key;
-        aes.IV = iv;
-
-        await using var cryptoStream = new CryptoStream(outputStream, aes.CreateEncryptor(), CryptoStreamMode.Write);
-        await inputStream.CopyToAsync(cryptoStream, cancellationToken);
-    }
-
-    private static byte[] DeriveKey(string password)
-    {
-        var salt = Encoding.UTF8.GetBytes("SysMonitorBackup2024");
-        using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256);
-        return pbkdf2.GetBytes(32);
     }
 
     private async Task SaveManifestAsync(BackupManifest manifest, string path)

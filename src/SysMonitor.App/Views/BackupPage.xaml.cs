@@ -137,9 +137,37 @@ public sealed partial class BackupPage : Page
     // Backup History
     private async void RestoreBackup_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.Tag is BackupArchiveViewModel archive)
+        if (sender is not Button { Tag: BackupArchiveViewModel archive })
+            return;
+
+        if (!archive.IsEncrypted)
         {
             await ViewModel.RestoreBackupCommand.ExecuteAsync(archive);
+            return;
+        }
+
+        var passwordBox = new PasswordBox { PlaceholderText = "Backup password" };
+        var content = new StackPanel { Spacing = 12 };
+        content.Children.Add(new TextBlock
+        {
+            Text = $"'{archive.Name}' is encrypted. Enter the password that was used when it was created.",
+            TextWrapping = TextWrapping.Wrap
+        });
+        content.Children.Add(passwordBox);
+
+        var dialog = new ContentDialog
+        {
+            Title = "Encrypted Backup",
+            Content = content,
+            PrimaryButtonText = "Restore",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = this.XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary && !string.IsNullOrEmpty(passwordBox.Password))
+        {
+            await ViewModel.RestoreBackupWithPasswordAsync(archive, passwordBox.Password);
         }
     }
 

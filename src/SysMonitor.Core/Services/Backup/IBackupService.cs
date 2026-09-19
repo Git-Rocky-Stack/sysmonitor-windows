@@ -254,6 +254,9 @@ public class RestoreOptions
     public string? AlternateDestination { get; set; }
     public List<string>? SelectiveFiles { get; set; } // null = restore all
     public bool VerifyAfterRestore { get; set; } = true;
+
+    /// <summary>Password for encrypted backups; required when the archive is encrypted.</summary>
+    public string? Password { get; set; }
 }
 
 /// <summary>
