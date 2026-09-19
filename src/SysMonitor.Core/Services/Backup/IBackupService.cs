@@ -16,7 +16,9 @@ public interface IBackupService
 
     // Backup Management
     Task<List<BackupArchive>> GetBackupHistoryAsync(string? backupLocation = null);
-    Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null);
+    /// <summary>Verifies the backup contents against the manifest checksums; encrypted backups need their password.</summary>
+    Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null,
+        string? password = null, CancellationToken cancellationToken = default);
     Task<BackupResult> DeleteBackupAsync(BackupArchive archive);
 
     // Scheduling

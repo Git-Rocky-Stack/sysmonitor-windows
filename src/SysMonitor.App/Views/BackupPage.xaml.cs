@@ -146,6 +146,34 @@ public sealed partial class BackupPage : Page
             return;
         }
 
+        var password = await AskForBackupPasswordAsync(archive, "Restore");
+        if (password != null)
+        {
+            await ViewModel.RestoreBackupWithPasswordAsync(archive, password);
+        }
+    }
+
+    private async void VerifyBackup_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: BackupArchiveViewModel archive })
+            return;
+
+        if (!archive.IsEncrypted)
+        {
+            await ViewModel.VerifyBackupCommand.ExecuteAsync(archive);
+            return;
+        }
+
+        var password = await AskForBackupPasswordAsync(archive, "Verify");
+        if (password != null)
+        {
+            await ViewModel.VerifyBackupWithPasswordAsync(archive, password);
+        }
+    }
+
+    /// <summary>Prompts for an encrypted backup's password; returns null when cancelled or left empty.</summary>
+    private async Task<string?> AskForBackupPasswordAsync(BackupArchiveViewModel archive, string actionText)
+    {
         var passwordBox = new PasswordBox { PlaceholderText = "Backup password" };
         var content = new StackPanel { Spacing = 12 };
         content.Children.Add(new TextBlock
@@ -159,16 +187,15 @@ public sealed partial class BackupPage : Page
         {
             Title = "Encrypted Backup",
             Content = content,
-            PrimaryButtonText = "Restore",
+            PrimaryButtonText = actionText,
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = this.XamlRoot
         };
 
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary && !string.IsNullOrEmpty(passwordBox.Password))
-        {
-            await ViewModel.RestoreBackupWithPasswordAsync(archive, passwordBox.Password);
-        }
+        return await dialog.ShowAsync() == ContentDialogResult.Primary && !string.IsNullOrEmpty(passwordBox.Password)
+            ? passwordBox.Password
+            : null;
     }
 
     private async void DeleteBackup_Click(object sender, RoutedEventArgs e)

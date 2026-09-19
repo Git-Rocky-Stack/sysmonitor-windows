@@ -285,14 +285,44 @@ public class BackupService : IBackupService
                 SizeBytes = GetBackupSize(finalBackupPath),
                 FileCount = processedFiles,
                 IsEncrypted = isEncrypted,
-                IsVerified = job.VerifyAfterBackup,
+                IsVerified = false,
                 Description = job.Description,
                 SourcePaths = job.SourcePaths,
                 Manifest = manifest
             };
 
+            // Verify the finished backup (after compression/encryption) against the recorded checksums.
+            BackupResult? verification = null;
+            if (job.VerifyAfterBackup)
+            {
+                verification = await VerifyBackupAsync(archive, progress, job.EncryptionPassword, _currentBackupCts.Token);
+                archive.IsVerified = verification.Success;
+            }
+
             // Save archive metadata
             await SaveArchiveMetadataAsync(archive);
+
+            if (verification is { Success: false })
+            {
+                // Keep older backups: retention cleanup only runs after a backup that verified.
+                return new BackupResult
+                {
+                    Success = false,
+                    Status = BackupStatus.Failed,
+                    Message = $"Backup was written to {finalBackupPath}, but verification failed: {verification.Message}",
+                    OutputPath = finalBackupPath,
+                    TotalBytes = totalBytes,
+                    ProcessedBytes = processedBytes,
+                    TotalFiles = totalFiles,
+                    ProcessedFiles = processedFiles,
+                    FailedFiles = failedFiles,
+                    Duration = stopwatch.Elapsed,
+                    StartTime = startTime,
+                    EndTime = DateTime.Now,
+                    Errors = [.. errors, .. verification.Errors],
+                    Archive = archive
+                };
+            }
 
             // Cleanup old backups
             await CleanupOldBackupsAsync(job);
@@ -789,61 +819,141 @@ public class BackupService : IBackupService
         });
     }
 
-    public async Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null)
+    /// <summary>
+    /// Verifies the backup itself: every manifest entry that has a recorded SHA-256 is read from the backup
+    /// (decrypting it first when encrypted) and compared with that hash. The original source files are not read.
+    /// </summary>
+    public async Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null,
+        string? password = null, CancellationToken cancellationToken = default)
     {
-        return await Task.Run(async () =>
+        string? decryptedArchivePath = null;
+        try
         {
-            try
+            if (archive.Manifest == null)
             {
-                if (archive.Manifest == null)
+                return Failed("No manifest available for verification");
+            }
+
+            var hashedFiles = archive.Manifest.Files.Where(f => !string.IsNullOrEmpty(f.Hash)).ToList();
+            if (hashedFiles.Count == 0)
+            {
+                return Failed("This backup was created without checksums, so it cannot be verified");
+            }
+
+            var sourcePath = archive.FilePath;
+            if (archive.IsEncrypted || sourcePath.EndsWith(".enc", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(password))
                 {
-                    return new BackupResult
-                    {
-                        Success = false,
-                        Status = BackupStatus.Failed,
-                        Message = "No manifest available for verification"
-                    };
+                    return Failed("This backup is encrypted. Enter its password to verify it.");
                 }
 
-                var verified = 0;
-                var failed = 0;
-
-                foreach (var file in archive.Manifest.Files)
+                decryptedArchivePath = Path.Combine(Path.GetTempPath(), $"verify_{Guid.NewGuid():N}.zip");
+                try
                 {
-                    if (!string.IsNullOrEmpty(file.Hash))
+                    await BackupEncryption.DecryptFileAsync(sourcePath, decryptedArchivePath, password, cancellationToken);
+                }
+                catch (BackupPasswordException ex)
+                {
+                    return Failed(ex.Message);
+                }
+                sourcePath = decryptedArchivePath;
+            }
+
+            progress?.Report(new BackupProgress
+            {
+                Status = BackupStatus.Running,
+                CurrentOperation = "Verifying backup...",
+                TotalFiles = hashedFiles.Count
+            });
+
+            var verified = 0;
+            var problems = new List<BackupError>();
+
+            if (sourcePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                using var zip = ZipFile.OpenRead(sourcePath);
+                var entries = new Dictionary<string, ZipArchiveEntry>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in zip.Entries)
+                {
+                    entries.TryAdd(NormalizeEntryName(entry.FullName), entry);
+                }
+
+                foreach (var file in hashedFiles)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!entries.TryGetValue(NormalizeEntryName(file.RelativePath), out var entry))
                     {
-                        var currentHash = await CalculateFileHashAsync(file.OriginalPath);
-                        if (currentHash == file.Hash)
-                        {
-                            verified++;
-                        }
-                        else
-                        {
-                            failed++;
-                        }
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Missing from backup" });
+                        continue;
                     }
-                }
 
-                return new BackupResult
-                {
-                    Success = failed == 0,
-                    Status = failed == 0 ? BackupStatus.Completed : BackupStatus.PartialSuccess,
-                    Message = $"Verified {verified} files, {failed} mismatches",
-                    ProcessedFiles = verified,
-                    FailedFiles = failed
-                };
+                    await using var stream = entry.Open();
+                    var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
+                    if (string.Equals(hash, file.Hash, StringComparison.OrdinalIgnoreCase))
+                        verified++;
+                    else
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Checksum mismatch" });
+                }
             }
-            catch (Exception ex)
+            else if (Directory.Exists(sourcePath))
             {
-                return new BackupResult
+                foreach (var file in hashedFiles)
                 {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = $"Verification failed: {ex.Message}"
-                };
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var path = Path.Combine(sourcePath, file.RelativePath);
+                    if (!File.Exists(path))
+                    {
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Missing from backup" });
+                        continue;
+                    }
+
+                    await using var stream = File.OpenRead(path);
+                    var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
+                    if (string.Equals(hash, file.Hash, StringComparison.OrdinalIgnoreCase))
+                        verified++;
+                    else
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Checksum mismatch" });
+                }
             }
-        });
+            else
+            {
+                return Failed("Backup file not found");
+            }
+
+            var ok = problems.Count == 0;
+            return new BackupResult
+            {
+                Success = ok,
+                Status = ok ? BackupStatus.Completed : BackupStatus.Failed,
+                Message = ok
+                    ? $"Backup verified: all {verified} files match their recorded checksums"
+                    : $"Backup verification failed: {problems.Count} file(s) missing or changed in the backup ({verified} verified)",
+                ProcessedFiles = verified,
+                FailedFiles = problems.Count,
+                Errors = problems
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            return new BackupResult { Success = false, Status = BackupStatus.Cancelled, Message = "Verification was cancelled" };
+        }
+        catch (Exception ex)
+        {
+            return Failed($"Verification failed: {ex.Message}");
+        }
+        finally
+        {
+            if (decryptedArchivePath != null)
+            {
+                try { File.Delete(decryptedArchivePath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            }
+        }
+
+        static BackupResult Failed(string message) => new() { Success = false, Status = BackupStatus.Failed, Message = message };
     }
+
+    private static string NormalizeEntryName(string name) => name.Replace('\\', '/').TrimStart('/');
 
     public async Task<BackupResult> DeleteBackupAsync(BackupArchive archive)
     {

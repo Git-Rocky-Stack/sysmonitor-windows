@@ -673,17 +673,28 @@ public partial class BackupViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task VerifyBackupAsync(BackupArchiveViewModel archive)
+    private Task VerifyBackupAsync(BackupArchiveViewModel archive) => VerifyBackupWithPasswordAsync(archive, null);
+
+    /// <summary>
+    /// Verifies a backup's contents against its recorded checksums; <paramref name="password"/> is required
+    /// for encrypted backups (the page prompts for it before calling this).
+    /// </summary>
+    public async Task VerifyBackupWithPasswordAsync(BackupArchiveViewModel archive, string? password)
     {
         if (archive?.Archive == null) return;
 
         IsBackupRunning = true;
         ProgressStatus = "Verifying backup...";
 
-        var result = await _backupService.VerifyBackupAsync(archive.Archive);
-
-        IsBackupRunning = false;
-        ShowStatus(result.Message, result.Success);
+        try
+        {
+            var result = await _backupService.VerifyBackupAsync(archive.Archive, password: password);
+            ShowStatus(result.Message, result.Success);
+        }
+        finally
+        {
+            IsBackupRunning = false;
+        }
     }
 
     // ==================== HELPERS ====================
