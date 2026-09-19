@@ -19,11 +19,56 @@ public partial class RegistryCleanerViewModel : ObservableObject
     [ObservableProperty] private int _selectedIssues = 0;
     [ObservableProperty] private string _statusMessage = "Click 'Scan' to find registry issues";
     [ObservableProperty] private int _fixedCount = 0;
-    [ObservableProperty] private string _lastBackupPath = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasBackup))]
+    private string _lastBackupPath = string.Empty;
+    [ObservableProperty] private bool _isRestoring = false;
+
+    /// <summary>True when a registry backup exists that can be restored.</summary>
+    public bool HasBackup => !string.IsNullOrEmpty(LastBackupPath) && File.Exists(LastBackupPath);
 
     public RegistryCleanerViewModel(IRegistryCleaner registryCleaner)
     {
         _registryCleaner = registryCleaner;
+        LastBackupPath = _registryCleaner.GetBackups().FirstOrDefault() ?? string.Empty;
+    }
+
+    /// <summary>Imports the most recent registry backup (the page confirms with the user first).</summary>
+    public async Task RestoreLastBackupAsync()
+    {
+        if (!HasBackup || IsRestoring) return;
+
+        IsRestoring = true;
+        StatusMessage = "Restoring registry backup...";
+        try
+        {
+            var result = await _registryCleaner.RestoreRegistryBackupAsync(LastBackupPath);
+            StatusMessage = result.Message;
+            if (result.Success)
+            {
+                await ScanAsync();
+                StatusMessage = $"{result.Message} Rescanned the registry.";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Restore failed: {ex.Message}";
+        }
+        finally
+        {
+            IsRestoring = false;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenBackupFolder()
+    {
+        Directory.CreateDirectory(_registryCleaner.BackupFolder);
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = _registryCleaner.BackupFolder,
+            UseShellExecute = true
+        });
     }
 
     [RelayCommand]
@@ -69,11 +114,20 @@ public partial class RegistryCleanerViewModel : ObservableObject
 
         try
         {
-            // Create backup first
-            StatusMessage = "Creating registry backup...";
-            LastBackupPath = await _registryCleaner.BackupRegistryAsync();
-
             var selected = ScanResults.Where(r => r.IsSelected).ToList();
+
+            // Back up every key the fixes will modify; never change anything without a backup.
+            StatusMessage = "Creating registry backup...";
+            var backup = await _registryCleaner.BackupRegistryAsync(selected);
+            if (!backup.Success)
+            {
+                StatusMessage = backup.Message;
+                return;
+            }
+            if (backup.BackupPath != null)
+            {
+                LastBackupPath = backup.BackupPath;
+            }
 
             // Check if any issues require elevation (HKLM/HKCR keys)
             var requiresElevation = ElevatedRegistryHelper.RequiresElevation(selected);

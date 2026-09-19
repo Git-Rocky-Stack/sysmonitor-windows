@@ -6,9 +6,19 @@ namespace SysMonitor.Core.Services.Cleaners;
 public class RegistryCleaner : IRegistryCleaner
 {
     private readonly List<(string KeyPath, string Description, RegistryIssueCategory Category)> _scanLocations;
+    private readonly string _backupFolder;
 
     public RegistryCleaner()
+        : this(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SysMonitor", "RegistryBackups"))
     {
+    }
+
+    /// <summary>Uses <paramref name="backupFolder"/> for registry backups (tests use an isolated folder).</summary>
+    internal RegistryCleaner(string backupFolder)
+    {
+        _backupFolder = backupFolder;
         _scanLocations = new List<(string, string, RegistryIssueCategory)>
         {
             // Shared DLLs with invalid paths
@@ -745,41 +755,255 @@ public class RegistryCleaner : IRegistryCleaner
         });
     }
 
-    public async Task<string> BackupRegistryAsync()
+    public string BackupFolder => _backupFolder;
+
+    public IReadOnlyList<string> GetBackups() =>
+        Directory.Exists(_backupFolder)
+            ? new DirectoryInfo(_backupFolder).GetFiles("registry_backup_*.reg")
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .Select(f => f.FullName)
+                .ToList()
+            : [];
+
+    private const string RegFileHeader = "Windows Registry Editor Version 5.00";
+    private static readonly string[] RegistryRootPrefixes =
+    [
+        "HKEY_CURRENT_USER\\", "HKCU\\", "HKEY_LOCAL_MACHINE\\", "HKLM\\", "HKEY_CLASSES_ROOT\\", "HKCR\\"
+    ];
+
+    public async Task<RegistryBackupResult> BackupRegistryAsync(IEnumerable<RegistryIssue> issuesToFix)
     {
-        return await Task.Run(() =>
+        // Every fix deletes either the issue's key with its whole subtree, or values inside the key, so exporting
+        // each issue's key captures everything the run can change. Each key is exported on its own: reg.exe
+        // exits 0 while silently omitting subkeys it cannot read, so exporting a parent would hide a failure.
+        var keys = issuesToFix
+            .Where(i => i.IsSelected && RegistryRootPrefixes.Any(p => i.Key.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+            .GroupBy(i => i.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(g => (Key: g.Key, DeletesSubtree: g.Any(DeletesSubtree)))
+            .ToList();
+
+        var tempFolder = Path.Combine(Path.GetTempPath(), $"sysmon_regbackup_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempFolder);
+        try
         {
-            var backupDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SysMonitor", "RegistryBackups");
+            var sections = new List<string>();
+            var failed = new List<string>();
+            var exported = 0;
 
-            Directory.CreateDirectory(backupDir);
-
-            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            var backupPath = Path.Combine(backupDir, $"registry_backup_{timestamp}.reg");
-
-            // Export key sections we might modify
-            var keysToBackup = new[]
+            for (int i = 0; i < keys.Count; i++)
             {
-                @"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
-                @"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts",
-                @"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs"
-            };
+                var unreadable = FindUnreadable(keys[i].Key, keys[i].DeletesSubtree);
+                if (unreadable != null)
+                {
+                    failed.Add($"{unreadable}: cannot be read, so it cannot be backed up");
+                    continue;
+                }
 
-            using var writer = new StreamWriter(backupPath);
-            writer.WriteLine("Windows Registry Editor Version 5.00");
-            writer.WriteLine();
-            writer.WriteLine($"; SysMonitor Registry Backup - {DateTime.Now}");
-            writer.WriteLine("; Keys backed up before registry cleaning");
-            writer.WriteLine();
+                var exportFile = Path.Combine(tempFolder, $"{i}.reg");
+                var (exitCode, output) = await RunRegAsync(["export", keys[i].Key, exportFile, "/y"]);
 
-            foreach (var keyPath in keysToBackup)
-            {
-                writer.WriteLine($"; Backup of {keyPath}");
-                writer.WriteLine();
+                if (exitCode == 0 && File.Exists(exportFile))
+                {
+                    var lines = await File.ReadAllLinesAsync(exportFile);
+                    if (lines.Length == 0 || lines[0] != RegFileHeader)
+                    {
+                        failed.Add($"{keys[i].Key}: unexpected export format");
+                        continue;
+                    }
+                    sections.AddRange(lines.Skip(1));
+                    exported++;
+                }
+                else if (output.Contains("unable to find", StringComparison.OrdinalIgnoreCase))
+                {
+                    // The key no longer exists, so fixing the issue cannot change anything.
+                }
+                else
+                {
+                    failed.Add($"{keys[i].Key}: {output.Trim()}");
+                }
             }
 
-            return backupPath;
-        });
+            if (failed.Count > 0)
+            {
+                return new RegistryBackupResult
+                {
+                    Success = false,
+                    FailedKeys = failed,
+                    Message = $"Could not back up {failed.Count} registry key(s); nothing was changed. First: {failed[0]}"
+                };
+            }
+
+            if (exported == 0)
+            {
+                return new RegistryBackupResult { Success = true, Message = "None of the selected keys exist any more; nothing to back up." };
+            }
+
+            Directory.CreateDirectory(_backupFolder);
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff");
+            var backupPath = Path.Combine(_backupFolder, $"registry_backup_{timestamp}.reg");
+            var content = new List<string>
+            {
+                RegFileHeader,
+                "",
+                $"; SysMonitor registry backup, {DateTime.Now:yyyy-MM-dd HH:mm:ss}: {exported} key(s) that registry cleaning was about to modify.",
+                "; Restore from the Registry Cleaner page, or double-click this file to import it with Registry Editor."
+            };
+            content.AddRange(sections);
+
+            // Same encoding reg.exe and Registry Editor write: UTF-16 LE with a byte-order mark.
+            await File.WriteAllLinesAsync(backupPath, content, new System.Text.UnicodeEncoding(bigEndian: false, byteOrderMark: true));
+
+            return new RegistryBackupResult
+            {
+                Success = true,
+                BackupPath = backupPath,
+                KeysExported = exported,
+                Message = $"Backed up {exported} registry key(s) to {backupPath}"
+            };
+        }
+        finally
+        {
+            try { Directory.Delete(tempFolder, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        }
+    }
+
+    public async Task<RegistryRestoreResult> RestoreRegistryBackupAsync(string backupPath)
+    {
+        if (!File.Exists(backupPath))
+            return new RegistryRestoreResult { Message = "Backup file not found." };
+
+        var content = await File.ReadAllTextAsync(backupPath);
+        if (!content.TrimStart('\uFEFF').StartsWith(RegFileHeader, StringComparison.Ordinal))
+            return new RegistryRestoreResult { Message = "The file is not a registry backup." };
+
+        var machineWide = content.Contains("[HKEY_LOCAL_MACHINE", StringComparison.OrdinalIgnoreCase) ||
+                          content.Contains("[HKEY_CLASSES_ROOT", StringComparison.OrdinalIgnoreCase);
+
+        if (!machineWide || ElevatedRegistryHelper.IsRunningElevated())
+        {
+            var (exitCode, output) = await RunRegAsync(["import", backupPath]);
+            return exitCode == 0
+                ? new RegistryRestoreResult { Success = true, Message = "Registry backup restored." }
+                : new RegistryRestoreResult { Message = $"Restore failed: {output.Trim()}" };
+        }
+
+        // Machine-wide keys need administrator rights; reg.exe runs elevated after a UAC prompt.
+        try
+        {
+            using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "reg.exe",
+                Arguments = $"import \"{backupPath}\"",
+                UseShellExecute = true,
+                Verb = "runas",
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+            });
+            if (process == null)
+                return new RegistryRestoreResult { Message = "Could not start the restore." };
+
+            await process.WaitForExitAsync();
+            return process.ExitCode == 0
+                ? new RegistryRestoreResult { Success = true, Message = "Registry backup restored." }
+                : new RegistryRestoreResult { Message = $"Restore failed (reg.exe exit code {process.ExitCode})." };
+        }
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        {
+            return new RegistryRestoreResult { WasCancelled = true, Message = "Restore cancelled: administrator permission was not granted." };
+        }
+    }
+
+    /// <summary>Fixes in these categories delete the issue's whole key; all others delete values inside it.</summary>
+    private static bool DeletesSubtree(RegistryIssue issue) =>
+        issue.Category is RegistryIssueCategory.OrphanedSoftware
+            or RegistryIssueCategory.InvalidCOM
+            or RegistryIssueCategory.InvalidTypeLib;
+
+    /// <summary>
+    /// Returns null when the key's values (and, if <paramref name="includeSubtree"/>, every descendant key) can be
+    /// read; otherwise the first path that cannot. A key that does not exist returns null.
+    /// </summary>
+    internal static string? FindUnreadable(string fullKey, bool includeSubtree)
+    {
+        RegistryKey? hive = null;
+        var subPath = fullKey;
+        foreach (var (prefix, candidate) in new (string, RegistryKey)[]
+                 {
+                     ("HKEY_CURRENT_USER\\", Registry.CurrentUser), ("HKCU\\", Registry.CurrentUser),
+                     ("HKEY_LOCAL_MACHINE\\", Registry.LocalMachine), ("HKLM\\", Registry.LocalMachine),
+                     ("HKEY_CLASSES_ROOT\\", Registry.ClassesRoot), ("HKCR\\", Registry.ClassesRoot)
+                 })
+        {
+            if (fullKey.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                hive = candidate;
+                subPath = fullKey[prefix.Length..];
+                break;
+            }
+        }
+        if (hive == null)
+            return fullKey;
+
+        return FindUnreadable(hive, subPath, fullKey, includeSubtree);
+    }
+
+    private static string? FindUnreadable(RegistryKey hive, string subPath, string displayPath, bool includeSubtree)
+    {
+        RegistryKey? key;
+        try
+        {
+            key = hive.OpenSubKey(subPath, writable: false);
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException)
+        {
+            return displayPath;
+        }
+
+        if (key == null)
+            return null;
+
+        using (key)
+        {
+            try
+            {
+                foreach (var valueName in key.GetValueNames())
+                    _ = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+
+                if (!includeSubtree)
+                    return null;
+
+                foreach (var child in key.GetSubKeyNames())
+                {
+                    var unreadable = FindUnreadable(hive, $@"{subPath}\{child}", $@"{displayPath}\{child}", includeSubtree: true);
+                    if (unreadable != null)
+                        return unreadable;
+                }
+            }
+            catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+            {
+                return displayPath;
+            }
+        }
+
+        return null;
+    }
+
+    private static async Task<(int ExitCode, string Output)> RunRegAsync(string[] arguments)
+    {
+        var startInfo = new System.Diagnostics.ProcessStartInfo("reg.exe")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        foreach (var argument in arguments)
+            startInfo.ArgumentList.Add(argument);
+
+        using var process = System.Diagnostics.Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Could not start reg.exe");
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (process.ExitCode, (await stdout) + (await stderr));
     }
 }
