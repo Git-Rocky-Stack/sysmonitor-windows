@@ -90,11 +90,13 @@ To sign the installer for Windows SmartScreen:
    - Sectigo
    - SSL.com
 
-2. Add to SysMonitor.iss [Setup] section:
-   SignTool=signtool sign /f "cert.pfx" /p "password" /t http://timestamp.digicert.com $f
+2. Install the certificate in your Windows certificate store (CurrentUser\My) and note its
+   thumbprint. Never place certificate files in this repository.
 
-3. Or sign manually after build:
-   signtool sign /f "cert.pfx" /p "password" /t http://timestamp.digicert.com output\SysMonitor_Setup_1.0.0.exe
+3. Sign after build, selecting the certificate by thumbprint:
+   signtool sign /sha1 <thumbprint> /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 output\SysMonitor_Setup_1.0.0.exe
+
+   (Build-Release.ps1 -SignCode -CertificateThumbprint <thumbprint> does this for you.)
 
 
 TROUBLESHOOTING

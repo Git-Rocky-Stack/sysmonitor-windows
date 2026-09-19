@@ -13,14 +13,12 @@
 .PARAMETER SignCode
     Sign the application and installer with a code signing certificate.
 
-.PARAMETER CertificatePath
-    Path to the PFX certificate file for signing.
-
-.PARAMETER CertificatePassword
-    Password for the PFX certificate.
+.PARAMETER CertificateThumbprint
+    SHA-1 thumbprint of a code-signing certificate installed in CurrentUser\My or LocalMachine\My.
+    Defaults to $env:SYSMONITOR_SIGNING_THUMBPRINT. No certificate files or passwords are used.
 
 .PARAMETER UseSelfSignedCert
-    Use a self-signed certificate for testing (will show SmartScreen warnings).
+    Use a local self-signed development certificate for testing (will show SmartScreen warnings).
 
 .PARAMETER SkipInstaller
     Skip building the installer (only create portable ZIP).
@@ -34,20 +32,20 @@
     .\Build-Release.ps1 -SignCode -UseSelfSignedCert
 
 .EXAMPLE
-    # Full release build with commercial certificate:
-    .\Build-Release.ps1 -SignCode -CertificatePath ".\cert.pfx" -CertificatePassword "password"
+    # Full release build with a certificate from the certificate store:
+    .\Build-Release.ps1 -SignCode -CertificateThumbprint 0123456789ABCDEF0123456789ABCDEF01234567
 #>
 
 param(
     [switch]$SignCode,
-    [string]$CertificatePath,
-    [string]$CertificatePassword,
+    [string]$CertificateThumbprint = $env:SYSMONITOR_SIGNING_THUMBPRINT,
     [switch]$UseSelfSignedCert,
     [switch]$SkipInstaller
 )
 
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $ScriptDir "signing\SigningCommon.ps1")
 
 # Configuration
 $AppName = "STX1 System Monitor"
@@ -96,75 +94,42 @@ if ($SignCode) {
     Write-Host ""
     Write-Host "[2/5] Signing application files..." -ForegroundColor Yellow
 
-    # Find SignTool
-    $SignTool = $null
-    $SignToolPaths = @(
-        "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe",
-        "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe"
-    )
+    $SignTool = Find-SignTool
+    if (-not $SignTool) {
+        Write-Host "ERROR: signtool.exe not found. Install the Windows SDK or run without -SignCode." -ForegroundColor Red
+        exit 1
+    }
 
-    foreach ($path in $SignToolPaths) {
-        if (Test-Path $path) {
-            $SignTool = $path
-            break
+    try {
+        if ($UseSelfSignedCert) {
+            $Certificate = Get-DevelopmentSigningCertificate
+            Write-Host "      Using development certificate $($Certificate.Thumbprint)" -ForegroundColor Yellow
         }
-    }
+        elseif ($CertificateThumbprint) {
+            $Certificate = Resolve-SigningCertificate -Thumbprint $CertificateThumbprint
+            Write-Host "      Using certificate $($Certificate.Subject) ($($Certificate.Thumbprint))" -ForegroundColor Green
+        }
+        else {
+            throw "Specify -UseSelfSignedCert or -CertificateThumbprint (or set SYSMONITOR_SIGNING_THUMBPRINT)."
+        }
 
-    if (-not $SignTool) {
-        $cmd = Get-Command signtool.exe -ErrorAction SilentlyContinue
-        if ($cmd) { $SignTool = $cmd.Source }
-    }
-
-    if (-not $SignTool) {
-        Write-Host "      WARNING: signtool.exe not found. Skipping signing." -ForegroundColor Yellow
-    }
-    else {
         $FilesToSign = @(
             (Join-Path $PublishDir "SysMonitor.App.exe"),
             (Join-Path $PublishDir "SysMonitor.Core.dll")
         )
 
-        $Certificate = $null
-
-        if ($UseSelfSignedCert) {
-            # Create or get self-signed certificate
-            $CertName = "STX1 System Monitor (Development)"
-            $CertStore = "Cert:\CurrentUser\My"
-            $Certificate = Get-ChildItem $CertStore | Where-Object { $_.Subject -like "*$CertName*" } | Select-Object -First 1
-
-            if (-not $Certificate) {
-                $Certificate = New-SelfSignedCertificate `
-                    -Type CodeSigningCert `
-                    -Subject "CN=$CertName, O=Rocky Stack" `
-                    -KeyUsage DigitalSignature `
-                    -CertStoreLocation $CertStore `
-                    -NotAfter (Get-Date).AddYears(3)
-                Write-Host "      Created self-signed certificate" -ForegroundColor Green
-            }
-        }
-
         foreach ($file in $FilesToSign) {
-            if (Test-Path $file) {
-                $fileName = Split-Path $file -Leaf
-                Write-Host "      Signing: $fileName" -ForegroundColor Gray
-
-                try {
-                    if ($UseSelfSignedCert -and $Certificate) {
-                        & $SignTool sign /sha1 $Certificate.Thumbprint /fd SHA256 /t $TimestampServer "$file" 2>&1 | Out-Null
-                    }
-                    elseif ($CertificatePath) {
-                        & $SignTool sign /f "$CertificatePath" /p "$CertificatePassword" /fd SHA256 /t $TimestampServer "$file" 2>&1 | Out-Null
-                    }
-
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-Host "        Signed!" -ForegroundColor Green
-                    }
-                }
-                catch {
-                    Write-Host "        Warning: $($_.Exception.Message)" -ForegroundColor Yellow
-                }
+            if (-not (Test-Path $file)) {
+                throw "File to sign not found: $file"
             }
+            Write-Host "      Signing: $(Split-Path $file -Leaf)" -ForegroundColor Gray
+            Invoke-CodeSign -SignTool $SignTool -Thumbprint $Certificate.Thumbprint -TimestampServer $TimestampServer -FilePath $file
+            Write-Host "        Signed!" -ForegroundColor Green
         }
+    }
+    catch {
+        Write-Host "ERROR: Signing failed: $($_.Exception.Message)" -ForegroundColor Red
+        exit 1
     }
 }
 else {
@@ -215,22 +180,17 @@ if (-not $SkipInstaller) {
 
                 $installerPath = Join-Path $InstallerDir "STX1-SystemMonitor-Setup-$AppVersion.exe"
 
-                if (Test-Path $installerPath) {
-                    try {
-                        if ($UseSelfSignedCert -and $Certificate) {
-                            & $SignTool sign /sha1 $Certificate.Thumbprint /fd SHA256 /t $TimestampServer "$installerPath" 2>&1 | Out-Null
-                        }
-                        elseif ($CertificatePath) {
-                            & $SignTool sign /f "$CertificatePath" /p "$CertificatePassword" /fd SHA256 /t $TimestampServer "$installerPath" 2>&1 | Out-Null
-                        }
-
-                        if ($LASTEXITCODE -eq 0) {
-                            Write-Host "      Installer signed!" -ForegroundColor Green
-                        }
-                    }
-                    catch {
-                        Write-Host "      Warning: $($_.Exception.Message)" -ForegroundColor Yellow
-                    }
+                if (-not (Test-Path $installerPath)) {
+                    Write-Host "ERROR: Installer not found for signing: $installerPath" -ForegroundColor Red
+                    exit 1
+                }
+                try {
+                    Invoke-CodeSign -SignTool $SignTool -Thumbprint $Certificate.Thumbprint -TimestampServer $TimestampServer -FilePath $installerPath
+                    Write-Host "      Installer signed!" -ForegroundColor Green
+                }
+                catch {
+                    Write-Host "ERROR: Installer signing failed: $($_.Exception.Message)" -ForegroundColor Red
+                    exit 1
                 }
             }
             else {
@@ -295,10 +255,10 @@ Write-Host ""
 
 if ($SignCode) {
     if ($UseSelfSignedCert) {
-        Write-Host "  NOTE: Self-signed certificate used - SmartScreen warnings expected" -ForegroundColor Yellow
+        Write-Host "  NOTE: Self-signed development certificate used - SmartScreen warnings expected" -ForegroundColor Yellow
     }
     else {
-        Write-Host "  Code signed with commercial certificate" -ForegroundColor Green
+        Write-Host "  Code signed with $($Certificate.Subject)" -ForegroundColor Green
     }
 }
 else {

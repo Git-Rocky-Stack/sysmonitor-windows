@@ -46,3 +46,8 @@ aab-extracted/
 
 # Misc
 nul
+
+# Signing material - private keys must never be committed
+*.pfx
+*.p12
+*.snk

@@ -1,8 +1,8 @@
 ; STX1 System Monitor - Inno Setup Script
 ; Copyright (c) 2024 Rocky Stack
 ;
-; To sign the installer, use SignTool after compilation:
-; signtool sign /f certificate.pfx /p password /fd SHA256 /t http://timestamp.digicert.com "STX1-SystemMonitor-Setup-1.0.0.exe"
+; To sign the installer, use SignTool after compilation with a certificate from the Windows certificate store:
+; signtool sign /sha1 <thumbprint> /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "STX1-SystemMonitor-Setup-1.0.0.exe"
 
 #define MyAppName "STX1 System Monitor"
 #define MyAppVersion "1.0.0"

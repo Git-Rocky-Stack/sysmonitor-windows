@@ -36,7 +36,6 @@
     <AppxPackageDir>$(SolutionDir)publish\msix\</AppxPackageDir>
     <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>0724EBBA9D97D28CB1E784218E29B870C442312D</PackageCertificateThumbprint>
   </PropertyGroup>
 
   <ItemGroup>
