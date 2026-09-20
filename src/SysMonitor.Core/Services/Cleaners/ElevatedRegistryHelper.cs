@@ -1,5 +1,7 @@
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using SysMonitor.Core.Models;
 
@@ -52,7 +54,13 @@ public static class ElevatedRegistryHelper
             // Serialize issues to temp file
             var issueList = issues.Where(i => i.IsSelected).ToList();
             var json = JsonSerializer.Serialize(issueList, new JsonSerializerOptions { WriteIndented = true });
-            await File.WriteAllTextAsync(inputFile, json);
+            var payload = Encoding.UTF8.GetBytes(json);
+
+            // Any process running as this user can rewrite a file in the temp folder while the UAC prompt is
+            // open, and the elevated process would then carry out whatever it found. It is handed the
+            // fingerprint of what was written on its command line, which cannot be rewritten, and checks it.
+            var fingerprint = Convert.ToHexString(SHA256.HashData(payload));
+            await File.WriteAllBytesAsync(inputFile, payload);
 
             // Get the current executable path
             var exePath = Process.GetCurrentProcess().MainModule?.FileName;
@@ -69,7 +77,7 @@ public static class ElevatedRegistryHelper
             var startInfo = new ProcessStartInfo
             {
                 FileName = exePath,
-                Arguments = $"--fix-registry \"{inputFile}\" \"{outputFile}\"",
+                Arguments = $"--fix-registry \"{inputFile}\" \"{outputFile}\" {fingerprint}",
                 UseShellExecute = true,
                 Verb = "runas", // This triggers UAC
                 CreateNoWindow = false
@@ -163,9 +171,13 @@ public static class ElevatedRegistryHelper
     }
 
     /// <summary>
-    /// Execute registry cleaning in elevated mode (called from command line)
+    /// Execute registry cleaning in elevated mode (called from command line).
     /// </summary>
-    public static async Task<int> ExecuteElevatedClean(string inputFile, string outputFile)
+    /// <param name="fingerprint">
+    /// SHA-256 of the bytes the unelevated side wrote, in hex. The file lives where any process running as
+    /// this user can rewrite it, so it is only acted on when it still matches.
+    /// </param>
+    public static async Task<int> ExecuteElevatedClean(string inputFile, string outputFile, string fingerprint)
     {
         var result = new ElevatedCleanResult();
 
@@ -179,8 +191,16 @@ public static class ElevatedRegistryHelper
                 return 1;
             }
 
-            var json = await File.ReadAllTextAsync(inputFile);
-            var issues = JsonSerializer.Deserialize<List<RegistryIssue>>(json);
+            var payload = await File.ReadAllBytesAsync(inputFile);
+            if (!MatchesFingerprint(payload, fingerprint))
+            {
+                result.Success = false;
+                result.ErrorMessage = "The list of registry fixes changed after it was approved. Nothing was cleaned.";
+                await WriteResultAsync(outputFile, result);
+                return 1;
+            }
+
+            var issues = JsonSerializer.Deserialize<List<RegistryIssue>>(payload);
 
             if (issues == null || issues.Count == 0)
             {
@@ -190,11 +210,21 @@ public static class ElevatedRegistryHelper
                 return 0;
             }
 
-            // Mark all as selected (they were filtered before serialization)
-            foreach (var issue in issues)
+            // Second gate: clean only what this process's own scan reports as broken. Even a list that
+            // matches its fingerprint says what to delete, and this is what decides whether that is true.
+            var confirmed = await ConfirmedByOwnScanAsync(issues);
+            var refused = issues.Count - confirmed.Count;
+            if (confirmed.Count == 0)
             {
-                issue.IsSelected = true;
+                result.Success = false;
+                result.ErrorMessage = refused > 0
+                    ? $"None of the {refused} entries are still broken according to this machine's own scan. Nothing was cleaned."
+                    : "No issues to fix";
+                await WriteResultAsync(outputFile, result);
+                return refused > 0 ? 1 : 0;
             }
+
+            issues = confirmed;
 
             // Perform the actual cleaning
             int fixedCount = 0;
@@ -223,11 +253,18 @@ public static class ElevatedRegistryHelper
                 }
             }
 
+            if (refused > 0)
+            {
+                errors.Add($"{refused} entries were left alone: this machine's own scan no longer reports them as broken.");
+            }
+
             result.Success = fixedCount > 0;
             result.FixedCount = fixedCount;
-            result.ErrorCount = errorCount;
+            result.ErrorCount = errorCount + refused;
             result.Errors = errors;
-            result.Message = $"Fixed {fixedCount} of {issues.Count} registry issues";
+            result.Message = refused > 0
+                ? $"Fixed {fixedCount} of {issues.Count} registry issues; {refused} were left alone"
+                : $"Fixed {fixedCount} of {issues.Count} registry issues";
 
             await WriteResultAsync(outputFile, result);
             return result.Success ? 0 : 1;
@@ -240,6 +277,50 @@ public static class ElevatedRegistryHelper
             return 1;
         }
     }
+
+    /// <summary>Whether a payload is the one whose fingerprint was passed on the command line.</summary>
+    internal static bool MatchesFingerprint(byte[] payload, string fingerprint)
+    {
+        if (string.IsNullOrWhiteSpace(fingerprint))
+            return false;
+
+        byte[] expected;
+        try
+        {
+            expected = Convert.FromHexString(fingerprint.Trim());
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+
+        return CryptographicOperations.FixedTimeEquals(SHA256.HashData(payload), expected);
+    }
+
+    /// <summary>
+    /// The entries a fresh scan on this machine agrees are broken. An entry counts only when the same key,
+    /// value and kind of problem come back, so the approved list can shrink but never grow into something else.
+    /// </summary>
+    internal static async Task<List<RegistryIssue>> ConfirmedByOwnScanAsync(
+        IEnumerable<RegistryIssue> issues, IRegistryCleaner? cleaner = null)
+    {
+        var scanned = await (cleaner ?? new RegistryCleaner()).ScanAsync();
+        var broken = new HashSet<string>(scanned.Select(Identity), StringComparer.OrdinalIgnoreCase);
+
+        var confirmed = new List<RegistryIssue>();
+        foreach (var issue in issues)
+        {
+            if (!broken.Contains(Identity(issue)))
+                continue;
+
+            issue.IsSelected = true;
+            confirmed.Add(issue);
+        }
+
+        return confirmed;
+    }
+
+    private static string Identity(RegistryIssue issue) => $"{(int)issue.Category}\u0000{issue.Key}\u0000{issue.ValueName}";
 
     private static bool CleanRegistryIssue(RegistryIssue issue)
     {

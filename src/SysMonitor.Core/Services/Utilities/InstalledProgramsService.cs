@@ -462,12 +462,9 @@ public class InstalledProgramsService : IInstalledProgramsService
 
     private async Task<UninstallResult> UninstallProtectedSystemAppAsync(InstalledProgram program)
     {
-        // Extract package name (without version/architecture suffix) for wildcard matching
-        var packageName = program.PackageFullName;
-        var underscoreIndex = packageName.IndexOf('_');
-        if (underscoreIndex > 0)
+        if (!TryGetPackageName(program, out var packageName, out var rejected))
         {
-            packageName = packageName.Substring(0, underscoreIndex);
+            return rejected;
         }
 
         // For system apps, we need to:
@@ -502,12 +499,9 @@ try {{
 
     private async Task<UninstallResult> UninstallViaElevatedPowerShellAsync(InstalledProgram program, string? previousError = null)
     {
-        // Extract package name for wildcard matching
-        var packageName = program.PackageFullName;
-        var underscoreIndex = packageName.IndexOf('_');
-        if (underscoreIndex > 0)
+        if (!TryGetPackageName(program, out var packageName, out var rejected))
         {
-            packageName = packageName.Substring(0, underscoreIndex);
+            return rejected;
         }
 
         var script = $@"
@@ -545,22 +539,57 @@ try {{
         return result;
     }
 
+    /// <summary>
+    /// The package name to match on, once it is certain it is a name: it is put straight into PowerShell
+    /// source, and an Appx name that carried a quote could otherwise add commands of its own.
+    /// </summary>
+    internal static bool TryGetPackageName(InstalledProgram program, out string packageName, out UninstallResult rejected)
+    {
+        packageName = program.PackageFullName ?? string.Empty;
+        var underscoreIndex = packageName.IndexOf('_');
+        if (underscoreIndex > 0)
+        {
+            packageName = packageName.Substring(0, underscoreIndex);
+        }
+
+        if (System.Text.RegularExpressions.Regex.IsMatch(packageName, @"^[A-Za-z0-9][A-Za-z0-9.-]{0,127}$"))
+        {
+            rejected = new UninstallResult { Success = true };
+            return true;
+        }
+
+        rejected = new UninstallResult
+        {
+            Success = false,
+            Message = $"\"{program.Name}\" has a package name this uninstaller will not pass to PowerShell. Remove it from Settings > Apps instead."
+        };
+        return false;
+    }
+
+    /// <summary>
+    /// The command line that runs a script as administrator without leaving it anywhere to be rewritten:
+    /// the script itself is encoded into the arguments, which are fixed when the process starts.
+    /// </summary>
+    internal static string BuildElevatedPowerShellArguments(string script) =>
+        "-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand " +
+        Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
+
+    /// <summary>
+    /// Runs a script as administrator. The script travels on the command line, encoded, rather than in a
+    /// file: a file in the temp folder can be rewritten by any process running as this user while the UAC
+    /// prompt is open, and the replacement would then run as administrator.
+    /// </summary>
     private async Task<UninstallResult> RunPowerShellScriptAsync(string script, string operationType)
     {
         return await Task.Run(() =>
         {
             try
             {
-                // Write script to temp file to avoid command line escaping issues
-                var scriptPath = Path.Combine(Path.GetTempPath(), $"sysmon_uninstall_{Guid.NewGuid():N}.ps1");
-                File.WriteAllText(scriptPath, script);
-
-                try
                 {
                     var psi = new ProcessStartInfo
                     {
                         FileName = "powershell.exe",
-                        Arguments = $"-ExecutionPolicy Bypass -NoProfile -File \"{scriptPath}\"",
+                        Arguments = BuildElevatedPowerShellArguments(script),
                         UseShellExecute = true,
                         Verb = "runas",
                         WindowStyle = ProcessWindowStyle.Hidden
@@ -576,7 +605,14 @@ try {{
                         };
                     }
 
-                    process.WaitForExit(60000);
+                    if (!process.WaitForExit(60000))
+                    {
+                        return new UninstallResult
+                        {
+                            Success = false,
+                            Message = $"{operationType} is still running after a minute. It was left alone; check Settings > Apps for the result."
+                        };
+                    }
 
                     if (process.ExitCode == 0)
                     {
@@ -595,11 +631,6 @@ try {{
                             Message = $"{operationType} failed (exit code: {process.ExitCode}). The app may be protected by Windows or require a restart."
                         };
                     }
-                }
-                finally
-                {
-                    // Clean up temp script file
-                    try { File.Delete(scriptPath); } catch { }
                 }
             }
             catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)

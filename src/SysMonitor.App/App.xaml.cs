@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -48,15 +48,17 @@ public partial class App : Application
     {
         // Check for elevated registry cleaning mode BEFORE InitializeComponent
         var args = Environment.GetCommandLineArgs();
-        if (args.Length >= 4 && args[1] == "--fix-registry")
+        if (args.Length >= 5 && args[1] == "--fix-registry")
         {
-            // Run elevated registry cleaning and exit
+            // Run elevated registry cleaning and exit. The fingerprint is what the unelevated side wrote;
+            // the elevated side refuses a list that no longer matches it.
             var inputFile = args[2];
             var outputFile = args[3];
+            var fingerprint = args[4];
 
             Task.Run(async () =>
             {
-                var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(inputFile, outputFile);
+                var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(inputFile, outputFile, fingerprint);
                 Environment.Exit(exitCode);
             }).GetAwaiter().GetResult();
 
