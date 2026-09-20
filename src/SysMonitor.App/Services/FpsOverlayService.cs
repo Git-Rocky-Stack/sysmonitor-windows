@@ -193,30 +193,11 @@ public class FpsOverlayService : IFpsOverlayService
                     if (stats.GpuUsage == 0)
                         stats.GpuUsage = load.Value;
                 }
-                // FPS from GPU if available (some GPUs report this)
-                else if (key.Contains("FPS") || key.Contains("FRAME"))
-                {
-                    stats.Fps = (int)load.Value;
-                }
             }
 
-            // If no FPS sensor, estimate from GPU frametime if available
-            if (stats.Fps == 0)
-            {
-                foreach (var load in loadSensors)
-                {
-                    var key = load.Key.ToUpperInvariant();
-                    if (key.Contains("FRAMETIME") || key.Contains("FRAME TIME"))
-                    {
-                        // Frametime in ms, convert to FPS
-                        if (load.Value > 0)
-                        {
-                            stats.Fps = (int)(1000.0 / load.Value);
-                        }
-                        break;
-                    }
-                }
-            }
+            // Frame rate comes from a Factor sensor, which is not in this list - looking for it here is why
+            // the overlay's FPS readout was blank on every machine, including ones that could report it.
+            stats.FrameRate = await _temperatureMonitor.GetFrameRateAsync();
 
             // Power readings
             var powerReadings = await _temperatureMonitor.GetAllPowerReadingsAsync();

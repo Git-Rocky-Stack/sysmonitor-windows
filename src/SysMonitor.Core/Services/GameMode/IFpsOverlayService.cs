@@ -1,3 +1,5 @@
+using SysMonitor.Core.Services.Monitors;
+
 namespace SysMonitor.Core.Services.GameMode;
 
 /// <summary>
@@ -16,7 +18,8 @@ public enum OverlayPosition
 /// </summary>
 public class OverlayStats
 {
-    public int Fps { get; set; }
+    /// <summary>What the hardware says about frame rate, which on most machines is that it cannot say.</summary>
+    public FrameRate FrameRate { get; set; } = FrameRate.NoSensor;
     public double CpuTemperature { get; set; }
     public double GpuTemperature { get; set; }
     public double CpuUsage { get; set; }

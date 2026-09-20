@@ -189,7 +189,7 @@ public class TemperatureMonitor : ITemperatureMonitor
                     hardware.Update();
                     foreach (var sensor in hardware.Sensors)
                     {
-                        // Get Load sensors (CPU/GPU usage) and SmallData (includes FPS/frametime)
+                        // Usage and throughput. Frame rate is not among these - see GetFrameRateAsync.
                         if ((sensor.SensorType == SensorType.Load ||
                              sensor.SensorType == SensorType.SmallData ||
                              sensor.SensorType == SensorType.Throughput) &&
@@ -217,6 +217,42 @@ public class TemperatureMonitor : ITemperatureMonitor
             }
             catch { }
             return loads;
+        });
+    }
+
+    /// <summary>
+    /// The name LibreHardwareMonitor gives its one frame-rate sensor, on AMD GPUs whose driver exposes the
+    /// ADL2 FrameMetrics API (LibreHardwareMonitorLib 0.9.3, AmdGpu.cs:79). It is a Factor sensor, not a Load
+    /// one, and it reads -1 until a fullscreen application reports a frame (AmdGpu.cs:123, :237).
+    /// </summary>
+    private const string FrameRateSensorName = "Fullscreen FPS";
+
+    public async Task<FrameRate> GetFrameRateAsync()
+    {
+        return await Task.Run(() =>
+        {
+            if (_computer == null) return FrameRate.NoSensor;
+
+            try
+            {
+                foreach (var hardware in _computer.Hardware)
+                {
+                    hardware.Update();
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        if (sensor.SensorType != SensorType.Factor ||
+                            !sensor.Name.Contains(FrameRateSensorName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        return FrameRate.FromSensor(sensor.Value);
+                    }
+                }
+            }
+            catch { }
+
+            return FrameRate.NoSensor;
         });
     }
 

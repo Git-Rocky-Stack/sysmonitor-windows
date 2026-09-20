@@ -190,7 +190,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- FPS Overlay Card -->
+                    <!-- In-game overlay card -->
                     <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="20">
                         <StackPanel Spacing="10">
                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -198,8 +198,8 @@
                                     <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{StaticResource SuccessBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="FPS OVERLAY" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
-                                    <TextBlock Text="F1 Telemetry HUD" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                                    <TextBlock Text="GAME OVERLAY" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
+                                    <TextBlock Text="Temperatures, load and power on top of your game" Style="{StaticResource CardSubtitleStyle}" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </StackPanel>
 
@@ -223,6 +223,9 @@
                                 <TextBlock Text="Drag overlay to reposition"
                                            FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center"/>
+                                <TextBlock Text="Frame rate needs a GPU that reports it; the overlay says so when yours does not."
+                                           FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
                                     <FontIcon Glyph="&#xE7C2;" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"/>
                                     <TextBlock Text="Click &amp; drag anywhere"

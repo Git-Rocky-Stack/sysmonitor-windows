@@ -241,7 +241,7 @@
 
                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="22">
                         Game Mode is a gaming optimization suite with three features: Auto Game Mode,
-                        Performance Profiles and the FPS Overlay. It moves background apps out of the game's
+                        Performance Profiles and the game overlay. It moves background apps out of the game's
                         way, switches the power plan, and shows what the machine is doing while you play.
                     </TextBlock>
 
@@ -303,9 +303,9 @@
 
                                 <StackPanel Grid.Column="1" Spacing="8">
                                     <StackPanel Spacing="2">
-                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" FontSize="12">FPS Overlay (F1 HUD)</TextBlock>
+                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" FontSize="12">Game Overlay</TextBlock>
                                         <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
-                                            F1 Telemetry-style overlay showing FPS, CPU/GPU temps (°F), usage %, RAM, power draw, and fan speed. Drag to reposition.
+                                            Telemetry-style overlay showing CPU/GPU temps (°F), usage %, RAM, power draw and fan speed. Frame rate too, on a GPU that reports it - the overlay says so when yours does not. Drag to reposition.
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
@@ -740,7 +740,7 @@
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> FPS Overlay - F1 Telemetry HUD with real-time stats (drag to reposition)</Run>
+                                <Run> Game Overlay - live temperatures, load and power over your game (drag to reposition)</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>

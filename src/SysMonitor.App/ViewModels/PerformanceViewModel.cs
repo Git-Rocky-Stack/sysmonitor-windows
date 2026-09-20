@@ -17,8 +17,6 @@ public partial class PerformanceViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private ObservableCollection<PerformanceMetric> _metrics = new();
     [ObservableProperty] private bool _isMonitoring = true;
-    [ObservableProperty] private double _frameRate = 60;
-    [ObservableProperty] private double _uiThreadUtilization = 0;
     [ObservableProperty] private double _memoryUsageMB = 0;
     [ObservableProperty] private double _gcPressure = 0;
 
