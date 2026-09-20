@@ -213,7 +213,7 @@
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Drive Wiper</Run>
-                                <Run> - Secure file deletion (unrecoverable)</Run>
+                                <Run> - Overwrites files before deleting them, and reads the last pass back</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Scheduled Cleaning</Run>

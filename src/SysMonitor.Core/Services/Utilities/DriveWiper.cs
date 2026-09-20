@@ -13,6 +13,12 @@ public interface IDriveWiper
     Task<WipeResult> WipeFreeSpaceAsync(string driveLetter, WipeMethod method = WipeMethod.SinglePass,
         IProgress<WipeProgress>? progress = null, CancellationToken cancellationToken = default);
     Task<long> GetFreeSpaceAsync(string driveLetter);
+
+    /// <summary>
+    /// Whether a path sits on a solid-state drive, where overwriting a file cannot promise the flash that
+    /// held it has been written over.
+    /// </summary>
+    bool IsSolidStateDrive(string path);
 }
 
 public enum WipeMethod
@@ -47,6 +53,12 @@ public class WipeResult
 
     /// <summary>Symbolic links and junctions that were removed without touching their targets.</summary>
     public int LinksRemoved { get; set; }
+
+    /// <summary>
+    /// Files whose last pass was read back and matched. A file that was wiped but not verified is listed in
+    /// <see cref="FailedPaths"/>, because an overwrite nobody checked is not one to claim.
+    /// </summary>
+    public int FilesVerified { get; set; }
 
     /// <summary>Files, links, or folders that could not be wiped or removed.</summary>
     public List<string> FailedPaths { get; } = new();
@@ -84,11 +96,16 @@ public class DriveWiper : IDriveWiper
                 return result;
             }
 
-            var (bytesWiped, passes) = await WipeRegularFileAsync(filePath, method, progress, cancellationToken);
+            var (bytesWiped, passes, verified) = await WipeRegularFileAsync(filePath, method, progress, cancellationToken);
             result.Success = true;
             result.FilesWiped = 1;
             result.BytesWiped = bytesWiped;
             result.PassesCompleted = passes;
+            result.FilesVerified = verified ? 1 : 0;
+            if (!verified)
+            {
+                result.FailedPaths.Add($"{filePath} (the last pass could not be read back, so the overwrite is unconfirmed)");
+            }
         }
         catch (OperationCanceledException)
         {
@@ -143,10 +160,18 @@ public class DriveWiper : IDriveWiper
 
                 try
                 {
-                    var (bytesWiped, passes) = await WipeRegularFileAsync(file, method, fileProgress, cancellationToken);
+                    var (bytesWiped, passes, verified) = await WipeRegularFileAsync(file, method, fileProgress, cancellationToken);
                     result.FilesWiped++;
                     result.BytesWiped += bytesWiped;
                     result.PassesCompleted = passes;
+                    if (verified)
+                    {
+                        result.FilesVerified++;
+                    }
+                    else
+                    {
+                        result.FailedPaths.Add($"{file} (the last pass could not be read back, so the overwrite is unconfirmed)");
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -273,6 +298,45 @@ public class DriveWiper : IDriveWiper
     }
 
     /// <summary>
+    /// Whether a path sits on a solid-state drive. Windows reports the media type of the physical disk
+    /// behind a partition; anything it will not answer for is treated as not one, since the warning is only
+    /// worth showing when it is known to apply.
+    /// </summary>
+    public bool IsSolidStateDrive(string path)
+    {
+        try
+        {
+            var root = Path.GetPathRoot(Path.GetFullPath(path));
+            if (string.IsNullOrEmpty(root)) return false;
+
+            var letter = root.TrimEnd('\\', ':');
+            using var partitions = new System.Management.ManagementObjectSearcher(
+                @"\\.\ROOT\Microsoft\Windows\Storage",
+                $"SELECT DiskNumber FROM MSFT_Partition WHERE DriveLetter = '{letter}'");
+
+            foreach (var partition in partitions.Get())
+            {
+                var diskNumber = Convert.ToInt32(partition["DiskNumber"]);
+                using var disks = new System.Management.ManagementObjectSearcher(
+                    @"\\.\ROOT\Microsoft\Windows\Storage",
+                    $"SELECT MediaType FROM MSFT_PhysicalDisk WHERE DeviceId = '{diskNumber}'");
+
+                foreach (var disk in disks.Get())
+                {
+                    // 4 is solid state, 3 is spinning, 0 and 5 are unspecified kinds.
+                    if (Convert.ToInt32(disk["MediaType"] ?? 0) == 4) return true;
+                }
+            }
+        }
+        catch
+        {
+            // Nothing can be said about the media, so nothing is said.
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// True for the system drive root and for the Windows, Program Files, and ProgramData folders
     /// (or anything inside them), which a file wiper must never target.
     /// </summary>
@@ -306,7 +370,7 @@ public class DriveWiper : IDriveWiper
     }
 
     /// <summary>Overwrites a regular (non-link) file with every pass, then renames and deletes it.</summary>
-    private static async Task<(long BytesWiped, int Passes)> WipeRegularFileAsync(string filePath, WipeMethod method,
+    private static async Task<(long BytesWiped, int Passes, bool Verified)> WipeRegularFileAsync(string filePath, WipeMethod method,
         IProgress<double>? progress, CancellationToken cancellationToken)
     {
         var fileInfo = new FileInfo(filePath);
@@ -316,6 +380,7 @@ public class DriveWiper : IDriveWiper
         if (fileInfo.IsReadOnly)
             fileInfo.IsReadOnly = false;
 
+        byte[]? lastPattern = null;
         for (int pass = 1; pass <= passes; pass++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -324,7 +389,12 @@ public class DriveWiper : IDriveWiper
             var completedPasses = pass - 1;
             var passProgress = new Progress<double>(p => progress?.Report((completedPasses + p) / passes));
             await OverwriteFileAsync(filePath, fileSize, pattern, passProgress, cancellationToken);
+            lastPattern = pattern;
         }
+
+        // Read it back: a write that never reached the disk would otherwise be reported as a wipe.
+        var verified = fileSize == 0 || lastPattern == null ||
+                       await VerifyOverwriteAsync(filePath, lastPattern, cancellationToken);
 
         // Truncate, rename to a random name (obscures the original name), then delete.
         await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Write))
@@ -337,7 +407,7 @@ public class DriveWiper : IDriveWiper
         File.Move(filePath, randomName);
         File.Delete(randomName);
 
-        return (fileSize * passes, passes);
+        return (fileSize * passes, passes, verified);
     }
 
     public async Task<WipeResult> WipeFreeSpaceAsync(string driveLetter, WipeMethod method = WipeMethod.SinglePass,
@@ -416,7 +486,7 @@ public class DriveWiper : IDriveWiper
         });
     }
 
-    private static int GetPassCount(WipeMethod method) => method switch
+    internal static int GetPassCount(WipeMethod method) => method switch
     {
         WipeMethod.SinglePass => 1,
         WipeMethod.DoD3Pass => 3,
@@ -425,7 +495,7 @@ public class DriveWiper : IDriveWiper
         _ => 1
     };
 
-    private static byte[] GetWipePattern(WipeMethod method, int pass)
+    internal static byte[] GetWipePattern(WipeMethod method, int pass)
     {
         var buffer = new byte[BufferSize];
 
@@ -462,19 +532,89 @@ public class DriveWiper : IDriveWiper
 
             case WipeMethod.Gutmann:
             default:
-                // Gutmann uses specific patterns for first 4 and last 4 passes, random in between
+                // Passes 1-4 and 32-35 are random; 5-31 are the patterns from the paper.
                 if (pass <= 4 || pass > 31)
+                {
                     RandomNumberGenerator.Fill(buffer);
+                }
                 else
                 {
-                    // Various specific patterns
-                    var patternByte = (byte)((pass * 17) % 256);
-                    Array.Fill(buffer, patternByte);
+                    FillRepeating(buffer, GutmannPatterns[pass - 5]);
                 }
+
                 break;
         }
 
         return buffer;
+    }
+
+    /// <summary>
+    /// Passes 5 to 31 of the Gutmann method, in order, as three-byte sequences repeated across the region.
+    /// Taken from Peter Gutmann, "Secure Deletion of Data from Magnetic and Solid-State Memory" (1996);
+    /// see https://en.wikipedia.org/wiki/Gutmann_method for the same table.
+    /// The previous code wrote (pass * 17) % 256 here, which is not that method by any reading.
+    /// </summary>
+    internal static readonly byte[][] GutmannPatterns =
+    [
+        [0x55, 0x55, 0x55], [0xAA, 0xAA, 0xAA], [0x92, 0x49, 0x24], [0x49, 0x24, 0x92], [0x24, 0x92, 0x49],
+        [0x00, 0x00, 0x00], [0x11, 0x11, 0x11], [0x22, 0x22, 0x22], [0x33, 0x33, 0x33], [0x44, 0x44, 0x44],
+        [0x55, 0x55, 0x55], [0x66, 0x66, 0x66], [0x77, 0x77, 0x77], [0x88, 0x88, 0x88], [0x99, 0x99, 0x99],
+        [0xAA, 0xAA, 0xAA], [0xBB, 0xBB, 0xBB], [0xCC, 0xCC, 0xCC], [0xDD, 0xDD, 0xDD], [0xEE, 0xEE, 0xEE],
+        [0xFF, 0xFF, 0xFF], [0x92, 0x49, 0x24], [0x49, 0x24, 0x92], [0x24, 0x92, 0x49], [0x6D, 0xB6, 0xDB],
+        [0xB6, 0xDB, 0x6D], [0xDB, 0x6D, 0xB6],
+    ];
+
+    /// <summary>Lays a short pattern down across a buffer, repeating it.</summary>
+    internal static void FillRepeating(byte[] buffer, byte[] pattern)
+    {
+        for (var i = 0; i < buffer.Length; i++)
+        {
+            buffer[i] = pattern[i % pattern.Length];
+        }
+    }
+
+    /// <summary>
+    /// Reads the file back and checks it holds what the last pass wrote. It says the write reached the disk
+    /// and was not held in a cache or quietly dropped; it says nothing about what a drive keeps elsewhere.
+    /// </summary>
+    internal static async Task<bool> VerifyOverwriteAsync(string filePath, byte[] pattern, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, BufferSize,
+                FileOptions.SequentialScan);
+
+            var buffer = new byte[BufferSize];
+            long position = 0;
+
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var read = await fs.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
+                if (read == 0) break;
+
+                for (var i = 0; i < read; i++)
+                {
+                    if (buffer[i] != pattern[(int)((position + i) % pattern.Length)])
+                    {
+                        return false;
+                    }
+                }
+
+                position += read;
+            }
+
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static async Task OverwriteFileAsync(string filePath, long fileSize, byte[] pattern,

@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
@@ -25,11 +25,19 @@ public partial class DriveWiperViewModel : ObservableObject
 
     public ObservableCollection<WipeMethodOption> WipeMethods { get; } = new()
     {
-        new WipeMethodOption(WipeMethod.SinglePass, "Quick (1 Pass)", "Fast but basic overwrite. Good for non-sensitive data."),
-        new WipeMethodOption(WipeMethod.DoD3Pass, "DoD 3-Pass (Recommended)", "US Department of Defense short method. Good balance of security and speed."),
-        new WipeMethodOption(WipeMethod.DoD7Pass, "DoD 7-Pass", "US Department of Defense extended method. Very secure."),
-        new WipeMethodOption(WipeMethod.Gutmann, "Gutmann 35-Pass", "Maximum security. Very slow. For extremely sensitive data only.")
+        new WipeMethodOption(WipeMethod.SinglePass, "1 pass (zeros)", "Writes zeros over the file once. Quick."),
+        new WipeMethodOption(WipeMethod.DoD3Pass, "3 passes (recommended)", "Zeros, then ones, then random bytes - the pattern DoD 5220.22-M describes."),
+        new WipeMethodOption(WipeMethod.DoD7Pass, "7 passes", "Seven alternating patterns. Takes about twice as long as three."),
+        new WipeMethodOption(WipeMethod.Gutmann, "35 passes (Gutmann)", "The 1996 Gutmann patterns, meant for drive encodings of that era. Very slow.")
     };
+
+    /// <summary>
+    /// Shown when the files chosen sit on a solid-state drive. Overwriting a file there writes to different
+    /// flash than the copy being replaced, because the drive decides where writes land.
+    /// </summary>
+    [ObservableProperty] private string _mediaWarning = "";
+
+    [ObservableProperty] private bool _hasMediaWarning;
 
     public DriveWiperViewModel(IDriveWiper driveWiper)
     {
@@ -46,10 +54,10 @@ public partial class DriveWiperViewModel : ObservableObject
     {
         MethodDescription = SelectedMethod switch
         {
-            WipeMethod.SinglePass => "Overwrites data once with zeros. Fast but recoverable with forensic tools.",
-            WipeMethod.DoD3Pass => "Overwrites with 0x00, then 0xFF, then random bytes. Meets most security requirements.",
-            WipeMethod.DoD7Pass => "Seven alternating pattern passes. Exceeds most compliance requirements.",
-            WipeMethod.Gutmann => "35 passes with specific patterns. Maximum theoretical security but very time consuming.",
+            WipeMethod.SinglePass => "One pass of zeros over the file's own blocks, then the file is deleted. The last pass is read back to check it landed.",
+            WipeMethod.DoD3Pass => "Zeros, then 0xFF, then random bytes, as DoD 5220.22-M describes. The last pass is read back to check it landed.",
+            WipeMethod.DoD7Pass => "Seven passes of alternating patterns and random bytes. The last pass is read back to check it landed.",
+            WipeMethod.Gutmann => "Four random passes, the 27 Gutmann patterns, then four more random passes. Written for 1990s drive encodings; on anything modern the extra passes buy little over three.",
             _ => ""
         };
     }
@@ -219,8 +227,30 @@ public partial class DriveWiperViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Says so when the chosen files sit on a solid-state drive. Overwriting a file there does not
+    /// necessarily reach the flash that held it: the drive writes elsewhere and remaps, so the old contents
+    /// can survive in blocks nothing can address from here.
+    /// </summary>
+    private void UpdateMediaWarning()
+    {
+        var ssdDrives = FilesToWipe
+            .Select(f => Path.GetPathRoot(f.Path))
+            .Where(root => !string.IsNullOrEmpty(root))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(root => _driveWiper.IsSolidStateDrive(root!))
+            .Select(root => root!.TrimEnd('\\'))
+            .ToList();
+
+        HasMediaWarning = ssdDrives.Count > 0;
+        MediaWarning = HasMediaWarning
+            ? $"{string.Join(", ", ssdDrives)} is a solid-state drive. Overwriting a file there cannot promise the old contents are gone, because the drive chooses where writes land. Use the drive's own secure erase, or keep the disk encrypted so what is left cannot be read."
+            : "";
+    }
+
     private void UpdateFileStats()
     {
+        UpdateMediaWarning();
         HasFiles = FilesToWipe.Count > 0;
         TotalFiles = FilesToWipe.Count;
 
