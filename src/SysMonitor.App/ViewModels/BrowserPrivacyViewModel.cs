@@ -10,7 +10,6 @@ public partial class BrowserPrivacyViewModel : ObservableObject
     private readonly IBrowserPrivacyCleaner _browserPrivacyCleaner;
 
     [ObservableProperty] private ObservableCollection<BrowserGroupViewModel> _browserGroups = new();
-    [ObservableProperty] private ObservableCollection<InstalledBrowser> _installedBrowsers = new();
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private bool _isCleaning;
     [ObservableProperty] private bool _hasResults;
@@ -35,12 +34,6 @@ public partial class BrowserPrivacyViewModel : ObservableObject
         _browserPrivacyCleaner = browserPrivacyCleaner;
     }
 
-    public async Task InitializeAsync()
-    {
-        var browsers = await _browserPrivacyCleaner.GetInstalledBrowsersAsync();
-        InstalledBrowsers = new ObservableCollection<InstalledBrowser>(browsers);
-    }
-
     [RelayCommand]
     private async Task ScanAsync()
     {
@@ -55,8 +48,12 @@ public partial class BrowserPrivacyViewModel : ObservableObject
             ApplyFilter();
 
             HasResults = _allItems.Count > 0;
+            // The browsers the items were actually found in. It used to count InstalledBrowsers, which
+            // nothing fills in unless InitializeAsync is called, and no page ever called it - so every scan
+            // reported finding things "across 0 browsers".
+            var browsersWithData = BrowserGroups.Count;
             StatusMessage = HasResults
-                ? $"Found {TotalItems} items ({FormattedTotalSize}) across {InstalledBrowsers.Count} browsers"
+                ? $"Found {TotalItems} items ({FormattedTotalSize}) in {browsersWithData} browser{(browsersWithData == 1 ? "" : "s")}"
                 : "No browser data found";
         }
         catch (Exception ex)

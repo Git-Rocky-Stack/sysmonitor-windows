@@ -7,7 +7,6 @@ public interface IBrowserPrivacyCleaner
 {
     Task<List<BrowserPrivacyItem>> ScanAsync(CancellationToken cancellationToken = default);
     Task<PrivacyCleanResult> CleanAsync(IEnumerable<BrowserPrivacyItem> itemsToClean, CancellationToken cancellationToken = default);
-    Task<List<InstalledBrowser>> GetInstalledBrowsersAsync();
 }
 
 public class BrowserPrivacyItem
@@ -45,15 +44,6 @@ public enum PrivacyRiskLevel
     Low,        // History, downloads
     Medium,     // Cookies, sessions
     High        // Passwords, autofill
-}
-
-public class InstalledBrowser
-{
-    public string Name { get; set; } = string.Empty;
-    public string Version { get; set; } = string.Empty;
-    public string ProfilePath { get; set; } = string.Empty;
-    public bool IsDefault { get; set; }
-    public string Icon { get; set; } = string.Empty;
 }
 
 public class PrivacyCleanResult
@@ -471,29 +461,6 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
         _logger.LogInformation("Privacy clean complete: {ItemsDeleted} items deleted, {BytesCleaned} bytes freed",
             result.ItemsDeleted, result.BytesCleaned);
         return result;
-    }
-
-    public async Task<List<InstalledBrowser>> GetInstalledBrowsersAsync()
-    {
-        return await Task.Run(() =>
-        {
-            var browsers = new List<InstalledBrowser>();
-
-            foreach (var browser in _browsers)
-            {
-                if (Directory.Exists(browser.BasePath))
-                {
-                    browsers.Add(new InstalledBrowser
-                    {
-                        Name = browser.Name,
-                        ProfilePath = browser.BasePath,
-                        Icon = browser.Icon
-                    });
-                }
-            }
-
-            return browsers;
-        });
     }
 
     private static (long size, int count) GetDirectorySize(string path)

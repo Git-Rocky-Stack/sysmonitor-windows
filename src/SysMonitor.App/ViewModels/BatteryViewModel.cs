@@ -167,13 +167,15 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
 
     private static string GetHealthColor(string health)
     {
+        // These are the words BatteryMonitor uses for how worn the battery is. "Low" and "Critical" were
+        // among them while this showed the charge level instead.
         return health switch
         {
             "Good" => "#4CAF50",    // Green
             "Fair" => "#FF9800",    // Orange
-            "Low" => "#FF5722",     // Deep Orange
-            "Critical" => "#F44336", // Red
-            _ => "#808080"          // Gray
+            "Worn" => "#FF5722",    // Deep Orange
+            "Poor" => "#F44336",    // Red
+            _ => "#808080"          // Gray: not reported
         };
     }
 

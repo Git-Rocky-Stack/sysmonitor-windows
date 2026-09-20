@@ -12,6 +12,8 @@ using System.Text;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
+using SysMonitor.Core.Helpers;
+
 namespace SysMonitor.App.ViewModels;
 
 public partial class DashboardViewModel : ObservableObject, IDisposable
@@ -300,9 +302,12 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
         try
         {
-            var freedMB = await _memoryOptimizer.OptimizeMemoryAsync();
+            var trimmedBytes = await _memoryOptimizer.OptimizeMemoryAsync();
             await RefreshDataAsync();
-            ShowActionStatus($"Freed {freedMB:F0} MB of memory!", true);
+            // The optimizer returns bytes; this used to print that number with "MB" after it, so trimming
+            // 500 MB read as "Freed 524288000 MB". And trimming a working set is not freeing memory: Windows
+            // moves those pages to the standby list and can page them back as soon as the app touches them.
+            ShowActionStatus($"Trimmed {FormatHelper.FormatSize(trimmedBytes)} from background apps", true);
         }
         catch (Exception ex)
         {
