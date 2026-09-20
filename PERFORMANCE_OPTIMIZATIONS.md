@@ -2,7 +2,7 @@
 
 ## What this document is
 
-A description of the performance changes in this code, each one anchored to the lines that implement it.
+Each section below names one change and the file and line it lives at, so you can go and read it.
 
 **It contains no before-and-after timings.** The version of this document that did — "startup time 2–5
 seconds → <1 second", "30–40 FPS → 55–60 FPS", "150ms freeze → <20ms", and twenty-odd more — had no

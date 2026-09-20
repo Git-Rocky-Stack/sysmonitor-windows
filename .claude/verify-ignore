@@ -1,0 +1,22 @@
+# Files the verification gate should not judge, and why.
+#
+# tests/SysMonitor.Tests/TestSupport/ holds helpers, not tests: TempDirectory, FileSystemLinks,
+# TestRegistryKey, RenderedPage, PdfTestFile, PdfContent, RepoSource. None of them contains a [Fact] or a
+# [Theory] - checked, all seven return 0 - so Gate 3's "no assertions" is true of them by design and its
+# conclusion, that they prove nothing, does not follow: a helper's job is to be leaned on.
+#
+# The gate already knows this shape. Its TEST_SUPPORT_RX matches a path segment named Fixtures, Stubs,
+# Doubles, Mocks, Fakes, Helpers, Builders, Support, TestData or TestFixtures - "TestSupport" is simply
+# missing from that list. Adding it to ~/.claude/hooks/verify-lib.mjs would fix this everywhere; that file
+# is shared by every project, so it is Rocky's call, not a change to make silently from inside one repo.
+#
+# Before adding this line, each helper was broken in turn to check it is load-bearing - if one of them
+# quietly lies, real tests must go red. Every one of them does, and the suite returns to 0 failures once
+# they are restored:
+#
+#     TempDirectory    11 tests notice     RenderedPage     25 tests notice
+#     FileSystemLinks   2 tests notice     PdfTestFile       8 tests notice
+#     TestRegistryKey   4 tests notice     PdfContent        6 tests notice
+#     RepoSource        2 tests notice
+#
+tests/SysMonitor.Tests/TestSupport/
