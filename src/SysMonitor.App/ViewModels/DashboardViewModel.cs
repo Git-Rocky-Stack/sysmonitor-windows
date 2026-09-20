@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
@@ -139,16 +139,18 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         {
             // Fetch all data in parallel
             var infoTask = _systemInfoService.GetSystemInfoAsync();
+            // One reading per refresh: the speeds come with the network info. Asking twice at once used to
+            // leave one of the two callers with a zero, and that zero reached the screen.
             var networkTask = _networkMonitor.GetNetworkInfoAsync();
-            var networkSpeedTask = _networkMonitor.GetSpeedAsync();
             var cpuTempTask = _temperatureMonitor.GetCpuTemperatureAsync();
             var gpuTempTask = _temperatureMonitor.GetGpuTemperatureAsync();
 
-            await Task.WhenAll(infoTask, networkTask, networkSpeedTask, cpuTempTask, gpuTempTask);
+            await Task.WhenAll(infoTask, networkTask, cpuTempTask, gpuTempTask);
 
             var info = await infoTask;
             var networkInfo = await networkTask;
-            var (upload, download) = await networkSpeedTask;
+            var upload = networkInfo.UploadSpeedBps;
+            var download = networkInfo.DownloadSpeedBps;
             var cpuTemp = await cpuTempTask;
             var gpuTemp = await gpuTempTask;
 
