@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Optimizers;
@@ -48,24 +48,31 @@ public partial class StartupViewModel : ObservableObject
     private async Task EnableItemAsync()
     {
         if (SelectedItem == null) return;
-        await _startupOptimizer.EnableStartupItemAsync(SelectedItem);
-        await RefreshStartupItemsAsync();
+        await ApplyAsync(await _startupOptimizer.EnableStartupItemAsync(SelectedItem));
     }
 
     [RelayCommand]
     private async Task DisableItemAsync()
     {
         if (SelectedItem == null) return;
-        await _startupOptimizer.DisableStartupItemAsync(SelectedItem);
-        await RefreshStartupItemsAsync();
+        await ApplyAsync(await _startupOptimizer.DisableStartupItemAsync(SelectedItem));
     }
 
     [RelayCommand]
     private async Task DeleteItemAsync()
     {
         if (SelectedItem == null) return;
-        await _startupOptimizer.DeleteStartupItemAsync(SelectedItem);
+        await ApplyAsync(await _startupOptimizer.DeleteStartupItemAsync(SelectedItem));
+    }
+
+    /// <summary>
+    /// Refreshes the list and leaves the result on screen. A change that did not happen has to say so: the
+    /// list alone cannot, since it looks the same either way.
+    /// </summary>
+    private async Task ApplyAsync(StartupChangeResult result)
+    {
         await RefreshStartupItemsAsync();
+        StatusMessage = result.Message;
     }
 
     [RelayCommand]
