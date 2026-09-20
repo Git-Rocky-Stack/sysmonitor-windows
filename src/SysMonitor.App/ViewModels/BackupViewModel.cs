@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Backup;
@@ -598,6 +598,12 @@ public partial class BackupViewModel : ObservableObject
 
     // ==================== BACKUP HISTORY ACTIONS ====================
 
+    /// <summary>
+    /// Asked before a restore writes anything, with what it would write and where. The page puts it on
+    /// screen; without an answer, nothing is written.
+    /// </summary>
+    public Func<RestorePlan, Task<bool>>? ConfirmRestore { get; set; }
+
     [RelayCommand]
     private Task RestoreBackupAsync(BackupArchiveViewModel archive) => RestoreBackupWithPasswordAsync(archive, null);
 
@@ -624,9 +630,6 @@ public partial class BackupViewModel : ObservableObject
             var folder = await picker.PickSingleFolderAsync();
             if (folder == null) return;
 
-            IsBackupRunning = true;
-            ProgressStatus = "Restoring backup...";
-
             var options = new RestoreOptions
             {
                 RestoreToOriginalLocation = false,
@@ -634,6 +637,27 @@ public partial class BackupViewModel : ObservableObject
                 OverwriteExisting = true,
                 Password = password
             };
+
+            // What this would write, worked out before anything is written, and shown before it happens.
+            ProgressStatus = "Checking what this backup would restore...";
+            var plan = await _backupService.PrepareRestoreAsync(archive.Archive, folder.Path, options);
+
+            if (plan.Files.Count == 0)
+            {
+                ShowStatus(plan.Refused.Count > 0
+                    ? $"Nothing was restored: every entry in this backup ({plan.Refused.Count}) asked to be written somewhere it does not belong."
+                    : "This backup has nothing to restore.", false);
+                return;
+            }
+
+            if (ConfirmRestore != null && !await ConfirmRestore(plan))
+            {
+                ShowStatus("Nothing was restored", false);
+                return;
+            }
+
+            IsBackupRunning = true;
+            ProgressStatus = "Restoring backup...";
 
             var progress = new Progress<BackupProgress>(p =>
             {

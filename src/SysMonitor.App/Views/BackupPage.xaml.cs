@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Backup;
@@ -13,6 +13,9 @@ public sealed partial class BackupPage : Page
     {
         ViewModel = App.GetService<BackupViewModel>();
         InitializeComponent();
+
+        // A restore writes files onto someone's machine; they get to see where first.
+        ViewModel.ConfirmRestore = AskBeforeRestoringAsync;
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
@@ -219,5 +222,53 @@ public sealed partial class BackupPage : Page
                 await ViewModel.DeleteBackupCommand.ExecuteAsync(archive);
             }
         }
+    }
+
+    /// <summary>Shows what a restore would write and where, and asks before it happens.</summary>
+    private async Task<bool> AskBeforeRestoringAsync(RestorePlan plan)
+    {
+        var folders = string.Join("\n", plan.DestinationFolders.Take(8));
+        if (plan.DestinationFolders.Count > 8)
+        {
+            folders += $"\n... and {plan.DestinationFolders.Count - 8} more";
+        }
+
+        var message = $"{plan.Files.Count} file(s), {FormatBytes(plan.TotalBytes)}, into:\n\n{folders}";
+
+        if (plan.Refused.Count > 0)
+        {
+            message += $"\n\n{plan.Refused.Count} entry(ies) in this backup ask to be written outside the folders it was taken from. They will not be restored.";
+        }
+
+        if (!plan.HasRecordedSourceRoots)
+        {
+            message += "\n\nThis backup was made before the app recorded where files came from, so check the folders above.";
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Restore these files?",
+            Content = message,
+            PrimaryButtonText = "Restore",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        double size = bytes;
+        var unit = 0;
+        while (size >= 1024 && unit < units.Length - 1)
+        {
+            size /= 1024;
+            unit++;
+        }
+
+        return $"{size:0.#} {units[unit]}";
     }
 }

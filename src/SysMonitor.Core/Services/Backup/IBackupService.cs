@@ -12,6 +12,12 @@ public interface IBackupService
 
     // Restore Operations
     Task<BackupResult> RestoreBackupAsync(BackupArchive archive, string destinationPath, RestoreOptions options, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// What a restore of this archive would write, worked out without writing anything, so the folders can be
+    /// shown to the person before they agree to it.
+    /// </summary>
+    Task<RestorePlan> PrepareRestoreAsync(BackupArchive archive, string destinationPath, RestoreOptions options, CancellationToken cancellationToken = default);
     Task<List<RestorePointInfo>> GetRestorePointsAsync();
 
     // Backup Management
@@ -228,7 +234,35 @@ public class BackupManifest
     public DateTime CreatedDate { get; set; }
     public List<BackupFileEntry> Files { get; set; } = [];
     public Dictionary<string, string> Metadata { get; set; } = [];
+
+    /// <summary>
+    /// The folders this backup was taken from. A restore to the original locations puts files back inside
+    /// these and nowhere else, so an archive that has been tampered with cannot choose its own destinations.
+    /// Backups written before this existed have none, and such a restore has to be confirmed by destination.
+    /// </summary>
+    public List<string> SourceRoots { get; set; } = [];
 }
+
+/// <summary>What a restore would write, worked out before anything is written.</summary>
+public class RestorePlan
+{
+    /// <summary>The entries that may be restored, with the place each one goes.</summary>
+    public List<PlannedRestore> Files { get; init; } = [];
+
+    /// <summary>The folders that would be written to, for the person to look at before agreeing.</summary>
+    public List<string> DestinationFolders { get; init; } = [];
+
+    /// <summary>Entries the archive asked for that will not be written, and why.</summary>
+    public List<BackupError> Refused { get; init; } = [];
+
+    /// <summary>Whether the archive recorded where it came from; older ones did not.</summary>
+    public bool HasRecordedSourceRoots { get; init; }
+
+    public long TotalBytes => Files.Sum(f => f.Entry.SizeBytes);
+}
+
+/// <summary>One file of a restore, and the checked path it goes to.</summary>
+public record PlannedRestore(BackupFileEntry Entry, string SourceFile, string DestinationFile);
 
 /// <summary>
 /// Entry for a single file in the backup

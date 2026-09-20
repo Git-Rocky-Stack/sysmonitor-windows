@@ -124,6 +124,7 @@ public class BackupService : IBackupService
                 BackupId = Guid.NewGuid().ToString(),
                 CreatedDate = DateTime.Now,
                 Files = [],
+                SourceRoots = job.SourcePaths.ToList(),
                 Metadata = new Dictionary<string, string>
                 {
                     ["BackupType"] = job.Type.ToString(),
@@ -692,16 +693,19 @@ public class BackupService : IBackupService
                 ? manifest.Files.Where(f => options.SelectiveFiles.Contains(f.RelativePath)).ToList()
                 : manifest.Files;
 
-            foreach (var fileEntry in filesToRestore)
+            var plan = PlanRestore(manifest, filesToRestore, extractPath, destinationPath, options);
+            errors.AddRange(plan.Refused);
+            totalFiles = plan.Files.Count;
+
+            foreach (var planned in plan.Files)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                var fileEntry = planned.Entry;
 
                 try
                 {
-                    var sourceFile = Path.Combine(extractPath, fileEntry.RelativePath);
-                    var destFile = options.RestoreToOriginalLocation
-                        ? fileEntry.OriginalPath
-                        : Path.Combine(destinationPath, fileEntry.RelativePath);
+                    var sourceFile = planned.SourceFile;
+                    var destFile = planned.DestinationFile;
 
                     var destDir = Path.GetDirectoryName(destFile);
                     if (!string.IsNullOrEmpty(destDir))
@@ -749,7 +753,9 @@ public class BackupService : IBackupService
             {
                 Success = true,
                 Status = errors.Count > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed,
-                Message = errors.Count > 0 ? $"Restored with {errors.Count} errors" : "Restore completed successfully",
+                Message = plan.Refused.Count > 0
+                    ? $"Restored {processedFiles} file(s); {plan.Refused.Count} entry(ies) in the backup asked to be written outside the folders it was taken from and were refused"
+                    : errors.Count > 0 ? $"Restored with {errors.Count} errors" : "Restore completed successfully",
                 ProcessedFiles = processedFiles,
                 TotalFiles = totalFiles,
                 Duration = stopwatch.Elapsed,
@@ -1263,6 +1269,198 @@ public class BackupService : IBackupService
     {
         var json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(path, json);
+    }
+
+    /// <summary>
+    /// Works out what a restore would write, before it writes anything. Every path in the archive is checked:
+    /// a backup can be edited by anyone who can reach the file, and an edited one would otherwise choose its
+    /// own destinations - the Startup folder, say - and have the restore write them as the user.
+    /// </summary>
+    internal static RestorePlan PlanRestore(
+        BackupManifest manifest,
+        IEnumerable<BackupFileEntry> entries,
+        string extractPath,
+        string destinationPath,
+        RestoreOptions options)
+    {
+        var files = new List<PlannedRestore>();
+        var refused = new List<BackupError>();
+        var folders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        var sourceRoots = manifest.SourceRoots
+            .Where(rootPath => !string.IsNullOrWhiteSpace(rootPath))
+            .Select(FullPathOrNull)
+            .Where(rootPath => rootPath != null)
+            .Select(rootPath => rootPath!)
+            .ToList();
+
+        var extractRoot = FullPathOrNull(extractPath);
+        var destinationRoot = FullPathOrNull(destinationPath);
+
+        foreach (var entry in entries)
+        {
+            // Where it comes from: inside the extracted backup, never up and out of it.
+            var sourceFile = CombineWithin(extractRoot, entry.RelativePath);
+            if (sourceFile == null)
+            {
+                refused.Add(Refuse(entry, "its place in the backup points outside the backup"));
+                continue;
+            }
+
+            string? destination;
+            if (options.RestoreToOriginalLocation)
+            {
+                destination = FullPathOrNull(entry.OriginalPath);
+                if (destination == null || !Path.IsPathFullyQualified(destination))
+                {
+                    refused.Add(Refuse(entry, "it does not say where it came from"));
+                    continue;
+                }
+
+                // Back inside the folders the backup was taken from, and nowhere else.
+                if (sourceRoots.Count > 0 && !sourceRoots.Any(rootPath => IsInside(rootPath, destination)))
+                {
+                    refused.Add(Refuse(entry, $"it asks to be written to {destination}, outside the folders this backup was taken from"));
+                    continue;
+                }
+            }
+            else
+            {
+                destination = CombineWithin(destinationRoot, entry.RelativePath);
+                if (destination == null)
+                {
+                    refused.Add(Refuse(entry, "its place in the backup points outside the folder being restored to"));
+                    continue;
+                }
+            }
+
+            files.Add(new PlannedRestore(entry, sourceFile, destination));
+
+            var folder = Path.GetDirectoryName(destination);
+            if (!string.IsNullOrEmpty(folder))
+            {
+                folders.Add(folder);
+            }
+        }
+
+        return new RestorePlan
+        {
+            Files = files,
+            DestinationFolders = folders.OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList(),
+            Refused = refused,
+            HasRecordedSourceRoots = sourceRoots.Count > 0,
+        };
+    }
+
+    /// <summary>
+    /// What a restore of this archive would write. Callers show the folders to the person before agreeing to
+    /// it; RestoreBackupAsync applies the same rules whether they do or not.
+    /// </summary>
+    public async Task<RestorePlan> PrepareRestoreAsync(
+        BackupArchive archive, string destinationPath, RestoreOptions options, CancellationToken cancellationToken = default)
+    {
+        var manifest = await ReadManifestOnlyAsync(archive, options, cancellationToken);
+        if (manifest == null)
+        {
+            return new RestorePlan();
+        }
+
+        var entries = options.SelectiveFiles != null
+            ? manifest.Files.Where(f => options.SelectiveFiles.Contains(f.RelativePath)).ToList()
+            : manifest.Files;
+
+        // Nothing is extracted for a preview, so the place files would be read from stands in for the real
+        // one; it is only used to check that no entry points out of the backup.
+        var notionalExtractPath = Path.Combine(Path.GetTempPath(), "sysmonitor-restore-preview");
+        return PlanRestore(manifest, entries, notionalExtractPath, destinationPath, options);
+    }
+
+    /// <summary>Reads only the manifest out of a backup, decrypting it in a temporary file when it has to.</summary>
+    private async Task<BackupManifest?> ReadManifestOnlyAsync(BackupArchive archive, RestoreOptions options, CancellationToken cancellationToken)
+    {
+        string? decrypted = null;
+
+        try
+        {
+            var path = archive.FilePath;
+
+            if (archive.IsEncrypted || path.EndsWith(".enc", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(options.Password))
+                {
+                    return null;
+                }
+
+                decrypted = Path.Combine(Path.GetTempPath(), $"restore_preview_{Guid.NewGuid():N}.zip");
+                await BackupEncryption.DecryptFileAsync(path, decrypted, options.Password, cancellationToken);
+                path = decrypted;
+            }
+
+            if (Directory.Exists(path))
+            {
+                var manifestPath = Path.Combine(path, _manifestFileName);
+                return File.Exists(manifestPath) ? await LoadManifestAsync(manifestPath) : null;
+            }
+
+            using var zip = System.IO.Compression.ZipFile.OpenRead(path);
+            var entry = zip.GetEntry(_manifestFileName);
+            if (entry == null)
+            {
+                return null;
+            }
+
+            using var stream = entry.Open();
+            return await JsonSerializer.DeserializeAsync<BackupManifest>(stream, cancellationToken: cancellationToken);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        finally
+        {
+            if (decrypted != null)
+            {
+                try { File.Delete(decrypted); } catch { }
+            }
+        }
+    }
+
+    private static BackupError Refuse(BackupFileEntry entry, string reason) => new()
+    {
+        FilePath = string.IsNullOrEmpty(entry.OriginalPath) ? entry.RelativePath : entry.OriginalPath,
+        ErrorMessage = $"Refused: {reason}.",
+    };
+
+    /// <summary>A full path, or null when the text is not one.</summary>
+    private static string? FullPathOrNull(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return null;
+
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>A path under a root, or null when the relative part climbs out of it.</summary>
+    private static string? CombineWithin(string? root, string relativePath)
+    {
+        if (root == null || string.IsNullOrWhiteSpace(relativePath)) return null;
+        if (Path.IsPathRooted(relativePath)) return null;
+
+        var combined = FullPathOrNull(Path.Combine(root, relativePath));
+        return combined != null && IsInside(root, combined) ? combined : null;
+    }
+
+    private static bool IsInside(string root, string candidate)
+    {
+        var rooted = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        return candidate.StartsWith(rooted, StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(candidate.TrimEnd(Path.DirectorySeparatorChar), root.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<BackupManifest> LoadManifestAsync(string path)
