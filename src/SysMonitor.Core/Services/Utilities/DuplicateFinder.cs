@@ -12,8 +12,21 @@ public class DuplicateFinder : IDuplicateFinder
 {
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// How a file is got rid of. The real one hands it to the Recycle Bin, which is what makes a wrong
+    /// choice undoable; a test passes its own so that running the suite does not put anything in the
+    /// developer's Recycle Bin, from where nothing can reliably take it out again.
+    /// </summary>
+    private readonly Func<string, bool> _recycle;
+
     public DuplicateFinder(ILogger<DuplicateFinder>? logger = null)
+        : this(FileScanning.SendToRecycleBin, logger)
     {
+    }
+
+    internal DuplicateFinder(Func<string, bool> recycle, ILogger<DuplicateFinder>? logger = null)
+    {
+        _recycle = recycle;
         _logger = logger ?? NullLogger<DuplicateFinder>.Instance;
     }
 
@@ -184,7 +197,7 @@ public class DuplicateFinder : IDuplicateFinder
                 try
                 {
                     var size = new FileInfo(filePath).Length;
-                    if (FileScanning.SendToRecycleBin(filePath))
+                    if (_recycle(filePath))
                     {
                         bytesFreed += size;
                     }

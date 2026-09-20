@@ -93,17 +93,46 @@ public class DuplicateFinderTests : IDisposable
         groups.Should().BeEmpty("a hard link is the same file, not a second copy");
     }
 
+    /// <summary>
+    /// A duplicate is handed to the Recycle Bin, never deleted outright, because the user may have picked
+    /// the wrong copy. The handing-over is checked here with a stand-in: a test that used the real Recycle
+    /// Bin left an item in it on every run, and nothing can reliably take an item back out - the shell's
+    /// Delete verb asks for confirmation and blocks, and its Restore verb did not take effect when invoked
+    /// from outside Explorer. FileScanning.SendToRecycleBin is the one line this stands in for.
+    /// </summary>
     [Fact]
-    public async Task ADeletedDuplicateGoesToTheRecycleBinAndCanBeGotBack()
+    public async Task ADeletedDuplicateIsHandedToTheRecycleBin()
     {
         var kept = _temp.File(@"keep\photo.txt", "a photo");
         var copy = _temp.File(@"copy\photo.txt", "a photo");
 
-        var freed = await _finder.DeleteDuplicatesAsync([copy]);
+        var recycled = new List<string>();
+        var finder = new DuplicateFinder(path =>
+        {
+            recycled.Add(path);
+            File.Delete(path);
+            return true;
+        });
 
+        var freed = await finder.DeleteDuplicatesAsync([copy]);
+
+        recycled.Should().ContainSingle("the copy is the one that goes, and nothing else")
+                .Which.Should().Be(copy);
         freed.Should().Be(new FileInfo(kept).Length);
         File.Exists(copy).Should().BeFalse();
-        RecycleBin.HoldsItemFrom(copy).Should().BeTrue("a wrong choice here has to be undoable");
+        File.Exists(kept).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task NothingIsCountedAsFreedWhenItCouldNotBeRemoved()
+    {
+        var copy = _temp.File(@"copy\photo.txt", "a photo");
+
+        var finder = new DuplicateFinder(_ => false);
+        var freed = await finder.DeleteDuplicatesAsync([copy]);
+
+        freed.Should().Be(0, "a file that is still there has freed nothing");
+        File.Exists(copy).Should().BeTrue();
     }
 
     [Fact]
