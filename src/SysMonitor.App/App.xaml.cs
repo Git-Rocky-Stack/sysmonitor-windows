@@ -240,10 +240,6 @@ public partial class App : Application
                 services.AddSingleton<ProfileService>();
                 services.AddSingleton<IProfileService>(sp => sp.GetRequiredService<ProfileService>());
 
-                // RAM Cache Service (fast temp storage)
-                services.AddSingleton<RamCacheService>();
-                services.AddSingleton<IRamCacheService>(sp => sp.GetRequiredService<RamCacheService>());
-
                 // FPS Overlay Service (real-time stats overlay)
                 services.AddSingleton<FpsOverlayService>();
                 services.AddSingleton<IFpsOverlayService>(sp => sp.GetRequiredService<FpsOverlayService>());

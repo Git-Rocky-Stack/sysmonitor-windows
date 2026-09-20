@@ -13,7 +13,6 @@ public partial class GameModeViewModel : ObservableObject
     private readonly IAutoGameModeService _autoGameModeService;
     private readonly IProfileService _profileService;
     private readonly IFpsOverlayService _fpsOverlayService;
-    private readonly IRamCacheService _ramCacheService;
     private readonly DispatcherQueue _dispatcherQueue;
 
     // Main Game Mode
@@ -21,7 +20,7 @@ public partial class GameModeViewModel : ObservableObject
     [ObservableProperty] private bool _isActivating;
     [ObservableProperty] private string _statusMessage = "Game Mode is OFF";
     [ObservableProperty] private string _statusColor = "#FFFFFF";
-    [ObservableProperty] private int _lastProcessesKilled;
+    [ObservableProperty] private int _lastBackgroundAppsAffected;
 
     /// <summary>
     /// Whether to ask background apps to close instead of only lowering them out of the way. Off by default:
@@ -54,29 +53,20 @@ public partial class GameModeViewModel : ObservableObject
     [ObservableProperty] private string _overlayButtonText = "SHOW";
     [ObservableProperty] private string _overlayPositionText = "Top Right";
 
-    // RAM Cache
-    [ObservableProperty] private bool _ramCacheEnabled;
-    [ObservableProperty] private double _ramCacheUsagePercent;
-    [ObservableProperty] private string _ramCacheStatus = "0 / 0 MB";
-    [ObservableProperty] private long _selectedCacheSize = 1024; // 1GB default
-
     public ObservableCollection<string> TargetApps { get; } = new();
-    public ObservableCollection<string> KilledApps { get; } = new();
+    public ObservableCollection<string> AffectedApps { get; } = new();
     public ObservableCollection<PerformanceProfile> Profiles { get; } = new();
-    public ObservableCollection<long> CacheSizes { get; } = new() { 512, 1024, 2048, 4096 };
 
     public GameModeViewModel(
         IGameModeService gameModeService,
         IAutoGameModeService autoGameModeService,
         IProfileService profileService,
-        IFpsOverlayService fpsOverlayService,
-        IRamCacheService ramCacheService)
+        IFpsOverlayService fpsOverlayService)
     {
         _gameModeService = gameModeService;
         _autoGameModeService = autoGameModeService;
         _profileService = profileService;
         _fpsOverlayService = fpsOverlayService;
-        _ramCacheService = ramCacheService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         // Subscribe to events
@@ -84,7 +74,6 @@ public partial class GameModeViewModel : ObservableObject
         _autoGameModeService.GameDetected += OnGameDetected;
         _autoGameModeService.GameClosed += OnGameClosed;
         _profileService.ProfileChanged += OnProfileChanged;
-        _ramCacheService.StatsUpdated += OnRamCacheStatsUpdated;
 
         // Initialize
         InitializeAsync();
@@ -121,10 +110,6 @@ public partial class GameModeViewModel : ObservableObject
         OverlayVisible = _fpsOverlayService.IsVisible;
         UpdateOverlayButtonText();
         UpdateOverlayPositionText();
-
-        // Initialize RAM cache state
-        RamCacheEnabled = _ramCacheService.IsEnabled;
-        UpdateRamCacheStatus();
     }
 
     #region Event Handlers
@@ -163,14 +148,6 @@ public partial class GameModeViewModel : ObservableObject
         });
     }
 
-    private void OnRamCacheStatsUpdated(object? sender, RamCacheStats stats)
-    {
-        _dispatcherQueue.TryEnqueue(() =>
-        {
-            RamCacheEnabled = stats.IsEnabled;
-            UpdateRamCacheStatus();
-        });
-    }
 
     #endregion
 
@@ -205,7 +182,7 @@ public partial class GameModeViewModel : ObservableObject
                 StatusMessage = "Restoring settings...";
                 await _gameModeService.DisableAsync();
 
-                KilledApps.Clear();
+                AffectedApps.Clear();
                 HasLastSession = false;
             }
             else
@@ -225,15 +202,15 @@ public partial class GameModeViewModel : ObservableObject
                 if (result.Success)
                 {
                     // Update last session info
-                    LastProcessesKilled = result.ProcessesAffected;
+                    LastBackgroundAppsAffected = result.ProcessesAffected;
                     LastMemoryFreed = FormatBytes(result.MemoryFreedBytes);
                     HasLastSession = true;
                     LastSessionAppsLabel = action == BackgroundAppAction.AskToClose ? "Apps Closed" : "Apps Lowered";
 
-                    KilledApps.Clear();
+                    AffectedApps.Clear();
                     foreach (var app in result.BackgroundAppsAffected)
                     {
-                        KilledApps.Add(FormatAppName(app));
+                        AffectedApps.Add(FormatAppName(app));
                     }
 
                     if (result.BackgroundAppsStillRunning.Count > 0)
@@ -353,47 +330,6 @@ public partial class GameModeViewModel : ObservableObject
 
     #endregion
 
-    #region RAM Cache
-
-    private void UpdateRamCacheStatus()
-    {
-        if (!_ramCacheService.IsEnabled)
-        {
-            RamCacheStatus = "Disabled";
-            RamCacheUsagePercent = 0;
-        }
-        else
-        {
-            var usedMb = _ramCacheService.UsedSizeBytes / (1024.0 * 1024.0);
-            var allocatedMb = _ramCacheService.AllocatedSizeBytes / (1024.0 * 1024.0);
-            RamCacheStatus = $"{usedMb:F0} / {allocatedMb:F0} MB";
-            RamCacheUsagePercent = allocatedMb > 0 ? (usedMb / allocatedMb) * 100 : 0;
-        }
-    }
-
-    [RelayCommand]
-    private async Task ToggleRamCacheAsync()
-    {
-        if (_ramCacheService.IsEnabled)
-        {
-            await _ramCacheService.DisableAsync();
-        }
-        else
-        {
-            await _ramCacheService.EnableAsync(SelectedCacheSize);
-        }
-        RamCacheEnabled = _ramCacheService.IsEnabled;
-        UpdateRamCacheStatus();
-    }
-
-    [RelayCommand]
-    private async Task ClearRamCacheAsync()
-    {
-        await _ramCacheService.ClearCacheAsync();
-        UpdateRamCacheStatus();
-    }
-
-    #endregion
 
     #region Helpers
 

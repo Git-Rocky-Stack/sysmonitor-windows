@@ -240,9 +240,9 @@
                     </StackPanel>
 
                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="22">
-                        Game Mode is a comprehensive gaming optimization suite with four powerful features:
-                        Auto Game Mode, Performance Profiles, FPS Overlay, and RAM Cache. Optimize your
-                        system for maximum gaming performance with intelligent automation and real-time monitoring.
+                        Game Mode is a gaming optimization suite with three features: Auto Game Mode,
+                        Performance Profiles and the FPS Overlay. It moves background apps out of the game's
+                        way, switches the power plan, and shows what the machine is doing while you play.
                     </TextBlock>
 
                     <!-- Core Features -->
@@ -306,12 +306,6 @@
                                         <TextBlock FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" FontSize="12">FPS Overlay (F1 HUD)</TextBlock>
                                         <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
                                             F1 Telemetry-style overlay showing FPS, CPU/GPU temps (°F), usage %, RAM, power draw, and fan speed. Drag to reposition.
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <StackPanel Spacing="2">
-                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource CyanAccentBrush}" FontSize="12">RAM Cache</TextBlock>
-                                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
-                                            Redirect temp files to RAM for faster I/O. Configurable sizes: 512MB, 1GB, 2GB, or 4GB.
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
@@ -747,10 +741,6 @@
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> FPS Overlay - F1 Telemetry HUD with real-time stats (drag to reposition)</Run>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
-                                <Run> RAM Cache - Redirect temp files to RAM for faster I/O</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>

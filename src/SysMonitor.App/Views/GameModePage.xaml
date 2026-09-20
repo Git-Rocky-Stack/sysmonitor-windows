@@ -129,7 +129,6 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Auto Game Mode Card -->
@@ -233,39 +232,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- RAM Cache Card -->
-                    <Border Grid.Column="3" Style="{StaticResource CardStyle}" Padding="16">
-                        <StackPanel Spacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{StaticResource InfoBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="RAM CACHE" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
-                                    <TextBlock Text="Fast temp storage" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <ToggleSwitch IsOn="{x:Bind ViewModel.RamCacheEnabled, Mode=OneWay}"
-                                          Toggled="RamCacheToggle_Toggled"
-                                          OnContent="Enabled" OffContent="Disabled"
-                                          Margin="0"/>
-
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="{x:Bind ViewModel.RamCacheStatus, Mode=OneWay}"
-                                           FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <ProgressBar Value="{x:Bind ViewModel.RamCacheUsagePercent, Mode=OneWay}"
-                                             Maximum="100" Height="4"
-                                             Foreground="{StaticResource InfoBrush}"/>
-                            </StackPanel>
-
-                            <Button Content="Clear Cache"
-                                    Command="{x:Bind ViewModel.ClearRamCacheCommand}"
-                                    IsEnabled="{x:Bind ViewModel.RamCacheEnabled, Mode=OneWay}"
-                                    HorizontalAlignment="Stretch"
-                                    FontSize="11"/>
-                        </StackPanel>
-                    </Border>
                 </Grid>
             </StackPanel>
 
@@ -529,7 +495,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.LastProcessesKilled, Mode=OneWay}"
+                                    <TextBlock Text="{x:Bind ViewModel.LastBackgroundAppsAffected, Mode=OneWay}"
                                                FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
                                                Foreground="{StaticResource PrimaryBrush}"/>
                                     <TextBlock Text="{x:Bind ViewModel.LastSessionAppsLabel, Mode=OneWay}" FontSize="12"
@@ -546,10 +512,10 @@
                             </Grid>
 
                             <!-- Killed Apps List -->
-                            <StackPanel Visibility="{x:Bind ViewModel.KilledApps.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
+                            <StackPanel Visibility="{x:Bind ViewModel.AffectedApps.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
                                 <TextBlock Text="Closed Applications:" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8"/>
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.KilledApps, Mode=OneWay}">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.AffectedApps, Mode=OneWay}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Horizontal" Spacing="8"/>

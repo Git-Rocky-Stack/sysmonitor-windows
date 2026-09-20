@@ -143,18 +143,6 @@ public sealed partial class GameModePage : Page
         }
     }
 
-    private void RamCacheToggle_Toggled(object sender, RoutedEventArgs e)
-    {
-        if (sender is ToggleSwitch toggle)
-        {
-            // Only trigger if the state is different from current
-            if (toggle.IsOn != ViewModel.RamCacheEnabled)
-            {
-                ViewModel.ToggleRamCacheCommand.Execute(null);
-            }
-        }
-    }
-
     private async void ViewSensors_Click(object sender, RoutedEventArgs e)
     {
         try
