@@ -206,14 +206,8 @@ public class ScheduledCleaningService : IScheduledCleaningService
                         break;
                 }
 
-                // Build command line arguments based on what to clean
-                var args = new List<string> { "--scheduled-clean" };
-                if (config.CleanTempFiles) args.Add("--temp");
-                if (config.CleanBrowserCache) args.Add("--browser");
-                if (config.CleanRecycleBin) args.Add("--recycle");
-                if (config.CleanWindowsUpdateCache) args.Add("--update");
-                if (config.CleanThumbnailCache) args.Add("--thumbnails");
-                if (!config.ShowNotification) args.Add("--silent");
+                // The switches the app reads on the way in, written by the same code that reads them.
+                var args = ScheduledCleaningRequest.From(config).ToArguments();
 
                 // Add action
                 if (!string.IsNullOrEmpty(_executablePath))

@@ -65,6 +65,19 @@ public partial class App : Application
             return; // Don't initialize the rest of the app
         }
 
+        // Windows Task Scheduler starts the app with these switches at the scheduled time. Clean and exit:
+        // opening the whole app with highest privileges and cleaning nothing is what M4 was about.
+        if (ScheduledCleaningRequest.FromCommandLine(args) is { } cleaningRequest)
+        {
+            Task.Run(async () =>
+            {
+                var exitCode = await RunScheduledCleanAsync(cleaningRequest);
+                Environment.Exit(exitCode);
+            }).GetAwaiter().GetResult();
+
+            return; // Don't initialize the rest of the app
+        }
+
         InitializeComponent();
 
         // Set up global exception handlers
@@ -328,6 +341,82 @@ public partial class App : Application
             throw new InvalidOperationException($"Service {typeof(T).Name} not found.");
         }
         return service;
+    }
+
+    /// <summary>
+    /// Cleans what the schedule asked for, with no window, and records what happened. Returns the process
+    /// exit code, so Task Scheduler's history shows a failed run as failed.
+    /// </summary>
+    private static async Task<int> RunScheduledCleanAsync(ScheduledCleaningRequest request)
+    {
+        var logPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SysMonitor", "Logs", "sysmonitor-.log");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.File(logPath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog());
+
+        try
+        {
+            if (!request.CleansAnything)
+            {
+                Log.Warning("Scheduled clean ran with nothing selected to clean");
+                return 0;
+            }
+
+            var runner = new ScheduledCleaningRunner(
+                new TempFileCleaner(loggerFactory.CreateLogger<TempFileCleaner>()),
+                new BrowserCacheCleaner(loggerFactory.CreateLogger<BrowserCacheCleaner>()),
+                loggerFactory.CreateLogger<ScheduledCleaningRunner>());
+
+            var outcome = await runner.RunAsync(request);
+
+            if (request.ShowNotification)
+            {
+                ShowScheduledCleanNotification(outcome);
+            }
+
+            return outcome.Success ? 0 : 1;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Scheduled clean failed");
+            return 1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+
+    private static void ShowScheduledCleanNotification(ScheduledCleaningOutcome outcome)
+    {
+        try
+        {
+            var template = Windows.UI.Notifications.ToastNotificationManager.GetTemplateContent(
+                Windows.UI.Notifications.ToastTemplateType.ToastText02);
+            var textNodes = template.GetElementsByTagName("text");
+            if (textNodes.Length >= 2)
+            {
+                textNodes[0].AppendChild(template.CreateTextNode("Scheduled cleaning finished"));
+                textNodes[1].AppendChild(template.CreateTextNode(outcome.Summary));
+            }
+
+            Windows.UI.Notifications.ToastNotificationManager.CreateToastNotifier("SysMonitor")
+                .Show(new Windows.UI.Notifications.ToastNotification(template));
+        }
+        catch (Exception ex)
+        {
+            // Nobody is watching a scheduled run; the log is the record that matters.
+            Log.Warning(ex, "Scheduled clean finished but its notification could not be shown");
+        }
     }
 
     private static void OnUnhandledException(object sender, System.UnhandledExceptionEventArgs e)
