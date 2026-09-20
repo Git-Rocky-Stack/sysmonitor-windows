@@ -71,22 +71,41 @@ public class PdfEditor : IPdfEditor
                 using var inputDoc = PdfReader.Open(document.FilePath, PdfDocumentOpenMode.Import);
                 using var outputDoc = new PdfDocument();
 
-                // Reorder and process pages based on document.Pages
+                // Write the pages in the order the editor holds them
                 foreach (var pageInfo in document.Pages)
                 {
-                    if (pageInfo.PageNumber < 1 || pageInfo.PageNumber > inputDoc.PageCount)
-                        continue;
+                    PdfPage page;
+                    int sourceRotation;
 
-                    var page = outputDoc.AddPage(inputDoc.Pages[pageInfo.PageNumber - 1]);
+                    if (pageInfo.IsBlank)
+                    {
+                        page = outputDoc.AddPage();
+                        page.Width = XUnit.FromPoint(pageInfo.Width);
+                        page.Height = XUnit.FromPoint(pageInfo.Height);
+                        sourceRotation = 0;
+                    }
+                    else if (pageInfo.PageNumber <= inputDoc.PageCount)
+                    {
+                        page = outputDoc.AddPage(inputDoc.Pages[pageInfo.PageNumber - 1]);
 
-                    // Annotations are measured on the page as displayed with the rotation it has in the
-                    // source, so take that before applying the new one. Always apply the new one: a page
-                    // turned back to 0 must not keep the source's /Rotate.
-                    var sourceRotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
+                        // Annotations are measured on the page as displayed with the rotation it has in the
+                        // source, so take that before applying the new one.
+                        sourceRotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
+                    }
+                    else
+                    {
+                        return new PdfOperationResult
+                        {
+                            Success = false,
+                            ErrorMessage = $"This document expects page {pageInfo.PageNumber} of \"{document.FileName}\", which has only {inputDoc.PageCount} pages. Nothing was saved."
+                        };
+                    }
+
+                    // Always apply the rotation: a page turned back upright must not keep the source's /Rotate.
                     page.Rotate = PdfPageGeometry.NormalizeRotation(pageInfo.Rotation);
 
                     // Apply annotations for this page
-                    var pageAnnotations = document.Annotations.Where(a => a.PageNumber == pageInfo.PageNumber).ToList();
+                    var pageAnnotations = document.Annotations.Where(a => a.PageId == pageInfo.Id).ToList();
                     if (pageAnnotations.Count > 0)
                     {
                         using var gfx = XGraphics.FromPdfPage(page);
@@ -117,6 +136,15 @@ public class PdfEditor : IPdfEditor
 
                 // Count the pages first: a saved PdfDocument refuses every further access.
                 var pagesProcessed = outputDoc.PageCount;
+                if (pagesProcessed == 0)
+                {
+                    return new PdfOperationResult
+                    {
+                        Success = false,
+                        ErrorMessage = "A PDF must have at least one page. Nothing was saved."
+                    };
+                }
+
                 outputDoc.Save(outputPath);
 
                 return new PdfOperationResult
@@ -327,25 +355,19 @@ public class PdfEditor : IPdfEditor
         return ~crc;
     }
 
-    public async Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pageNumber, int degrees)
+    public async Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pagePosition, int degrees)
     {
         return await Task.Run(() =>
         {
             try
             {
-                var page = document.Pages.FirstOrDefault(p => p.PageNumber == pageNumber);
+                var page = PageAt(document, pagePosition);
                 if (page == null)
                 {
-                    return new PdfOperationResult
-                    {
-                        Success = false,
-                        ErrorMessage = $"Page {pageNumber} not found"
-                    };
+                    return NoSuchPage(pagePosition);
                 }
 
-                // Normalize rotation to 0, 90, 180, or 270
-                page.Rotation = (page.Rotation + degrees) % 360;
-                if (page.Rotation < 0) page.Rotation += 360;
+                page.Rotation = PdfPageGeometry.NormalizeRotation(page.Rotation + degrees);
 
                 document.IsModified = true;
 
@@ -366,20 +388,16 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pageNumber)
+    public async Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pagePosition)
     {
         return await Task.Run(() =>
         {
             try
             {
-                var page = document.Pages.FirstOrDefault(p => p.PageNumber == pageNumber);
+                var page = PageAt(document, pagePosition);
                 if (page == null)
                 {
-                    return new PdfOperationResult
-                    {
-                        Success = false,
-                        ErrorMessage = $"Page {pageNumber} not found"
-                    };
+                    return NoSuchPage(pagePosition);
                 }
 
                 if (document.Pages.Count <= 1)
@@ -394,7 +412,7 @@ public class PdfEditor : IPdfEditor
                 document.Pages.Remove(page);
 
                 // Remove annotations for this page
-                document.Annotations.RemoveAll(a => a.PageNumber == pageNumber);
+                document.Annotations.RemoveAll(a => a.PageId == page.Id);
 
                 document.IsModified = true;
 
@@ -460,220 +478,69 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation)
-    {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                annotation.PageNumber = pageNumber;
-                document.Annotations.Add(annotation);
-                document.IsModified = true;
+    /// <summary>The 1-based position of the page an annotation sits on, or 0 when that page is gone.</summary>
+    private static int PositionOf(PdfEditorDocument document, PdfAnnotation annotation) =>
+        document.Pages.FindIndex(p => p.Id == annotation.PageId) + 1;
 
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+    /// <summary>The page at a 1-based position in the document, or null when there is none.</summary>
+    private static PdfPageInfo? PageAt(PdfEditorDocument document, int pagePosition) =>
+        pagePosition >= 1 && pagePosition <= document.Pages.Count ? document.Pages[pagePosition - 1] : null;
+
+    private static PdfOperationResult NoSuchPage(int pagePosition) =>
+        new() { Success = false, ErrorMessage = $"This document has no page {pagePosition}." };
+
+    /// <summary>Binds an annotation to the page at a position, so it stays with that page when pages move.</summary>
+    private static PdfOperationResult AddAnnotation(PdfEditorDocument document, int pagePosition, PdfAnnotation annotation)
+    {
+        var page = PageAt(document, pagePosition);
+        if (page == null)
+            return NoSuchPage(pagePosition);
+
+        annotation.PageId = page.Id;
+        document.Annotations.Add(annotation);
+        document.IsModified = true;
+
+        return new PdfOperationResult { Success = true, PagesProcessed = 1 };
     }
 
-    public async Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight)
+    public async Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pagePosition, TextAnnotation annotation)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                highlight.PageNumber = pageNumber;
-                document.Annotations.Add(highlight);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, annotation));
     }
 
-    public async Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape)
+    public async Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pagePosition, HighlightAnnotation highlight)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                shape.PageNumber = pageNumber;
-                document.Annotations.Add(shape);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, highlight));
     }
 
-    public async Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pageNumber, FreehandAnnotation freehand)
+    public async Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pagePosition, ShapeAnnotation shape)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                freehand.PageNumber = pageNumber;
-                document.Annotations.Add(freehand);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, shape));
     }
 
-    public async Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pageNumber, ImageAnnotation image)
+    public async Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pagePosition, FreehandAnnotation freehand)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                image.PageNumber = pageNumber;
-                document.Annotations.Add(image);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, freehand));
     }
 
-    public async Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pageNumber, StickyNoteAnnotation note)
+    public async Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pagePosition, ImageAnnotation image)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                note.PageNumber = pageNumber;
-                document.Annotations.Add(note);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, image));
     }
 
-    public async Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pageNumber, RedactionAnnotation redaction)
+    public async Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pagePosition, StickyNoteAnnotation note)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                redaction.PageNumber = pageNumber;
-                document.Annotations.Add(redaction);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, note));
     }
 
-    public async Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pageNumber, SignatureAnnotation signature)
+    public async Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pagePosition, RedactionAnnotation redaction)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                signature.PageNumber = pageNumber;
-                document.Annotations.Add(signature);
-                document.IsModified = true;
+        return await Task.Run(() => AddAnnotation(document, pagePosition, redaction));
+    }
 
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+    public async Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pagePosition, SignatureAnnotation signature)
+    {
+        return await Task.Run(() => AddAnnotation(document, pagePosition, signature));
     }
 
     public async Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath)
@@ -704,16 +571,18 @@ public class PdfEditor : IPdfEditor
                 body.AppendChild(new Paragraph()); // Empty line
 
                 // Add page content markers
-                foreach (var page in document.Pages)
+                for (var position = 1; position <= document.Pages.Count; position++)
                 {
+                    var page = document.Pages[position - 1];
+
                     // Page separator
                     var pagePara = body.AppendChild(new Paragraph());
                     var pageRun = pagePara.AppendChild(new Run());
                     pageRun.AppendChild(new RunProperties(new Bold()));
-                    pageRun.AppendChild(new Text($"--- Page {page.PageNumber} ({page.Width:F0} x {page.Height:F0} pt) ---"));
+                    pageRun.AppendChild(new Text($"--- Page {position} ({page.Width:F0} x {page.Height:F0} pt) ---"));
 
                     // Add annotations for this page
-                    var pageAnnotations = document.Annotations.Where(a => a.PageNumber == page.PageNumber).ToList();
+                    var pageAnnotations = document.Annotations.Where(a => a.PageId == page.Id).ToList();
                     if (pageAnnotations.Any())
                     {
                         var annotPara = body.AppendChild(new Paragraph());
@@ -1143,21 +1012,26 @@ public class PdfEditor : IPdfEditor
 
     // ==================== NEW FEATURES ====================
 
-    public async Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPageNumber, double width = 612, double height = 792)
+    public async Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPagePosition, double width = 612, double height = 792)
     {
         return await Task.Run(() =>
         {
             try
             {
+                if (!(width > 0) || !(height > 0))
+                {
+                    return new PdfOperationResult { Success = false, ErrorMessage = "A page must have a positive width and height." };
+                }
+
                 var newPage = new PdfPageInfo
                 {
-                    PageNumber = -1, // Marker for new blank page
+                    PageNumber = 0, // Comes from no page of the source file
                     Width = width,
                     Height = height,
                     Rotation = 0
                 };
 
-                var insertIndex = Math.Max(0, Math.Min(afterPageNumber, document.Pages.Count));
+                var insertIndex = Math.Max(0, Math.Min(afterPagePosition, document.Pages.Count));
                 document.Pages.Insert(insertIndex, newPage);
                 document.IsModified = true;
 
@@ -1174,16 +1048,16 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pageNumber)
+    public async Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pagePosition)
     {
         return await Task.Run(() =>
         {
             try
             {
-                var sourcePage = document.Pages.FirstOrDefault(p => p.PageNumber == pageNumber);
+                var sourcePage = PageAt(document, pagePosition);
                 if (sourcePage == null)
                 {
-                    return new PdfOperationResult { Success = false, ErrorMessage = $"Page {pageNumber} not found" };
+                    return NoSuchPage(pagePosition);
                 }
 
                 var duplicatePage = new PdfPageInfo
@@ -1197,6 +1071,13 @@ public class PdfEditor : IPdfEditor
 
                 var insertIndex = document.Pages.IndexOf(sourcePage) + 1;
                 document.Pages.Insert(insertIndex, duplicatePage);
+
+                // The copy carries the page's annotations, so a duplicate of a redacted page stays redacted.
+                foreach (var annotation in document.Annotations.Where(a => a.PageId == sourcePage.Id).ToList())
+                {
+                    document.Annotations.Add(annotation.CopyTo(duplicatePage.Id));
+                }
+
                 document.IsModified = true;
 
                 return new PdfOperationResult
@@ -1212,26 +1093,12 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pageNumber, StampAnnotation stamp)
+    public async Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pagePosition, StampAnnotation stamp)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                stamp.PageNumber = pageNumber;
-                document.Annotations.Add(stamp);
-                document.IsModified = true;
-
-                return new PdfOperationResult { Success = true, PagesProcessed = 1 };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, stamp));
     }
 
-    public async Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark)
+    public async Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark, int pagePosition = 1)
     {
         return await Task.Run(() =>
         {
@@ -1244,7 +1111,7 @@ public class PdfEditor : IPdfEditor
                     {
                         var pageWatermark = new WatermarkAnnotation
                         {
-                            PageNumber = page.PageNumber,
+                            PageId = page.Id,
                             Type = watermark.Type,
                             Text = watermark.Text,
                             ImageData = watermark.ImageData,
@@ -1265,6 +1132,13 @@ public class PdfEditor : IPdfEditor
                 }
                 else
                 {
+                    var page = PageAt(document, pagePosition);
+                    if (page == null)
+                    {
+                        return NoSuchPage(pagePosition);
+                    }
+
+                    watermark.PageId = page.Id;
                     document.Annotations.Add(watermark);
                 }
 
@@ -1278,23 +1152,9 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pageNumber, LinkAnnotation link)
+    public async Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pagePosition, LinkAnnotation link)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                link.PageNumber = pageNumber;
-                document.Annotations.Add(link);
-                document.IsModified = true;
-
-                return new PdfOperationResult { Success = true, PagesProcessed = 1 };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, link));
     }
 
     public async Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false)
@@ -1327,7 +1187,7 @@ public class PdfEditor : IPdfEditor
                     {
                         results.Add(new PdfSearchResult
                         {
-                            PageNumber = annotation.PageNumber,
+                            PageNumber = PositionOf(document, annotation),
                             MatchedText = searchText,
                             ContextBefore = textContent.Length > 20 ? textContent.Substring(0, 20) : textContent,
                             ContextAfter = "",
@@ -1355,7 +1215,7 @@ public class PdfEditor : IPdfEditor
             {
                 // Extract text from annotations
                 var annotations = pageNumber.HasValue
-                    ? document.Annotations.Where(a => a.PageNumber == pageNumber.Value)
+                    ? document.Annotations.Where(a => PositionOf(document, a) == pageNumber.Value)
                     : document.Annotations;
 
                 foreach (var annotation in annotations)

@@ -272,7 +272,6 @@ public class PdfAnnotationPlacementTests : IDisposable
 
     private static WatermarkAnnotation Watermark(string text, double fontSize) => new()
     {
-        PageNumber = 1,
         Text = text,
         FontSize = fontSize,
         Rotation = 0,

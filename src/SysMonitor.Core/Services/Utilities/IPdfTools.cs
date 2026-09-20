@@ -130,25 +130,26 @@ public interface IPdfEditor
     Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
     Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath);
 
-    // Page Operations
-    Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pageNumber, int degrees);
-    Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pageNumber);
+    // Page Operations. A pagePosition is a 1-based place in PdfEditorDocument.Pages, the order the editor
+    // shows and saves; it is not the page's number in the source file, which reordering leaves behind.
+    Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pagePosition, int degrees);
+    Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pagePosition);
     Task<PdfOperationResult> ReorderPagesAsync(PdfEditorDocument document, int[] newOrder);
-    Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPageNumber, double width = 612, double height = 792);
-    Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pageNumber);
+    Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPagePosition, double width = 612, double height = 792);
+    Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pagePosition);
 
-    // Annotations
-    Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation);
-    Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight);
-    Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape);
-    Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pageNumber, FreehandAnnotation freehand);
-    Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pageNumber, ImageAnnotation image);
-    Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pageNumber, StickyNoteAnnotation note);
-    Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pageNumber, RedactionAnnotation redaction);
-    Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pageNumber, SignatureAnnotation signature);
-    Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pageNumber, StampAnnotation stamp);
-    Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark);
-    Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pageNumber, LinkAnnotation link);
+    // Annotations. They are bound to the page at pagePosition and stay with it afterwards.
+    Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pagePosition, TextAnnotation annotation);
+    Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pagePosition, HighlightAnnotation highlight);
+    Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pagePosition, ShapeAnnotation shape);
+    Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pagePosition, FreehandAnnotation freehand);
+    Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pagePosition, ImageAnnotation image);
+    Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pagePosition, StickyNoteAnnotation note);
+    Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pagePosition, RedactionAnnotation redaction);
+    Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pagePosition, SignatureAnnotation signature);
+    Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pagePosition, StampAnnotation stamp);
+    Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark, int pagePosition = 1);
+    Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pagePosition, LinkAnnotation link);
 
     // Search
     Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false);
@@ -170,7 +171,18 @@ public class PdfEditorDocument
 
 public class PdfPageInfo
 {
+    /// <summary>
+    /// Identifies this page while the document is open. Annotations point at it, so they stay with their page
+    /// when pages are moved, deleted or duplicated.
+    /// </summary>
+    public Guid Id { get; } = Guid.NewGuid();
+
+    /// <summary>The page of the source file this page comes from (1-based), or 0 for a page inserted blank.</summary>
     public int PageNumber { get; set; }
+
+    /// <summary>True for a page inserted into the document rather than taken from the source file.</summary>
+    public bool IsBlank => PageNumber <= 0;
+
     public double Width { get; set; }
     public double Height { get; set; }
 
@@ -192,7 +204,9 @@ public class PdfPageInfo
 public abstract class PdfAnnotation
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public int PageNumber { get; set; }
+
+    /// <summary>The page this annotation belongs to, as <see cref="PdfPageInfo.Id"/>.</summary>
+    public Guid PageId { get; set; }
 
     // Position and size are measured from the top-left corner of the page as displayed with its
     // original rotation (the visible area, i.e. the CropBox), y down, in CoordinateScale points.
@@ -208,6 +222,18 @@ public abstract class PdfAnnotation
     /// canvas use <see cref="PdfPageGeometry.CanvasCoordinateScale"/>; 1 means the values are already points.
     /// </summary>
     public double CoordinateScale { get; set; } = 1.0;
+
+    /// <summary>
+    /// A copy of this annotation on another page, with an id of its own. The copy shares the original's point
+    /// lists and image data, which annotations never change once created.
+    /// </summary>
+    public PdfAnnotation CopyTo(Guid pageId)
+    {
+        var copy = (PdfAnnotation)MemberwiseClone();
+        copy.Id = Guid.NewGuid();
+        copy.PageId = pageId;
+        return copy;
+    }
 }
 
 /// <summary>Text drawn with the top-left corner of its first line at (X, Y).</summary>

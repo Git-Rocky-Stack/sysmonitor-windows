@@ -17,6 +17,30 @@ public static class PdfPageRasterizer
     public static uint ToPixels(double dips, double zoom) => (uint)Math.Max(1, Math.Round(dips * zoom));
 
     /// <summary>
+    /// A white image for a page that is in no file yet, the size this class would render a page of
+    /// <paramref name="widthPoints"/> x <paramref name="heightPoints"/> at <paramref name="zoom"/>, so
+    /// coordinates taken on it mean the same as on a rendered page.
+    /// </summary>
+    public static byte[] BlankPagePng(double widthPoints, double heightPoints, double zoom)
+    {
+        if (!(widthPoints > 0) || !(heightPoints > 0))
+            throw new ArgumentOutOfRangeException(nameof(widthPoints), "A page must have a positive width and height.");
+        if (!(zoom > 0) || double.IsInfinity(zoom))
+            throw new ArgumentOutOfRangeException(nameof(zoom), zoom, "Zoom must be a positive number.");
+
+        var width = (int)ToPixels(widthPoints / PdfPageGeometry.PointsPerDip, zoom);
+        var height = (int)ToPixels(heightPoints / PdfPageGeometry.PointsPerDip, zoom);
+
+        using var bitmap = new System.Drawing.Bitmap(width, height);
+        using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
+            graphics.Clear(System.Drawing.Color.White);
+
+        using var stream = new MemoryStream();
+        bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+        return stream.ToArray();
+    }
+
+    /// <summary>
     /// Renders page <paramref name="pageNumber"/> (1-based) of <paramref name="filePath"/> as a PNG,
     /// <paramref name="zoom"/> times its displayed size in DIPs.
     /// </summary>

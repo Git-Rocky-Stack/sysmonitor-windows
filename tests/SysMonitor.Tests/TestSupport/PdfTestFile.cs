@@ -1,6 +1,7 @@
 using System.Text;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using SysMonitor.Core.Services.Utilities;
 
 namespace SysMonitor.Tests.TestSupport;
 
@@ -9,6 +10,49 @@ internal static class PdfTestFile
 {
     /// <summary>US Letter, as [x1 y1 x2 y2] in PDF user space.</summary>
     public static readonly double[] Letter = [0, 0, 612, 792];
+
+    // Where WriteNumberedPages puts each page's mark, in points of the unrotated page.
+    private const double MarkFirstX = 60;
+    private const double MarkStep = 80;
+    private const double MarkTop = 100;
+    private const double MarkWidth = 40;
+    private const double MarkHeight = 30;
+
+    /// <summary>
+    /// Writes <paramref name="pageCount"/> Letter pages, each marked in its own place: page n's mark sits one
+    /// step further right than page n-1's, so a rendering says which page of the file it came from.
+    /// </summary>
+    public static void WriteNumberedPages(string path, int pageCount)
+    {
+        using var document = new PdfDocument();
+        for (var number = 1; number <= pageCount; number++)
+        {
+            var page = document.AddPage();
+            page.MediaBox = Rectangle(Letter);
+            using var gfx = XGraphics.FromPdfPage(page);
+            gfx.DrawRectangle(
+                new XSolidBrush(XColor.FromArgb(0, 0, 255)),
+                MarkFirstX + (MarkStep * (number - 1)), MarkTop, MarkWidth, MarkHeight);
+        }
+
+        document.Save(path);
+    }
+
+    /// <summary>
+    /// Which page of <see cref="WriteNumberedPages"/> a rendering shows, or 0 when it carries no mark.
+    /// <paramref name="rotation"/> says how the page is turned, so a page on its side can be read too.
+    /// </summary>
+    public static int MarkedPageNumber(RenderedPage rendered, int rotation = 0)
+    {
+        var mark = rendered.BoundsOf(RenderedPage.IsMark);
+        if (mark is null)
+            return 0;
+
+        // Turn the mark back to where it sits on the upright page before measuring.
+        var upright = mark.Value.Rotate(360 - PdfPageGeometry.NormalizeRotation(rotation), rendered.Width, rendered.Height);
+        var left = upright.Left * PdfPageGeometry.PointsPerDip;
+        return (int)Math.Round((left - MarkFirstX) / MarkStep) + 1;
+    }
 
     /// <summary>
     /// Writes a one-page PDF holding a blue mark inside the visible area. The mark sits off-centre, so a box
