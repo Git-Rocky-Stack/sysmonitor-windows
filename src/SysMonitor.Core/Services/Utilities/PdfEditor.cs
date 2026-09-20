@@ -71,11 +71,19 @@ public class PdfEditor : IPdfEditor
                 using var inputDoc = PdfReader.Open(document.FilePath, PdfDocumentOpenMode.Import);
                 using var outputDoc = new PdfDocument();
 
+                // Pictures drawn into the output have to stay readable until it is written out.
+                var pageImages = new List<MemoryStream>();
+
                 // Write the pages in the order the editor holds them
                 foreach (var pageInfo in document.Pages)
                 {
+                    var pageAnnotations = document.Annotations.Where(a => a.PageId == pageInfo.Id).ToList();
+                    var redactions = pageAnnotations.OfType<RedactionAnnotation>().ToList();
+
                     PdfPage page;
                     int sourceRotation;
+                    XImage? pageImage = null;
+                    var imageSize = new XSize();
 
                     if (pageInfo.IsBlank)
                     {
@@ -84,15 +92,7 @@ public class PdfEditor : IPdfEditor
                         page.Height = XUnit.FromPoint(pageInfo.Height);
                         sourceRotation = 0;
                     }
-                    else if (pageInfo.PageNumber <= inputDoc.PageCount)
-                    {
-                        page = outputDoc.AddPage(inputDoc.Pages[pageInfo.PageNumber - 1]);
-
-                        // Annotations are measured on the page as displayed with the rotation it has in the
-                        // source, so take that before applying the new one.
-                        sourceRotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
-                    }
-                    else
+                    else if (pageInfo.PageNumber > inputDoc.PageCount)
                     {
                         return new PdfOperationResult
                         {
@@ -100,18 +100,64 @@ public class PdfEditor : IPdfEditor
                             ErrorMessage = $"This document expects page {pageInfo.PageNumber} of \"{document.FileName}\", which has only {inputDoc.PageCount} pages. Nothing was saved."
                         };
                     }
+                    else if (redactions.Count > 0)
+                    {
+                        // A redacted page is replaced by a picture of itself with the boxes painted onto the
+                        // pixels. Drawing a box over the page would leave the text under it in the file,
+                        // where anyone can select, copy or extract it.
+                        var sourcePage = inputDoc.Pages[pageInfo.PageNumber - 1];
+                        sourceRotation = PdfPageGeometry.NormalizeRotation(sourcePage.Rotate);
+                        var sourceVisible = PdfPageGeometry.VisibleBox(sourcePage, new XSize(sourcePage.Width.Point, sourcePage.Height.Point));
+                        imageSize = PdfPageGeometry.DisplayedSize(sourceVisible, sourceRotation);
+
+                        // A stream of its own, not one wrapped around a byte array: PDFsharp reads the buffer.
+                        var stream = new MemoryStream();
+                        stream.Write(RedactedPagePng(document.FilePath, pageInfo.PageNumber, redactions));
+                        stream.Position = 0;
+                        pageImages.Add(stream);
+                        pageImage = XImage.FromStream(stream);
+
+                        page = outputDoc.AddPage();
+                        page.Width = XUnit.FromPoint(imageSize.Width);
+                        page.Height = XUnit.FromPoint(imageSize.Height);
+                    }
+                    else
+                    {
+                        page = outputDoc.AddPage(inputDoc.Pages[pageInfo.PageNumber - 1]);
+
+                        // Annotations are measured on the page as displayed with the rotation it has in the
+                        // source, so take that before applying the new one.
+                        sourceRotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
+                    }
 
                     // Always apply the rotation: a page turned back upright must not keep the source's /Rotate.
-                    page.Rotate = PdfPageGeometry.NormalizeRotation(pageInfo.Rotation);
+                    page.Rotate = pageImage != null
+                        // The picture already shows the page turned the way the source file turns it, so only
+                        // what the user changed since is left to apply.
+                        ? PdfPageGeometry.NormalizeRotation(pageInfo.Rotation - sourceRotation)
+                        : PdfPageGeometry.NormalizeRotation(pageInfo.Rotation);
 
-                    // Apply annotations for this page
-                    var pageAnnotations = document.Annotations.Where(a => a.PageId == pageInfo.Id).ToList();
-                    if (pageAnnotations.Count > 0)
+                    if (pageAnnotations.Count > 0 || pageImage != null)
                     {
                         using var gfx = XGraphics.FromPdfPage(page);
-                        var visible = PdfPageGeometry.VisibleBox(page, gfx.PageSize);
-                        var displayToDrawing = PdfPageGeometry.DisplayToDrawing(visible, gfx.PageSize.Height, sourceRotation);
-                        var displayedSize = PdfPageGeometry.DisplayedSize(visible, sourceRotation);
+
+                        XMatrix displayToDrawing;
+                        XSize displayedSize;
+                        if (pageImage != null)
+                        {
+                            gfx.DrawImage(pageImage, 0, 0, imageSize.Width, imageSize.Height);
+
+                            // The new page is exactly the page as it was displayed, so annotation coordinates
+                            // need no turning or shifting, only their own scale.
+                            displayToDrawing = XMatrix.Identity;
+                            displayedSize = imageSize;
+                        }
+                        else
+                        {
+                            var visible = PdfPageGeometry.VisibleBox(page, gfx.PageSize);
+                            displayToDrawing = PdfPageGeometry.DisplayToDrawing(visible, gfx.PageSize.Height, sourceRotation);
+                            displayedSize = PdfPageGeometry.DisplayedSize(visible, sourceRotation);
+                        }
 
                         foreach (var annotation in pageAnnotations)
                         {
@@ -128,7 +174,7 @@ public class PdfEditor : IPdfEditor
                             var state = gfx.Save();
                             gfx.MultiplyTransform(displayToDrawing);
                             gfx.ScaleTransform(scale);
-                            DrawAnnotation(gfx, annotation, new XSize(displayedSize.Width / scale, displayedSize.Height / scale));
+                            DrawAnnotation(gfx, annotation, new XSize(displayedSize.Width / scale, displayedSize.Height / scale), pageImage != null);
                             gfx.Restore(state);
                         }
                     }
@@ -147,6 +193,9 @@ public class PdfEditor : IPdfEditor
 
                 outputDoc.Save(outputPath);
 
+                foreach (var image in pageImages)
+                    image.Dispose();
+
                 return new PdfOperationResult
                 {
                     Success = true,
@@ -164,6 +213,45 @@ public class PdfEditor : IPdfEditor
                 };
             }
         });
+    }
+
+    /// <summary>
+    /// How finely a redacted page is drawn before its boxes are painted on, in dots per inch. That picture
+    /// replaces the page, so this trades sharpness against file size.
+    /// </summary>
+    private const double RedactedPageDpi = 200;
+
+    /// <summary>
+    /// A picture of a page with its redactions painted onto the pixels. What was under them is not in the
+    /// result at all - which is the point, since a box drawn over text leaves the text in the file.
+    /// </summary>
+    private static byte[] RedactedPagePng(string filePath, int sourcePageNumber, IEnumerable<RedactionAnnotation> redactions)
+    {
+        var zoom = RedactedPageDpi / 96.0;
+        var png = PdfPageRasterizer.RenderPngAsync(filePath, sourcePageNumber, zoom).GetAwaiter().GetResult();
+        var pixelsPerPoint = zoom / PdfPageGeometry.PointsPerDip;
+
+        using var source = new MemoryStream(png);
+        using var bitmap = new System.Drawing.Bitmap(source);
+        using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
+        {
+            foreach (var redaction in redactions)
+            {
+                var color = ParseColor(redaction.FillColor);
+
+                // A redaction is never see-through, whatever colour it was given.
+                using var brush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, color.R, color.G, color.B));
+                var scale = redaction.CoordinateScale * pixelsPerPoint;
+                graphics.FillRectangle(
+                    brush,
+                    (float)(redaction.X * scale), (float)(redaction.Y * scale),
+                    (float)(redaction.Width * scale), (float)(redaction.Height * scale));
+            }
+        }
+
+        using var output = new MemoryStream();
+        bitmap.Save(output, System.Drawing.Imaging.ImageFormat.Png);
+        return output.ToArray();
     }
 
     public async Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0)
@@ -687,7 +775,11 @@ public class PdfEditor : IPdfEditor
     /// Draws an annotation in its own coordinates. The caller has set up the transform from those coordinates
     /// to the page; <paramref name="pageSize"/> is the displayed page in the same units (for page-relative placement).
     /// </summary>
-    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, XSize pageSize)
+    /// <param name="boxesAlreadyPainted">
+    /// True when the page has been redrawn as a picture with the redaction boxes painted onto its pixels, so
+    /// only their labels are left to draw.
+    /// </param>
+    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, XSize pageSize, bool boxesAlreadyPainted = false)
     {
         var color = ParseColor(annotation.Color);
 
@@ -712,7 +804,7 @@ public class PdfEditor : IPdfEditor
                 DrawStickyNote(gfx, noteAnn);
                 break;
             case RedactionAnnotation redactAnn:
-                DrawRedaction(gfx, redactAnn);
+                DrawRedaction(gfx, redactAnn, boxesAlreadyPainted);
                 break;
             case SignatureAnnotation sigAnn:
                 DrawSignature(gfx, sigAnn, color);
@@ -824,13 +916,16 @@ public class PdfEditor : IPdfEditor
         }
     }
 
-    private void DrawRedaction(XGraphics gfx, RedactionAnnotation annotation)
+    private void DrawRedaction(XGraphics gfx, RedactionAnnotation annotation, bool boxAlreadyPainted)
     {
-        var fillColor = ParseColor(annotation.FillColor);
-        var brush = new XSolidBrush(fillColor);
-
-        // Draw solid black rectangle to cover content
-        gfx.DrawRectangle(brush, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+        // On a page saved as a picture the box is already in the pixels, where it covers content that is no
+        // longer in the file. Drawing it again would only hide the difference between the two.
+        if (!boxAlreadyPainted)
+        {
+            var fillColor = ParseColor(annotation.FillColor);
+            var brush = new XSolidBrush(fillColor);
+            gfx.DrawRectangle(brush, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+        }
 
         // Draw overlay text if specified (e.g., "REDACTED")
         if (!string.IsNullOrEmpty(annotation.OverlayText))

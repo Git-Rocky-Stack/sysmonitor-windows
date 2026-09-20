@@ -602,6 +602,7 @@ public partial class PdfEditorViewModel : ObservableObject
                 };
                 await _pdfEditor.AddRedactionAsync(CurrentDocument, CurrentPageNumber, redaction);
                 annotation = redaction;
+                ShowStatus("Redacted. Saving turns this page into an image, so what is under the box is removed from the file — its text can no longer be selected either.", true);
                 break;
 
             case AnnotationTool.Stamp:

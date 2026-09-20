@@ -148,7 +148,8 @@
                                 Padding="8" Background="{x:Bind ViewModel.IsImageToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
                             <FontIcon Glyph="&#xEB9F;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Redaction" ToolTipService.ToolTip="Redact (X)"
+                        <Button Click="SelectTool_Click" Tag="Redaction"
+                                ToolTipService.ToolTip="Redact (X) — on save, the page becomes an image and whatever is under the box is gone from the file"
                                 Padding="8" Background="{x:Bind ViewModel.IsRedactionToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
                             <FontIcon Glyph="&#xE738;" FontSize="14"/>
                         </Button>

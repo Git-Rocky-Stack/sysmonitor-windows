@@ -39,6 +39,35 @@ internal static class PdfTestFile
     }
 
     /// <summary>
+    /// Writes <paramref name="pageCount"/> Letter pages, each carrying the same line of secret text in blue
+    /// and a green bar below it: a test can then tell what a redaction removed from what it must leave alone.
+    /// </summary>
+    public static void WritePagesWithSecretText(string path, int pageCount, string secret, int rotate = 0)
+    {
+        using var document = new PdfDocument();
+        for (var number = 1; number <= pageCount; number++)
+        {
+            var page = document.AddPage();
+            page.MediaBox = Rectangle(Letter);
+
+            using (var gfx = XGraphics.FromPdfPage(page))
+            {
+                gfx.DrawString(
+                    secret, new XFont("Arial", 24, XFontStyleEx.Regular), new XSolidBrush(XColor.FromArgb(0, 0, 255)),
+                    new XRect(72, 100, 450, 40), XStringFormats.TopLeft);
+                gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(0, 160, 0)), 72, 300, 200, 60);
+            }
+
+            page.Rotate = rotate;
+        }
+
+        document.Save(path);
+    }
+
+    /// <summary>A strong green: the part of a secret-text page a redaction must leave alone.</summary>
+    public static bool IsKeep(byte r, byte g, byte b) => g > 110 && r < 90 && b < 90;
+
+    /// <summary>
     /// Which page of <see cref="WriteNumberedPages"/> a rendering shows, or 0 when it carries no mark.
     /// <paramref name="rotation"/> says how the page is turned, so a page on its side can be read too.
     /// </summary>
