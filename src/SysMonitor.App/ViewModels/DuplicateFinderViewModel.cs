@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Utilities;
@@ -16,6 +16,12 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
     private bool _isDisposed;
 
     public ObservableCollection<DuplicateGroupDisplay> DuplicateGroups { get; } = [];
+
+    /// <summary>
+    /// Asked before anything is deleted, with how many files and how much space. The page puts it on screen;
+    /// nothing is deleted unless it comes back true.
+    /// </summary>
+    public Func<int, long, Task<bool>>? ConfirmDeletion { get; set; }
 
     // Scan Settings
     [ObservableProperty] private string _scanPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -162,6 +168,17 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
         if (filesToDelete.Count == 0)
         {
             ShowAction("No duplicates selected for deletion", false);
+            return;
+        }
+
+        // Deleting files someone did not mean to delete is the worst thing this page can do, so it asks.
+        var totalBytes = DuplicateGroups
+            .SelectMany(group => group.Files.Where(f => f.IsSelected && !f.IsOriginal).Select(_ => group.FileSizeBytes))
+            .Sum();
+
+        if (ConfirmDeletion == null || !await ConfirmDeletion(filesToDelete.Count, totalBytes))
+        {
+            ShowAction("Nothing was deleted", false);
             return;
         }
 

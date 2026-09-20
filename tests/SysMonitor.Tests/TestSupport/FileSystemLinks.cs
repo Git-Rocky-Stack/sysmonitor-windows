@@ -24,6 +24,25 @@ internal static class FileSystemLinks
             throw new InvalidOperationException($"Could not create junction {linkPath} -> {targetDirectory}: {output}");
     }
 
+    /// <summary>Creates a hard link: a second name for the same file (no special privileges required).</summary>
+    public static void CreateHardLink(string linkPath, string targetFile)
+    {
+        var startInfo = new ProcessStartInfo("cmd.exe", $"/c mklink /H \"{linkPath}\" \"{targetFile}\"")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        using var process = Process.Start(startInfo)!;
+        var output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        if (process.ExitCode != 0 || !File.Exists(linkPath))
+            throw new InvalidOperationException($"Could not create hard link {linkPath} -> {targetFile}: {output}");
+    }
+
     /// <summary>
     /// Creates a file symbolic link. Windows requires Developer Mode or administrator rights for this;
     /// the test fails loudly (rather than passing vacuously) when the environment cannot create one.

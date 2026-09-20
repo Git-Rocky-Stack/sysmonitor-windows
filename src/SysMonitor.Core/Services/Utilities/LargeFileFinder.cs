@@ -81,7 +81,7 @@ public class LargeFileFinder : ILargeFileFinder
                 // Process directories in parallel
                 Parallel.ForEach(topLevelDirs, parallelOptions, topDir =>
                 {
-                    foreach (var filePath in EnumerateFiles(topDir, cancellationToken))
+                    foreach (var filePath in FileScanning.EnumerateFiles(topDir, cancellationToken))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
@@ -141,88 +141,15 @@ public class LargeFileFinder : ILargeFileFinder
                dirName == "Program Files (x86)";
     }
 
-    public async Task<bool> DeleteFileAsync(string filePath)
-    {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                    return true;
-                }
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        });
-    }
+    /// <summary>
+    /// Removes a file to the Recycle Bin. There is no outright delete here: this list is built from a scan,
+    /// and a scan can be wrong about what someone still wants.
+    /// </summary>
+    public async Task<bool> DeleteFileAsync(string filePath) =>
+        await Task.Run(() => FileScanning.SendToRecycleBin(filePath));
 
-    public async Task<bool> MoveToRecycleBinAsync(string filePath)
-    {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                    return true;
-                }
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        });
-    }
-
-    private static IEnumerable<string> EnumerateFiles(string path, CancellationToken cancellationToken)
-    {
-        var directories = new Stack<string>();
-        directories.Push(path);
-
-        while (directories.Count > 0)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var currentDir = directories.Pop();
-
-            string[] files;
-            try
-            {
-                files = Directory.GetFiles(currentDir);
-            }
-            catch (UnauthorizedAccessException) { continue; }
-            catch (IOException) { continue; }
-
-            foreach (var file in files)
-            {
-                yield return file;
-            }
-
-            try
-            {
-                foreach (var subDir in Directory.GetDirectories(currentDir))
-                {
-                    // Skip system directories
-                    var dirName = Path.GetFileName(subDir);
-                    if (dirName.StartsWith("$") || dirName == "System Volume Information" ||
-                        dirName == "Windows" || dirName == "Program Files" ||
-                        dirName == "Program Files (x86)")
-                        continue;
-
-                    directories.Push(subDir);
-                }
-            }
-            catch (UnauthorizedAccessException) { }
-            catch (IOException) { }
-        }
-    }
+    public async Task<bool> MoveToRecycleBinAsync(string filePath) =>
+        await Task.Run(() => FileScanning.SendToRecycleBin(filePath));
 
     private static string GetFileType(string extension)
     {

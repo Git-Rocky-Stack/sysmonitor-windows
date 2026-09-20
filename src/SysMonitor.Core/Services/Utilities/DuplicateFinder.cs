@@ -2,6 +2,10 @@ using System.Security.Cryptography;
 
 namespace SysMonitor.Core.Services.Utilities;
 
+/// <summary>
+/// Finds files whose contents are the same. What it reports gets deleted, so a file is only ever called a
+/// duplicate of another when the whole of it matches and it is a different file on disk.
+/// </summary>
 public class DuplicateFinder : IDuplicateFinder
 {
     public async Task<List<DuplicateGroup>> ScanAsync(string path, IProgress<ScanProgress>? progress = null,
@@ -20,7 +24,7 @@ public class DuplicateFinder : IDuplicateFinder
                 var filesIndexed = 0;
 
                 // Stream files instead of loading all at once
-                foreach (var filePath in EnumerateFiles(path, cancellationToken))
+                foreach (var filePath in FileScanning.EnumerateFiles(path, cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -68,6 +72,7 @@ public class DuplicateFinder : IDuplicateFinder
 
                     // Phase 3: Calculate hashes for same-size files
                     var hashGroups = new Dictionary<string, List<DuplicateFileInfo>>();
+                    var seenFiles = new Dictionary<FileIdentity, string>();
 
                     foreach (var filePath in sizeGroup.Value)
                     {
@@ -75,6 +80,15 @@ public class DuplicateFinder : IDuplicateFinder
 
                         try
                         {
+                            // Two names for one file - a hard link, or a path through a junction - are not
+                            // two copies, and deleting "the duplicate" would delete the only one there is.
+                            var identity = FileScanning.TryGetIdentity(filePath);
+                            if (identity is { } id)
+                            {
+                                if (seenFiles.ContainsKey(id)) continue;
+                                seenFiles[id] = filePath;
+                            }
+
                             var hash = ComputeFileHash(filePath);
                             var fileInfo = new FileInfo(filePath);
 
@@ -87,7 +101,6 @@ public class DuplicateFinder : IDuplicateFinder
                                 FileName = fileInfo.Name,
                                 Directory = fileInfo.DirectoryName ?? "",
                                 LastModified = fileInfo.LastWriteTime,
-                                IsOriginal = hashGroups[hash].Count == 0 // First found is "original"
                             });
 
                             filesChecked++;
@@ -109,12 +122,17 @@ public class DuplicateFinder : IDuplicateFinder
                     // Only add groups with actual duplicates
                     foreach (var hashGroup in hashGroups.Where(hg => hg.Value.Count > 1))
                     {
+                        var files = hashGroup.Value.OrderBy(f => f.LastModified).ToList();
+
+                        // The oldest is the one to keep; the rest are the copies made since.
+                        files[0].IsOriginal = true;
+
                         duplicateGroups.Add(new DuplicateGroup
                         {
                             Hash = hashGroup.Key[..16] + "...", // Truncate for display
                             FileSize = sizeGroup.Key,
                             FormattedSize = FormatSize(sizeGroup.Key),
-                            Files = hashGroup.Value.OrderBy(f => f.LastModified).ToList()
+                            Files = files
                         });
                     }
                 }
@@ -127,6 +145,10 @@ public class DuplicateFinder : IDuplicateFinder
         return duplicateGroups.OrderByDescending(g => g.WastedSpace).ToList();
     }
 
+    /// <summary>
+    /// Removes the given files to the Recycle Bin and returns how much they took up. Nothing is deleted
+    /// outright: a wrong choice here costs someone their only copy.
+    /// </summary>
     public async Task<long> DeleteDuplicatesAsync(IEnumerable<string> filesToDelete)
     {
         long bytesFreed = 0;
@@ -137,12 +159,9 @@ public class DuplicateFinder : IDuplicateFinder
             {
                 try
                 {
-                    var fileInfo = new FileInfo(filePath);
-                    var size = fileInfo.Length;
-
-                    if (File.Exists(filePath))
+                    var size = new FileInfo(filePath).Length;
+                    if (FileScanning.SendToRecycleBin(filePath))
                     {
-                        File.Delete(filePath);
                         bytesFreed += size;
                     }
                 }
@@ -153,74 +172,15 @@ public class DuplicateFinder : IDuplicateFinder
         return bytesFreed;
     }
 
-    private static IEnumerable<string> EnumerateFiles(string path, CancellationToken cancellationToken)
+    /// <summary>
+    /// Hashes the whole file. Files over 10 MB used to be judged by their first and last megabyte plus their
+    /// length, which matches for every file a program writes with the same header, footer and size - videos
+    /// from one camera, disk images, database files - and those were offered up for deletion.
+    /// </summary>
+    internal static string ComputeFileHash(string filePath)
     {
-        var directories = new Stack<string>();
-        directories.Push(path);
-
-        while (directories.Count > 0)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var currentDir = directories.Pop();
-
-            string[] files;
-            try
-            {
-                files = Directory.GetFiles(currentDir);
-            }
-            catch (UnauthorizedAccessException) { continue; }
-            catch (IOException) { continue; }
-
-            foreach (var file in files)
-            {
-                yield return file;
-            }
-
-            try
-            {
-                foreach (var subDir in Directory.GetDirectories(currentDir))
-                {
-                    var dirName = Path.GetFileName(subDir);
-                    // Skip system directories
-                    if (dirName.StartsWith("$") || dirName == "System Volume Information" ||
-                        dirName == "Windows" || dirName == "Program Files" ||
-                        dirName == "Program Files (x86)" || dirName == ".git")
-                        continue;
-
-                    directories.Push(subDir);
-                }
-            }
-            catch (UnauthorizedAccessException) { }
-            catch (IOException) { }
-        }
-    }
-
-    private static string ComputeFileHash(string filePath)
-    {
-        using var md5 = MD5.Create();
         using var stream = File.OpenRead(filePath);
-
-        // For very large files, only hash first and last 1MB
-        if (stream.Length > 10 * 1024 * 1024) // > 10MB
-        {
-            var buffer = new byte[1024 * 1024]; // 1MB
-            stream.Read(buffer, 0, buffer.Length);
-            stream.Seek(-buffer.Length, SeekOrigin.End);
-            var endBuffer = new byte[buffer.Length];
-            stream.Read(endBuffer, 0, endBuffer.Length);
-
-            var combinedBuffer = new byte[buffer.Length + endBuffer.Length + 8];
-            Buffer.BlockCopy(buffer, 0, combinedBuffer, 0, buffer.Length);
-            Buffer.BlockCopy(BitConverter.GetBytes(stream.Length), 0, combinedBuffer, buffer.Length, 8);
-            Buffer.BlockCopy(endBuffer, 0, combinedBuffer, buffer.Length + 8, endBuffer.Length);
-
-            var hash = md5.ComputeHash(combinedBuffer);
-            return BitConverter.ToString(hash).Replace("-", "");
-        }
-
-        var fullHash = md5.ComputeHash(stream);
-        return BitConverter.ToString(fullHash).Replace("-", "");
+        return Convert.ToHexString(SHA256.HashData(stream));
     }
 
     private static string FormatSize(long bytes)
