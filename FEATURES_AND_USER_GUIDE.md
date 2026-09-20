@@ -138,6 +138,8 @@ Power management (laptops/tablets):
 - **Charge Level** - Current battery percentage
 - **Charging Status** - Charging, Plugged In, or On Battery
 - **Health Alerts** - Low and critical battery warnings
+- **Health** - How much of its original capacity the battery still holds, from the figures Windows reports
+  for it. Many machines do not report them, and the page says "Not reported" rather than guessing
 - **Time Remaining** - Estimated battery life
 
 ### Temperature Monitor
@@ -473,8 +475,9 @@ File compression and archiving:
 
 **Compression Formats:**
 - ZIP (most compatible)
-- 7Z (best compression)
 - TAR.GZ (Unix compatible)
+
+7z is not offered: the code behind it wrote a zip file with a different name.
 
 **How to Use:**
 1. Select file or folder to compress
@@ -592,8 +595,8 @@ Detailed system specifications:
 ### Monitoring
 
 - **Refresh Interval** - Data update frequency (1-10 seconds)
-- **Auto-Optimize Memory** - Automatic RAM optimization
-- **Memory Threshold** - Trigger level for auto-optimization
+- **Memory Threshold** - The usage level that raises a memory alert. Nothing optimizes memory on its own;
+  the Dashboard's memory action is the only thing that trims working sets, and you start it.
 
 ### Alert Thresholds
 

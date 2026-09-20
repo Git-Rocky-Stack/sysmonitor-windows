@@ -72,7 +72,6 @@ public class FileConverter : IFileConverter
                 {
                     CompressionFormat.Zip => ".zip",
                     CompressionFormat.GZip => ".gz",
-                    CompressionFormat.SevenZip => ".7z",
                     _ => ".zip"
                 };
 
@@ -88,12 +87,6 @@ public class FileConverter : IFileConverter
                         CompressToGZip(sourcePath, targetPath);
                         break;
 
-                    case CompressionFormat.SevenZip:
-                        // 7z would require 7-Zip SDK or SevenZipSharp
-                        // Fall back to zip for now
-                        targetPath = Path.ChangeExtension(targetPath, ".zip");
-                        CompressToZip(sourcePath, targetPath);
-                        break;
                 }
 
                 var targetInfo = new FileInfo(targetPath);

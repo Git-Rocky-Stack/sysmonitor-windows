@@ -26,7 +26,6 @@ public partial class SettingsViewModel : ObservableObject
 
     // Monitoring
     [ObservableProperty] private int _refreshInterval = 2;
-    [ObservableProperty] private bool _autoOptimizeMemory = false;
     [ObservableProperty] private int _memoryThreshold = 80;
 
     // Alert Thresholds
@@ -100,7 +99,6 @@ public partial class SettingsViewModel : ObservableObject
 
         // Monitoring
         RefreshInterval = GetSetting("RefreshInterval", 2);
-        AutoOptimizeMemory = GetSetting("AutoOptimizeMemory", false);
         MemoryThreshold = GetSetting("MemoryThreshold", 80);
 
         // Alert Thresholds
@@ -235,7 +233,6 @@ public partial class SettingsViewModel : ObservableObject
 
         // Monitoring
         SaveSetting("RefreshInterval", RefreshInterval);
-        SaveSetting("AutoOptimizeMemory", AutoOptimizeMemory);
         SaveSetting("MemoryThreshold", MemoryThreshold);
 
         // Alert Thresholds
@@ -271,7 +268,6 @@ public partial class SettingsViewModel : ObservableObject
 
         // Monitoring
         RefreshInterval = 2;
-        AutoOptimizeMemory = false;
         MemoryThreshold = 80;
 
         // Alert Thresholds

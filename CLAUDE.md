@@ -187,5 +187,5 @@ All services and ViewModels registered in `App.xaml.cs`:
 
 ### Platform Support
 
-Builds for x86, x64, and ARM64 Windows (min Windows 10 1809).
+Builds for x86, x64, and ARM64 Windows (min Windows 10 2004, build 19041 - `src/SysMonitor.App/SysMonitor.App.csproj:5` and `Package.appxmanifest:23`).
 Self-contained deployment includes Windows App SDK runtime.

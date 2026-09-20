@@ -95,6 +95,5 @@ public record ImageConversionOptions
 public enum CompressionFormat
 {
     Zip,
-    GZip,
-    SevenZip
+    GZip
 }

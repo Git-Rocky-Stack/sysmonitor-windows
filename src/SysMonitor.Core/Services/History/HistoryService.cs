@@ -10,7 +10,8 @@ namespace SysMonitor.Core.Services.History;
 
 /// <summary>
 /// Service for recording and retrieving historical metric data using SQLite.
-/// Records metrics every 30 seconds and auto-purges data older than 30 days.
+/// Records metrics every 30 seconds. Data older than 30 days is removed when the service starts, so a run
+/// that never restarts keeps everything it has recorded.
 /// </summary>
 public class HistoryService : IHistoryService
 {

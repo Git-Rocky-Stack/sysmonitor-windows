@@ -19,24 +19,6 @@ using SysMonitor.App.Services;
 
 namespace SysMonitor.App;
 
-/// <summary>
-/// Provides lazy initialization wrapper for singleton services to defer expensive
-/// instantiation until first use, reducing startup time by 2-5 seconds.
-/// </summary>
-/// <typeparam name="T">The service interface type</typeparam>
-internal sealed class LazyServiceWrapper<T> where T : class
-{
-    private readonly Lazy<T> _lazy;
-
-    public LazyServiceWrapper(IServiceProvider sp)
-    {
-        _lazy = new Lazy<T>(() => sp.GetRequiredService<T>(), LazyThreadSafetyMode.ExecutionAndPublication);
-    }
-
-    public T Value => _lazy.Value;
-    public bool IsValueCreated => _lazy.IsValueCreated;
-}
-
 public partial class App : Application
 {
     private static Window? _mainWindow;
@@ -479,7 +461,8 @@ public partial class App : Application
         try
         {
             var crashPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SysMonitor", "Logs",
                 $"SysMonitor_Crash_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
             File.WriteAllText(crashPath, $"Crash at {DateTime.Now}\n\nMessage: {e.Message}\n\nException:\n{e.Exception}");
         }
