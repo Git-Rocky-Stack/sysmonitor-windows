@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -90,6 +90,12 @@ public partial class PdfEditorViewModel : ObservableObject
 
     // Zoom
     [ObservableProperty] private double _zoomLevel = 1.0;
+
+    // The zoom the page image on the canvas was rendered at. Annotation coordinates are pixels of that
+    // image, so the scale that turns them into page points comes from it, not from a zoom the user may
+    // have changed since (the re-render is asynchronous).
+    private double _canvasZoom = 1.0;
+    private double CanvasCoordinateScale => PdfPageGeometry.CanvasCoordinateScale(_canvasZoom);
     [ObservableProperty] private string _zoomDisplay = "100%";
 
     // Current page rotation for visual display
@@ -213,11 +219,13 @@ public partial class PdfEditorViewModel : ObservableObject
         {
             CurrentPage = CurrentDocument.Pages[CurrentPageNumber - 1];
 
-            // Update visual rotation based on page's rotation value
-            CurrentPageRotation = CurrentPage.Rotation;
+            // The rendered page already shows the rotation it has in the file, so the preview only turns
+            // it by what the user has changed since.
+            CurrentPageRotation = CurrentPage.PreviewRotation;
 
             // Load page image for viewer using Windows PDF renderer
-            var imageBytes = await PdfPageRenderer.RenderPageAsync(CurrentDocument.FilePath, CurrentPageNumber, ZoomLevel);
+            var renderZoom = ZoomLevel;
+            var imageBytes = await PdfPageRenderer.RenderPageAsync(CurrentDocument.FilePath, CurrentPageNumber, renderZoom);
 
             // Convert bytes to BitmapImage on UI thread (avoids converter deadlock)
             if (imageBytes != null && imageBytes.Length > 0)
@@ -228,6 +236,7 @@ public partial class PdfEditorViewModel : ObservableObject
                 stream.Seek(0);
                 await bitmap.SetSourceAsync(stream);
                 CurrentPageImage = bitmap;
+                _canvasZoom = renderZoom;
             }
             else
             {
@@ -507,6 +516,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Text:
                 var textAnnotation = new TextAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -524,6 +534,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Highlight:
                 var highlight = new HighlightAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -541,6 +552,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Arrow:
                 var shape = new ShapeAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -563,6 +575,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.StickyNote:
                 var stickyNote = new StickyNoteAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = Math.Max(width, 150),
@@ -579,6 +592,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Redaction:
                 var redaction = new RedactionAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -594,6 +608,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Stamp:
                 var stamp = new StampAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = Math.Max(width, 180),
@@ -632,6 +647,7 @@ public partial class PdfEditorViewModel : ObservableObject
 
         var freehand = new FreehandAnnotation
         {
+            CoordinateScale = CanvasCoordinateScale,
             X = minX,
             Y = minY,
             Width = maxX - minX,
@@ -661,6 +677,7 @@ public partial class PdfEditorViewModel : ObservableObject
 
         var signature = new SignatureAnnotation
         {
+            CoordinateScale = CanvasCoordinateScale,
             X = x,
             Y = y,
             Width = width,
@@ -691,6 +708,7 @@ public partial class PdfEditorViewModel : ObservableObject
 
         var imageAnnotation = new ImageAnnotation
         {
+            CoordinateScale = CanvasCoordinateScale,
             X = x,
             Y = y,
             Width = width,

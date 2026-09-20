@@ -33,12 +33,14 @@ public class PdfEditor : IPdfEditor
                 for (int i = 0; i < pdfDoc.PageCount; i++)
                 {
                     var page = pdfDoc.Pages[i];
+                    var rotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
                     document.Pages.Add(new PdfPageInfo
                     {
                         PageNumber = i + 1,
                         Width = page.Width.Point,
                         Height = page.Height.Point,
-                        Rotation = (int)page.Rotate
+                        Rotation = rotation,
+                        OriginalRotation = rotation
                     });
                 }
 
@@ -77,31 +79,51 @@ public class PdfEditor : IPdfEditor
 
                     var page = outputDoc.AddPage(inputDoc.Pages[pageInfo.PageNumber - 1]);
 
-                    // Apply rotation
-                    if (pageInfo.Rotation != 0)
-                    {
-                        page.Rotate = pageInfo.Rotation;
-                    }
+                    // Annotations are measured on the page as displayed with the rotation it has in the
+                    // source, so take that before applying the new one. Always apply the new one: a page
+                    // turned back to 0 must not keep the source's /Rotate.
+                    var sourceRotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
+                    page.Rotate = PdfPageGeometry.NormalizeRotation(pageInfo.Rotation);
 
                     // Apply annotations for this page
                     var pageAnnotations = document.Annotations.Where(a => a.PageNumber == pageInfo.PageNumber).ToList();
-                    if (pageAnnotations.Any())
+                    if (pageAnnotations.Count > 0)
                     {
                         using var gfx = XGraphics.FromPdfPage(page);
+                        var visible = PdfPageGeometry.VisibleBox(page, gfx.PageSize);
+                        var displayToDrawing = PdfPageGeometry.DisplayToDrawing(visible, gfx.PageSize.Height, sourceRotation);
+                        var displayedSize = PdfPageGeometry.DisplayedSize(visible, sourceRotation);
+
                         foreach (var annotation in pageAnnotations)
                         {
-                            DrawAnnotation(gfx, annotation, page);
+                            var scale = annotation.CoordinateScale;
+                            if (!(scale > 0) || double.IsInfinity(scale))
+                            {
+                                return new PdfOperationResult
+                                {
+                                    Success = false,
+                                    ErrorMessage = $"An annotation on page {pageInfo.PageNumber} has an invalid coordinate scale ({scale}). Nothing was saved."
+                                };
+                            }
+
+                            var state = gfx.Save();
+                            gfx.MultiplyTransform(displayToDrawing);
+                            gfx.ScaleTransform(scale);
+                            DrawAnnotation(gfx, annotation, new XSize(displayedSize.Width / scale, displayedSize.Height / scale));
+                            gfx.Restore(state);
                         }
                     }
                 }
 
+                // Count the pages first: a saved PdfDocument refuses every further access.
+                var pagesProcessed = outputDoc.PageCount;
                 outputDoc.Save(outputPath);
 
                 return new PdfOperationResult
                 {
                     Success = true,
                     OutputPath = outputPath,
-                    PagesProcessed = outputDoc.PageCount,
+                    PagesProcessed = pagesProcessed,
                     OutputFiles = [outputPath]
                 };
             }
@@ -775,12 +797,14 @@ public class PdfEditor : IPdfEditor
                 for (int i = 0; i < pdfDoc.PageCount; i++)
                 {
                     var page = pdfDoc.Pages[i];
+                    var rotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
                     pages.Add(new PdfPageInfo
                     {
                         PageNumber = i + 1,
                         Width = page.Width.Point,
                         Height = page.Height.Point,
-                        Rotation = (int)page.Rotate
+                        Rotation = rotation,
+                        OriginalRotation = rotation
                     });
                 }
             }
@@ -790,7 +814,11 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, PdfPage page)
+    /// <summary>
+    /// Draws an annotation in its own coordinates. The caller has set up the transform from those coordinates
+    /// to the page; <paramref name="pageSize"/> is the displayed page in the same units (for page-relative placement).
+    /// </summary>
+    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, XSize pageSize)
     {
         var color = ParseColor(annotation.Color);
 
@@ -809,7 +837,7 @@ public class PdfEditor : IPdfEditor
                 DrawFreehand(gfx, freehand, color);
                 break;
             case ImageAnnotation imageAnn:
-                DrawImage(gfx, imageAnn, page);
+                DrawImage(gfx, imageAnn);
                 break;
             case StickyNoteAnnotation noteAnn:
                 DrawStickyNote(gfx, noteAnn);
@@ -821,10 +849,10 @@ public class PdfEditor : IPdfEditor
                 DrawSignature(gfx, sigAnn, color);
                 break;
             case StampAnnotation stampAnn:
-                DrawStamp(gfx, stampAnn, page);
+                DrawStamp(gfx, stampAnn);
                 break;
             case WatermarkAnnotation watermarkAnn:
-                DrawWatermark(gfx, watermarkAnn, page);
+                DrawWatermark(gfx, watermarkAnn, pageSize);
                 break;
             case LinkAnnotation linkAnn:
                 DrawLink(gfx, linkAnn);
@@ -851,7 +879,7 @@ public class PdfEditor : IPdfEditor
         }
     }
 
-    private void DrawImage(XGraphics gfx, ImageAnnotation annotation, PdfPage page)
+    private void DrawImage(XGraphics gfx, ImageAnnotation annotation)
     {
         if (annotation.ImageData == null || annotation.ImageData.Length == 0) return;
 
@@ -1009,7 +1037,10 @@ public class PdfEditor : IPdfEditor
         var font = new XFont(annotation.FontFamily, annotation.FontSize, style);
         var brush = new XSolidBrush(color);
 
-        gfx.DrawString(annotation.Text, font, brush, annotation.X, annotation.Y);
+        // (X, Y) is the top-left corner of the text, as on the editor canvas; a plain point would be the baseline.
+        // The rectangle only anchors the text (TopLeft needs a non-empty layout box); it does not clip.
+        var anchor = new XRect(annotation.X, annotation.Y, Math.Max(annotation.Width, 1), Math.Max(annotation.Height, 1));
+        gfx.DrawString(annotation.Text, font, brush, anchor, XStringFormats.TopLeft);
     }
 
     private void DrawHighlight(XGraphics gfx, HighlightAnnotation annotation, XColor color)
@@ -1160,7 +1191,8 @@ public class PdfEditor : IPdfEditor
                     PageNumber = sourcePage.PageNumber, // Will copy from original
                     Width = sourcePage.Width,
                     Height = sourcePage.Height,
-                    Rotation = sourcePage.Rotation
+                    Rotation = sourcePage.Rotation,
+                    OriginalRotation = sourcePage.OriginalRotation
                 };
 
                 var insertIndex = document.Pages.IndexOf(sourcePage) + 1;
@@ -1225,7 +1257,8 @@ public class PdfEditor : IPdfEditor
                             X = watermark.X,
                             Y = watermark.Y,
                             Width = watermark.Width,
-                            Height = watermark.Height
+                            Height = watermark.Height,
+                            CoordinateScale = watermark.CoordinateScale
                         };
                         document.Annotations.Add(pageWatermark);
                     }
@@ -1418,7 +1451,7 @@ public class PdfEditor : IPdfEditor
     }
 
     // Drawing methods for new annotation types
-    private void DrawStamp(XGraphics gfx, StampAnnotation stamp, PdfPage page)
+    private void DrawStamp(XGraphics gfx, StampAnnotation stamp)
     {
         var stampText = stamp.StampType == StampType.Custom
             ? stamp.CustomText
@@ -1473,7 +1506,8 @@ public class PdfEditor : IPdfEditor
         gfx.Restore(state);
     }
 
-    private void DrawWatermark(XGraphics gfx, WatermarkAnnotation watermark, PdfPage page)
+    /// <param name="pageSize">The page as displayed (original rotation, visible area), in the watermark's units.</param>
+    private void DrawWatermark(XGraphics gfx, WatermarkAnnotation watermark, XSize pageSize)
     {
         if (watermark.Type == WatermarkType.Image && watermark.ImageData != null)
         {
@@ -1483,7 +1517,7 @@ public class PdfEditor : IPdfEditor
                 var image = XImage.FromStream(ms);
 
                 // Position based on setting
-                var (x, y) = GetWatermarkPosition(watermark.Position, page.Width.Point, page.Height.Point, watermark.Width, watermark.Height);
+                var (x, y) = GetWatermarkPosition(watermark.Position, pageSize.Width, pageSize.Height, watermark.Width, watermark.Height);
 
                 var state = gfx.Save();
                 gfx.TranslateTransform(x + watermark.Width / 2, y + watermark.Height / 2);
@@ -1506,21 +1540,23 @@ public class PdfEditor : IPdfEditor
             var brush = new XSolidBrush(watermarkColor);
 
             var textSize = gfx.MeasureString(watermark.Text, font);
-            var (x, y) = GetWatermarkPosition(watermark.Position, page.Width.Point, page.Height.Point, textSize.Width, textSize.Height);
+            var (x, y) = GetWatermarkPosition(watermark.Position, pageSize.Width, pageSize.Height, textSize.Width, textSize.Height);
 
             var state = gfx.Save();
 
+            // Lay the text out by its box rather than its baseline, so a centred watermark is really centred.
             if (watermark.Position == WatermarkPosition.Diagonal || watermark.Position == WatermarkPosition.Center)
             {
-                var centerX = page.Width.Point / 2;
-                var centerY = page.Height.Point / 2;
-                gfx.TranslateTransform(centerX, centerY);
+                gfx.TranslateTransform(pageSize.Width / 2, pageSize.Height / 2);
                 gfx.RotateTransform(watermark.Rotation);
-                gfx.DrawString(watermark.Text, font, brush, -textSize.Width / 2, textSize.Height / 2);
+                gfx.DrawString(watermark.Text, font, brush,
+                    new XRect(-textSize.Width / 2, -textSize.Height / 2, textSize.Width, textSize.Height),
+                    XStringFormats.Center);
             }
             else
             {
-                gfx.DrawString(watermark.Text, font, brush, x, y + textSize.Height);
+                gfx.DrawString(watermark.Text, font, brush,
+                    new XRect(x, y, textSize.Width, textSize.Height), XStringFormats.TopLeft);
             }
 
             gfx.Restore(state);

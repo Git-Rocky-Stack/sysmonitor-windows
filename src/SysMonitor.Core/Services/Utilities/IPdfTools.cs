@@ -173,7 +173,19 @@ public class PdfPageInfo
     public int PageNumber { get; set; }
     public double Width { get; set; }
     public double Height { get; set; }
+
+    /// <summary>Rotation the page is saved with: 0, 90, 180 or 270 degrees clockwise.</summary>
     public int Rotation { get; set; }
+
+    /// <summary>
+    /// The page's rotation in the source file. Renderings of the source page already show it, and annotation
+    /// coordinates are measured on the page displayed this way.
+    /// </summary>
+    public int OriginalRotation { get; set; }
+
+    /// <summary>How far to turn a rendering of the source page (which shows <see cref="OriginalRotation"/>) to preview <see cref="Rotation"/>.</summary>
+    public int PreviewRotation => PdfPageGeometry.NormalizeRotation(Rotation - OriginalRotation);
+
     public byte[]? ThumbnailBytes { get; set; }
 }
 
@@ -181,13 +193,24 @@ public abstract class PdfAnnotation
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public int PageNumber { get; set; }
+
+    // Position and size are measured from the top-left corner of the page as displayed with its
+    // original rotation (the visible area, i.e. the CropBox), y down, in CoordinateScale points.
     public double X { get; set; }
     public double Y { get; set; }
     public double Width { get; set; }
     public double Height { get; set; }
     public string Color { get; set; } = "#FF0000";
+
+    /// <summary>
+    /// Points per coordinate unit. Every length on the annotation (position, size, font size, stroke width,
+    /// freehand points) is multiplied by this when it is drawn into the PDF. Annotations drawn on the editor
+    /// canvas use <see cref="PdfPageGeometry.CanvasCoordinateScale"/>; 1 means the values are already points.
+    /// </summary>
+    public double CoordinateScale { get; set; } = 1.0;
 }
 
+/// <summary>Text drawn with the top-left corner of its first line at (X, Y).</summary>
 public class TextAnnotation : PdfAnnotation
 {
     public string Text { get; set; } = "";

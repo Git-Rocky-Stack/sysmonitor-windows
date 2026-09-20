@@ -404,13 +404,15 @@ public class PdfTools : IPdfTools
                     };
                 }
 
+                // Count the pages first: a saved PdfDocument refuses every further access.
+                var pagesProcessed = document.PageCount;
                 document.Save(outputPath);
 
                 return new PdfOperationResult
                 {
                     Success = true,
                     OutputPath = outputPath,
-                    PagesProcessed = document.PageCount,
+                    PagesProcessed = pagesProcessed,
                     OutputFiles = [outputPath]
                 };
             }

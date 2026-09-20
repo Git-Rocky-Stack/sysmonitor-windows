@@ -22,6 +22,10 @@ public sealed partial class PdfEditorPage : Page
 
     public PdfEditorViewModel ViewModel { get; }
 
+    // Inset of a text annotation's text inside its box on the canvas. The saved annotation starts where the
+    // text does, so the two agree.
+    private const double TextAnnotationPadding = 4;
+
     // Annotation drawing state
     private bool _isDrawing;
     private Point _startPoint;
@@ -1259,8 +1263,9 @@ public sealed partial class PdfEditorPage : Page
             }
         }
 
-        // Add to view model and get the ID
-        var annotationId = await ViewModel.AddAnnotationAtPositionAsync(x, y, 200, 30);
+        // Add to view model and get the ID. The text sits inside the box's padding.
+        var annotationId = await ViewModel.AddAnnotationAtPositionAsync(
+            x + TextAnnotationPadding, y + TextAnnotationPadding, 200, 30);
         if (!annotationId.HasValue)
         {
             CancelTextInput();
@@ -1283,7 +1288,7 @@ public sealed partial class PdfEditorPage : Page
         {
             Child = textBlock,
             Background = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255)), // Nearly transparent for hit-testing
-            Padding = new Thickness(4),
+            Padding = new Thickness(TextAnnotationPadding),
             MinWidth = 20,
             MinHeight = 20
         };
