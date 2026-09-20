@@ -4,6 +4,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
+using SysMonitor.Core.Helpers;
+
 namespace SysMonitor.Core.Services.Backup;
 
 /// <summary>
@@ -1456,12 +1458,9 @@ public class BackupService : IBackupService
         return combined != null && IsInside(root, combined) ? combined : null;
     }
 
-    private static bool IsInside(string root, string candidate)
-    {
-        var rooted = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        return candidate.StartsWith(rooted, StringComparison.OrdinalIgnoreCase) ||
-               string.Equals(candidate.TrimEnd(Path.DirectorySeparatorChar), root.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase);
-    }
+    /// <summary>A restore may write to the destination folder itself as well as anywhere under it.</summary>
+    private static bool IsInside(string root, string candidate) =>
+        PathHelper.IsPathWithinDirectory(candidate, root) || PathHelper.IsSamePath(candidate, root);
 
     private async Task<BackupManifest> LoadManifestAsync(string path)
     {

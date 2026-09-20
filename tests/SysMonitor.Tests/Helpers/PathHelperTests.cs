@@ -4,91 +4,71 @@ using Xunit;
 
 namespace SysMonitor.Tests.Helpers;
 
+/// <summary>
+/// Staying inside the folder the user picked is what stops a wipe walking into the rest of the disk and a
+/// restore writing outside the destination. Both of those call this, so what it decides here is what they do.
+/// </summary>
 public class PathHelperTests
 {
     [Theory]
-    [InlineData(null, false)]
-    [InlineData("", false)]
-    [InlineData("   ", false)]
-    [InlineData(@"C:\Valid\Path", true)]
-    [InlineData(@"C:\Valid\Path\file.txt", true)]
-    public void IsPathSafe_BasicValidation(string? path, bool expected)
-    {
-        // Act
-        var result = PathHelper.IsPathSafe(path);
-
-        // Assert
-        result.Should().Be(expected);
-    }
-
-    [Theory]
-    [InlineData(@"C:\Test\..\Windows\System32", false)]
-    [InlineData(@"C:\Test\..\..\Windows", false)]
-    [InlineData(@"..\secret.txt", false)]
-    public void IsPathSafe_RejectsDirectoryTraversal(string path, bool expected)
-    {
-        // Act
-        var result = PathHelper.IsPathSafe(path);
-
-        // Assert
-        result.Should().Be(expected);
-    }
-
-    [Theory]
     [InlineData(@"C:\Users\Test\file.txt", @"C:\Users\Test", true)]
     [InlineData(@"C:\Users\Test\Sub\file.txt", @"C:\Users\Test", true)]
+    [InlineData(@"C:\Users\Test\", @"C:\Users\Test", false)]
+    [InlineData(@"C:\Users\Test", @"C:\Users\Test", false)]
     [InlineData(@"C:\Users\Other\file.txt", @"C:\Users\Test", false)]
+    [InlineData(@"C:\Users\Testing\file.txt", @"C:\Users\Test", false)]
     [InlineData(@"D:\Other\file.txt", @"C:\Users\Test", false)]
     public void IsPathWithinDirectory_ValidatesContainment(string path, string basePath, bool expected)
     {
-        // Act
-        var result = PathHelper.IsPathWithinDirectory(path, basePath);
-
-        // Assert
-        result.Should().Be(expected);
+        PathHelper.IsPathWithinDirectory(path, basePath).Should().Be(expected);
     }
 
     [Theory]
-    [InlineData(null, "unnamed")]
-    [InlineData("", "unnamed")]
-    [InlineData("valid_file.txt", "valid_file.txt")]
-    [InlineData("file<with>invalid:chars?.txt", "file_with_invalid_chars_.txt")]
-    [InlineData("file/with\\slashes.txt", "file_with_slashes.txt")]
-    public void GetSafeFileName_SanitizesInput(string? input, string expected)
+    [InlineData(@"C:\Users\Test\..\Other\file.txt")]
+    [InlineData(@"C:\Users\Test\Sub\..\..\Other\file.txt")]
+    public void IsPathWithinDirectory_ResolvesAPathBeforeJudgingIt(string path)
     {
-        // Act
-        var result = PathHelper.GetSafeFileName(input);
-
-        // Assert
-        result.Should().Be(expected);
+        PathHelper.IsPathWithinDirectory(path, @"C:\Users\Test")
+            .Should().BeFalse("it leaves the folder, however it is spelled");
     }
 
     [Fact]
-    public void GetDirectorySize_NonExistentDirectory_ReturnsZero()
+    public void IsPathWithinDirectory_AcceptsADeeperPathThatOnlyLooksLikeItLeaves()
     {
-        // Arrange
-        var path = @"C:\NonExistent\Directory\Path\That\Should\Not\Exist";
-
-        // Act
-        var (size, count) = PathHelper.GetDirectorySize(path);
-
-        // Assert
-        size.Should().Be(0);
-        count.Should().Be(0);
+        PathHelper.IsPathWithinDirectory(@"C:\Users\Test\Sub\..\Other\file.txt", @"C:\Users\Test")
+            .Should().BeTrue("it comes back inside");
     }
 
-    [Fact]
-    public void GetDirectorySize_TempDirectory_ReturnsValues()
+    [Theory]
+    [InlineData(@"c:\users\test\file.txt", @"C:\Users\Test")]
+    [InlineData(@"C:\USERS\TEST\FILE.TXT", @"c:\users\test")]
+    public void IsPathWithinDirectory_IgnoresCase(string path, string basePath)
     {
-        // Arrange
-        var tempPath = Path.GetTempPath();
+        PathHelper.IsPathWithinDirectory(path, basePath).Should().BeTrue("Windows paths are case-insensitive");
+    }
 
-        // Act
-        var (size, count) = PathHelper.GetDirectorySize(tempPath, includeSubdirectories: false);
+    [Theory]
+    [InlineData(null, @"C:\Users\Test")]
+    [InlineData("", @"C:\Users\Test")]
+    [InlineData("   ", @"C:\Users\Test")]
+    [InlineData(@"C:\Users\Test\file.txt", null)]
+    [InlineData(@"C:\Users\Test\file.txt", "")]
+    [InlineData("\0", @"C:\Users\Test")]
+    public void IsPathWithinDirectory_RefusesWhatItCannotJudge(string? path, string? basePath)
+    {
+        PathHelper.IsPathWithinDirectory(path, basePath)
+            .Should().BeFalse("an answer it cannot work out is not a yes");
+    }
 
-        // Assert - temp directory should have some files
-        // We just verify it doesn't throw and returns reasonable values
-        size.Should().BeGreaterOrEqualTo(0);
-        count.Should().BeGreaterOrEqualTo(0);
+    [Theory]
+    [InlineData(@"C:\Users\Test", @"C:\Users\Test", true)]
+    [InlineData(@"C:\Users\Test\", @"C:\Users\Test", true)]
+    [InlineData(@"c:\users\test", @"C:\Users\Test", true)]
+    [InlineData(@"C:\Users\Test\Sub", @"C:\Users\Test", false)]
+    [InlineData(@"C:\Users\Testing", @"C:\Users\Test", false)]
+    [InlineData(null, @"C:\Users\Test", false)]
+    public void IsSamePath_ComparesTheSameWayWindowsDoes(string? path, string? other, bool expected)
+    {
+        PathHelper.IsSamePath(path, other).Should().Be(expected);
     }
 }

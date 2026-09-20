@@ -2,6 +2,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 
+using SysMonitor.Core.Helpers;
+
 namespace SysMonitor.Core.Services.Utilities;
 
 public interface IDriveWiper
@@ -291,11 +293,7 @@ public class DriveWiper : IDriveWiper
         return plan;
     }
 
-    private static bool IsWithin(string root, string path)
-    {
-        var prefix = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
-        return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
-    }
+    private static bool IsWithin(string root, string path) => PathHelper.IsPathWithinDirectory(path, root);
 
     /// <summary>
     /// Whether a path sits on a solid-state drive. Windows reports the media type of the physical disk

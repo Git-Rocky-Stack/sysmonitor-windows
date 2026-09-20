@@ -83,13 +83,4 @@ public class MemoryOptimizer : IMemoryOptimizer
         });
     }
 
-    public async Task<long> ClearStandbyListAsync()
-    {
-        return await Task.Run(() =>
-        {
-            // Requires admin privileges
-            // This would use NtSetSystemInformation to clear standby list
-            return 0L;
-        });
-    }
 }

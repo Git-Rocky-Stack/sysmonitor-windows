@@ -20,7 +20,6 @@ public interface IMemoryOptimizer
 {
     Task<long> OptimizeMemoryAsync();
     Task<long> TrimProcessWorkingSetAsync(int processId);
-    Task<long> ClearStandbyListAsync();
 }
 
 public interface IServiceOptimizer
