@@ -33,6 +33,23 @@ public static class PdfPageGeometry
         return PointsPerDip / zoom;
     }
 
+    /// <summary>
+    /// How many canvas units one unit of an annotation's own coordinates is worth, on a page image rendered
+    /// at <paramref name="canvasZoom"/>. An annotation drawn at one zoom is put back on the canvas at another
+    /// by multiplying its numbers by this, which is what lets a redraw survive a zoom.
+    /// </summary>
+    /// <param name="annotationCoordinateScale">The annotation's <see cref="PdfAnnotation.CoordinateScale"/>: points per unit of its own coordinates.</param>
+    public static double RedrawScale(double annotationCoordinateScale, double canvasZoom)
+    {
+        if (!(annotationCoordinateScale > 0) || double.IsInfinity(annotationCoordinateScale))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(annotationCoordinateScale), annotationCoordinateScale, "A coordinate scale must be a positive number.");
+        }
+
+        return annotationCoordinateScale / CanvasCoordinateScale(canvasZoom);
+    }
+
     /// <summary>Reduces a /Rotate value to 0, 90, 180 or 270. Values that are not multiples of 90 are invalid and count as 0.</summary>
     public static int NormalizeRotation(int degrees)
     {

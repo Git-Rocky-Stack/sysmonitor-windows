@@ -288,35 +288,6 @@ public class StringToColorConverter : IValueConverter
     }
 }
 
-public class BytesToImageConverter : IValueConverter
-{
-    public object? Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is byte[] bytes && bytes.Length > 0)
-        {
-            try
-            {
-                var image = new BitmapImage();
-                using var stream = new InMemoryRandomAccessStream();
-                using var writer = new DataWriter(stream.GetOutputStreamAt(0));
-                writer.WriteBytes(bytes);
-                writer.StoreAsync().AsTask().GetAwaiter().GetResult();
-                writer.FlushAsync().AsTask().GetAwaiter().GetResult();
-                stream.Seek(0);
-                image.SetSourceAsync(stream).AsTask().GetAwaiter().GetResult();
-                return image;
-            }
-            catch { }
-        }
-        return null;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
 public class GreaterThanOneConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)

@@ -52,6 +52,9 @@ public sealed partial class PdfEditorPage : Page
         ViewModel = App.GetService<PdfEditorViewModel>();
         InitializeComponent();
 
+        // Whenever the page's annotations are rebuilt - navigation, zoom, undo, redo - redraw the canvas.
+        ViewModel.AnnotationsReloaded += (_, _) => RefreshAnnotationVisuals();
+
         // Handle keyboard events for delete
         this.KeyDown += Page_KeyDown;
     }
@@ -75,8 +78,6 @@ public sealed partial class PdfEditorPage : Page
     private async void OpenPdf_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.OpenPdfCommand.ExecuteAsync(null);
-        // Clear annotations when opening new document
-        ClearAnnotationVisuals();
     }
 
     private async void SavePdf_Click(object sender, RoutedEventArgs e)
@@ -88,13 +89,11 @@ public sealed partial class PdfEditorPage : Page
     private async void PreviousPage_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.PreviousPageCommand.ExecuteAsync(null);
-        ClearAnnotationVisuals();
     }
 
     private async void NextPage_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.NextPageCommand.ExecuteAsync(null);
-        ClearAnnotationVisuals();
     }
 
     private async void PageThumbnail_Click(object sender, RoutedEventArgs e)
@@ -102,7 +101,6 @@ public sealed partial class PdfEditorPage : Page
         if (sender is Button button && button.Tag is int pageNumber)
         {
             await ViewModel.NavigateToPageCommand.ExecuteAsync(pageNumber);
-            ClearAnnotationVisuals();
         }
     }
 
@@ -144,7 +142,6 @@ public sealed partial class PdfEditorPage : Page
     private void ClearAnnotations_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ClearAnnotationsCommand.Execute(null);
-        ClearAnnotationVisuals();
     }
 
     private void ClearAnnotationVisuals()
@@ -219,21 +216,19 @@ public sealed partial class PdfEditorPage : Page
     }
 
     // New button handlers
-    private async void ExportToWord_Click(object sender, RoutedEventArgs e)
+    private async void ExportAnnotationReport_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.ExportToWordCommand.ExecuteAsync(null);
+        await ViewModel.ExportAnnotationReportCommand.ExecuteAsync(null);
     }
 
     private void Undo_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.UndoCommand.Execute(null);
-        RefreshAnnotationVisuals();
     }
 
     private void Redo_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.RedoCommand.Execute(null);
-        RefreshAnnotationVisuals();
     }
 
     private async void InsertImage_Click(object sender, RoutedEventArgs e)
@@ -284,6 +279,32 @@ public sealed partial class PdfEditorPage : Page
     private void Search_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.ToggleSearchPanelCommand.Execute(null);
+        if (ViewModel.IsSearchPanelVisible)
+        {
+            SearchBox.Focus(FocusState.Programmatic);
+        }
+    }
+
+    private async void RunSearch_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.SearchInPdfCommand.ExecuteAsync(null);
+    }
+
+    private async void SearchBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            e.Handled = true;
+            await ViewModel.SearchInPdfCommand.ExecuteAsync(null);
+        }
+    }
+
+    private async void SearchResult_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: PdfSearchResult result })
+        {
+            await ViewModel.GoToSearchResultCommand.ExecuteAsync(result);
+        }
     }
 
     private async void InsertBlankPage_Click(object sender, RoutedEventArgs e)
@@ -376,10 +397,130 @@ public sealed partial class PdfEditorPage : Page
         }
     }
 
+    /// <summary>
+    /// Draws an annotation that is already in the document back onto the canvas, at the zoom the page is
+    /// shown at now. Without this, undo and redo cleared the canvas and left the annotations invisible -
+    /// still in the document, still saved, but impossible to see or select.
+    /// </summary>
     private void AddVisualFromAnnotation(AnnotationViewModel annotation)
     {
-        // Add visual elements for existing annotations
-        // This is a simplified version - full implementation would recreate exact visuals
+        var scale = ViewModel.CanvasScaleFor(annotation.Annotation);
+        var x = annotation.X * scale;
+        var y = annotation.Y * scale;
+        var width = annotation.Width * scale;
+        var height = annotation.Height * scale;
+        var colour = ParseColor(annotation.Color);
+
+        FrameworkElement element = annotation.Annotation switch
+        {
+            HighlightAnnotation highlight => new Rectangle
+            {
+                Fill = new SolidColorBrush(WithOpacity(colour, highlight.Opacity)),
+                Width = Math.Max(width, 1),
+                Height = Math.Max(height, 1),
+            },
+            RedactionAnnotation => new Rectangle
+            {
+                Fill = new SolidColorBrush(Colors.Black),
+                Width = Math.Max(width, 1),
+                Height = Math.Max(height, 1),
+            },
+            ShapeAnnotation { Type: ShapeType.Ellipse } shape => new Ellipse
+            {
+                Stroke = new SolidColorBrush(colour),
+                StrokeThickness = shape.StrokeWidth * scale,
+                Width = Math.Max(width, 1),
+                Height = Math.Max(height, 1),
+            },
+            ShapeAnnotation { Type: ShapeType.Line or ShapeType.Arrow } shape => new Line
+            {
+                Stroke = new SolidColorBrush(colour),
+                StrokeThickness = shape.StrokeWidth * scale,
+                X1 = 0,
+                Y1 = 0,
+                X2 = width,
+                Y2 = height,
+            },
+            ShapeAnnotation shape => new Rectangle
+            {
+                Stroke = new SolidColorBrush(colour),
+                StrokeThickness = shape.StrokeWidth * scale,
+                Width = Math.Max(width, 1),
+                Height = Math.Max(height, 1),
+            },
+            TextAnnotation text => new TextBlock
+            {
+                Text = text.Text,
+                FontSize = Math.Max(text.FontSize * scale, 1),
+                FontWeight = text.IsBold ? Microsoft.UI.Text.FontWeights.Bold : Microsoft.UI.Text.FontWeights.Normal,
+                Foreground = new SolidColorBrush(colour),
+            },
+            FreehandAnnotation freehand => FreehandVisual(freehand, colour, scale),
+            SignatureAnnotation signature => SignatureVisual(signature, colour, scale, x, y),
+            _ => new Rectangle
+            {
+                Stroke = new SolidColorBrush(colour),
+                StrokeDashArray = [2, 2],
+                Width = Math.Max(width, 1),
+                Height = Math.Max(height, 1),
+            },
+        };
+
+        // Freehand and signature strokes carry their own positions.
+        if (annotation.Annotation is FreehandAnnotation or SignatureAnnotation)
+        {
+            Canvas.SetLeft(element, 0);
+            Canvas.SetTop(element, 0);
+        }
+        else
+        {
+            Canvas.SetLeft(element, x);
+            Canvas.SetTop(element, y);
+        }
+
+        AnnotationCanvas.Children.Add(element);
+        _annotationElements[annotation.Id] = element;
+    }
+
+    private static Color WithOpacity(Color colour, double opacity) =>
+        Color.FromArgb((byte)Math.Clamp(opacity * 255, 0, 255), colour.R, colour.G, colour.B);
+
+    private static Polyline FreehandVisual(FreehandAnnotation freehand, Color colour, double scale)
+    {
+        var polyline = new Polyline
+        {
+            Stroke = new SolidColorBrush(colour),
+            StrokeThickness = freehand.StrokeWidth * scale,
+        };
+
+        foreach (var point in freehand.Points)
+        {
+            polyline.Points.Add(new Point(point.X * scale, point.Y * scale));
+        }
+
+        return polyline;
+    }
+
+    private static Canvas SignatureVisual(SignatureAnnotation signature, Color colour, double scale, double x, double y)
+    {
+        var canvas = new Canvas();
+        foreach (var stroke in signature.Strokes)
+        {
+            var polyline = new Polyline
+            {
+                Stroke = new SolidColorBrush(colour),
+                StrokeThickness = signature.StrokeWidth * scale,
+            };
+
+            foreach (var point in stroke)
+            {
+                polyline.Points.Add(new Point(x + (point.X * scale), y + (point.Y * scale)));
+            }
+
+            canvas.Children.Add(polyline);
+        }
+
+        return canvas;
     }
 
     // Annotation Canvas Event Handlers

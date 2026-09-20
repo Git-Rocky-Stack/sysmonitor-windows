@@ -128,7 +128,12 @@ public interface IPdfEditor
     Task<PdfOperationResult> SavePdfAsync(PdfEditorDocument document, string outputPath);
     Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0);
     Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
-    Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath);
+    /// <summary>
+    /// Writes a Word document describing this PDF: its pages, their sizes, and the annotations on each one.
+    /// It is a report about the document, not the document converted - the page content is not carried over,
+    /// because nothing here extracts it.
+    /// </summary>
+    Task<PdfOperationResult> ExportAnnotationReportAsync(PdfEditorDocument document, string outputPath);
 
     // Page Operations. A pagePosition is a 1-based place in PdfEditorDocument.Pages, the order the editor
     // shows and saves; it is not the page's number in the source file, which reordering leaves behind.
@@ -152,8 +157,13 @@ public interface IPdfEditor
     Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pagePosition, LinkAnnotation link);
 
     // Search
-    Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false);
-    Task<string> ExtractTextAsync(PdfEditorDocument document, int? pageNumber = null);
+
+    /// <summary>
+    /// Searches the text carried by this document's annotations - text boxes, sticky notes, stamps,
+    /// watermarks, signatures and links. The page content itself is not searched: nothing here extracts
+    /// text from a PDF.
+    /// </summary>
+    Task<List<PdfSearchResult>> SearchAnnotationsAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false);
 
     // Compression & Optimization
     Task<PdfOperationResult> CompressPdfAsync(string inputPath, string outputPath, PdfCompressionOptions? options = null);
@@ -423,9 +433,15 @@ public class LinkAnnotation : PdfAnnotation
 public record PdfSearchResult
 {
     public int PageNumber { get; init; }
+
+    /// <summary>The text that matched, as the annotation spells it.</summary>
     public string MatchedText { get; init; } = "";
+
     public string ContextBefore { get; init; } = "";
     public string ContextAfter { get; init; } = "";
+
+    /// <summary>The match with the text around it, for a result list to show.</summary>
+    public string Preview => $"{ContextBefore}{MatchedText}{ContextAfter}";
     public double X { get; init; }
     public double Y { get; init; }
     public double Width { get; init; }
@@ -435,11 +451,13 @@ public record PdfSearchResult
 /// <summary>
 /// PDF compression options
 /// </summary>
+/// <summary>
+/// What compressing a PDF may do. It rewrites the file with its streams packed as tightly as the format
+/// allows, and can drop the document's metadata. Recompressing images and subsetting fonts are not offered,
+/// because nothing here does them; options that promised both were removed rather than left as decoration.
+/// </summary>
 public class PdfCompressionOptions
 {
-    public bool CompressImages { get; set; } = true;
-    public int ImageQuality { get; set; } = 75; // 1-100
+    /// <summary>Clears the title, author, subject and keywords recorded in the file.</summary>
     public bool RemoveMetadata { get; set; } = false;
-    public bool RemoveAnnotations { get; set; } = false;
-    public bool OptimizeFonts { get; set; } = true;
 }

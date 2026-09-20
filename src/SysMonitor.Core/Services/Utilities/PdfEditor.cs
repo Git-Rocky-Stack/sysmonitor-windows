@@ -631,7 +631,7 @@ public class PdfEditor : IPdfEditor
         return await Task.Run(() => AddAnnotation(document, pagePosition, signature));
     }
 
-    public async Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath)
+    public async Task<PdfOperationResult> ExportAnnotationReportAsync(PdfEditorDocument document, string outputPath)
     {
         return await Task.Run(() =>
         {
@@ -656,6 +656,12 @@ public class PdfEditor : IPdfEditor
 
                 infoRun = body.AppendChild(new Paragraph()).AppendChild(new Run());
                 infoRun.AppendChild(new Text($"Total Pages: {document.Pages.Count}"));
+
+                var scopeRun = body.AppendChild(new Paragraph()).AppendChild(new Run());
+                scopeRun.AppendChild(new RunProperties(new Italic()));
+                scopeRun.AppendChild(new Text(
+                    "This report lists the pages of the PDF and the annotations added to them. " +
+                    "The text of the pages themselves is not included."));
                 body.AppendChild(new Paragraph()); // Empty line
 
                 // Add page content markers
@@ -703,7 +709,7 @@ public class PdfEditor : IPdfEditor
                     body.AppendChild(new Paragraph()); // Empty line between pages
 
                     // Add page break after each page (except last)
-                    if (page.PageNumber < document.Pages.Count)
+                    if (position < document.Pages.Count)
                     {
                         var breakPara = body.AppendChild(new Paragraph());
                         breakPara.AppendChild(new Run(new Break { Type = BreakValues.Page }));
@@ -1252,86 +1258,92 @@ public class PdfEditor : IPdfEditor
         return await Task.Run(() => AddAnnotation(document, pagePosition, link));
     }
 
-    public async Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false)
+    /// <summary>
+    /// Searches the annotations on this document. PDFsharp does not extract page text and nothing here adds
+    /// that, so the pages themselves are not searched - which is why this is not called SearchText.
+    /// </summary>
+    public async Task<List<PdfSearchResult>> SearchAnnotationsAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false)
     {
         return await Task.Run(() =>
         {
             var results = new List<PdfSearchResult>();
 
-            try
+            if (string.IsNullOrEmpty(searchText))
+                return results;
+
+            // The annotations are held in memory, so a search does not need the file - and still works when
+            // it has been moved or is open elsewhere.
+            var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+            foreach (var annotation in document.Annotations)
             {
-                if (string.IsNullOrEmpty(searchText) || string.IsNullOrEmpty(document.FilePath))
-                    return results;
+                var textContent = SearchableText(annotation);
 
-                using var pdfDoc = PdfReader.Open(document.FilePath, PdfDocumentOpenMode.Import);
+                if (string.IsNullOrEmpty(textContent))
+                    continue;
 
-                // Note: PdfSharp doesn't have built-in text extraction
-                // This searches through our annotations for now
-                var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                var index = textContent.IndexOf(searchText, comparison);
+                if (index < 0)
+                    continue;
 
-                foreach (var annotation in document.Annotations)
+                results.Add(new PdfSearchResult
                 {
-                    string? textContent = annotation switch
-                    {
-                        TextAnnotation ta => ta.Text,
-                        StickyNoteAnnotation sn => $"{sn.Title} {sn.Content}",
-                        _ => null
-                    };
-
-                    if (!string.IsNullOrEmpty(textContent) && textContent.Contains(searchText, comparison))
-                    {
-                        results.Add(new PdfSearchResult
-                        {
-                            PageNumber = PositionOf(document, annotation),
-                            MatchedText = searchText,
-                            ContextBefore = textContent.Length > 20 ? textContent.Substring(0, 20) : textContent,
-                            ContextAfter = "",
-                            X = annotation.X,
-                            Y = annotation.Y,
-                            Width = annotation.Width,
-                            Height = annotation.Height
-                        });
-                    }
-                }
+                    PageNumber = PositionOf(document, annotation),
+                    MatchedText = textContent.Substring(index, searchText.Length),
+                    ContextBefore = Ellipsize(textContent[..index], keepEnd: true),
+                    ContextAfter = Ellipsize(textContent[(index + searchText.Length)..], keepEnd: false),
+                    X = annotation.X,
+                    Y = annotation.Y,
+                    Width = annotation.Width,
+                    Height = annotation.Height
+                });
             }
-            catch { }
 
             return results;
         });
     }
 
-    public async Task<string> ExtractTextAsync(PdfEditorDocument document, int? pageNumber = null)
+    /// <summary>Carries a document's own description - what a reader sees in File > Properties - to a copy of it.</summary>
+    private static void CopyDescription(PdfDocumentInformation from, PdfDocumentInformation to)
     {
-        return await Task.Run(() =>
-        {
-            var textBuilder = new System.Text.StringBuilder();
+        to.Title = from.Title;
+        to.Author = from.Author;
+        to.Subject = from.Subject;
+        to.Keywords = from.Keywords;
+        to.Creator = from.Creator;
 
-            try
-            {
-                // Extract text from annotations
-                var annotations = pageNumber.HasValue
-                    ? document.Annotations.Where(a => PositionOf(document, a) == pageNumber.Value)
-                    : document.Annotations;
+        // Only a date the file actually carries; an absent one reads as DateTime.MinValue.
+        if (from.Elements.ContainsKey("/CreationDate"))
+            to.CreationDate = from.CreationDate;
+    }
 
-                foreach (var annotation in annotations)
-                {
-                    var text = annotation switch
-                    {
-                        TextAnnotation ta => ta.Text,
-                        StickyNoteAnnotation sn => $"[Note: {sn.Title}] {sn.Content}",
-                        _ => null
-                    };
+    /// <summary>
+    /// The text an annotation carries, as a reader of the page would see it. Annotations that show no text -
+    /// highlights, shapes, drawings, images, redactions - have none.
+    /// </summary>
+    private static string? SearchableText(PdfAnnotation annotation) => annotation switch
+    {
+        TextAnnotation text => text.Text,
+        StickyNoteAnnotation note => $"{note.Title} {note.Content}".Trim(),
+        StampAnnotation stamp => string.IsNullOrWhiteSpace(stamp.CustomText)
+            ? stamp.StampType.ToString()
+            : stamp.CustomText,
+        WatermarkAnnotation watermark => watermark.Text,
+        SignatureAnnotation signature => signature.SignerName,
+        LinkAnnotation link => $"{link.DisplayText} {link.Url}".Trim(),
+        _ => null
+    };
 
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        textBuilder.AppendLine(text);
-                    }
-                }
-            }
-            catch { }
+    /// <summary>Trims a side of a match down to a readable amount of context, marking what was cut.</summary>
+    private static string Ellipsize(string context, bool keepEnd)
+    {
+        const int maxLength = 40;
+        if (context.Length <= maxLength)
+            return context;
 
-            return textBuilder.ToString();
-        });
+        return keepEnd
+            ? "\u2026" + context[^maxLength..]
+            : context[..maxLength] + "\u2026";
     }
 
     public async Task<PdfOperationResult> CompressPdfAsync(string inputPath, string outputPath, PdfCompressionOptions? options = null)
@@ -1362,14 +1374,15 @@ public class PdfEditor : IPdfEditor
                 outputDoc.Options.FlateEncodeMode = PdfFlateEncodeMode.BestCompression;
                 outputDoc.Options.UseFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Automatic;
 
-                if (options.RemoveMetadata)
+                if (!options.RemoveMetadata)
                 {
-                    outputDoc.Info.Title = "";
-                    outputDoc.Info.Author = "";
-                    outputDoc.Info.Subject = "";
-                    outputDoc.Info.Keywords = "";
+                    // The output is a new document, which starts with no description at all. Without this,
+                    // compressing a file threw away its title, author and dates whatever the option said.
+                    CopyDescription(inputDoc.Info, outputDoc.Info);
                 }
 
+                // Counted before the save: a PdfDocument reports no pages once it has been written out.
+                var pagesProcessed = outputDoc.PageCount;
                 outputDoc.Save(outputPath);
 
                 var compressedSize = new FileInfo(outputPath).Length;
@@ -1380,7 +1393,7 @@ public class PdfEditor : IPdfEditor
                 {
                     Success = true,
                     OutputPath = outputPath,
-                    PagesProcessed = outputDoc.PageCount,
+                    PagesProcessed = pagesProcessed,
                     OutputFiles = [outputPath],
                     ErrorMessage = $"Compressed from {FormatFileSize(originalSize)} to {FormatFileSize(compressedSize)} ({savingsPercent:F1}% reduction)"
                 };
