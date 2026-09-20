@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Utilities;
@@ -10,6 +12,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
 {
+    private readonly ILogger _logger;
+
     private readonly IDuplicateFinder _duplicateFinder;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _scanCts;
@@ -43,8 +47,10 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _hasActionStatus;
     [ObservableProperty] private string _actionStatusColor = "#4CAF50";
 
-    public DuplicateFinderViewModel(IDuplicateFinder duplicateFinder)
+    public DuplicateFinderViewModel(IDuplicateFinder duplicateFinder,
+        ILogger<DuplicateFinderViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<DuplicateFinderViewModel>.Instance;
         _duplicateFinder = duplicateFinder;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
@@ -73,7 +79,10 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
                 ScanPath = folder.Path;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "BrowseFolderAsync failed");
+        }
     }
 
     [RelayCommand]

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Reflection;
@@ -8,6 +10,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
+
     private readonly ApplicationDataContainer? _localSettings;
     private readonly string _settingsFilePath;
     private readonly bool _useFileStorage;
@@ -53,8 +57,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private bool _hasStatusMessage = false;
 
-    public SettingsViewModel()
+    public SettingsViewModel(ILogger<SettingsViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<SettingsViewModel>.Instance;
         // Try to use ApplicationData (packaged app), fall back to file storage (unpackaged)
         _settingsFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -384,9 +389,16 @@ public partial class SettingsViewModel : ObservableObject
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                // Best effort: an unreadable setting falls back to the default below, which is the answer
+                // this method is for.
+            }
         }
-        catch { }
+        catch
+        {
+            // Best effort: see above - there is no logger to reach from a static helper.
+        }
         return defaultValue;
     }
 

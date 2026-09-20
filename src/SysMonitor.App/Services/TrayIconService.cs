@@ -196,7 +196,11 @@ public class TrayIconService : IDisposable
                     title: alert.Title,
                     message: alert.Message);
             }
-            catch { }
+            catch
+            {
+                // Best effort: this is already the fallback for a notification that would not show,
+                // and failing to tell the user something is not worth failing over.
+            }
         }
     }
 

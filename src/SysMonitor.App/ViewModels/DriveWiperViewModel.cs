@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
@@ -8,6 +10,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class DriveWiperViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
+
     private readonly IDriveWiper _driveWiper;
 
     [ObservableProperty] private ObservableCollection<FileToWipe> _filesToWipe = new();
@@ -39,8 +43,10 @@ public partial class DriveWiperViewModel : ObservableObject
 
     [ObservableProperty] private bool _hasMediaWarning;
 
-    public DriveWiperViewModel(IDriveWiper driveWiper)
+    public DriveWiperViewModel(IDriveWiper driveWiper,
+        ILogger<DriveWiperViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<DriveWiperViewModel>.Instance;
         _driveWiper = driveWiper;
         UpdateMethodDescription();
     }
@@ -265,7 +271,7 @@ public partial class DriveWiperViewModel : ObservableObject
         }
     }
 
-    private static async Task<long> GetDirectorySizeAsync(string path)
+    private async Task<long> GetDirectorySizeAsync(string path)
     {
         return await Task.Run(() =>
         {
@@ -275,10 +281,16 @@ public partial class DriveWiperViewModel : ObservableObject
                 foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
                 {
                     try { size += new FileInfo(file).Length; }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "GetDirectorySizeAsync failed");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetDirectorySizeAsync failed");
+            }
             return size;
         });
     }

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Concurrent;
 using System.Management;
 using SysMonitor.Core.Models;
@@ -15,6 +17,13 @@ namespace SysMonitor.Core.Services.Monitors;
 /// </summary>
 public class DiskMonitor : IDiskMonitor
 {
+    private readonly ILogger _logger;
+
+    public DiskMonitor(ILogger<DiskMonitor>? logger = null)
+    {
+        _logger = logger ?? NullLogger<DiskMonitor>.Instance;
+    }
+
     // Cache for SSD detection results (drive type never changes at runtime)
     private static readonly ConcurrentDictionary<string, bool> SsdCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -46,7 +55,10 @@ public class DiskMonitor : IDiskMonitor
                         IsSSD = IsSSDCached(drive.Name)
                     });
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetAllDisksAsync failed");
+                }
             }
             return disks;
         });

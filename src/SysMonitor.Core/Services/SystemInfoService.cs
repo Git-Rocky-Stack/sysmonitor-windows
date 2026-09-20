@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Management;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitors;
@@ -15,6 +17,8 @@ namespace SysMonitor.Core.Services;
 /// </summary>
 public class SystemInfoService : ISystemInfoService
 {
+    private readonly ILogger _logger;
+
     private readonly ICpuMonitor _cpuMonitor;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly IDiskMonitor _diskMonitor;
@@ -31,8 +35,10 @@ public class SystemInfoService : ISystemInfoService
         IMemoryMonitor memoryMonitor,
         IDiskMonitor diskMonitor,
         IBatteryMonitor batteryMonitor,
-        INetworkMonitor networkMonitor)
+        INetworkMonitor networkMonitor,
+        ILogger<SystemInfoService>? logger = null)
     {
+        _logger = logger ?? NullLogger<SystemInfoService>.Instance;
         _cpuMonitor = cpuMonitor;
         _memoryMonitor = memoryMonitor;
         _diskMonitor = diskMonitor;
@@ -185,7 +191,10 @@ public class SystemInfoService : ISystemInfoService
                     break;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "LoadOsInfoAsync failed");
+            }
 
             return info;
         });

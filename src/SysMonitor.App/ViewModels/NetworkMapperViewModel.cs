@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
@@ -8,6 +10,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class NetworkMapperViewModel : ObservableObject, IDisposable
 {
+    private readonly ILogger _logger;
+
     private readonly INetworkMapper _networkMapper;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _scanCts;
@@ -53,8 +57,10 @@ public partial class NetworkMapperViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _hasActionStatus;
     [ObservableProperty] private string _actionStatusColor = "#4CAF50";
 
-    public NetworkMapperViewModel(INetworkMapper networkMapper)
+    public NetworkMapperViewModel(INetworkMapper networkMapper,
+        ILogger<NetworkMapperViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<NetworkMapperViewModel>.Instance;
         _networkMapper = networkMapper;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
@@ -277,7 +283,10 @@ public partial class NetworkMapperViewModel : ObservableObject, IDisposable
             Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
             ShowAction("Copied to clipboard", true);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CopyToClipboard failed");
+        }
     }
 
     private void UpdateStats()

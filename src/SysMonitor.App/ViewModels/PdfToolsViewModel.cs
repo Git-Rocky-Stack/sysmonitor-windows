@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
@@ -10,6 +12,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class PdfToolsViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
+
     private readonly IPdfTools _pdfTools;
     private readonly DispatcherQueue _dispatcherQueue;
 
@@ -87,8 +91,10 @@ public partial class PdfToolsViewModel : ObservableObject
     [ObservableProperty] private string _resultPath = "";
     [ObservableProperty] private string _resultMessage = "";
 
-    public PdfToolsViewModel(IPdfTools pdfTools)
+    public PdfToolsViewModel(IPdfTools pdfTools,
+        ILogger<PdfToolsViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<PdfToolsViewModel>.Instance;
         _pdfTools = pdfTools;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
@@ -114,7 +120,10 @@ public partial class PdfToolsViewModel : ObservableObject
                 await LoadPdfInfoAsync(file.Path);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "SelectPdfAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -146,7 +155,10 @@ public partial class PdfToolsViewModel : ObservableObject
                 IsMergeMode = true;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "SelectMultiplePdfsAsync failed");
+        }
     }
 
     private async Task LoadPdfInfoAsync(string path)
@@ -429,7 +441,10 @@ public partial class PdfToolsViewModel : ObservableObject
                 System.Diagnostics.Process.Start("explorer.exe", path);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "OpenOutputFolder failed");
+        }
     }
 
     [RelayCommand]

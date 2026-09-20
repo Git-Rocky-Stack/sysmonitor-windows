@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Backup;
@@ -10,6 +12,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class BackupViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
+
     private readonly IBackupService _backupService;
     private DispatcherQueue? _dispatcherQueue;
     private CancellationTokenSource? _backupCts;
@@ -96,8 +100,10 @@ public partial class BackupViewModel : ObservableObject
     [ObservableProperty] private bool _hasStatusMessage;
     [ObservableProperty] private string _statusColor = "#4CAF50";
 
-    public BackupViewModel(IBackupService backupService)
+    public BackupViewModel(IBackupService backupService,
+        ILogger<BackupViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<BackupViewModel>.Instance;
         _backupService = backupService;
 
         // Add default exclusion paths
@@ -151,7 +157,10 @@ public partial class BackupViewModel : ObservableObject
                 }
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadAvailableDrivesAsync failed");
+        }
     }
 
     private async Task LoadBackupHistoryAsync()
@@ -169,7 +178,10 @@ public partial class BackupViewModel : ObservableObject
                 HasBackups = BackupHistory.Count > 0;
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadBackupHistoryAsync failed");
+        }
     }
 
     private async Task LoadRestorePointsAsync()
@@ -187,7 +199,10 @@ public partial class BackupViewModel : ObservableObject
                 HasRestorePoints = RestorePoints.Count > 0;
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadRestorePointsAsync failed");
+        }
     }
 
     private async Task LoadSchedulesAsync()
@@ -205,7 +220,10 @@ public partial class BackupViewModel : ObservableObject
                 HasSchedules = Schedules.Count > 0;
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadSchedulesAsync failed");
+        }
     }
 
     // ==================== WIZARD NAVIGATION ====================
@@ -294,7 +312,10 @@ public partial class BackupViewModel : ObservableObject
                 await UpdateEstimatedSizeAsync();
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "AddSourceFolderAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -322,7 +343,10 @@ public partial class BackupViewModel : ObservableObject
             }
             await UpdateEstimatedSizeAsync();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "AddSourceFilesAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -414,7 +438,10 @@ public partial class BackupViewModel : ObservableObject
                 SelectedDrive = await _backupService.GetDriveSpaceAsync(folder.Path);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "BrowseDestinationAsync failed");
+        }
     }
 
     // ==================== BACKUP EXECUTION ====================

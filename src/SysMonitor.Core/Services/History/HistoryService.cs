@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using SysMonitor.Core.Data;
 using SysMonitor.Core.Data.Entities;
@@ -12,6 +14,8 @@ namespace SysMonitor.Core.Services.History;
 /// </summary>
 public class HistoryService : IHistoryService
 {
+    private readonly ILogger _logger;
+
     private readonly ICpuMonitor _cpuMonitor;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
@@ -35,8 +39,10 @@ public class HistoryService : IHistoryService
         ITemperatureMonitor temperatureMonitor,
         INetworkMonitor networkMonitor,
         IBatteryMonitor batteryMonitor,
-        IDiskMonitor diskMonitor)
+        IDiskMonitor diskMonitor,
+        ILogger<HistoryService>? logger = null)
     {
+        _logger = logger ?? NullLogger<HistoryService>.Instance;
         _cpuMonitor = cpuMonitor;
         _memoryMonitor = memoryMonitor;
         _temperatureMonitor = temperatureMonitor;
@@ -97,7 +103,10 @@ public class HistoryService : IHistoryService
             var cpuUsage = await _cpuMonitor.GetUsagePercentAsync();
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Cpu, Value = cpuUsage });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Memory Usage
         try
@@ -105,7 +114,10 @@ public class HistoryService : IHistoryService
             var memInfo = await _memoryMonitor.GetMemoryInfoAsync();
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Memory, Value = memInfo.UsagePercent });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // CPU Temperature
         try
@@ -116,7 +128,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.CpuTemp, Value = cpuTemp });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // GPU Temperature
         try
@@ -127,7 +142,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.GpuTemp, Value = gpuTemp });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Network
         try
@@ -136,7 +154,10 @@ public class HistoryService : IHistoryService
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.NetworkUp, Value = netInfo.UploadSpeedBps });
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.NetworkDown, Value = netInfo.DownloadSpeedBps });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Battery
         try
@@ -147,7 +168,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Battery, Value = batteryInfo.ChargePercent });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Disk (primary drive)
         try
@@ -159,7 +183,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Disk, Value = primaryDisk.UsagePercent });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Queue for batch write
         foreach (var metric in metrics)

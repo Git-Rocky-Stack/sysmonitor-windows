@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.Management;
 using System.Net.NetworkInformation;
@@ -9,6 +11,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class WiFiAnalyzer : IWiFiAnalyzer
 {
+    private readonly ILogger _logger;
+
+    public WiFiAnalyzer(ILogger<WiFiAnalyzer>? logger = null)
+    {
+        _logger = logger ?? NullLogger<WiFiAnalyzer>.Instance;
+    }
+
     private bool? _isAvailableCache;
     private DateTime _lastAvailabilityCheck = DateTime.MinValue;
 
@@ -220,7 +229,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ScanNetworksAsync failed");
+        }
 
         // Sort by connected first, then by signal strength
         return networks
@@ -229,7 +241,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             .ToList();
     }
 
-    private static async Task<List<WiFiNetworkInfo>> GetNetworksFromPowerShellAsync(CancellationToken cancellationToken)
+    private async Task<List<WiFiNetworkInfo>> GetNetworksFromPowerShellAsync(CancellationToken cancellationToken)
     {
         var networks = new List<WiFiNetworkInfo>();
 
@@ -259,7 +271,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetNetworksFromPowerShellAsync failed");
+        }
 
         return networks;
     }
@@ -415,12 +430,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 // This may not work on all systems, so we wrap in try-catch
             }, cancellationToken);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetNetworksFromWmiAsync failed");
+        }
 
         return networks;
     }
 
-    private static string? GetWirelessInterfaceName()
+    private string? GetWirelessInterfaceName()
     {
         try
         {
@@ -469,7 +487,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetWirelessInterfaceName failed");
+        }
 
         return null;
     }
@@ -528,7 +549,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetConnectedNetworkAsFallback failed");
+        }
 
         // Fallback: Use NetworkInterface to build basic info
         try
@@ -561,7 +585,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 };
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetConnectedNetworkAsFallback failed");
+        }
 
         return null;
     }
@@ -614,7 +641,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     };
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetAdapterInfoAsync failed");
+            }
 
             return null;
         });
@@ -675,7 +705,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetCurrentConnectionAsync failed");
+            }
 
             // Fallback: Build connection info from NetworkInterface
             try
@@ -712,13 +745,16 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     };
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetCurrentConnectionAsync failed");
+            }
 
             return null;
         });
     }
 
-    private static WiFiConnectionInfo? GetConnectionInfoFromCmd()
+    private WiFiConnectionInfo? GetConnectionInfoFromCmd()
     {
         try
         {
@@ -776,7 +812,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         return null;
     }
 
-    private static WiFiConnectionInfo? GetConnectionInfoFromPowerShell()
+    private WiFiConnectionInfo? GetConnectionInfoFromPowerShell()
     {
         try
         {
@@ -803,12 +839,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
 
             return ParseWiFiInterfaceOutput(output);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetConnectionInfoFromPowerShell failed");
+        }
 
         return null;
     }
 
-    private static WiFiConnectionInfo? ParseWiFiInterfaceOutput(string output)
+    private WiFiConnectionInfo? ParseWiFiInterfaceOutput(string output)
     {
         if (string.IsNullOrWhiteSpace(output))
         {
@@ -990,7 +1029,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         };
     }
 
-    private static string? GetConnectedSsidFromProfile()
+    private string? GetConnectedSsidFromProfile()
     {
         try
         {
@@ -1028,7 +1067,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetConnectedSsidFromProfile failed");
+        }
 
         return null;
     }
@@ -1297,7 +1339,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         };
     }
 
-    private static WiFiConnectionInfo? ParseConnectionInfo(string output)
+    private WiFiConnectionInfo? ParseConnectionInfo(string output)
     {
         if (string.IsNullOrWhiteSpace(output))
             return null;
@@ -1473,7 +1515,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         };
     }
 
-    private static string GetCurrentIpAddress()
+    private string GetCurrentIpAddress()
     {
         try
         {
@@ -1493,7 +1535,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetCurrentIpAddress failed");
+        }
 
         return "";
     }

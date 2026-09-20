@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
@@ -12,6 +14,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfEditor : IPdfEditor
 {
+    private readonly ILogger _logger;
+
+    public PdfEditor(ILogger<PdfEditor>? logger = null)
+    {
+        _logger = logger ?? NullLogger<PdfEditor>.Instance;
+    }
+
     public async Task<PdfEditorDocument?> OpenPdfAsync(string filePath)
     {
         return await Task.Run(() =>
@@ -225,7 +234,7 @@ public class PdfEditor : IPdfEditor
     /// A picture of a page with its redactions painted onto the pixels. What was under them is not in the
     /// result at all - which is the point, since a box drawn over text leaves the text in the file.
     /// </summary>
-    private static byte[] RedactedPagePng(string filePath, int sourcePageNumber, IEnumerable<RedactionAnnotation> redactions)
+    private byte[] RedactedPagePng(string filePath, int sourcePageNumber, IEnumerable<RedactionAnnotation> redactions)
     {
         var zoom = RedactedPageDpi / 96.0;
         var png = PdfPageRasterizer.RenderPngAsync(filePath, sourcePageNumber, zoom).GetAwaiter().GetResult();
@@ -771,7 +780,10 @@ public class PdfEditor : IPdfEditor
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetPagesInfoAsync failed");
+            }
 
             return pages;
         });
@@ -959,7 +971,10 @@ public class PdfEditor : IPdfEditor
                 gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
                 return;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "DrawSignature failed");
+            }
         }
 
         // Draw handwritten signature from strokes
@@ -1082,7 +1097,7 @@ public class PdfEditor : IPdfEditor
         gfx.DrawLine(pen, endX, endY, x2, y2);
     }
 
-    private static XColor ParseColor(string colorString)
+    private XColor ParseColor(string colorString)
     {
         try
         {
@@ -1106,7 +1121,10 @@ public class PdfEditor : IPdfEditor
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ParseColor failed");
+        }
 
         return XColors.Red;
     }
@@ -1496,7 +1514,10 @@ public class PdfEditor : IPdfEditor
                 gfx.DrawImage(image, 0, 0, watermark.Width, watermark.Height);
                 gfx.Restore(state);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "DrawWatermark failed");
+            }
         }
         else
         {

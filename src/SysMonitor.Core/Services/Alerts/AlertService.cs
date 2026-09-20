@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Services.Monitors;
 using System.Collections.Concurrent;
@@ -11,6 +13,8 @@ namespace SysMonitor.Core.Services.Alerts;
 /// </summary>
 public class AlertService : IAlertService
 {
+    private readonly ILogger _logger;
+
     private readonly ICpuMonitor _cpuMonitor;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
@@ -29,8 +33,10 @@ public class AlertService : IAlertService
         ICpuMonitor cpuMonitor,
         IMemoryMonitor memoryMonitor,
         ITemperatureMonitor temperatureMonitor,
-        IBatteryMonitor batteryMonitor)
+        IBatteryMonitor batteryMonitor,
+        ILogger<AlertService>? logger = null)
     {
+        _logger = logger ?? NullLogger<AlertService>.Instance;
         _cpuMonitor = cpuMonitor;
         _memoryMonitor = memoryMonitor;
         _temperatureMonitor = temperatureMonitor;
@@ -89,7 +95,10 @@ public class AlertService : IAlertService
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CheckTemperatureAlertsAsync failed");
+        }
 
         // GPU Temperature
         try
@@ -121,7 +130,10 @@ public class AlertService : IAlertService
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CheckTemperatureAlertsAsync failed");
+        }
     }
 
     private async Task CheckMemoryAlertsAsync()
@@ -143,7 +155,10 @@ public class AlertService : IAlertService
                 ClearAlertCondition(AlertType.MemoryHigh);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CheckMemoryAlertsAsync failed");
+        }
     }
 
     private async Task CheckBatteryAlertsAsync()
@@ -179,7 +194,10 @@ public class AlertService : IAlertService
                 ClearAlertCondition(AlertType.BatteryCritical);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CheckBatteryAlertsAsync failed");
+        }
     }
 
     private void TriggerAlert(AlertType type, AlertSeverity severity, string title, string message, double value, double threshold)
@@ -253,7 +271,10 @@ public class AlertService : IAlertService
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetSetting failed");
+        }
         return defaultValue;
     }
 }

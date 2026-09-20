@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using SysMonitor.Core.Models;
@@ -22,6 +24,13 @@ namespace SysMonitor.Core.Services.Monitors;
 /// </summary>
 public class ProcessMonitor : IProcessMonitor
 {
+    private readonly ILogger _logger;
+
+    public ProcessMonitor(ILogger<ProcessMonitor>? logger = null)
+    {
+        _logger = logger ?? NullLogger<ProcessMonitor>.Instance;
+    }
+
     /// <summary>
     /// Cache entry with timestamp for LRU eviction and CPU time for usage calculation.
     /// </summary>
@@ -108,7 +117,7 @@ public class ProcessMonitor : IProcessMonitor
                 // CRITICAL: Dispose all Process objects to prevent handle leaks
                 foreach (var proc in allProcesses)
                 {
-                    try { proc.Dispose(); } catch { }
+                    try { proc.Dispose(); } catch (Exception ex) { _logger.LogDebug(ex, "GetAllProcessesAsync failed"); }
                 }
             }
 
@@ -246,13 +255,19 @@ public class ProcessMonitor : IProcessMonitor
                     info.StartTime = proc.StartTime;
                     info.TotalProcessorTime = proc.TotalProcessorTime;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetProcessAsync failed");
+                }
 
                 try
                 {
                     info.FilePath = proc.MainModule?.FileName ?? string.Empty;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetProcessAsync failed");
+                }
 
                 return info;
             }

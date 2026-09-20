@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -9,6 +11,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfTools : IPdfTools
 {
+    private readonly ILogger _logger;
+
+    public PdfTools(ILogger<PdfTools>? logger = null)
+    {
+        _logger = logger ?? NullLogger<PdfTools>.Instance;
+    }
+
     public async Task<PdfOperationResult> MergePdfsAsync(IEnumerable<string> inputPaths, string outputPath)
     {
         return await Task.Run(() =>
@@ -427,7 +436,7 @@ public class PdfTools : IPdfTools
         });
     }
 
-    private static PdfOperationResult ConvertWordToPdf(string inputPath, string outputPath)
+    private PdfOperationResult ConvertWordToPdf(string inputPath, string outputPath)
     {
         dynamic? wordApp = null;
         dynamic? doc = null;
@@ -492,11 +501,14 @@ public class PdfTools : IPdfTools
                 if (doc != null) Marshal.ReleaseComObject(doc);
                 if (wordApp != null) Marshal.ReleaseComObject(wordApp);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ConvertWordToPdf failed");
+            }
         }
     }
 
-    private static PdfOperationResult ConvertExcelToPdf(string inputPath, string outputPath)
+    private PdfOperationResult ConvertExcelToPdf(string inputPath, string outputPath)
     {
         dynamic? excelApp = null;
         dynamic? workbook = null;
@@ -561,11 +573,14 @@ public class PdfTools : IPdfTools
                 if (workbook != null) Marshal.ReleaseComObject(workbook);
                 if (excelApp != null) Marshal.ReleaseComObject(excelApp);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ConvertExcelToPdf failed");
+            }
         }
     }
 
-    private static PdfOperationResult ConvertPowerPointToPdf(string inputPath, string outputPath)
+    private PdfOperationResult ConvertPowerPointToPdf(string inputPath, string outputPath)
     {
         dynamic? pptApp = null;
         dynamic? presentation = null;
@@ -630,7 +645,10 @@ public class PdfTools : IPdfTools
                 if (presentation != null) Marshal.ReleaseComObject(presentation);
                 if (pptApp != null) Marshal.ReleaseComObject(pptApp);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ConvertPowerPointToPdf failed");
+            }
         }
     }
 
@@ -852,7 +870,7 @@ public class PdfTools : IPdfTools
         }
     }
 
-    private static string ExtractPdfVersion(string filePath)
+    private string ExtractPdfVersion(string filePath)
     {
         try
         {
@@ -866,7 +884,10 @@ public class PdfTools : IPdfTools
                 return headerStr.Substring(5, 3).Trim();
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ExtractPdfVersion failed");
+        }
         return "";
     }
 

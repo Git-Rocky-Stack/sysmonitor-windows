@@ -98,6 +98,7 @@ public static class ElevatedRegistryHelper
 
             if (!completed)
             {
+                // Best effort: the elevated helper has already timed out, and it may have exited by now.
                 try { process.Kill(); } catch { }
                 return new ElevatedCleanResult
                 {
@@ -165,6 +166,7 @@ public static class ElevatedRegistryHelper
         finally
         {
             // Cleanup temp files
+            // Best effort: temporary files in the user's temp folder, which Windows clears anyway.
             try { if (File.Exists(inputFile)) File.Delete(inputFile); } catch { }
             try { if (File.Exists(outputFile)) File.Delete(outputFile); } catch { }
         }
@@ -376,6 +378,7 @@ public static class ElevatedRegistryHelper
 
             foreach (var valueName in key.GetValueNames())
             {
+                // Best effort: the value is reported as not removed either way, by the re-scan that follows.
                 try { key.DeleteValue(valueName, throwOnMissingValue: false); } catch { }
             }
             return true;

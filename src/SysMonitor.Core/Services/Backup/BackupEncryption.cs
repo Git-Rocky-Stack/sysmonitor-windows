@@ -239,6 +239,8 @@ public static class BackupEncryption
 
     private static void TryDelete(string path)
     {
+        // Best effort: this only removes a partial file this class just wrote, and the caller is already
+        // on its way out with the real failure.
         try { File.Delete(path); } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 

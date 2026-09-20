@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32.TaskScheduler;
 using System.Runtime.Versioning;
 using SystemTask = System.Threading.Tasks.Task;
@@ -49,6 +51,8 @@ public enum CleaningSchedule
 [SupportedOSPlatform("windows")]
 public class ScheduledCleaningService : IScheduledCleaningService
 {
+    private readonly ILogger _logger;
+
     private const string TaskName = "SysMonitor Scheduled Cleaning";
     private const string TaskFolder = "SysMonitor";
     private const string ConfigFileName = "scheduled_cleaning.json";
@@ -56,8 +60,9 @@ public class ScheduledCleaningService : IScheduledCleaningService
     private readonly string _configPath;
     private readonly string _executablePath;
 
-    public ScheduledCleaningService()
+    public ScheduledCleaningService(ILogger<ScheduledCleaningService>? logger = null)
     {
+        _logger = logger ?? NullLogger<ScheduledCleaningService>.Instance;
         var appDataPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "SysMonitor");
@@ -82,7 +87,10 @@ public class ScheduledCleaningService : IScheduledCleaningService
                            ?? new ScheduledCleaningConfig();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetConfigurationAsync failed");
+            }
 
             return new ScheduledCleaningConfig();
         });

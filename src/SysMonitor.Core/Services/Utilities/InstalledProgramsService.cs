@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using System.Diagnostics;
 using Windows.Management.Deployment;
@@ -6,6 +8,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class InstalledProgramsService : IInstalledProgramsService
 {
+    private readonly ILogger _logger;
+
+    public InstalledProgramsService(ILogger<InstalledProgramsService>? logger = null)
+    {
+        _logger = logger ?? NullLogger<InstalledProgramsService>.Instance;
+    }
+
     // Known system/bloatware package name patterns
     private static readonly string[] SystemAppPatterns =
     {
@@ -64,7 +73,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                     EnumerateRegistryPrograms(hklmKey, programs, seenNames, $"HKLM\\{path}");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetWin32Programs failed");
+            }
 
             try
             {
@@ -75,7 +87,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                     EnumerateRegistryPrograms(hkcuKey, programs, seenNames, $"HKCU\\{path}");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetWin32Programs failed");
+            }
         }
     }
 
@@ -136,7 +151,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                         {
                             program.InstallDate = new DateTime(year, month, day);
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            _logger.LogDebug(ex, "EnumerateRegistryPrograms failed");
+                        }
                     }
                 }
 
@@ -157,7 +175,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                 seenNames.Add(displayName);
                 programs.Add(program);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "EnumerateRegistryPrograms failed");
+            }
         }
     }
 
@@ -220,15 +241,24 @@ public class InstalledProgramsService : IInstalledProgramsService
                             program.EstimatedSizeBytes = GetDirectorySize(package.InstalledPath);
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "GetStoreApps failed");
+                    }
 
                     seenNames.Add(displayName);
                     programs.Add(program);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetStoreApps failed");
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetStoreApps failed");
+        }
     }
 
     public async Task<UninstallResult> UninstallProgramAsync(InstalledProgram program)
@@ -826,7 +856,10 @@ try {{
         {
             Process.Start("explorer.exe", program.InstallLocation);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "OpenInstallLocation failed");
+        }
     }
 
     private static bool IsKnownSystemApp(string packageName)
@@ -843,17 +876,20 @@ try {{
             name.Contains("Runtime", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static long GetDirectorySize(string path)
+    private long GetDirectorySize(string path)
     {
         long size = 0;
         try
         {
             foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
             {
-                try { size += new FileInfo(file).Length; } catch { }
+                try { size += new FileInfo(file).Length; } catch (Exception ex) { _logger.LogDebug(ex, "GetDirectorySize failed"); }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetDirectorySize failed");
+        }
         return size;
     }
 }

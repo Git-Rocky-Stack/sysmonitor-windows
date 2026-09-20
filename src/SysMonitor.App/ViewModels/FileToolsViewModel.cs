@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
@@ -9,6 +11,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class FileToolsViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
+
     private readonly IFileConverter _fileConverter;
     private readonly DispatcherQueue _dispatcherQueue;
 
@@ -43,8 +47,10 @@ public partial class FileToolsViewModel : ObservableObject
 
     public CompressionFormat[] CompressionFormats { get; } = Enum.GetValues<CompressionFormat>();
 
-    public FileToolsViewModel(IFileConverter fileConverter)
+    public FileToolsViewModel(IFileConverter fileConverter,
+        ILogger<FileToolsViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<FileToolsViewModel>.Instance;
         _fileConverter = fileConverter;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
@@ -76,7 +82,10 @@ public partial class FileToolsViewModel : ObservableObject
                 HasResult = false;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "SelectFileAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -108,7 +117,10 @@ public partial class FileToolsViewModel : ObservableObject
                 HasResult = false;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "SelectFolderAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -239,7 +251,10 @@ public partial class FileToolsViewModel : ObservableObject
                 System.Diagnostics.Process.Start("explorer.exe", path);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "OpenOutputFolder failed");
+        }
     }
 
     [RelayCommand]

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualBasic.FileIO;
 using System.Collections.Concurrent;
 
@@ -14,6 +16,13 @@ namespace SysMonitor.Core.Services.Utilities;
 /// </summary>
 public class LargeFileFinder : ILargeFileFinder
 {
+    private readonly ILogger _logger;
+
+    public LargeFileFinder(ILogger<LargeFileFinder>? logger = null)
+    {
+        _logger = logger ?? NullLogger<LargeFileFinder>.Instance;
+    }
+
     // Parallelism configuration
     private static readonly int MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount / 2);
 
@@ -70,7 +79,10 @@ public class LargeFileFinder : ILargeFileFinder
                     topLevelDirs.AddRange(Directory.GetDirectories(path)
                         .Where(d => !ShouldSkipDirectory(d)));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanAsync failed");
+                }
 
                 var parallelOptions = new ParallelOptions
                 {
@@ -116,13 +128,22 @@ public class LargeFileFinder : ILargeFileFinder
                                 });
                             }
                         }
-                        catch (UnauthorizedAccessException) { }
-                        catch (IOException) { }
+                        catch (UnauthorizedAccessException ex)
+                        {
+                            _logger.LogDebug(ex, "ScanAsync failed");
+                        }
+                        catch (IOException ex)
+                        {
+                            _logger.LogDebug(ex, "ScanAsync failed");
+                        }
                     }
                 });
             }
             catch (OperationCanceledException) { throw; }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanAsync failed");
+            }
         }, cancellationToken);
 
         return largeFiles.OrderByDescending(f => f.SizeBytes).ToList();

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Security.Cryptography;
@@ -13,6 +15,8 @@ namespace SysMonitor.Core.Services.Backup;
 /// </summary>
 public class BackupService : IBackupService
 {
+    private readonly ILogger _logger;
+
     private readonly string _backupMetadataFolder;
     private readonly string _manifestFileName = "backup_manifest.json";
     private bool _isBackupInProgress;
@@ -20,16 +24,17 @@ public class BackupService : IBackupService
 
     public bool IsBackupInProgress => _isBackupInProgress;
 
-    public BackupService()
+    public BackupService(ILogger<BackupService>? logger = null)
         : this(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "Backups"))
+            "SysMonitor", "Backups"), logger)
     {
     }
 
     /// <summary>Uses <paramref name="metadataFolder"/> for the backup catalog (tests use an isolated folder).</summary>
-    internal BackupService(string metadataFolder)
+    internal BackupService(string metadataFolder, ILogger<BackupService>? logger = null)
     {
+        _logger = logger ?? NullLogger<BackupService>.Instance;
         _backupMetadataFolder = metadataFolder;
         Directory.CreateDirectory(_backupMetadataFolder);
     }
@@ -580,7 +585,10 @@ public class BackupService : IBackupService
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetRestorePointsAsync failed");
+            }
 
             return restorePoints;
         });
@@ -783,11 +791,11 @@ public class BackupService : IBackupService
             // Temporary plaintext copies are removed whether the restore succeeded or not.
             if (tempExtractPath != null && Directory.Exists(tempExtractPath))
             {
-                try { Directory.Delete(tempExtractPath, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                try { Directory.Delete(tempExtractPath, true); } catch (IOException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); }
             }
             if (decryptedArchivePath != null)
             {
-                try { File.Delete(decryptedArchivePath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                try { File.Delete(decryptedArchivePath); } catch (IOException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); }
             }
         }
     }
@@ -818,10 +826,16 @@ public class BackupService : IBackupService
                             }
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "GetBackupHistoryAsync failed");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetBackupHistoryAsync failed");
+            }
 
             return archives.OrderByDescending(a => a.CreatedDate).ToList();
         });
@@ -954,7 +968,7 @@ public class BackupService : IBackupService
         {
             if (decryptedArchivePath != null)
             {
-                try { File.Delete(decryptedArchivePath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                try { File.Delete(decryptedArchivePath); } catch (IOException ex) { _logger.LogDebug(ex, "VerifyBackupAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "VerifyBackupAsync failed"); }
             }
         }
 
@@ -1072,7 +1086,10 @@ public class BackupService : IBackupService
                         schedules.Add(schedule);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetScheduledBackupsAsync failed");
+                }
             }
 
             return schedules;
@@ -1422,7 +1439,7 @@ public class BackupService : IBackupService
         {
             if (decrypted != null)
             {
-                try { File.Delete(decrypted); } catch { }
+                try { File.Delete(decrypted); } catch (Exception ex) { _logger.LogDebug(ex, "ReadManifestOnlyAsync failed"); }
             }
         }
     }

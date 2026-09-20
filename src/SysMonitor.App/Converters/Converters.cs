@@ -248,7 +248,10 @@ public class StringToBrushConverter : IValueConverter
                     return new SolidColorBrush(Windows.UI.Color.FromArgb(255, r, g, b));
                 }
             }
-            catch { }
+            catch
+            {
+                // Best effort: a colour that will not parse falls through to the default below.
+            }
         }
         return new SolidColorBrush(Windows.UI.Color.FromArgb(255, 76, 175, 80)); // Default green
     }
@@ -277,7 +280,10 @@ public class StringToColorConverter : IValueConverter
                     return Windows.UI.Color.FromArgb(255, r, g, b);
                 }
             }
-            catch { }
+            catch
+            {
+                // Best effort: a colour that will not parse falls through to the default below.
+            }
         }
         return Windows.UI.Color.FromArgb(255, 128, 128, 128); // Default gray
     }

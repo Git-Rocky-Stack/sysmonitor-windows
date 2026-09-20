@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.Management;
 using System.Runtime.Versioning;
@@ -40,6 +42,13 @@ public class RestorePointResult
 [SupportedOSPlatform("windows")]
 public class SystemRestoreService : ISystemRestoreService
 {
+    private readonly ILogger _logger;
+
+    public SystemRestoreService(ILogger<SystemRestoreService>? logger = null)
+    {
+        _logger = logger ?? NullLogger<SystemRestoreService>.Instance;
+    }
+
     public async Task<RestorePointResult> CreateRestorePointAsync(string description,
         RestorePointType type = RestorePointType.ApplicationInstall)
     {
@@ -126,11 +135,17 @@ public class SystemRestoreService : ISystemRestoreService
                             Type = (RestorePointType)Convert.ToInt32(queryObj["RestorePointType"] ?? 0)
                         });
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "GetRestorePointsAsync failed");
+                    }
                 }
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetRestorePointsAsync failed");
+        }
 
         return restorePoints;
     }

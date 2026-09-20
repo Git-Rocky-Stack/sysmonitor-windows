@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Security.Cryptography;
 
 namespace SysMonitor.Core.Services.Utilities;
@@ -8,6 +10,13 @@ namespace SysMonitor.Core.Services.Utilities;
 /// </summary>
 public class DuplicateFinder : IDuplicateFinder
 {
+    private readonly ILogger _logger;
+
+    public DuplicateFinder(ILogger<DuplicateFinder>? logger = null)
+    {
+        _logger = logger ?? NullLogger<DuplicateFinder>.Instance;
+    }
+
     public async Task<List<DuplicateGroup>> ScanAsync(string path, IProgress<ScanProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -51,8 +60,14 @@ public class DuplicateFinder : IDuplicateFinder
                             });
                         }
                     }
-                    catch (UnauthorizedAccessException) { }
-                    catch (IOException) { }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        _logger.LogDebug(ex, "ScanAsync failed");
+                    }
+                    catch (IOException ex)
+                    {
+                        _logger.LogDebug(ex, "ScanAsync failed");
+                    }
                 }
 
                 // Phase 2: Only check files with matching sizes
@@ -115,8 +130,14 @@ public class DuplicateFinder : IDuplicateFinder
                                 });
                             }
                         }
-                        catch (UnauthorizedAccessException) { }
-                        catch (IOException) { }
+                        catch (UnauthorizedAccessException ex)
+                        {
+                            _logger.LogDebug(ex, "ScanAsync failed");
+                        }
+                        catch (IOException ex)
+                        {
+                            _logger.LogDebug(ex, "ScanAsync failed");
+                        }
                     }
 
                     // Only add groups with actual duplicates
@@ -138,7 +159,10 @@ public class DuplicateFinder : IDuplicateFinder
                 }
             }
             catch (OperationCanceledException) { throw; }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanAsync failed");
+            }
         }, cancellationToken);
 
         // Sort by wasted space descending
@@ -165,7 +189,10 @@ public class DuplicateFinder : IDuplicateFinder
                         bytesFreed += size;
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "DeleteDuplicatesAsync failed");
+                }
             }
         });
 

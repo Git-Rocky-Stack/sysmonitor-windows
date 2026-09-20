@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -7,6 +9,13 @@ namespace SysMonitor.Core.Services.Monitors;
 
 public class NetworkMonitor : INetworkMonitor
 {
+    private readonly ILogger _logger;
+
+    public NetworkMonitor(ILogger<NetworkMonitor>? logger = null)
+    {
+        _logger = logger ?? NullLogger<NetworkMonitor>.Instance;
+    }
+
     private readonly NetworkSpeedSampler _sampler = new();
 
     public async Task<NetworkInfo> GetNetworkInfoAsync()
@@ -63,7 +72,7 @@ public class NetworkMonitor : INetworkMonitor
         });
     }
 
-    private static List<NetworkAdapter> GetAllAdapters()
+    private List<NetworkAdapter> GetAllAdapters()
     {
         var adapters = new List<NetworkAdapter>();
         foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
@@ -86,7 +95,10 @@ public class NetworkMonitor : INetworkMonitor
                     Speed = ni.Speed
                 });
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetAllAdapters failed");
+            }
         }
         return adapters;
     }

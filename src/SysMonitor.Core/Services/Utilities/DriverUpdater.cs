@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.Management;
 using System.Text;
@@ -6,6 +8,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class DriverUpdater : IDriverUpdater
 {
+    private readonly ILogger _logger;
+
+    public DriverUpdater(ILogger<DriverUpdater>? logger = null)
+    {
+        _logger = logger ?? NullLogger<DriverUpdater>.Instance;
+    }
+
     // Device class icons mapping
     private static readonly Dictionary<string, string> DeviceClassIcons = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -196,10 +205,16 @@ public class DriverUpdater : IDriverUpdater
                         IsCritical = CriticalClasses.Contains(deviceClass)
                     });
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetProblemDevices failed");
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetProblemDevices failed");
+        }
 
         return problems;
     }

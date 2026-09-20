@@ -1,9 +1,18 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using LibreHardwareMonitor.Hardware;
 
 namespace SysMonitor.Core.Services.Monitors;
 
 public class TemperatureMonitor : ITemperatureMonitor
 {
+    private readonly ILogger _logger;
+
+    public TemperatureMonitor(ILogger<TemperatureMonitor>? logger = null)
+    {
+        _logger = logger ?? NullLogger<TemperatureMonitor>.Instance;
+    }
+
     private Computer? _computer;
     private bool _isInitialized;
     private bool _initializationFailed;
@@ -62,7 +71,10 @@ public class TemperatureMonitor : ITemperatureMonitor
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetAllTemperaturesAsync failed");
+            }
             return temps;
         });
     }
@@ -132,7 +144,10 @@ public class TemperatureMonitor : ITemperatureMonitor
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetAllFanSpeedsAsync failed");
+            }
             return fans;
         });
     }
@@ -170,7 +185,10 @@ public class TemperatureMonitor : ITemperatureMonitor
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetAllPowerReadingsAsync failed");
+            }
             return power;
         });
     }
@@ -215,7 +233,10 @@ public class TemperatureMonitor : ITemperatureMonitor
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetAllLoadSensorsAsync failed");
+            }
             return loads;
         });
     }
@@ -250,7 +271,10 @@ public class TemperatureMonitor : ITemperatureMonitor
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetFrameRateAsync failed");
+            }
 
             return FrameRate.NoSensor;
         });

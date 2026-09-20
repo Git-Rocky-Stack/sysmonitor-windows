@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using SysMonitor.Core.Models;
 
@@ -5,19 +7,22 @@ namespace SysMonitor.Core.Services.Cleaners;
 
 public class RegistryCleaner : IRegistryCleaner
 {
+    private readonly ILogger _logger;
+
     private readonly List<(string KeyPath, string Description, RegistryIssueCategory Category)> _scanLocations;
     private readonly string _backupFolder;
 
-    public RegistryCleaner()
+    public RegistryCleaner(ILogger<RegistryCleaner>? logger = null)
         : this(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "RegistryBackups"))
+            "SysMonitor", "RegistryBackups"), logger)
     {
     }
 
     /// <summary>Uses <paramref name="backupFolder"/> for registry backups (tests use an isolated folder).</summary>
-    internal RegistryCleaner(string backupFolder)
+    internal RegistryCleaner(string backupFolder, ILogger<RegistryCleaner>? logger = null)
     {
+        _logger = logger ?? NullLogger<RegistryCleaner>.Instance;
         _backupFolder = backupFolder;
         _scanLocations = new List<(string, string, RegistryIssueCategory)>
         {
@@ -59,7 +64,10 @@ public class RegistryCleaner : IRegistryCleaner
                 {
                     ScanRegistryKey(Registry.CurrentUser, keyPath, description, category, issues);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanAsync failed");
+                }
             }
 
             // Scan HKEY_LOCAL_MACHINE (may require admin for some keys)
@@ -69,7 +77,10 @@ public class RegistryCleaner : IRegistryCleaner
                 {
                     ScanRegistryKey(Registry.LocalMachine, keyPath, description, category, issues);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanAsync failed");
+                }
             }
 
             // Scan for invalid file associations
@@ -240,7 +251,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidFilePaths failed");
+            }
         }
     }
 
@@ -289,7 +303,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForOrphanedSoftware failed");
+            }
         }
     }
 
@@ -333,7 +350,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidShellExtensions failed");
+            }
         }
     }
 
@@ -360,7 +380,10 @@ public class RegistryCleaner : IRegistryCleaner
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidStartupEntries failed");
+            }
         }
     }
 
@@ -387,7 +410,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanMUICache failed");
+            }
         }
     }
 
@@ -422,7 +448,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidCOM failed");
+            }
         }
     }
 
@@ -459,7 +488,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidTypeLib failed");
+            }
         }
     }
 
@@ -495,10 +527,16 @@ public class RegistryCleaner : IRegistryCleaner
                         });
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanFileAssociations failed");
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ScanFileAssociations failed");
+        }
     }
 
     private void ScanRecentDocs(List<RegistryIssue> issues)
@@ -523,7 +561,10 @@ public class RegistryCleaner : IRegistryCleaner
                 });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ScanRecentDocs failed");
+        }
     }
 
     private static string ExtractFilePath(string value)
@@ -675,7 +716,10 @@ public class RegistryCleaner : IRegistryCleaner
                                         deletedCount++;
                                     }
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogDebug(ex, "CleanAsync failed");
+                                }
                             }
                             operationSucceeded = deletedCount > 0;
                             if (deletedCount < valueNames.Count)
@@ -863,7 +907,7 @@ public class RegistryCleaner : IRegistryCleaner
         }
         finally
         {
-            try { Directory.Delete(tempFolder, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            try { Directory.Delete(tempFolder, true); } catch (IOException ex) { _logger.LogDebug(ex, "BackupRegistryAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "BackupRegistryAsync failed"); }
         }
     }
 

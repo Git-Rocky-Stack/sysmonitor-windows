@@ -448,7 +448,7 @@ public class DriveWiper : IDriveWiper
                 // Delete temp file after each pass
                 if (File.Exists(tempPath))
                 {
-                    try { File.Delete(tempPath); } catch { }
+                    try { File.Delete(tempPath); } catch (Exception ex) { _logger.LogDebug(ex, "WipeFreeSpaceAsync failed"); }
                 }
             }
 

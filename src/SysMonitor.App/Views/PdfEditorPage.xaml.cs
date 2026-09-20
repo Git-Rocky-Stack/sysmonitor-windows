@@ -1455,7 +1455,10 @@ public sealed partial class PdfEditorPage : Page
                 return Color.FromArgb(255, r, g, b);
             }
         }
-        catch { }
+        catch
+        {
+            // Best effort: a colour that will not parse falls through to the default below.
+        }
 
         return Colors.Red;
     }

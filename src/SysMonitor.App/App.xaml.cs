@@ -483,7 +483,11 @@ public partial class App : Application
                 $"SysMonitor_Crash_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
             File.WriteAllText(crashPath, $"Crash at {DateTime.Now}\n\nMessage: {e.Message}\n\nException:\n{e.Exception}");
         }
-        catch { }
+        catch
+        {
+            // Best effort: the app is already going down with the failure this was trying to record,
+            // and there is nowhere left to say that the record itself could not be written.
+        }
 
         e.Handled = false; // Let it crash but we've logged it
     }
