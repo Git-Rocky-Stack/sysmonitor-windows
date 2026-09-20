@@ -185,10 +185,21 @@ public class StartupOptimizer : IStartupOptimizer
                 return StartupChangeResult.Failed($"\"{item.Name}\" is no longer listed under {location.Name}.");
             }
 
-            // An entry an older version of this app moved aside comes back to where Windows looks for it.
+            // An entry an older version of this app moved aside comes back to where Windows looks for it -
+            // unless Windows already has one under that name. Then the live entry is the one that counts:
+            // the program will have rewritten it, often with a new path after an update, and putting the
+            // old copy back would point Windows at a version that is no longer installed. The stale copy is
+            // dropped instead.
             if (enable && setAside)
             {
-                MoveValue(location.Root, location.SetAsidePath, location.RunPath, item.Name);
+                if (inRun)
+                {
+                    DeleteValue(location.Root, location.SetAsidePath, item.Name);
+                }
+                else
+                {
+                    MoveValue(location.Root, location.SetAsidePath, location.RunPath, item.Name);
+                }
             }
 
             if (location.ApprovedPath != null)

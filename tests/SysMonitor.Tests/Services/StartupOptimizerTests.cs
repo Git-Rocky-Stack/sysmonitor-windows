@@ -124,6 +124,25 @@ public class StartupOptimizerTests : IDisposable
     }
 
     [Fact]
+    public async Task AStaleSetAsideCopyIsNeverPutBackOverTheEntryWindowsIsUsing()
+    {
+        // The state this machine is in: the app set an entry aside, the program was updated and wrote itself
+        // back into Run with a new path, and the copy left behind still points at the version that is gone.
+        SetValue(SetAside, "Updater", @"C:\App\1.0\updater.exe");
+        GivenRunEntry("Updater", @"C:\App\2.0\updater.exe");
+
+        var item = await SingleItemAsync("Updater");
+        item.Command.Should().Be(@"C:\App\2.0\updater.exe", "the live entry is the one listed");
+
+        var result = await _optimizer.EnableStartupItemAsync(item);
+
+        result.Success.Should().BeTrue();
+        ValueIn(Run, "Updater").Should().Be(@"C:\App\2.0\updater.exe",
+            "putting the old path back would point Windows at a version that is no longer installed");
+        ValueIn(SetAside, "Updater").Should().BeNull("the stale copy is dropped rather than kept for next time");
+    }
+
+    [Fact]
     public async Task ARunOnceItemIsSetAsideWhereItCanBeFoundAgain()
     {
         SetValue(RunOnce, "Once", @"C:\App\once.exe");
