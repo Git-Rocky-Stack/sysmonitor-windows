@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
@@ -22,6 +22,21 @@ public partial class GameModeViewModel : ObservableObject
     [ObservableProperty] private string _statusMessage = "Game Mode is OFF";
     [ObservableProperty] private string _statusColor = "#FFFFFF";
     [ObservableProperty] private int _lastProcessesKilled;
+
+    /// <summary>
+    /// Whether to ask background apps to close instead of only lowering them out of the way. Off by default:
+    /// closing them can lose unsaved work, so it is the user's choice and is confirmed before it happens.
+    /// </summary>
+    [ObservableProperty] private bool _closeBackgroundApps;
+
+    /// <summary>What the number beside it counted: apps lowered out of the way, or apps closed.</summary>
+    [ObservableProperty] private string _lastSessionAppsLabel = "Apps Lowered";
+
+    /// <summary>
+    /// Asked before background apps are closed, with the apps that are actually running. The page puts this
+    /// on screen; Game Mode does not close anything unless it comes back true.
+    /// </summary>
+    public Func<IReadOnlyList<string>, Task<bool>>? ConfirmCloseBackgroundApps { get; set; }
     [ObservableProperty] private string _lastMemoryFreed = "0 MB";
     [ObservableProperty] private bool _hasLastSession;
 
@@ -196,21 +211,35 @@ public partial class GameModeViewModel : ObservableObject
             else
             {
                 // Enable Game Mode
+                var action = CloseBackgroundApps ? BackgroundAppAction.AskToClose : BackgroundAppAction.LowerPriority;
+
+                if (action == BackgroundAppAction.AskToClose && !await ConfirmClosingAsync())
+                {
+                    StatusMessage = "Game Mode not started.";
+                    return;
+                }
+
                 StatusMessage = "Activating Game Mode...";
-                var result = await _gameModeService.EnableAsync();
+                var result = await _gameModeService.EnableAsync(new GameModeOptions { BackgroundApps = action });
 
                 if (result.Success)
                 {
                     // Update last session info
-                    LastProcessesKilled = result.ProcessesKilled;
+                    LastProcessesKilled = result.ProcessesAffected;
                     LastMemoryFreed = FormatBytes(result.MemoryFreedBytes);
                     HasLastSession = true;
+                    LastSessionAppsLabel = action == BackgroundAppAction.AskToClose ? "Apps Closed" : "Apps Lowered";
 
-                    // Update killed apps list
                     KilledApps.Clear();
-                    foreach (var app in result.KilledProcessNames)
+                    foreach (var app in result.BackgroundAppsAffected)
                     {
                         KilledApps.Add(FormatAppName(app));
+                    }
+
+                    if (result.BackgroundAppsStillRunning.Count > 0)
+                    {
+                        // Left running on purpose: they had something to keep.
+                        StatusMessage = $"Game Mode on. Still open: {string.Join(", ", result.BackgroundAppsStillRunning.Select(FormatAppName))}";
                     }
                 }
                 else
@@ -226,6 +255,25 @@ public partial class GameModeViewModel : ObservableObject
         {
             IsActivating = false;
         }
+    }
+
+    /// <summary>
+    /// Asks before closing anything, listing the apps that are actually running. Without an answer from the
+    /// page, nothing is closed.
+    /// </summary>
+    private async Task<bool> ConfirmClosingAsync()
+    {
+        var running = _gameModeService.GetTargetProcesses()
+            .Where(name => System.Diagnostics.Process.GetProcessesByName(name).Length > 0)
+            .Select(FormatAppName)
+            .ToList();
+
+        if (running.Count == 0)
+        {
+            return true;
+        }
+
+        return ConfirmCloseBackgroundApps != null && await ConfirmCloseBackgroundApps(running);
     }
 
     #endregion

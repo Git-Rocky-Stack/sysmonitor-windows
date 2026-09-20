@@ -331,7 +331,49 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _mainWindow = new MainWindow();
+
+        // A Game Mode session that never ended - a crash, or the machine going down with it on - leaves
+        // Windows on the High Performance plan. This puts the plan back.
+        _mainWindow.Closed += OnMainWindowClosed;
+        _ = RestorePowerPlanAfterCrashAsync();
+
         _mainWindow.Activate();
+    }
+
+    private static async Task RestorePowerPlanAfterCrashAsync()
+    {
+        try
+        {
+            var restored = await GetService<IGameModeService>().RestorePowerPlanAfterCrashAsync();
+            if (restored != null)
+            {
+                Log.Information("Power plan {Plan} restored after a Game Mode session that did not end properly", restored);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not check whether a power plan was left changed by Game Mode");
+        }
+    }
+
+    /// <summary>
+    /// Puts back what Game Mode changed - process priorities and the power plan - and flushes the log, rather
+    /// than leaving the machine on High Performance after the window closes.
+    /// </summary>
+    private static void OnMainWindowClosed(object sender, WindowEventArgs args)
+    {
+        try
+        {
+            _host?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Shutting the services down did not finish cleanly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 
     public static T GetService<T>() where T : class

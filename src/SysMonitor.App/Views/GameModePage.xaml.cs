@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Monitors;
@@ -18,6 +18,9 @@ public sealed partial class GameModePage : Page
         _temperatureMonitor = App.GetService<ITemperatureMonitor>();
 
         InitializeComponent();
+
+        // Closing someone's browser or Teams is their decision, taken each time, with the apps named.
+        ViewModel.ConfirmCloseBackgroundApps = AskBeforeClosingAppsAsync;
 
         // Set up timer for real-time monitoring updates
         _updateTimer = new DispatcherTimer
@@ -41,6 +44,27 @@ public sealed partial class GameModePage : Page
     private void GameModePage_Unloaded(object sender, RoutedEventArgs e)
     {
         _updateTimer.Stop();
+    }
+
+    /// <summary>
+    /// Asks whether Game Mode may close the background apps that are running, naming them. Anything not
+    /// confirmed stays open.
+    /// </summary>
+    private async Task<bool> AskBeforeClosingAppsAsync(IReadOnlyList<string> apps)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Close these apps?",
+            Content = "Game Mode will ask these to close, which can lose unsaved work:\n\n" +
+                      string.Join(", ", apps) +
+                      "\n\nAnything that will not close is left running. Clear the checkbox to lower them out of the way instead.",
+            PrimaryButtonText = "Close them",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
 
     private async void UpdateTimer_Tick(object? sender, object e)

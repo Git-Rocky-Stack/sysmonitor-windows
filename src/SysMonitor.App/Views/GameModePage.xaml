@@ -480,8 +480,12 @@
                                     <FontIcon Glyph="&#xE71A;" FontSize="16" Foreground="{StaticResource ErrorBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Closes Background Apps" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Browsers, Discord, Spotify, etc." Style="{StaticResource CardSubtitleStyle}"/>
+                                    <TextBlock Text="Lowers Background Apps" Style="{StaticResource CardTitleStyle}"/>
+                                    <TextBlock Text="Browsers, Discord, Spotify and the rest keep running, below the game"
+                                               Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap"/>
+                                    <CheckBox Content="Ask them to close instead (may lose unsaved work)"
+                                              IsChecked="{x:Bind ViewModel.CloseBackgroundApps, Mode=TwoWay}"
+                                              Margin="0,8,0,0"/>
                                 </StackPanel>
                             </StackPanel>
 
@@ -528,7 +532,7 @@
                                     <TextBlock Text="{x:Bind ViewModel.LastProcessesKilled, Mode=OneWay}"
                                                FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
                                                Foreground="{StaticResource PrimaryBrush}"/>
-                                    <TextBlock Text="Processes Killed" FontSize="12"
+                                    <TextBlock Text="{x:Bind ViewModel.LastSessionAppsLabel, Mode=OneWay}" FontSize="12"
                                                Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
 

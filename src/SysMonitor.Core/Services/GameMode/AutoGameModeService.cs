@@ -329,7 +329,12 @@ public class AutoGameModeService : IAutoGameModeService
 
                     if (_autoModeEnabled && !_gameModeService.IsEnabled)
                     {
-                        await _gameModeService.EnableAsync();
+                        // Nobody asked for this one: a game starting is not permission to close anything,
+                        // so auto mode only moves background apps out of the way.
+                        await _gameModeService.EnableAsync(new GameModeOptions
+                        {
+                            BackgroundApps = BackgroundAppAction.LowerPriority,
+                        });
                         _gameModeWasAutoEnabled = true;
                         wasAutoEnabled = true;
                     }

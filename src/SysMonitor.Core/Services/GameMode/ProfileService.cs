@@ -76,7 +76,7 @@ public class ProfileService : IProfileService
             IsDefault = true,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = true,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge", "opera", "brave", "vivaldi",
                 "discord", "slack", "teams", "skype", "zoom", "telegram", "whatsapp",
@@ -94,7 +94,7 @@ public class ProfileService : IProfileService
             IsDefault = true,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = true,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge", "opera", "brave", "vivaldi",
                 "onedrive", "dropbox", "googledrivesync",
@@ -110,7 +110,7 @@ public class ProfileService : IProfileService
             IsDefault = true,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = false,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge", "opera", "brave", "vivaldi",
                 "slack", "teams", "skype", "zoom", "telegram",
@@ -160,7 +160,7 @@ public class ProfileService : IProfileService
             IsDefault = false,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = true,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge"
             }
@@ -174,10 +174,17 @@ public class ProfileService : IProfileService
 
         _activeProfile = profile;
 
-        // Enable Game Mode with profile settings
+        // Enable Game Mode with this profile's settings, not the built-in ones. "Streaming Mode" keeps
+        // Discord and OBS because its own list does; it used to close them along with everything else.
         if (!_gameModeService.IsEnabled)
         {
-            await _gameModeService.EnableAsync();
+            await _gameModeService.EnableAsync(new GameModeOptions
+            {
+                BackgroundApps = profile.BackgroundAppAction,
+                BackgroundAppNames = profile.BackgroundApps,
+                OptimizeMemory = profile.OptimizeMemory,
+                PowerPlanGuid = profile.PowerPlanGuid,
+            });
         }
 
         ProfileChanged?.Invoke(this, profile);
