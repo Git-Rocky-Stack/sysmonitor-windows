@@ -152,8 +152,9 @@ public class AlertService : IAlertService
 
         try
         {
+            // A machine with no battery reports none at all, which is not the same as a battery at 0%.
             var batteryInfo = await _batteryMonitor.GetBatteryInfoAsync();
-            if (!batteryInfo.IsPresent || batteryInfo.IsCharging) return;
+            if (batteryInfo is null || !batteryInfo.IsPresent || batteryInfo.IsCharging) return;
 
             var criticalThreshold = GetSetting("BatteryCriticalWarning", 10);
             var lowThreshold = GetSetting("BatteryLowWarning", 20);

@@ -322,13 +322,13 @@ public class PdfEditorHonestyTests : IDisposable
     private static string WordText(string path)
     {
         using var word = WordprocessingDocument.Open(path, false);
-        return word.MainDocumentPart?.Document.Body?.InnerText ?? "";
+        return word.MainDocumentPart?.Document?.Body?.InnerText ?? "";
     }
 
     private static int PageBreaks(string path)
     {
         using var word = WordprocessingDocument.Open(path, false);
-        return word.MainDocumentPart?.Document.Body
+        return word.MainDocumentPart?.Document?.Body
             ?.Descendants<DocumentFormat.OpenXml.Wordprocessing.Break>()
             .Count(b => b.Type?.Value == DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page) ?? 0;
     }
