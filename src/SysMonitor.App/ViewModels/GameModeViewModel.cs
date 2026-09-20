@@ -7,13 +7,15 @@ using System.Collections.ObjectModel;
 
 namespace SysMonitor.App.ViewModels;
 
-public partial class GameModeViewModel : ObservableObject
+public partial class GameModeViewModel : ObservableObject, IDisposable
 {
     private readonly IGameModeService _gameModeService;
     private readonly IAutoGameModeService _autoGameModeService;
     private readonly IProfileService _profileService;
     private readonly IFpsOverlayService _fpsOverlayService;
     private readonly DispatcherQueue _dispatcherQueue;
+    private bool _isInitialized;
+    private bool _isDisposed;
 
     // Main Game Mode
     [ObservableProperty] private bool _isGameModeEnabled;
@@ -74,12 +76,30 @@ public partial class GameModeViewModel : ObservableObject
         _autoGameModeService.GameDetected += OnGameDetected;
         _autoGameModeService.GameClosed += OnGameClosed;
         _profileService.ProfileChanged += OnProfileChanged;
-
-        // Initialize
-        InitializeAsync();
     }
 
-    private async void InitializeAsync()
+    /// <summary>
+    /// Fills the page in. The page awaits this when it is navigated to: run from the constructor as an
+    /// async void, a failure reading the profiles had nowhere to go but the top of a thread nobody was
+    /// watching, which ends the process.
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+        if (_isInitialized || _isDisposed) return;
+        _isInitialized = true;
+
+        try
+        {
+            await LoadInitialStateAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Game Mode could not read its settings: {ex.Message}";
+            StatusColor = "#F44336";
+        }
+    }
+
+    private async Task LoadInitialStateAsync()
     {
         // Load target apps list
         foreach (var app in _gameModeService.GetTargetProcesses())
@@ -110,6 +130,25 @@ public partial class GameModeViewModel : ObservableObject
         OverlayVisible = _fpsOverlayService.IsVisible;
         UpdateOverlayButtonText();
         UpdateOverlayPositionText();
+    }
+
+    /// <summary>
+    /// Lets go of the services. They are singletons that outlive the page, so a view model still subscribed
+    /// to them is a view model they keep alive - and with it the page, its bindings and everything those
+    /// hold. The page disposes this when it navigates away, as the other pages do.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _gameModeService.GameModeChanged -= OnGameModeChanged;
+        _autoGameModeService.GameDetected -= OnGameDetected;
+        _autoGameModeService.GameClosed -= OnGameClosed;
+        _profileService.ProfileChanged -= OnProfileChanged;
+
+        // It points back at the page, and a page being navigated away from cannot show a dialog.
+        ConfirmCloseBackgroundApps = null;
     }
 
     #region Event Handlers

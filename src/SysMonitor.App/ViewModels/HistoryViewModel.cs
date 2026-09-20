@@ -12,7 +12,7 @@ using System.Collections.ObjectModel;
 
 namespace SysMonitor.App.ViewModels;
 
-public partial class HistoryViewModel : ObservableObject, IDisposable
+public partial class HistoryViewModel : ObservableObject
 {
     private readonly IHistoryService _historyService;
     private readonly DispatcherQueue _dispatcherQueue;
@@ -218,10 +218,5 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
         }
 
         TemperatureSeries = series;
-    }
-
-    public void Dispose()
-    {
-        GC.SuppressFinalize(this);
     }
 }

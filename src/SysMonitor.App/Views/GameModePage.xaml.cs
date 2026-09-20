@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Monitors;
 
@@ -31,6 +32,19 @@ public sealed partial class GameModePage : Page
 
         Loaded += GameModePage_Loaded;
         Unloaded += GameModePage_Unloaded;
+    }
+
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        await ViewModel.InitializeAsync();
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        _updateTimer.Stop();
+        ViewModel.Dispose();
     }
 
     private async void GameModePage_Loaded(object sender, RoutedEventArgs e)
