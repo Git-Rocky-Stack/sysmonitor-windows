@@ -14,6 +14,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfEditor : IPdfEditor
 {
+    static PdfEditor()
+    {
+        // PDFsharp only resolves a couple of families on its own, so anything else - Consolas, Segoe UI, a
+        // font the user picked - has to be found on this machine first.
+        WindowsFontResolver.Install();
+    }
+
     private readonly ILogger _logger;
 
     public PdfEditor(ILogger<PdfEditor>? logger = null)

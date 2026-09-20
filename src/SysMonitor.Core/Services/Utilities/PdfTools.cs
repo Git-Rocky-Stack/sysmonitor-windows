@@ -11,6 +11,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfTools : IPdfTools
 {
+    static PdfTools()
+    {
+        // PDFsharp only resolves a couple of families on its own, so anything else - Consolas, Segoe UI, a
+        // font the user picked - has to be found on this machine first.
+        WindowsFontResolver.Install();
+    }
+
     private readonly ILogger _logger;
 
     public PdfTools(ILogger<PdfTools>? logger = null)
