@@ -50,14 +50,14 @@ INSTALLATION NOTES
 LICENSE
 -------
 STX1 System Monitor is free and open source software, released under the
-MIT License. You are free to use it for anything including commercial
+MIT License. In plain terms: use it for anything including commercial
 purposes, read and modify the source, and redistribute it -- provided you
-keep the copyright and permission notice with any copy you pass on. It
-comes with no warranty of any kind.
+keep the copyright and permission notice with any copy you pass on.
 
-The full text is shown on this installer's license page, and is installed
+This summary is not the licence. The binding text, including the warranty
+disclaimer, is shown on this installer's licence page and is installed
 alongside the application as LICENSE.txt. Bundled open-source libraries
-keep their own licenses, listed in THIRD-PARTY-NOTICES.txt in the same
+keep their own licences, listed in THIRD-PARTY-NOTICES.txt in the same
 folder.
 
 Source code: https://github.com/Git-Rocky-Stack/sysmonitor-windows

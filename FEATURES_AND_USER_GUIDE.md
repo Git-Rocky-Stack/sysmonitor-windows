@@ -628,8 +628,7 @@ There are no application-wide keyboard shortcuts. The app registers no
 page or cancels a running operation — use the navigation menu and the on-screen
 buttons.
 
-The only keys the app handles are the five below, all of them in the **PDF Editor**
-(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1360-1372`):
+All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1360-1372`):
 
 | Key | Where | Action |
 |-----|-------|--------|
@@ -693,10 +692,12 @@ For issues and feature requests:
 
 Copyright (c) 2024-2026 Strategia / Rocky Stack.
 
-Released under the [MIT License](LICENSE) — you are free to use, copy, modify, merge,
+Released under the [MIT License](LICENSE). In plain terms: use, copy, modify, merge,
 publish, distribute, sublicense and sell copies of this software, provided the
-copyright notice and permission notice are included. The software is provided "as is",
-without warranty of any kind.
+copyright notice and permission notice go with it (`LICENSE:5-13`).
+
+This summary is not the licence. The binding grant and the warranty disclaimer are
+`LICENSE:5-13` and `LICENSE:15-21`.
 
 Third-party components bundled with the application keep their own licences, listed in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

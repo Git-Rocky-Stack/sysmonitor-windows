@@ -207,12 +207,15 @@ Readings stay on your machine. See [PRIVACY_POLICY.md](PRIVACY_POLICY.md).
 
 **MIT** — see [LICENSE](LICENSE).
 
-You may use, copy, modify, merge, publish, distribute, sublicense and sell copies of
-this software, for any purpose including commercial, provided the copyright notice and
-the permission notice are included. It is provided "as is", without warranty of any
-kind. There is no separate end-user agreement: the MIT text at
-[LICENSE](LICENSE) is what the installer presents
-(`installer/SysMonitorSetup.iss:39`) and it is the whole of the terms.
+In plain terms: use, copy, modify, merge, publish, distribute, sublicense and sell
+copies of this software, for any purpose including commercial, provided the copyright
+notice and the permission notice go with it (`LICENSE:5-13`). The warranty disclaimer
+is `LICENSE:15-21`. This paragraph is a summary; the file is the licence.
+
+There is no separate end-user agreement. The MIT text at [LICENSE](LICENSE) is what the
+installer presents (`installer/SysMonitorSetup.iss:39`), what installs beside the
+application as `LICENSE.txt` (`installer/SysMonitorSetup.iss:87`), and the whole of the
+terms.
 
 Third-party components bundled into the self-contained build keep their own licences —
 notably **LibreHardwareMonitor under MPL-2.0** and **Serilog under Apache-2.0**. These
