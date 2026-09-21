@@ -5,8 +5,7 @@ All notable changes to STX.1 System Monitor are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Entries name the file that implements them, so any claim here can be checked
-against the code.
+Each entry describes a behaviour change and cites the file it lives in.
 
 ---
 
@@ -235,7 +234,8 @@ which is what makes this a major version.
 
 ### Added
 - Advanced Game Mode.
-- Auto Game Mode — detects a running game and enables optimisation.
+- Auto Game Mode — detects a running game and enables optimisation
+  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:266`).
 - Performance Profiles — save and switch between optimisation presets.
 - Game overlay showing live temperatures, load and power, repositionable by dragging.
 - Fan speed and power draw monitoring widgets.

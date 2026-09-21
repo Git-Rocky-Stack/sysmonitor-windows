@@ -19,8 +19,10 @@ feature was removed rather than reworded. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Features
 
-Thirty-four entries in the navigation menu, grouped the way the app groups them.
-Settings, Donate and the built-in User's Guide sit below these.
+Thirty-four entries in the navigation menu, grouped the way the app groups them
+(`src/SysMonitor.App/MainWindow.xaml:73-252`). Settings
+(`MainWindow.xaml:238`), Donate (`:243`) and the built-in User's Guide (`:248`)
+sit below the groups listed here.
 
 ### Monitoring
 | Page | What it does |

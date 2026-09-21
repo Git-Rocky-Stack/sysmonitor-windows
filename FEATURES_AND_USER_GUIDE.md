@@ -628,8 +628,8 @@ There are no application-wide keyboard shortcuts. The app registers no
 page or cancels a running operation — use the navigation menu and the on-screen
 buttons.
 
-The only keys the app handles are in the **PDF Editor**
-(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs`):
+The only keys the app handles are the five below, all of them in the **PDF Editor**
+(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1360-1372`):
 
 | Key | Where | Action |
 |-----|-------|--------|
