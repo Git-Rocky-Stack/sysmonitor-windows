@@ -2,7 +2,7 @@
 
 **Strategic. Excellence. Engineered.**
 
-Version 1.0.0 | Windows Desktop Application | Built with WinUI 3 & .NET 8
+Version 3.0.0 | Windows Desktop Application | Built with WinUI 3 & .NET 8
 
 ---
 
@@ -41,11 +41,14 @@ STX.1 System Monitor is a comprehensive Windows system utility that provides rea
 
 ### System Requirements
 
-- **OS:** Windows 10 (version 1903+) or Windows 11
-- **Architecture:** x64, x86, or ARM64
-- **Runtime:** .NET 8.0 Desktop Runtime
+- **OS:** Windows 10 version 2004 (build 19041) or later, or Windows 11
+  (`src/SysMonitor.App/SysMonitor.App.csproj:5`, `src/SysMonitor.App/Package.appxmanifest:23`)
+- **Architecture:** x64. The projects also build for x86 and ARM64, but the released
+  installer is x64 only (`Build-Release.ps1:81-82`, `installer/SysMonitorSetup.iss:57`)
+- **Runtime:** none to install — the release is self-contained and carries the .NET 8 and
+  Windows App SDK runtimes with it (`src/SysMonitor.App/SysMonitor.App.csproj:12`)
 - **RAM:** 4 GB minimum (8 GB recommended)
-- **Disk Space:** 100 MB for installation
+- **Disk Space:** 300 MB for installation
 
 ### First Launch
 
@@ -473,9 +476,10 @@ Image processing and optimization:
 
 File compression and archiving:
 
-**Compression Formats:**
-- ZIP (most compatible)
-- TAR.GZ (Unix compatible)
+**Compression Formats** (`src/SysMonitor.Core/Services/Utilities/IUtilities.cs:95-99`)**:**
+- **ZIP** — a file or a whole folder (`FileConverter.cs:195-218`)
+- **GZip** (`.gz`) — a single file only. This is plain gzip, not a tar archive, so it
+  compresses one file rather than bundling several (`FileConverter.cs:221-226`)
 
 7z is not offered: the code behind it wrote a zip file with a different name.
 
@@ -619,14 +623,21 @@ Detailed system specifications:
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| Ctrl+D | Open Dashboard |
-| Ctrl+C | Open Cleaner |
-| Ctrl+S | Open Settings |
-| Ctrl+R | Refresh current page |
-| F5 | Refresh data |
-| Esc | Cancel current operation |
+There are no application-wide keyboard shortcuts. The app registers no
+`KeyboardAccelerator` anywhere, so there is no key that opens a page, refreshes a
+page or cancels a running operation — use the navigation menu and the on-screen
+buttons.
+
+The only keys the app handles are in the **PDF Editor**
+(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs`):
+
+| Key | Where | Action |
+|-----|-------|--------|
+| `Delete` | Editor canvas | Delete the selected annotation (`:65-69`) |
+| `Esc` | Editor canvas | Clear the current selection (`:70-74`) |
+| `Enter` | Search box | Run the annotation search (`:314-321`) |
+| `Enter` | Text annotation box | Commit the text annotation (`:1362-1366`) |
+| `Esc` | Text annotation box | Cancel the text annotation (`:1367-1371`) |
 
 ---
 
@@ -673,8 +684,7 @@ Detailed system specifications:
 ## Support
 
 For issues and feature requests:
-- GitHub: [Report Issues](https://github.com/strategia/sysmonitor-windows/issues)
-- Email: support@strategia.com
+- GitHub: [Report Issues](https://github.com/Git-Rocky-Stack/sysmonitor-windows/issues)
 
 ---
 

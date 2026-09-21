@@ -1,6 +1,6 @@
 ============================================================
               SYSMONITOR FOR WINDOWS
-                   Version 1.0.0
+                   Version 3.0.0
 ============================================================
 
 Thank you for choosing SysMonitor for Windows!
@@ -19,11 +19,13 @@ optimization tool that helps you:
 
 SYSTEM REQUIREMENTS:
 --------------------
-  * Windows 10 version 1903 (build 18362) or later
+  * Windows 10 version 2004 (build 19041) or later
   * Windows 11 (all versions supported)
   * 64-bit processor
-  * 100 MB free disk space
-  * Internet connection (for updates only)
+  * 300 MB free disk space
+
+NOTE: The app does not check for or download its own
+updates. New versions are published on GitHub.
 
 BEFORE INSTALLATION:
 --------------------

@@ -75,7 +75,7 @@ CUSTOMIZATION
 4. CHANGE PUBLISHER INFO:
    Edit these lines in SysMonitorSetup.iss:
    #define MyAppPublisher "Rocky Stack"
-   #define MyAppURL "https://github.com/rockystack"
+   #define MyAppURL "https://github.com/Git-Rocky-Stack/sysmonitor-windows"
 
 
 INSTALLER FEATURES

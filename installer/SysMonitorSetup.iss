@@ -13,7 +13,7 @@
 #define FullVersion GetFileVersion(AppExeFile)
 #define MyAppVersion Copy(FullVersion, 1, RPos(".", FullVersion) - 1)
 #define MyAppPublisher "Rocky Stack"
-#define MyAppURL "https://github.com/rockystack"
+#define MyAppURL "https://github.com/Git-Rocky-Stack/sysmonitor-windows"
 #define MyAppExeName "SysMonitor.App.exe"
 #define MyAppAssocName "System Monitor"
 #define MyAppAssocExt ".sysmon"

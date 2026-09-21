@@ -1,0 +1,285 @@
+# Changelog
+
+All notable changes to STX.1 System Monitor are documented here.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Entries name the file that implements them, so any claim here can be checked
+against the code.
+
+---
+
+## [3.0.0] - 2026-09-21
+
+A correctness release. Every item below is a behaviour that did not match what the
+app told the user it was doing. Three features were removed rather than documented,
+which is what makes this a major version.
+
+### Security
+
+- **Elevated operations no longer take instructions from a file any process can rewrite.**
+  Registry cleaning wrote the selected fixes to `%LocalAppData%\SysMonitor\Temp` and
+  relaunched elevated against that path; a second process could replace the file while the
+  UAC prompt was open, and the user's own "Yes" then carried it out as administrator against
+  any key in any hive. Store-app uninstall had the same shape via a generated `.ps1`.
+  (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs`,
+  `src/SysMonitor.Core/Services/Utilities/InstalledProgramsService.cs`)
+- **Signing material removed from the repository.** A signing PFX and its hard-coded password
+  were published here. Signing now selects a certificate by thumbprint from the Windows
+  certificate store and refuses the two retired thumbprints.
+  (`signing/SigningCommon.ps1`, `Build-Release.ps1`)
+- **PDF redaction removes what is under the box.** "Redact" drew a black rectangle and
+  imported the page content unchanged, so the text beneath stayed in the file and could be
+  selected, copied or extracted with any tool. A redacted page is now rasterised at 200 dpi
+  with the boxes painted into the pixels.
+  (`src/SysMonitor.Core/Services/Utilities/PdfEditor.cs`)
+- **Drive Wiper never follows links and stays inside the selection.** Directory wipes
+  enumerated with `AllDirectories`, which follows junctions and symlinks, so files outside
+  the chosen folder were overwritten and deleted. A file symbolic link also caused the
+  link's target to be truncated while the wipe reported success.
+  (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs`)
+- **Restoring a backup decides where files go, not the archive.** Restore used the path
+  recorded inside the backup, so an edited backup could write chosen content anywhere the
+  user could write, including the Startup folder. Destinations are now planned up front and
+  confined to the folders the backup was taken from, and refused entries are reported rather
+  than silently skipped. (`src/SysMonitor.Core/Services/Backup/BackupService.cs`)
+- **Encrypted backups are authenticated and restorable.** Every backup made with "Encrypt
+  Backup" was previously unrestorable, because no decryption code existed. The format is now
+  PBKDF2 (600,000 iterations), AES-256-CBC, encrypt-then-MAC with HMAC-SHA256 verified before
+  any plaintext is written. The legacy format is still readable.
+  (`src/SysMonitor.Core/Services/Backup/BackupEncryption.cs`)
+- **No vulnerable packages remain in the dependency tree.** Four High-severity advisories
+  arrived transitively through EntityFrameworkCore.Sqlite and DocumentFormat.OpenXml; both
+  were raised and the affected transitive packages with them.
+  (`src/SysMonitor.Core/SysMonitor.Core.csproj`)
+
+### Removed
+
+- **RAM Cache.** It was a folder on disk plus a `TEMP` variable set inside this one process
+  that no other program could see, and its own code switched itself off on the next start.
+  Doing it for real needs a RAM-disk driver. The card, toggle, usage bar and Clear Cache
+  button are gone from Game Mode.
+- **7z compression.** The code behind it wrote a ZIP and changed the extension, so a user
+  asking for 7z received a ZIP named `.7z`.
+- **"Auto-Optimize Memory" setting.** Nothing read it. The related threshold is now described
+  as what it actually drives: a memory alert.
+- **Performance page frame-rate card.** It displayed a hard-coded 60 that nothing set, beside
+  memory and GC figures that are measured.
+- **Dead code with no callers:** `ExtractTextAsync` (returned annotation text under a name
+  promising page text), `LazyServiceWrapper<T>`, `MemoryOptimizer.ClearStandbyListAsync`,
+  `BytesToImageConverter`, and `UiThreadUtilization`.
+
+### Fixed
+
+- **Uninstalling actually uninstalls.** An `UninstallString` beginning `MsiExec.exe` was cut
+  exactly seven characters in, handing msiexec `.exe /X{...}` — it showed its usage dialog and
+  removed nothing, and after 60 seconds the app read an exit code from a process still running.
+  The command is now parsed into program and arguments, the wait is five minutes, and exit
+  codes are reported in words, including 3010/1641 (restart needed) and 1605/1614 (no longer
+  installed), which are not failures.
+  (`src/SysMonitor.Core/Services/Utilities/InstalledProgramsService.cs`)
+- **Startup items turn off the way Windows turns them off.** "Enable" logged a line and changed
+  nothing, every item was listed as enabled regardless of its real state, and "Disable" moved
+  the value into a private key nothing read again — so disabling from inside the app was one-way
+  and Task Manager knew nothing about it. Entries now use `Explorer\StartupApproved`, the same
+  mechanism Task Manager writes, so all three views agree and every change is reversible.
+  (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs`)
+- **A stale set-aside startup entry no longer overwrites the live one.** Enabling an item
+  restored whatever copy an older version of this app had set aside, even when Windows already
+  had a newer entry under that name, pointing Windows at a version no longer installed.
+  (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs`)
+- **Scheduled cleaning cleans.** The scheduled task ran the app with `--scheduled-clean` and
+  switches nothing in the app read, so at every scheduled time Windows opened the full UI as
+  administrator and cleaned nothing. The run is now headless, writes its outcome to the log,
+  notifies unless the schedule asked for silence, and returns an exit code so Task Scheduler
+  history shows a failed run as failed.
+  (`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs`, `src/SysMonitor.App/App.xaml.cs`)
+- **Network speed is read from the adapter carrying the traffic.** The monitor picked whichever
+  adapter claimed the fastest link, which on any machine with WSL, Hyper-V or Docker is a
+  virtual switch claiming 10 Gb/s and carrying nothing — so the dashboard showed 0 B/s with the
+  wrong adapter name beside it, and history recorded those zeros. Selection now follows the
+  routed interface, then a real default gateway, then link speed. The counters read are the
+  interface's own, so a machine on IPv6 no longer looks idle.
+  (`src/SysMonitor.Core/Services/Monitors/NetworkMonitor.cs`)
+- **Duplicate Finder no longer deletes files that are not duplicates.** Files over 10 MB were
+  judged by their first megabyte, last megabyte and length, which matches for every file a
+  program writes with the same header, footer and size. It also followed junctions, so one file
+  reached by two paths was reported as a pair and deleting "the duplicate" deleted the only copy.
+  Duplicates are now decided by SHA-256 of the whole file, one physical file is counted once, the
+  oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count
+  and size. (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs`,
+  `src/SysMonitor.Core/Services/Utilities/FileScanning.cs`)
+- **Large File Finder deletion also goes to the Recycle Bin** and no longer follows links.
+  (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs`)
+- **Drive Wiper writes the patterns it names.** The "Gutmann 35-pass" option filled its middle
+  passes with `(pass * 17) % 256`, which is not that method, and no pass was ever read back.
+  Passes now follow the 1996 paper's table, every wipe reads its last pass back and compares,
+  and a file that cannot be confirmed is reported as unconfirmed rather than counted as wiped.
+  When the selection sits on a solid-state drive the page says that overwriting cannot promise
+  the flash holding the old contents was written over.
+  (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs`)
+- **The PDF editor claims only what it does.** Search looked only at annotations while being
+  called `SearchText`, and its button toggled a panel no XAML bound. "Export to Word" wrote an
+  outline containing none of the document's text. Compression offered image recompression and
+  font subsetting it does not perform, and dropped title and author whether or not asked. Undo,
+  redo and page navigation cleared the canvas and never redrew annotations, so they were still
+  in the document, still saved, and invisible.
+  (`src/SysMonitor.Core/Services/Utilities/PdfEditor.cs`)
+- **PDF annotations land where they are drawn.** Canvas pixel coordinates were handed to
+  PDFsharp as points, so at 100% zoom every annotation saved 1.33x away from where it was drawn,
+  and further still on pages the file rotates or crops — a redaction box did not cover what the
+  user covered. Page identity was also confused between source page number and document
+  position, so annotations on a document whose pages had been moved or deleted were dropped
+  without a word. (`src/SysMonitor.Core/Services/Utilities/PdfEditor.cs`)
+- **Text-to-PDF conversion works at all.** PDFsharp 6 ships almost no fonts and does not consult
+  the system, so drawing in Consolas or Segoe UI threw on every machine, including machines with
+  those fonts installed. A font resolver now reads the fonts Windows lists under HKLM and HKCU;
+  a family that genuinely is not installed falls back to Arial rather than losing the document.
+  (`src/SysMonitor.Core/Services/Utilities/WindowsFontResolver.cs`)
+- **Registry cleaning takes a real backup, and restore works.** The backup wrote a `.reg` file
+  containing only comment lines — no keys, no values — for three fixed HKCU keys, while the
+  cleaner deletes HKCU and HKLM values and whole subkey trees. There was no restore code at all.
+  Every key a selected fix will modify is now exported with `reg.exe` before anything is cleaned,
+  and a failed export stops the clean.
+  (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs`)
+- **Backup verification checks the backup.** It hashed the live source files instead, so a
+  corrupted backup verified and a healthy one failed once the originals were edited. The "Verify
+  backup after completion" option recorded hashes and checked nothing, and the Verify command had
+  no button in the UI. (`src/SysMonitor.Core/Services/Backup/BackupService.cs`)
+- **Uncompressed backups no longer fail after copying every file.** With compression set to None
+  the backup is a folder, and reading its size as a file threw, so the job ended in failure with
+  no catalog entry after all the work was done.
+  (`src/SysMonitor.Core/Services/Backup/BackupService.cs`)
+- **The Game Mode page releases its view model.** It subscribed four handlers to app-lifetime
+  services and never unsubscribed, and the page never disposed it, so every visit to Game Mode
+  leaked a view model, a page and its bindings. Its state was also loaded by an `async void`
+  called from the constructor, where a failure surfaced on a thread with nobody waiting on it and
+  ended the process. (`src/SysMonitor.App/Views/GameModePage.xaml.cs`,
+  `src/SysMonitor.App/ViewModels/GameModeViewModel.cs`)
+- **The overlay reads frame rate where it actually is.** It searched Load sensors by name;
+  LibreHardwareMonitor exposes exactly one frame-rate sensor and it is a Factor sensor, so the
+  readout could not produce a number on any machine, including those able to measure it. A
+  reading, an idle sensor and no sensor at all are now three distinct answers, shown as the
+  number, `---`, and `NO FPS SENSOR`.
+  (`src/SysMonitor.Core/Services/Monitors/TemperatureMonitor.cs`)
+- **Three numbers that said the wrong thing.** "Freed 524288000 MB of memory" printed bytes with
+  MB after them. Battery health was computed from charge percentage, so a battery at 15% read as
+  "Critical"; health is now design capacity against full-charge capacity, and "Not reported" when
+  Windows does not supply them. Browser privacy scans reported findings "across 0 browsers"
+  because the count came from a collection nothing filled.
+  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs`,
+  `src/SysMonitor.Core/Services/Monitors/BatteryMonitor.cs`,
+  `src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs`)
+- **A caught failure now leaves a trace.** 210 empty catch clauses and 13 services with no logger
+  meant a cleaner, an uninstall, a backup or an alert could fail leaving nothing in
+  `%LocalAppData%\SysMonitor\Logs` and nothing on screen. Twenty-one classes gained a logger; six
+  catches remain deliberately empty and each carries a line saying why.
+- **A machine with no battery is not a battery at 0%.** The alert service dereferenced a null
+  battery reading, so every battery alert check threw and was swallowed by a bare catch.
+  (`src/SysMonitor.Core/Services/Alerts/AlertService.cs`)
+
+### Changed
+
+- **Game Mode moves background apps out of the way instead of killing them.** Enabling it asked
+  twenty-one apps — browsers, Teams, Discord, Slack, Zoom, OneDrive, Dropbox — to close and killed
+  whatever had not gone one second later; anything without a window was killed outright, and
+  unsaved work went with it. Background apps are now lowered below the game in the processor queue
+  and put back exactly where they were when Game Mode ends, when the app closes, or on the next
+  start after a crash. Asking apps to close is a separate opt-in checkbox that only ever asks,
+  with a ten-second wait, and auto mode never closes anything.
+  (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`,
+  `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs`)
+- **The power plan is always put back** — when Game Mode ends, when the app closes with it on, and
+  on the next start after a crash. The plan being replaced is written down before it is changed.
+  (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`)
+- **The memory optimizer describes what it does.** Trimming a working set moves pages to the
+  standby list, from which Windows can page them straight back; it does not free RAM, and the
+  wording no longer says it does. (`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs`)
+- **Crash reports are written to the log folder** rather than the user's Desktop, which makes the
+  privacy policy's "delete `%LocalAppData%\SysMonitor`" statement true. (`src/SysMonitor.App/App.xaml.cs`)
+- **The repository no longer tracks build output.** 560 MB of MSIX packages, publish DLLs, `.vs/`
+  state and local settings had been force-added past `.gitignore`. Tracked files went from 954 to
+  381 and tracked binaries to zero. This stops them accumulating from here on; the existing history
+  is unchanged. (`.gitignore`)
+- **The installer reads its version from the executable it packages.** It was written by hand and
+  said 1.0.0 for a 2.2.2 build, so Add/Remove Programs reported a release that never existed.
+  (`installer/SysMonitorSetup.iss`)
+
+### Documentation
+
+- The keyboard-shortcut table has been removed from the user guide. None of the six shortcuts it
+  listed were implemented — the app has no `KeyboardAccelerator` anywhere, and the only key
+  handling is Delete, Escape and Enter inside the PDF editor.
+- Compression formats are described as ZIP and GZip (`.gz`, single file). The previous "TAR.GZ"
+  claim had no tar step behind it.
+- The minimum OS is stated as Windows 10 version 2004 (build 19041) throughout, matching
+  `TargetPlatformMinVersion`. Documents previously said 1903 in three places and "build 22621+"
+  in two, the latter being the maximum version tested rather than the floor.
+- The shipped build is self-contained; the feature guide previously also required the user to
+  install the .NET 8 Desktop Runtime, which contradicted the installer text.
+- Support and repository links point at `github.com/Git-Rocky-Stack/sysmonitor-windows`. Three
+  different incorrect URLs were in circulation.
+- Version strings across the installer text, the feature guide and the in-app release notes now
+  track the shipped version.
+
+---
+
+## [2.2.2] - 2026-01-03
+
+### Changed
+- Publisher updated to Rocky Stack.
+- Privacy policy added.
+
+## [2.2.0]
+
+### Added
+- Advanced Game Mode.
+- Auto Game Mode — detects a running game and enables optimisation.
+- Performance Profiles — save and switch between optimisation presets.
+- Game overlay showing live temperatures, load and power, repositionable by dragging.
+- Fan speed and power draw monitoring widgets.
+- Hardware sensor diagnostic viewer.
+- Administrator rights requested at launch for full hardware sensor access.
+
+### Changed
+- Temperatures display in Fahrenheit.
+
+## [2.1.1]
+
+### Added
+- Game Mode — one-click gaming optimisation.
+- Session statistics covering background apps moved aside, apps that declined to close, and
+  memory trimmed.
+
+## [2.1.0]
+
+### Added
+- System tray mode with a live CPU/RAM tooltip and a right-click menu.
+- Real-time alerts with toast notifications.
+- History page with interactive LiveCharts2 graphs.
+- 30-day historical data storage in SQLite.
+
+## [2.0.1]
+
+### Added
+- Performance Monitor page with operation metrics and timing.
+- System overview cards, P95/P99 percentiles, and CSV export.
+- Window icon and global crash logging.
+
+## [1.0.0]
+
+### Added
+- System monitoring dashboard with real-time statistics.
+- CPU, GPU, memory, disk, network, battery and temperature monitoring.
+- Directory cleaner, registry cleaner and browser privacy cleaner.
+- Startup manager, large file finder and duplicate file detector.
+- PDF tools, image tools, WiFi analyzer, Bluetooth scanner and network mapper.
+- Secure drive wiper, health check, backup manager and scheduled cleaning.
+
+[3.0.0]: https://github.com/Git-Rocky-Stack/sysmonitor-windows/compare/v2.2.2...v3.0.0
+[2.2.2]: https://github.com/Git-Rocky-Stack/sysmonitor-windows/compare/v2.2.0...v2.2.2
+[2.2.0]: https://github.com/Git-Rocky-Stack/sysmonitor-windows/compare/v2.1.1...v2.2.0
+[2.1.1]: https://github.com/Git-Rocky-Stack/sysmonitor-windows/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/Git-Rocky-Stack/sysmonitor-windows/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases/tag/v2.0.1
