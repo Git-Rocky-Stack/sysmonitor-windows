@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Cleaners;
@@ -7,8 +7,13 @@ using System;
 
 namespace SysMonitor.App.ViewModels;
 
-public partial class RegistryCleanerViewModel : ObservableObject
+public partial class RegistryCleanerViewModel : ObservableObject, IDisposable
 {
+    /// <summary>Cancelled when the user leaves the page, so the work it started can stop.</summary>
+    private readonly CancellationTokenSource _pageCts = new();
+
+    private bool _isDisposed;
+
     private readonly IRegistryCleaner _registryCleaner;
 
     [ObservableProperty] private ObservableCollection<RegistryIssue> _scanResults = new();
@@ -80,7 +85,7 @@ public partial class RegistryCleanerViewModel : ObservableObject
 
         try
         {
-            var results = await _registryCleaner.ScanAsync();
+            var results = await _registryCleaner.ScanAsync(_pageCts.Token);
 
             foreach (var r in results) ScanResults.Add(r);
 
@@ -153,7 +158,7 @@ public partial class RegistryCleanerViewModel : ObservableObject
                 if (nonElevatedIssues.Count > 0)
                 {
                     StatusMessage = $"Fixing {nonElevatedIssues.Count:N0} user registry issues...";
-                    var normalResult = await _registryCleaner.CleanAsync(nonElevatedIssues);
+                    var normalResult = await _registryCleaner.CleanAsync(nonElevatedIssues, _pageCts.Token);
                     totalFixed += normalResult.FilesDeleted;
                     totalErrors += normalResult.ErrorCount;
                 }
@@ -189,7 +194,7 @@ public partial class RegistryCleanerViewModel : ObservableObject
             {
                 // Either no elevation needed, or already running as admin
                 StatusMessage = $"Fixing {selectedCount:N0} registry issues...";
-                var result = await _registryCleaner.CleanAsync(selected);
+                var result = await _registryCleaner.CleanAsync(selected, _pageCts.Token);
                 totalFixed = result.FilesDeleted;
                 totalErrors = result.ErrorCount;
             }
@@ -284,5 +289,20 @@ public partial class RegistryCleanerViewModel : ObservableObject
             CleanerRiskLevel.High => "#F44336",
             _ => "#808080"
         };
+    }
+
+    /// <summary>
+    /// Stops whatever this page started. The page calls it on the way out; without it a scan or a wipe kept
+    /// running against a page the user had already left, holding the page and its bindings alive with it.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _pageCts.Cancel();
+        _pageCts.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }

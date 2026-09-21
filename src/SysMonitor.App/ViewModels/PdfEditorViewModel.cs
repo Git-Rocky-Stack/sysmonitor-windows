@@ -917,7 +917,14 @@ public partial class PdfEditorViewModel : ObservableObject
             if (result.Success)
             {
                 IsModified = false;
-                ShowStatus($"Saved: {file.Name}", true);
+
+                // A save that dropped part of the document says so. Reporting only "Saved" would be the
+                // same silence that let form fields disappear without anyone noticing.
+                ShowStatus(
+                    result.Warnings.Count == 0
+                        ? $"Saved: {file.Name}"
+                        : $"Saved: {file.Name} - {string.Join(" ", result.Warnings)}",
+                    result.Warnings.Count == 0);
             }
             else
             {

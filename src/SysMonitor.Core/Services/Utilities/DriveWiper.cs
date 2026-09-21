@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 
@@ -84,6 +84,16 @@ public class DriveWiper : IDriveWiper
 
         try
         {
+            // Asked before anything else, including whether the file is there. The folder wipe has asked
+            // this since it was written; the single-file path did not, so picking a file inside Windows or
+            // Program Files in the file dialog went straight through to the overwrite. Whether the file
+            // happens to exist is not the point - nothing in that place is this app's to destroy.
+            if (IsProtectedLocation(filePath))
+            {
+                result.ErrorMessage = "The selected file is inside a protected system location and was not wiped.";
+                return result;
+            }
+
             if (!File.Exists(filePath))
             {
                 result.ErrorMessage = "File not found";
@@ -328,7 +338,7 @@ public class DriveWiper : IDriveWiper
         }
         catch
         {
-            // Nothing can be said about the media, so nothing is said.
+            // Best effort: nothing can be said about the media, so nothing is said.
         }
 
         return false;
@@ -338,7 +348,8 @@ public class DriveWiper : IDriveWiper
     /// True for the system drive root and for the Windows, Program Files, and ProgramData folders
     /// (or anything inside them), which a file wiper must never target.
     /// </summary>
-    internal static bool IsProtectedLocation(string fullPath)
+    /// <summary>Places nothing in this app may overwrite, whether asked for one file or a whole folder.</summary>
+    public static bool IsProtectedLocation(string fullPath)
     {
         var path = Path.TrimEndingDirectorySeparator(fullPath);
         var systemRoot = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
@@ -689,7 +700,7 @@ public class DriveWiper : IDriveWiper
         }
         catch (IOException)
         {
-            // Disk full during creation - expected
+            // Best effort: filling the free space is the point, so running out of it is success.
         }
 
         return bytesWritten;

@@ -193,6 +193,76 @@ public class RegistryBackupTests : IDisposable
         restore.Message.Should().Contain("not a registry backup");
     }
 
+    /// <summary>
+    /// The backup folder is under %LocalAppData%, which any process running as this user can write to. A
+    /// machine-wide restore hands the file to reg.exe behind a UAC prompt, so a file dropped there that the
+    /// app never wrote is a way into HKLM with administrator rights - a prompt the user attributes to this
+    /// app, spending it on someone else's payload.
+    /// <para>
+    /// A .reg file is refused unless its contents match what this app recorded when it wrote that backup.
+    /// The refusal happens before anything is launched, which is also what keeps this test from raising a
+    /// UAC prompt of its own.
+    /// </para>
+    /// </summary>
+    /// <summary>
+    /// A harmless key stands in for the payload on purpose. The real attack writes an Image File Execution
+    /// Options debugger and gets SYSTEM; a test that did that would arm the backdoor on this machine every
+    /// time the guard regressed. This proves the same thing - a machine-wide file the app did not write is
+    /// turned away - and the absence check below is what catches a regression, safely.
+    /// </summary>
+    private const string CanaryKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\SysMonitor.Tests\MustNeverBeImported";
+
+    [Fact]
+    public async Task Restore_RefusesAMachineWideFileTheAppNeverWrote()
+    {
+        var planted = _backupFolder.File("registry_backup_2099-01-01_00-00-00-000.reg",
+            "Windows Registry Editor Version 5.00\r\n\r\n" +
+            $"[{CanaryKey}]\r\n\"Imported\"=\"yes\"\r\n");
+
+        var restore = await _cleaner.RestoreRegistryBackupAsync(planted);
+
+        restore.Success.Should().BeFalse("nothing this app did not write may be imported into HKLM under its UAC prompt");
+        restore.Message.Should().Contain("not one this app wrote");
+        CanaryWasImported().Should().BeFalse("the refusal must happen before anything is handed to reg.exe");
+    }
+
+    /// <summary>Reads the canary without creating it, so the check itself cannot cause what it looks for.</summary>
+    private static bool CanaryWasImported()
+    {
+        using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\SysMonitor.Tests\MustNeverBeImported");
+        return key is not null;
+    }
+
+    /// <summary>The same guard must not turn away a genuine backup - otherwise recovery is gone too.</summary>
+    [Fact]
+    public async Task Restore_StillAcceptsABackupTheAppItselfWrote()
+    {
+        Populate();
+        var backup = await _cleaner.BackupRegistryAsync([ValueIssue("Str")]);
+        backup.Success.Should().BeTrue(backup.Message);
+
+        var restore = await _cleaner.RestoreRegistryBackupAsync(backup.BackupPath!);
+
+        restore.Success.Should().BeTrue(restore.Message);
+    }
+
+    /// <summary>A recorded backup edited afterwards is no longer the backup that was recorded.</summary>
+    [Fact]
+    public async Task Restore_RefusesARecordedBackupThatWasEditedAfterwards()
+    {
+        Populate();
+        var backup = await _cleaner.BackupRegistryAsync([ValueIssue("Str")]);
+        backup.Success.Should().BeTrue(backup.Message);
+
+        await File.AppendAllTextAsync(backup.BackupPath!, $"\r\n[{CanaryKey}]\r\n\"Imported\"=\"yes\"\r\n");
+
+        var restore = await _cleaner.RestoreRegistryBackupAsync(backup.BackupPath!);
+
+        restore.Success.Should().BeFalse("the bytes no longer match what was recorded when the backup was written");
+        restore.Message.Should().Contain("not one this app wrote");
+        CanaryWasImported().Should().BeFalse("an edited backup must be refused before anything is handed to reg.exe");
+    }
+
     private static RegistryAccessRule DenyRead() => new(
         WindowsIdentity.GetCurrent().User!,
         RegistryRights.QueryValues | RegistryRights.EnumerateSubKeys,

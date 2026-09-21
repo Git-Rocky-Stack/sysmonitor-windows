@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32.SafeHandles;
 
@@ -17,7 +17,18 @@ public static class FileScanning
     /// Every file under a folder, never following a junction, symbolic link or mount point. Following one
     /// shows the same file twice, and a finder that calls the second one a duplicate deletes the only copy.
     /// </summary>
-    public static IEnumerable<string> EnumerateFiles(string root, CancellationToken cancellationToken = default)
+    public static IEnumerable<string> EnumerateFiles(string root, CancellationToken cancellationToken = default) =>
+        Walk(root, recurse: true, cancellationToken);
+
+    /// <summary>
+    /// The files sitting directly in a folder, without descending into it. A caller that walks each
+    /// subfolder separately uses this for the folder itself, rather than a second recursive walk that
+    /// would see everything below it twice.
+    /// </summary>
+    public static IEnumerable<string> EnumerateFilesIn(string folder, CancellationToken cancellationToken = default) =>
+        Walk(folder, recurse: false, cancellationToken);
+
+    private static IEnumerable<string> Walk(string root, bool recurse, CancellationToken cancellationToken)
     {
         var options = new EnumerationOptions
         {
@@ -57,14 +68,14 @@ public static class FileScanning
                 }
 
                 // A link is a way to somewhere else, not a place of its own.
-                if (attributes.HasFlag(FileAttributes.ReparsePoint))
+                if (IsLinkToElsewhere(attributes, LinkTargetOf(entry)))
                 {
                     continue;
                 }
 
                 if (attributes.HasFlag(FileAttributes.Directory))
                 {
-                    if (!IsSkippedFolder(entry.Name))
+                    if (recurse && !IsSkippedFolder(entry.Name))
                     {
                         directories.Push(entry.FullName);
                     }
@@ -74,6 +85,38 @@ public static class FileScanning
                     yield return entry.FullName;
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Whether an entry is a way to somewhere else rather than a place of its own.
+    ///
+    /// <para>
+    /// The reparse-point attribute alone is not the question. A junction and a symbolic link have it, and
+    /// following one shows the same file twice. So do two things that are not links at all: a OneDrive
+    /// Files On-Demand placeholder, and a file stored by Data Deduplication. Both are real files, at that
+    /// path, with a real size — and skipping every reparse point meant a user with 400 GB in OneDrive got
+    /// no large-file results at all, with nothing on screen to say why.
+    /// </para>
+    /// <para>
+    /// <c>LinkTarget</c> is what tells them apart: it is set for a link and null for everything else.
+    /// </para>
+    /// </summary>
+    public static bool IsLinkToElsewhere(FileAttributes attributes, string? linkTarget) =>
+        attributes.HasFlag(FileAttributes.ReparsePoint) && linkTarget is not null;
+
+    /// <summary>The path an entry points at, or null when it is not a link or cannot be read.</summary>
+    private static string? LinkTargetOf(FileSystemInfo entry)
+    {
+        try
+        {
+            return entry.LinkTarget;
+        }
+        catch (IOException)
+        {
+            // Best effort: an entry that will not say where it points is treated as a link, which is the
+            // answer that keeps a scan from walking into it twice.
+            return entry.FullName;
         }
     }
 

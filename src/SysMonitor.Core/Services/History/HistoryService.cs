@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using SysMonitor.Core.Data;
@@ -33,6 +33,9 @@ public class HistoryService : IHistoryService
     private const int RecordingIntervalSeconds = 30;
     private const int WriteIntervalSeconds = 60;
     private const int RetentionDays = 30;
+
+    /// <summary>How long Dispose waits for the loops to flush what they still hold before giving up.</summary>
+    private static readonly TimeSpan ShutdownFlushTimeout = TimeSpan.FromSeconds(5);
 
     public HistoryService(
         ICpuMonitor cpuMonitor,
@@ -86,9 +89,9 @@ public class HistoryService : IHistoryService
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently continue on collection errors
+                _logger.LogDebug(ex, "Collecting a history snapshot failed; the next tick tries again");
             }
         }
     }
@@ -200,13 +203,24 @@ public class HistoryService : IHistoryService
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(WriteIntervalSeconds));
 
-        while (await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
+        try
         {
+            while (await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await FlushPendingWritesAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Best effort: stopping is how this loop ends, and the flush below is the point of
+            // stopping cleanly.
+        }
+        finally
+        {
+            // Up to a full write interval of snapshots is still queued here. Cancellation throws out of
+            // the condition above, so this only runs at all because it is in a finally.
             await FlushPendingWritesAsync();
         }
-
-        // Final flush on cancellation
-        await FlushPendingWritesAsync();
     }
 
     private async Task FlushPendingWritesAsync()
@@ -326,6 +340,21 @@ public class HistoryService : IHistoryService
     public void Dispose()
     {
         StopRecording();
+
+        // The write loop still has a final flush to do, and it needs _writeLock to do it. Disposing the
+        // lock out from under it turns the last snapshots into an ObjectDisposedException nobody sees.
+        // The wait is bounded so a stuck write cannot hold the app open.
+        try
+        {
+            var running = new[] { _recordingTask, _writeTask }.Where(task => task is not null).ToArray()!;
+            if (running.Length > 0)
+                Task.WaitAll(running!, ShutdownFlushTimeout);
+        }
+        catch (AggregateException)
+        {
+            // Best effort: the loops are stopping and their own failures are logged where they happen.
+        }
+
         _cts?.Dispose();
         _writeLock.Dispose();
         GC.SuppressFinalize(this);

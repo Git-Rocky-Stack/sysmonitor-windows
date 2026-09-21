@@ -1,5 +1,6 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using SysMonitor.App.ViewModels;
 
 namespace SysMonitor.App.Views;
@@ -13,6 +14,17 @@ public sealed partial class RegistryCleanerPage : Page
         ViewModel = App.GetService<RegistryCleanerViewModel>();
         InitializeComponent();
     }
+
+    /// <summary>
+    /// Ends what this page started. The view model is built for one visit and holds the work it kicked off;
+    /// leaving without this left a registry scan, a wipe or a backup running against a page that was gone.
+    /// </summary>
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        ViewModel.Dispose();
+    }
+
 
     private async void RestoreBackup_Click(object sender, RoutedEventArgs e)
     {

@@ -1,6 +1,7 @@
-using SysMonitor.App.Views;
+﻿using SysMonitor.App.Views;
 using SysMonitor.Core.Services.GameMode;
 using SysMonitor.Core.Services.Monitors;
+using Serilog;
 
 namespace SysMonitor.App.Services;
 
@@ -9,6 +10,9 @@ namespace SysMonitor.App.Services;
 /// </summary>
 public class FpsOverlayService : IFpsOverlayService
 {
+    /// <summary>How long shutdown waits for the update loop to notice it has been cancelled.</summary>
+    public static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(2);
+
     private readonly ICpuMonitor _cpuMonitor;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
@@ -18,6 +22,7 @@ public class FpsOverlayService : IFpsOverlayService
     private Task? _updateTask;
     private OverlayPosition _position = OverlayPosition.TopRight;
     private int _updateIntervalMs = 500;
+    private bool _disposed;
 
     public bool IsVisible { get; private set; }
 
@@ -87,7 +92,7 @@ public class FpsOverlayService : IFpsOverlayService
             }
             catch (OperationCanceledException)
             {
-                // Expected
+                // Best effort: cancellation is how this loop is asked to stop.
             }
         }
 
@@ -100,6 +105,44 @@ public class FpsOverlayService : IFpsOverlayService
         _overlayWindow = null;
 
         IsVisible = false;
+    }
+
+    /// <summary>
+    /// Closes the overlay and stops its loop. The DI container calls this when the host is disposed at
+    /// shutdown, which is the only thing that ever closes the overlay if the user did not toggle it off -
+    /// and a WinUI app with a window still open does not exit.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        try
+        {
+            _cts?.Cancel();
+            _updateTask?.Wait(ShutdownTimeout);
+        }
+        catch (Exception ex)
+        {
+            Log.Debug(ex, "The overlay's update loop did not stop cleanly");
+        }
+
+        try
+        {
+            _cts?.Dispose();
+            _overlayWindow?.Close();
+        }
+        catch (Exception ex)
+        {
+            Log.Debug(ex, "Closing the overlay window failed");
+        }
+
+        _cts = null;
+        _updateTask = null;
+        _overlayWindow = null;
+        IsVisible = false;
+
+        GC.SuppressFinalize(this);
     }
 
     public async Task ToggleAsync()
@@ -125,16 +168,25 @@ public class FpsOverlayService : IFpsOverlayService
                 var stats = await CollectStatsAsync();
                 _overlayWindow?.UpdateStats(stats);
                 StatsUpdated?.Invoke(this, stats);
-
-                await timer.WaitForNextTickAsync(cancellationToken);
             }
             catch (OperationCanceledException)
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // Continue on errors
+                Log.Debug(ex, "A frame-rate sample failed; the overlay keeps running");
+            }
+
+            // Outside the catch above on purpose: a tick that throws must still cost a full interval,
+            // or the loop comes straight back round and polls the hardware flat out.
+            try
+            {
+                await timer.WaitForNextTickAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
             }
         }
     }
@@ -231,9 +283,9 @@ public class FpsOverlayService : IFpsOverlayService
             // Fan speeds
             stats.FanSpeeds = await _temperatureMonitor.GetAllFanSpeedsAsync();
         }
-        catch
+        catch (Exception ex)
         {
-            // Return partial stats on error
+            Log.Debug(ex, "Frame-rate statistics are incomplete");
         }
 
         return stats;

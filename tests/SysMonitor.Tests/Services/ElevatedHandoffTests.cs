@@ -161,7 +161,7 @@ public class ElevatedHandoffTests : IDisposable
     private static IRegistryCleaner ScannerReturning(params RegistryIssue[] issues)
     {
         var cleaner = new Mock<IRegistryCleaner>();
-        cleaner.Setup(c => c.ScanAsync()).ReturnsAsync(issues.ToList());
+        cleaner.Setup(c => c.ScanAsync(It.IsAny<CancellationToken>())).ReturnsAsync(issues.ToList());
         return cleaner.Object;
     }
 }

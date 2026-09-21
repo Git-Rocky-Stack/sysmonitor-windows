@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Monitors;
+using Serilog;
 
 namespace SysMonitor.App.Views;
 
@@ -151,9 +152,9 @@ public sealed partial class GameModePage : Page
             GpuPowerText.Text = gpuPower > 0 ? $"{gpuPower:F0}W" : "N/A";
             TotalPowerText.Text = (cpuPower + gpuPower) > 0 ? $"{cpuPower + gpuPower:F0}W" : "N/A";
         }
-        catch
+        catch (Exception ex)
         {
-            // Silently handle errors in monitoring
+            Log.Debug(ex, "A Game Mode status refresh failed");
         }
     }
 

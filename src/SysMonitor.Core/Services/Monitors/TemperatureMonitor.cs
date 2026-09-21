@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using LibreHardwareMonitor.Hardware;
 
@@ -13,47 +13,72 @@ public class TemperatureMonitor : ITemperatureMonitor
         _logger = logger ?? NullLogger<TemperatureMonitor>.Instance;
     }
 
+    /// <summary>
+    /// Guards every touch of <see cref="_computer"/>.
+    /// <para>
+    /// One instance is shared by the 5-second dashboard timer, the 30-second history timer, the alert
+    /// check and the overlay loop. <c>IHardware.Update()</c> walks and rewrites the sensor tree in place;
+    /// two of those callers doing it at once is a read of a half-rewritten tree, and the symptom is a
+    /// temperature that is wrong or an exception from inside the driver.
+    /// </para>
+    /// </summary>
+    private readonly object _hardwareGate = new();
+
     private Computer? _computer;
     private bool _isInitialized;
     private bool _initializationFailed;
 
     public async Task InitializeAsync()
     {
-        if (_isInitialized || _initializationFailed) return;
         await Task.Run(() =>
         {
-            try
+            lock (_hardwareGate)
             {
-                var computer = new Computer
-                {
-                    IsCpuEnabled = true,
-                    IsGpuEnabled = true,
-                    IsMotherboardEnabled = true,
-                    IsStorageEnabled = true,
-                    IsControllerEnabled = true,  // Enable fan controller sensors
-                    IsPsuEnabled = true,         // Enable PSU sensors
-                    IsNetworkEnabled = false,
-                    IsBatteryEnabled = true
-                };
-                computer.Open();
-                _computer = computer;
-                _isInitialized = true;
-            }
-            catch (Exception)
-            {
-                // LibreHardwareMonitor can throw NullReferenceException from Ring0.Open()
-                // when running without admin privileges or when the driver fails to load.
-                // Mark as failed to prevent repeated initialization attempts.
-                _initializationFailed = true;
-                _computer = null;
+                // Checked inside the gate: two callers that both passed an unguarded check would each
+                // open a Computer, and the second would replace the first - leaking its driver handle.
+                if (_isInitialized || _initializationFailed) return;
+
+                Open();
             }
         });
+    }
+
+    /// <summary>Opens the hardware. The caller holds <see cref="_hardwareGate"/>.</summary>
+    private void Open()
+    {
+        try
+        {
+            var computer = new Computer
+            {
+                IsCpuEnabled = true,
+                IsGpuEnabled = true,
+                IsMotherboardEnabled = true,
+                IsStorageEnabled = true,
+                IsControllerEnabled = true,  // Enable fan controller sensors
+                IsPsuEnabled = true,         // Enable PSU sensors
+                IsNetworkEnabled = false,
+                IsBatteryEnabled = true
+            };
+            computer.Open();
+            _computer = computer;
+            _isInitialized = true;
+        }
+        catch (Exception)
+        {
+            // LibreHardwareMonitor can throw NullReferenceException from Ring0.Open()
+            // when running without admin privileges or when the driver fails to load.
+            // Mark as failed to prevent repeated initialization attempts.
+            _initializationFailed = true;
+            _computer = null;
+        }
     }
 
     public async Task<Dictionary<string, double>> GetAllTemperaturesAsync()
     {
         return await Task.Run(() =>
         {
+            lock (_hardwareGate)
+            {
             var temps = new Dictionary<string, double>();
             if (_computer == null) return temps;
 
@@ -76,6 +101,7 @@ public class TemperatureMonitor : ITemperatureMonitor
                 _logger.LogDebug(ex, "GetAllTemperaturesAsync failed");
             }
             return temps;
+            }
         });
     }
 
@@ -106,6 +132,8 @@ public class TemperatureMonitor : ITemperatureMonitor
     {
         return await Task.Run(() =>
         {
+            lock (_hardwareGate)
+            {
             var fans = new Dictionary<string, double>();
             if (_computer == null) return fans;
 
@@ -149,6 +177,7 @@ public class TemperatureMonitor : ITemperatureMonitor
                 _logger.LogDebug(ex, "GetAllFanSpeedsAsync failed");
             }
             return fans;
+            }
         });
     }
 
@@ -156,6 +185,8 @@ public class TemperatureMonitor : ITemperatureMonitor
     {
         return await Task.Run(() =>
         {
+            lock (_hardwareGate)
+            {
             var power = new Dictionary<string, double>();
             if (_computer == null) return power;
 
@@ -190,6 +221,7 @@ public class TemperatureMonitor : ITemperatureMonitor
                 _logger.LogDebug(ex, "GetAllPowerReadingsAsync failed");
             }
             return power;
+            }
         });
     }
 
@@ -197,6 +229,8 @@ public class TemperatureMonitor : ITemperatureMonitor
     {
         return await Task.Run(() =>
         {
+            lock (_hardwareGate)
+            {
             var loads = new Dictionary<string, double>();
             if (_computer == null) return loads;
 
@@ -238,6 +272,7 @@ public class TemperatureMonitor : ITemperatureMonitor
                 _logger.LogDebug(ex, "GetAllLoadSensorsAsync failed");
             }
             return loads;
+            }
         });
     }
 
@@ -252,6 +287,8 @@ public class TemperatureMonitor : ITemperatureMonitor
     {
         return await Task.Run(() =>
         {
+            lock (_hardwareGate)
+            {
             if (_computer == null) return FrameRate.NoSensor;
 
             try
@@ -277,6 +314,7 @@ public class TemperatureMonitor : ITemperatureMonitor
             }
 
             return FrameRate.NoSensor;
+            }
         });
     }
 
@@ -305,6 +343,8 @@ public class TemperatureMonitor : ITemperatureMonitor
     {
         return await Task.Run(() =>
         {
+            lock (_hardwareGate)
+            {
             var sensors = new List<string>();
             if (_computer == null)
             {
@@ -348,13 +388,24 @@ public class TemperatureMonitor : ITemperatureMonitor
             }
 
             return sensors;
+            }
         });
     }
 
+    /// <summary>
+    /// Closes the hardware, which releases the kernel driver LibreHardwareMonitor loaded to read the
+    /// sensors. Nothing called this: <c>Dispose</c> was declared on the interface, but the interface did
+    /// not extend <see cref="IDisposable"/>, so the host had no way to know there was anything to release.
+    /// </summary>
     public void Dispose()
     {
-        _computer?.Close();
-        _computer = null;
-        _isInitialized = false;
+        lock (_hardwareGate)
+        {
+            _computer?.Close();
+            _computer = null;
+            _isInitialized = false;
+        }
+
+        GC.SuppressFinalize(this);
     }
 }

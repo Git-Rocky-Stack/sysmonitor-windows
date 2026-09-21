@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.IO.Compression;
@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.Json;
 
 using SysMonitor.Core.Helpers;
+using SysMonitor.Core.Services.Cleaners;
+using SysMonitor.Core.Services.Utilities;
 
 namespace SysMonitor.Core.Services.Backup;
 
@@ -15,7 +17,10 @@ namespace SysMonitor.Core.Services.Backup;
 /// </summary>
 public class BackupService : IBackupService
 {
+    private bool _disposed;
+
     private readonly ILogger _logger;
+    private readonly ISystemRestoreService _systemRestore;
 
     private readonly string _backupMetadataFolder;
     private readonly string _manifestFileName = "backup_manifest.json";
@@ -24,17 +29,19 @@ public class BackupService : IBackupService
 
     public bool IsBackupInProgress => _isBackupInProgress;
 
-    public BackupService(ILogger<BackupService>? logger = null)
+    public BackupService(ILogger<BackupService>? logger = null, ISystemRestoreService? systemRestore = null)
         : this(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "Backups"), logger)
+            "SysMonitor", "Backups"), logger, systemRestore)
     {
     }
 
     /// <summary>Uses <paramref name="metadataFolder"/> for the backup catalog (tests use an isolated folder).</summary>
-    internal BackupService(string metadataFolder, ILogger<BackupService>? logger = null)
+    internal BackupService(string metadataFolder, ILogger<BackupService>? logger = null,
+        ISystemRestoreService? systemRestore = null)
     {
         _logger = logger ?? NullLogger<BackupService>.Instance;
+        _systemRestore = systemRestore ?? new SystemRestoreService();
         _backupMetadataFolder = metadataFolder;
         Directory.CreateDirectory(_backupMetadataFolder);
     }
@@ -391,6 +398,30 @@ public class BackupService : IBackupService
         }
     }
 
+    /// <summary>
+    /// Cancels a backup that is still running and releases its token source. The host calls this at
+    /// shutdown; without it a copy loop carried on writing after the window had closed.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        try
+        {
+            _currentBackupCts?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Best effort: the backup finished and disposed its own token source first.
+        }
+
+        _currentBackupCts?.Dispose();
+        _currentBackupCts = null;
+
+        GC.SuppressFinalize(this);
+    }
+
     // ==================== SYSTEM IMAGE BACKUP ====================
 
     public async Task<BackupResult> CreateSystemImageAsync(string destinationPath, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
@@ -421,7 +452,25 @@ public class BackupService : IBackupService
                 };
             }
 
-            // wbadmin requires admin privileges
+            // wbadmin needs administrator rights and this code cannot obtain them: the output is redirected,
+            // which requires UseShellExecute = false, and a verb is only honoured when the shell starts the
+            // process. The "runas" that used to sit here did nothing - wbadmin ran unelevated, failed with
+            // access denied, and the user was shown that as though the backup itself had gone wrong. Say
+            // what is actually needed instead of appearing to ask for it.
+            if (!ElevatedRegistryHelper.IsRunningElevated())
+            {
+                return new BackupResult
+                {
+                    Success = false,
+                    Status = BackupStatus.Failed,
+                    Message = "A system image needs administrator rights. Close STX.1 System Monitor and " +
+                              "start it again with \"Run as administrator\", then try again.",
+                    Duration = stopwatch.Elapsed,
+                    StartTime = startTime,
+                    EndTime = DateTime.Now
+                };
+            }
+
             var psi = new ProcessStartInfo
             {
                 FileName = "wbadmin",
@@ -429,8 +478,7 @@ public class BackupService : IBackupService
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = true,
-                Verb = "runas"
+                CreateNoWindow = true
             };
 
             using var process = Process.Start(psi);
@@ -492,55 +540,26 @@ public class BackupService : IBackupService
 
     // ==================== RESTORE POINT ====================
 
+    /// <summary>
+    /// Creates a system restore point.
+    /// <para>
+    /// This used to run <c>powershell -Command "Checkpoint-Computer -Description '{description}'"</c>. A
+    /// description containing an apostrophe closed that literal and the rest of it was another statement -
+    /// and the <c>Verb = "runas"</c> beside it did nothing, because a verb is only honoured when the shell
+    /// starts the process. The Health Check page has always used <see cref="ISystemRestoreService"/>, which
+    /// passes the description as a typed WMI parameter that no parser ever sees. Both pages now do.
+    /// </para>
+    /// </summary>
     public async Task<BackupResult> CreateRestorePointAsync(string description)
     {
-        return await Task.Run(() =>
+        var result = await _systemRestore.CreateRestorePointAsync(description, RestorePointType.ModifySettings);
+
+        return new BackupResult
         {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powershell",
-                    Arguments = $"-Command \"Checkpoint-Computer -Description '{description}' -RestorePointType 'MODIFY_SETTINGS'\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    Verb = "runas"
-                };
-
-                using var process = Process.Start(psi);
-                process?.WaitForExit(60000); // 1 minute timeout
-
-                if (process?.ExitCode == 0)
-                {
-                    return new BackupResult
-                    {
-                        Success = true,
-                        Status = BackupStatus.Completed,
-                        Message = $"Restore point created: {description}"
-                    };
-                }
-                else
-                {
-                    return new BackupResult
-                    {
-                        Success = false,
-                        Status = BackupStatus.Failed,
-                        Message = "Failed to create restore point (requires admin privileges)"
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                return new BackupResult
-                {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = $"Restore point error: {ex.Message}"
-                };
-            }
-        });
+            Success = result.Success,
+            Status = result.Success ? BackupStatus.Completed : BackupStatus.Failed,
+            Message = result.Message
+        };
     }
 
     public async Task<List<RestorePointInfo>> GetRestorePointsAsync()
@@ -944,13 +963,22 @@ public class BackupService : IBackupService
             }
 
             var ok = problems.Count == 0;
+
+            // Files the backup recorded without a checksum were filtered out of hashedFiles above, so
+            // nothing was ever compared for them. "All N files match" counted only the ones that could be
+            // checked, and said nothing about the rest - which is the part a reader would want to know.
+            var unchecked_ = archive.Manifest.Files.Count - hashedFiles.Count;
+            var uncheckedNote = unchecked_ > 0
+                ? $"; {unchecked_} file(s) were stored without a checksum and could not be checked"
+                : "";
+
             return new BackupResult
             {
                 Success = ok,
                 Status = ok ? BackupStatus.Completed : BackupStatus.Failed,
                 Message = ok
-                    ? $"Backup verified: all {verified} files match their recorded checksums"
-                    : $"Backup verification failed: {problems.Count} file(s) missing or changed in the backup ({verified} verified)",
+                    ? $"Backup verified: {verified} file(s) match their recorded checksums{uncheckedNote}"
+                    : $"Backup verification failed: {problems.Count} file(s) missing or changed in the backup ({verified} verified){uncheckedNote}",
                 ProcessedFiles = verified,
                 FailedFiles = problems.Count,
                 Errors = problems

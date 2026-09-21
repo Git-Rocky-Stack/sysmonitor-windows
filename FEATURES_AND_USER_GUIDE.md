@@ -23,7 +23,7 @@ Version 1.0.0 | Windows Desktop Application | Built with WinUI 3 & .NET 8
 
 ## Overview
 
-STX.1 System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring, system optimization, privacy protection, and productivity tools. Designed with a sleek AMOLED dark theme, it offers professional-grade features in an intuitive interface.
+STX.1 System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:19`), system optimization (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:18`), privacy protection (`src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs:60`), and productivity tools (`src/SysMonitor.Core/Services/Utilities/PdfTools.cs:12`). Designed with a sleek AMOLED dark theme, it offers professional-grade features in an intuitive interface.
 
 ### Key Features at a Glance
 
@@ -58,7 +58,7 @@ STX.1 System Monitor is a comprehensive Windows system utility that provides rea
 
 ## Dashboard
 
-The Dashboard provides a comprehensive overview of your system's health and performance.
+The Dashboard provides a comprehensive overview of your system's health and performance (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:20`).
 
 ### Health Score
 
@@ -246,7 +246,7 @@ Control programs that launch at startup:
 1. View startup programs list
 2. Select a program to see details
 3. Click **Disable** to prevent auto-start
-4. Click **Enable** to restore auto-start
+4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:81`)
 
 ### Scheduled Cleaning
 
@@ -590,7 +590,7 @@ Detailed system specifications:
 
 - **Run at Startup** - Launch app when Windows starts
 - **Minimize to Tray** - Keep running in system tray
-- **Show Notifications** - Enable/disable alerts
+- **Show Notifications** - Enable/disable alerts (`src/SysMonitor.App/Views/SettingsPage.xaml:98`)
 
 ### Monitoring
 

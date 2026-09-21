@@ -1,4 +1,4 @@
-namespace SysMonitor.Core.Models;
+﻿namespace SysMonitor.Core.Models;
 
 /// <summary>
 /// Comprehensive system information snapshot.
@@ -108,14 +108,27 @@ public class NetworkInfo
     public string MacAddress { get; set; } = string.Empty;
     public long BytesSent { get; set; }
     public long BytesReceived { get; set; }
+    /// <summary>Bytes per second, as the adapter's byte counters report it.</summary>
     public double UploadSpeedBps { get; set; }
+
+    /// <summary>Bytes per second, as the adapter's byte counters report it.</summary>
     public double DownloadSpeedBps { get; set; }
     public int SignalStrength { get; set; }
     public string SSID { get; set; } = string.Empty;
     public List<NetworkAdapter> Adapters { get; set; } = new();
 
-    public double UploadSpeedMbps => UploadSpeedBps / (1024 * 1024);
-    public double DownloadSpeedMbps => DownloadSpeedBps / (1024 * 1024);
+    /// <summary>Bits per byte, for converting the adapter's byte counters into the unit a link is sold in.</summary>
+    private const double BitsPerByte = 8;
+
+    /// <summary>
+    /// Bits in a megabit. Network rates are decimal — a 100 Mbps link carries 100,000,000 bits per second,
+    /// not 104,857,600. Dividing by 1024² instead gave mebibytes per second under a name that says
+    /// megabits, understating a saturated link by a factor of 8.4.
+    /// </summary>
+    private const double BitsPerMegabit = 1_000_000;
+
+    public double UploadSpeedMbps => UploadSpeedBps * BitsPerByte / BitsPerMegabit;
+    public double DownloadSpeedMbps => DownloadSpeedBps * BitsPerByte / BitsPerMegabit;
 }
 
 /// <summary>

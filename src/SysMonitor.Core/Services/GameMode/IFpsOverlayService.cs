@@ -1,4 +1,4 @@
-using SysMonitor.Core.Services.Monitors;
+﻿using SysMonitor.Core.Services.Monitors;
 
 namespace SysMonitor.Core.Services.GameMode;
 
@@ -34,8 +34,14 @@ public class OverlayStats
 
 /// <summary>
 /// Service for controlling the FPS overlay window.
+/// <para>
+/// <see cref="IDisposable"/> because the overlay is a real window with a background loop behind it. Nothing
+/// in shutdown called <see cref="HideAsync"/>, and a host can only dispose what says it is disposable — so
+/// the overlay and its loop outlived the main window, and a WinUI app with a window still open does not
+/// exit. The user closed the app and it stayed in Task Manager.
+/// </para>
 /// </summary>
-public interface IFpsOverlayService
+public interface IFpsOverlayService : IDisposable
 {
     /// <summary>
     /// Whether the overlay is currently visible.

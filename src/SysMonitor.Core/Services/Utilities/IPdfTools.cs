@@ -1,4 +1,4 @@
-namespace SysMonitor.Core.Services.Utilities;
+﻿namespace SysMonitor.Core.Services.Utilities;
 
 /// <summary>
 /// Service for PDF operations - merge, split, extract, sign, convert
@@ -48,6 +48,12 @@ public record PdfOperationResult
     public int PagesProcessed { get; init; }
     public string ErrorMessage { get; init; } = "";
     public List<string> OutputFiles { get; init; } = [];
+
+    /// <summary>
+    /// Things the operation succeeded at doing but could not do completely. A save that quietly drops part
+    /// of a document and reports success is how a user loses work without ever being told.
+    /// </summary>
+    public List<string> Warnings { get; init; } = [];
 }
 
 public record PdfInfo

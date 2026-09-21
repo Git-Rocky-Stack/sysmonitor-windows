@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Master build script for STX1 System Monitor release.
 
@@ -49,7 +49,11 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Configuration
 $AppName = "STX1 System Monitor"
-$AppVersion = "1.0.0"
+# The one place the version is written is the app's csproj. Copied here by hand it read 1.0.0 while
+# the app was 2.2.2, and named both the installer and the portable zip after a release that never was.
+$AppCsproj = Join-Path $ScriptDir "src\SysMonitor.App\SysMonitor.App.csproj"
+$AppVersion = ([xml](Get-Content $AppCsproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+if (-not $AppVersion) { throw "No <Version> in $AppCsproj - the build has no version to name its output after." }
 $PublishDir = Join-Path $ScriptDir "publish\installer-build"
 $InstallerDir = Join-Path $ScriptDir "publish\installer"
 $TimestampServer = "http://timestamp.digicert.com"

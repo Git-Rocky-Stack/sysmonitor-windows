@@ -1,4 +1,4 @@
-using SysMonitor.Core.Models;
+﻿using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Cleaners;
 
@@ -17,8 +17,13 @@ public interface IBrowserCacheCleaner
 
 public interface IRegistryCleaner
 {
-    Task<List<RegistryIssue>> ScanAsync();
-    Task<CleanerResult> CleanAsync(IEnumerable<RegistryIssue> issuesToFix);
+    /// <param name="cancellationToken">
+    /// Stops the scan. It walks tens of thousands of keys, and a user who has left the page is not waiting
+    /// for the answer - without this there was no way to tell it so.
+    /// </param>
+    Task<List<RegistryIssue>> ScanAsync(CancellationToken cancellationToken = default);
+
+    Task<CleanerResult> CleanAsync(IEnumerable<RegistryIssue> issuesToFix, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Exports every registry key that fixing <paramref name="issuesToFix"/> would modify into one .reg file.

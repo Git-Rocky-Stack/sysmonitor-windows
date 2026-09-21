@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32.TaskScheduler;
 using System.Runtime.Versioning;
@@ -175,13 +175,16 @@ public class ScheduledCleaningService : IScheduledCleaningService
                     td.Settings.RunOnlyIfIdle = true;
                 }
 
-                // Create trigger based on schedule type
+                // Create trigger based on schedule type. The start is always in the future: see
+                // FirstRunAfter for why a start in the past is not a harmless detail here.
+                var firstRun = FirstRunAfter(DateTime.Now, config.TimeOfDay);
+
                 switch (config.Schedule)
                 {
                     case CleaningSchedule.Daily:
                         td.Triggers.Add(new DailyTrigger
                         {
-                            StartBoundary = DateTime.Today.Add(config.TimeOfDay),
+                            StartBoundary = firstRun,
                             DaysInterval = 1
                         });
                         break;
@@ -189,7 +192,7 @@ public class ScheduledCleaningService : IScheduledCleaningService
                     case CleaningSchedule.Weekly:
                         td.Triggers.Add(new WeeklyTrigger
                         {
-                            StartBoundary = DateTime.Today.Add(config.TimeOfDay),
+                            StartBoundary = firstRun,
                             DaysOfWeek = (DaysOfTheWeek)(1 << (int)config.DayOfWeek)
                         });
                         break;
@@ -197,8 +200,8 @@ public class ScheduledCleaningService : IScheduledCleaningService
                     case CleaningSchedule.Monthly:
                         td.Triggers.Add(new MonthlyTrigger
                         {
-                            StartBoundary = DateTime.Today.Add(config.TimeOfDay),
-                            DaysOfMonth = new[] { config.DayOfMonth }
+                            StartBoundary = firstRun,
+                            DaysOfMonth = new[] { DayOfMonthWithin(config.DayOfMonth) }
                         });
                         break;
 
@@ -343,4 +346,39 @@ public class ScheduledCleaningService : IScheduledCleaningService
 
         return string.Join("; ", commands);
     }
+    /// <summary>
+    /// The first time of day this schedule should run, always later than <paramref name="now"/>.
+    ///
+    /// <para>
+    /// The start used to be <c>DateTime.Today.Add(timeOfDay)</c>, which is this morning - already past for
+    /// most of the day. Task Scheduler treats a start in the past as an overdue run, and with
+    /// "run missed schedules" turned on it starts one within minutes. Setting up a daily clean at 2 AM,
+    /// at four in the afternoon, deleted files immediately instead of at 2 AM.
+    /// </para>
+    /// </summary>
+    public static DateTime FirstRunAfter(DateTime now, TimeSpan timeOfDay)
+    {
+        var today = now.Date.Add(timeOfDay);
+        return today > now ? today : today.AddDays(1);
+    }
+
+    /// <summary>
+    /// A day of the month Task Scheduler will accept.
+    /// <para>
+    /// The configured value was passed through untouched, and Task Scheduler rejects anything outside 1 to
+    /// 31 - so a stored 0, or a 32 from a control with no upper bound, meant the schedule was never created
+    /// and the user was left believing it had been.
+    /// </para>
+    /// <para>
+    /// 29 to 31 are kept as asked: those days do exist in most months, and silently moving someone's
+    /// month-end clean to the 28th would be a different lie. Months that do not have the day simply skip it,
+    /// which is Task Scheduler's own behaviour.
+    /// </para>
+    /// </summary>
+    public static int DayOfMonthWithin(int day)
+    {
+        if (day < 1) return 1;
+        return day > 28 && day <= 31 ? day : Math.Min(day, 28);
+    }
+
 }

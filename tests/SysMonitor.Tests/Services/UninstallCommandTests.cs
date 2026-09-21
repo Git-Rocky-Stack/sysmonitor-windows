@@ -11,6 +11,34 @@ namespace SysMonitor.Tests.Services;
 /// </summary>
 public class UninstallCommandTests
 {
+    /// <summary>
+    /// The uninstall list is read from HKLM and from HKCU. HKCU is writable by the user - and therefore by
+    /// anything running as the user - so an entry there is not evidence of an installed program. Raising a
+    /// UAC prompt for one turns this page into a way to get a payload running as administrator: write
+    /// DisplayName "Adobe Acrobat Reader" and an UninstallString of your choosing, wait for the click.
+    /// <para>
+    /// Windows' own Settings &gt; Apps runs an HKCU uninstall string without elevating, and so does this. An
+    /// uninstaller that genuinely needs administrator rights asks for them itself, through its manifest,
+    /// and Windows shows a prompt naming that program rather than this one.
+    /// </para>
+    /// </summary>
+    [Theory]
+    [InlineData(@"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Foo", true)]
+    [InlineData(@"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Foo", true)]
+    [InlineData(@"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Foo", false)]
+    [InlineData(@"hkcu\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Foo", false)]
+    [InlineData("", false)]
+    public void OnlyAMachineWideEntryIsWorthAUacPrompt(string registryKey, bool expected) =>
+        InstalledProgramsService.ShouldRequestElevation(registryKey).Should().Be(expected);
+
+    /// <summary>A key this code does not recognise is not given the benefit of the doubt.</summary>
+    [Theory]
+    [InlineData(@"HKEY_CURRENT_USER\SOFTWARE\...\Uninstall\Foo")]
+    [InlineData(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Foo")]
+    [InlineData(@"HKCR\Something")]
+    public void AnUnrecognisedOriginIsNotElevated(string registryKey) =>
+        InstalledProgramsService.ShouldRequestElevation(registryKey).Should().BeFalse();
+
     [Theory]
     // The shape most entries on a machine have: cutting seven characters in used to leave ".exe /X{...}".
     [InlineData(@"MsiExec.exe /X{0EFDDD81-1F1E-4A29-B9C6-B5D1A7F1DD8F}", "MsiExec.exe", "/X{0EFDDD81-1F1E-4A29-B9C6-B5D1A7F1DD8F} /quiet /norestart")]

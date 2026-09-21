@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -108,7 +108,7 @@ public class ProcessMonitor : IProcessMonitor
                     }
                     catch
                     {
-                        // Process may have exited during enumeration
+                        // Best effort: the process ended between being listed and being read.
                     }
                 }
             }

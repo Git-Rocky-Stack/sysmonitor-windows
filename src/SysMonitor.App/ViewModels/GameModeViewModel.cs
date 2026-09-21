@@ -280,7 +280,7 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
     private async Task<bool> ConfirmClosingAsync()
     {
         var running = _gameModeService.GetTargetProcesses()
-            .Where(name => System.Diagnostics.Process.GetProcessesByName(name).Length > 0)
+            .Where(IsRunning)
             .Select(FormatAppName)
             .ToList();
 
@@ -290,6 +290,24 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
         }
 
         return ConfirmCloseBackgroundApps != null && await ConfirmCloseBackgroundApps(running);
+    }
+
+    /// <summary>
+    /// Whether anything by this name is running. Every <c>Process</c> the lookup hands back owns a kernel
+    /// handle, so they are closed here rather than left for a finaliser that may never run.
+    /// </summary>
+    private static bool IsRunning(string processName)
+    {
+        var processes = System.Diagnostics.Process.GetProcessesByName(processName);
+        try
+        {
+            return processes.Length > 0;
+        }
+        finally
+        {
+            foreach (var process in processes)
+                process.Dispose();
+        }
     }
 
     #endregion

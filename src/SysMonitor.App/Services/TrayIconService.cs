@@ -1,4 +1,4 @@
-using H.NotifyIcon;
+﻿using H.NotifyIcon;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -6,6 +6,7 @@ using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.Monitors;
 using System.Drawing;
 using Windows.UI.Notifications;
+using Serilog;
 
 namespace SysMonitor.App.Services;
 
@@ -59,7 +60,8 @@ public class TrayIconService : IDisposable
             }
             catch
             {
-                // Use default icon if loading fails
+                // Best effort: the tray icon falls back to the default below, which is a picture, not a
+            // function the user loses.
             }
         }
 
@@ -146,9 +148,9 @@ public class TrayIconService : IDisposable
                     }
                 });
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently continue on errors
+                Log.Debug(ex, "Updating the tray icon tooltip failed");
             }
 
             try

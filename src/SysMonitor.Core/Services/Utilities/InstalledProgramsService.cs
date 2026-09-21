@@ -318,9 +318,14 @@ public class InstalledProgramsService : IInstalledProgramsService
             {
                 FileName = command.FileName,
                 Arguments = command.Arguments,
-                UseShellExecute = true,
-                Verb = "runas" // Request elevation
+                UseShellExecute = true
             };
+
+            // Only a machine-wide program's uninstaller is worth a prompt from us; see ShouldRequestElevation.
+            if (ShouldRequestElevation(program.RegistryKey))
+            {
+                psi.Verb = "runas";
+            }
 
             using var process = Process.Start(psi);
             if (process == null)
@@ -391,6 +396,19 @@ public class InstalledProgramsService : IInstalledProgramsService
     /// used to be cut seven characters in, leaving msiexec with ".exe /X{...}": it then showed its usage
     /// dialog and never uninstalled anything.
     /// </summary>
+    /// <summary>
+    /// Whether this app should raise a UAC prompt before running a program's uninstaller.
+    /// <para>
+    /// Only for a program recorded under HKLM. HKCU is writable by the user, so anything running as the
+    /// user can add an entry there with any DisplayName and any UninstallString it likes. Elevating that
+    /// would spend a prompt the user is giving to this app on a program this app knows nothing about.
+    /// Windows' own Settings &gt; Apps does not elevate HKCU uninstallers either; one that truly needs
+    /// administrator rights requests them through its own manifest, and the prompt then names it.
+    /// </para>
+    /// </summary>
+    internal static bool ShouldRequestElevation(string registryKey) =>
+        registryKey.StartsWith(@"HKLM\", StringComparison.OrdinalIgnoreCase);
+
     internal static UninstallCommand ParseUninstallCommand(string uninstallString)
     {
         var command = (uninstallString ?? string.Empty).Trim();

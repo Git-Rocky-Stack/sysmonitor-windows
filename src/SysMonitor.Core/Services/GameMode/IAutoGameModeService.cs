@@ -1,4 +1,4 @@
-namespace SysMonitor.Core.Services.GameMode;
+﻿namespace SysMonitor.Core.Services.GameMode;
 
 /// <summary>
 /// Represents a game that can be detected for auto Game Mode activation.
@@ -22,8 +22,13 @@ public class GameDetectedEventArgs : EventArgs
 
 /// <summary>
 /// Service for automatically detecting running games and enabling Game Mode.
+/// <para>
+/// <see cref="IDisposable"/> because the watch is a background loop that enumerates every process on the
+/// machine every two seconds, and it starts itself when the saved setting says auto mode was left on. The
+/// host disposes the singletons it built, and only the ones that say they are disposable.
+/// </para>
 /// </summary>
-public interface IAutoGameModeService
+public interface IAutoGameModeService : IDisposable
 {
     /// <summary>
     /// Whether the service is actively monitoring for games.

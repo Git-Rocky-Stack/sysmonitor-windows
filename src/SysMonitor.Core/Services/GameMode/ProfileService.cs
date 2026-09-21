@@ -1,4 +1,6 @@
-using System.Text.Json;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.GameMode;
@@ -8,6 +10,7 @@ namespace SysMonitor.Core.Services.GameMode;
 /// </summary>
 public class ProfileService : IProfileService
 {
+    private readonly ILogger _logger;
     private readonly string _profilesPath;
     private readonly IGameModeService _gameModeService;
     private readonly List<PerformanceProfile> _profiles = new();
@@ -22,8 +25,9 @@ public class ProfileService : IProfileService
 
     public event EventHandler<PerformanceProfile?>? ProfileChanged;
 
-    public ProfileService(IGameModeService gameModeService)
+    public ProfileService(IGameModeService gameModeService, ILogger<ProfileService>? logger = null)
     {
+        _logger = logger ?? NullLogger<ProfileService>.Instance;
         _gameModeService = gameModeService;
         _profilesPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -52,9 +56,9 @@ public class ProfileService : IProfileService
                     _profiles.AddRange(data.Profiles);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Failed to load, create defaults
+                _logger.LogWarning(ex, "Saved Game Mode profiles could not be read; the defaults are used");
             }
         }
 

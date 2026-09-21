@@ -1,4 +1,4 @@
-using Microsoft.UI;
+﻿using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -82,6 +82,8 @@ public sealed partial class PdfEditorPage : Page
 
     private async void SavePdf_Click(object sender, RoutedEventArgs e)
     {
+        // A signature drawn but not yet finished is part of what the user is saving.
+        await FinalizeSignatureAsync();
         await ViewModel.SaveCommand.ExecuteAsync(null);
     }
 
@@ -131,12 +133,31 @@ public sealed partial class PdfEditorPage : Page
     }
 
     // Annotation Tools
-    private void SelectTool_Click(object sender, RoutedEventArgs e)
+    private async void SelectTool_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is string toolName)
         {
-            ViewModel.SelectToolCommand.Execute(toolName);
+            await SelectToolAsync(toolName);
         }
+    }
+
+    /// <summary>
+    /// Switches the active tool, finishing a signature in progress first.
+    /// <para>
+    /// Strokes drawn with the signature tool are collected until something finishes them. Nothing did:
+    /// <see cref="FinalizeSignatureAsync"/> had no caller anywhere in the app, so a signature was drawn on
+    /// the canvas, never became an annotation, and vanished on the next save with no error.
+    /// </para>
+    /// </summary>
+    private async Task SelectToolAsync(string toolName)
+    {
+        if (ViewModel.SelectedTool == AnnotationTool.Signature &&
+            !string.Equals(toolName, nameof(AnnotationTool.Signature), StringComparison.Ordinal))
+        {
+            await FinalizeSignatureAsync();
+        }
+
+        ViewModel.SelectToolCommand.Execute(toolName);
     }
 
     private void ClearAnnotations_Click(object sender, RoutedEventArgs e)
@@ -317,9 +338,9 @@ public sealed partial class PdfEditorPage : Page
         await ViewModel.DuplicateCurrentPageCommand.ExecuteAsync(null);
     }
 
-    private void StampTool_Click(object sender, RoutedEventArgs e)
+    private async void StampTool_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.SelectToolCommand.Execute("Stamp");
+        await SelectToolAsync("Stamp");
 
         // Show stamp type selection flyout
         var flyout = new MenuFlyout();
@@ -862,8 +883,11 @@ public sealed partial class PdfEditorPage : Page
         _freehandPoints.Clear();
     }
 
-    // Method to finalize signature (can be called from a "Finish Signature" button)
-    private async void FinalizeSignature()
+    /// <summary>
+    /// Turns the strokes drawn with the signature tool into a signature annotation. Called when the user
+    /// switches tool or saves - see <see cref="SelectToolAsync"/>.
+    /// </summary>
+    private async Task FinalizeSignatureAsync()
     {
         if (_signatureStrokes.Count == 0) return;
 

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualBasic.FileIO;
 using System.Collections.Concurrent;
@@ -72,8 +72,13 @@ public class LargeFileFinder : ILargeFileFinder
         {
             try
             {
-                // Get top-level directories for parallel processing
-                var topLevelDirs = new List<string> { path };
+                // Split the work across the root's subfolders, one task each.
+                //
+                // The root itself is deliberately not in this list. EnumerateFiles already recurses, so a
+                // list of { root } plus the root's subfolders walks everything below the root twice - once
+                // under the root and once under its own folder. That doubled the disk reads and put every
+                // file in the results twice, which doubled the total the page reports.
+                var topLevelDirs = new List<string>();
                 try
                 {
                     topLevelDirs.AddRange(Directory.GetDirectories(path)
@@ -90,10 +95,19 @@ public class LargeFileFinder : ILargeFileFinder
                     CancellationToken = cancellationToken
                 };
 
-                // Process directories in parallel
-                Parallel.ForEach(topLevelDirs, parallelOptions, topDir =>
+                // The files sitting directly in the root belong to no subfolder, so they are their own
+                // unit of work rather than a second walk of everything.
+                var units = new List<Func<IEnumerable<string>>>
                 {
-                    foreach (var filePath in FileScanning.EnumerateFiles(topDir, cancellationToken))
+                    () => FileScanning.EnumerateFilesIn(path, cancellationToken),
+                };
+                units.AddRange(topLevelDirs.Select<string, Func<IEnumerable<string>>>(
+                    topDir => () => FileScanning.EnumerateFiles(topDir, cancellationToken)));
+
+                // Process directories in parallel
+                Parallel.ForEach(units, parallelOptions, unit =>
+                {
+                    foreach (var filePath in unit())
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 

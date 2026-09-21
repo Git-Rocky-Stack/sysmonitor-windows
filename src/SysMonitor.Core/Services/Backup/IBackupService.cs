@@ -1,9 +1,9 @@
-namespace SysMonitor.Core.Services.Backup;
+﻿namespace SysMonitor.Core.Services.Backup;
 
 /// <summary>
 /// Comprehensive backup service for Windows - File, Folder, System Image, and Incremental backups
 /// </summary>
-public interface IBackupService
+public interface IBackupService : IDisposable
 {
     // Backup Operations
     Task<BackupResult> CreateBackupAsync(BackupJob job, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default);
@@ -108,11 +108,21 @@ public class BackupJob
     // Destination
     public string DestinationPath { get; set; } = "";
     public string? NetworkUsername { get; set; }
+    /// <summary>
+    /// Never written to disk. A saved schedule is a JSON file in the user's profile, and serialising this
+    /// put the password for a network share in clear text next to the backups it reaches.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public string? NetworkPassword { get; set; }
 
     // Options
     public BackupCompression Compression { get; set; } = BackupCompression.Normal;
     public bool EnableEncryption { get; set; } = false;
+    /// <summary>
+    /// Never written to disk. This is the password the backup is encrypted with; storing it in a file
+    /// beside the backup would undo the encryption for anyone who could read the folder.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public string? EncryptionPassword { get; set; }
     public bool VerifyAfterBackup { get; set; } = true;
     public bool UseVss { get; set; } = true; // Volume Shadow Copy for in-use files

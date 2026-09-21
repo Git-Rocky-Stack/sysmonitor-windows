@@ -238,11 +238,13 @@ public class PdfTools : IPdfTools
                 var page = document.Pages[options.PageNumber - 1];
                 using var gfx = XGraphics.FromPdfPage(page);
 
+                // PDFsharp reads an image's pixels at Save(), so the stream behind it outlives this block.
+                var signatureImages = new List<MemoryStream>();
+
                 // Draw signature image
                 if (options.SignatureImageBytes != null && options.SignatureImageBytes.Length > 0)
                 {
-                    using var ms = new MemoryStream(options.SignatureImageBytes);
-                    var image = XImage.FromStream(ms);
+                    var image = PdfImageSource.Open(options.SignatureImageBytes, signatureImages);
 
                     // Calculate position (convert from percentage to points)
                     var x = page.Width.Point * (options.X / 100.0);
@@ -273,6 +275,9 @@ public class PdfTools : IPdfTools
                 }
 
                 document.Save(outputPath);
+
+                foreach (var stream in signatureImages)
+                    stream.Dispose();
 
                 return new PdfOperationResult
                 {

@@ -10,13 +10,18 @@ using Windows.Storage.Pickers;
 
 namespace SysMonitor.App.ViewModels;
 
-public partial class BackupViewModel : ObservableObject
+public partial class BackupViewModel : ObservableObject, IDisposable
 {
     private readonly ILogger _logger;
 
     private readonly IBackupService _backupService;
     private DispatcherQueue? _dispatcherQueue;
     private CancellationTokenSource? _backupCts;
+
+    /// <summary>Cancelled when the user leaves the page, so a backup it started does not outlive it.</summary>
+    private readonly CancellationTokenSource _pageCts = new();
+
+    private bool _isDisposed;
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetActiveWindow();
@@ -489,7 +494,8 @@ public partial class BackupViewModel : ObservableObject
         IsBackupRunning = true;
         ProgressPercent = 0;
         ProgressStatus = "Preparing backup...";
-        _backupCts = new CancellationTokenSource();
+        // Linked to the page: leaving the page cancels the backup as surely as pressing Cancel does.
+        _backupCts = CancellationTokenSource.CreateLinkedTokenSource(_pageCts.Token);
 
         var progress = new Progress<BackupProgress>(p =>
         {
@@ -775,6 +781,24 @@ public partial class BackupViewModel : ObservableObject
             size /= 1024;
         }
         return $"{size:F1} {sizes[order]}";
+    }
+
+    /// <summary>
+    /// Ends a backup the user has walked away from, and releases what it was using. Without this the copy
+    /// loop carried on writing while the page that showed its progress was gone, and the wizard was left
+    /// stranded on its last step.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _pageCts.Cancel();
+        _pageCts.Dispose();
+        _backupCts?.Dispose();
+        _backupCts = null;
+
+        GC.SuppressFinalize(this);
     }
 }
 

@@ -13,6 +13,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 
 using SysMonitor.Core.Helpers;
+using Serilog;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -119,15 +120,16 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
                 {
                     await _alertService.CheckThresholdsAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Alerts are non-critical, continue even if they fail
+                    Log.Debug(ex, "Checking alert thresholds failed during a dashboard refresh");
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            // Expected when disposed
+            // Best effort: the page was left while this was in flight, so the work it was doing
+            // no longer has anywhere to go.
         }
     }
 
@@ -225,11 +227,11 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected during shutdown
+            // Best effort: the app is closing and the refresh was cancelled on purpose.
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Log in production - for now, silently handle
+            Log.Warning(ex, "Refreshing the dashboard failed");
         }
     }
 

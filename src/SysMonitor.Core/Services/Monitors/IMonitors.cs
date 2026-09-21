@@ -1,4 +1,4 @@
-using SysMonitor.Core.Models;
+﻿using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Monitors;
 
@@ -82,7 +82,16 @@ public readonly record struct FrameRate
         sensorValue is > 0 ? Of(sensorValue.Value) : Idle;
 }
 
-public interface ITemperatureMonitor
+/// <summary>
+/// Reads temperatures, fans and power from the hardware.
+/// <para>
+/// <see cref="IDisposable"/> because opening the hardware loads a kernel driver, and closing it is what
+/// gives that driver back. <c>Dispose</c> used to be declared here on its own, without the interface
+/// extending <see cref="IDisposable"/> - so nothing in the app could see there was anything to release,
+/// and nothing ever called it.
+/// </para>
+/// </summary>
+public interface ITemperatureMonitor : IDisposable
 {
     Task InitializeAsync();
     Task<Dictionary<string, double>> GetAllTemperaturesAsync();
@@ -99,5 +108,4 @@ public interface ITemperatureMonitor
     Task<FrameRate> GetFrameRateAsync();
     Task<double> GetTotalSystemPowerAsync();
     Task<List<string>> GetAllSensorsDiagnosticAsync();
-    void Dispose();
 }

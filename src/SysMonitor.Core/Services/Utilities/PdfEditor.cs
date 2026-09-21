@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
@@ -190,10 +190,23 @@ public class PdfEditor : IPdfEditor
                             var state = gfx.Save();
                             gfx.MultiplyTransform(displayToDrawing);
                             gfx.ScaleTransform(scale);
-                            DrawAnnotation(gfx, annotation, new XSize(displayedSize.Width / scale, displayedSize.Height / scale), pageImage != null);
+                            DrawAnnotation(gfx, annotation, new XSize(displayedSize.Width / scale, displayedSize.Height / scale), pageImages, pageImage != null);
                             gfx.Restore(state);
                         }
                     }
+                }
+
+                // The output is a new document, which starts with no description and no bookmarks at all.
+                // Without these two, every save quietly returned the file anonymous and unnavigable.
+                CopyDescription(inputDoc.Info, outputDoc.Info);
+                CopyOutlines(inputDoc, outputDoc, document.Pages);
+
+                var warnings = new List<string>();
+                if (HasFormFields(inputDoc))
+                {
+                    warnings.Add(
+                        "This document has fillable form fields. They are not kept when it is saved from " +
+                        "the editor - keep the original if you need them.");
                 }
 
                 // Count the pages first: a saved PdfDocument refuses every further access.
@@ -212,12 +225,19 @@ public class PdfEditor : IPdfEditor
                 foreach (var image in pageImages)
                     image.Dispose();
 
+                // Saving over the file the document was opened from makes every page number it holds point
+                // at the old layout of a file that no longer has it. Reordering, saving, then saving again
+                // shuffled the pages a second time. Renumbering here is what makes the second save a no-op.
+                if (IsSameFile(outputPath, document.FilePath))
+                    RenumberToSavedLayout(document);
+
                 return new PdfOperationResult
                 {
                     Success = true,
                     OutputPath = outputPath,
                     PagesProcessed = pagesProcessed,
-                    OutputFiles = [outputPath]
+                    OutputFiles = [outputPath],
+                    Warnings = warnings
                 };
             }
             catch (Exception ex)
@@ -229,6 +249,31 @@ public class PdfEditor : IPdfEditor
                 };
             }
         });
+    }
+
+    /// <summary>
+    /// Whether the document carries an /AcroForm, i.e. whether it is a fillable form.
+    /// <para>
+    /// Saving builds a new document and re-imports each page. The widget annotations come across with their
+    /// pages, but the catalog-level /AcroForm that ties them into fields does not, and rebuilding it
+    /// correctly for fields with child widgets is more than this editor can promise. A form that looks
+    /// present and does not work is worse than one the user was told about, so this reports rather than
+    /// guesses.
+    /// </para>
+    /// </summary>
+    private static bool HasFormFields(PdfDocument document)
+    {
+        try
+        {
+            return document.Internals.Catalog.Elements.ContainsKey("/AcroForm");
+        }
+        catch (Exception ex)
+        {
+            _ = ex;
+            // Best effort: a catalog that will not answer is not evidence of a form, and the save itself
+            // is unaffected either way.
+            return false;
+        }
     }
 
     /// <summary>
@@ -800,11 +845,15 @@ public class PdfEditor : IPdfEditor
     /// Draws an annotation in its own coordinates. The caller has set up the transform from those coordinates
     /// to the page; <paramref name="pageSize"/> is the displayed page in the same units (for page-relative placement).
     /// </summary>
+    /// <param name="keepOpenUntilSaved">
+    /// Streams behind any pictures this annotation draws. PDFsharp reads their pixels when the document is
+    /// saved, so the caller disposes them after that and not before.
+    /// </param>
     /// <param name="boxesAlreadyPainted">
     /// True when the page has been redrawn as a picture with the redaction boxes painted onto its pixels, so
     /// only their labels are left to draw.
     /// </param>
-    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, XSize pageSize, bool boxesAlreadyPainted = false)
+    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, XSize pageSize, ICollection<MemoryStream> keepOpenUntilSaved, bool boxesAlreadyPainted = false)
     {
         var color = ParseColor(annotation.Color);
 
@@ -823,7 +872,7 @@ public class PdfEditor : IPdfEditor
                 DrawFreehand(gfx, freehand, color);
                 break;
             case ImageAnnotation imageAnn:
-                DrawImage(gfx, imageAnn);
+                DrawImage(gfx, imageAnn, keepOpenUntilSaved);
                 break;
             case StickyNoteAnnotation noteAnn:
                 DrawStickyNote(gfx, noteAnn);
@@ -832,13 +881,13 @@ public class PdfEditor : IPdfEditor
                 DrawRedaction(gfx, redactAnn, boxesAlreadyPainted);
                 break;
             case SignatureAnnotation sigAnn:
-                DrawSignature(gfx, sigAnn, color);
+                DrawSignature(gfx, sigAnn, color, keepOpenUntilSaved);
                 break;
             case StampAnnotation stampAnn:
                 DrawStamp(gfx, stampAnn);
                 break;
             case WatermarkAnnotation watermarkAnn:
-                DrawWatermark(gfx, watermarkAnn, pageSize);
+                DrawWatermark(gfx, watermarkAnn, pageSize, keepOpenUntilSaved);
                 break;
             case LinkAnnotation linkAnn:
                 DrawLink(gfx, linkAnn);
@@ -865,30 +914,17 @@ public class PdfEditor : IPdfEditor
         }
     }
 
-    private void DrawImage(XGraphics gfx, ImageAnnotation annotation)
+    /// <remarks>
+    /// An image that cannot be read throws. It used to paint a grey box captioned "[Image]" and let the save
+    /// report success, so the user was told their picture was saved when it was not.
+    /// </remarks>
+    private void DrawImage(XGraphics gfx, ImageAnnotation annotation, ICollection<MemoryStream> keepOpenUntilSaved)
     {
         if (annotation.ImageData == null || annotation.ImageData.Length == 0) return;
 
-        try
-        {
-            using var ms = new MemoryStream(annotation.ImageData);
-            var image = XImage.FromStream(ms);
-
-            // Apply opacity if needed
-            if (annotation.Opacity < 1.0)
-            {
-                // PdfSharp doesn't directly support opacity for images, draw as-is
-            }
-
-            gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
-        }
-        catch
-        {
-            // If image fails to load, draw placeholder
-            gfx.DrawRectangle(XPens.Gray, XBrushes.LightGray, annotation.X, annotation.Y, annotation.Width, annotation.Height);
-            var font = new XFont("Arial", 8, XFontStyleEx.Regular);
-            gfx.DrawString("[Image]", font, XBrushes.Gray, annotation.X + 5, annotation.Y + annotation.Height / 2);
-        }
+        // Opacity is not applied: PDFsharp draws images opaque and there is no per-image alpha to set.
+        var image = PdfImageSource.Open(annotation.ImageData, keepOpenUntilSaved);
+        gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
     }
 
     private void DrawStickyNote(XGraphics gfx, StickyNoteAnnotation annotation)
@@ -966,22 +1002,15 @@ public class PdfEditor : IPdfEditor
         }
     }
 
-    private void DrawSignature(XGraphics gfx, SignatureAnnotation annotation, XColor color)
+    private void DrawSignature(XGraphics gfx, SignatureAnnotation annotation, XColor color, ICollection<MemoryStream> keepOpenUntilSaved)
     {
-        // If signature has image data, draw it
+        // A signature captured as a picture is drawn as one. An unreadable picture throws rather than
+        // falling through to the strokes: falling through would save a signature the user never drew.
         if (annotation.SignatureImageData != null && annotation.SignatureImageData.Length > 0)
         {
-            try
-            {
-                using var ms = new MemoryStream(annotation.SignatureImageData);
-                var image = XImage.FromStream(ms);
-                gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
-                return;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "DrawSignature failed");
-            }
+            var image = PdfImageSource.Open(annotation.SignatureImageData, keepOpenUntilSaved);
+            gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+            return;
         }
 
         // Draw handwritten signature from strokes
@@ -1329,6 +1358,99 @@ public class PdfEditor : IPdfEditor
     }
 
     /// <summary>Carries a document's own description - what a reader sees in File > Properties - to a copy of it.</summary>
+    /// <summary>True when two paths name the same file on disk.</summary>
+    private static bool IsSameFile(string left, string right)
+    {
+        if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+            return false;
+
+        try
+        {
+            return string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            // Best effort: a path the framework will not normalise is not one we can call the same file,
+            // and treating it as different only costs the renumbering below.
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Points the document at what was just written over its own file: page 1 is now page 1, whatever it
+    /// used to be, every page is a real page, and the rotation the user chose is the file's own rotation.
+    /// </summary>
+    private static void RenumberToSavedLayout(PdfEditorDocument document)
+    {
+        for (var index = 0; index < document.Pages.Count; index++)
+        {
+            var page = document.Pages[index];
+            page.PageNumber = index + 1;
+            page.OriginalRotation = PdfPageGeometry.NormalizeRotation(page.Rotation);
+        }
+    }
+
+    /// <summary>
+    /// Rebuilds the source document's bookmarks against the pages that were actually written, in the order
+    /// they were written. A bookmark whose page the user deleted has nowhere to point and is dropped —
+    /// which is the truth about that bookmark, not a loss.
+    /// </summary>
+    private static void CopyOutlines(PdfDocument inputDoc, PdfDocument outputDoc, List<PdfPageInfo> pages)
+    {
+        if (inputDoc.Outlines.Count == 0)
+            return;
+
+        // Source page number (1-based) to the first place it ended up in the output.
+        var destinations = new Dictionary<int, int>();
+        for (var index = 0; index < pages.Count; index++)
+        {
+            if (!pages[index].IsBlank)
+                destinations.TryAdd(pages[index].PageNumber, index);
+        }
+
+        CopyOutlinesInto(inputDoc.Outlines, outputDoc.Outlines, inputDoc, outputDoc, destinations);
+    }
+
+    private static void CopyOutlinesInto(
+        PdfOutlineCollection from,
+        PdfOutlineCollection to,
+        PdfDocument inputDoc,
+        PdfDocument outputDoc,
+        IReadOnlyDictionary<int, int> destinations)
+    {
+        foreach (var outline in from)
+        {
+            var sourcePage = SourcePageNumberOf(outline, inputDoc);
+            if (sourcePage is null || !destinations.TryGetValue(sourcePage.Value, out var outputIndex))
+                continue;
+
+            var copy = new PdfOutline(outline.Title, outputDoc.Pages[outputIndex], outline.Opened);
+            to.Add(copy);
+
+            if (outline.Outlines.Count > 0)
+                CopyOutlinesInto(outline.Outlines, copy.Outlines, inputDoc, outputDoc, destinations);
+        }
+    }
+
+    /// <summary>The 1-based page of the source file a bookmark points at, or null when it points nowhere.</summary>
+    private static int? SourcePageNumberOf(PdfOutline outline, PdfDocument inputDoc)
+    {
+        var target = outline.DestinationPage;
+        if (target is null)
+            return null;
+
+        for (var index = 0; index < inputDoc.PageCount; index++)
+        {
+            if (ReferenceEquals(inputDoc.Pages[index], target) ||
+                (inputDoc.Pages[index].Reference is { } reference && reference == target.Reference))
+            {
+                return index + 1;
+            }
+        }
+
+        return null;
+    }
+
     private static void CopyDescription(PdfDocumentInformation from, PdfDocumentInformation to)
     {
         to.Title = from.Title;
@@ -1500,31 +1622,23 @@ public class PdfEditor : IPdfEditor
     }
 
     /// <param name="pageSize">The page as displayed (original rotation, visible area), in the watermark's units.</param>
-    private void DrawWatermark(XGraphics gfx, WatermarkAnnotation watermark, XSize pageSize)
+    private void DrawWatermark(XGraphics gfx, WatermarkAnnotation watermark, XSize pageSize, ICollection<MemoryStream> keepOpenUntilSaved)
     {
         if (watermark.Type == WatermarkType.Image && watermark.ImageData != null)
         {
-            try
-            {
-                using var ms = new MemoryStream(watermark.ImageData);
-                var image = XImage.FromStream(ms);
+            var image = PdfImageSource.Open(watermark.ImageData, keepOpenUntilSaved);
 
-                // Position based on setting
-                var (x, y) = GetWatermarkPosition(watermark.Position, pageSize.Width, pageSize.Height, watermark.Width, watermark.Height);
+            // Position based on setting
+            var (x, y) = GetWatermarkPosition(watermark.Position, pageSize.Width, pageSize.Height, watermark.Width, watermark.Height);
 
-                var state = gfx.Save();
-                gfx.TranslateTransform(x + watermark.Width / 2, y + watermark.Height / 2);
-                gfx.RotateTransform(watermark.Rotation);
-                gfx.TranslateTransform(-watermark.Width / 2, -watermark.Height / 2);
+            var state = gfx.Save();
+            gfx.TranslateTransform(x + watermark.Width / 2, y + watermark.Height / 2);
+            gfx.RotateTransform(watermark.Rotation);
+            gfx.TranslateTransform(-watermark.Width / 2, -watermark.Height / 2);
 
-                // Note: PdfSharp doesn't support opacity for images directly
-                gfx.DrawImage(image, 0, 0, watermark.Width, watermark.Height);
-                gfx.Restore(state);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "DrawWatermark failed");
-            }
+            // Note: PdfSharp doesn't support opacity for images directly
+            gfx.DrawImage(image, 0, 0, watermark.Width, watermark.Height);
+            gfx.Restore(state);
         }
         else
         {

@@ -8,8 +8,13 @@ using Windows.Storage.Pickers;
 
 namespace SysMonitor.App.ViewModels;
 
-public partial class DriveWiperViewModel : ObservableObject
+public partial class DriveWiperViewModel : ObservableObject, IDisposable
 {
+    /// <summary>Cancelled when the user leaves the page, so the work it started can stop.</summary>
+    private readonly CancellationTokenSource _pageCts = new();
+
+    private bool _isDisposed;
+
     private readonly ILogger _logger;
 
     private readonly IDriveWiper _driveWiper;
@@ -167,6 +172,10 @@ public partial class DriveWiperViewModel : ObservableObject
         var errorCount = 0;
         var linksRemoved = 0;
 
+        // Overwrites the wiper could not read back to confirm. WipeResult has recorded these since it
+        // was written; nothing read the list, so "Successfully wiped" was said over the top of them.
+        var unconfirmed = new List<string>();
+
         try
         {
             var filesToProcess = FilesToWipe.ToList();
@@ -183,14 +192,15 @@ public partial class DriveWiperViewModel : ObservableObject
                 WipeResult result;
                 if (file.IsDirectory)
                 {
-                    result = await _driveWiper.SecureDeleteDirectoryAsync(file.Path, SelectedMethod, progress);
+                    result = await _driveWiper.SecureDeleteDirectoryAsync(file.Path, SelectedMethod, progress, _pageCts.Token);
                 }
                 else
                 {
-                    result = await _driveWiper.SecureDeleteFileAsync(file.Path, SelectedMethod, progress);
+                    result = await _driveWiper.SecureDeleteFileAsync(file.Path, SelectedMethod, progress, _pageCts.Token);
                 }
 
                 linksRemoved += result.LinksRemoved;
+                unconfirmed.AddRange(result.FailedPaths);
 
                 if (result.Success)
                 {
@@ -213,13 +223,22 @@ public partial class DriveWiperViewModel : ObservableObject
                 ? $" {linksRemoved} link(s) were removed; the files they pointed to were not touched."
                 : "";
 
-            if (errorCount == 0)
+            // An overwrite the wiper could not read back is not a wipe anybody should call successful.
+            var unconfirmedNote = unconfirmed.Count > 0
+                ? $" {unconfirmed.Count} overwrite(s) could not be read back to confirm - treat those files as not securely erased."
+                : "";
+
+            if (errorCount == 0 && unconfirmed.Count == 0)
             {
                 StatusMessage = $"Successfully wiped {successCount} items using {SelectedMethod}.{linkNote}";
             }
+            else if (errorCount == 0)
+            {
+                StatusMessage = $"Wiped {successCount} items using {SelectedMethod}.{linkNote}{unconfirmedNote}";
+            }
             else
             {
-                StatusMessage = $"Wiped {successCount} items, {errorCount} failed.{linkNote}";
+                StatusMessage = $"Wiped {successCount} items, {errorCount} failed.{linkNote}{unconfirmedNote}";
             }
         }
         catch (Exception ex)
@@ -301,6 +320,21 @@ public partial class DriveWiperViewModel : ObservableObject
         if (bytes >= 1_048_576) return $"{bytes / 1_048_576.0:F2} MB";
         if (bytes >= 1024) return $"{bytes / 1024.0:F2} KB";
         return $"{bytes} B";
+    }
+
+    /// <summary>
+    /// Stops whatever this page started. The page calls it on the way out; without it a scan or a wipe kept
+    /// running against a page the user had already left, holding the page and its bindings alive with it.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _pageCts.Cancel();
+        _pageCts.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }
 

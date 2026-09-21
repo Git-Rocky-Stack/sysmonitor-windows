@@ -1,9 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Monitoring;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Serilog;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -63,7 +64,8 @@ public partial class PerformanceViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected when disposed
+            // Best effort: the page was left while this was in flight, so the work it was doing
+            // no longer has anywhere to go.
         }
     }
 
@@ -115,9 +117,9 @@ public partial class PerformanceViewModel : ObservableObject, IDisposable
                 GcPressure = gcPressure;
             });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Ignore errors during refresh
+            Log.Warning(ex, "Refreshing the performance page failed");
         }
 
         return Task.CompletedTask;

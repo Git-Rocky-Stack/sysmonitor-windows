@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -156,7 +156,8 @@ public partial class SettingsViewModel : ObservableObject
         }
         catch
         {
-            // Fall through to default
+            // Best effort: an unreadable setting means the default returned below, which is the
+            // answer this method exists to give.
         }
         return defaultValue;
     }
@@ -198,9 +199,9 @@ public partial class SettingsViewModel : ObservableObject
                 _localSettings.Values[key] = value;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Silently fail - settings are not critical
+            _logger.LogWarning(ex, "A setting could not be saved");
         }
     }
 
@@ -213,9 +214,9 @@ public partial class SettingsViewModel : ObservableObject
                 var json = JsonSerializer.Serialize(_fileSettings, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(_settingsFilePath, json);
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently fail
+                _logger.LogWarning(ex, "The settings file could not be written");
             }
         }
     }
@@ -332,7 +333,8 @@ public partial class SettingsViewModel : ObservableObject
         }
         catch
         {
-            // May fail without admin rights - that's okay
+            // Best effort: this needs administrator rights the app may not have, and the setting it
+            // would change is not one the app depends on.
         }
     }
 

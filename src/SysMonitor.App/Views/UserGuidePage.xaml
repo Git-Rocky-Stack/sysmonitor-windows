@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="SysMonitor.App.Views.UserGuidePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -255,7 +255,7 @@
                         <StackPanel Grid.Column="0" Spacing="8">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Close Background Apps</Run>
-                                <Run> - Kills browsers, Discord, Spotify, etc.</Run>
+                                <Run> - Asks browsers, Discord, Spotify and the rest to close, or just lowers their priority. Anything that declines keeps running.</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">High Performance Mode</Run>
@@ -270,7 +270,7 @@
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Session Stats</Run>
-                                <Run> - Shows processes killed and RAM freed</Run>
+                                <Run> - Shows how many background apps were moved out of the way, which ones would not go, and the RAM freed</Run>
                             </TextBlock>
                         </StackPanel>
                     </Grid>
@@ -773,7 +773,7 @@
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
                                 <Run Text="•"/>
-                                <Run> Session stats showing processes killed and memory freed</Run>
+                                <Run> Session stats showing background apps moved out of the way, ones that declined to close, and memory freed</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>

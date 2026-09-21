@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
 using SysMonitor.Core.Services.Optimizers;
 
@@ -43,7 +43,14 @@ public sealed class GameModeService : IGameModeService, IDisposable
     private readonly object _gate = new();
     private readonly Dictionary<int, ProcessPriorityClass> _loweredPriorities = new();
 
-    private bool _isEnabled;
+    /// <summary>
+    /// Serialises turning Game Mode on and off. Three callers can do it - the page's toggle, the
+    /// auto-detect timer and a performance profile - from three different threads.
+    /// </summary>
+    private readonly SemaphoreSlim _transition = new(1, 1);
+
+    // volatile: read by IsEnabled from whichever thread asks, written under _transition.
+    private volatile bool _isEnabled;
     private string? _previousPowerPlanGuid;
 
     public GameModeService(IMemoryOptimizer memoryOptimizer)
@@ -70,8 +77,19 @@ public sealed class GameModeService : IGameModeService, IDisposable
     {
         var result = new GameModeResult { BackgroundAppAction = options.BackgroundApps };
 
+        await _transition.WaitAsync().ConfigureAwait(false);
         try
         {
+            if (_isEnabled)
+            {
+                // Already on, and the plan the machine started from is already recorded. Reading the active
+                // plan again here would record High Performance as the one to go back to - both in memory
+                // and in the note on disk, which would then re-apply it on every launch from now on.
+                result.Success = true;
+                result.PreviousPowerPlanGuid = _previousPowerPlanGuid;
+                return result;
+            }
+
             _previousPowerPlanGuid = await _powerPlans.GetActiveAsync();
             result.PreviousPowerPlanGuid = _previousPowerPlanGuid;
 
@@ -103,11 +121,28 @@ public sealed class GameModeService : IGameModeService, IDisposable
             result.Success = false;
             result.ErrorMessage = ex.Message;
         }
+        finally
+        {
+            _transition.Release();
+        }
 
         return result;
     }
 
     public async Task DisableAsync()
+    {
+        await _transition.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            await DisableWhileHoldingTheGateAsync();
+        }
+        finally
+        {
+            _transition.Release();
+        }
+    }
+
+    private async Task DisableWhileHoldingTheGateAsync()
     {
         RestoreLoweredPriorities();
 
@@ -120,7 +155,7 @@ public sealed class GameModeService : IGameModeService, IDisposable
         }
         catch
         {
-            // Ignore errors when restoring
+            // Best effort: the plan this is putting back is the one the machine already had.
         }
 
         ForgetPowerPlan();
@@ -157,7 +192,7 @@ public sealed class GameModeService : IGameModeService, IDisposable
             }
             catch
             {
-                // Leave the note on disk: the next start will put the plan back.
+                // Best effort: leave the note on disk; the next start will put the plan back.
             }
         }
 
@@ -198,7 +233,7 @@ public sealed class GameModeService : IGameModeService, IDisposable
                 }
                 catch
                 {
-                    // A process this app may not touch is left alone.
+                    // Best effort: a process this app may not touch is left alone.
                 }
                 finally
                 {
@@ -265,7 +300,7 @@ public sealed class GameModeService : IGameModeService, IDisposable
             }
             catch
             {
-                // It has gone, or it is not ours to change any more.
+                // Best effort: it has gone, or it is not ours to change any more.
             }
         }
     }
@@ -291,7 +326,8 @@ public sealed class GameModeService : IGameModeService, IDisposable
         }
         catch
         {
-            // Without the note, only this process can put the plan back - which it still does.
+            // Best effort: without the note, only this process can put the plan back - which it
+            // still does, from memory, for as long as it is running.
         }
     }
 
@@ -321,7 +357,7 @@ public sealed class GameModeService : IGameModeService, IDisposable
         }
         catch
         {
-            // A note left behind only costs one extra restore next time.
+            // Best effort: a note left behind only costs one extra restore next time.
         }
     }
 }

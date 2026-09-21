@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
 using System.Collections.Concurrent;
@@ -365,7 +365,7 @@ public class TempFileCleaner : ITempFileCleaner
             }
             catch
             {
-                // Skip inaccessible directories
+                // Best effort: a folder this account cannot read holds nothing this clean may delete.
             }
         }
     }
@@ -417,7 +417,8 @@ public class TempFileCleaner : ITempFileCleaner
             }
             catch
             {
-                // Expected for locked/inaccessible files during scan - silently skip
+                // Best effort: a file in use cannot be measured or deleted, and the scan is a survey,
+                // not a promise to have seen everything.
             }
         }
 

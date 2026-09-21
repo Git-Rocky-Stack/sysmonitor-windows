@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.Management;
@@ -359,40 +359,10 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         };
     }
 
-    private static int GetChannelFromFrequency(int freqMHz)
-    {
-        // 2.4 GHz band (2412-2484 MHz)
-        if (freqMHz >= 2412 && freqMHz <= 2484)
-        {
-            if (freqMHz == 2484) return 14; // Japan only
-            return (freqMHz - 2412) / 5 + 1;
-        }
+    private static int GetChannelFromFrequency(int freqMHz) => WiFiChannels.ChannelFromFrequency(freqMHz);
 
-        // 5 GHz band
-        if (freqMHz >= 5170 && freqMHz <= 5825)
-        {
-            return (freqMHz - 5000) / 5;
-        }
-
-        // 6 GHz band (WiFi 6E)
-        if (freqMHz >= 5925 && freqMHz <= 7125)
-        {
-            return (freqMHz - 5950) / 5 + 1;
-        }
-
-        return 0;
-    }
-
-    private static string GetBandFromFrequency(int freqMHz)
-    {
-        if (freqMHz >= 2400 && freqMHz < 2500)
-            return "2.4 GHz";
-        if (freqMHz >= 5000 && freqMHz < 5900)
-            return "5 GHz";
-        if (freqMHz >= 5925 && freqMHz <= 7125)
-            return "6 GHz";
-        return "Unknown";
-    }
+    private static string GetBandFromFrequency(int freqMHz) =>
+        WiFiChannels.Describe(WiFiChannels.BandFromFrequency(freqMHz));
 
     private static string GetSecurityString(NetworkAuthenticationType authType)
     {
@@ -577,8 +547,9 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     SignalColor = color,
                     Channel = 0,
                     Band = "Unknown",
-                    Security = "WPA2",
-                    IsSecured = true,
+                    // Not read from the adapter on this path, so it is not claimed.
+                    Security = WiFiSecurity.UnknownLabel,
+                    IsSecured = false,
                     IsConnected = true,
                     FrequencyMHz = 0,
                     NetworkType = $"{speed} Mbps"
@@ -738,7 +709,9 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                         Bssid = FormatMacAddress(wirelessAdapter.GetPhysicalAddress().ToString()),
                         SignalStrength = 75, // Estimated since we can't get exact signal from NetworkInterface
                         Channel = 0, // Not available from NetworkInterface
-                        Security = "WPA2", // Assumed
+                        // NetworkInterface does not report the encryption, so none is claimed. The page shows a
+                        // padlock for anything that is not Open, and an invented "WPA2" earned one on no evidence.
+                        Security = WiFiSecurity.UnknownLabel,
                         LinkSpeed = speed,
                         IpAddress = ipAddress,
                         IsConnected = true
@@ -1020,7 +993,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             Bssid = bssid,
             SignalStrength = signal > 0 ? signal : 75,
             Channel = channel,
-            Security = !string.IsNullOrEmpty(security) ? security : "WPA2",
+            Security = !string.IsNullOrEmpty(security) ? security : WiFiSecurity.UnknownLabel,
             LinkSpeed = speed,
             IpAddress = GetCurrentIpAddress(),
             IsConnected = true,
@@ -1506,7 +1479,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             Bssid = bssid,
             SignalStrength = signal > 0 ? signal : 75, // Default to 75 if not found
             Channel = channel,
-            Security = !string.IsNullOrEmpty(security) ? security : "WPA2",
+            Security = !string.IsNullOrEmpty(security) ? security : WiFiSecurity.UnknownLabel,
             LinkSpeed = speed,
             IpAddress = GetCurrentIpAddress(),
             IsConnected = true,
@@ -1567,11 +1540,12 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         };
     }
 
-    private static string GetBandFromChannel(int channel)
-    {
-        if (channel <= 0) return "Unknown";
-        return channel <= 14 ? "2.4 GHz" : "5 GHz";
-    }
+    /// <remarks>
+    /// A channel number does not always settle the band: 6 GHz numbers its channels from 1 again, so this
+    /// says "Unknown" where it genuinely is. Calling a 6 GHz network "5 GHz" was the previous answer.
+    /// </remarks>
+    private static string GetBandFromChannel(int channel) =>
+        WiFiChannels.Describe(WiFiChannels.BandFromChannel(channel));
 
     private static string GetBandFromRadioType(string radioType)
     {
@@ -1592,51 +1566,12 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         return "Unknown";
     }
 
-    private static double GetFrequencyFromChannel(int channel)
-    {
-        if (channel <= 0)
-        {
-            return 0;
-        }
-        else if (channel <= 14)
-        {
-            // 2.4 GHz band
-            return 2412 + (channel - 1) * 5;
-        }
-        else
-        {
-            // 5 GHz band (simplified)
-            return channel switch
-            {
-                36 => 5180,
-                40 => 5200,
-                44 => 5220,
-                48 => 5240,
-                52 => 5260,
-                56 => 5280,
-                60 => 5300,
-                64 => 5320,
-                100 => 5500,
-                104 => 5520,
-                108 => 5540,
-                112 => 5560,
-                116 => 5580,
-                120 => 5600,
-                124 => 5620,
-                128 => 5640,
-                132 => 5660,
-                136 => 5680,
-                140 => 5700,
-                144 => 5720,
-                149 => 5745,
-                153 => 5765,
-                157 => 5785,
-                161 => 5805,
-                165 => 5825,
-                _ => 5000 + channel * 5
-            };
-        }
-    }
+    /// <remarks>
+    /// Only the 2.4 and 5 GHz bands: a channel number alone cannot tell a 6 GHz channel from one of those,
+    /// and inventing a frequency for it would put a wrong number on the screen.
+    /// </remarks>
+    private static double GetFrequencyFromChannel(int channel) =>
+        WiFiChannels.FrequencyFromChannel(channel, WiFiChannels.BandFromChannel(channel));
 
     private static string FormatMacAddress(string mac)
     {

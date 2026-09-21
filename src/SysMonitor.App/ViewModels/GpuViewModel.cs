@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Monitors;
 using System.Management;
@@ -127,7 +127,8 @@ public partial class GpuViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected when disposed
+            // Best effort: the page was left while this was in flight, so the work it was doing
+            // no longer has anywhere to go.
         }
     }
 
@@ -178,7 +179,7 @@ public partial class GpuViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected during shutdown
+            // Best effort: the app is closing and the refresh was cancelled on purpose.
         }
         catch (Exception)
         {

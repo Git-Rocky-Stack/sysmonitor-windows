@@ -1,4 +1,4 @@
-using System.Management;
+﻿using System.Management;
 using System.Runtime.InteropServices;
 using SysMonitor.Core.Models;
 
@@ -25,7 +25,7 @@ public class BatteryMonitor : IBatteryMonitor
         get
         {
             if (GetSystemPowerStatus(out var status))
-                return status.BatteryFlag != 128;
+                return status.BatteryFlag != BatteryStatusReading.NoSystemBattery;
             return false;
         }
     }
@@ -35,23 +35,19 @@ public class BatteryMonitor : IBatteryMonitor
         return await Task.Run(() =>
         {
             if (!GetSystemPowerStatus(out var status)) return null;
-            if (status.BatteryFlag == 128) return null;
+
+            // Win32 says "unknown" two different ways, and reading either as a fact is how a desktop
+            // ended up being told its battery was critically low. BatteryStatusReading has the rules.
+            var battery = BatteryStatusReading.Read(new BatteryPowerStatus(
+                status.ACLineStatus, status.BatteryFlag, status.BatteryLifePercent, status.BatteryLifeTime));
+
+            if (battery is null) return null;
 
             var capacity = ReadCapacity();
-
-            return new BatteryInfo
-            {
-                IsPresent = true,
-                IsPluggedIn = status.ACLineStatus == 1,
-                IsCharging = (status.BatteryFlag & 8) != 0,
-                ChargePercent = status.BatteryLifePercent <= 100 ? status.BatteryLifePercent : 0,
-                EstimatedRuntime = status.BatteryLifeTime > 0
-                    ? TimeSpan.FromSeconds(status.BatteryLifeTime)
-                    : TimeSpan.Zero,
-                HealthStatus = capacity.Health,
-                DesignCapacityWh = capacity.DesignWattHours,
-                FullChargeCapacityWh = capacity.FullChargeWattHours
-            };
+            battery.HealthStatus = capacity.Health;
+            battery.DesignCapacityWh = capacity.DesignWattHours;
+            battery.FullChargeCapacityWh = capacity.FullChargeWattHours;
+            return battery;
         });
     }
 

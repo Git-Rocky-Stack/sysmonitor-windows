@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -155,13 +155,14 @@ public class NetworkMonitor : INetworkMonitor
                 }
                 catch (NetworkInformationException)
                 {
-                    // The adapter has no IPv4 properties; the gateway test above still applies.
+                    // Best effort: the adapter has no IPv4 properties; the gateway test above still applies.
                 }
             }
         }
         catch (NetworkInformationException)
         {
-            // An adapter that will not describe itself cannot be the one carrying the traffic.
+            // Best effort: an adapter that will not describe itself cannot be the one carrying the
+            // traffic this is looking for.
         }
 
         return new AdapterChoice(ni.Id, isUp, isLoopbackOrTunnel, ownsDefaultRoute, hasGateway, ni.Speed);

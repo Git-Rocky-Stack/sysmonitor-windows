@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Concurrent;
 using System.Management;
@@ -148,7 +148,9 @@ public class DiskMonitor : IDiskMonitor
         }
         catch
         {
-            // WMI query failed - return empty dictionary
+            // Best effort: this is a static cache loader with no logger to reach. An empty result
+            // sends every drive down the IsSSDCached fallback above, which reports "not an SSD" -
+            // a conservative answer, and the same one this method gives for a drive it cannot classify.
         }
 
         return result;

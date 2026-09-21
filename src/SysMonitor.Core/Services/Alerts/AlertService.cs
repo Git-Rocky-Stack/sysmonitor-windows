@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Services.Monitors;
@@ -22,6 +22,7 @@ public class AlertService : IAlertService
 
     private readonly ConcurrentDictionary<AlertType, AlertState> _alertStates = new();
     private readonly string _settingsPath;
+    private readonly TimeProvider _timeProvider;
 
     public event EventHandler<AlertNotification>? AlertTriggered;
 
@@ -29,20 +30,30 @@ public class AlertService : IAlertService
 
     public bool AreAlertsEnabled => GetSetting("ShowNotifications", true);
 
+    /// <param name="settingsPath">
+    /// Where the thresholds live. Defaults to the per-user file the app writes; a test passes its own so it
+    /// never reads the developer's real settings.
+    /// </param>
+    /// <param name="timeProvider">
+    /// The clock the cooldown is measured on. A test can move it; nothing else needs to.
+    /// </param>
     public AlertService(
         ICpuMonitor cpuMonitor,
         IMemoryMonitor memoryMonitor,
         ITemperatureMonitor temperatureMonitor,
         IBatteryMonitor batteryMonitor,
-        ILogger<AlertService>? logger = null)
+        ILogger<AlertService>? logger = null,
+        string? settingsPath = null,
+        TimeProvider? timeProvider = null)
     {
         _logger = logger ?? NullLogger<AlertService>.Instance;
         _cpuMonitor = cpuMonitor;
         _memoryMonitor = memoryMonitor;
         _temperatureMonitor = temperatureMonitor;
         _batteryMonitor = batteryMonitor;
+        _timeProvider = timeProvider ?? TimeProvider.System;
 
-        _settingsPath = Path.Combine(
+        _settingsPath = settingsPath ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "SysMonitor", "settings.json");
     }
@@ -202,18 +213,30 @@ public class AlertService : IAlertService
 
     private void TriggerAlert(AlertType type, AlertSeverity severity, string title, string message, double value, double threshold)
     {
-        var now = DateTime.Now;
+        // UTC, not local: the cooldown is a length of real time, and local time repeats an hour every
+        // autumn. On DateTime.Now the elapsed time went negative for that hour, which reads as "inside the
+        // cooldown" and silenced every alert on the machine until it was over.
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
         var state = _alertStates.GetOrAdd(type, _ => new AlertState { Type = type });
 
-        // Check cooldown
-        if (state.IsActive && (now - state.LastTriggered) < CooldownPeriod)
+        var sinceLast = now - state.LastTriggeredUtc;
+
+        // The cooldown is on the alert, not on the condition holding unbroken. It used to also require
+        // state.IsActive, and the automatic clear-down turns that off without touching the timestamp - so a
+        // metric flickering across its threshold re-armed the alert on every dip and produced a toast per
+        // poll. ClearAlert(type) is the documented way to ask to be told again sooner.
+        //
+        // A negative elapsed time means the clock was moved back under us. Say it anyway: a repeat toast
+        // costs less than a missed critical temperature.
+        if (state.HasTriggered && sinceLast >= TimeSpan.Zero && sinceLast < CooldownPeriod)
         {
             return; // Still in cooldown
         }
 
         // Update state
-        state.LastTriggered = now;
+        state.LastTriggeredUtc = now;
+        state.HasTriggered = true;
         state.IsActive = true;
         state.TriggerValue = value;
         state.Threshold = threshold;
@@ -227,10 +250,15 @@ public class AlertService : IAlertService
             Message = message,
             CurrentValue = value,
             Threshold = threshold,
-            Timestamp = now
+            Timestamp = _timeProvider.GetLocalNow().DateTime
         });
     }
 
+    /// <remarks>
+    /// Records that the metric came back inside its threshold. It deliberately leaves
+    /// <see cref="AlertState.LastTriggeredUtc"/> alone: the cooldown counts from the last time the user was
+    /// told, and a value that dips under the line for one poll has not told them anything new.
+    /// </remarks>
     private void ClearAlertCondition(AlertType type)
     {
         if (_alertStates.TryGetValue(type, out var state))

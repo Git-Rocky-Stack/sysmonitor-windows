@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using SysMonitor.Core.Models;
@@ -51,15 +51,20 @@ public class RegistryCleaner : IRegistryCleaner
         };
     }
 
-    public async Task<List<RegistryIssue>> ScanAsync()
+    public async Task<List<RegistryIssue>> ScanAsync(CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
         {
             var issues = new List<RegistryIssue>();
 
+            // Checked between locations rather than inside a key: one key is quick, the whole walk is not.
+            // The catch below is for a location that will not open, and must not swallow the cancellation.
+            cancellationToken.ThrowIfCancellationRequested();
+
             // Scan HKEY_CURRENT_USER
             foreach (var (keyPath, description, category) in _scanLocations)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     ScanRegistryKey(Registry.CurrentUser, keyPath, description, category, issues);
@@ -73,6 +78,7 @@ public class RegistryCleaner : IRegistryCleaner
             // Scan HKEY_LOCAL_MACHINE (may require admin for some keys)
             foreach (var (keyPath, description, category) in _scanLocations)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     ScanRegistryKey(Registry.LocalMachine, keyPath, description, category, issues);
@@ -83,8 +89,12 @@ public class RegistryCleaner : IRegistryCleaner
                 }
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             // Scan for invalid file associations
             ScanFileAssociations(issues);
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             // Scan for orphaned recent document entries
             ScanRecentDocs(issues);
@@ -92,6 +102,7 @@ public class RegistryCleaner : IRegistryCleaner
             // Check protection status for all issues
             foreach (var issue in issues)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 CheckProtectionStatus(issue);
             }
 
@@ -430,22 +441,17 @@ public class RegistryCleaner : IRegistryCleaner
                 if (clsidKey == null) continue;
 
                 var dllPath = clsidKey.GetValue("")?.ToString();
-                if (!string.IsNullOrEmpty(dllPath))
+                if (!string.IsNullOrEmpty(dllPath) && IsMissingComServer(dllPath))
                 {
-                    var cleanPath = ExtractFilePath(dllPath);
-                    if (!string.IsNullOrEmpty(cleanPath) && !File.Exists(cleanPath) &&
-                        !cleanPath.ToLower().Contains("system32") && !cleanPath.ToLower().Contains("syswow64"))
+                    issues.Add(new RegistryIssue
                     {
-                        issues.Add(new RegistryIssue
-                        {
-                            Key = $"{rootName}\\{keyPath}\\{clsid}",
-                            ValueName = "InprocServer32",
-                            IssueType = "Invalid COM Object",
-                            Description = $"COM server DLL missing: {cleanPath}",
-                            Category = RegistryIssueCategory.InvalidCOM,
-                            RiskLevel = CleanerRiskLevel.Medium
-                        });
-                    }
+                        Key = $"{rootName}\\{keyPath}\\{clsid}",
+                        ValueName = "InprocServer32",
+                        IssueType = "Invalid COM Object",
+                        Description = $"COM server DLL missing: {ExtractFilePath(dllPath)}",
+                        Category = RegistryIssueCategory.InvalidCOM,
+                        RiskLevel = CleanerRiskLevel.Medium
+                    });
                 }
             }
             catch (Exception ex)
@@ -567,6 +573,37 @@ public class RegistryCleaner : IRegistryCleaner
         }
     }
 
+    /// <summary>
+    /// Whether a registered COM server's file can be shown to be gone.
+    /// <para>
+    /// Only a fully qualified path can. COM servers are commonly registered by bare name - mapi32.dll,
+    /// mscoree.dll - and Windows finds those through the DLL search order, which includes directories this
+    /// scan has no way to enumerate. <c>File.Exists</c> on a bare name resolves it against the current
+    /// directory of this process instead, and answers false for a file that is sitting in System32. The
+    /// consequence of believing that answer is deleting the CLSID subtree of a working component.
+    /// </para>
+    /// <para>
+    /// So: a rooted path is checked, and anything else is left alone. A cleaner that cannot prove absence
+    /// must not act on a guess.
+    /// </para>
+    /// </summary>
+    internal static bool IsMissingComServer(string registeredValue)
+    {
+        var path = ExtractFilePath(registeredValue);
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        if (!Path.IsPathFullyQualified(path))
+            return false;
+
+        // Windows' own files are left to Windows, as they always have been.
+        if (path.Contains("system32", StringComparison.OrdinalIgnoreCase) ||
+            path.Contains("syswow64", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return !File.Exists(path);
+    }
+
     private static string ExtractFilePath(string value)
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;
@@ -605,17 +642,22 @@ public class RegistryCleaner : IRegistryCleaner
         return value;
     }
 
-    public async Task<CleanerResult> CleanAsync(IEnumerable<RegistryIssue> issuesToFix)
+    public async Task<CleanerResult> CleanAsync(IEnumerable<RegistryIssue> issuesToFix, CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
         {
             var result = new CleanerResult { Success = true };
             var startTime = DateTime.Now;
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var issuesToProcess = issuesToFix.Where(i => i.IsSelected).ToList();
 
+            // Between entries, never part way through one: a half-applied registry change is worse than
+            // one that was not started.
             foreach (var issue in issuesToProcess)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     // Parse the key path
@@ -801,6 +843,57 @@ public class RegistryCleaner : IRegistryCleaner
 
     public string BackupFolder => _backupFolder;
 
+    /// <summary>
+    /// The file holding the SHA-256 of a backup, written beside it when the backup is made.
+    /// <para>
+    /// This does not stop a process running as this user from writing both files - nothing stored in this
+    /// user's profile can. What it does is make the app refuse anything it did not write itself, which is
+    /// the policy "Restore last backup" already implies, and which closes the drop-a-file-and-wait route
+    /// into HKLM. A backup that must survive a hostile local process belongs somewhere only administrators
+    /// can write.
+    /// </para>
+    /// </summary>
+    private static string FingerprintPathFor(string backupPath) => backupPath + ".sha256";
+
+    private static async Task<string> Sha256OfAsync(Stream stream)
+    {
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        return Convert.ToHexString(await sha.ComputeHashAsync(stream));
+    }
+
+    private async Task RecordFingerprintAsync(string backupPath)
+    {
+        try
+        {
+            await using var file = new FileStream(backupPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            await File.WriteAllTextAsync(FingerprintPathFor(backupPath), await Sha256OfAsync(file));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The backup itself is written and usable by hand; only the app's own restore will refuse it.
+            _logger.LogWarning(ex, "Could not record the fingerprint for {BackupPath}", backupPath);
+        }
+    }
+
+    private async Task<bool> MatchesRecordedFingerprintAsync(string backupPath, Stream openBackup)
+    {
+        var fingerprintPath = FingerprintPathFor(backupPath);
+        if (!File.Exists(fingerprintPath))
+            return false;
+
+        try
+        {
+            var recorded = (await File.ReadAllTextAsync(fingerprintPath)).Trim();
+            var actual = await Sha256OfAsync(openBackup);
+            return recorded.Equals(actual, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _logger.LogWarning(ex, "Could not read the fingerprint for {BackupPath}", backupPath);
+            return false;
+        }
+    }
+
     public IReadOnlyList<string> GetBackups() =>
         Directory.Exists(_backupFolder)
             ? new DirectoryInfo(_backupFolder).GetFiles("registry_backup_*.reg")
@@ -897,6 +990,10 @@ public class RegistryCleaner : IRegistryCleaner
             // Same encoding reg.exe and Registry Editor write: UTF-16 LE with a byte-order mark.
             await File.WriteAllLinesAsync(backupPath, content, new System.Text.UnicodeEncoding(bigEndian: false, byteOrderMark: true));
 
+            // Record what was written, so a restore can tell this file apart from one somebody else dropped
+            // into the folder. See RestoreRegistryBackupAsync for why that matters.
+            await RecordFingerprintAsync(backupPath);
+
             return new RegistryBackupResult
             {
                 Success = true,
@@ -911,14 +1008,47 @@ public class RegistryCleaner : IRegistryCleaner
         }
     }
 
+    /// <summary>
+    /// Imports a backup this app wrote.
+    /// <para>
+    /// The backup folder lives under %LocalAppData%, which every process running as this user can write to,
+    /// and a machine-wide import runs reg.exe elevated. Those two facts together would make this method a
+    /// way into HKLM: drop a .reg file with a newer timestamp than the real backup, wait for the user to
+    /// click "Restore last backup", and their UAC approval - which they are giving to this app - is spent
+    /// importing somebody else's keys. Checking that the file begins with the Registry Editor header does
+    /// not distinguish the two, because anyone can write that line.
+    /// </para>
+    /// <para>
+    /// So a file is imported only if its bytes match what was recorded when this app wrote that backup, and
+    /// the file is held open for reading - denying writers - from the moment it is checked until reg.exe has
+    /// finished with it. Without the lock the check and the import are two separate reads of a file that
+    /// anyone can rewrite in between, and the UAC prompt is a generous window to do it in.
+    /// </para>
+    /// </summary>
     public async Task<RegistryRestoreResult> RestoreRegistryBackupAsync(string backupPath)
     {
         if (!File.Exists(backupPath))
             return new RegistryRestoreResult { Message = "Backup file not found." };
 
-        var content = await File.ReadAllTextAsync(backupPath);
+        // FileShare.Read lets reg.exe read it too, and keeps every writer out until this handle closes.
+        using var locked = new FileStream(backupPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+        string content;
+        using (var reader = new StreamReader(locked, detectEncodingFromByteOrderMarks: true, leaveOpen: true))
+            content = await reader.ReadToEndAsync();
+
         if (!content.TrimStart('\uFEFF').StartsWith(RegFileHeader, StringComparison.Ordinal))
             return new RegistryRestoreResult { Message = "The file is not a registry backup." };
+
+        locked.Position = 0;
+        if (!await MatchesRecordedFingerprintAsync(backupPath, locked))
+        {
+            return new RegistryRestoreResult
+            {
+                Message = "This file is not one this app wrote, or it has been changed since. " +
+                          "It will not be imported. Registry backups made by this app restore normally."
+            };
+        }
 
         var machineWide = content.Contains("[HKEY_LOCAL_MACHINE", StringComparison.OrdinalIgnoreCase) ||
                           content.Contains("[HKEY_CLASSES_ROOT", StringComparison.OrdinalIgnoreCase);

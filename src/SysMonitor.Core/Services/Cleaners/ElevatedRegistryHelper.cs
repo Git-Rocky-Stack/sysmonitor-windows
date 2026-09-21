@@ -62,8 +62,10 @@ public static class ElevatedRegistryHelper
             var fingerprint = Convert.ToHexString(SHA256.HashData(payload));
             await File.WriteAllBytesAsync(inputFile, payload);
 
-            // Get the current executable path
-            var exePath = Process.GetCurrentProcess().MainModule?.FileName;
+            // Get the current executable path. Environment.ProcessPath is the same value as
+            // Process.GetCurrentProcess().MainModule.FileName without opening a handle on ourselves that
+            // nothing then closes.
+            var exePath = Environment.ProcessPath;
             if (string.IsNullOrEmpty(exePath))
             {
                 return new ElevatedCleanResult
