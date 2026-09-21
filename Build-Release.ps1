@@ -225,8 +225,44 @@ if (Test-Path $ZipPath) {
     Remove-Item $ZipPath -Force
 }
 
-Compress-Archive -Path "$PublishDir\*" -DestinationPath $ZipPath -Force
-Write-Host "      Portable ZIP created!" -ForegroundColor Green
+# The portable ZIP is a distribution in its own right and has to carry the same notices the
+# installer does. MIT requires the copyright and permission notice to travel with every copy,
+# and the bundled LibreHardwareMonitor (MPL-2.0) and Serilog (Apache-2.0) carry notice
+# obligations of their own. installer\SysMonitorSetup.iss:88 covers only setup.exe, so the ZIP
+# went out with no licence in it at all.
+#
+# Staged in a temp folder rather than copied into $PublishDir: the .iss adds these same two
+# files by explicit Source/DestName, so a copy left sitting in installer-build would put each
+# licence into the installer twice - installer\build-installer.ps1 recompiles that folder on
+# its own and would pick them up.
+$LicenseStage = Join-Path ([System.IO.Path]::GetTempPath()) "stx1-license-stage-$PID"
+if (Test-Path $LicenseStage) { Remove-Item $LicenseStage -Recurse -Force }
+New-Item -ItemType Directory -Path $LicenseStage -Force | Out-Null
+
+try {
+    # Renamed .txt so they open on a double-click, matching the names the installer lays down.
+    $LicenseFiles = @(
+        @{ Source = "LICENSE";                Name = "LICENSE.txt" },
+        @{ Source = "THIRD-PARTY-NOTICES.md"; Name = "THIRD-PARTY-NOTICES.txt" }
+    )
+
+    $StagedLicenses = foreach ($license in $LicenseFiles) {
+        $sourcePath = Join-Path $ScriptDir $license.Source
+        if (-not (Test-Path $sourcePath)) {
+            throw "Licence file not found: $sourcePath - refusing to build a portable ZIP without it."
+        }
+        $stagedPath = Join-Path $LicenseStage $license.Name
+        Copy-Item $sourcePath $stagedPath -Force
+        $stagedPath
+    }
+
+    Compress-Archive -Path (@("$PublishDir\*") + $StagedLicenses) -DestinationPath $ZipPath -Force
+}
+finally {
+    Remove-Item $LicenseStage -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+Write-Host "      Portable ZIP created (LICENSE.txt and THIRD-PARTY-NOTICES.txt included)!" -ForegroundColor Green
 
 # ============================================================================
 # Summary
