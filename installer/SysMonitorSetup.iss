@@ -78,6 +78,15 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 Source: "..\publish\installer-build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
+; Licence text, installed beside the application. MIT requires the copyright and
+; permission notice to travel with every copy of the software, and the bundled
+; LibreHardwareMonitor (MPL-2.0) and Serilog (Apache-2.0) carry notice obligations
+; of their own. Build-Release.ps1 does not stage these into installer-build, so
+; they are taken from the repository root. Renamed .txt so it opens on a
+; double-click rather than prompting for an application.
+Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
+Source: "..\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; DestName: "THIRD-PARTY-NOTICES.txt"; Flags: ignoreversion
+
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"

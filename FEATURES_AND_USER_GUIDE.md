@@ -691,4 +691,12 @@ For issues and feature requests:
 **STX.1 System Monitor**
 *Strategic. Excellence. Engineered.*
 
-Copyright 2024 Strategia / Rocky Stack. All rights reserved.
+Copyright (c) 2024-2026 Strategia / Rocky Stack.
+
+Released under the [MIT License](LICENSE) — you are free to use, copy, modify, merge,
+publish, distribute, sublicense and sell copies of this software, provided the
+copyright notice and permission notice are included. The software is provided "as is",
+without warranty of any kind.
+
+Third-party components bundled with the application keep their own licences, listed in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

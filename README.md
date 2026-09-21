@@ -2,8 +2,14 @@
 
 **Strategic. Excellence. Engineered.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](CHANGELOG.md)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%202004%2B-lightgrey.svg)](#requirements)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4.svg)](https://dotnet.microsoft.com/)
+
 A Windows system monitoring and optimization desktop application, built with WinUI 3
-and .NET 8.
+and .NET 8. **Free and open source under the MIT License** — use it, read it, change
+it, ship it.
 
 ![STX.1 System Monitor dashboard](App%20Screenshots/v%202.2.0.0%20%28Microsoft%20store%29/1.png)
 
@@ -199,4 +205,22 @@ Readings stay on your machine. See [PRIVACY_POLICY.md](PRIVACY_POLICY.md).
 
 ## License
 
-See [LICENSE](LICENSE).
+**MIT** — see [LICENSE](LICENSE).
+
+You may use, copy, modify, merge, publish, distribute, sublicense and sell copies of
+this software, for any purpose including commercial, provided the copyright notice and
+the permission notice are included. It is provided "as is", without warranty of any
+kind. There is no separate end-user agreement: the MIT text at
+[LICENSE](LICENSE) is what the installer presents
+(`installer/SysMonitorSetup.iss:39`) and it is the whole of the terms.
+
+Third-party components bundled into the self-contained build keep their own licences —
+notably **LibreHardwareMonitor under MPL-2.0** and **Serilog under Apache-2.0**. These
+are compatible with MIT but carry their own obligations, all listed in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+### Contributing
+
+Issues and pull requests are welcome at
+[github.com/Git-Rocky-Stack/sysmonitor-windows](https://github.com/Git-Rocky-Stack/sysmonitor-windows).
+Contributions are accepted under the same MIT terms.

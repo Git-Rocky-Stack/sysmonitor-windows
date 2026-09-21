@@ -952,7 +952,7 @@
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="Windows 10 2004 (build 19041) or later, and Windows 11" Foreground="{StaticResource TextPrimaryBrush}"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="License:" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="MIT License" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="MIT License (free and open source)" Foreground="{StaticResource TextPrimaryBrush}"/>
                         </Grid>
                     </StackPanel>
                 </StackPanel>
@@ -965,8 +965,9 @@
                                Foreground="{StaticResource TextPrimaryBrush}"/>
 
                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
-                        Built with care using Microsoft WinUI 3, LibreHardwareMonitor for hardware data,
-                        LiveCharts2 for visualizations, and the CommunityToolkit.Mvvm framework.
+                        Built with care using Microsoft WinUI 3, LibreHardwareMonitor for the temperature
+                        and fan sensors, LiveCharts2 for visualizations, Serilog for logging, PDFsharp for
+                        the PDF tools, and the CommunityToolkit.Mvvm framework.
                     </TextBlock>
 
                     <Border Height="1" Background="{StaticResource SurfaceBrush}"/>
@@ -980,6 +981,66 @@
 
                     <TextBlock Text="Strategic. Excellence. Engineered."
                                Foreground="{StaticResource PrimaryBrush}" FontSize="12" FontStyle="Italic"/>
+                </StackPanel>
+            </Border>
+
+            <!-- License Card -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE8D7;" FontSize="18" Foreground="{StaticResource SuccessBrush}"/>
+                        <TextBlock Text="License - Free and Open Source" FontWeight="Bold" FontSize="14"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </StackPanel>
+
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" LineHeight="20">
+                        <Run Text="STX.1 System Monitor is released under the"/>
+                        <Run Text="MIT License" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                        <Run Text="."/>
+                    </TextBlock>
+
+                    <StackPanel Spacing="4" Margin="8,0,0,0">
+                        <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
+                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text=" Use it for anything, including commercially"/>
+                        </TextBlock>
+                        <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
+                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text=" Read, study and modify the source code"/>
+                        </TextBlock>
+                        <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
+                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text=" Copy, redistribute, sublicense and sell copies"/>
+                        </TextBlock>
+                        <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
+                            <Run Text="!" Foreground="{StaticResource WarningBrush}" FontWeight="Bold"/>
+                            <Run Text=" Keep the copyright and permission notice with any copy you pass on"/>
+                        </TextBlock>
+                        <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
+                            <Run Text="!" Foreground="{StaticResource WarningBrush}" FontWeight="Bold"/>
+                            <Run Text=" Provided as is, with no warranty of any kind"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{StaticResource SurfaceBrush}"/>
+
+                    <TextBlock Text="Third-party components" FontWeight="SemiBold" FontSize="13"
+                               Foreground="{StaticResource CyanAccentBrush}"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" LineHeight="18">
+                        This app bundles open-source libraries that keep their own licenses:
+                        LibreHardwareMonitor (Mozilla Public License 2.0), Serilog (Apache License 2.0),
+                        and CommunityToolkit.Mvvm, LiveCharts2, PDFsharp, Entity Framework Core and
+                        others under the MIT License. The Windows App SDK and Win2D ship under
+                        Microsoft&#8217;s own terms. Full details are in THIRD-PARTY-NOTICES.md.
+                    </TextBlock>
+
+                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                        <Run Text="Full license text: LICENSE.txt in the installation folder, and at"/>
+                        <Run Text="github.com/Git-Rocky-Stack/sysmonitor-windows" Foreground="{StaticResource CyanAccentBrush}"/>
+                    </TextBlock>
+
+                    <TextBlock Text="&#169; 2024-2026 Rocky Stack / Strategia-X"
+                               Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                 </StackPanel>
             </Border>
 

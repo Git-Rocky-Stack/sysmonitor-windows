@@ -49,7 +49,8 @@ SysMonitorSetup.iss  - The Inno Setup script. The only one: every build path
                        second AppId, which Inno Setup treats as a different
                        product - so installing from both would leave two
                        copies side by side instead of upgrading.
-LICENSE.rtf          - License agreement (shown during install)
+(The licence shown during install is ..icense, the mit text at the
+                       repository root - see licensefile in the .iss.)
 README_BEFORE.txt    - Pre-installation information
 README_AFTER.txt     - Post-installation information
 installer_icon.ico   - Installer icon
@@ -70,7 +71,8 @@ CUSTOMIZATION
    Replace installer_icon.ico with a 256x256 .ico file.
 
 3. MODIFY LICENSE:
-   Edit LICENSE.rtf in WordPad or Word
+   Edit LICENSE at the repository root. It is plain text; Inno Setup
+   reads it directly via LicenseFile in SysMonitorSetup.iss.
 
 4. CHANGE PUBLISHER INFO:
    Edit these lines in SysMonitorSetup.iss:
@@ -127,5 +129,5 @@ A: Either code-sign the installer or users can click "More info" > "Run anyway"
 
 
 ============================================================
-             (C) 2024 Rocky Stack - All Rights Reserved
+     (C) 2024-2026 Rocky Stack - Released under the MIT License
 ============================================================

@@ -31,5 +31,5 @@ IMPORTANT NOTES:
 Thank you for choosing SysMonitor!
 
 ============================================================
-        (C) 2024-2025 Rocky Stack - All Rights Reserved
+     (C) 2024-2026 Rocky Stack - Released under the MIT License
 ============================================================

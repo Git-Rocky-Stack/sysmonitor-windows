@@ -205,6 +205,31 @@ which is what makes this a major version.
   said 1.0.0 for a 2.2.2 build, so Add/Remove Programs reported a release that never existed.
   (`installer/SysMonitorSetup.iss`)
 
+### Licensing
+
+- **The app says it is MIT, everywhere, for the first time.** The MIT text at `LICENSE`
+  is what the installer has presented since 2025-12-15 (`installer/SysMonitorSetup.iss:39`),
+  but six other places told the user the opposite — the Settings page read
+  "All rights reserved", and `installer/LICENSE.rtf` was a proprietary end-user agreement
+  forbidding copying, modification, distribution and reverse engineering.
+- **`installer/LICENSE.rtf` deleted.** It was never wired into the build — the installer
+  reads `..\LICENSE` — so it contradicted the actual terms while being documented as the
+  agreement shown during installation. `installer/INSTALLER_README.txt` now points at the
+  real file.
+- **A License card was added to the in-app User's Guide**
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml`), stating what the MIT grant permits and
+  requires, and listing the third-party licences bundled with the app. The Settings page
+  says the same (`src/SysMonitor.App/Views/SettingsPage.xaml:374`).
+- **`THIRD-PARTY-NOTICES.md` added.** The build is self-contained, so it redistributes its
+  dependencies, and none were attributed. LibreHardwareMonitor is MPL-2.0 and carries a
+  source-availability obligation that was not being met; Serilog is Apache-2.0.
+- **The licence now installs with the application.** `Build-Release.ps1` stages only the
+  publish output, and the installer copied only that folder, so `LICENSE` never reached
+  the installed app — while MIT requires the copyright and permission notice to travel
+  with every copy. `LICENSE.txt` and `THIRD-PARTY-NOTICES.txt` are now installed beside
+  the executable (`installer/SysMonitorSetup.iss`).
+- Copyright lines read 2024-2026 rather than 2024 or 2024-2025.
+
 ### Documentation
 
 - The keyboard-shortcut table has been removed from the user guide. None of the six shortcuts it

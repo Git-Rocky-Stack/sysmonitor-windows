@@ -1,7 +1,13 @@
 # Third-Party Notices
 
-STX.1 System Monitor ships as a self-contained build, so the components below are
-redistributed inside the installed application.
+STX.1 System Monitor is itself released under the [MIT License](LICENSE). It ships as a
+self-contained build, so the components below are redistributed inside the installed
+application, and each keeps its own terms.
+
+All of them are compatible with MIT distribution, but two carry obligations beyond
+attribution: **LibreHardwareMonitorLib (MPL-2.0)** requires that recipients be told how
+to obtain that library's source, and **Serilog (Apache-2.0)** requires its notices be
+preserved. Both are satisfied below.
 
 Every entry was read from the package's own `.nuspec` at the exact version this
 project references, not from memory. To re-check any line:

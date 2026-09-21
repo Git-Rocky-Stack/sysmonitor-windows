@@ -37,5 +37,5 @@ BEFORE INSTALLATION:
 Click "Next" to continue with the installation.
 
 ============================================================
-             (C) 2024 Rocky Stack - All Rights Reserved
+     (C) 2024-2026 Rocky Stack - Released under the MIT License
 ============================================================
