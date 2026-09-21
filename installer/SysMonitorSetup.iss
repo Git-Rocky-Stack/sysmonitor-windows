@@ -1,11 +1,17 @@
-; STX1 System Monitor - Inno Setup Script
+﻿; STX1 System Monitor - Inno Setup Script
 ; Copyright (c) 2024 Rocky Stack
 ;
-; To sign the installer, use SignTool after compilation:
-; signtool sign /f certificate.pfx /p password /fd SHA256 /t http://timestamp.digicert.com "STX1-SystemMonitor-Setup-1.0.0.exe"
+; To sign the installer, use SignTool after compilation with a certificate from the Windows certificate store:
+; signtool sign /sha1 <thumbprint> /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "STX1-SystemMonitor-Setup-<version>.exe"
 
 #define MyAppName "STX1 System Monitor"
-#define MyAppVersion "1.0.0"
+
+; Read straight out of the executable being packaged. Written by hand this said 1.0.0 for a 2.2.2
+; build, so Add/Remove Programs and HKLM\SOFTWARE\...\Version both reported a release that never
+; existed. GetFileVersion returns four parts ("2.2.2.0"); the trailing one is dropped.
+#define AppExeFile "..\publish\installer-build\SysMonitor.App.exe"
+#define FullVersion GetFileVersion(AppExeFile)
+#define MyAppVersion Copy(FullVersion, 1, RPos(".", FullVersion) - 1)
 #define MyAppPublisher "Rocky Stack"
 #define MyAppURL "https://github.com/rockystack"
 #define MyAppExeName "SysMonitor.App.exe"

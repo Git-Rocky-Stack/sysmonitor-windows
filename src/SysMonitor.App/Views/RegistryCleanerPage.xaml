@@ -99,6 +99,27 @@
                                     Style="{StaticResource RedButtonStyle}"
                                     IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
                         </Border>
+                        <!-- RESTORE BACKUP with chrome bezel -->
+                        <Border CornerRadius="26" Padding="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#707070" Offset="0.0"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
+                                    <GradientStop Color="#505050" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Button Content="RESTORE BACKUP" Click="RestoreBackup_Click"
+                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
+                                    ToolTipService.ToolTip="Undo the last registry cleaning by importing its backup"
+                                    IsEnabled="{x:Bind ViewModel.HasBackup, Mode=OneWay}"/>
+                        </Border>
+                        <Button Command="{x:Bind ViewModel.OpenBackupFolderCommand}" Padding="10" VerticalAlignment="Center"
+                                ToolTipService.ToolTip="Open the registry backups folder"
+                                AutomationProperties.Name="Open registry backups folder">
+                            <FontIcon Glyph="&#xE838;" FontSize="14"/>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -115,7 +136,7 @@
                               Foreground="{StaticResource CyanAccentBrush}" Margin="0,0,12,0"/>
                     <TextBlock Grid.Column="1" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
                         <Run Text="Registry cleaning removes invalid entries left behind by uninstalled programs. "/>
-                        <Run Text="A backup is automatically created before any changes are made." Foreground="{StaticResource SuccessBrush}"/>
+                        <Run Text="Every key that will change is backed up first; if the backup fails, nothing is changed. Use RESTORE BACKUP to undo the last cleaning." Foreground="{StaticResource SuccessBrush}"/>
                     </TextBlock>
                 </Grid>
             </Border>

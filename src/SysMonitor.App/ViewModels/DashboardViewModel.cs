@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
@@ -11,6 +11,9 @@ using SysMonitor.Core.Services.Optimizers;
 using System.Text;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+
+using SysMonitor.Core.Helpers;
+using Serilog;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -117,15 +120,16 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
                 {
                     await _alertService.CheckThresholdsAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Alerts are non-critical, continue even if they fail
+                    Log.Debug(ex, "Checking alert thresholds failed during a dashboard refresh");
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            // Expected when disposed
+            // Best effort: the page was left while this was in flight, so the work it was doing
+            // no longer has anywhere to go.
         }
     }
 
@@ -139,16 +143,18 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         {
             // Fetch all data in parallel
             var infoTask = _systemInfoService.GetSystemInfoAsync();
+            // One reading per refresh: the speeds come with the network info. Asking twice at once used to
+            // leave one of the two callers with a zero, and that zero reached the screen.
             var networkTask = _networkMonitor.GetNetworkInfoAsync();
-            var networkSpeedTask = _networkMonitor.GetSpeedAsync();
             var cpuTempTask = _temperatureMonitor.GetCpuTemperatureAsync();
             var gpuTempTask = _temperatureMonitor.GetGpuTemperatureAsync();
 
-            await Task.WhenAll(infoTask, networkTask, networkSpeedTask, cpuTempTask, gpuTempTask);
+            await Task.WhenAll(infoTask, networkTask, cpuTempTask, gpuTempTask);
 
             var info = await infoTask;
             var networkInfo = await networkTask;
-            var (upload, download) = await networkSpeedTask;
+            var upload = networkInfo.UploadSpeedBps;
+            var download = networkInfo.DownloadSpeedBps;
             var cpuTemp = await cpuTempTask;
             var gpuTemp = await gpuTempTask;
 
@@ -221,11 +227,11 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected during shutdown
+            // Best effort: the app is closing and the refresh was cancelled on purpose.
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Log in production - for now, silently handle
+            Log.Warning(ex, "Refreshing the dashboard failed");
         }
     }
 
@@ -298,9 +304,12 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
         try
         {
-            var freedMB = await _memoryOptimizer.OptimizeMemoryAsync();
+            var trimmedBytes = await _memoryOptimizer.OptimizeMemoryAsync();
             await RefreshDataAsync();
-            ShowActionStatus($"Freed {freedMB:F0} MB of memory!", true);
+            // The optimizer returns bytes; this used to print that number with "MB" after it, so trimming
+            // 500 MB read as "Freed 524288000 MB". And trimming a working set is not freeing memory: Windows
+            // moves those pages to the standby list and can page them back as soon as the app touches them.
+            ShowActionStatus($"Trimmed {FormatHelper.FormatSize(trimmedBytes)} from background apps", true);
         }
         catch (Exception ex)
         {

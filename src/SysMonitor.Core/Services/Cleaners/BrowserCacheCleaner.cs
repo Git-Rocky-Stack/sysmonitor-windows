@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
 
@@ -207,13 +207,14 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                 }
                 catch
                 {
-                    // Expected for locked/inaccessible files - silently skip
+                    // Best effort: a file the browser still holds open is left where it is; the
+                    // clean carries on with the rest.
                 }
             }
         }
         catch
         {
-            // Expected for inaccessible directories - silently skip
+            // Best effort: a folder this account cannot read is skipped, not failed on.
         }
         return (size, count);
     }

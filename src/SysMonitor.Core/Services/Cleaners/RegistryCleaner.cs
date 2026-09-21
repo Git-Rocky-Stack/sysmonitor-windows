@@ -1,3 +1,5 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using SysMonitor.Core.Models;
 
@@ -5,10 +7,23 @@ namespace SysMonitor.Core.Services.Cleaners;
 
 public class RegistryCleaner : IRegistryCleaner
 {
-    private readonly List<(string KeyPath, string Description, RegistryIssueCategory Category)> _scanLocations;
+    private readonly ILogger _logger;
 
-    public RegistryCleaner()
+    private readonly List<(string KeyPath, string Description, RegistryIssueCategory Category)> _scanLocations;
+    private readonly string _backupFolder;
+
+    public RegistryCleaner(ILogger<RegistryCleaner>? logger = null)
+        : this(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SysMonitor", "RegistryBackups"), logger)
     {
+    }
+
+    /// <summary>Uses <paramref name="backupFolder"/> for registry backups (tests use an isolated folder).</summary>
+    internal RegistryCleaner(string backupFolder, ILogger<RegistryCleaner>? logger = null)
+    {
+        _logger = logger ?? NullLogger<RegistryCleaner>.Instance;
+        _backupFolder = backupFolder;
         _scanLocations = new List<(string, string, RegistryIssueCategory)>
         {
             // Shared DLLs with invalid paths
@@ -36,34 +51,50 @@ public class RegistryCleaner : IRegistryCleaner
         };
     }
 
-    public async Task<List<RegistryIssue>> ScanAsync()
+    public async Task<List<RegistryIssue>> ScanAsync(CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
         {
             var issues = new List<RegistryIssue>();
 
+            // Checked between locations rather than inside a key: one key is quick, the whole walk is not.
+            // The catch below is for a location that will not open, and must not swallow the cancellation.
+            cancellationToken.ThrowIfCancellationRequested();
+
             // Scan HKEY_CURRENT_USER
             foreach (var (keyPath, description, category) in _scanLocations)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     ScanRegistryKey(Registry.CurrentUser, keyPath, description, category, issues);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanAsync failed");
+                }
             }
 
             // Scan HKEY_LOCAL_MACHINE (may require admin for some keys)
             foreach (var (keyPath, description, category) in _scanLocations)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     ScanRegistryKey(Registry.LocalMachine, keyPath, description, category, issues);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanAsync failed");
+                }
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             // Scan for invalid file associations
             ScanFileAssociations(issues);
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             // Scan for orphaned recent document entries
             ScanRecentDocs(issues);
@@ -71,6 +102,7 @@ public class RegistryCleaner : IRegistryCleaner
             // Check protection status for all issues
             foreach (var issue in issues)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 CheckProtectionStatus(issue);
             }
 
@@ -230,7 +262,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidFilePaths failed");
+            }
         }
     }
 
@@ -279,7 +314,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForOrphanedSoftware failed");
+            }
         }
     }
 
@@ -323,7 +361,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidShellExtensions failed");
+            }
         }
     }
 
@@ -350,7 +391,10 @@ public class RegistryCleaner : IRegistryCleaner
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidStartupEntries failed");
+            }
         }
     }
 
@@ -377,7 +421,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanMUICache failed");
+            }
         }
     }
 
@@ -394,25 +441,23 @@ public class RegistryCleaner : IRegistryCleaner
                 if (clsidKey == null) continue;
 
                 var dllPath = clsidKey.GetValue("")?.ToString();
-                if (!string.IsNullOrEmpty(dllPath))
+                if (!string.IsNullOrEmpty(dllPath) && IsMissingComServer(dllPath))
                 {
-                    var cleanPath = ExtractFilePath(dllPath);
-                    if (!string.IsNullOrEmpty(cleanPath) && !File.Exists(cleanPath) &&
-                        !cleanPath.ToLower().Contains("system32") && !cleanPath.ToLower().Contains("syswow64"))
+                    issues.Add(new RegistryIssue
                     {
-                        issues.Add(new RegistryIssue
-                        {
-                            Key = $"{rootName}\\{keyPath}\\{clsid}",
-                            ValueName = "InprocServer32",
-                            IssueType = "Invalid COM Object",
-                            Description = $"COM server DLL missing: {cleanPath}",
-                            Category = RegistryIssueCategory.InvalidCOM,
-                            RiskLevel = CleanerRiskLevel.Medium
-                        });
-                    }
+                        Key = $"{rootName}\\{keyPath}\\{clsid}",
+                        ValueName = "InprocServer32",
+                        IssueType = "Invalid COM Object",
+                        Description = $"COM server DLL missing: {ExtractFilePath(dllPath)}",
+                        Category = RegistryIssueCategory.InvalidCOM,
+                        RiskLevel = CleanerRiskLevel.Medium
+                    });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidCOM failed");
+            }
         }
     }
 
@@ -449,7 +494,10 @@ public class RegistryCleaner : IRegistryCleaner
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanForInvalidTypeLib failed");
+            }
         }
     }
 
@@ -485,10 +533,16 @@ public class RegistryCleaner : IRegistryCleaner
                         });
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanFileAssociations failed");
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ScanFileAssociations failed");
+        }
     }
 
     private void ScanRecentDocs(List<RegistryIssue> issues)
@@ -513,7 +567,41 @@ public class RegistryCleaner : IRegistryCleaner
                 });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ScanRecentDocs failed");
+        }
+    }
+
+    /// <summary>
+    /// Whether a registered COM server's file can be shown to be gone.
+    /// <para>
+    /// Only a fully qualified path can. COM servers are commonly registered by bare name - mapi32.dll,
+    /// mscoree.dll - and Windows finds those through the DLL search order, which includes directories this
+    /// scan has no way to enumerate. <c>File.Exists</c> on a bare name resolves it against the current
+    /// directory of this process instead, and answers false for a file that is sitting in System32. The
+    /// consequence of believing that answer is deleting the CLSID subtree of a working component.
+    /// </para>
+    /// <para>
+    /// So: a rooted path is checked, and anything else is left alone. A cleaner that cannot prove absence
+    /// must not act on a guess.
+    /// </para>
+    /// </summary>
+    internal static bool IsMissingComServer(string registeredValue)
+    {
+        var path = ExtractFilePath(registeredValue);
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        if (!Path.IsPathFullyQualified(path))
+            return false;
+
+        // Windows' own files are left to Windows, as they always have been.
+        if (path.Contains("system32", StringComparison.OrdinalIgnoreCase) ||
+            path.Contains("syswow64", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return !File.Exists(path);
     }
 
     private static string ExtractFilePath(string value)
@@ -554,17 +642,22 @@ public class RegistryCleaner : IRegistryCleaner
         return value;
     }
 
-    public async Task<CleanerResult> CleanAsync(IEnumerable<RegistryIssue> issuesToFix)
+    public async Task<CleanerResult> CleanAsync(IEnumerable<RegistryIssue> issuesToFix, CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
         {
             var result = new CleanerResult { Success = true };
             var startTime = DateTime.Now;
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var issuesToProcess = issuesToFix.Where(i => i.IsSelected).ToList();
 
+            // Between entries, never part way through one: a half-applied registry change is worse than
+            // one that was not started.
             foreach (var issue in issuesToProcess)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     // Parse the key path
@@ -665,7 +758,10 @@ public class RegistryCleaner : IRegistryCleaner
                                         deletedCount++;
                                     }
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogDebug(ex, "CleanAsync failed");
+                                }
                             }
                             operationSucceeded = deletedCount > 0;
                             if (deletedCount < valueNames.Count)
@@ -745,41 +841,343 @@ public class RegistryCleaner : IRegistryCleaner
         });
     }
 
-    public async Task<string> BackupRegistryAsync()
+    public string BackupFolder => _backupFolder;
+
+    /// <summary>
+    /// The file holding the SHA-256 of a backup, written beside it when the backup is made.
+    /// <para>
+    /// This does not stop a process running as this user from writing both files - nothing stored in this
+    /// user's profile can. What it does is make the app refuse anything it did not write itself, which is
+    /// the policy "Restore last backup" already implies, and which closes the drop-a-file-and-wait route
+    /// into HKLM. A backup that must survive a hostile local process belongs somewhere only administrators
+    /// can write.
+    /// </para>
+    /// </summary>
+    private static string FingerprintPathFor(string backupPath) => backupPath + ".sha256";
+
+    private static async Task<string> Sha256OfAsync(Stream stream)
     {
-        return await Task.Run(() =>
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        return Convert.ToHexString(await sha.ComputeHashAsync(stream));
+    }
+
+    private async Task RecordFingerprintAsync(string backupPath)
+    {
+        try
         {
-            var backupDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SysMonitor", "RegistryBackups");
+            await using var file = new FileStream(backupPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            await File.WriteAllTextAsync(FingerprintPathFor(backupPath), await Sha256OfAsync(file));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The backup itself is written and usable by hand; only the app's own restore will refuse it.
+            _logger.LogWarning(ex, "Could not record the fingerprint for {BackupPath}", backupPath);
+        }
+    }
 
-            Directory.CreateDirectory(backupDir);
+    private async Task<bool> MatchesRecordedFingerprintAsync(string backupPath, Stream openBackup)
+    {
+        var fingerprintPath = FingerprintPathFor(backupPath);
+        if (!File.Exists(fingerprintPath))
+            return false;
 
-            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            var backupPath = Path.Combine(backupDir, $"registry_backup_{timestamp}.reg");
+        try
+        {
+            var recorded = (await File.ReadAllTextAsync(fingerprintPath)).Trim();
+            var actual = await Sha256OfAsync(openBackup);
+            return recorded.Equals(actual, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _logger.LogWarning(ex, "Could not read the fingerprint for {BackupPath}", backupPath);
+            return false;
+        }
+    }
 
-            // Export key sections we might modify
-            var keysToBackup = new[]
+    public IReadOnlyList<string> GetBackups() =>
+        Directory.Exists(_backupFolder)
+            ? new DirectoryInfo(_backupFolder).GetFiles("registry_backup_*.reg")
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .Select(f => f.FullName)
+                .ToList()
+            : [];
+
+    private const string RegFileHeader = "Windows Registry Editor Version 5.00";
+    private static readonly string[] RegistryRootPrefixes =
+    [
+        "HKEY_CURRENT_USER\\", "HKCU\\", "HKEY_LOCAL_MACHINE\\", "HKLM\\", "HKEY_CLASSES_ROOT\\", "HKCR\\"
+    ];
+
+    public async Task<RegistryBackupResult> BackupRegistryAsync(IEnumerable<RegistryIssue> issuesToFix)
+    {
+        // Every fix deletes either the issue's key with its whole subtree, or values inside the key, so exporting
+        // each issue's key captures everything the run can change. Each key is exported on its own: reg.exe
+        // exits 0 while silently omitting subkeys it cannot read, so exporting a parent would hide a failure.
+        var keys = issuesToFix
+            .Where(i => i.IsSelected && RegistryRootPrefixes.Any(p => i.Key.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+            .GroupBy(i => i.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(g => (Key: g.Key, DeletesSubtree: g.Any(DeletesSubtree)))
+            .ToList();
+
+        var tempFolder = Path.Combine(Path.GetTempPath(), $"sysmon_regbackup_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempFolder);
+        try
+        {
+            var sections = new List<string>();
+            var failed = new List<string>();
+            var exported = 0;
+
+            for (int i = 0; i < keys.Count; i++)
             {
-                @"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
-                @"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts",
-                @"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs"
-            };
+                var unreadable = FindUnreadable(keys[i].Key, keys[i].DeletesSubtree);
+                if (unreadable != null)
+                {
+                    failed.Add($"{unreadable}: cannot be read, so it cannot be backed up");
+                    continue;
+                }
 
-            using var writer = new StreamWriter(backupPath);
-            writer.WriteLine("Windows Registry Editor Version 5.00");
-            writer.WriteLine();
-            writer.WriteLine($"; SysMonitor Registry Backup - {DateTime.Now}");
-            writer.WriteLine("; Keys backed up before registry cleaning");
-            writer.WriteLine();
+                var exportFile = Path.Combine(tempFolder, $"{i}.reg");
+                var (exitCode, output) = await RunRegAsync(["export", keys[i].Key, exportFile, "/y"]);
 
-            foreach (var keyPath in keysToBackup)
-            {
-                writer.WriteLine($"; Backup of {keyPath}");
-                writer.WriteLine();
+                if (exitCode == 0 && File.Exists(exportFile))
+                {
+                    var lines = await File.ReadAllLinesAsync(exportFile);
+                    if (lines.Length == 0 || lines[0] != RegFileHeader)
+                    {
+                        failed.Add($"{keys[i].Key}: unexpected export format");
+                        continue;
+                    }
+                    sections.AddRange(lines.Skip(1));
+                    exported++;
+                }
+                else if (output.Contains("unable to find", StringComparison.OrdinalIgnoreCase))
+                {
+                    // The key no longer exists, so fixing the issue cannot change anything.
+                }
+                else
+                {
+                    failed.Add($"{keys[i].Key}: {output.Trim()}");
+                }
             }
 
-            return backupPath;
-        });
+            if (failed.Count > 0)
+            {
+                return new RegistryBackupResult
+                {
+                    Success = false,
+                    FailedKeys = failed,
+                    Message = $"Could not back up {failed.Count} registry key(s); nothing was changed. First: {failed[0]}"
+                };
+            }
+
+            if (exported == 0)
+            {
+                return new RegistryBackupResult { Success = true, Message = "None of the selected keys exist any more; nothing to back up." };
+            }
+
+            Directory.CreateDirectory(_backupFolder);
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff");
+            var backupPath = Path.Combine(_backupFolder, $"registry_backup_{timestamp}.reg");
+            var content = new List<string>
+            {
+                RegFileHeader,
+                "",
+                $"; SysMonitor registry backup, {DateTime.Now:yyyy-MM-dd HH:mm:ss}: {exported} key(s) that registry cleaning was about to modify.",
+                "; Restore from the Registry Cleaner page, or double-click this file to import it with Registry Editor."
+            };
+            content.AddRange(sections);
+
+            // Same encoding reg.exe and Registry Editor write: UTF-16 LE with a byte-order mark.
+            await File.WriteAllLinesAsync(backupPath, content, new System.Text.UnicodeEncoding(bigEndian: false, byteOrderMark: true));
+
+            // Record what was written, so a restore can tell this file apart from one somebody else dropped
+            // into the folder. See RestoreRegistryBackupAsync for why that matters.
+            await RecordFingerprintAsync(backupPath);
+
+            return new RegistryBackupResult
+            {
+                Success = true,
+                BackupPath = backupPath,
+                KeysExported = exported,
+                Message = $"Backed up {exported} registry key(s) to {backupPath}"
+            };
+        }
+        finally
+        {
+            try { Directory.Delete(tempFolder, true); } catch (IOException ex) { _logger.LogDebug(ex, "BackupRegistryAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "BackupRegistryAsync failed"); }
+        }
+    }
+
+    /// <summary>
+    /// Imports a backup this app wrote.
+    /// <para>
+    /// The backup folder lives under %LocalAppData%, which every process running as this user can write to,
+    /// and a machine-wide import runs reg.exe elevated. Those two facts together would make this method a
+    /// way into HKLM: drop a .reg file with a newer timestamp than the real backup, wait for the user to
+    /// click "Restore last backup", and their UAC approval - which they are giving to this app - is spent
+    /// importing somebody else's keys. Checking that the file begins with the Registry Editor header does
+    /// not distinguish the two, because anyone can write that line.
+    /// </para>
+    /// <para>
+    /// So a file is imported only if its bytes match what was recorded when this app wrote that backup, and
+    /// the file is held open for reading - denying writers - from the moment it is checked until reg.exe has
+    /// finished with it. Without the lock the check and the import are two separate reads of a file that
+    /// anyone can rewrite in between, and the UAC prompt is a generous window to do it in.
+    /// </para>
+    /// </summary>
+    public async Task<RegistryRestoreResult> RestoreRegistryBackupAsync(string backupPath)
+    {
+        if (!File.Exists(backupPath))
+            return new RegistryRestoreResult { Message = "Backup file not found." };
+
+        // FileShare.Read lets reg.exe read it too, and keeps every writer out until this handle closes.
+        using var locked = new FileStream(backupPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+        string content;
+        using (var reader = new StreamReader(locked, detectEncodingFromByteOrderMarks: true, leaveOpen: true))
+            content = await reader.ReadToEndAsync();
+
+        if (!content.TrimStart('\uFEFF').StartsWith(RegFileHeader, StringComparison.Ordinal))
+            return new RegistryRestoreResult { Message = "The file is not a registry backup." };
+
+        locked.Position = 0;
+        if (!await MatchesRecordedFingerprintAsync(backupPath, locked))
+        {
+            return new RegistryRestoreResult
+            {
+                Message = "This file is not one this app wrote, or it has been changed since. " +
+                          "It will not be imported. Registry backups made by this app restore normally."
+            };
+        }
+
+        var machineWide = content.Contains("[HKEY_LOCAL_MACHINE", StringComparison.OrdinalIgnoreCase) ||
+                          content.Contains("[HKEY_CLASSES_ROOT", StringComparison.OrdinalIgnoreCase);
+
+        if (!machineWide || ElevatedRegistryHelper.IsRunningElevated())
+        {
+            var (exitCode, output) = await RunRegAsync(["import", backupPath]);
+            return exitCode == 0
+                ? new RegistryRestoreResult { Success = true, Message = "Registry backup restored." }
+                : new RegistryRestoreResult { Message = $"Restore failed: {output.Trim()}" };
+        }
+
+        // Machine-wide keys need administrator rights; reg.exe runs elevated after a UAC prompt.
+        try
+        {
+            using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "reg.exe",
+                Arguments = $"import \"{backupPath}\"",
+                UseShellExecute = true,
+                Verb = "runas",
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+            });
+            if (process == null)
+                return new RegistryRestoreResult { Message = "Could not start the restore." };
+
+            await process.WaitForExitAsync();
+            return process.ExitCode == 0
+                ? new RegistryRestoreResult { Success = true, Message = "Registry backup restored." }
+                : new RegistryRestoreResult { Message = $"Restore failed (reg.exe exit code {process.ExitCode})." };
+        }
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        {
+            return new RegistryRestoreResult { WasCancelled = true, Message = "Restore cancelled: administrator permission was not granted." };
+        }
+    }
+
+    /// <summary>Fixes in these categories delete the issue's whole key; all others delete values inside it.</summary>
+    private static bool DeletesSubtree(RegistryIssue issue) =>
+        issue.Category is RegistryIssueCategory.OrphanedSoftware
+            or RegistryIssueCategory.InvalidCOM
+            or RegistryIssueCategory.InvalidTypeLib;
+
+    /// <summary>
+    /// Returns null when the key's values (and, if <paramref name="includeSubtree"/>, every descendant key) can be
+    /// read; otherwise the first path that cannot. A key that does not exist returns null.
+    /// </summary>
+    internal static string? FindUnreadable(string fullKey, bool includeSubtree)
+    {
+        RegistryKey? hive = null;
+        var subPath = fullKey;
+        foreach (var (prefix, candidate) in new (string, RegistryKey)[]
+                 {
+                     ("HKEY_CURRENT_USER\\", Registry.CurrentUser), ("HKCU\\", Registry.CurrentUser),
+                     ("HKEY_LOCAL_MACHINE\\", Registry.LocalMachine), ("HKLM\\", Registry.LocalMachine),
+                     ("HKEY_CLASSES_ROOT\\", Registry.ClassesRoot), ("HKCR\\", Registry.ClassesRoot)
+                 })
+        {
+            if (fullKey.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                hive = candidate;
+                subPath = fullKey[prefix.Length..];
+                break;
+            }
+        }
+        if (hive == null)
+            return fullKey;
+
+        return FindUnreadable(hive, subPath, fullKey, includeSubtree);
+    }
+
+    private static string? FindUnreadable(RegistryKey hive, string subPath, string displayPath, bool includeSubtree)
+    {
+        RegistryKey? key;
+        try
+        {
+            key = hive.OpenSubKey(subPath, writable: false);
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException)
+        {
+            return displayPath;
+        }
+
+        if (key == null)
+            return null;
+
+        using (key)
+        {
+            try
+            {
+                foreach (var valueName in key.GetValueNames())
+                    _ = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+
+                if (!includeSubtree)
+                    return null;
+
+                foreach (var child in key.GetSubKeyNames())
+                {
+                    var unreadable = FindUnreadable(hive, $@"{subPath}\{child}", $@"{displayPath}\{child}", includeSubtree: true);
+                    if (unreadable != null)
+                        return unreadable;
+                }
+            }
+            catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+            {
+                return displayPath;
+            }
+        }
+
+        return null;
+    }
+
+    private static async Task<(int ExitCode, string Output)> RunRegAsync(string[] arguments)
+    {
+        var startInfo = new System.Diagnostics.ProcessStartInfo("reg.exe")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        foreach (var argument in arguments)
+            startInfo.ArgumentList.Add(argument);
+
+        using var process = System.Diagnostics.Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Could not start reg.exe");
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (process.ExitCode, (await stdout) + (await stderr));
     }
 }

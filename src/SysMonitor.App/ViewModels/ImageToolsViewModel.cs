@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
@@ -10,6 +12,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class ImageToolsViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
+
     private readonly IImageTools _imageTools;
     private readonly DispatcherQueue _dispatcherQueue;
 
@@ -61,8 +65,10 @@ public partial class ImageToolsViewModel : ObservableObject
 
     public ImageFormat[] ImageFormats { get; } = Enum.GetValues<ImageFormat>();
 
-    public ImageToolsViewModel(IImageTools imageTools)
+    public ImageToolsViewModel(IImageTools imageTools,
+        ILogger<ImageToolsViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<ImageToolsViewModel>.Instance;
         _imageTools = imageTools;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
@@ -123,7 +129,10 @@ public partial class ImageToolsViewModel : ObservableObject
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "SelectImagesAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -167,7 +176,10 @@ public partial class ImageToolsViewModel : ObservableObject
                 await LoadImageInfoAsync(file.Path);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "SelectSingleImageAsync failed");
+        }
     }
 
     private async Task LoadImageInfoAsync(string path)
@@ -399,7 +411,10 @@ public partial class ImageToolsViewModel : ObservableObject
                 System.Diagnostics.Process.Start("explorer.exe", path);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "OpenOutputFolder failed");
+        }
     }
 
     [RelayCommand]

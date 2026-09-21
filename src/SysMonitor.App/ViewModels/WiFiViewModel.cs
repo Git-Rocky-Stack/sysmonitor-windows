@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Utilities;
@@ -166,7 +166,9 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
 
                 NetworksFound = Networks.Count;
                 SecureNetworks = Networks.Count(n => n.IsSecure);
-                OpenNetworks = Networks.Count(n => !n.IsSecure);
+                // A network whose security could not be read is neither secure nor open, and counting it
+                // as open would overstate how much of the air around the user is unencrypted.
+                OpenNetworks = Networks.Count(n => n.IsSecurityKnown && !n.IsSecure);
                 Networks24GHz = Networks.Count(n => n.Band == "2.4 GHz");
                 Networks5GHz = Networks.Count(n => n.Band == "5 GHz");
 
@@ -236,6 +238,9 @@ public partial class WiFiNetworkDisplay : ObservableObject
     public string Frequency { get; }
     public string Security { get; }
     public bool IsSecure { get; }
+
+    /// <summary>False when the platform would not say whether the network is encrypted.</summary>
+    public bool IsSecurityKnown { get; }
     public string SecurityIcon { get; }
     public string SecurityColor { get; }
     public string NetworkType { get; }
@@ -251,10 +256,24 @@ public partial class WiFiNetworkDisplay : ObservableObject
         Channel = info.Channel;
         Band = info.Band;
         Frequency = $"{info.FrequencyMHz} MHz";
-        Security = info.Security;
-        IsSecure = !string.IsNullOrEmpty(info.Security) && info.Security != "Open";
-        SecurityIcon = IsSecure ? "\uE72E" : "\uE785";
-        SecurityColor = IsSecure ? "#4CAF50" : "#FF9800";
+        // Three answers, not two: encrypted, not encrypted, and not known. Treating "not known" as
+        // encrypted put a green padlock on networks whose security the app had never read.
+        var state = WiFiSecurity.Describe(info.Security);
+        Security = state == WiFiSecurityState.Unknown ? "Security unknown" : info.Security;
+        IsSecure = state == WiFiSecurityState.Secured;
+        IsSecurityKnown = state != WiFiSecurityState.Unknown;
+        SecurityIcon = state switch
+        {
+            WiFiSecurityState.Secured => "\uE72E",   // closed padlock
+            WiFiSecurityState.Open => "\uE785",      // open padlock
+            _ => "\uE9CE",                           // question mark
+        };
+        SecurityColor = state switch
+        {
+            WiFiSecurityState.Secured => "#4CAF50",
+            WiFiSecurityState.Open => "#FF9800",
+            _ => "#9E9E9E",
+        };
         NetworkType = info.NetworkType;
     }
 

@@ -59,7 +59,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!-- FPS Label -->
-                                <TextBlock Grid.Column="0" Text="FPS"
+                                <TextBlock x:Name="FpsLabel" Grid.Column="0" Text="FPS"
                                            FontSize="11" FontWeight="Bold"
                                            Foreground="#80FFFFFF" VerticalAlignment="Bottom"
                                            Margin="0,0,6,2"/>
@@ -77,6 +77,15 @@
                                         </LinearGradientBrush>
                                     </TextBlock.Foreground>
                                 </TextBlock>
+
+                                <!-- Shown instead when this machine has no frame-rate sensor, so the row is
+                                     never a blank number the user is left to interpret. -->
+                                <TextBlock x:Name="NoFpsText" Grid.Column="1"
+                                           Text="NO FPS SENSOR"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#80FFFFFF"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="Collapsed"/>
 
                                 <!-- Status LED with glow effect -->
                                 <Grid Grid.Column="2" Width="16" Height="16" VerticalAlignment="Center">

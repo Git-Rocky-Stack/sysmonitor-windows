@@ -1,6 +1,7 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Monitors;
+using Serilog;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -72,7 +73,8 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected when disposed
+            // Best effort: the page was left while this was in flight, so the work it was doing
+            // no longer has anywhere to go.
         }
     }
 
@@ -150,11 +152,11 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected during shutdown
+            // Best effort: the app is closing and the refresh was cancelled on purpose.
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Log in production
+            Log.Warning(ex, "Refreshing the battery page failed");
         }
     }
 
@@ -167,13 +169,15 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
 
     private static string GetHealthColor(string health)
     {
+        // These are the words BatteryMonitor uses for how worn the battery is. "Low" and "Critical" were
+        // among them while this showed the charge level instead.
         return health switch
         {
             "Good" => "#4CAF50",    // Green
             "Fair" => "#FF9800",    // Orange
-            "Low" => "#FF5722",     // Deep Orange
-            "Critical" => "#F44336", // Red
-            _ => "#808080"          // Gray
+            "Worn" => "#FF5722",    // Deep Orange
+            "Poor" => "#F44336",    // Red
+            _ => "#808080"          // Gray: not reported
         };
     }
 

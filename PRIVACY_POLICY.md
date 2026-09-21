@@ -6,7 +6,8 @@
 
 ## Overview
 
-STX-1 ULTIMATE System Monitor ("the App") is developed by Rocky Stack. This Privacy Policy explains how we handle information when you use our Windows desktop application.
+STX-1 ULTIMATE System Monitor ("the App") is developed by Rocky Stack.
+This Privacy Policy explains how we handle information when you use our Windows desktop application.
 
 ## Data Collection
 

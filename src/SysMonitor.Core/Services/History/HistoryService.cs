@@ -1,3 +1,5 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using SysMonitor.Core.Data;
 using SysMonitor.Core.Data.Entities;
@@ -8,10 +10,13 @@ namespace SysMonitor.Core.Services.History;
 
 /// <summary>
 /// Service for recording and retrieving historical metric data using SQLite.
-/// Records metrics every 30 seconds and auto-purges data older than 30 days.
+/// Records metrics every 30 seconds. Data older than 30 days is removed when the service starts, so a run
+/// that never restarts keeps everything it has recorded.
 /// </summary>
 public class HistoryService : IHistoryService
 {
+    private readonly ILogger _logger;
+
     private readonly ICpuMonitor _cpuMonitor;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
@@ -29,14 +34,19 @@ public class HistoryService : IHistoryService
     private const int WriteIntervalSeconds = 60;
     private const int RetentionDays = 30;
 
+    /// <summary>How long Dispose waits for the loops to flush what they still hold before giving up.</summary>
+    private static readonly TimeSpan ShutdownFlushTimeout = TimeSpan.FromSeconds(5);
+
     public HistoryService(
         ICpuMonitor cpuMonitor,
         IMemoryMonitor memoryMonitor,
         ITemperatureMonitor temperatureMonitor,
         INetworkMonitor networkMonitor,
         IBatteryMonitor batteryMonitor,
-        IDiskMonitor diskMonitor)
+        IDiskMonitor diskMonitor,
+        ILogger<HistoryService>? logger = null)
     {
+        _logger = logger ?? NullLogger<HistoryService>.Instance;
         _cpuMonitor = cpuMonitor;
         _memoryMonitor = memoryMonitor;
         _temperatureMonitor = temperatureMonitor;
@@ -79,9 +89,9 @@ public class HistoryService : IHistoryService
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently continue on collection errors
+                _logger.LogDebug(ex, "Collecting a history snapshot failed; the next tick tries again");
             }
         }
     }
@@ -97,7 +107,10 @@ public class HistoryService : IHistoryService
             var cpuUsage = await _cpuMonitor.GetUsagePercentAsync();
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Cpu, Value = cpuUsage });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Memory Usage
         try
@@ -105,7 +118,10 @@ public class HistoryService : IHistoryService
             var memInfo = await _memoryMonitor.GetMemoryInfoAsync();
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Memory, Value = memInfo.UsagePercent });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // CPU Temperature
         try
@@ -116,7 +132,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.CpuTemp, Value = cpuTemp });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // GPU Temperature
         try
@@ -127,7 +146,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.GpuTemp, Value = gpuTemp });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Network
         try
@@ -136,7 +158,10 @@ public class HistoryService : IHistoryService
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.NetworkUp, Value = netInfo.UploadSpeedBps });
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.NetworkDown, Value = netInfo.DownloadSpeedBps });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Battery
         try
@@ -147,7 +172,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Battery, Value = batteryInfo.ChargePercent });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Disk (primary drive)
         try
@@ -159,7 +187,10 @@ public class HistoryService : IHistoryService
                 metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Disk, Value = primaryDisk.UsagePercent });
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "CollectAndQueueMetricsAsync failed");
+        }
 
         // Queue for batch write
         foreach (var metric in metrics)
@@ -172,13 +203,24 @@ public class HistoryService : IHistoryService
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(WriteIntervalSeconds));
 
-        while (await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
+        try
         {
+            while (await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await FlushPendingWritesAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Best effort: stopping is how this loop ends, and the flush below is the point of
+            // stopping cleanly.
+        }
+        finally
+        {
+            // Up to a full write interval of snapshots is still queued here. Cancellation throws out of
+            // the condition above, so this only runs at all because it is in a finally.
             await FlushPendingWritesAsync();
         }
-
-        // Final flush on cancellation
-        await FlushPendingWritesAsync();
     }
 
     private async Task FlushPendingWritesAsync()
@@ -298,6 +340,21 @@ public class HistoryService : IHistoryService
     public void Dispose()
     {
         StopRecording();
+
+        // The write loop still has a final flush to do, and it needs _writeLock to do it. Disposing the
+        // lock out from under it turns the last snapshots into an ObjectDisposedException nobody sees.
+        // The wait is bounded so a stuck write cannot hold the app open.
+        try
+        {
+            var running = new[] { _recordingTask, _writeTask }.Where(task => task is not null).ToArray()!;
+            if (running.Length > 0)
+                Task.WaitAll(running!, ShutdownFlushTimeout);
+        }
+        catch (AggregateException)
+        {
+            // Best effort: the loops are stopping and their own failures are logged where they happen.
+        }
+
         _cts?.Dispose();
         _writeLock.Dispose();
         GC.SuppressFinalize(this);

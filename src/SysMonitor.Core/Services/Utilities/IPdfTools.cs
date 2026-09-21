@@ -1,4 +1,4 @@
-namespace SysMonitor.Core.Services.Utilities;
+﻿namespace SysMonitor.Core.Services.Utilities;
 
 /// <summary>
 /// Service for PDF operations - merge, split, extract, sign, convert
@@ -48,6 +48,12 @@ public record PdfOperationResult
     public int PagesProcessed { get; init; }
     public string ErrorMessage { get; init; } = "";
     public List<string> OutputFiles { get; init; } = [];
+
+    /// <summary>
+    /// Things the operation succeeded at doing but could not do completely. A save that quietly drops part
+    /// of a document and reports success is how a user loses work without ever being told.
+    /// </summary>
+    public List<string> Warnings { get; init; } = [];
 }
 
 public record PdfInfo
@@ -128,31 +134,42 @@ public interface IPdfEditor
     Task<PdfOperationResult> SavePdfAsync(PdfEditorDocument document, string outputPath);
     Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0);
     Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
-    Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath);
+    /// <summary>
+    /// Writes a Word document describing this PDF: its pages, their sizes, and the annotations on each one.
+    /// It is a report about the document, not the document converted - the page content is not carried over,
+    /// because nothing here extracts it.
+    /// </summary>
+    Task<PdfOperationResult> ExportAnnotationReportAsync(PdfEditorDocument document, string outputPath);
 
-    // Page Operations
-    Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pageNumber, int degrees);
-    Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pageNumber);
+    // Page Operations. A pagePosition is a 1-based place in PdfEditorDocument.Pages, the order the editor
+    // shows and saves; it is not the page's number in the source file, which reordering leaves behind.
+    Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pagePosition, int degrees);
+    Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pagePosition);
     Task<PdfOperationResult> ReorderPagesAsync(PdfEditorDocument document, int[] newOrder);
-    Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPageNumber, double width = 612, double height = 792);
-    Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pageNumber);
+    Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPagePosition, double width = 612, double height = 792);
+    Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pagePosition);
 
-    // Annotations
-    Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation);
-    Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight);
-    Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape);
-    Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pageNumber, FreehandAnnotation freehand);
-    Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pageNumber, ImageAnnotation image);
-    Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pageNumber, StickyNoteAnnotation note);
-    Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pageNumber, RedactionAnnotation redaction);
-    Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pageNumber, SignatureAnnotation signature);
-    Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pageNumber, StampAnnotation stamp);
-    Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark);
-    Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pageNumber, LinkAnnotation link);
+    // Annotations. They are bound to the page at pagePosition and stay with it afterwards.
+    Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pagePosition, TextAnnotation annotation);
+    Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pagePosition, HighlightAnnotation highlight);
+    Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pagePosition, ShapeAnnotation shape);
+    Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pagePosition, FreehandAnnotation freehand);
+    Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pagePosition, ImageAnnotation image);
+    Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pagePosition, StickyNoteAnnotation note);
+    Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pagePosition, RedactionAnnotation redaction);
+    Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pagePosition, SignatureAnnotation signature);
+    Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pagePosition, StampAnnotation stamp);
+    Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark, int pagePosition = 1);
+    Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pagePosition, LinkAnnotation link);
 
     // Search
-    Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false);
-    Task<string> ExtractTextAsync(PdfEditorDocument document, int? pageNumber = null);
+
+    /// <summary>
+    /// Searches the text carried by this document's annotations - text boxes, sticky notes, stamps,
+    /// watermarks, signatures and links. The page content itself is not searched: nothing here extracts
+    /// text from a PDF.
+    /// </summary>
+    Task<List<PdfSearchResult>> SearchAnnotationsAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false);
 
     // Compression & Optimization
     Task<PdfOperationResult> CompressPdfAsync(string inputPath, string outputPath, PdfCompressionOptions? options = null);
@@ -170,24 +187,72 @@ public class PdfEditorDocument
 
 public class PdfPageInfo
 {
+    /// <summary>
+    /// Identifies this page while the document is open. Annotations point at it, so they stay with their page
+    /// when pages are moved, deleted or duplicated.
+    /// </summary>
+    public Guid Id { get; } = Guid.NewGuid();
+
+    /// <summary>The page of the source file this page comes from (1-based), or 0 for a page inserted blank.</summary>
     public int PageNumber { get; set; }
+
+    /// <summary>True for a page inserted into the document rather than taken from the source file.</summary>
+    public bool IsBlank => PageNumber <= 0;
+
     public double Width { get; set; }
     public double Height { get; set; }
+
+    /// <summary>Rotation the page is saved with: 0, 90, 180 or 270 degrees clockwise.</summary>
     public int Rotation { get; set; }
+
+    /// <summary>
+    /// The page's rotation in the source file. Renderings of the source page already show it, and annotation
+    /// coordinates are measured on the page displayed this way.
+    /// </summary>
+    public int OriginalRotation { get; set; }
+
+    /// <summary>How far to turn a rendering of the source page (which shows <see cref="OriginalRotation"/>) to preview <see cref="Rotation"/>.</summary>
+    public int PreviewRotation => PdfPageGeometry.NormalizeRotation(Rotation - OriginalRotation);
+
     public byte[]? ThumbnailBytes { get; set; }
 }
 
 public abstract class PdfAnnotation
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public int PageNumber { get; set; }
+
+    /// <summary>The page this annotation belongs to, as <see cref="PdfPageInfo.Id"/>.</summary>
+    public Guid PageId { get; set; }
+
+    // Position and size are measured from the top-left corner of the page as displayed with its
+    // original rotation (the visible area, i.e. the CropBox), y down, in CoordinateScale points.
     public double X { get; set; }
     public double Y { get; set; }
     public double Width { get; set; }
     public double Height { get; set; }
     public string Color { get; set; } = "#FF0000";
+
+    /// <summary>
+    /// Points per coordinate unit. Every length on the annotation (position, size, font size, stroke width,
+    /// freehand points) is multiplied by this when it is drawn into the PDF. Annotations drawn on the editor
+    /// canvas use <see cref="PdfPageGeometry.CanvasCoordinateScale"/>; 1 means the values are already points.
+    /// </summary>
+    public double CoordinateScale { get; set; } = 1.0;
+
+    /// <summary>
+    /// A copy of this annotation on another page, with an id of its own. The copy shares the original's point
+    /// lists and image data, which annotations never change once created.
+    /// </summary>
+    public PdfAnnotation CopyTo(Guid pageId)
+    {
+        var copy = (PdfAnnotation)MemberwiseClone();
+        copy.Id = Guid.NewGuid();
+        copy.PageId = pageId;
+        return copy;
+    }
 }
 
+/// <summary>Text drawn with the top-left corner of its first line at (X, Y).</summary>
 public class TextAnnotation : PdfAnnotation
 {
     public string Text { get; set; } = "";
@@ -374,9 +439,15 @@ public class LinkAnnotation : PdfAnnotation
 public record PdfSearchResult
 {
     public int PageNumber { get; init; }
+
+    /// <summary>The text that matched, as the annotation spells it.</summary>
     public string MatchedText { get; init; } = "";
+
     public string ContextBefore { get; init; } = "";
     public string ContextAfter { get; init; } = "";
+
+    /// <summary>The match with the text around it, for a result list to show.</summary>
+    public string Preview => $"{ContextBefore}{MatchedText}{ContextAfter}";
     public double X { get; init; }
     public double Y { get; init; }
     public double Width { get; init; }
@@ -386,11 +457,13 @@ public record PdfSearchResult
 /// <summary>
 /// PDF compression options
 /// </summary>
+/// <summary>
+/// What compressing a PDF may do. It rewrites the file with its streams packed as tightly as the format
+/// allows, and can drop the document's metadata. Recompressing images and subsetting fonts are not offered,
+/// because nothing here does them; options that promised both were removed rather than left as decoration.
+/// </summary>
 public class PdfCompressionOptions
 {
-    public bool CompressImages { get; set; } = true;
-    public int ImageQuality { get; set; } = 75; // 1-100
+    /// <summary>Clears the title, author, subject and keywords recorded in the file.</summary>
     public bool RemoveMetadata { get; set; } = false;
-    public bool RemoveAnnotations { get; set; } = false;
-    public bool OptimizeFonts { get; set; } = true;
 }

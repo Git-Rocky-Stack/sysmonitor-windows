@@ -1,3 +1,5 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualBasic.FileIO;
 using System.Collections.Concurrent;
 
@@ -14,6 +16,13 @@ namespace SysMonitor.Core.Services.Utilities;
 /// </summary>
 public class LargeFileFinder : ILargeFileFinder
 {
+    private readonly ILogger _logger;
+
+    public LargeFileFinder(ILogger<LargeFileFinder>? logger = null)
+    {
+        _logger = logger ?? NullLogger<LargeFileFinder>.Instance;
+    }
+
     // Parallelism configuration
     private static readonly int MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount / 2);
 
@@ -63,14 +72,22 @@ public class LargeFileFinder : ILargeFileFinder
         {
             try
             {
-                // Get top-level directories for parallel processing
-                var topLevelDirs = new List<string> { path };
+                // Split the work across the root's subfolders, one task each.
+                //
+                // The root itself is deliberately not in this list. EnumerateFiles already recurses, so a
+                // list of { root } plus the root's subfolders walks everything below the root twice - once
+                // under the root and once under its own folder. That doubled the disk reads and put every
+                // file in the results twice, which doubled the total the page reports.
+                var topLevelDirs = new List<string>();
                 try
                 {
                     topLevelDirs.AddRange(Directory.GetDirectories(path)
                         .Where(d => !ShouldSkipDirectory(d)));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "ScanAsync failed");
+                }
 
                 var parallelOptions = new ParallelOptions
                 {
@@ -78,10 +95,19 @@ public class LargeFileFinder : ILargeFileFinder
                     CancellationToken = cancellationToken
                 };
 
-                // Process directories in parallel
-                Parallel.ForEach(topLevelDirs, parallelOptions, topDir =>
+                // The files sitting directly in the root belong to no subfolder, so they are their own
+                // unit of work rather than a second walk of everything.
+                var units = new List<Func<IEnumerable<string>>>
                 {
-                    foreach (var filePath in EnumerateFiles(topDir, cancellationToken))
+                    () => FileScanning.EnumerateFilesIn(path, cancellationToken),
+                };
+                units.AddRange(topLevelDirs.Select<string, Func<IEnumerable<string>>>(
+                    topDir => () => FileScanning.EnumerateFiles(topDir, cancellationToken)));
+
+                // Process directories in parallel
+                Parallel.ForEach(units, parallelOptions, unit =>
+                {
+                    foreach (var filePath in unit())
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
@@ -116,13 +142,22 @@ public class LargeFileFinder : ILargeFileFinder
                                 });
                             }
                         }
-                        catch (UnauthorizedAccessException) { }
-                        catch (IOException) { }
+                        catch (UnauthorizedAccessException ex)
+                        {
+                            _logger.LogDebug(ex, "ScanAsync failed");
+                        }
+                        catch (IOException ex)
+                        {
+                            _logger.LogDebug(ex, "ScanAsync failed");
+                        }
                     }
                 });
             }
             catch (OperationCanceledException) { throw; }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanAsync failed");
+            }
         }, cancellationToken);
 
         return largeFiles.OrderByDescending(f => f.SizeBytes).ToList();
@@ -141,88 +176,15 @@ public class LargeFileFinder : ILargeFileFinder
                dirName == "Program Files (x86)";
     }
 
-    public async Task<bool> DeleteFileAsync(string filePath)
-    {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                    return true;
-                }
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        });
-    }
+    /// <summary>
+    /// Removes a file to the Recycle Bin. There is no outright delete here: this list is built from a scan,
+    /// and a scan can be wrong about what someone still wants.
+    /// </summary>
+    public async Task<bool> DeleteFileAsync(string filePath) =>
+        await Task.Run(() => FileScanning.SendToRecycleBin(filePath));
 
-    public async Task<bool> MoveToRecycleBinAsync(string filePath)
-    {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                    return true;
-                }
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        });
-    }
-
-    private static IEnumerable<string> EnumerateFiles(string path, CancellationToken cancellationToken)
-    {
-        var directories = new Stack<string>();
-        directories.Push(path);
-
-        while (directories.Count > 0)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var currentDir = directories.Pop();
-
-            string[] files;
-            try
-            {
-                files = Directory.GetFiles(currentDir);
-            }
-            catch (UnauthorizedAccessException) { continue; }
-            catch (IOException) { continue; }
-
-            foreach (var file in files)
-            {
-                yield return file;
-            }
-
-            try
-            {
-                foreach (var subDir in Directory.GetDirectories(currentDir))
-                {
-                    // Skip system directories
-                    var dirName = Path.GetFileName(subDir);
-                    if (dirName.StartsWith("$") || dirName == "System Volume Information" ||
-                        dirName == "Windows" || dirName == "Program Files" ||
-                        dirName == "Program Files (x86)")
-                        continue;
-
-                    directories.Push(subDir);
-                }
-            }
-            catch (UnauthorizedAccessException) { }
-            catch (IOException) { }
-        }
-    }
+    public async Task<bool> MoveToRecycleBinAsync(string filePath) =>
+        await Task.Run(() => FileScanning.SendToRecycleBin(filePath));
 
     private static string GetFileType(string extension)
     {

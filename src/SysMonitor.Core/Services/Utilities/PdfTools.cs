@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -9,6 +11,20 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfTools : IPdfTools
 {
+    static PdfTools()
+    {
+        // PDFsharp only resolves a couple of families on its own, so anything else - Consolas, Segoe UI, a
+        // font the user picked - has to be found on this machine first.
+        WindowsFontResolver.Install();
+    }
+
+    private readonly ILogger _logger;
+
+    public PdfTools(ILogger<PdfTools>? logger = null)
+    {
+        _logger = logger ?? NullLogger<PdfTools>.Instance;
+    }
+
     public async Task<PdfOperationResult> MergePdfsAsync(IEnumerable<string> inputPaths, string outputPath)
     {
         return await Task.Run(() =>
@@ -222,11 +238,13 @@ public class PdfTools : IPdfTools
                 var page = document.Pages[options.PageNumber - 1];
                 using var gfx = XGraphics.FromPdfPage(page);
 
+                // PDFsharp reads an image's pixels at Save(), so the stream behind it outlives this block.
+                var signatureImages = new List<MemoryStream>();
+
                 // Draw signature image
                 if (options.SignatureImageBytes != null && options.SignatureImageBytes.Length > 0)
                 {
-                    using var ms = new MemoryStream(options.SignatureImageBytes);
-                    var image = XImage.FromStream(ms);
+                    var image = PdfImageSource.Open(options.SignatureImageBytes, signatureImages);
 
                     // Calculate position (convert from percentage to points)
                     var x = page.Width.Point * (options.X / 100.0);
@@ -257,6 +275,9 @@ public class PdfTools : IPdfTools
                 }
 
                 document.Save(outputPath);
+
+                foreach (var stream in signatureImages)
+                    stream.Dispose();
 
                 return new PdfOperationResult
                 {
@@ -404,13 +425,15 @@ public class PdfTools : IPdfTools
                     };
                 }
 
+                // Count the pages first: a saved PdfDocument refuses every further access.
+                var pagesProcessed = document.PageCount;
                 document.Save(outputPath);
 
                 return new PdfOperationResult
                 {
                     Success = true,
                     OutputPath = outputPath,
-                    PagesProcessed = document.PageCount,
+                    PagesProcessed = pagesProcessed,
                     OutputFiles = [outputPath]
                 };
             }
@@ -425,7 +448,7 @@ public class PdfTools : IPdfTools
         });
     }
 
-    private static PdfOperationResult ConvertWordToPdf(string inputPath, string outputPath)
+    private PdfOperationResult ConvertWordToPdf(string inputPath, string outputPath)
     {
         dynamic? wordApp = null;
         dynamic? doc = null;
@@ -490,11 +513,14 @@ public class PdfTools : IPdfTools
                 if (doc != null) Marshal.ReleaseComObject(doc);
                 if (wordApp != null) Marshal.ReleaseComObject(wordApp);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ConvertWordToPdf failed");
+            }
         }
     }
 
-    private static PdfOperationResult ConvertExcelToPdf(string inputPath, string outputPath)
+    private PdfOperationResult ConvertExcelToPdf(string inputPath, string outputPath)
     {
         dynamic? excelApp = null;
         dynamic? workbook = null;
@@ -559,11 +585,14 @@ public class PdfTools : IPdfTools
                 if (workbook != null) Marshal.ReleaseComObject(workbook);
                 if (excelApp != null) Marshal.ReleaseComObject(excelApp);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ConvertExcelToPdf failed");
+            }
         }
     }
 
-    private static PdfOperationResult ConvertPowerPointToPdf(string inputPath, string outputPath)
+    private PdfOperationResult ConvertPowerPointToPdf(string inputPath, string outputPath)
     {
         dynamic? pptApp = null;
         dynamic? presentation = null;
@@ -628,7 +657,10 @@ public class PdfTools : IPdfTools
                 if (presentation != null) Marshal.ReleaseComObject(presentation);
                 if (pptApp != null) Marshal.ReleaseComObject(pptApp);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ConvertPowerPointToPdf failed");
+            }
         }
     }
 
@@ -850,7 +882,7 @@ public class PdfTools : IPdfTools
         }
     }
 
-    private static string ExtractPdfVersion(string filePath)
+    private string ExtractPdfVersion(string filePath)
     {
         try
         {
@@ -864,7 +896,10 @@ public class PdfTools : IPdfTools
                 return headerStr.Substring(5, 3).Trim();
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ExtractPdfVersion failed");
+        }
         return "";
     }
 

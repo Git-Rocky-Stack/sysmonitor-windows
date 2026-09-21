@@ -151,10 +151,13 @@
                                                 </Border>
 
                                                 <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                                    <Button Click="RestoreBackup_Click" Tag="{Binding}" ToolTipService.ToolTip="Restore" Padding="8">
+                                                    <Button Click="RestoreBackup_Click" Tag="{Binding}" ToolTipService.ToolTip="Restore" AutomationProperties.Name="Restore backup" Padding="8">
                                                         <FontIcon Glyph="&#xE777;" FontSize="14"/>
                                                     </Button>
-                                                    <Button Click="DeleteBackup_Click" Tag="{Binding}" ToolTipService.ToolTip="Delete" Padding="8">
+                                                    <Button Click="VerifyBackup_Click" Tag="{Binding}" ToolTipService.ToolTip="Verify backup contents" AutomationProperties.Name="Verify backup" Padding="8">
+                                                        <FontIcon Glyph="&#xE73E;" FontSize="14"/>
+                                                    </Button>
+                                                    <Button Click="DeleteBackup_Click" Tag="{Binding}" ToolTipService.ToolTip="Delete" AutomationProperties.Name="Delete backup" Padding="8">
                                                         <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#F44336"/>
                                                     </Button>
                                                 </StackPanel>

@@ -1,6 +1,7 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
+using Serilog;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -26,9 +27,9 @@ public partial class DonationViewModel : ObservableObject
                 UseShellExecute = true
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Silently fail if browser cannot be opened
+            Log.Warning(ex, "Could not open the donation link in a browser");
         }
     }
 }

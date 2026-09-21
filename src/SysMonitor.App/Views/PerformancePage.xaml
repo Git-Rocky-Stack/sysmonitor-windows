@@ -126,7 +126,6 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Memory Usage Card -->
@@ -162,25 +161,8 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Frame Rate Card -->
-                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}" Padding="16">
-                    <StackPanel Spacing="8">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE7F4;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
-                            </Border>
-                            <TextBlock Text="FRAME RATE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}">
-                            <Run Text="{x:Bind ViewModel.FrameRate, Mode=OneWay, Converter={StaticResource DoubleToStringConverter}}"/>
-                            <Run Text="FPS" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        </TextBlock>
-                        <TextBlock Text="Target: 60 FPS" Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
-                    </StackPanel>
-                </Border>
-
                 <!-- Metrics Count Card -->
-                <Border Grid.Column="3" Style="{StaticResource StatCardStyle}" Padding="16">
+                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}" Padding="16">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">

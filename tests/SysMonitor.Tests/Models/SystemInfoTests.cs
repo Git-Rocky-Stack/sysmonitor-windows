@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using SysMonitor.Core.Models;
 using Xunit;
 
@@ -56,19 +56,42 @@ public class SystemInfoTests
         disk.FreeGB.Should().BeApproximately(300.0, 0.1);
     }
 
+    /// <summary>
+    /// Mbps means megabits per second, the unit a link is sold in. The counters behind it are bytes per
+    /// second, so the conversion is x8 and then /1,000,000 - not /1,048,576, which is mebibytes and out by
+    /// a factor of 8.4. The test that used to sit here asserted 10485760 B/s -> "10.0", certifying the bug:
+    /// that rate is a 100 Mbps link running flat out, and the property called it 10.
+    /// </summary>
     [Fact]
-    public void NetworkInfo_CalculatesMbpsCorrectly()
+    public void NetworkInfo_ReportsMegabitsPerSecond_NotMebibytes()
     {
-        // Arrange
         var network = new NetworkInfo
         {
-            UploadSpeedBps = 10485760,   // 10 MB/s
-            DownloadSpeedBps = 104857600 // 100 MB/s
+            UploadSpeedBps = 10_485_760,   // 10 MiB/s
+            DownloadSpeedBps = 104_857_600 // 100 MiB/s
         };
 
-        // Assert
-        network.UploadSpeedMbps.Should().BeApproximately(10.0, 0.1);
-        network.DownloadSpeedMbps.Should().BeApproximately(100.0, 0.1);
+        network.UploadSpeedMbps.Should().BeApproximately(83.886, 0.001);
+        network.DownloadSpeedMbps.Should().BeApproximately(838.861, 0.001);
+    }
+
+    [Fact]
+    public void NetworkInfo_ReportsASaturatedHundredMegabitLink_AsAHundred()
+    {
+        // 100 Mbps is 12,500,000 bytes per second, by definition.
+        var network = new NetworkInfo { DownloadSpeedBps = 12_500_000, UploadSpeedBps = 12_500_000 };
+
+        network.DownloadSpeedMbps.Should().BeApproximately(100.0, 0.001);
+        network.UploadSpeedMbps.Should().BeApproximately(100.0, 0.001);
+    }
+
+    [Fact]
+    public void NetworkInfo_ReportsAnIdleLink_AsZero()
+    {
+        var network = new NetworkInfo();
+
+        network.DownloadSpeedMbps.Should().Be(0);
+        network.UploadSpeedMbps.Should().Be(0);
     }
 
     [Fact]

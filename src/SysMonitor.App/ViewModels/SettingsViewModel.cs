@@ -1,3 +1,5 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Reflection;
@@ -8,6 +10,8 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
+
     private readonly ApplicationDataContainer? _localSettings;
     private readonly string _settingsFilePath;
     private readonly bool _useFileStorage;
@@ -22,7 +26,6 @@ public partial class SettingsViewModel : ObservableObject
 
     // Monitoring
     [ObservableProperty] private int _refreshInterval = 2;
-    [ObservableProperty] private bool _autoOptimizeMemory = false;
     [ObservableProperty] private int _memoryThreshold = 80;
 
     // Alert Thresholds
@@ -53,8 +56,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private bool _hasStatusMessage = false;
 
-    public SettingsViewModel()
+    public SettingsViewModel(ILogger<SettingsViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<SettingsViewModel>.Instance;
         // Try to use ApplicationData (packaged app), fall back to file storage (unpackaged)
         _settingsFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -95,7 +99,6 @@ public partial class SettingsViewModel : ObservableObject
 
         // Monitoring
         RefreshInterval = GetSetting("RefreshInterval", 2);
-        AutoOptimizeMemory = GetSetting("AutoOptimizeMemory", false);
         MemoryThreshold = GetSetting("MemoryThreshold", 80);
 
         // Alert Thresholds
@@ -153,7 +156,8 @@ public partial class SettingsViewModel : ObservableObject
         }
         catch
         {
-            // Fall through to default
+            // Best effort: an unreadable setting means the default returned below, which is the
+            // answer this method exists to give.
         }
         return defaultValue;
     }
@@ -195,9 +199,9 @@ public partial class SettingsViewModel : ObservableObject
                 _localSettings.Values[key] = value;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Silently fail - settings are not critical
+            _logger.LogWarning(ex, "A setting could not be saved");
         }
     }
 
@@ -210,9 +214,9 @@ public partial class SettingsViewModel : ObservableObject
                 var json = JsonSerializer.Serialize(_fileSettings, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(_settingsFilePath, json);
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently fail
+                _logger.LogWarning(ex, "The settings file could not be written");
             }
         }
     }
@@ -230,7 +234,6 @@ public partial class SettingsViewModel : ObservableObject
 
         // Monitoring
         SaveSetting("RefreshInterval", RefreshInterval);
-        SaveSetting("AutoOptimizeMemory", AutoOptimizeMemory);
         SaveSetting("MemoryThreshold", MemoryThreshold);
 
         // Alert Thresholds
@@ -266,7 +269,6 @@ public partial class SettingsViewModel : ObservableObject
 
         // Monitoring
         RefreshInterval = 2;
-        AutoOptimizeMemory = false;
         MemoryThreshold = 80;
 
         // Alert Thresholds
@@ -331,7 +333,8 @@ public partial class SettingsViewModel : ObservableObject
         }
         catch
         {
-            // May fail without admin rights - that's okay
+            // Best effort: this needs administrator rights the app may not have, and the setting it
+            // would change is not one the app depends on.
         }
     }
 
@@ -384,9 +387,16 @@ public partial class SettingsViewModel : ObservableObject
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                // Best effort: an unreadable setting falls back to the default below, which is the answer
+                // this method is for.
+            }
         }
-        catch { }
+        catch
+        {
+            // Best effort: see above - there is no logger to reach from a static helper.
+        }
         return defaultValue;
     }
 

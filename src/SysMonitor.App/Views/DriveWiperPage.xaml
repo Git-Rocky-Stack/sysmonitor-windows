@@ -57,6 +57,10 @@
                         <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"/>
                         <TextBlock Text="{x:Bind ViewModel.MethodDescription, Mode=OneWay}"
                                    Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap" MaxWidth="400"/>
+                        <TextBlock Text="{x:Bind ViewModel.MediaWarning, Mode=OneWay}"
+                                   Visibility="{x:Bind ViewModel.HasMediaWarning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                   Foreground="{StaticResource WarningBrush}" TextWrapping="Wrap" MaxWidth="400"
+                                   FontSize="12" Margin="0,6,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">

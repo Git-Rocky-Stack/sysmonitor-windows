@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
@@ -7,21 +7,37 @@ using System.Collections.ObjectModel;
 
 namespace SysMonitor.App.ViewModels;
 
-public partial class GameModeViewModel : ObservableObject
+public partial class GameModeViewModel : ObservableObject, IDisposable
 {
     private readonly IGameModeService _gameModeService;
     private readonly IAutoGameModeService _autoGameModeService;
     private readonly IProfileService _profileService;
     private readonly IFpsOverlayService _fpsOverlayService;
-    private readonly IRamCacheService _ramCacheService;
     private readonly DispatcherQueue _dispatcherQueue;
+    private bool _isInitialized;
+    private bool _isDisposed;
 
     // Main Game Mode
     [ObservableProperty] private bool _isGameModeEnabled;
     [ObservableProperty] private bool _isActivating;
     [ObservableProperty] private string _statusMessage = "Game Mode is OFF";
     [ObservableProperty] private string _statusColor = "#FFFFFF";
-    [ObservableProperty] private int _lastProcessesKilled;
+    [ObservableProperty] private int _lastBackgroundAppsAffected;
+
+    /// <summary>
+    /// Whether to ask background apps to close instead of only lowering them out of the way. Off by default:
+    /// closing them can lose unsaved work, so it is the user's choice and is confirmed before it happens.
+    /// </summary>
+    [ObservableProperty] private bool _closeBackgroundApps;
+
+    /// <summary>What the number beside it counted: apps lowered out of the way, or apps closed.</summary>
+    [ObservableProperty] private string _lastSessionAppsLabel = "Apps Lowered";
+
+    /// <summary>
+    /// Asked before background apps are closed, with the apps that are actually running. The page puts this
+    /// on screen; Game Mode does not close anything unless it comes back true.
+    /// </summary>
+    public Func<IReadOnlyList<string>, Task<bool>>? ConfirmCloseBackgroundApps { get; set; }
     [ObservableProperty] private string _lastMemoryFreed = "0 MB";
     [ObservableProperty] private bool _hasLastSession;
 
@@ -39,29 +55,20 @@ public partial class GameModeViewModel : ObservableObject
     [ObservableProperty] private string _overlayButtonText = "SHOW";
     [ObservableProperty] private string _overlayPositionText = "Top Right";
 
-    // RAM Cache
-    [ObservableProperty] private bool _ramCacheEnabled;
-    [ObservableProperty] private double _ramCacheUsagePercent;
-    [ObservableProperty] private string _ramCacheStatus = "0 / 0 MB";
-    [ObservableProperty] private long _selectedCacheSize = 1024; // 1GB default
-
     public ObservableCollection<string> TargetApps { get; } = new();
-    public ObservableCollection<string> KilledApps { get; } = new();
+    public ObservableCollection<string> AffectedApps { get; } = new();
     public ObservableCollection<PerformanceProfile> Profiles { get; } = new();
-    public ObservableCollection<long> CacheSizes { get; } = new() { 512, 1024, 2048, 4096 };
 
     public GameModeViewModel(
         IGameModeService gameModeService,
         IAutoGameModeService autoGameModeService,
         IProfileService profileService,
-        IFpsOverlayService fpsOverlayService,
-        IRamCacheService ramCacheService)
+        IFpsOverlayService fpsOverlayService)
     {
         _gameModeService = gameModeService;
         _autoGameModeService = autoGameModeService;
         _profileService = profileService;
         _fpsOverlayService = fpsOverlayService;
-        _ramCacheService = ramCacheService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         // Subscribe to events
@@ -69,13 +76,30 @@ public partial class GameModeViewModel : ObservableObject
         _autoGameModeService.GameDetected += OnGameDetected;
         _autoGameModeService.GameClosed += OnGameClosed;
         _profileService.ProfileChanged += OnProfileChanged;
-        _ramCacheService.StatsUpdated += OnRamCacheStatsUpdated;
-
-        // Initialize
-        InitializeAsync();
     }
 
-    private async void InitializeAsync()
+    /// <summary>
+    /// Fills the page in. The page awaits this when it is navigated to: run from the constructor as an
+    /// async void, a failure reading the profiles had nowhere to go but the top of a thread nobody was
+    /// watching, which ends the process.
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+        if (_isInitialized || _isDisposed) return;
+        _isInitialized = true;
+
+        try
+        {
+            await LoadInitialStateAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Game Mode could not read its settings: {ex.Message}";
+            StatusColor = "#F44336";
+        }
+    }
+
+    private async Task LoadInitialStateAsync()
     {
         // Load target apps list
         foreach (var app in _gameModeService.GetTargetProcesses())
@@ -106,10 +130,25 @@ public partial class GameModeViewModel : ObservableObject
         OverlayVisible = _fpsOverlayService.IsVisible;
         UpdateOverlayButtonText();
         UpdateOverlayPositionText();
+    }
 
-        // Initialize RAM cache state
-        RamCacheEnabled = _ramCacheService.IsEnabled;
-        UpdateRamCacheStatus();
+    /// <summary>
+    /// Lets go of the services. They are singletons that outlive the page, so a view model still subscribed
+    /// to them is a view model they keep alive - and with it the page, its bindings and everything those
+    /// hold. The page disposes this when it navigates away, as the other pages do.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _gameModeService.GameModeChanged -= OnGameModeChanged;
+        _autoGameModeService.GameDetected -= OnGameDetected;
+        _autoGameModeService.GameClosed -= OnGameClosed;
+        _profileService.ProfileChanged -= OnProfileChanged;
+
+        // It points back at the page, and a page being navigated away from cannot show a dialog.
+        ConfirmCloseBackgroundApps = null;
     }
 
     #region Event Handlers
@@ -148,14 +187,6 @@ public partial class GameModeViewModel : ObservableObject
         });
     }
 
-    private void OnRamCacheStatsUpdated(object? sender, RamCacheStats stats)
-    {
-        _dispatcherQueue.TryEnqueue(() =>
-        {
-            RamCacheEnabled = stats.IsEnabled;
-            UpdateRamCacheStatus();
-        });
-    }
 
     #endregion
 
@@ -190,27 +221,41 @@ public partial class GameModeViewModel : ObservableObject
                 StatusMessage = "Restoring settings...";
                 await _gameModeService.DisableAsync();
 
-                KilledApps.Clear();
+                AffectedApps.Clear();
                 HasLastSession = false;
             }
             else
             {
                 // Enable Game Mode
+                var action = CloseBackgroundApps ? BackgroundAppAction.AskToClose : BackgroundAppAction.LowerPriority;
+
+                if (action == BackgroundAppAction.AskToClose && !await ConfirmClosingAsync())
+                {
+                    StatusMessage = "Game Mode not started.";
+                    return;
+                }
+
                 StatusMessage = "Activating Game Mode...";
-                var result = await _gameModeService.EnableAsync();
+                var result = await _gameModeService.EnableAsync(new GameModeOptions { BackgroundApps = action });
 
                 if (result.Success)
                 {
                     // Update last session info
-                    LastProcessesKilled = result.ProcessesKilled;
+                    LastBackgroundAppsAffected = result.ProcessesAffected;
                     LastMemoryFreed = FormatBytes(result.MemoryFreedBytes);
                     HasLastSession = true;
+                    LastSessionAppsLabel = action == BackgroundAppAction.AskToClose ? "Apps Closed" : "Apps Lowered";
 
-                    // Update killed apps list
-                    KilledApps.Clear();
-                    foreach (var app in result.KilledProcessNames)
+                    AffectedApps.Clear();
+                    foreach (var app in result.BackgroundAppsAffected)
                     {
-                        KilledApps.Add(FormatAppName(app));
+                        AffectedApps.Add(FormatAppName(app));
+                    }
+
+                    if (result.BackgroundAppsStillRunning.Count > 0)
+                    {
+                        // Left running on purpose: they had something to keep.
+                        StatusMessage = $"Game Mode on. Still open: {string.Join(", ", result.BackgroundAppsStillRunning.Select(FormatAppName))}";
                     }
                 }
                 else
@@ -225,6 +270,43 @@ public partial class GameModeViewModel : ObservableObject
         finally
         {
             IsActivating = false;
+        }
+    }
+
+    /// <summary>
+    /// Asks before closing anything, listing the apps that are actually running. Without an answer from the
+    /// page, nothing is closed.
+    /// </summary>
+    private async Task<bool> ConfirmClosingAsync()
+    {
+        var running = _gameModeService.GetTargetProcesses()
+            .Where(IsRunning)
+            .Select(FormatAppName)
+            .ToList();
+
+        if (running.Count == 0)
+        {
+            return true;
+        }
+
+        return ConfirmCloseBackgroundApps != null && await ConfirmCloseBackgroundApps(running);
+    }
+
+    /// <summary>
+    /// Whether anything by this name is running. Every <c>Process</c> the lookup hands back owns a kernel
+    /// handle, so they are closed here rather than left for a finaliser that may never run.
+    /// </summary>
+    private static bool IsRunning(string processName)
+    {
+        var processes = System.Diagnostics.Process.GetProcessesByName(processName);
+        try
+        {
+            return processes.Length > 0;
+        }
+        finally
+        {
+            foreach (var process in processes)
+                process.Dispose();
         }
     }
 
@@ -305,47 +387,6 @@ public partial class GameModeViewModel : ObservableObject
 
     #endregion
 
-    #region RAM Cache
-
-    private void UpdateRamCacheStatus()
-    {
-        if (!_ramCacheService.IsEnabled)
-        {
-            RamCacheStatus = "Disabled";
-            RamCacheUsagePercent = 0;
-        }
-        else
-        {
-            var usedMb = _ramCacheService.UsedSizeBytes / (1024.0 * 1024.0);
-            var allocatedMb = _ramCacheService.AllocatedSizeBytes / (1024.0 * 1024.0);
-            RamCacheStatus = $"{usedMb:F0} / {allocatedMb:F0} MB";
-            RamCacheUsagePercent = allocatedMb > 0 ? (usedMb / allocatedMb) * 100 : 0;
-        }
-    }
-
-    [RelayCommand]
-    private async Task ToggleRamCacheAsync()
-    {
-        if (_ramCacheService.IsEnabled)
-        {
-            await _ramCacheService.DisableAsync();
-        }
-        else
-        {
-            await _ramCacheService.EnableAsync(SelectedCacheSize);
-        }
-        RamCacheEnabled = _ramCacheService.IsEnabled;
-        UpdateRamCacheStatus();
-    }
-
-    [RelayCommand]
-    private async Task ClearRamCacheAsync()
-    {
-        await _ramCacheService.ClearCacheAsync();
-        UpdateRamCacheStatus();
-    }
-
-    #endregion
 
     #region Helpers
 

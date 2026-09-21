@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
@@ -19,24 +19,6 @@ using SysMonitor.App.Services;
 
 namespace SysMonitor.App;
 
-/// <summary>
-/// Provides lazy initialization wrapper for singleton services to defer expensive
-/// instantiation until first use, reducing startup time by 2-5 seconds.
-/// </summary>
-/// <typeparam name="T">The service interface type</typeparam>
-internal sealed class LazyServiceWrapper<T> where T : class
-{
-    private readonly Lazy<T> _lazy;
-
-    public LazyServiceWrapper(IServiceProvider sp)
-    {
-        _lazy = new Lazy<T>(() => sp.GetRequiredService<T>(), LazyThreadSafetyMode.ExecutionAndPublication);
-    }
-
-    public T Value => _lazy.Value;
-    public bool IsValueCreated => _lazy.IsValueCreated;
-}
-
 public partial class App : Application
 {
     private static Window? _mainWindow;
@@ -48,15 +30,30 @@ public partial class App : Application
     {
         // Check for elevated registry cleaning mode BEFORE InitializeComponent
         var args = Environment.GetCommandLineArgs();
-        if (args.Length >= 4 && args[1] == "--fix-registry")
+        if (args.Length >= 5 && args[1] == "--fix-registry")
         {
-            // Run elevated registry cleaning and exit
+            // Run elevated registry cleaning and exit. The fingerprint is what the unelevated side wrote;
+            // the elevated side refuses a list that no longer matches it.
             var inputFile = args[2];
             var outputFile = args[3];
+            var fingerprint = args[4];
 
             Task.Run(async () =>
             {
-                var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(inputFile, outputFile);
+                var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(inputFile, outputFile, fingerprint);
+                Environment.Exit(exitCode);
+            }).GetAwaiter().GetResult();
+
+            return; // Don't initialize the rest of the app
+        }
+
+        // Windows Task Scheduler starts the app with these switches at the scheduled time. Clean and exit:
+        // opening the whole app with highest privileges and cleaning nothing is what M4 was about.
+        if (ScheduledCleaningRequest.FromCommandLine(args) is { } cleaningRequest)
+        {
+            Task.Run(async () =>
+            {
+                var exitCode = await RunScheduledCleanAsync(cleaningRequest);
                 Environment.Exit(exitCode);
             }).GetAwaiter().GetResult();
 
@@ -225,10 +222,6 @@ public partial class App : Application
                 services.AddSingleton<ProfileService>();
                 services.AddSingleton<IProfileService>(sp => sp.GetRequiredService<ProfileService>());
 
-                // RAM Cache Service (fast temp storage)
-                services.AddSingleton<RamCacheService>();
-                services.AddSingleton<IRamCacheService>(sp => sp.GetRequiredService<RamCacheService>());
-
                 // FPS Overlay Service (real-time stats overlay)
                 services.AddSingleton<FpsOverlayService>();
                 services.AddSingleton<IFpsOverlayService>(sp => sp.GetRequiredService<FpsOverlayService>());
@@ -316,7 +309,49 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _mainWindow = new MainWindow();
+
+        // A Game Mode session that never ended - a crash, or the machine going down with it on - leaves
+        // Windows on the High Performance plan. This puts the plan back.
+        _mainWindow.Closed += OnMainWindowClosed;
+        _ = RestorePowerPlanAfterCrashAsync();
+
         _mainWindow.Activate();
+    }
+
+    private static async Task RestorePowerPlanAfterCrashAsync()
+    {
+        try
+        {
+            var restored = await GetService<IGameModeService>().RestorePowerPlanAfterCrashAsync();
+            if (restored != null)
+            {
+                Log.Information("Power plan {Plan} restored after a Game Mode session that did not end properly", restored);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not check whether a power plan was left changed by Game Mode");
+        }
+    }
+
+    /// <summary>
+    /// Puts back what Game Mode changed - process priorities and the power plan - and flushes the log, rather
+    /// than leaving the machine on High Performance after the window closes.
+    /// </summary>
+    private static void OnMainWindowClosed(object sender, WindowEventArgs args)
+    {
+        try
+        {
+            _host?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Shutting the services down did not finish cleanly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 
     public static T GetService<T>() where T : class
@@ -326,6 +361,82 @@ public partial class App : Application
             throw new InvalidOperationException($"Service {typeof(T).Name} not found.");
         }
         return service;
+    }
+
+    /// <summary>
+    /// Cleans what the schedule asked for, with no window, and records what happened. Returns the process
+    /// exit code, so Task Scheduler's history shows a failed run as failed.
+    /// </summary>
+    private static async Task<int> RunScheduledCleanAsync(ScheduledCleaningRequest request)
+    {
+        var logPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SysMonitor", "Logs", "sysmonitor-.log");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.File(logPath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog());
+
+        try
+        {
+            if (!request.CleansAnything)
+            {
+                Log.Warning("Scheduled clean ran with nothing selected to clean");
+                return 0;
+            }
+
+            var runner = new ScheduledCleaningRunner(
+                new TempFileCleaner(loggerFactory.CreateLogger<TempFileCleaner>()),
+                new BrowserCacheCleaner(loggerFactory.CreateLogger<BrowserCacheCleaner>()),
+                loggerFactory.CreateLogger<ScheduledCleaningRunner>());
+
+            var outcome = await runner.RunAsync(request);
+
+            if (request.ShowNotification)
+            {
+                ShowScheduledCleanNotification(outcome);
+            }
+
+            return outcome.Success ? 0 : 1;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Scheduled clean failed");
+            return 1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+
+    private static void ShowScheduledCleanNotification(ScheduledCleaningOutcome outcome)
+    {
+        try
+        {
+            var template = Windows.UI.Notifications.ToastNotificationManager.GetTemplateContent(
+                Windows.UI.Notifications.ToastTemplateType.ToastText02);
+            var textNodes = template.GetElementsByTagName("text");
+            if (textNodes.Length >= 2)
+            {
+                textNodes[0].AppendChild(template.CreateTextNode("Scheduled cleaning finished"));
+                textNodes[1].AppendChild(template.CreateTextNode(outcome.Summary));
+            }
+
+            Windows.UI.Notifications.ToastNotificationManager.CreateToastNotifier("SysMonitor")
+                .Show(new Windows.UI.Notifications.ToastNotification(template));
+        }
+        catch (Exception ex)
+        {
+            // Nobody is watching a scheduled run; the log is the record that matters.
+            Log.Warning(ex, "Scheduled clean finished but its notification could not be shown");
+        }
     }
 
     private static void OnUnhandledException(object sender, System.UnhandledExceptionEventArgs e)
@@ -350,11 +461,16 @@ public partial class App : Application
         try
         {
             var crashPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SysMonitor", "Logs",
                 $"SysMonitor_Crash_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
             File.WriteAllText(crashPath, $"Crash at {DateTime.Now}\n\nMessage: {e.Message}\n\nException:\n{e.Exception}");
         }
-        catch { }
+        catch
+        {
+            // Best effort: the app is already going down with the failure this was trying to record,
+            // and there is nowhere left to say that the record itself could not be written.
+        }
 
         e.Handled = false; // Let it crash but we've logged it
     }

@@ -1,7 +1,9 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Monitors;
+using Serilog;
 
 namespace SysMonitor.App.Views;
 
@@ -19,6 +21,9 @@ public sealed partial class GameModePage : Page
 
         InitializeComponent();
 
+        // Closing someone's browser or Teams is their decision, taken each time, with the apps named.
+        ViewModel.ConfirmCloseBackgroundApps = AskBeforeClosingAppsAsync;
+
         // Set up timer for real-time monitoring updates
         _updateTimer = new DispatcherTimer
         {
@@ -28,6 +33,19 @@ public sealed partial class GameModePage : Page
 
         Loaded += GameModePage_Loaded;
         Unloaded += GameModePage_Unloaded;
+    }
+
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        await ViewModel.InitializeAsync();
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        _updateTimer.Stop();
+        ViewModel.Dispose();
     }
 
     private async void GameModePage_Loaded(object sender, RoutedEventArgs e)
@@ -41,6 +59,27 @@ public sealed partial class GameModePage : Page
     private void GameModePage_Unloaded(object sender, RoutedEventArgs e)
     {
         _updateTimer.Stop();
+    }
+
+    /// <summary>
+    /// Asks whether Game Mode may close the background apps that are running, naming them. Anything not
+    /// confirmed stays open.
+    /// </summary>
+    private async Task<bool> AskBeforeClosingAppsAsync(IReadOnlyList<string> apps)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Close these apps?",
+            Content = "Game Mode will ask these to close, which can lose unsaved work:\n\n" +
+                      string.Join(", ", apps) +
+                      "\n\nAnything that will not close is left running. Clear the checkbox to lower them out of the way instead.",
+            PrimaryButtonText = "Close them",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
 
     private async void UpdateTimer_Tick(object? sender, object e)
@@ -113,21 +152,9 @@ public sealed partial class GameModePage : Page
             GpuPowerText.Text = gpuPower > 0 ? $"{gpuPower:F0}W" : "N/A";
             TotalPowerText.Text = (cpuPower + gpuPower) > 0 ? $"{cpuPower + gpuPower:F0}W" : "N/A";
         }
-        catch
+        catch (Exception ex)
         {
-            // Silently handle errors in monitoring
-        }
-    }
-
-    private void RamCacheToggle_Toggled(object sender, RoutedEventArgs e)
-    {
-        if (sender is ToggleSwitch toggle)
-        {
-            // Only trigger if the state is different from current
-            if (toggle.IsOn != ViewModel.RamCacheEnabled)
-            {
-                ViewModel.ToggleRamCacheCommand.Execute(null);
-            }
+            Log.Debug(ex, "A Game Mode status refresh failed");
         }
     }
 

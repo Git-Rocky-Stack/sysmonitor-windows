@@ -1,3 +1,5 @@
+﻿using SysMonitor.Core.Services.Monitors;
+
 namespace SysMonitor.Core.Services.GameMode;
 
 /// <summary>
@@ -16,7 +18,8 @@ public enum OverlayPosition
 /// </summary>
 public class OverlayStats
 {
-    public int Fps { get; set; }
+    /// <summary>What the hardware says about frame rate, which on most machines is that it cannot say.</summary>
+    public FrameRate FrameRate { get; set; } = FrameRate.NoSensor;
     public double CpuTemperature { get; set; }
     public double GpuTemperature { get; set; }
     public double CpuUsage { get; set; }
@@ -31,8 +34,14 @@ public class OverlayStats
 
 /// <summary>
 /// Service for controlling the FPS overlay window.
+/// <para>
+/// <see cref="IDisposable"/> because the overlay is a real window with a background loop behind it. Nothing
+/// in shutdown called <see cref="HideAsync"/>, and a host can only dispose what says it is disposable — so
+/// the overlay and its loop outlived the main window, and a WinUI app with a window still open does not
+/// exit. The user closed the app and it stayed in Task Manager.
+/// </para>
 /// </summary>
-public interface IFpsOverlayService
+public interface IFpsOverlayService : IDisposable
 {
     /// <summary>
     /// Whether the overlay is currently visible.

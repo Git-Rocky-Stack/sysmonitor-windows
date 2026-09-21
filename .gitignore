@@ -46,3 +46,21 @@ aab-extracted/
 
 # Misc
 nul
+
+# Signing material - private keys must never be committed
+*.pfx
+*.p12
+*.snk
+
+# Release artefacts - these belong on a GitHub release, not in the repository.
+# 560 MB of them were tracked here, half of it four copies of the same MSIX package.
+MSIX packages/
+*.msix
+*.msixbundle
+*.appx
+v.2.0.1 Exec/*.exe
+v.2.0.1 Exec/*.zip
+v.2.0.1 Exec/Previous Versions - Archive/
+
+# Local tool state
+.claude/settings.local.json

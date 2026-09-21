@@ -67,7 +67,7 @@ public sealed partial class FpsOverlayWindow : Window
         SetWindowStyles();
 
         // Set size and initial position (taller for power/fan rows)
-        _appWindow.MoveAndResize(new RectInt32(100, 100, 220, 260));
+        ApplyPosition();
 
         // Initialize LED arrays
         InitializeLedArrays();
@@ -89,7 +89,41 @@ public sealed partial class FpsOverlayWindow : Window
         _fanDots = new Border[] { FanDot0, FanDot1, FanDot2, FanDot3, FanDot4 };
     }
 
-    public OverlayPosition Position { get; set; } = OverlayPosition.TopRight;
+    /// <summary>The overlay's width and height in pixels: tall enough for the power and fan rows.</summary>
+    private const int OverlayWidth = 220;
+    private const int OverlayHeight = 260;
+
+    private OverlayPosition _position = OverlayPosition.TopRight;
+
+    /// <summary>
+    /// Which corner of the display the overlay sits in. Setting it moves the window; the user can still drag
+    /// it anywhere afterwards. It used to be an auto-property nothing read, so the dropdown cycled through
+    /// four labels and the window never moved.
+    /// </summary>
+    public OverlayPosition Position
+    {
+        get => _position;
+        set
+        {
+            _position = value;
+            ApplyPosition();
+        }
+    }
+
+    /// <summary>Moves and sizes the window to the corner <see cref="Position"/> names, on the display it is on.</summary>
+    private void ApplyPosition()
+    {
+        var display = DisplayArea.GetFromWindowId(_appWindow.Id, DisplayAreaFallback.Nearest);
+        var work = display.WorkArea;
+
+        var placed = OverlayPlacement.Place(
+            _position,
+            new OverlayBounds(work.X, work.Y, work.Width, work.Height),
+            OverlayWidth,
+            OverlayHeight);
+
+        _appWindow.MoveAndResize(new RectInt32(placed.X, placed.Y, placed.Width, placed.Height));
+    }
 
     #region Drag Handling
 
@@ -136,8 +170,15 @@ public sealed partial class FpsOverlayWindow : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            // Update FPS display
-            FpsText.Text = stats.Fps > 0 ? stats.Fps.ToString() : "---";
+            // Frame rate, or the reason there is none. A machine with no frame-rate sensor is the normal
+            // case, and saying so beats a number that never arrives.
+            var frameRate = stats.FrameRate;
+            FpsLabel.Visibility = frameRate.HasSensor ? Visibility.Visible : Visibility.Collapsed;
+            FpsText.Visibility = frameRate.HasSensor ? Visibility.Visible : Visibility.Collapsed;
+            NoFpsText.Visibility = frameRate.HasSensor ? Visibility.Collapsed : Visibility.Visible;
+
+            // With a sensor but nothing drawing fullscreen there is nothing to measure yet.
+            FpsText.Text = frameRate.FramesPerSecond is { } fps ? fps.ToString("F0") : "---";
 
             // Update status LED color based on overall health
             UpdateStatusLed(stats);

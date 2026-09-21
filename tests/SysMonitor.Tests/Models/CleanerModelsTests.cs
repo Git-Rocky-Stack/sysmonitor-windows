@@ -4,6 +4,10 @@ using Xunit;
 
 namespace SysMonitor.Tests.Models;
 
+/// <summary>
+/// What a result object says before anything has filled it in. It matters because the app shows these
+/// straight to the user: a result that starts out claiming success would report one for work that never ran.
+/// </summary>
 public class CleanerModelsTests
 {
     [Fact]
@@ -35,44 +39,5 @@ public class CleanerModelsTests
         result.ErrorCount.Should().Be(0);
         result.Errors.Should().NotBeNull().And.BeEmpty();
         result.Duration.Should().Be(TimeSpan.Zero);
-    }
-
-    [Theory]
-    [InlineData(CleanerRiskLevel.Safe)]
-    [InlineData(CleanerRiskLevel.Low)]
-    [InlineData(CleanerRiskLevel.Medium)]
-    [InlineData(CleanerRiskLevel.High)]
-    public void CleanerRiskLevel_AllValuesExist(CleanerRiskLevel level)
-    {
-        // Assert - just verifying enum values exist
-        level.Should().BeDefined();
-    }
-
-    [Theory]
-    [InlineData(CleanerCategory.UserTemp)]
-    [InlineData(CleanerCategory.WindowsTemp)]
-    [InlineData(CleanerCategory.BrowserCache)]
-    [InlineData(CleanerCategory.RecycleBin)]
-    [InlineData(CleanerCategory.Thumbnails)]
-    [InlineData(CleanerCategory.LogFiles)]
-    public void CleanerCategory_AllValuesExist(CleanerCategory category)
-    {
-        // Assert - just verifying enum values exist
-        category.Should().BeDefined();
-    }
-
-    [Fact]
-    public void CleanerResult_SuccessLogic_WorksCorrectly()
-    {
-        // Arrange
-        var result = new CleanerResult
-        {
-            FilesDeleted = 100,
-            ErrorCount = 10
-        };
-
-        // Assert - Success should be true when errors < files deleted
-        // (This tests the logic that allows some errors)
-        result.FilesDeleted.Should().BeGreaterThan(result.ErrorCount);
     }
 }

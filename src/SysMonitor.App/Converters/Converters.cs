@@ -248,67 +248,12 @@ public class StringToBrushConverter : IValueConverter
                     return new SolidColorBrush(Windows.UI.Color.FromArgb(255, r, g, b));
                 }
             }
-            catch { }
+            catch
+            {
+                // Best effort: a colour that will not parse falls through to the default below.
+            }
         }
         return new SolidColorBrush(Windows.UI.Color.FromArgb(255, 76, 175, 80)); // Default green
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class StringToColorConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is string colorString && !string.IsNullOrEmpty(colorString))
-        {
-            try
-            {
-                // Parse hex color string like "#4CAF50" or "#F44336"
-                colorString = colorString.TrimStart('#');
-                if (colorString.Length == 6)
-                {
-                    var r = System.Convert.ToByte(colorString.Substring(0, 2), 16);
-                    var g = System.Convert.ToByte(colorString.Substring(2, 2), 16);
-                    var b = System.Convert.ToByte(colorString.Substring(4, 2), 16);
-                    return Windows.UI.Color.FromArgb(255, r, g, b);
-                }
-            }
-            catch { }
-        }
-        return Windows.UI.Color.FromArgb(255, 128, 128, 128); // Default gray
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class BytesToImageConverter : IValueConverter
-{
-    public object? Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is byte[] bytes && bytes.Length > 0)
-        {
-            try
-            {
-                var image = new BitmapImage();
-                using var stream = new InMemoryRandomAccessStream();
-                using var writer = new DataWriter(stream.GetOutputStreamAt(0));
-                writer.WriteBytes(bytes);
-                writer.StoreAsync().AsTask().GetAwaiter().GetResult();
-                writer.FlushAsync().AsTask().GetAwaiter().GetResult();
-                stream.Seek(0);
-                image.SetSourceAsync(stream).AsTask().GetAwaiter().GetResult();
-                return image;
-            }
-            catch { }
-        }
-        return null;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -564,27 +509,6 @@ public class DoubleToStringConverter : IValueConverter
         if (value is double d)
             return d.ToString("F2");
         return "0.00";
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
-}
-
-public class StatusToBackgroundConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is string status)
-        {
-            return status switch
-            {
-                "Excellent" => new SolidColorBrush(ColorHelper.FromArgb(255, 76, 175, 80)),   // Green
-                "Good" => new SolidColorBrush(ColorHelper.FromArgb(255, 139, 195, 74)),      // Light Green
-                "Fair" => new SolidColorBrush(ColorHelper.FromArgb(255, 255, 152, 0)),       // Orange
-                "Poor" => new SolidColorBrush(ColorHelper.FromArgb(255, 255, 87, 34)),       // Deep Orange
-                "Critical" => new SolidColorBrush(ColorHelper.FromArgb(255, 244, 67, 54)),   // Red
-                _ => new SolidColorBrush(ColorHelper.FromArgb(255, 158, 158, 158))           // Gray
-            };
-        }
-        return new SolidColorBrush(ColorHelper.FromArgb(255, 158, 158, 158));
     }
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using System.Diagnostics;
 using Windows.Management.Deployment;
@@ -6,6 +8,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class InstalledProgramsService : IInstalledProgramsService
 {
+    private readonly ILogger _logger;
+
+    public InstalledProgramsService(ILogger<InstalledProgramsService>? logger = null)
+    {
+        _logger = logger ?? NullLogger<InstalledProgramsService>.Instance;
+    }
+
     // Known system/bloatware package name patterns
     private static readonly string[] SystemAppPatterns =
     {
@@ -64,7 +73,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                     EnumerateRegistryPrograms(hklmKey, programs, seenNames, $"HKLM\\{path}");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetWin32Programs failed");
+            }
 
             try
             {
@@ -75,7 +87,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                     EnumerateRegistryPrograms(hkcuKey, programs, seenNames, $"HKCU\\{path}");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetWin32Programs failed");
+            }
         }
     }
 
@@ -136,7 +151,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                         {
                             program.InstallDate = new DateTime(year, month, day);
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            _logger.LogDebug(ex, "EnumerateRegistryPrograms failed");
+                        }
                     }
                 }
 
@@ -157,7 +175,10 @@ public class InstalledProgramsService : IInstalledProgramsService
                 seenNames.Add(displayName);
                 programs.Add(program);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "EnumerateRegistryPrograms failed");
+            }
         }
     }
 
@@ -220,15 +241,24 @@ public class InstalledProgramsService : IInstalledProgramsService
                             program.EstimatedSizeBytes = GetDirectorySize(package.InstalledPath);
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "GetStoreApps failed");
+                    }
 
                     seenNames.Add(displayName);
                     programs.Add(program);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetStoreApps failed");
+                }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetStoreApps failed");
+        }
     }
 
     public async Task<UninstallResult> UninstallProgramAsync(InstalledProgram program)
@@ -243,7 +273,7 @@ public class InstalledProgramsService : IInstalledProgramsService
                 }
                 else
                 {
-                    return UninstallWin32App(program);
+                    return await UninstallWin32AppAsync(program);
                 }
             }
             catch (Exception ex)
@@ -257,7 +287,7 @@ public class InstalledProgramsService : IInstalledProgramsService
         });
     }
 
-    private UninstallResult UninstallWin32App(InstalledProgram program)
+    private async Task<UninstallResult> UninstallWin32AppAsync(InstalledProgram program)
     {
         var uninstallString = !string.IsNullOrEmpty(program.QuietUninstallString)
             ? program.QuietUninstallString
@@ -272,53 +302,49 @@ public class InstalledProgramsService : IInstalledProgramsService
             };
         }
 
-        try
+        var command = ParseUninstallCommand(uninstallString);
+        if (string.IsNullOrEmpty(command.FileName))
         {
-            // Parse the uninstall string
-            string fileName;
-            string arguments;
-
-            if (uninstallString.StartsWith("\""))
-            {
-                // Quoted path - extract between quotes
-                var endQuote = uninstallString.IndexOf('"', 1);
-                fileName = uninstallString.Substring(1, endQuote - 1);
-                arguments = uninstallString.Substring(endQuote + 1).Trim();
-            }
-            else if (uninstallString.StartsWith("MsiExec", StringComparison.OrdinalIgnoreCase))
-            {
-                fileName = "msiexec.exe";
-                arguments = uninstallString.Substring(7).Trim();
-                // Add quiet flag if not present
-                if (!arguments.Contains("/quiet", StringComparison.OrdinalIgnoreCase) &&
-                    !arguments.Contains("/qn", StringComparison.OrdinalIgnoreCase))
-                {
-                    arguments += " /quiet /norestart";
-                }
-            }
-            else
-            {
-                // Unquoted path - need to handle paths with spaces like "C:\Program Files\..."
-                // Strategy: Find the .exe extension and split there
-                (fileName, arguments) = ParseUnquotedUninstallString(uninstallString);
-            }
-
-            var psi = new ProcessStartInfo
-            {
-                FileName = fileName,
-                Arguments = arguments,
-                UseShellExecute = true,
-                Verb = "runas" // Request elevation
-            };
-
-            using var process = Process.Start(psi);
-            process?.WaitForExit(60000); // Wait up to 60 seconds
-
             return new UninstallResult
             {
-                Success = process?.ExitCode == 0,
-                ExitCode = process?.ExitCode ?? -1,
-                Message = process?.ExitCode == 0 ? "Uninstall started" : "Uninstall may have failed"
+                Success = false,
+                Message = $"The uninstall command recorded for \"{program.Name}\" cannot be read: {uninstallString}"
+            };
+        }
+
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = command.FileName,
+                Arguments = command.Arguments,
+                UseShellExecute = true
+            };
+
+            // Only a machine-wide program's uninstaller is worth a prompt from us; see ShouldRequestElevation.
+            if (ShouldRequestElevation(program.RegistryKey))
+            {
+                psi.Verb = "runas";
+            }
+
+            using var process = Process.Start(psi);
+            if (process == null)
+            {
+                return new UninstallResult
+                {
+                    Success = false,
+                    Message = $"Could not start the uninstaller for \"{program.Name}\"."
+                };
+            }
+
+            return await WaitForUninstallerAsync(process, program.Name, UninstallTimeout);
+        }
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        {
+            return new UninstallResult
+            {
+                Success = false,
+                Message = $"Uninstalling \"{program.Name}\" needs administrator approval, and the prompt was declined."
             };
         }
         catch (Exception ex)
@@ -330,6 +356,191 @@ public class InstalledProgramsService : IInstalledProgramsService
             };
         }
     }
+
+    /// <summary>How long an uninstaller is given before the app stops waiting for it.</summary>
+    private static readonly TimeSpan UninstallTimeout = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Waits for an uninstaller and turns what it did into a result. One that outlives the wait is left
+    /// running and reported as running: it has no exit code yet, and asking for one would throw.
+    /// </summary>
+    internal static async Task<UninstallResult> WaitForUninstallerAsync(Process process, string programName, TimeSpan timeout)
+    {
+        using var expiry = new CancellationTokenSource(timeout);
+        try
+        {
+            await process.WaitForExitAsync(expiry.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return new UninstallResult
+            {
+                Success = false,
+                Message = $"The uninstaller for \"{programName}\" is still running after {Describe(timeout)}. It was left alone; check Settings > Apps for the result.",
+            };
+        }
+
+        return DescribeExitCode(process.ExitCode, programName);
+    }
+
+    private static string Describe(TimeSpan timeout) => timeout.TotalMinutes >= 1
+        ? $"{timeout.TotalMinutes:0} minute{(timeout.TotalMinutes >= 2 ? "s" : string.Empty)}"
+        : $"{timeout.TotalSeconds:0} seconds";
+
+    /// <summary>An uninstall command split into what to run and what to pass it.</summary>
+    internal readonly record struct UninstallCommand(string FileName, string Arguments);
+
+    /// <summary>
+    /// Splits an UninstallString from the registry into a program and its arguments. The program may be
+    /// quoted, may be an unquoted path with spaces, and on most machines is "MsiExec.exe /X{...}" - which
+    /// used to be cut seven characters in, leaving msiexec with ".exe /X{...}": it then showed its usage
+    /// dialog and never uninstalled anything.
+    /// </summary>
+    /// <summary>
+    /// Whether this app should raise a UAC prompt before running a program's uninstaller.
+    /// <para>
+    /// Only for a program recorded under HKLM. HKCU is writable by the user, so anything running as the
+    /// user can add an entry there with any DisplayName and any UninstallString it likes. Elevating that
+    /// would spend a prompt the user is giving to this app on a program this app knows nothing about.
+    /// Windows' own Settings &gt; Apps does not elevate HKCU uninstallers either; one that truly needs
+    /// administrator rights requests them through its own manifest, and the prompt then names it.
+    /// </para>
+    /// </summary>
+    internal static bool ShouldRequestElevation(string registryKey) =>
+        registryKey.StartsWith(@"HKLM\", StringComparison.OrdinalIgnoreCase);
+
+    internal static UninstallCommand ParseUninstallCommand(string uninstallString)
+    {
+        var command = (uninstallString ?? string.Empty).Trim();
+        if (command.Length == 0)
+        {
+            return new UninstallCommand(string.Empty, string.Empty);
+        }
+
+        string fileName;
+        string arguments;
+
+        if (command.StartsWith('"'))
+        {
+            var endQuote = command.IndexOf('"', 1);
+            if (endQuote < 0)
+            {
+                return new UninstallCommand(string.Empty, string.Empty);
+            }
+
+            fileName = command[1..endQuote];
+            arguments = command[(endQuote + 1)..].Trim();
+        }
+        else
+        {
+            var end = EndOfUnquotedProgram(command);
+            fileName = command[..end];
+            arguments = command[end..].Trim();
+        }
+
+        if (fileName.Length == 0)
+        {
+            return new UninstallCommand(string.Empty, string.Empty);
+        }
+
+        if (Path.GetFileNameWithoutExtension(fileName).Equals("msiexec", StringComparison.OrdinalIgnoreCase))
+        {
+            arguments = EnsureWindowsInstallerIsQuiet(arguments);
+        }
+
+        return new UninstallCommand(fileName, arguments);
+    }
+
+    /// <summary>
+    /// Where the program ends in an unquoted command: after the first executable extension that a space or
+    /// the end of the string follows, so a folder called "weird.executables" is not mistaken for it.
+    /// </summary>
+    private static int EndOfUnquotedProgram(string command)
+    {
+        string[] extensions = [".exe", ".msi", ".bat", ".cmd", ".com"];
+
+        var best = -1;
+        foreach (var extension in extensions)
+        {
+            var index = 0;
+            while ((index = command.IndexOf(extension, index, StringComparison.OrdinalIgnoreCase)) >= 0)
+            {
+                var end = index + extension.Length;
+                if (end == command.Length || char.IsWhiteSpace(command[end]))
+                {
+                    if (best < 0 || end < best)
+                        best = end;
+                    break;
+                }
+
+                index = end;
+            }
+        }
+
+        if (best > 0)
+            return best;
+
+        // Nothing that looks like a program name: take the first word, as Windows would.
+        var space = command.IndexOf(' ');
+        return space > 0 ? space : command.Length;
+    }
+
+    /// <summary>Adds the switches that keep msiexec from asking, unless the command already says how to behave.</summary>
+    internal static string EnsureWindowsInstallerIsQuiet(string arguments)
+    {
+        string[] display = ["/quiet", "/qn", "/qb", "/qr", "/qf", "/passive"];
+        if (display.Any(switchName => arguments.Contains(switchName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return arguments;
+        }
+
+        return string.IsNullOrEmpty(arguments) ? "/quiet /norestart" : $"{arguments} /quiet /norestart";
+    }
+
+    /// <summary>
+    /// What an uninstaller's exit code means. A reboot code is a success that needs a restart, and a product
+    /// that is no longer installed is not a failure to report as one.
+    /// </summary>
+    internal static UninstallResult DescribeExitCode(int exitCode, string programName) => exitCode switch
+    {
+        0 => new UninstallResult { Success = true, ExitCode = 0, Message = $"\"{programName}\" was uninstalled." },
+        3010 or 1641 => new UninstallResult
+        {
+            Success = true,
+            ExitCode = exitCode,
+            Message = $"\"{programName}\" was uninstalled. Restart Windows to finish.",
+        },
+        1605 or 1614 => new UninstallResult
+        {
+            Success = true,
+            ExitCode = exitCode,
+            Message = $"\"{programName}\" was not installed any more; its entry was left over.",
+        },
+        1602 => new UninstallResult
+        {
+            Success = false,
+            ExitCode = exitCode,
+            Message = $"Uninstalling \"{programName}\" was cancelled.",
+        },
+        1603 => new UninstallResult
+        {
+            Success = false,
+            ExitCode = exitCode,
+            Message = $"The uninstaller for \"{programName}\" failed (1603). It often means the program is in use or needs a restart first.",
+        },
+        1618 => new UninstallResult
+        {
+            Success = false,
+            ExitCode = exitCode,
+            Message = "Another installation is already running. Wait for it to finish and try again.",
+        },
+        _ => new UninstallResult
+        {
+            Success = false,
+            ExitCode = exitCode,
+            Message = $"The uninstaller for \"{programName}\" reported failure (exit code {exitCode}).",
+        },
+    };
 
     /// <summary>
     /// Parses an unquoted uninstall string that may contain spaces in the path.
@@ -462,12 +673,9 @@ public class InstalledProgramsService : IInstalledProgramsService
 
     private async Task<UninstallResult> UninstallProtectedSystemAppAsync(InstalledProgram program)
     {
-        // Extract package name (without version/architecture suffix) for wildcard matching
-        var packageName = program.PackageFullName;
-        var underscoreIndex = packageName.IndexOf('_');
-        if (underscoreIndex > 0)
+        if (!TryGetPackageName(program, out var packageName, out var rejected))
         {
-            packageName = packageName.Substring(0, underscoreIndex);
+            return rejected;
         }
 
         // For system apps, we need to:
@@ -502,12 +710,9 @@ try {{
 
     private async Task<UninstallResult> UninstallViaElevatedPowerShellAsync(InstalledProgram program, string? previousError = null)
     {
-        // Extract package name for wildcard matching
-        var packageName = program.PackageFullName;
-        var underscoreIndex = packageName.IndexOf('_');
-        if (underscoreIndex > 0)
+        if (!TryGetPackageName(program, out var packageName, out var rejected))
         {
-            packageName = packageName.Substring(0, underscoreIndex);
+            return rejected;
         }
 
         var script = $@"
@@ -545,22 +750,57 @@ try {{
         return result;
     }
 
+    /// <summary>
+    /// The package name to match on, once it is certain it is a name: it is put straight into PowerShell
+    /// source, and an Appx name that carried a quote could otherwise add commands of its own.
+    /// </summary>
+    internal static bool TryGetPackageName(InstalledProgram program, out string packageName, out UninstallResult rejected)
+    {
+        packageName = program.PackageFullName ?? string.Empty;
+        var underscoreIndex = packageName.IndexOf('_');
+        if (underscoreIndex > 0)
+        {
+            packageName = packageName.Substring(0, underscoreIndex);
+        }
+
+        if (System.Text.RegularExpressions.Regex.IsMatch(packageName, @"^[A-Za-z0-9][A-Za-z0-9.-]{0,127}$"))
+        {
+            rejected = new UninstallResult { Success = true };
+            return true;
+        }
+
+        rejected = new UninstallResult
+        {
+            Success = false,
+            Message = $"\"{program.Name}\" has a package name this uninstaller will not pass to PowerShell. Remove it from Settings > Apps instead."
+        };
+        return false;
+    }
+
+    /// <summary>
+    /// The command line that runs a script as administrator without leaving it anywhere to be rewritten:
+    /// the script itself is encoded into the arguments, which are fixed when the process starts.
+    /// </summary>
+    internal static string BuildElevatedPowerShellArguments(string script) =>
+        "-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand " +
+        Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
+
+    /// <summary>
+    /// Runs a script as administrator. The script travels on the command line, encoded, rather than in a
+    /// file: a file in the temp folder can be rewritten by any process running as this user while the UAC
+    /// prompt is open, and the replacement would then run as administrator.
+    /// </summary>
     private async Task<UninstallResult> RunPowerShellScriptAsync(string script, string operationType)
     {
         return await Task.Run(() =>
         {
             try
             {
-                // Write script to temp file to avoid command line escaping issues
-                var scriptPath = Path.Combine(Path.GetTempPath(), $"sysmon_uninstall_{Guid.NewGuid():N}.ps1");
-                File.WriteAllText(scriptPath, script);
-
-                try
                 {
                     var psi = new ProcessStartInfo
                     {
                         FileName = "powershell.exe",
-                        Arguments = $"-ExecutionPolicy Bypass -NoProfile -File \"{scriptPath}\"",
+                        Arguments = BuildElevatedPowerShellArguments(script),
                         UseShellExecute = true,
                         Verb = "runas",
                         WindowStyle = ProcessWindowStyle.Hidden
@@ -576,7 +816,14 @@ try {{
                         };
                     }
 
-                    process.WaitForExit(60000);
+                    if (!process.WaitForExit(60000))
+                    {
+                        return new UninstallResult
+                        {
+                            Success = false,
+                            Message = $"{operationType} is still running after a minute. It was left alone; check Settings > Apps for the result."
+                        };
+                    }
 
                     if (process.ExitCode == 0)
                     {
@@ -595,11 +842,6 @@ try {{
                             Message = $"{operationType} failed (exit code: {process.ExitCode}). The app may be protected by Windows or require a restart."
                         };
                     }
-                }
-                finally
-                {
-                    // Clean up temp script file
-                    try { File.Delete(scriptPath); } catch { }
                 }
             }
             catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
@@ -632,7 +874,10 @@ try {{
         {
             Process.Start("explorer.exe", program.InstallLocation);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "OpenInstallLocation failed");
+        }
     }
 
     private static bool IsKnownSystemApp(string packageName)
@@ -649,17 +894,20 @@ try {{
             name.Contains("Runtime", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static long GetDirectorySize(string path)
+    private long GetDirectorySize(string path)
     {
         long size = 0;
         try
         {
             foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
             {
-                try { size += new FileInfo(file).Length; } catch { }
+                try { size += new FileInfo(file).Length; } catch (Exception ex) { _logger.LogDebug(ex, "GetDirectorySize failed"); }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetDirectorySize failed");
+        }
         return size;
     }
 }

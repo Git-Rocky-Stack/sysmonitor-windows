@@ -23,7 +23,7 @@ Version 1.0.0 | Windows Desktop Application | Built with WinUI 3 & .NET 8
 
 ## Overview
 
-STX.1 System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring, system optimization, privacy protection, and productivity tools. Designed with a sleek AMOLED dark theme, it offers professional-grade features in an intuitive interface.
+STX.1 System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:19`), system optimization (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:18`), privacy protection (`src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs:60`), and productivity tools (`src/SysMonitor.Core/Services/Utilities/PdfTools.cs:12`). Designed with a sleek AMOLED dark theme, it offers professional-grade features in an intuitive interface.
 
 ### Key Features at a Glance
 
@@ -58,7 +58,7 @@ STX.1 System Monitor is a comprehensive Windows system utility that provides rea
 
 ## Dashboard
 
-The Dashboard provides a comprehensive overview of your system's health and performance.
+The Dashboard provides a comprehensive overview of your system's health and performance (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:20`).
 
 ### Health Score
 
@@ -138,6 +138,8 @@ Power management (laptops/tablets):
 - **Charge Level** - Current battery percentage
 - **Charging Status** - Charging, Plugged In, or On Battery
 - **Health Alerts** - Low and critical battery warnings
+- **Health** - How much of its original capacity the battery still holds, from the figures Windows reports
+  for it. Many machines do not report them, and the page says "Not reported" rather than guessing
 - **Time Remaining** - Estimated battery life
 
 ### Temperature Monitor
@@ -244,7 +246,7 @@ Control programs that launch at startup:
 1. View startup programs list
 2. Select a program to see details
 3. Click **Disable** to prevent auto-start
-4. Click **Enable** to restore auto-start
+4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:81`)
 
 ### Scheduled Cleaning
 
@@ -473,8 +475,9 @@ File compression and archiving:
 
 **Compression Formats:**
 - ZIP (most compatible)
-- 7Z (best compression)
 - TAR.GZ (Unix compatible)
+
+7z is not offered: the code behind it wrote a zip file with a different name.
 
 **How to Use:**
 1. Select file or folder to compress
@@ -587,13 +590,13 @@ Detailed system specifications:
 
 - **Run at Startup** - Launch app when Windows starts
 - **Minimize to Tray** - Keep running in system tray
-- **Show Notifications** - Enable/disable alerts
+- **Show Notifications** - Enable/disable alerts (`src/SysMonitor.App/Views/SettingsPage.xaml:98`)
 
 ### Monitoring
 
 - **Refresh Interval** - Data update frequency (1-10 seconds)
-- **Auto-Optimize Memory** - Automatic RAM optimization
-- **Memory Threshold** - Trigger level for auto-optimization
+- **Memory Threshold** - The usage level that raises a memory alert. Nothing optimizes memory on its own;
+  the Dashboard's memory action is the only thing that trims working sets, and you start it.
 
 ### Alert Thresholds
 

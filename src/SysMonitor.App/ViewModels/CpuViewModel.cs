@@ -1,8 +1,9 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Monitoring;
 using System.Collections.ObjectModel;
+using Serilog;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -82,7 +83,8 @@ public partial class CpuViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected when disposed
+            // Best effort: the page was left while this was in flight, so the work it was doing
+            // no longer has anywhere to go.
         }
     }
 
@@ -135,11 +137,11 @@ public partial class CpuViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Expected during shutdown
+            // Best effort: the app is closing and the refresh was cancelled on purpose.
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Log in production
+            Log.Warning(ex, "Refreshing the CPU page failed");
         }
     }
 

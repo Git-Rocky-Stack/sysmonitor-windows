@@ -1,3 +1,5 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Monitors;
@@ -115,6 +117,7 @@ public class QuickFixResult
 
 public class HealthCheckService : IHealthCheckService
 {
+    private readonly ILogger _logger;
     private readonly ITempFileCleaner _tempFileCleaner;
     private readonly IBrowserCacheCleaner _browserCacheCleaner;
     private readonly IRegistryCleaner _registryCleaner;
@@ -128,8 +131,10 @@ public class HealthCheckService : IHealthCheckService
         IRegistryCleaner registryCleaner,
         IStartupOptimizer startupOptimizer,
         IMemoryMonitor memoryMonitor,
-        IDiskMonitor diskMonitor)
+        IDiskMonitor diskMonitor,
+        ILogger<HealthCheckService>? logger = null)
     {
+        _logger = logger ?? NullLogger<HealthCheckService>.Instance;
         _tempFileCleaner = tempFileCleaner;
         _browserCacheCleaner = browserCacheCleaner;
         _registryCleaner = registryCleaner;
@@ -257,9 +262,9 @@ public class HealthCheckService : IHealthCheckService
         {
             throw;
         }
-        catch
+        catch (Exception ex)
         {
-            // Continue with partial results
+            _logger.LogWarning(ex, "A health check did not finish; its results are missing from the report");
         }
 
         report.ScanDuration = DateTime.Now - startTime;

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Management;
 using System.Net.NetworkInformation;
 
@@ -5,6 +7,13 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class BluetoothAnalyzer : IBluetoothAnalyzer
 {
+    private readonly ILogger _logger;
+
+    public BluetoothAnalyzer(ILogger<BluetoothAnalyzer>? logger = null)
+    {
+        _logger = logger ?? NullLogger<BluetoothAnalyzer>.Instance;
+    }
+
     public bool IsAvailable => CheckBluetoothAvailable();
 
     public async Task<List<BluetoothDeviceInfo>> ScanDevicesAsync(CancellationToken cancellationToken = default)
@@ -54,7 +63,10 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
                 }
             }
             catch (OperationCanceledException) { throw; }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "ScanDevicesAsync failed");
+            }
         }, cancellationToken);
 
         return devices;
@@ -89,7 +101,10 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetAdapterInfoAsync failed");
+            }
 
             return null;
         });

@@ -1,4 +1,6 @@
-using System.Text.Json;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.GameMode;
@@ -8,6 +10,7 @@ namespace SysMonitor.Core.Services.GameMode;
 /// </summary>
 public class ProfileService : IProfileService
 {
+    private readonly ILogger _logger;
     private readonly string _profilesPath;
     private readonly IGameModeService _gameModeService;
     private readonly List<PerformanceProfile> _profiles = new();
@@ -22,8 +25,9 @@ public class ProfileService : IProfileService
 
     public event EventHandler<PerformanceProfile?>? ProfileChanged;
 
-    public ProfileService(IGameModeService gameModeService)
+    public ProfileService(IGameModeService gameModeService, ILogger<ProfileService>? logger = null)
     {
+        _logger = logger ?? NullLogger<ProfileService>.Instance;
         _gameModeService = gameModeService;
         _profilesPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -52,9 +56,9 @@ public class ProfileService : IProfileService
                     _profiles.AddRange(data.Profiles);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Failed to load, create defaults
+                _logger.LogWarning(ex, "Saved Game Mode profiles could not be read; the defaults are used");
             }
         }
 
@@ -76,7 +80,7 @@ public class ProfileService : IProfileService
             IsDefault = true,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = true,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge", "opera", "brave", "vivaldi",
                 "discord", "slack", "teams", "skype", "zoom", "telegram", "whatsapp",
@@ -94,7 +98,7 @@ public class ProfileService : IProfileService
             IsDefault = true,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = true,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge", "opera", "brave", "vivaldi",
                 "onedrive", "dropbox", "googledrivesync",
@@ -110,7 +114,7 @@ public class ProfileService : IProfileService
             IsDefault = true,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = false,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge", "opera", "brave", "vivaldi",
                 "slack", "teams", "skype", "zoom", "telegram",
@@ -160,7 +164,7 @@ public class ProfileService : IProfileService
             IsDefault = false,
             PowerPlanGuid = HighPerformanceGuid,
             OptimizeMemory = true,
-            ProcessesToKill = new List<string>
+            BackgroundApps = new List<string>
             {
                 "chrome", "firefox", "msedge"
             }
@@ -174,10 +178,17 @@ public class ProfileService : IProfileService
 
         _activeProfile = profile;
 
-        // Enable Game Mode with profile settings
+        // Enable Game Mode with this profile's settings, not the built-in ones. "Streaming Mode" keeps
+        // Discord and OBS because its own list does; it used to close them along with everything else.
         if (!_gameModeService.IsEnabled)
         {
-            await _gameModeService.EnableAsync();
+            await _gameModeService.EnableAsync(new GameModeOptions
+            {
+                BackgroundApps = profile.BackgroundAppAction,
+                BackgroundAppNames = profile.BackgroundApps,
+                OptimizeMemory = profile.OptimizeMemory,
+                PowerPlanGuid = profile.PowerPlanGuid,
+            });
         }
 
         ProfileChanged?.Invoke(this, profile);

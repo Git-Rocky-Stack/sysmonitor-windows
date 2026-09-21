@@ -1,8 +1,14 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+
+using SysMonitor.Core.Helpers;
+using SysMonitor.Core.Services.Cleaners;
+using SysMonitor.Core.Services.Utilities;
 
 namespace SysMonitor.Core.Services.Backup;
 
@@ -11,6 +17,11 @@ namespace SysMonitor.Core.Services.Backup;
 /// </summary>
 public class BackupService : IBackupService
 {
+    private bool _disposed;
+
+    private readonly ILogger _logger;
+    private readonly ISystemRestoreService _systemRestore;
+
     private readonly string _backupMetadataFolder;
     private readonly string _manifestFileName = "backup_manifest.json";
     private bool _isBackupInProgress;
@@ -18,11 +29,20 @@ public class BackupService : IBackupService
 
     public bool IsBackupInProgress => _isBackupInProgress;
 
-    public BackupService()
-    {
-        _backupMetadataFolder = Path.Combine(
+    public BackupService(ILogger<BackupService>? logger = null, ISystemRestoreService? systemRestore = null)
+        : this(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "Backups");
+            "SysMonitor", "Backups"), logger, systemRestore)
+    {
+    }
+
+    /// <summary>Uses <paramref name="metadataFolder"/> for the backup catalog (tests use an isolated folder).</summary>
+    internal BackupService(string metadataFolder, ILogger<BackupService>? logger = null,
+        ISystemRestoreService? systemRestore = null)
+    {
+        _logger = logger ?? NullLogger<BackupService>.Instance;
+        _systemRestore = systemRestore ?? new SystemRestoreService();
+        _backupMetadataFolder = metadataFolder;
         Directory.CreateDirectory(_backupMetadataFolder);
     }
 
@@ -60,6 +80,16 @@ public class BackupService : IBackupService
                     Success = false,
                     Status = BackupStatus.Failed,
                     Message = "No source paths specified"
+                };
+            }
+
+            if (job.EnableEncryption && string.IsNullOrEmpty(job.EncryptionPassword))
+            {
+                return new BackupResult
+                {
+                    Success = false,
+                    Status = BackupStatus.Failed,
+                    Message = "Encryption is enabled but no password was provided"
                 };
             }
 
@@ -108,6 +138,7 @@ public class BackupService : IBackupService
                 BackupId = Guid.NewGuid().ToString(),
                 CreatedDate = DateTime.Now,
                 Files = [],
+                SourceRoots = job.SourcePaths.ToList(),
                 Metadata = new Dictionary<string, string>
                 {
                     ["BackupType"] = job.Type.ToString(),
@@ -227,6 +258,7 @@ public class BackupService : IBackupService
             }
 
             // Apply encryption if requested
+            var isEncrypted = false;
             if (job.EnableEncryption && !string.IsNullOrEmpty(job.EncryptionPassword))
             {
                 progress?.Report(new BackupProgress
@@ -239,10 +271,20 @@ public class BackupService : IBackupService
                     TotalFiles = totalFiles
                 });
 
+                // Encryption works on a single file, so an uncompressed backup folder is packed into a zip first.
+                if (Directory.Exists(finalBackupPath))
+                {
+                    var packedPath = finalBackupPath + ".zip";
+                    await CompressBackupAsync(finalBackupPath, packedPath, BackupCompression.None, _currentBackupCts.Token);
+                    Directory.Delete(finalBackupPath, true);
+                    finalBackupPath = packedPath;
+                }
+
                 var encryptedPath = finalBackupPath + ".enc";
-                await EncryptFileAsync(finalBackupPath, encryptedPath, job.EncryptionPassword, _currentBackupCts.Token);
+                await BackupEncryption.EncryptFileAsync(finalBackupPath, encryptedPath, job.EncryptionPassword, _currentBackupCts.Token);
                 File.Delete(finalBackupPath);
                 finalBackupPath = encryptedPath;
+                isEncrypted = true;
             }
 
             stopwatch.Stop();
@@ -255,17 +297,47 @@ public class BackupService : IBackupService
                 FilePath = finalBackupPath,
                 Type = job.Type,
                 CreatedDate = DateTime.Now,
-                SizeBytes = new FileInfo(finalBackupPath).Length,
+                SizeBytes = GetBackupSize(finalBackupPath),
                 FileCount = processedFiles,
-                IsEncrypted = job.EnableEncryption,
-                IsVerified = job.VerifyAfterBackup,
+                IsEncrypted = isEncrypted,
+                IsVerified = false,
                 Description = job.Description,
                 SourcePaths = job.SourcePaths,
                 Manifest = manifest
             };
 
+            // Verify the finished backup (after compression/encryption) against the recorded checksums.
+            BackupResult? verification = null;
+            if (job.VerifyAfterBackup)
+            {
+                verification = await VerifyBackupAsync(archive, progress, job.EncryptionPassword, _currentBackupCts.Token);
+                archive.IsVerified = verification.Success;
+            }
+
             // Save archive metadata
             await SaveArchiveMetadataAsync(archive);
+
+            if (verification is { Success: false })
+            {
+                // Keep older backups: retention cleanup only runs after a backup that verified.
+                return new BackupResult
+                {
+                    Success = false,
+                    Status = BackupStatus.Failed,
+                    Message = $"Backup was written to {finalBackupPath}, but verification failed: {verification.Message}",
+                    OutputPath = finalBackupPath,
+                    TotalBytes = totalBytes,
+                    ProcessedBytes = processedBytes,
+                    TotalFiles = totalFiles,
+                    ProcessedFiles = processedFiles,
+                    FailedFiles = failedFiles,
+                    Duration = stopwatch.Elapsed,
+                    StartTime = startTime,
+                    EndTime = DateTime.Now,
+                    Errors = [.. errors, .. verification.Errors],
+                    Archive = archive
+                };
+            }
 
             // Cleanup old backups
             await CleanupOldBackupsAsync(job);
@@ -326,6 +398,30 @@ public class BackupService : IBackupService
         }
     }
 
+    /// <summary>
+    /// Cancels a backup that is still running and releases its token source. The host calls this at
+    /// shutdown; without it a copy loop carried on writing after the window had closed.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        try
+        {
+            _currentBackupCts?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Best effort: the backup finished and disposed its own token source first.
+        }
+
+        _currentBackupCts?.Dispose();
+        _currentBackupCts = null;
+
+        GC.SuppressFinalize(this);
+    }
+
     // ==================== SYSTEM IMAGE BACKUP ====================
 
     public async Task<BackupResult> CreateSystemImageAsync(string destinationPath, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
@@ -356,7 +452,25 @@ public class BackupService : IBackupService
                 };
             }
 
-            // wbadmin requires admin privileges
+            // wbadmin needs administrator rights and this code cannot obtain them: the output is redirected,
+            // which requires UseShellExecute = false, and a verb is only honoured when the shell starts the
+            // process. The "runas" that used to sit here did nothing - wbadmin ran unelevated, failed with
+            // access denied, and the user was shown that as though the backup itself had gone wrong. Say
+            // what is actually needed instead of appearing to ask for it.
+            if (!ElevatedRegistryHelper.IsRunningElevated())
+            {
+                return new BackupResult
+                {
+                    Success = false,
+                    Status = BackupStatus.Failed,
+                    Message = "A system image needs administrator rights. Close STX.1 System Monitor and " +
+                              "start it again with \"Run as administrator\", then try again.",
+                    Duration = stopwatch.Elapsed,
+                    StartTime = startTime,
+                    EndTime = DateTime.Now
+                };
+            }
+
             var psi = new ProcessStartInfo
             {
                 FileName = "wbadmin",
@@ -364,8 +478,7 @@ public class BackupService : IBackupService
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = true,
-                Verb = "runas"
+                CreateNoWindow = true
             };
 
             using var process = Process.Start(psi);
@@ -427,55 +540,26 @@ public class BackupService : IBackupService
 
     // ==================== RESTORE POINT ====================
 
+    /// <summary>
+    /// Creates a system restore point.
+    /// <para>
+    /// This used to run <c>powershell -Command "Checkpoint-Computer -Description '{description}'"</c>. A
+    /// description containing an apostrophe closed that literal and the rest of it was another statement -
+    /// and the <c>Verb = "runas"</c> beside it did nothing, because a verb is only honoured when the shell
+    /// starts the process. The Health Check page has always used <see cref="ISystemRestoreService"/>, which
+    /// passes the description as a typed WMI parameter that no parser ever sees. Both pages now do.
+    /// </para>
+    /// </summary>
     public async Task<BackupResult> CreateRestorePointAsync(string description)
     {
-        return await Task.Run(() =>
+        var result = await _systemRestore.CreateRestorePointAsync(description, RestorePointType.ModifySettings);
+
+        return new BackupResult
         {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powershell",
-                    Arguments = $"-Command \"Checkpoint-Computer -Description '{description}' -RestorePointType 'MODIFY_SETTINGS'\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    Verb = "runas"
-                };
-
-                using var process = Process.Start(psi);
-                process?.WaitForExit(60000); // 1 minute timeout
-
-                if (process?.ExitCode == 0)
-                {
-                    return new BackupResult
-                    {
-                        Success = true,
-                        Status = BackupStatus.Completed,
-                        Message = $"Restore point created: {description}"
-                    };
-                }
-                else
-                {
-                    return new BackupResult
-                    {
-                        Success = false,
-                        Status = BackupStatus.Failed,
-                        Message = "Failed to create restore point (requires admin privileges)"
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                return new BackupResult
-                {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = $"Restore point error: {ex.Message}"
-                };
-            }
-        });
+            Success = result.Success,
+            Status = result.Success ? BackupStatus.Completed : BackupStatus.Failed,
+            Message = result.Message
+        };
     }
 
     public async Task<List<RestorePointInfo>> GetRestorePointsAsync()
@@ -520,7 +604,10 @@ public class BackupService : IBackupService
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetRestorePointsAsync failed");
+            }
 
             return restorePoints;
         });
@@ -545,33 +632,72 @@ public class BackupService : IBackupService
         var stopwatch = Stopwatch.StartNew();
         var processedFiles = 0;
         var errors = new List<BackupError>();
+        string? decryptedArchivePath = null;
+        string? tempExtractPath = null;
 
         try
         {
             var sourcePath = archive.FilePath;
 
             // Decrypt if needed
-            if (archive.IsEncrypted)
+            if (archive.IsEncrypted || sourcePath.EndsWith(".enc", StringComparison.OrdinalIgnoreCase))
             {
-                return new BackupResult
+                if (string.IsNullOrEmpty(options.Password))
                 {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = "Encrypted backups require password - use DecryptBackup first"
-                };
+                    return new BackupResult
+                    {
+                        Success = false,
+                        Status = BackupStatus.Failed,
+                        Message = "This backup is encrypted. Enter its password to restore it."
+                    };
+                }
+
+                progress?.Report(new BackupProgress
+                {
+                    Status = BackupStatus.Running,
+                    CurrentOperation = "Decrypting backup..."
+                });
+
+                decryptedArchivePath = Path.Combine(Path.GetTempPath(), $"restore_{Guid.NewGuid():N}.zip");
+                try
+                {
+                    await BackupEncryption.DecryptFileAsync(sourcePath, decryptedArchivePath, options.Password, cancellationToken);
+                }
+                catch (BackupPasswordException ex)
+                {
+                    return new BackupResult { Success = false, Status = BackupStatus.Failed, Message = ex.Message };
+                }
+
+                sourcePath = decryptedArchivePath;
             }
 
             // Extract if compressed
             string extractPath;
             if (sourcePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
             {
-                extractPath = Path.Combine(Path.GetTempPath(), $"restore_{Guid.NewGuid()}");
+                tempExtractPath = Path.Combine(Path.GetTempPath(), $"restore_{Guid.NewGuid():N}");
+                extractPath = tempExtractPath;
                 progress?.Report(new BackupProgress
                 {
                     Status = BackupStatus.Running,
                     CurrentOperation = "Extracting backup archive..."
                 });
-                ZipFile.ExtractToDirectory(sourcePath, extractPath);
+
+                try
+                {
+                    ZipFile.ExtractToDirectory(sourcePath, extractPath);
+                }
+                catch (InvalidDataException) when (decryptedArchivePath != null)
+                {
+                    // Legacy encrypted backups have no authentication tag; a wrong password can
+                    // decrypt to bytes that are not a valid archive.
+                    return new BackupResult
+                    {
+                        Success = false,
+                        Status = BackupStatus.Failed,
+                        Message = "Incorrect password, or the backup file has been altered or damaged."
+                    };
+                }
             }
             else
             {
@@ -596,16 +722,19 @@ public class BackupService : IBackupService
                 ? manifest.Files.Where(f => options.SelectiveFiles.Contains(f.RelativePath)).ToList()
                 : manifest.Files;
 
-            foreach (var fileEntry in filesToRestore)
+            var plan = PlanRestore(manifest, filesToRestore, extractPath, destinationPath, options);
+            errors.AddRange(plan.Refused);
+            totalFiles = plan.Files.Count;
+
+            foreach (var planned in plan.Files)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                var fileEntry = planned.Entry;
 
                 try
                 {
-                    var sourceFile = Path.Combine(extractPath, fileEntry.RelativePath);
-                    var destFile = options.RestoreToOriginalLocation
-                        ? fileEntry.OriginalPath
-                        : Path.Combine(destinationPath, fileEntry.RelativePath);
+                    var sourceFile = planned.SourceFile;
+                    var destFile = planned.DestinationFile;
 
                     var destDir = Path.GetDirectoryName(destFile);
                     if (!string.IsNullOrEmpty(destDir))
@@ -647,19 +776,15 @@ public class BackupService : IBackupService
                 }
             }
 
-            // Cleanup temp extraction
-            if (sourcePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-            {
-                try { Directory.Delete(extractPath, true); } catch { }
-            }
-
             stopwatch.Stop();
 
             return new BackupResult
             {
                 Success = true,
                 Status = errors.Count > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed,
-                Message = errors.Count > 0 ? $"Restored with {errors.Count} errors" : "Restore completed successfully",
+                Message = plan.Refused.Count > 0
+                    ? $"Restored {processedFiles} file(s); {plan.Refused.Count} entry(ies) in the backup asked to be written outside the folders it was taken from and were refused"
+                    : errors.Count > 0 ? $"Restored with {errors.Count} errors" : "Restore completed successfully",
                 ProcessedFiles = processedFiles,
                 TotalFiles = totalFiles,
                 Duration = stopwatch.Elapsed,
@@ -679,6 +804,18 @@ public class BackupService : IBackupService
                 StartTime = startTime,
                 EndTime = DateTime.Now
             };
+        }
+        finally
+        {
+            // Temporary plaintext copies are removed whether the restore succeeded or not.
+            if (tempExtractPath != null && Directory.Exists(tempExtractPath))
+            {
+                try { Directory.Delete(tempExtractPath, true); } catch (IOException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); }
+            }
+            if (decryptedArchivePath != null)
+            {
+                try { File.Delete(decryptedArchivePath); } catch (IOException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "RestoreBackupAsync failed"); }
+            }
         }
     }
 
@@ -708,70 +845,165 @@ public class BackupService : IBackupService
                             }
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "GetBackupHistoryAsync failed");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetBackupHistoryAsync failed");
+            }
 
             return archives.OrderByDescending(a => a.CreatedDate).ToList();
         });
     }
 
-    public async Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null)
+    /// <summary>
+    /// Verifies the backup itself: every manifest entry that has a recorded SHA-256 is read from the backup
+    /// (decrypting it first when encrypted) and compared with that hash. The original source files are not read.
+    /// </summary>
+    public async Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null,
+        string? password = null, CancellationToken cancellationToken = default)
     {
-        return await Task.Run(async () =>
+        string? decryptedArchivePath = null;
+        try
         {
-            try
+            if (archive.Manifest == null)
             {
-                if (archive.Manifest == null)
+                return Failed("No manifest available for verification");
+            }
+
+            var hashedFiles = archive.Manifest.Files.Where(f => !string.IsNullOrEmpty(f.Hash)).ToList();
+            if (hashedFiles.Count == 0)
+            {
+                return Failed("This backup was created without checksums, so it cannot be verified");
+            }
+
+            var sourcePath = archive.FilePath;
+            if (archive.IsEncrypted || sourcePath.EndsWith(".enc", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(password))
                 {
-                    return new BackupResult
-                    {
-                        Success = false,
-                        Status = BackupStatus.Failed,
-                        Message = "No manifest available for verification"
-                    };
+                    return Failed("This backup is encrypted. Enter its password to verify it.");
                 }
 
-                var verified = 0;
-                var failed = 0;
-
-                foreach (var file in archive.Manifest.Files)
+                decryptedArchivePath = Path.Combine(Path.GetTempPath(), $"verify_{Guid.NewGuid():N}.zip");
+                try
                 {
-                    if (!string.IsNullOrEmpty(file.Hash))
+                    await BackupEncryption.DecryptFileAsync(sourcePath, decryptedArchivePath, password, cancellationToken);
+                }
+                catch (BackupPasswordException ex)
+                {
+                    return Failed(ex.Message);
+                }
+                sourcePath = decryptedArchivePath;
+            }
+
+            progress?.Report(new BackupProgress
+            {
+                Status = BackupStatus.Running,
+                CurrentOperation = "Verifying backup...",
+                TotalFiles = hashedFiles.Count
+            });
+
+            var verified = 0;
+            var problems = new List<BackupError>();
+
+            if (sourcePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                using var zip = ZipFile.OpenRead(sourcePath);
+                var entries = new Dictionary<string, ZipArchiveEntry>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in zip.Entries)
+                {
+                    entries.TryAdd(NormalizeEntryName(entry.FullName), entry);
+                }
+
+                foreach (var file in hashedFiles)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!entries.TryGetValue(NormalizeEntryName(file.RelativePath), out var entry))
                     {
-                        var currentHash = await CalculateFileHashAsync(file.OriginalPath);
-                        if (currentHash == file.Hash)
-                        {
-                            verified++;
-                        }
-                        else
-                        {
-                            failed++;
-                        }
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Missing from backup" });
+                        continue;
                     }
-                }
 
-                return new BackupResult
-                {
-                    Success = failed == 0,
-                    Status = failed == 0 ? BackupStatus.Completed : BackupStatus.PartialSuccess,
-                    Message = $"Verified {verified} files, {failed} mismatches",
-                    ProcessedFiles = verified,
-                    FailedFiles = failed
-                };
+                    await using var stream = entry.Open();
+                    var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
+                    if (string.Equals(hash, file.Hash, StringComparison.OrdinalIgnoreCase))
+                        verified++;
+                    else
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Checksum mismatch" });
+                }
             }
-            catch (Exception ex)
+            else if (Directory.Exists(sourcePath))
             {
-                return new BackupResult
+                foreach (var file in hashedFiles)
                 {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = $"Verification failed: {ex.Message}"
-                };
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var path = Path.Combine(sourcePath, file.RelativePath);
+                    if (!File.Exists(path))
+                    {
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Missing from backup" });
+                        continue;
+                    }
+
+                    await using var stream = File.OpenRead(path);
+                    var hash = Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken));
+                    if (string.Equals(hash, file.Hash, StringComparison.OrdinalIgnoreCase))
+                        verified++;
+                    else
+                        problems.Add(new BackupError { FilePath = file.RelativePath, ErrorMessage = "Checksum mismatch" });
+                }
             }
-        });
+            else
+            {
+                return Failed("Backup file not found");
+            }
+
+            var ok = problems.Count == 0;
+
+            // Files the backup recorded without a checksum were filtered out of hashedFiles above, so
+            // nothing was ever compared for them. "All N files match" counted only the ones that could be
+            // checked, and said nothing about the rest - which is the part a reader would want to know.
+            var unchecked_ = archive.Manifest.Files.Count - hashedFiles.Count;
+            var uncheckedNote = unchecked_ > 0
+                ? $"; {unchecked_} file(s) were stored without a checksum and could not be checked"
+                : "";
+
+            return new BackupResult
+            {
+                Success = ok,
+                Status = ok ? BackupStatus.Completed : BackupStatus.Failed,
+                Message = ok
+                    ? $"Backup verified: {verified} file(s) match their recorded checksums{uncheckedNote}"
+                    : $"Backup verification failed: {problems.Count} file(s) missing or changed in the backup ({verified} verified){uncheckedNote}",
+                ProcessedFiles = verified,
+                FailedFiles = problems.Count,
+                Errors = problems
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            return new BackupResult { Success = false, Status = BackupStatus.Cancelled, Message = "Verification was cancelled" };
+        }
+        catch (Exception ex)
+        {
+            return Failed($"Verification failed: {ex.Message}");
+        }
+        finally
+        {
+            if (decryptedArchivePath != null)
+            {
+                try { File.Delete(decryptedArchivePath); } catch (IOException ex) { _logger.LogDebug(ex, "VerifyBackupAsync failed"); } catch (UnauthorizedAccessException ex) { _logger.LogDebug(ex, "VerifyBackupAsync failed"); }
+            }
+        }
+
+        static BackupResult Failed(string message) => new() { Success = false, Status = BackupStatus.Failed, Message = message };
     }
+
+    private static string NormalizeEntryName(string name) => name.Replace('\\', '/').TrimStart('/');
 
     public async Task<BackupResult> DeleteBackupAsync(BackupArchive archive)
     {
@@ -882,7 +1114,10 @@ public class BackupService : IBackupService
                         schedules.Add(schedule);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "GetScheduledBackupsAsync failed");
+                }
             }
 
             return schedules;
@@ -1071,37 +1306,206 @@ public class BackupService : IBackupService
         await Task.Run(() => ZipFile.CreateFromDirectory(sourcePath, zipPath, level, false), cancellationToken);
     }
 
-    private static async Task EncryptFileAsync(string inputPath, string outputPath, string password, CancellationToken cancellationToken)
-    {
-        var key = DeriveKey(password);
-        var iv = RandomNumberGenerator.GetBytes(16);
-
-        await using var inputStream = File.OpenRead(inputPath);
-        await using var outputStream = File.Create(outputPath);
-
-        // Write IV first
-        await outputStream.WriteAsync(iv, cancellationToken);
-
-        using var aes = Aes.Create();
-        aes.Key = key;
-        aes.IV = iv;
-
-        await using var cryptoStream = new CryptoStream(outputStream, aes.CreateEncryptor(), CryptoStreamMode.Write);
-        await inputStream.CopyToAsync(cryptoStream, cancellationToken);
-    }
-
-    private static byte[] DeriveKey(string password)
-    {
-        var salt = Encoding.UTF8.GetBytes("SysMonitorBackup2024");
-        using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256);
-        return pbkdf2.GetBytes(32);
-    }
+    /// <summary>Size on disk of a backup: the archive file, or every file in an uncompressed backup folder.</summary>
+    private static long GetBackupSize(string backupPath) =>
+        Directory.Exists(backupPath)
+            ? new DirectoryInfo(backupPath).EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length)
+            : new FileInfo(backupPath).Length;
 
     private async Task SaveManifestAsync(BackupManifest manifest, string path)
     {
         var json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(path, json);
     }
+
+    /// <summary>
+    /// Works out what a restore would write, before it writes anything. Every path in the archive is checked:
+    /// a backup can be edited by anyone who can reach the file, and an edited one would otherwise choose its
+    /// own destinations - the Startup folder, say - and have the restore write them as the user.
+    /// </summary>
+    internal static RestorePlan PlanRestore(
+        BackupManifest manifest,
+        IEnumerable<BackupFileEntry> entries,
+        string extractPath,
+        string destinationPath,
+        RestoreOptions options)
+    {
+        var files = new List<PlannedRestore>();
+        var refused = new List<BackupError>();
+        var folders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        var sourceRoots = manifest.SourceRoots
+            .Where(rootPath => !string.IsNullOrWhiteSpace(rootPath))
+            .Select(FullPathOrNull)
+            .Where(rootPath => rootPath != null)
+            .Select(rootPath => rootPath!)
+            .ToList();
+
+        var extractRoot = FullPathOrNull(extractPath);
+        var destinationRoot = FullPathOrNull(destinationPath);
+
+        foreach (var entry in entries)
+        {
+            // Where it comes from: inside the extracted backup, never up and out of it.
+            var sourceFile = CombineWithin(extractRoot, entry.RelativePath);
+            if (sourceFile == null)
+            {
+                refused.Add(Refuse(entry, "its place in the backup points outside the backup"));
+                continue;
+            }
+
+            string? destination;
+            if (options.RestoreToOriginalLocation)
+            {
+                destination = FullPathOrNull(entry.OriginalPath);
+                if (destination == null || !Path.IsPathFullyQualified(destination))
+                {
+                    refused.Add(Refuse(entry, "it does not say where it came from"));
+                    continue;
+                }
+
+                // Back inside the folders the backup was taken from, and nowhere else.
+                if (sourceRoots.Count > 0 && !sourceRoots.Any(rootPath => IsInside(rootPath, destination)))
+                {
+                    refused.Add(Refuse(entry, $"it asks to be written to {destination}, outside the folders this backup was taken from"));
+                    continue;
+                }
+            }
+            else
+            {
+                destination = CombineWithin(destinationRoot, entry.RelativePath);
+                if (destination == null)
+                {
+                    refused.Add(Refuse(entry, "its place in the backup points outside the folder being restored to"));
+                    continue;
+                }
+            }
+
+            files.Add(new PlannedRestore(entry, sourceFile, destination));
+
+            var folder = Path.GetDirectoryName(destination);
+            if (!string.IsNullOrEmpty(folder))
+            {
+                folders.Add(folder);
+            }
+        }
+
+        return new RestorePlan
+        {
+            Files = files,
+            DestinationFolders = folders.OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList(),
+            Refused = refused,
+            HasRecordedSourceRoots = sourceRoots.Count > 0,
+        };
+    }
+
+    /// <summary>
+    /// What a restore of this archive would write. Callers show the folders to the person before agreeing to
+    /// it; RestoreBackupAsync applies the same rules whether they do or not.
+    /// </summary>
+    public async Task<RestorePlan> PrepareRestoreAsync(
+        BackupArchive archive, string destinationPath, RestoreOptions options, CancellationToken cancellationToken = default)
+    {
+        var manifest = await ReadManifestOnlyAsync(archive, options, cancellationToken);
+        if (manifest == null)
+        {
+            return new RestorePlan();
+        }
+
+        var entries = options.SelectiveFiles != null
+            ? manifest.Files.Where(f => options.SelectiveFiles.Contains(f.RelativePath)).ToList()
+            : manifest.Files;
+
+        // Nothing is extracted for a preview, so the place files would be read from stands in for the real
+        // one; it is only used to check that no entry points out of the backup.
+        var notionalExtractPath = Path.Combine(Path.GetTempPath(), "sysmonitor-restore-preview");
+        return PlanRestore(manifest, entries, notionalExtractPath, destinationPath, options);
+    }
+
+    /// <summary>Reads only the manifest out of a backup, decrypting it in a temporary file when it has to.</summary>
+    private async Task<BackupManifest?> ReadManifestOnlyAsync(BackupArchive archive, RestoreOptions options, CancellationToken cancellationToken)
+    {
+        string? decrypted = null;
+
+        try
+        {
+            var path = archive.FilePath;
+
+            if (archive.IsEncrypted || path.EndsWith(".enc", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(options.Password))
+                {
+                    return null;
+                }
+
+                decrypted = Path.Combine(Path.GetTempPath(), $"restore_preview_{Guid.NewGuid():N}.zip");
+                await BackupEncryption.DecryptFileAsync(path, decrypted, options.Password, cancellationToken);
+                path = decrypted;
+            }
+
+            if (Directory.Exists(path))
+            {
+                var manifestPath = Path.Combine(path, _manifestFileName);
+                return File.Exists(manifestPath) ? await LoadManifestAsync(manifestPath) : null;
+            }
+
+            using var zip = System.IO.Compression.ZipFile.OpenRead(path);
+            var entry = zip.GetEntry(_manifestFileName);
+            if (entry == null)
+            {
+                return null;
+            }
+
+            using var stream = entry.Open();
+            return await JsonSerializer.DeserializeAsync<BackupManifest>(stream, cancellationToken: cancellationToken);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        finally
+        {
+            if (decrypted != null)
+            {
+                try { File.Delete(decrypted); } catch (Exception ex) { _logger.LogDebug(ex, "ReadManifestOnlyAsync failed"); }
+            }
+        }
+    }
+
+    private static BackupError Refuse(BackupFileEntry entry, string reason) => new()
+    {
+        FilePath = string.IsNullOrEmpty(entry.OriginalPath) ? entry.RelativePath : entry.OriginalPath,
+        ErrorMessage = $"Refused: {reason}.",
+    };
+
+    /// <summary>A full path, or null when the text is not one.</summary>
+    private static string? FullPathOrNull(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return null;
+
+        try
+        {
+            return Path.GetFullPath(path);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>A path under a root, or null when the relative part climbs out of it.</summary>
+    private static string? CombineWithin(string? root, string relativePath)
+    {
+        if (root == null || string.IsNullOrWhiteSpace(relativePath)) return null;
+        if (Path.IsPathRooted(relativePath)) return null;
+
+        var combined = FullPathOrNull(Path.Combine(root, relativePath));
+        return combined != null && IsInside(root, combined) ? combined : null;
+    }
+
+    /// <summary>A restore may write to the destination folder itself as well as anywhere under it.</summary>
+    private static bool IsInside(string root, string candidate) =>
+        PathHelper.IsPathWithinDirectory(candidate, root) || PathHelper.IsSamePath(candidate, root);
 
     private async Task<BackupManifest> LoadManifestAsync(string path)
     {

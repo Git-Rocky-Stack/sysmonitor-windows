@@ -1,3 +1,5 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
@@ -12,6 +14,20 @@ namespace SysMonitor.Core.Services.Utilities;
 
 public class PdfEditor : IPdfEditor
 {
+    static PdfEditor()
+    {
+        // PDFsharp only resolves a couple of families on its own, so anything else - Consolas, Segoe UI, a
+        // font the user picked - has to be found on this machine first.
+        WindowsFontResolver.Install();
+    }
+
+    private readonly ILogger _logger;
+
+    public PdfEditor(ILogger<PdfEditor>? logger = null)
+    {
+        _logger = logger ?? NullLogger<PdfEditor>.Instance;
+    }
+
     public async Task<PdfEditorDocument?> OpenPdfAsync(string filePath)
     {
         return await Task.Run(() =>
@@ -33,12 +49,14 @@ public class PdfEditor : IPdfEditor
                 for (int i = 0; i < pdfDoc.PageCount; i++)
                 {
                     var page = pdfDoc.Pages[i];
+                    var rotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
                     document.Pages.Add(new PdfPageInfo
                     {
                         PageNumber = i + 1,
                         Width = page.Width.Point,
                         Height = page.Height.Point,
-                        Rotation = (int)page.Rotate
+                        Rotation = rotation,
+                        OriginalRotation = rotation
                     });
                 }
 
@@ -69,40 +87,157 @@ public class PdfEditor : IPdfEditor
                 using var inputDoc = PdfReader.Open(document.FilePath, PdfDocumentOpenMode.Import);
                 using var outputDoc = new PdfDocument();
 
-                // Reorder and process pages based on document.Pages
+                // Pictures drawn into the output have to stay readable until it is written out.
+                var pageImages = new List<MemoryStream>();
+
+                // Write the pages in the order the editor holds them
                 foreach (var pageInfo in document.Pages)
                 {
-                    if (pageInfo.PageNumber < 1 || pageInfo.PageNumber > inputDoc.PageCount)
-                        continue;
+                    var pageAnnotations = document.Annotations.Where(a => a.PageId == pageInfo.Id).ToList();
+                    var redactions = pageAnnotations.OfType<RedactionAnnotation>().ToList();
 
-                    var page = outputDoc.AddPage(inputDoc.Pages[pageInfo.PageNumber - 1]);
+                    PdfPage page;
+                    int sourceRotation;
+                    XImage? pageImage = null;
+                    var imageSize = new XSize();
 
-                    // Apply rotation
-                    if (pageInfo.Rotation != 0)
+                    if (pageInfo.IsBlank)
                     {
-                        page.Rotate = pageInfo.Rotation;
+                        page = outputDoc.AddPage();
+                        page.Width = XUnit.FromPoint(pageInfo.Width);
+                        page.Height = XUnit.FromPoint(pageInfo.Height);
+                        sourceRotation = 0;
+                    }
+                    else if (pageInfo.PageNumber > inputDoc.PageCount)
+                    {
+                        return new PdfOperationResult
+                        {
+                            Success = false,
+                            ErrorMessage = $"This document expects page {pageInfo.PageNumber} of \"{document.FileName}\", which has only {inputDoc.PageCount} pages. Nothing was saved."
+                        };
+                    }
+                    else if (redactions.Count > 0)
+                    {
+                        // A redacted page is replaced by a picture of itself with the boxes painted onto the
+                        // pixels. Drawing a box over the page would leave the text under it in the file,
+                        // where anyone can select, copy or extract it.
+                        var sourcePage = inputDoc.Pages[pageInfo.PageNumber - 1];
+                        sourceRotation = PdfPageGeometry.NormalizeRotation(sourcePage.Rotate);
+                        var sourceVisible = PdfPageGeometry.VisibleBox(sourcePage, new XSize(sourcePage.Width.Point, sourcePage.Height.Point));
+                        imageSize = PdfPageGeometry.DisplayedSize(sourceVisible, sourceRotation);
+
+                        // A stream of its own, not one wrapped around a byte array: PDFsharp reads the buffer.
+                        var stream = new MemoryStream();
+                        stream.Write(RedactedPagePng(document.FilePath, pageInfo.PageNumber, redactions));
+                        stream.Position = 0;
+                        pageImages.Add(stream);
+                        pageImage = XImage.FromStream(stream);
+
+                        page = outputDoc.AddPage();
+                        page.Width = XUnit.FromPoint(imageSize.Width);
+                        page.Height = XUnit.FromPoint(imageSize.Height);
+                    }
+                    else
+                    {
+                        page = outputDoc.AddPage(inputDoc.Pages[pageInfo.PageNumber - 1]);
+
+                        // Annotations are measured on the page as displayed with the rotation it has in the
+                        // source, so take that before applying the new one.
+                        sourceRotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
                     }
 
-                    // Apply annotations for this page
-                    var pageAnnotations = document.Annotations.Where(a => a.PageNumber == pageInfo.PageNumber).ToList();
-                    if (pageAnnotations.Any())
+                    // Always apply the rotation: a page turned back upright must not keep the source's /Rotate.
+                    page.Rotate = pageImage != null
+                        // The picture already shows the page turned the way the source file turns it, so only
+                        // what the user changed since is left to apply.
+                        ? PdfPageGeometry.NormalizeRotation(pageInfo.Rotation - sourceRotation)
+                        : PdfPageGeometry.NormalizeRotation(pageInfo.Rotation);
+
+                    if (pageAnnotations.Count > 0 || pageImage != null)
                     {
                         using var gfx = XGraphics.FromPdfPage(page);
+
+                        XMatrix displayToDrawing;
+                        XSize displayedSize;
+                        if (pageImage != null)
+                        {
+                            gfx.DrawImage(pageImage, 0, 0, imageSize.Width, imageSize.Height);
+
+                            // The new page is exactly the page as it was displayed, so annotation coordinates
+                            // need no turning or shifting, only their own scale.
+                            displayToDrawing = XMatrix.Identity;
+                            displayedSize = imageSize;
+                        }
+                        else
+                        {
+                            var visible = PdfPageGeometry.VisibleBox(page, gfx.PageSize);
+                            displayToDrawing = PdfPageGeometry.DisplayToDrawing(visible, gfx.PageSize.Height, sourceRotation);
+                            displayedSize = PdfPageGeometry.DisplayedSize(visible, sourceRotation);
+                        }
+
                         foreach (var annotation in pageAnnotations)
                         {
-                            DrawAnnotation(gfx, annotation, page);
+                            var scale = annotation.CoordinateScale;
+                            if (!(scale > 0) || double.IsInfinity(scale))
+                            {
+                                return new PdfOperationResult
+                                {
+                                    Success = false,
+                                    ErrorMessage = $"An annotation on page {pageInfo.PageNumber} has an invalid coordinate scale ({scale}). Nothing was saved."
+                                };
+                            }
+
+                            var state = gfx.Save();
+                            gfx.MultiplyTransform(displayToDrawing);
+                            gfx.ScaleTransform(scale);
+                            DrawAnnotation(gfx, annotation, new XSize(displayedSize.Width / scale, displayedSize.Height / scale), pageImages, pageImage != null);
+                            gfx.Restore(state);
                         }
                     }
                 }
 
+                // The output is a new document, which starts with no description and no bookmarks at all.
+                // Without these two, every save quietly returned the file anonymous and unnavigable.
+                CopyDescription(inputDoc.Info, outputDoc.Info);
+                CopyOutlines(inputDoc, outputDoc, document.Pages);
+
+                var warnings = new List<string>();
+                if (HasFormFields(inputDoc))
+                {
+                    warnings.Add(
+                        "This document has fillable form fields. They are not kept when it is saved from " +
+                        "the editor - keep the original if you need them.");
+                }
+
+                // Count the pages first: a saved PdfDocument refuses every further access.
+                var pagesProcessed = outputDoc.PageCount;
+                if (pagesProcessed == 0)
+                {
+                    return new PdfOperationResult
+                    {
+                        Success = false,
+                        ErrorMessage = "A PDF must have at least one page. Nothing was saved."
+                    };
+                }
+
                 outputDoc.Save(outputPath);
+
+                foreach (var image in pageImages)
+                    image.Dispose();
+
+                // Saving over the file the document was opened from makes every page number it holds point
+                // at the old layout of a file that no longer has it. Reordering, saving, then saving again
+                // shuffled the pages a second time. Renumbering here is what makes the second save a no-op.
+                if (IsSameFile(outputPath, document.FilePath))
+                    RenumberToSavedLayout(document);
 
                 return new PdfOperationResult
                 {
                     Success = true,
                     OutputPath = outputPath,
-                    PagesProcessed = outputDoc.PageCount,
-                    OutputFiles = [outputPath]
+                    PagesProcessed = pagesProcessed,
+                    OutputFiles = [outputPath],
+                    Warnings = warnings
                 };
             }
             catch (Exception ex)
@@ -114,6 +249,70 @@ public class PdfEditor : IPdfEditor
                 };
             }
         });
+    }
+
+    /// <summary>
+    /// Whether the document carries an /AcroForm, i.e. whether it is a fillable form.
+    /// <para>
+    /// Saving builds a new document and re-imports each page. The widget annotations come across with their
+    /// pages, but the catalog-level /AcroForm that ties them into fields does not, and rebuilding it
+    /// correctly for fields with child widgets is more than this editor can promise. A form that looks
+    /// present and does not work is worse than one the user was told about, so this reports rather than
+    /// guesses.
+    /// </para>
+    /// </summary>
+    private static bool HasFormFields(PdfDocument document)
+    {
+        try
+        {
+            return document.Internals.Catalog.Elements.ContainsKey("/AcroForm");
+        }
+        catch (Exception ex)
+        {
+            _ = ex;
+            // Best effort: a catalog that will not answer is not evidence of a form, and the save itself
+            // is unaffected either way.
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// How finely a redacted page is drawn before its boxes are painted on, in dots per inch. That picture
+    /// replaces the page, so this trades sharpness against file size.
+    /// </summary>
+    private const double RedactedPageDpi = 200;
+
+    /// <summary>
+    /// A picture of a page with its redactions painted onto the pixels. What was under them is not in the
+    /// result at all - which is the point, since a box drawn over text leaves the text in the file.
+    /// </summary>
+    private byte[] RedactedPagePng(string filePath, int sourcePageNumber, IEnumerable<RedactionAnnotation> redactions)
+    {
+        var zoom = RedactedPageDpi / 96.0;
+        var png = PdfPageRasterizer.RenderPngAsync(filePath, sourcePageNumber, zoom).GetAwaiter().GetResult();
+        var pixelsPerPoint = zoom / PdfPageGeometry.PointsPerDip;
+
+        using var source = new MemoryStream(png);
+        using var bitmap = new System.Drawing.Bitmap(source);
+        using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
+        {
+            foreach (var redaction in redactions)
+            {
+                var color = ParseColor(redaction.FillColor);
+
+                // A redaction is never see-through, whatever colour it was given.
+                using var brush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, color.R, color.G, color.B));
+                var scale = redaction.CoordinateScale * pixelsPerPoint;
+                graphics.FillRectangle(
+                    brush,
+                    (float)(redaction.X * scale), (float)(redaction.Y * scale),
+                    (float)(redaction.Width * scale), (float)(redaction.Height * scale));
+            }
+        }
+
+        using var output = new MemoryStream();
+        bitmap.Save(output, System.Drawing.Imaging.ImageFormat.Png);
+        return output.ToArray();
     }
 
     public async Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0)
@@ -305,25 +504,19 @@ public class PdfEditor : IPdfEditor
         return ~crc;
     }
 
-    public async Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pageNumber, int degrees)
+    public async Task<PdfOperationResult> RotatePageAsync(PdfEditorDocument document, int pagePosition, int degrees)
     {
         return await Task.Run(() =>
         {
             try
             {
-                var page = document.Pages.FirstOrDefault(p => p.PageNumber == pageNumber);
+                var page = PageAt(document, pagePosition);
                 if (page == null)
                 {
-                    return new PdfOperationResult
-                    {
-                        Success = false,
-                        ErrorMessage = $"Page {pageNumber} not found"
-                    };
+                    return NoSuchPage(pagePosition);
                 }
 
-                // Normalize rotation to 0, 90, 180, or 270
-                page.Rotation = (page.Rotation + degrees) % 360;
-                if (page.Rotation < 0) page.Rotation += 360;
+                page.Rotation = PdfPageGeometry.NormalizeRotation(page.Rotation + degrees);
 
                 document.IsModified = true;
 
@@ -344,20 +537,16 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pageNumber)
+    public async Task<PdfOperationResult> DeletePageAsync(PdfEditorDocument document, int pagePosition)
     {
         return await Task.Run(() =>
         {
             try
             {
-                var page = document.Pages.FirstOrDefault(p => p.PageNumber == pageNumber);
+                var page = PageAt(document, pagePosition);
                 if (page == null)
                 {
-                    return new PdfOperationResult
-                    {
-                        Success = false,
-                        ErrorMessage = $"Page {pageNumber} not found"
-                    };
+                    return NoSuchPage(pagePosition);
                 }
 
                 if (document.Pages.Count <= 1)
@@ -372,7 +561,7 @@ public class PdfEditor : IPdfEditor
                 document.Pages.Remove(page);
 
                 // Remove annotations for this page
-                document.Annotations.RemoveAll(a => a.PageNumber == pageNumber);
+                document.Annotations.RemoveAll(a => a.PageId == page.Id);
 
                 document.IsModified = true;
 
@@ -438,223 +627,72 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pageNumber, TextAnnotation annotation)
-    {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                annotation.PageNumber = pageNumber;
-                document.Annotations.Add(annotation);
-                document.IsModified = true;
+    /// <summary>The 1-based position of the page an annotation sits on, or 0 when that page is gone.</summary>
+    private static int PositionOf(PdfEditorDocument document, PdfAnnotation annotation) =>
+        document.Pages.FindIndex(p => p.Id == annotation.PageId) + 1;
 
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+    /// <summary>The page at a 1-based position in the document, or null when there is none.</summary>
+    private static PdfPageInfo? PageAt(PdfEditorDocument document, int pagePosition) =>
+        pagePosition >= 1 && pagePosition <= document.Pages.Count ? document.Pages[pagePosition - 1] : null;
+
+    private static PdfOperationResult NoSuchPage(int pagePosition) =>
+        new() { Success = false, ErrorMessage = $"This document has no page {pagePosition}." };
+
+    /// <summary>Binds an annotation to the page at a position, so it stays with that page when pages move.</summary>
+    private static PdfOperationResult AddAnnotation(PdfEditorDocument document, int pagePosition, PdfAnnotation annotation)
+    {
+        var page = PageAt(document, pagePosition);
+        if (page == null)
+            return NoSuchPage(pagePosition);
+
+        annotation.PageId = page.Id;
+        document.Annotations.Add(annotation);
+        document.IsModified = true;
+
+        return new PdfOperationResult { Success = true, PagesProcessed = 1 };
     }
 
-    public async Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pageNumber, HighlightAnnotation highlight)
+    public async Task<PdfOperationResult> AddTextAnnotationAsync(PdfEditorDocument document, int pagePosition, TextAnnotation annotation)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                highlight.PageNumber = pageNumber;
-                document.Annotations.Add(highlight);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, annotation));
     }
 
-    public async Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pageNumber, ShapeAnnotation shape)
+    public async Task<PdfOperationResult> AddHighlightAsync(PdfEditorDocument document, int pagePosition, HighlightAnnotation highlight)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                shape.PageNumber = pageNumber;
-                document.Annotations.Add(shape);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, highlight));
     }
 
-    public async Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pageNumber, FreehandAnnotation freehand)
+    public async Task<PdfOperationResult> AddShapeAsync(PdfEditorDocument document, int pagePosition, ShapeAnnotation shape)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                freehand.PageNumber = pageNumber;
-                document.Annotations.Add(freehand);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, shape));
     }
 
-    public async Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pageNumber, ImageAnnotation image)
+    public async Task<PdfOperationResult> AddFreehandAsync(PdfEditorDocument document, int pagePosition, FreehandAnnotation freehand)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                image.PageNumber = pageNumber;
-                document.Annotations.Add(image);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, freehand));
     }
 
-    public async Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pageNumber, StickyNoteAnnotation note)
+    public async Task<PdfOperationResult> AddImageAsync(PdfEditorDocument document, int pagePosition, ImageAnnotation image)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                note.PageNumber = pageNumber;
-                document.Annotations.Add(note);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, image));
     }
 
-    public async Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pageNumber, RedactionAnnotation redaction)
+    public async Task<PdfOperationResult> AddStickyNoteAsync(PdfEditorDocument document, int pagePosition, StickyNoteAnnotation note)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                redaction.PageNumber = pageNumber;
-                document.Annotations.Add(redaction);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, note));
     }
 
-    public async Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pageNumber, SignatureAnnotation signature)
+    public async Task<PdfOperationResult> AddRedactionAsync(PdfEditorDocument document, int pagePosition, RedactionAnnotation redaction)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                signature.PageNumber = pageNumber;
-                document.Annotations.Add(signature);
-                document.IsModified = true;
-
-                return new PdfOperationResult
-                {
-                    Success = true,
-                    PagesProcessed = 1
-                };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, redaction));
     }
 
-    public async Task<PdfOperationResult> ExportToWordAsync(PdfEditorDocument document, string outputPath)
+    public async Task<PdfOperationResult> AddSignatureAsync(PdfEditorDocument document, int pagePosition, SignatureAnnotation signature)
+    {
+        return await Task.Run(() => AddAnnotation(document, pagePosition, signature));
+    }
+
+    public async Task<PdfOperationResult> ExportAnnotationReportAsync(PdfEditorDocument document, string outputPath)
     {
         return await Task.Run(() =>
         {
@@ -679,19 +717,27 @@ public class PdfEditor : IPdfEditor
 
                 infoRun = body.AppendChild(new Paragraph()).AppendChild(new Run());
                 infoRun.AppendChild(new Text($"Total Pages: {document.Pages.Count}"));
+
+                var scopeRun = body.AppendChild(new Paragraph()).AppendChild(new Run());
+                scopeRun.AppendChild(new RunProperties(new Italic()));
+                scopeRun.AppendChild(new Text(
+                    "This report lists the pages of the PDF and the annotations added to them. " +
+                    "The text of the pages themselves is not included."));
                 body.AppendChild(new Paragraph()); // Empty line
 
                 // Add page content markers
-                foreach (var page in document.Pages)
+                for (var position = 1; position <= document.Pages.Count; position++)
                 {
+                    var page = document.Pages[position - 1];
+
                     // Page separator
                     var pagePara = body.AppendChild(new Paragraph());
                     var pageRun = pagePara.AppendChild(new Run());
                     pageRun.AppendChild(new RunProperties(new Bold()));
-                    pageRun.AppendChild(new Text($"--- Page {page.PageNumber} ({page.Width:F0} x {page.Height:F0} pt) ---"));
+                    pageRun.AppendChild(new Text($"--- Page {position} ({page.Width:F0} x {page.Height:F0} pt) ---"));
 
                     // Add annotations for this page
-                    var pageAnnotations = document.Annotations.Where(a => a.PageNumber == page.PageNumber).ToList();
+                    var pageAnnotations = document.Annotations.Where(a => a.PageId == page.Id).ToList();
                     if (pageAnnotations.Any())
                     {
                         var annotPara = body.AppendChild(new Paragraph());
@@ -724,7 +770,7 @@ public class PdfEditor : IPdfEditor
                     body.AppendChild(new Paragraph()); // Empty line between pages
 
                     // Add page break after each page (except last)
-                    if (page.PageNumber < document.Pages.Count)
+                    if (position < document.Pages.Count)
                     {
                         var breakPara = body.AppendChild(new Paragraph());
                         breakPara.AppendChild(new Run(new Break { Type = BreakValues.Page }));
@@ -775,22 +821,39 @@ public class PdfEditor : IPdfEditor
                 for (int i = 0; i < pdfDoc.PageCount; i++)
                 {
                     var page = pdfDoc.Pages[i];
+                    var rotation = PdfPageGeometry.NormalizeRotation(page.Rotate);
                     pages.Add(new PdfPageInfo
                     {
                         PageNumber = i + 1,
                         Width = page.Width.Point,
                         Height = page.Height.Point,
-                        Rotation = (int)page.Rotate
+                        Rotation = rotation,
+                        OriginalRotation = rotation
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetPagesInfoAsync failed");
+            }
 
             return pages;
         });
     }
 
-    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, PdfPage page)
+    /// <summary>
+    /// Draws an annotation in its own coordinates. The caller has set up the transform from those coordinates
+    /// to the page; <paramref name="pageSize"/> is the displayed page in the same units (for page-relative placement).
+    /// </summary>
+    /// <param name="keepOpenUntilSaved">
+    /// Streams behind any pictures this annotation draws. PDFsharp reads their pixels when the document is
+    /// saved, so the caller disposes them after that and not before.
+    /// </param>
+    /// <param name="boxesAlreadyPainted">
+    /// True when the page has been redrawn as a picture with the redaction boxes painted onto its pixels, so
+    /// only their labels are left to draw.
+    /// </param>
+    private void DrawAnnotation(XGraphics gfx, PdfAnnotation annotation, XSize pageSize, ICollection<MemoryStream> keepOpenUntilSaved, bool boxesAlreadyPainted = false)
     {
         var color = ParseColor(annotation.Color);
 
@@ -809,22 +872,22 @@ public class PdfEditor : IPdfEditor
                 DrawFreehand(gfx, freehand, color);
                 break;
             case ImageAnnotation imageAnn:
-                DrawImage(gfx, imageAnn, page);
+                DrawImage(gfx, imageAnn, keepOpenUntilSaved);
                 break;
             case StickyNoteAnnotation noteAnn:
                 DrawStickyNote(gfx, noteAnn);
                 break;
             case RedactionAnnotation redactAnn:
-                DrawRedaction(gfx, redactAnn);
+                DrawRedaction(gfx, redactAnn, boxesAlreadyPainted);
                 break;
             case SignatureAnnotation sigAnn:
-                DrawSignature(gfx, sigAnn, color);
+                DrawSignature(gfx, sigAnn, color, keepOpenUntilSaved);
                 break;
             case StampAnnotation stampAnn:
-                DrawStamp(gfx, stampAnn, page);
+                DrawStamp(gfx, stampAnn);
                 break;
             case WatermarkAnnotation watermarkAnn:
-                DrawWatermark(gfx, watermarkAnn, page);
+                DrawWatermark(gfx, watermarkAnn, pageSize, keepOpenUntilSaved);
                 break;
             case LinkAnnotation linkAnn:
                 DrawLink(gfx, linkAnn);
@@ -851,30 +914,17 @@ public class PdfEditor : IPdfEditor
         }
     }
 
-    private void DrawImage(XGraphics gfx, ImageAnnotation annotation, PdfPage page)
+    /// <remarks>
+    /// An image that cannot be read throws. It used to paint a grey box captioned "[Image]" and let the save
+    /// report success, so the user was told their picture was saved when it was not.
+    /// </remarks>
+    private void DrawImage(XGraphics gfx, ImageAnnotation annotation, ICollection<MemoryStream> keepOpenUntilSaved)
     {
         if (annotation.ImageData == null || annotation.ImageData.Length == 0) return;
 
-        try
-        {
-            using var ms = new MemoryStream(annotation.ImageData);
-            var image = XImage.FromStream(ms);
-
-            // Apply opacity if needed
-            if (annotation.Opacity < 1.0)
-            {
-                // PdfSharp doesn't directly support opacity for images, draw as-is
-            }
-
-            gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
-        }
-        catch
-        {
-            // If image fails to load, draw placeholder
-            gfx.DrawRectangle(XPens.Gray, XBrushes.LightGray, annotation.X, annotation.Y, annotation.Width, annotation.Height);
-            var font = new XFont("Arial", 8, XFontStyleEx.Regular);
-            gfx.DrawString("[Image]", font, XBrushes.Gray, annotation.X + 5, annotation.Y + annotation.Height / 2);
-        }
+        // Opacity is not applied: PDFsharp draws images opaque and there is no per-image alpha to set.
+        var image = PdfImageSource.Open(annotation.ImageData, keepOpenUntilSaved);
+        gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
     }
 
     private void DrawStickyNote(XGraphics gfx, StickyNoteAnnotation annotation)
@@ -927,13 +977,16 @@ public class PdfEditor : IPdfEditor
         }
     }
 
-    private void DrawRedaction(XGraphics gfx, RedactionAnnotation annotation)
+    private void DrawRedaction(XGraphics gfx, RedactionAnnotation annotation, bool boxAlreadyPainted)
     {
-        var fillColor = ParseColor(annotation.FillColor);
-        var brush = new XSolidBrush(fillColor);
-
-        // Draw solid black rectangle to cover content
-        gfx.DrawRectangle(brush, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+        // On a page saved as a picture the box is already in the pixels, where it covers content that is no
+        // longer in the file. Drawing it again would only hide the difference between the two.
+        if (!boxAlreadyPainted)
+        {
+            var fillColor = ParseColor(annotation.FillColor);
+            var brush = new XSolidBrush(fillColor);
+            gfx.DrawRectangle(brush, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+        }
 
         // Draw overlay text if specified (e.g., "REDACTED")
         if (!string.IsNullOrEmpty(annotation.OverlayText))
@@ -949,19 +1002,15 @@ public class PdfEditor : IPdfEditor
         }
     }
 
-    private void DrawSignature(XGraphics gfx, SignatureAnnotation annotation, XColor color)
+    private void DrawSignature(XGraphics gfx, SignatureAnnotation annotation, XColor color, ICollection<MemoryStream> keepOpenUntilSaved)
     {
-        // If signature has image data, draw it
+        // A signature captured as a picture is drawn as one. An unreadable picture throws rather than
+        // falling through to the strokes: falling through would save a signature the user never drew.
         if (annotation.SignatureImageData != null && annotation.SignatureImageData.Length > 0)
         {
-            try
-            {
-                using var ms = new MemoryStream(annotation.SignatureImageData);
-                var image = XImage.FromStream(ms);
-                gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
-                return;
-            }
-            catch { }
+            var image = PdfImageSource.Open(annotation.SignatureImageData, keepOpenUntilSaved);
+            gfx.DrawImage(image, annotation.X, annotation.Y, annotation.Width, annotation.Height);
+            return;
         }
 
         // Draw handwritten signature from strokes
@@ -1009,7 +1058,10 @@ public class PdfEditor : IPdfEditor
         var font = new XFont(annotation.FontFamily, annotation.FontSize, style);
         var brush = new XSolidBrush(color);
 
-        gfx.DrawString(annotation.Text, font, brush, annotation.X, annotation.Y);
+        // (X, Y) is the top-left corner of the text, as on the editor canvas; a plain point would be the baseline.
+        // The rectangle only anchors the text (TopLeft needs a non-empty layout box); it does not clip.
+        var anchor = new XRect(annotation.X, annotation.Y, Math.Max(annotation.Width, 1), Math.Max(annotation.Height, 1));
+        gfx.DrawString(annotation.Text, font, brush, anchor, XStringFormats.TopLeft);
     }
 
     private void DrawHighlight(XGraphics gfx, HighlightAnnotation annotation, XColor color)
@@ -1081,7 +1133,7 @@ public class PdfEditor : IPdfEditor
         gfx.DrawLine(pen, endX, endY, x2, y2);
     }
 
-    private static XColor ParseColor(string colorString)
+    private XColor ParseColor(string colorString)
     {
         try
         {
@@ -1105,28 +1157,36 @@ public class PdfEditor : IPdfEditor
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "ParseColor failed");
+        }
 
         return XColors.Red;
     }
 
     // ==================== NEW FEATURES ====================
 
-    public async Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPageNumber, double width = 612, double height = 792)
+    public async Task<PdfOperationResult> InsertBlankPageAsync(PdfEditorDocument document, int afterPagePosition, double width = 612, double height = 792)
     {
         return await Task.Run(() =>
         {
             try
             {
+                if (!(width > 0) || !(height > 0))
+                {
+                    return new PdfOperationResult { Success = false, ErrorMessage = "A page must have a positive width and height." };
+                }
+
                 var newPage = new PdfPageInfo
                 {
-                    PageNumber = -1, // Marker for new blank page
+                    PageNumber = 0, // Comes from no page of the source file
                     Width = width,
                     Height = height,
                     Rotation = 0
                 };
 
-                var insertIndex = Math.Max(0, Math.Min(afterPageNumber, document.Pages.Count));
+                var insertIndex = Math.Max(0, Math.Min(afterPagePosition, document.Pages.Count));
                 document.Pages.Insert(insertIndex, newPage);
                 document.IsModified = true;
 
@@ -1143,16 +1203,16 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pageNumber)
+    public async Task<PdfOperationResult> DuplicatePageAsync(PdfEditorDocument document, int pagePosition)
     {
         return await Task.Run(() =>
         {
             try
             {
-                var sourcePage = document.Pages.FirstOrDefault(p => p.PageNumber == pageNumber);
+                var sourcePage = PageAt(document, pagePosition);
                 if (sourcePage == null)
                 {
-                    return new PdfOperationResult { Success = false, ErrorMessage = $"Page {pageNumber} not found" };
+                    return NoSuchPage(pagePosition);
                 }
 
                 var duplicatePage = new PdfPageInfo
@@ -1160,11 +1220,19 @@ public class PdfEditor : IPdfEditor
                     PageNumber = sourcePage.PageNumber, // Will copy from original
                     Width = sourcePage.Width,
                     Height = sourcePage.Height,
-                    Rotation = sourcePage.Rotation
+                    Rotation = sourcePage.Rotation,
+                    OriginalRotation = sourcePage.OriginalRotation
                 };
 
                 var insertIndex = document.Pages.IndexOf(sourcePage) + 1;
                 document.Pages.Insert(insertIndex, duplicatePage);
+
+                // The copy carries the page's annotations, so a duplicate of a redacted page stays redacted.
+                foreach (var annotation in document.Annotations.Where(a => a.PageId == sourcePage.Id).ToList())
+                {
+                    document.Annotations.Add(annotation.CopyTo(duplicatePage.Id));
+                }
+
                 document.IsModified = true;
 
                 return new PdfOperationResult
@@ -1180,26 +1248,12 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pageNumber, StampAnnotation stamp)
+    public async Task<PdfOperationResult> AddStampAsync(PdfEditorDocument document, int pagePosition, StampAnnotation stamp)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                stamp.PageNumber = pageNumber;
-                document.Annotations.Add(stamp);
-                document.IsModified = true;
-
-                return new PdfOperationResult { Success = true, PagesProcessed = 1 };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, stamp));
     }
 
-    public async Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark)
+    public async Task<PdfOperationResult> AddWatermarkAsync(PdfEditorDocument document, WatermarkAnnotation watermark, int pagePosition = 1)
     {
         return await Task.Run(() =>
         {
@@ -1212,7 +1266,7 @@ public class PdfEditor : IPdfEditor
                     {
                         var pageWatermark = new WatermarkAnnotation
                         {
-                            PageNumber = page.PageNumber,
+                            PageId = page.Id,
                             Type = watermark.Type,
                             Text = watermark.Text,
                             ImageData = watermark.ImageData,
@@ -1225,13 +1279,21 @@ public class PdfEditor : IPdfEditor
                             X = watermark.X,
                             Y = watermark.Y,
                             Width = watermark.Width,
-                            Height = watermark.Height
+                            Height = watermark.Height,
+                            CoordinateScale = watermark.CoordinateScale
                         };
                         document.Annotations.Add(pageWatermark);
                     }
                 }
                 else
                 {
+                    var page = PageAt(document, pagePosition);
+                    if (page == null)
+                    {
+                        return NoSuchPage(pagePosition);
+                    }
+
+                    watermark.PageId = page.Id;
                     document.Annotations.Add(watermark);
                 }
 
@@ -1245,105 +1307,190 @@ public class PdfEditor : IPdfEditor
         });
     }
 
-    public async Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pageNumber, LinkAnnotation link)
+    public async Task<PdfOperationResult> AddLinkAsync(PdfEditorDocument document, int pagePosition, LinkAnnotation link)
     {
-        return await Task.Run(() =>
-        {
-            try
-            {
-                link.PageNumber = pageNumber;
-                document.Annotations.Add(link);
-                document.IsModified = true;
-
-                return new PdfOperationResult { Success = true, PagesProcessed = 1 };
-            }
-            catch (Exception ex)
-            {
-                return new PdfOperationResult { Success = false, ErrorMessage = ex.Message };
-            }
-        });
+        return await Task.Run(() => AddAnnotation(document, pagePosition, link));
     }
 
-    public async Task<List<PdfSearchResult>> SearchTextAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false)
+    /// <summary>
+    /// Searches the annotations on this document. PDFsharp does not extract page text and nothing here adds
+    /// that, so the pages themselves are not searched - which is why this is not called SearchText.
+    /// </summary>
+    public async Task<List<PdfSearchResult>> SearchAnnotationsAsync(PdfEditorDocument document, string searchText, bool caseSensitive = false)
     {
         return await Task.Run(() =>
         {
             var results = new List<PdfSearchResult>();
 
-            try
+            if (string.IsNullOrEmpty(searchText))
+                return results;
+
+            // The annotations are held in memory, so a search does not need the file - and still works when
+            // it has been moved or is open elsewhere.
+            var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+            foreach (var annotation in document.Annotations)
             {
-                if (string.IsNullOrEmpty(searchText) || string.IsNullOrEmpty(document.FilePath))
-                    return results;
+                var textContent = SearchableText(annotation);
 
-                using var pdfDoc = PdfReader.Open(document.FilePath, PdfDocumentOpenMode.Import);
+                if (string.IsNullOrEmpty(textContent))
+                    continue;
 
-                // Note: PdfSharp doesn't have built-in text extraction
-                // This searches through our annotations for now
-                var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                var index = textContent.IndexOf(searchText, comparison);
+                if (index < 0)
+                    continue;
 
-                foreach (var annotation in document.Annotations)
+                results.Add(new PdfSearchResult
                 {
-                    string? textContent = annotation switch
-                    {
-                        TextAnnotation ta => ta.Text,
-                        StickyNoteAnnotation sn => $"{sn.Title} {sn.Content}",
-                        _ => null
-                    };
-
-                    if (!string.IsNullOrEmpty(textContent) && textContent.Contains(searchText, comparison))
-                    {
-                        results.Add(new PdfSearchResult
-                        {
-                            PageNumber = annotation.PageNumber,
-                            MatchedText = searchText,
-                            ContextBefore = textContent.Length > 20 ? textContent.Substring(0, 20) : textContent,
-                            ContextAfter = "",
-                            X = annotation.X,
-                            Y = annotation.Y,
-                            Width = annotation.Width,
-                            Height = annotation.Height
-                        });
-                    }
-                }
+                    PageNumber = PositionOf(document, annotation),
+                    MatchedText = textContent.Substring(index, searchText.Length),
+                    ContextBefore = Ellipsize(textContent[..index], keepEnd: true),
+                    ContextAfter = Ellipsize(textContent[(index + searchText.Length)..], keepEnd: false),
+                    X = annotation.X,
+                    Y = annotation.Y,
+                    Width = annotation.Width,
+                    Height = annotation.Height
+                });
             }
-            catch { }
 
             return results;
         });
     }
 
-    public async Task<string> ExtractTextAsync(PdfEditorDocument document, int? pageNumber = null)
+    /// <summary>Carries a document's own description - what a reader sees in File > Properties - to a copy of it.</summary>
+    /// <summary>True when two paths name the same file on disk.</summary>
+    private static bool IsSameFile(string left, string right)
     {
-        return await Task.Run(() =>
+        if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+            return false;
+
+        try
         {
-            var textBuilder = new System.Text.StringBuilder();
+            return string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            // Best effort: a path the framework will not normalise is not one we can call the same file,
+            // and treating it as different only costs the renumbering below.
+            return false;
+        }
+    }
 
-            try
+    /// <summary>
+    /// Points the document at what was just written over its own file: page 1 is now page 1, whatever it
+    /// used to be, every page is a real page, and the rotation the user chose is the file's own rotation.
+    /// </summary>
+    private static void RenumberToSavedLayout(PdfEditorDocument document)
+    {
+        for (var index = 0; index < document.Pages.Count; index++)
+        {
+            var page = document.Pages[index];
+            page.PageNumber = index + 1;
+            page.OriginalRotation = PdfPageGeometry.NormalizeRotation(page.Rotation);
+        }
+    }
+
+    /// <summary>
+    /// Rebuilds the source document's bookmarks against the pages that were actually written, in the order
+    /// they were written. A bookmark whose page the user deleted has nowhere to point and is dropped —
+    /// which is the truth about that bookmark, not a loss.
+    /// </summary>
+    private static void CopyOutlines(PdfDocument inputDoc, PdfDocument outputDoc, List<PdfPageInfo> pages)
+    {
+        if (inputDoc.Outlines.Count == 0)
+            return;
+
+        // Source page number (1-based) to the first place it ended up in the output.
+        var destinations = new Dictionary<int, int>();
+        for (var index = 0; index < pages.Count; index++)
+        {
+            if (!pages[index].IsBlank)
+                destinations.TryAdd(pages[index].PageNumber, index);
+        }
+
+        CopyOutlinesInto(inputDoc.Outlines, outputDoc.Outlines, inputDoc, outputDoc, destinations);
+    }
+
+    private static void CopyOutlinesInto(
+        PdfOutlineCollection from,
+        PdfOutlineCollection to,
+        PdfDocument inputDoc,
+        PdfDocument outputDoc,
+        IReadOnlyDictionary<int, int> destinations)
+    {
+        foreach (var outline in from)
+        {
+            var sourcePage = SourcePageNumberOf(outline, inputDoc);
+            if (sourcePage is null || !destinations.TryGetValue(sourcePage.Value, out var outputIndex))
+                continue;
+
+            var copy = new PdfOutline(outline.Title, outputDoc.Pages[outputIndex], outline.Opened);
+            to.Add(copy);
+
+            if (outline.Outlines.Count > 0)
+                CopyOutlinesInto(outline.Outlines, copy.Outlines, inputDoc, outputDoc, destinations);
+        }
+    }
+
+    /// <summary>The 1-based page of the source file a bookmark points at, or null when it points nowhere.</summary>
+    private static int? SourcePageNumberOf(PdfOutline outline, PdfDocument inputDoc)
+    {
+        var target = outline.DestinationPage;
+        if (target is null)
+            return null;
+
+        for (var index = 0; index < inputDoc.PageCount; index++)
+        {
+            if (ReferenceEquals(inputDoc.Pages[index], target) ||
+                (inputDoc.Pages[index].Reference is { } reference && reference == target.Reference))
             {
-                // Extract text from annotations
-                var annotations = pageNumber.HasValue
-                    ? document.Annotations.Where(a => a.PageNumber == pageNumber.Value)
-                    : document.Annotations;
-
-                foreach (var annotation in annotations)
-                {
-                    var text = annotation switch
-                    {
-                        TextAnnotation ta => ta.Text,
-                        StickyNoteAnnotation sn => $"[Note: {sn.Title}] {sn.Content}",
-                        _ => null
-                    };
-
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        textBuilder.AppendLine(text);
-                    }
-                }
+                return index + 1;
             }
-            catch { }
+        }
 
-            return textBuilder.ToString();
-        });
+        return null;
+    }
+
+    private static void CopyDescription(PdfDocumentInformation from, PdfDocumentInformation to)
+    {
+        to.Title = from.Title;
+        to.Author = from.Author;
+        to.Subject = from.Subject;
+        to.Keywords = from.Keywords;
+        to.Creator = from.Creator;
+
+        // Only a date the file actually carries; an absent one reads as DateTime.MinValue.
+        if (from.Elements.ContainsKey("/CreationDate"))
+            to.CreationDate = from.CreationDate;
+    }
+
+    /// <summary>
+    /// The text an annotation carries, as a reader of the page would see it. Annotations that show no text -
+    /// highlights, shapes, drawings, images, redactions - have none.
+    /// </summary>
+    private static string? SearchableText(PdfAnnotation annotation) => annotation switch
+    {
+        TextAnnotation text => text.Text,
+        StickyNoteAnnotation note => $"{note.Title} {note.Content}".Trim(),
+        StampAnnotation stamp => string.IsNullOrWhiteSpace(stamp.CustomText)
+            ? stamp.StampType.ToString()
+            : stamp.CustomText,
+        WatermarkAnnotation watermark => watermark.Text,
+        SignatureAnnotation signature => signature.SignerName,
+        LinkAnnotation link => $"{link.DisplayText} {link.Url}".Trim(),
+        _ => null
+    };
+
+    /// <summary>Trims a side of a match down to a readable amount of context, marking what was cut.</summary>
+    private static string Ellipsize(string context, bool keepEnd)
+    {
+        const int maxLength = 40;
+        if (context.Length <= maxLength)
+            return context;
+
+        return keepEnd
+            ? "\u2026" + context[^maxLength..]
+            : context[..maxLength] + "\u2026";
     }
 
     public async Task<PdfOperationResult> CompressPdfAsync(string inputPath, string outputPath, PdfCompressionOptions? options = null)
@@ -1374,14 +1521,15 @@ public class PdfEditor : IPdfEditor
                 outputDoc.Options.FlateEncodeMode = PdfFlateEncodeMode.BestCompression;
                 outputDoc.Options.UseFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Automatic;
 
-                if (options.RemoveMetadata)
+                if (!options.RemoveMetadata)
                 {
-                    outputDoc.Info.Title = "";
-                    outputDoc.Info.Author = "";
-                    outputDoc.Info.Subject = "";
-                    outputDoc.Info.Keywords = "";
+                    // The output is a new document, which starts with no description at all. Without this,
+                    // compressing a file threw away its title, author and dates whatever the option said.
+                    CopyDescription(inputDoc.Info, outputDoc.Info);
                 }
 
+                // Counted before the save: a PdfDocument reports no pages once it has been written out.
+                var pagesProcessed = outputDoc.PageCount;
                 outputDoc.Save(outputPath);
 
                 var compressedSize = new FileInfo(outputPath).Length;
@@ -1392,7 +1540,7 @@ public class PdfEditor : IPdfEditor
                 {
                     Success = true,
                     OutputPath = outputPath,
-                    PagesProcessed = outputDoc.PageCount,
+                    PagesProcessed = pagesProcessed,
                     OutputFiles = [outputPath],
                     ErrorMessage = $"Compressed from {FormatFileSize(originalSize)} to {FormatFileSize(compressedSize)} ({savingsPercent:F1}% reduction)"
                 };
@@ -1418,7 +1566,7 @@ public class PdfEditor : IPdfEditor
     }
 
     // Drawing methods for new annotation types
-    private void DrawStamp(XGraphics gfx, StampAnnotation stamp, PdfPage page)
+    private void DrawStamp(XGraphics gfx, StampAnnotation stamp)
     {
         var stampText = stamp.StampType == StampType.Custom
             ? stamp.CustomText
@@ -1473,28 +1621,24 @@ public class PdfEditor : IPdfEditor
         gfx.Restore(state);
     }
 
-    private void DrawWatermark(XGraphics gfx, WatermarkAnnotation watermark, PdfPage page)
+    /// <param name="pageSize">The page as displayed (original rotation, visible area), in the watermark's units.</param>
+    private void DrawWatermark(XGraphics gfx, WatermarkAnnotation watermark, XSize pageSize, ICollection<MemoryStream> keepOpenUntilSaved)
     {
         if (watermark.Type == WatermarkType.Image && watermark.ImageData != null)
         {
-            try
-            {
-                using var ms = new MemoryStream(watermark.ImageData);
-                var image = XImage.FromStream(ms);
+            var image = PdfImageSource.Open(watermark.ImageData, keepOpenUntilSaved);
 
-                // Position based on setting
-                var (x, y) = GetWatermarkPosition(watermark.Position, page.Width.Point, page.Height.Point, watermark.Width, watermark.Height);
+            // Position based on setting
+            var (x, y) = GetWatermarkPosition(watermark.Position, pageSize.Width, pageSize.Height, watermark.Width, watermark.Height);
 
-                var state = gfx.Save();
-                gfx.TranslateTransform(x + watermark.Width / 2, y + watermark.Height / 2);
-                gfx.RotateTransform(watermark.Rotation);
-                gfx.TranslateTransform(-watermark.Width / 2, -watermark.Height / 2);
+            var state = gfx.Save();
+            gfx.TranslateTransform(x + watermark.Width / 2, y + watermark.Height / 2);
+            gfx.RotateTransform(watermark.Rotation);
+            gfx.TranslateTransform(-watermark.Width / 2, -watermark.Height / 2);
 
-                // Note: PdfSharp doesn't support opacity for images directly
-                gfx.DrawImage(image, 0, 0, watermark.Width, watermark.Height);
-                gfx.Restore(state);
-            }
-            catch { }
+            // Note: PdfSharp doesn't support opacity for images directly
+            gfx.DrawImage(image, 0, 0, watermark.Width, watermark.Height);
+            gfx.Restore(state);
         }
         else
         {
@@ -1506,21 +1650,23 @@ public class PdfEditor : IPdfEditor
             var brush = new XSolidBrush(watermarkColor);
 
             var textSize = gfx.MeasureString(watermark.Text, font);
-            var (x, y) = GetWatermarkPosition(watermark.Position, page.Width.Point, page.Height.Point, textSize.Width, textSize.Height);
+            var (x, y) = GetWatermarkPosition(watermark.Position, pageSize.Width, pageSize.Height, textSize.Width, textSize.Height);
 
             var state = gfx.Save();
 
+            // Lay the text out by its box rather than its baseline, so a centred watermark is really centred.
             if (watermark.Position == WatermarkPosition.Diagonal || watermark.Position == WatermarkPosition.Center)
             {
-                var centerX = page.Width.Point / 2;
-                var centerY = page.Height.Point / 2;
-                gfx.TranslateTransform(centerX, centerY);
+                gfx.TranslateTransform(pageSize.Width / 2, pageSize.Height / 2);
                 gfx.RotateTransform(watermark.Rotation);
-                gfx.DrawString(watermark.Text, font, brush, -textSize.Width / 2, textSize.Height / 2);
+                gfx.DrawString(watermark.Text, font, brush,
+                    new XRect(-textSize.Width / 2, -textSize.Height / 2, textSize.Width, textSize.Height),
+                    XStringFormats.Center);
             }
             else
             {
-                gfx.DrawString(watermark.Text, font, brush, x, y + textSize.Height);
+                gfx.DrawString(watermark.Text, font, brush,
+                    new XRect(x, y, textSize.Width, textSize.Height), XStringFormats.TopLeft);
             }
 
             gfx.Restore(state);

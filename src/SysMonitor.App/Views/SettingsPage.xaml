@@ -137,10 +137,9 @@
                             <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
                         </Border>
                         <StackPanel Grid.Column="1">
-                            <ToggleSwitch Header="Auto-optimize memory when usage exceeds threshold"
-                                          IsOn="{x:Bind ViewModel.AutoOptimizeMemory, Mode=TwoWay}"/>
-                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0"
-                                        Visibility="{x:Bind ViewModel.AutoOptimizeMemory, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="Warn me when memory usage goes above"
+                                       Style="{StaticResource BodyTextBlockStyle}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
                                 <Slider Minimum="50" Maximum="95" Width="250"
                                         Value="{x:Bind ViewModel.MemoryThreshold, Mode=TwoWay}"/>
                                 <TextBlock VerticalAlignment="Center" Foreground="{StaticResource WarningBrush}"

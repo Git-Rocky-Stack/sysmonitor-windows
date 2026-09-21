@@ -60,7 +60,9 @@ public record DuplicateFileInfo
     public string FileName { get; init; } = "";
     public string Directory { get; init; } = "";
     public DateTime LastModified { get; init; }
-    public bool IsOriginal { get; init; }
+
+    /// <summary>The copy to keep - the oldest one - decided once the group is in order.</summary>
+    public bool IsOriginal { get; set; }
 }
 
 public record ScanProgress
@@ -93,6 +95,5 @@ public record ImageConversionOptions
 public enum CompressionFormat
 {
     Zip,
-    GZip,
-    SevenZip
+    GZip
 }

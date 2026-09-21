@@ -1,5 +1,7 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace SysMonitor.Core.Services.GameMode;
 
@@ -8,6 +10,7 @@ namespace SysMonitor.Core.Services.GameMode;
 /// </summary>
 public class AutoGameModeService : IAutoGameModeService
 {
+    private readonly ILogger _logger;
     private readonly IGameModeService _gameModeService;
     private readonly string _settingsPath;
     private readonly List<GameDefinition> _knownGames;
@@ -18,6 +21,10 @@ public class AutoGameModeService : IAutoGameModeService
     private Task? _monitoringTask;
     private bool _autoModeEnabled;
     private bool _gameModeWasAutoEnabled;
+    private bool _disposed;
+
+    /// <summary>How long shutdown waits for the watch to notice it has been cancelled.</summary>
+    public static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(3);
 
     public bool IsMonitoring => _monitoringTask != null && !_monitoringTask.IsCompleted;
 
@@ -50,10 +57,15 @@ public class AutoGameModeService : IAutoGameModeService
     public event EventHandler<GameDetectedEventArgs>? GameDetected;
     public event EventHandler<GameDetectedEventArgs>? GameClosed;
 
-    public AutoGameModeService(IGameModeService gameModeService)
+    /// <param name="settingsPath">
+    /// Where the auto-mode setting and custom games live. Defaults to the per-user file the app uses; a test
+    /// passes its own so it never reads or writes the developer's real settings.
+    /// </param>
+    public AutoGameModeService(IGameModeService gameModeService, string? settingsPath = null, ILogger<AutoGameModeService>? logger = null)
     {
+        _logger = logger ?? NullLogger<AutoGameModeService>.Instance;
         _gameModeService = gameModeService;
-        _settingsPath = Path.Combine(
+        _settingsPath = settingsPath ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "SysMonitor", "settings.json");
 
@@ -65,6 +77,12 @@ public class AutoGameModeService : IAutoGameModeService
 
         // Load auto mode setting
         LoadAutoModeSetting();
+
+        // A setting that survives a restart has to take effect after one. LoadAutoModeSetting writes the
+        // backing field, which deliberately skips SaveSettingsAsync - it also skips the only call to
+        // StartMonitoringAsync, so the toggle read ON while nothing was ever watched for.
+        if (_autoModeEnabled)
+            _ = StartMonitoringAsync();
     }
 
     private static List<GameDefinition> CreateKnownGamesList()
@@ -184,9 +202,9 @@ public class AutoGameModeService : IAutoGameModeService
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Failed to load custom games
+            _logger.LogWarning(ex, "The saved list of custom games could not be read");
         }
     }
 
@@ -239,9 +257,9 @@ public class AutoGameModeService : IAutoGameModeService
 
             await File.WriteAllTextAsync(_settingsPath, outputJson);
         }
-        catch
+        catch (Exception ex)
         {
-            // Failed to save settings
+            _logger.LogWarning(ex, "Auto Game Mode settings could not be saved");
         }
     }
 
@@ -268,7 +286,7 @@ public class AutoGameModeService : IAutoGameModeService
             }
             catch (OperationCanceledException)
             {
-                // Expected
+                // Best effort: cancellation is how this wait is asked to stop.
             }
         }
 
@@ -293,15 +311,25 @@ public class AutoGameModeService : IAutoGameModeService
             try
             {
                 await CheckForGamesAsync();
-                await timer.WaitForNextTickAsync(cancellationToken);
             }
             catch (OperationCanceledException)
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // Continue on errors
+                _logger.LogDebug(ex, "A pass over the running processes failed; the next tick tries again");
+            }
+
+            // Outside the catch above on purpose: a check that throws must still cost a full interval, or
+            // the loop comes straight back round and enumerates every process on the machine flat out.
+            try
+            {
+                await timer.WaitForNextTickAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
             }
         }
     }
@@ -309,8 +337,20 @@ public class AutoGameModeService : IAutoGameModeService
     private async Task CheckForGamesAsync()
     {
         var allGames = _knownGames.Concat(_customGames).Where(g => g.IsEnabled).ToList();
-        var runningProcessNames = new HashSet<string>(
-            Process.GetProcesses().Select(p => p.ProcessName.ToLower()));
+
+        // Every two seconds, for as long as auto mode is on. A Process left undisposed here is a kernel
+        // handle leaked 30 times a minute for the life of the app.
+        HashSet<string> runningProcessNames;
+        var all = Process.GetProcesses();
+        try
+        {
+            runningProcessNames = new HashSet<string>(all.Select(p => p.ProcessName.ToLower()));
+        }
+        finally
+        {
+            foreach (var process in all)
+                process.Dispose();
+        }
 
         var previouslyRunning = _runningGames.ToList();
         _runningGames.Clear();
@@ -329,7 +369,12 @@ public class AutoGameModeService : IAutoGameModeService
 
                     if (_autoModeEnabled && !_gameModeService.IsEnabled)
                     {
-                        await _gameModeService.EnableAsync();
+                        // Nobody asked for this one: a game starting is not permission to close anything,
+                        // so auto mode only moves background apps out of the way.
+                        await _gameModeService.EnableAsync(new GameModeOptions
+                        {
+                            BackgroundApps = BackgroundAppAction.LowerPriority,
+                        });
                         _gameModeWasAutoEnabled = true;
                         wasAutoEnabled = true;
                     }
@@ -374,6 +419,32 @@ public class AutoGameModeService : IAutoGameModeService
         });
 
         await SaveSettingsAsync();
+    }
+
+    /// <summary>
+    /// Stops the watch. The host calls this at shutdown; without it the loop kept enumerating every process
+    /// on the machine for as long as the process lived.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        try
+        {
+            _cts?.Cancel();
+            _monitoringTask?.Wait(ShutdownTimeout);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "The game watch did not stop cleanly");
+        }
+
+        _cts?.Dispose();
+        _cts = null;
+        _monitoringTask = null;
+
+        GC.SuppressFinalize(this);
     }
 
     public async Task RemoveCustomGameAsync(string processName)

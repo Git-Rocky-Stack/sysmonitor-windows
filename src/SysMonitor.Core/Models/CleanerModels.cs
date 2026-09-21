@@ -81,6 +81,30 @@ public enum CleanerRiskLevel
 /// <summary>
 /// Registry issue found during scan.
 /// </summary>
+/// <summary>Outcome of exporting the registry keys that a cleaning run will modify.</summary>
+public sealed class RegistryBackupResult
+{
+    public bool Success { get; init; }
+
+    /// <summary>The .reg file that was written, or null when there was nothing to back up.</summary>
+    public string? BackupPath { get; init; }
+
+    public int KeysExported { get; init; }
+
+    /// <summary>Keys that exist but could not be exported, with the reason.</summary>
+    public IReadOnlyList<string> FailedKeys { get; init; } = [];
+
+    public string Message { get; init; } = string.Empty;
+}
+
+/// <summary>Outcome of importing a registry backup file.</summary>
+public sealed class RegistryRestoreResult
+{
+    public bool Success { get; init; }
+    public bool WasCancelled { get; init; }
+    public string Message { get; init; } = string.Empty;
+}
+
 public class RegistryIssue
 {
     public string Key { get; set; } = string.Empty;

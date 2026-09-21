@@ -1,5 +1,6 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Backup;
 
@@ -13,7 +14,21 @@ public sealed partial class BackupPage : Page
     {
         ViewModel = App.GetService<BackupViewModel>();
         InitializeComponent();
+
+        // A restore writes files onto someone's machine; they get to see where first.
+        ViewModel.ConfirmRestore = AskBeforeRestoringAsync;
     }
+
+    /// <summary>
+    /// Ends what this page started. The view model is built for one visit and holds the work it kicked off;
+    /// leaving without this left a registry scan, a wipe or a backup running against a page that was gone.
+    /// </summary>
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        ViewModel.Dispose();
+    }
+
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
@@ -137,10 +152,65 @@ public sealed partial class BackupPage : Page
     // Backup History
     private async void RestoreBackup_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.Tag is BackupArchiveViewModel archive)
+        if (sender is not Button { Tag: BackupArchiveViewModel archive })
+            return;
+
+        if (!archive.IsEncrypted)
         {
             await ViewModel.RestoreBackupCommand.ExecuteAsync(archive);
+            return;
         }
+
+        var password = await AskForBackupPasswordAsync(archive, "Restore");
+        if (password != null)
+        {
+            await ViewModel.RestoreBackupWithPasswordAsync(archive, password);
+        }
+    }
+
+    private async void VerifyBackup_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: BackupArchiveViewModel archive })
+            return;
+
+        if (!archive.IsEncrypted)
+        {
+            await ViewModel.VerifyBackupCommand.ExecuteAsync(archive);
+            return;
+        }
+
+        var password = await AskForBackupPasswordAsync(archive, "Verify");
+        if (password != null)
+        {
+            await ViewModel.VerifyBackupWithPasswordAsync(archive, password);
+        }
+    }
+
+    /// <summary>Prompts for an encrypted backup's password; returns null when cancelled or left empty.</summary>
+    private async Task<string?> AskForBackupPasswordAsync(BackupArchiveViewModel archive, string actionText)
+    {
+        var passwordBox = new PasswordBox { PlaceholderText = "Backup password" };
+        var content = new StackPanel { Spacing = 12 };
+        content.Children.Add(new TextBlock
+        {
+            Text = $"'{archive.Name}' is encrypted. Enter the password that was used when it was created.",
+            TextWrapping = TextWrapping.Wrap
+        });
+        content.Children.Add(passwordBox);
+
+        var dialog = new ContentDialog
+        {
+            Title = "Encrypted Backup",
+            Content = content,
+            PrimaryButtonText = actionText,
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = this.XamlRoot
+        };
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary && !string.IsNullOrEmpty(passwordBox.Password)
+            ? passwordBox.Password
+            : null;
     }
 
     private async void DeleteBackup_Click(object sender, RoutedEventArgs e)
@@ -164,5 +234,53 @@ public sealed partial class BackupPage : Page
                 await ViewModel.DeleteBackupCommand.ExecuteAsync(archive);
             }
         }
+    }
+
+    /// <summary>Shows what a restore would write and where, and asks before it happens.</summary>
+    private async Task<bool> AskBeforeRestoringAsync(RestorePlan plan)
+    {
+        var folders = string.Join("\n", plan.DestinationFolders.Take(8));
+        if (plan.DestinationFolders.Count > 8)
+        {
+            folders += $"\n... and {plan.DestinationFolders.Count - 8} more";
+        }
+
+        var message = $"{plan.Files.Count} file(s), {FormatBytes(plan.TotalBytes)}, into:\n\n{folders}";
+
+        if (plan.Refused.Count > 0)
+        {
+            message += $"\n\n{plan.Refused.Count} entry(ies) in this backup ask to be written outside the folders it was taken from. They will not be restored.";
+        }
+
+        if (!plan.HasRecordedSourceRoots)
+        {
+            message += "\n\nThis backup was made before the app recorded where files came from, so check the folders above.";
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Restore these files?",
+            Content = message,
+            PrimaryButtonText = "Restore",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        double size = bytes;
+        var unit = 0;
+        while (size >= 1024 && unit < units.Length - 1)
+        {
+            size /= 1024;
+            unit++;
+        }
+
+        return $"{size:0.#} {units[unit]}";
     }
 }

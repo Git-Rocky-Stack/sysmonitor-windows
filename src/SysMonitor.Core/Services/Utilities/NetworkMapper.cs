@@ -130,7 +130,10 @@ public class NetworkMapper : INetworkMapper
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "GetLocalNetworkInfoAsync failed");
+            }
 
             return new LocalNetworkInfo();
         });
@@ -228,7 +231,7 @@ public class NetworkMapper : INetworkMapper
     [DllImport("iphlpapi.dll", ExactSpelling = true)]
     private static extern int SendARP(int destIp, int srcIp, byte[] macAddr, ref int physicalAddrLen);
 
-    private static string GetMacAddress(string ipAddress)
+    private string GetMacAddress(string ipAddress)
     {
         try
         {
@@ -241,7 +244,10 @@ public class NetworkMapper : INetworkMapper
                 return string.Join(":", macAddr.Take(macAddrLen).Select(b => b.ToString("X2")));
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetMacAddress failed");
+        }
 
         return "";
     }

@@ -12,11 +12,11 @@ A professional Windows system monitoring and optimization application built with
 ### Optimization Tools
 - **System Cleaner** - Remove temporary files and browser cache
 - **Startup Manager** - Control programs that run at boot
-- **Memory Optimizer** - Free up RAM by trimming working sets
+- **Memory Optimizer** - Trims background processes' working sets, which moves their pages out to the standby list; Windows pages them back when those apps need them again
 
 ## Requirements
 
-- Windows 10 version 1809 or later
+- Windows 10 version 2004 (build 19041) or later
 - .NET 8.0 Runtime
 - Visual Studio 2022 (for development)
 
@@ -44,7 +44,7 @@ SysMonitor/
 │       │   ├── Monitors/        # CPU, Memory, Disk, Network monitors
 │       │   ├── Cleaners/        # Temp file and browser cache cleaners
 │       │   └── Optimizers/      # Startup and memory optimizers
-│       └── Data/Database/       # SQLite database
+│       └── Data/                 # EF Core context and entities (SQLite)
 │
 └── tests/SysMonitor.Tests/      # Unit tests
 ```
@@ -60,4 +60,4 @@ SysMonitor/
 
 ## License
 
-Copyright (c) 2024 Rocky Stack. All rights reserved.
+MIT. See [LICENSE](LICENSE).

@@ -1,4 +1,4 @@
-using Microsoft.UI;
+﻿using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,6 +7,7 @@ using SysMonitor.App.Views;
 using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.History;
 using WinRT.Interop;
+using Serilog;
 
 namespace SysMonitor.App;
 
@@ -91,9 +92,9 @@ public sealed partial class MainWindow : Window
             _historyService = App.GetService<IHistoryService>();
             await _historyService.InitializeAsync();
         }
-        catch
+        catch (Exception ex)
         {
-            // Services may fail to initialize - continue without them
+            Log.Error(ex, "A service failed to start; the window opens without it");
         }
     }
 
@@ -108,9 +109,9 @@ public sealed partial class MainWindow : Window
             _trayService.ExitRequested += (s, e) => ExitApplication();
             _trayService.NavigateRequested += (s, tag) => NavigateToPage(tag);
         }
-        catch
+        catch (Exception ex)
         {
-            // Tray icon may fail to initialize - continue without it
+            Log.Warning(ex, "The tray icon could not be created");
         }
     }
 
@@ -164,7 +165,10 @@ public sealed partial class MainWindow : Window
                 }
             }
         }
-        catch { }
+        catch
+        {
+            // Best effort: an unreadable setting means the default below, which is what this returns.
+        }
         return true; // Default to true
     }
 
@@ -196,7 +200,10 @@ public sealed partial class MainWindow : Window
         {
             _trayService?.Dispose();
         }
-        catch { }
+        catch
+        {
+            // Best effort: the window is closing and the icon goes with the process either way.
+        }
 
         // Close window
         Close();

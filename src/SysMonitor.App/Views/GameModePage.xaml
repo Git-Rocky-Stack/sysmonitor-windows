@@ -129,7 +129,6 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Auto Game Mode Card -->
@@ -191,7 +190,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- FPS Overlay Card -->
+                    <!-- In-game overlay card -->
                     <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="20">
                         <StackPanel Spacing="10">
                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -199,8 +198,8 @@
                                     <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{StaticResource SuccessBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="FPS OVERLAY" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
-                                    <TextBlock Text="F1 Telemetry HUD" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                                    <TextBlock Text="GAME OVERLAY" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
+                                    <TextBlock Text="Temperatures, load and power on top of your game" Style="{StaticResource CardSubtitleStyle}" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </StackPanel>
 
@@ -224,6 +223,9 @@
                                 <TextBlock Text="Drag overlay to reposition"
                                            FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center"/>
+                                <TextBlock Text="Frame rate needs a GPU that reports it; the overlay says so when yours does not."
+                                           FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
                                     <FontIcon Glyph="&#xE7C2;" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"/>
                                     <TextBlock Text="Click &amp; drag anywhere"
@@ -233,39 +235,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- RAM Cache Card -->
-                    <Border Grid.Column="3" Style="{StaticResource CardStyle}" Padding="16">
-                        <StackPanel Spacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{StaticResource InfoBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="RAM CACHE" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
-                                    <TextBlock Text="Fast temp storage" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <ToggleSwitch IsOn="{x:Bind ViewModel.RamCacheEnabled, Mode=OneWay}"
-                                          Toggled="RamCacheToggle_Toggled"
-                                          OnContent="Enabled" OffContent="Disabled"
-                                          Margin="0"/>
-
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="{x:Bind ViewModel.RamCacheStatus, Mode=OneWay}"
-                                           FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <ProgressBar Value="{x:Bind ViewModel.RamCacheUsagePercent, Mode=OneWay}"
-                                             Maximum="100" Height="4"
-                                             Foreground="{StaticResource InfoBrush}"/>
-                            </StackPanel>
-
-                            <Button Content="Clear Cache"
-                                    Command="{x:Bind ViewModel.ClearRamCacheCommand}"
-                                    IsEnabled="{x:Bind ViewModel.RamCacheEnabled, Mode=OneWay}"
-                                    HorizontalAlignment="Stretch"
-                                    FontSize="11"/>
-                        </StackPanel>
-                    </Border>
                 </Grid>
             </StackPanel>
 
@@ -480,8 +449,12 @@
                                     <FontIcon Glyph="&#xE71A;" FontSize="16" Foreground="{StaticResource ErrorBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Closes Background Apps" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Browsers, Discord, Spotify, etc." Style="{StaticResource CardSubtitleStyle}"/>
+                                    <TextBlock Text="Lowers Background Apps" Style="{StaticResource CardTitleStyle}"/>
+                                    <TextBlock Text="Browsers, Discord, Spotify and the rest keep running, below the game"
+                                               Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap"/>
+                                    <CheckBox Content="Ask them to close instead (may lose unsaved work)"
+                                              IsChecked="{x:Bind ViewModel.CloseBackgroundApps, Mode=TwoWay}"
+                                              Margin="0,8,0,0"/>
                                 </StackPanel>
                             </StackPanel>
 
@@ -525,10 +498,10 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.LastProcessesKilled, Mode=OneWay}"
+                                    <TextBlock Text="{x:Bind ViewModel.LastBackgroundAppsAffected, Mode=OneWay}"
                                                FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
                                                Foreground="{StaticResource PrimaryBrush}"/>
-                                    <TextBlock Text="Processes Killed" FontSize="12"
+                                    <TextBlock Text="{x:Bind ViewModel.LastSessionAppsLabel, Mode=OneWay}" FontSize="12"
                                                Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
 
@@ -542,10 +515,10 @@
                             </Grid>
 
                             <!-- Killed Apps List -->
-                            <StackPanel Visibility="{x:Bind ViewModel.KilledApps.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
+                            <StackPanel Visibility="{x:Bind ViewModel.AffectedApps.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
                                 <TextBlock Text="Closed Applications:" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8"/>
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.KilledApps, Mode=OneWay}">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.AffectedApps, Mode=OneWay}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Horizontal" Spacing="8"/>

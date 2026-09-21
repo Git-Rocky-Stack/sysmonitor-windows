@@ -1,3 +1,5 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
@@ -8,11 +10,18 @@ using Windows.Storage.Pickers;
 
 namespace SysMonitor.App.ViewModels;
 
-public partial class BackupViewModel : ObservableObject
+public partial class BackupViewModel : ObservableObject, IDisposable
 {
+    private readonly ILogger _logger;
+
     private readonly IBackupService _backupService;
     private DispatcherQueue? _dispatcherQueue;
     private CancellationTokenSource? _backupCts;
+
+    /// <summary>Cancelled when the user leaves the page, so a backup it started does not outlive it.</summary>
+    private readonly CancellationTokenSource _pageCts = new();
+
+    private bool _isDisposed;
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetActiveWindow();
@@ -96,8 +105,10 @@ public partial class BackupViewModel : ObservableObject
     [ObservableProperty] private bool _hasStatusMessage;
     [ObservableProperty] private string _statusColor = "#4CAF50";
 
-    public BackupViewModel(IBackupService backupService)
+    public BackupViewModel(IBackupService backupService,
+        ILogger<BackupViewModel>? logger = null)
     {
+        _logger = logger ?? NullLogger<BackupViewModel>.Instance;
         _backupService = backupService;
 
         // Add default exclusion paths
@@ -151,7 +162,10 @@ public partial class BackupViewModel : ObservableObject
                 }
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadAvailableDrivesAsync failed");
+        }
     }
 
     private async Task LoadBackupHistoryAsync()
@@ -169,7 +183,10 @@ public partial class BackupViewModel : ObservableObject
                 HasBackups = BackupHistory.Count > 0;
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadBackupHistoryAsync failed");
+        }
     }
 
     private async Task LoadRestorePointsAsync()
@@ -187,7 +204,10 @@ public partial class BackupViewModel : ObservableObject
                 HasRestorePoints = RestorePoints.Count > 0;
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadRestorePointsAsync failed");
+        }
     }
 
     private async Task LoadSchedulesAsync()
@@ -205,7 +225,10 @@ public partial class BackupViewModel : ObservableObject
                 HasSchedules = Schedules.Count > 0;
             });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "LoadSchedulesAsync failed");
+        }
     }
 
     // ==================== WIZARD NAVIGATION ====================
@@ -294,7 +317,10 @@ public partial class BackupViewModel : ObservableObject
                 await UpdateEstimatedSizeAsync();
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "AddSourceFolderAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -322,7 +348,10 @@ public partial class BackupViewModel : ObservableObject
             }
             await UpdateEstimatedSizeAsync();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "AddSourceFilesAsync failed");
+        }
     }
 
     [RelayCommand]
@@ -414,7 +443,10 @@ public partial class BackupViewModel : ObservableObject
                 SelectedDrive = await _backupService.GetDriveSpaceAsync(folder.Path);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "BrowseDestinationAsync failed");
+        }
     }
 
     // ==================== BACKUP EXECUTION ====================
@@ -447,6 +479,12 @@ public partial class BackupViewModel : ObservableObject
             return;
         }
 
+        if (EnableEncryption && string.IsNullOrEmpty(EncryptionPassword))
+        {
+            ShowStatus("Enter a password to encrypt the backup", false);
+            return;
+        }
+
         if (EnableEncryption && EncryptionPassword != ConfirmPassword)
         {
             ShowStatus("Passwords do not match", false);
@@ -456,7 +494,8 @@ public partial class BackupViewModel : ObservableObject
         IsBackupRunning = true;
         ProgressPercent = 0;
         ProgressStatus = "Preparing backup...";
-        _backupCts = new CancellationTokenSource();
+        // Linked to the page: leaving the page cancels the backup as surely as pressing Cancel does.
+        _backupCts = CancellationTokenSource.CreateLinkedTokenSource(_pageCts.Token);
 
         var progress = new Progress<BackupProgress>(p =>
         {
@@ -592,8 +631,20 @@ public partial class BackupViewModel : ObservableObject
 
     // ==================== BACKUP HISTORY ACTIONS ====================
 
+    /// <summary>
+    /// Asked before a restore writes anything, with what it would write and where. The page puts it on
+    /// screen; without an answer, nothing is written.
+    /// </summary>
+    public Func<RestorePlan, Task<bool>>? ConfirmRestore { get; set; }
+
     [RelayCommand]
-    private async Task RestoreBackupAsync(BackupArchiveViewModel archive)
+    private Task RestoreBackupAsync(BackupArchiveViewModel archive) => RestoreBackupWithPasswordAsync(archive, null);
+
+    /// <summary>
+    /// Restores a backup; <paramref name="password"/> is required for encrypted backups
+    /// (the page prompts for it before calling this).
+    /// </summary>
+    public async Task RestoreBackupWithPasswordAsync(BackupArchiveViewModel archive, string? password)
     {
         if (archive?.Archive == null) return;
 
@@ -612,15 +663,34 @@ public partial class BackupViewModel : ObservableObject
             var folder = await picker.PickSingleFolderAsync();
             if (folder == null) return;
 
-            IsBackupRunning = true;
-            ProgressStatus = "Restoring backup...";
-
             var options = new RestoreOptions
             {
                 RestoreToOriginalLocation = false,
                 AlternateDestination = folder.Path,
-                OverwriteExisting = true
+                OverwriteExisting = true,
+                Password = password
             };
+
+            // What this would write, worked out before anything is written, and shown before it happens.
+            ProgressStatus = "Checking what this backup would restore...";
+            var plan = await _backupService.PrepareRestoreAsync(archive.Archive, folder.Path, options);
+
+            if (plan.Files.Count == 0)
+            {
+                ShowStatus(plan.Refused.Count > 0
+                    ? $"Nothing was restored: every entry in this backup ({plan.Refused.Count}) asked to be written somewhere it does not belong."
+                    : "This backup has nothing to restore.", false);
+                return;
+            }
+
+            if (ConfirmRestore != null && !await ConfirmRestore(plan))
+            {
+                ShowStatus("Nothing was restored", false);
+                return;
+            }
+
+            IsBackupRunning = true;
+            ProgressStatus = "Restoring backup...";
 
             var progress = new Progress<BackupProgress>(p =>
             {
@@ -660,17 +730,28 @@ public partial class BackupViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task VerifyBackupAsync(BackupArchiveViewModel archive)
+    private Task VerifyBackupAsync(BackupArchiveViewModel archive) => VerifyBackupWithPasswordAsync(archive, null);
+
+    /// <summary>
+    /// Verifies a backup's contents against its recorded checksums; <paramref name="password"/> is required
+    /// for encrypted backups (the page prompts for it before calling this).
+    /// </summary>
+    public async Task VerifyBackupWithPasswordAsync(BackupArchiveViewModel archive, string? password)
     {
         if (archive?.Archive == null) return;
 
         IsBackupRunning = true;
         ProgressStatus = "Verifying backup...";
 
-        var result = await _backupService.VerifyBackupAsync(archive.Archive);
-
-        IsBackupRunning = false;
-        ShowStatus(result.Message, result.Success);
+        try
+        {
+            var result = await _backupService.VerifyBackupAsync(archive.Archive, password: password);
+            ShowStatus(result.Message, result.Success);
+        }
+        finally
+        {
+            IsBackupRunning = false;
+        }
     }
 
     // ==================== HELPERS ====================
@@ -700,6 +781,24 @@ public partial class BackupViewModel : ObservableObject
             size /= 1024;
         }
         return $"{size:F1} {sizes[order]}";
+    }
+
+    /// <summary>
+    /// Ends a backup the user has walked away from, and releases what it was using. Without this the copy
+    /// loop carried on writing while the page that showed its progress was gone, and the wizard was left
+    /// stranded on its last step.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _pageCts.Cancel();
+        _pageCts.Dispose();
+        _backupCts?.Dispose();
+        _backupCts = null;
+
+        GC.SuppressFinalize(this);
     }
 }
 

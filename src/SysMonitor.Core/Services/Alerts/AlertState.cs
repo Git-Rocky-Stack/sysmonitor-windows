@@ -34,12 +34,21 @@ public class AlertState
     public AlertType Type { get; set; }
 
     /// <summary>
-    /// When the alert was last triggered.
+    /// When the user was last told about this alert, in UTC. The cooldown is a length of real time, so it
+    /// is never measured on local time — that repeats an hour every autumn.
     /// </summary>
-    public DateTime LastTriggered { get; set; }
+    public DateTime LastTriggeredUtc { get; set; }
 
     /// <summary>
-    /// Whether the condition is currently active.
+    /// Whether the user has ever been told about this alert. Distinguishes "never fired" from
+    /// <see cref="LastTriggeredUtc"/> happening to hold a default value.
+    /// </summary>
+    public bool HasTriggered { get; set; }
+
+    /// <summary>
+    /// Whether the condition is currently active — i.e. the metric is still outside its threshold. This is
+    /// for display; it is not part of the cooldown, because a metric flickering across the line would
+    /// otherwise re-arm the alert on every dip.
     /// </summary>
     public bool IsActive { get; set; }
 

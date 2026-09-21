@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -88,12 +88,35 @@ public partial class PdfEditorViewModel : ObservableObject
     [ObservableProperty] private bool _hasStatusMessage;
     [ObservableProperty] private string _statusColor = "#4CAF50";
 
+    /// <summary>Width of a page thumbnail in the strip, in pixels.</summary>
+    private const double ThumbnailWidth = 150;
+
     // Zoom
     [ObservableProperty] private double _zoomLevel = 1.0;
+
+    // The zoom the page image on the canvas was rendered at. Annotation coordinates are pixels of that
+    // image, so the scale that turns them into page points comes from it, not from a zoom the user may
+    // have changed since (the re-render is asynchronous).
+    private double _canvasZoom = 1.0;
+    private double CanvasCoordinateScale => PdfPageGeometry.CanvasCoordinateScale(_canvasZoom);
+
+    /// <summary>
+    /// How many canvas units one of an annotation's own units is worth right now. An annotation drawn at one
+    /// zoom is redrawn at another by multiplying its numbers by this.
+    /// </summary>
+    public double CanvasScaleFor(PdfAnnotation annotation) =>
+        PdfPageGeometry.RedrawScale(annotation.CoordinateScale, _canvasZoom);
     [ObservableProperty] private string _zoomDisplay = "100%";
 
     // Current page rotation for visual display
     [ObservableProperty] private int _currentPageRotation = 0;
+
+    /// <summary>
+    /// Raised whenever <see cref="CurrentAnnotations"/> has been rebuilt - after navigating, zooming, undoing
+    /// or redoing. The canvas draws the annotations, so it listens for this instead of every command
+    /// remembering to tell it; forgetting to was what left annotations invisible after an undo.
+    /// </summary>
+    public event EventHandler? AnnotationsReloaded;
 
     public PdfEditorViewModel(IPdfEditor pdfEditor)
     {
@@ -180,22 +203,23 @@ public partial class PdfEditorViewModel : ObservableObject
 
         GetDispatcher().TryEnqueue(() => PageThumbnails.Clear());
 
-        foreach (var page in CurrentDocument.Pages)
+        for (var position = 1; position <= CurrentDocument.Pages.Count; position++)
         {
+            var page = CurrentDocument.Pages[position - 1];
             var thumbnail = new PageThumbnailViewModel
             {
-                PageNumber = page.PageNumber,
+                PageNumber = position,
+                SourcePageNumber = page.PageNumber,
                 Width = page.Width,
                 Height = page.Height,
                 Rotation = page.Rotation
             };
 
             // Load thumbnail image using Windows PDF renderer
-            var imageBytes = await PdfPageRenderer.RenderThumbnailAsync(CurrentDocument.FilePath, page.PageNumber, 150);
-            if (imageBytes != null)
-            {
-                thumbnail.ImageBytes = imageBytes;
-            }
+            var imageBytes = page.IsBlank
+                ? PdfPageRasterizer.BlankPagePng(page.Width, page.Height, ThumbnailWidth * PdfPageGeometry.PointsPerDip / page.Width)
+                : await PdfPageRenderer.RenderThumbnailAsync(CurrentDocument.FilePath, page.PageNumber, ThumbnailWidth);
+            thumbnail.Image = await ToBitmapAsync(imageBytes);
 
             GetDispatcher().TryEnqueue(() => PageThumbnails.Add(thumbnail));
         }
@@ -213,25 +237,20 @@ public partial class PdfEditorViewModel : ObservableObject
         {
             CurrentPage = CurrentDocument.Pages[CurrentPageNumber - 1];
 
-            // Update visual rotation based on page's rotation value
-            CurrentPageRotation = CurrentPage.Rotation;
+            // The rendered page already shows the rotation it has in the file, so the preview only turns
+            // it by what the user has changed since.
+            CurrentPageRotation = CurrentPage.PreviewRotation;
 
             // Load page image for viewer using Windows PDF renderer
-            var imageBytes = await PdfPageRenderer.RenderPageAsync(CurrentDocument.FilePath, CurrentPageNumber, ZoomLevel);
+            var renderZoom = ZoomLevel;
+            var imageBytes = CurrentPage.IsBlank
+                ? PdfPageRasterizer.BlankPagePng(CurrentPage.Width, CurrentPage.Height, renderZoom)
+                : await PdfPageRenderer.RenderPageAsync(CurrentDocument.FilePath, CurrentPage.PageNumber, renderZoom);
 
-            // Convert bytes to BitmapImage on UI thread (avoids converter deadlock)
-            if (imageBytes != null && imageBytes.Length > 0)
+            CurrentPageImage = await ToBitmapAsync(imageBytes);
+            if (CurrentPageImage != null)
             {
-                var bitmap = new BitmapImage();
-                using var stream = new InMemoryRandomAccessStream();
-                await stream.WriteAsync(imageBytes.AsBuffer());
-                stream.Seek(0);
-                await bitmap.SetSourceAsync(stream);
-                CurrentPageImage = bitmap;
-            }
-            else
-            {
-                CurrentPageImage = null;
+                _canvasZoom = renderZoom;
             }
 
             // Load annotations for this page
@@ -251,16 +270,35 @@ public partial class PdfEditorViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Decodes rendered page bytes into an image, on whichever thread is loading the page. Doing this in a
+    /// value converter would mean blocking the UI thread on an async decode.
+    /// </summary>
+    private static async Task<BitmapImage?> ToBitmapAsync(byte[]? imageBytes)
+    {
+        if (imageBytes == null || imageBytes.Length == 0) return null;
+
+        var bitmap = new BitmapImage();
+        using var stream = new InMemoryRandomAccessStream();
+        await stream.WriteAsync(imageBytes.AsBuffer());
+        stream.Seek(0);
+        await bitmap.SetSourceAsync(stream);
+        return bitmap;
+    }
+
     private void LoadAnnotationsForCurrentPage()
     {
         CurrentAnnotations.Clear();
 
-        if (CurrentDocument?.Annotations == null) return;
-
-        foreach (var annotation in CurrentDocument.Annotations.Where(a => a.PageNumber == CurrentPageNumber))
+        if (CurrentDocument?.Annotations != null && CurrentPage != null)
         {
-            CurrentAnnotations.Add(new AnnotationViewModel(annotation));
+            foreach (var annotation in CurrentDocument.Annotations.Where(a => a.PageId == CurrentPage.Id))
+            {
+                CurrentAnnotations.Add(new AnnotationViewModel(annotation));
+            }
         }
+
+        AnnotationsReloaded?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]
@@ -327,18 +365,7 @@ public partial class PdfEditorViewModel : ObservableObject
             IsModified = true;
             TotalPages = CurrentDocument.Pages.Count;
 
-            // Remove thumbnail
-            var thumbnail = PageThumbnails.FirstOrDefault(t => t.PageNumber == CurrentPageNumber);
-            if (thumbnail != null)
-            {
-                PageThumbnails.Remove(thumbnail);
-            }
-
-            // Update page numbers
-            for (int i = 0; i < PageThumbnails.Count; i++)
-            {
-                PageThumbnails[i].PageNumber = i + 1;
-            }
+            await LoadThumbnailsAsync();
 
             // Navigate to appropriate page
             if (CurrentPageNumber > TotalPages)
@@ -395,18 +422,18 @@ public partial class PdfEditorViewModel : ObservableObject
         }
     }
 
-    private async Task RefreshThumbnailAsync(int pageNumber)
+    private async Task RefreshThumbnailAsync(int pagePosition)
     {
         if (CurrentDocument == null) return;
 
-        var thumbnail = PageThumbnails.FirstOrDefault(t => t.PageNumber == pageNumber);
-        if (thumbnail != null)
+        var thumbnail = PageThumbnails.FirstOrDefault(t => t.PageNumber == pagePosition);
+        if (thumbnail == null || thumbnail.SourcePageNumber <= 0) return;
+
+        var imageBytes = await PdfPageRenderer.RenderThumbnailAsync(CurrentDocument.FilePath, thumbnail.SourcePageNumber, ThumbnailWidth);
+        var image = await ToBitmapAsync(imageBytes);
+        if (image != null)
         {
-            var imageBytes = await PdfPageRenderer.RenderThumbnailAsync(CurrentDocument.FilePath, pageNumber, 150);
-            if (imageBytes != null)
-            {
-                GetDispatcher().TryEnqueue(() => thumbnail.ImageBytes = imageBytes);
-            }
+            GetDispatcher().TryEnqueue(() => thumbnail.Image = image);
         }
     }
 
@@ -507,6 +534,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Text:
                 var textAnnotation = new TextAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -524,6 +552,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Highlight:
                 var highlight = new HighlightAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -541,6 +570,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Arrow:
                 var shape = new ShapeAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -563,6 +593,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.StickyNote:
                 var stickyNote = new StickyNoteAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = Math.Max(width, 150),
@@ -579,6 +610,7 @@ public partial class PdfEditorViewModel : ObservableObject
             case AnnotationTool.Redaction:
                 var redaction = new RedactionAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = width,
@@ -589,11 +621,13 @@ public partial class PdfEditorViewModel : ObservableObject
                 };
                 await _pdfEditor.AddRedactionAsync(CurrentDocument, CurrentPageNumber, redaction);
                 annotation = redaction;
+                ShowStatus("Redacted. Saving turns this page into an image, so what is under the box is removed from the file — its text can no longer be selected either.", true);
                 break;
 
             case AnnotationTool.Stamp:
                 var stamp = new StampAnnotation
                 {
+                    CoordinateScale = CanvasCoordinateScale,
                     X = x,
                     Y = y,
                     Width = Math.Max(width, 180),
@@ -615,7 +649,6 @@ public partial class PdfEditorViewModel : ObservableObject
             {
                 Type = UndoActionType.AddAnnotation,
                 Annotation = annotation,
-                PageNumber = CurrentPageNumber
             });
         }
 
@@ -632,6 +665,7 @@ public partial class PdfEditorViewModel : ObservableObject
 
         var freehand = new FreehandAnnotation
         {
+            CoordinateScale = CanvasCoordinateScale,
             X = minX,
             Y = minY,
             Width = maxX - minX,
@@ -647,7 +681,6 @@ public partial class PdfEditorViewModel : ObservableObject
         {
             Type = UndoActionType.AddAnnotation,
             Annotation = freehand,
-            PageNumber = CurrentPageNumber
         });
 
         IsModified = true;
@@ -661,6 +694,7 @@ public partial class PdfEditorViewModel : ObservableObject
 
         var signature = new SignatureAnnotation
         {
+            CoordinateScale = CanvasCoordinateScale,
             X = x,
             Y = y,
             Width = width,
@@ -677,7 +711,6 @@ public partial class PdfEditorViewModel : ObservableObject
         {
             Type = UndoActionType.AddAnnotation,
             Annotation = signature,
-            PageNumber = CurrentPageNumber
         });
 
         IsModified = true;
@@ -691,6 +724,7 @@ public partial class PdfEditorViewModel : ObservableObject
 
         var imageAnnotation = new ImageAnnotation
         {
+            CoordinateScale = CanvasCoordinateScale,
             X = x,
             Y = y,
             Width = width,
@@ -705,7 +739,6 @@ public partial class PdfEditorViewModel : ObservableObject
         {
             Type = UndoActionType.AddAnnotation,
             Annotation = imageAnnotation,
-            PageNumber = CurrentPageNumber
         });
 
         IsModified = true;
@@ -784,7 +817,7 @@ public partial class PdfEditorViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ExportToWordAsync()
+    private async Task ExportAnnotationReportAsync()
     {
         if (CurrentDocument == null) return;
 
@@ -793,7 +826,7 @@ public partial class PdfEditorViewModel : ObservableObject
             var picker = new FileSavePicker();
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             picker.FileTypeChoices.Add("Word Document", [".docx"]);
-            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(CurrentDocument.FileName) + "_exported";
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(CurrentDocument.FileName) + "_annotations";
 
             var hwnd = GetActiveWindow();
             if (hwnd != IntPtr.Zero)
@@ -805,16 +838,16 @@ public partial class PdfEditorViewModel : ObservableObject
             if (file == null) return;
 
             IsLoading = true;
-            LoadingStatus = "Exporting to Word...";
+            LoadingStatus = "Writing annotation report...";
 
-            var result = await _pdfEditor.ExportToWordAsync(CurrentDocument, file.Path);
+            var result = await _pdfEditor.ExportAnnotationReportAsync(CurrentDocument, file.Path);
             if (result.Success)
             {
-                ShowStatus($"Exported to: {file.Name}", true);
+                ShowStatus($"Annotation report written to: {file.Name}", true);
             }
             else
             {
-                ShowStatus($"Export failed: {result.ErrorMessage}", false);
+                ShowStatus($"Report failed: {result.ErrorMessage}", false);
             }
         }
         catch (Exception ex)
@@ -837,7 +870,7 @@ public partial class PdfEditorViewModel : ObservableObject
         if (toRemove != null)
         {
             CurrentDocument.Annotations.Remove(toRemove);
-            CurrentAnnotations.Remove(annotation);
+            LoadAnnotationsForCurrentPage();
             IsModified = true;
             ShowStatus("Annotation removed", true);
         }
@@ -848,8 +881,10 @@ public partial class PdfEditorViewModel : ObservableObject
     {
         if (CurrentDocument == null) return;
 
-        CurrentDocument.Annotations.RemoveAll(a => a.PageNumber == CurrentPageNumber);
-        CurrentAnnotations.Clear();
+        if (CurrentPage == null) return;
+
+        CurrentDocument.Annotations.RemoveAll(a => a.PageId == CurrentPage.Id);
+        LoadAnnotationsForCurrentPage();
         IsModified = true;
         ShowStatus("All annotations on this page cleared", true);
     }
@@ -882,7 +917,14 @@ public partial class PdfEditorViewModel : ObservableObject
             if (result.Success)
             {
                 IsModified = false;
-                ShowStatus($"Saved: {file.Name}", true);
+
+                // A save that dropped part of the document says so. Reporting only "Saved" would be the
+                // same silence that let form fields disappear without anyone noticing.
+                ShowStatus(
+                    result.Warnings.Count == 0
+                        ? $"Saved: {file.Name}"
+                        : $"Saved: {file.Name} - {string.Join(" ", result.Warnings)}",
+                    result.Warnings.Count == 0);
             }
             else
             {
@@ -991,7 +1033,7 @@ public partial class PdfEditorViewModel : ObservableObject
 
         try
         {
-            var results = await _pdfEditor.SearchTextAsync(CurrentDocument, SearchText);
+            var results = await _pdfEditor.SearchAnnotationsAsync(CurrentDocument, SearchText);
             SearchResults.Clear();
             foreach (var result in results)
             {
@@ -1037,7 +1079,7 @@ public partial class PdfEditorViewModel : ObservableObject
             Color = "#888888"
         };
 
-        var result = await _pdfEditor.AddWatermarkAsync(CurrentDocument, watermark);
+        var result = await _pdfEditor.AddWatermarkAsync(CurrentDocument, watermark, CurrentPageNumber);
         if (result.Success)
         {
             IsModified = true;
@@ -1154,18 +1196,26 @@ public enum AnnotationTool
 
 public partial class PageThumbnailViewModel : ObservableObject
 {
+    /// <summary>Its place in the document: what the strip shows and navigates by.</summary>
     [ObservableProperty] private int _pageNumber;
+
+    /// <summary>The page of the source file it shows, or 0 for a page inserted blank.</summary>
+    [ObservableProperty] private int _sourcePageNumber;
     [ObservableProperty] private double _width;
     [ObservableProperty] private double _height;
     [ObservableProperty] private int _rotation;
-    [ObservableProperty] private byte[]? _imageBytes;
+    /// <summary>The rendered page, ready to show in the strip.</summary>
+    [ObservableProperty] private BitmapImage? _image;
+
     [ObservableProperty] private bool _isSelected;
 }
 
 public partial class AnnotationViewModel : ObservableObject
 {
+    /// <summary>The annotation itself, for the canvas to draw from.</summary>
+    public PdfAnnotation Annotation { get; }
+
     public Guid Id { get; }
-    public int PageNumber { get; }
     public double X { get; }
     public double Y { get; }
     public double Width { get; }
@@ -1176,8 +1226,8 @@ public partial class AnnotationViewModel : ObservableObject
 
     public AnnotationViewModel(PdfAnnotation annotation)
     {
+        Annotation = annotation;
         Id = annotation.Id;
-        PageNumber = annotation.PageNumber;
         X = annotation.X;
         Y = annotation.Y;
         Width = annotation.Width;
@@ -1221,5 +1271,4 @@ public class UndoAction
     public UndoActionType Type { get; set; }
     public PdfAnnotation? Annotation { get; set; }
     public PdfAnnotation? PreviousState { get; set; }
-    public int PageNumber { get; set; }
 }

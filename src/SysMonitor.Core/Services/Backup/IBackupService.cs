@@ -1,9 +1,9 @@
-namespace SysMonitor.Core.Services.Backup;
+﻿namespace SysMonitor.Core.Services.Backup;
 
 /// <summary>
 /// Comprehensive backup service for Windows - File, Folder, System Image, and Incremental backups
 /// </summary>
-public interface IBackupService
+public interface IBackupService : IDisposable
 {
     // Backup Operations
     Task<BackupResult> CreateBackupAsync(BackupJob job, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default);
@@ -12,11 +12,19 @@ public interface IBackupService
 
     // Restore Operations
     Task<BackupResult> RestoreBackupAsync(BackupArchive archive, string destinationPath, RestoreOptions options, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// What a restore of this archive would write, worked out without writing anything, so the folders can be
+    /// shown to the person before they agree to it.
+    /// </summary>
+    Task<RestorePlan> PrepareRestoreAsync(BackupArchive archive, string destinationPath, RestoreOptions options, CancellationToken cancellationToken = default);
     Task<List<RestorePointInfo>> GetRestorePointsAsync();
 
     // Backup Management
     Task<List<BackupArchive>> GetBackupHistoryAsync(string? backupLocation = null);
-    Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null);
+    /// <summary>Verifies the backup contents against the manifest checksums; encrypted backups need their password.</summary>
+    Task<BackupResult> VerifyBackupAsync(BackupArchive archive, IProgress<BackupProgress>? progress = null,
+        string? password = null, CancellationToken cancellationToken = default);
     Task<BackupResult> DeleteBackupAsync(BackupArchive archive);
 
     // Scheduling
@@ -100,11 +108,21 @@ public class BackupJob
     // Destination
     public string DestinationPath { get; set; } = "";
     public string? NetworkUsername { get; set; }
+    /// <summary>
+    /// Never written to disk. A saved schedule is a JSON file in the user's profile, and serialising this
+    /// put the password for a network share in clear text next to the backups it reaches.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public string? NetworkPassword { get; set; }
 
     // Options
     public BackupCompression Compression { get; set; } = BackupCompression.Normal;
     public bool EnableEncryption { get; set; } = false;
+    /// <summary>
+    /// Never written to disk. This is the password the backup is encrypted with; storing it in a file
+    /// beside the backup would undo the encryption for anyone who could read the folder.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public string? EncryptionPassword { get; set; }
     public bool VerifyAfterBackup { get; set; } = true;
     public bool UseVss { get; set; } = true; // Volume Shadow Copy for in-use files
@@ -226,7 +244,35 @@ public class BackupManifest
     public DateTime CreatedDate { get; set; }
     public List<BackupFileEntry> Files { get; set; } = [];
     public Dictionary<string, string> Metadata { get; set; } = [];
+
+    /// <summary>
+    /// The folders this backup was taken from. A restore to the original locations puts files back inside
+    /// these and nowhere else, so an archive that has been tampered with cannot choose its own destinations.
+    /// Backups written before this existed have none, and such a restore has to be confirmed by destination.
+    /// </summary>
+    public List<string> SourceRoots { get; set; } = [];
 }
+
+/// <summary>What a restore would write, worked out before anything is written.</summary>
+public class RestorePlan
+{
+    /// <summary>The entries that may be restored, with the place each one goes.</summary>
+    public List<PlannedRestore> Files { get; init; } = [];
+
+    /// <summary>The folders that would be written to, for the person to look at before agreeing.</summary>
+    public List<string> DestinationFolders { get; init; } = [];
+
+    /// <summary>Entries the archive asked for that will not be written, and why.</summary>
+    public List<BackupError> Refused { get; init; } = [];
+
+    /// <summary>Whether the archive recorded where it came from; older ones did not.</summary>
+    public bool HasRecordedSourceRoots { get; init; }
+
+    public long TotalBytes => Files.Sum(f => f.Entry.SizeBytes);
+}
+
+/// <summary>One file of a restore, and the checked path it goes to.</summary>
+public record PlannedRestore(BackupFileEntry Entry, string SourceFile, string DestinationFile);
 
 /// <summary>
 /// Entry for a single file in the backup
@@ -254,6 +300,9 @@ public class RestoreOptions
     public string? AlternateDestination { get; set; }
     public List<string>? SelectiveFiles { get; set; } // null = restore all
     public bool VerifyAfterRestore { get; set; } = true;
+
+    /// <summary>Password for encrypted backups; required when the archive is encrypted.</summary>
+    public string? Password { get; set; }
 }
 
 /// <summary>

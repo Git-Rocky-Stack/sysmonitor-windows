@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Helpers;
 
 namespace SysMonitor.Core.Services.Cleaners;
@@ -7,7 +7,6 @@ public interface IBrowserPrivacyCleaner
 {
     Task<List<BrowserPrivacyItem>> ScanAsync(CancellationToken cancellationToken = default);
     Task<PrivacyCleanResult> CleanAsync(IEnumerable<BrowserPrivacyItem> itemsToClean, CancellationToken cancellationToken = default);
-    Task<List<InstalledBrowser>> GetInstalledBrowsersAsync();
 }
 
 public class BrowserPrivacyItem
@@ -45,15 +44,6 @@ public enum PrivacyRiskLevel
     Low,        // History, downloads
     Medium,     // Cookies, sessions
     High        // Passwords, autofill
-}
-
-public class InstalledBrowser
-{
-    public string Name { get; set; } = string.Empty;
-    public string Version { get; set; } = string.Empty;
-    public string ProfilePath { get; set; } = string.Empty;
-    public bool IsDefault { get; set; }
-    public string Icon { get; set; } = string.Empty;
 }
 
 public class PrivacyCleanResult
@@ -473,29 +463,6 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
         return result;
     }
 
-    public async Task<List<InstalledBrowser>> GetInstalledBrowsersAsync()
-    {
-        return await Task.Run(() =>
-        {
-            var browsers = new List<InstalledBrowser>();
-
-            foreach (var browser in _browsers)
-            {
-                if (Directory.Exists(browser.BasePath))
-                {
-                    browsers.Add(new InstalledBrowser
-                    {
-                        Name = browser.Name,
-                        ProfilePath = browser.BasePath,
-                        Icon = browser.Icon
-                    });
-                }
-            }
-
-            return browsers;
-        });
-    }
-
     private static (long size, int count) GetDirectorySize(string path)
     {
         long size = 0;
@@ -512,13 +479,14 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                 }
                 catch
                 {
-                    // Expected for locked/inaccessible files - silently skip
+                    // Best effort: a file the browser still holds open is left where it is; the clean
+                    // carries on with the rest.
                 }
             }
         }
         catch
         {
-            // Expected for inaccessible directories - silently skip
+            // Best effort: a folder this account cannot read is skipped, not failed on.
         }
 
         return (size, count);
