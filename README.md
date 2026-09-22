@@ -109,6 +109,23 @@ Listed because previous versions implied otherwise:
 The released build is self-contained — the .NET 8 and Windows App SDK runtimes ship
 with it, so there is nothing to install separately.
 
+## Documentation
+
+The user documentation site is at
+<https://git-rocky-stack.github.io/sysmonitor-windows/>, built from [`docs/`](docs/).
+
+| Kind | Document |
+|---|---|
+| Tutorial | [Getting started](docs/tutorial-getting-started.md) |
+| How-to | [Free up disk space](docs/howto-free-disk-space.md) |
+| How-to | [Securely wipe files](docs/howto-securely-wipe-files.md) |
+| How-to | [Back up and restore](docs/howto-back-up-and-restore.md) |
+| How-to | [Manage startup programs](docs/howto-manage-startup-programs.md) |
+| Reference | [Pages](docs/reference-pages.md) |
+| Reference | [Settings and data](docs/reference-settings-and-data.md) |
+| Explanation | [What v3.0.0 removed, and why](docs/explanation-honest-reporting.md) |
+| Explanation | [The Drive Wiper and solid-state drives](docs/explanation-drive-wiper-and-ssds.md) |
+
 ## Installing
 
 Download the installer from

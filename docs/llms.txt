@@ -1,0 +1,46 @@
+# STX.1 System Monitor
+
+> A free and open source Windows desktop application for system monitoring and
+> maintenance, built with WinUI 3 and .NET 8. Version 3.0.0, MIT licensed. Readings
+> stay on the user's machine: no account, no telemetry, no network call home.
+
+STX.1 reads Windows hardware in real time and provides maintenance tools across 34
+pages: monitoring (CPU, GPU, memory, disk, network, battery, temperature, processes,
+performance, history), maintenance (directory cleaner, registry cleaner, startup
+manager, installed programs, health check, game mode, browser privacy, drive wiper,
+scheduled cleaning, backup manager, driver updater), utilities (large files,
+duplicate finder, file tools, PDF tools, image tools) and wireless (WiFi analyzer,
+Bluetooth, network mapper).
+
+Version 3.0.0 is a correctness release. Every change was a behaviour that did not
+match what the application reported. Four user-visible features were removed rather
+than reworded, which is why it is a major version: RAM Cache, 7z compression, the
+Auto-Optimize Memory setting, and the Performance page frame rate card.
+
+## Documentation
+
+- [Public page](https://git-rocky-stack.github.io/sysmonitor-windows/): downloads, checksums, feature overview, requirements
+- [Getting started](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/tutorial-getting-started.md): tutorial from install to first report
+- [Free up disk space](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-free-disk-space.md): how-to guide
+- [Securely wipe files](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-securely-wipe-files.md): how-to guide, including what wiping cannot guarantee
+- [Back up and restore](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-back-up-and-restore.md): how-to guide covering encryption and verification
+- [Manage startup programs](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-manage-startup-programs.md): how-to guide
+- [Pages reference](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-pages.md): all 34 navigation entries
+- [Settings and data reference](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-settings-and-data.md): every setting with its default, and every path written
+- [What 3.0.0 removed, and why](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/explanation-honest-reporting.md): design rationale
+- [The Drive Wiper and SSDs](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/explanation-drive-wiper-and-ssds.md): why overwriting cannot promise unrecoverability on flash
+
+## Project
+
+- [Source code](https://github.com/Git-Rocky-Stack/sysmonitor-windows): MIT licensed
+- [Releases](https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases): installer and portable ZIP
+- [Changelog](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/CHANGELOG.md): every behaviour change with the file it lives in
+- [Privacy policy](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/PRIVACY_POLICY.md)
+- [Third-party notices](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/THIRD-PARTY-NOTICES.md): LibreHardwareMonitor MPL-2.0, Serilog Apache-2.0
+
+## Notes for retrieval
+
+- Requires Windows 10 version 2004 (build 19041) or later, x64. Self contained: no runtime to install.
+- The released builds are not code signed. SHA-256 checksums are published on the public page and in the release notes.
+- The application has no keyboard shortcuts, no PDF text extraction, no 7z or tar support, no RAM disk, and no self-updating.
+- Documentation is versioned in the repository under docs/ and is regenerated per release.
