@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference: pages - STX.1 System Monitor</title>
+<meta name="description" content="Every one of the 34 pages in STX.1 System Monitor, what each one does, and the source line it is defined on.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/reference-pages.html">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:title" content="Reference: pages - STX.1 System Monitor">
+<meta property="og:description" content="Every one of the 34 pages in STX.1 System Monitor, what each one does, and the source line it is defined on.">
+<meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/reference-pages.html">
+<meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Reference: pages - STX.1 System Monitor">
+<meta name="twitter:description" content="Every one of the 34 pages in STX.1 System Monitor, what each one does, and the source line it is defined on.">
+<meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Reference: pages",
+  "description": "Every one of the 34 pages in STX.1 System Monitor, what each one does, and the source line it is defined on.",
+  "url": "https://git-rocky-stack.github.io/sysmonitor-windows/reference-pages.html",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
+  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+}
+</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="./#download">Download</a>
+      <a href="./#whatsnew">What is new</a>
+      <a href="./#features">Features</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / Reference</p>
+    <h1>Reference: pages</h1>
+    <p>Every entry in the navigation menu of STX.1 System Monitor v3.0.0. There are 34,
+    verified by counting <code>NavigationViewItem</code> entries in
+    <code>src/SysMonitor.App/MainWindow.xaml</code>.</p>
+    <p>The app defines three group headers (<code>MainWindow.xaml:119</code>, <code>:182</code>, <code>:209</code>). The nine
+    entries above the first header, and the five below the Wireless group, are not under a
+    header of their own. They are listed here in the order the menu shows them.</p>
+    <h2>Top of the menu</h2>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Page</th>
+    <th>Line</th>
+    <th>What it does</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Dashboard</td>
+    <td><code>:73</code></td>
+    <td>Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (<code>ViewModels/DashboardViewModel.cs:273</code>, <code>:298</code>, <code>:325</code>). In the v3.0.0 release the middle button reads BOOST RAM; it was renamed after that release, see <a href="reference-settings-and-data.html">Settings and data</a></td>
+    </tr>
+    <tr>
+    <td>CPU Monitor</td>
+    <td><code>:78</code></td>
+    <td>Processor usage, core counts, clock speeds, per-core figures where the hardware reports them</td>
+    </tr>
+    <tr>
+    <td>GPU Monitor</td>
+    <td><code>:83</code></td>
+    <td>Graphics adapter load, memory and temperature</td>
+    </tr>
+    <tr>
+    <td>Memory Monitor</td>
+    <td><code>:88</code></td>
+    <td>RAM in use and available, and working-set trimming</td>
+    </tr>
+    <tr>
+    <td>Processes</td>
+    <td><code>:93</code></td>
+    <td>Running processes with per-process processor and memory use, and the ability to end one</td>
+    </tr>
+    <tr>
+    <td>Directory Cleaner</td>
+    <td><code>:98</code></td>
+    <td>Scans thirteen categories of reclaimable files and removes the ones you select (<code>Models/CleanerModels.cs:56-70</code>)</td>
+    </tr>
+    <tr>
+    <td>Registry Cleaner</td>
+    <td><code>:103</code></td>
+    <td>Finds registry issues. Exports every key a selected fix will touch with <code>reg.exe</code> before changing anything, and a failed export stops the clean (<code>Services/Cleaners/RegistryCleaner.cs:913-915</code>, <code>:940</code>, <code>:973</code>)</td>
+    </tr>
+    <tr>
+    <td>Startup</td>
+    <td><code>:108</code></td>
+    <td>Enables and disables startup entries through <code>Explorer\StartupApproved</code>, the mechanism Task Manager uses (<code>Services/Optimizers/StartupOptimizer.cs:12</code>, <code>:52-53</code>)</td>
+    </tr>
+    <tr>
+    <td>Installed Programs</td>
+    <td><code>:113</code></td>
+    <td>Inventory and uninstall. Exit codes are reported in words, including restart-needed and already-removed, which are not failures</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <h2>Maintenance</h2>
+    <p>Header at <code>MainWindow.xaml:119</code>.</p>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Page</th>
+    <th>Line</th>
+    <th>What it does</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Health Check</td>
+    <td><code>:120</code></td>
+    <td>System-wide checks producing a score, a grade, counts of critical issues and warnings, and recommended actions</td>
+    </tr>
+    <tr>
+    <td>Game Mode</td>
+    <td><code>:125</code></td>
+    <td>Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (<code>Services/GameMode/GameModeService.cs</code>)</td>
+    </tr>
+    <tr>
+    <td>Browser Privacy</td>
+    <td><code>:130</code></td>
+    <td>Clears browsing traces across installed browsers, counted per browser actually found</td>
+    </tr>
+    <tr>
+    <td>Drive Wiper</td>
+    <td><code>:135</code></td>
+    <td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (<code>Services/Utilities/DriveWiper.cs:406</code>, <code>:589</code>, <code>:20</code>)</td>
+    </tr>
+    <tr>
+    <td>Scheduled Cleaning</td>
+    <td><code>:140</code></td>
+    <td>Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (<code>Services/Utilities/ScheduledCleaningRun.cs</code>)</td>
+    </tr>
+    <tr>
+    <td>Backup Manager</td>
+    <td><code>:145</code></td>
+    <td>Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (<code>Services/Backup/BackupEncryption.cs:20-22</code>)</td>
+    </tr>
+    <tr>
+    <td>Driver Updater</td>
+    <td><code>:150</code></td>
+    <td>Device driver inventory, with problem and unsigned drivers flagged, and links out to Device Manager and Windows Update</td>
+    </tr>
+    <tr>
+    <td>Disk Analyzer</td>
+    <td><code>:156</code></td>
+    <td>Storage use per drive and drive health where SMART is available</td>
+    </tr>
+    <tr>
+    <td>Network</td>
+    <td><code>:161</code></td>
+    <td>Live throughput read from the adapter that actually carries your traffic, selected by routed interface rather than claimed link speed (<code>Services/Monitors/NetworkMonitor.cs</code>)</td>
+    </tr>
+    <tr>
+    <td>Battery</td>
+    <td><code>:166</code></td>
+    <td>Charge, power state, and health from design capacity against full-charge capacity. Reports "Not reported" when Windows does not supply those figures (<code>Services/Monitors/BatteryMonitor.cs</code>)</td>
+    </tr>
+    <tr>
+    <td>Temperature</td>
+    <td><code>:171</code></td>
+    <td>Processor and graphics thermal sensors and fan speeds, through LibreHardwareMonitor</td>
+    </tr>
+    <tr>
+    <td>System Info</td>
+    <td><code>:176</code></td>
+    <td>Hardware and operating system inventory</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <h2>Utilities</h2>
+    <p>Header at <code>MainWindow.xaml:182</code>.</p>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Page</th>
+    <th>Line</th>
+    <th>What it does</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Large Files</td>
+    <td><code>:183</code></td>
+    <td>Finds large files. Deletion goes to the Recycle Bin and does not follow links (<code>Services/Utilities/LargeFileFinder.cs</code>)</td>
+    </tr>
+    <tr>
+    <td>Duplicate Finder</td>
+    <td><code>:188</code></td>
+    <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size (<code>Services/Utilities/DuplicateFinder.cs:161</code>, <code>:223</code>)</td>
+    </tr>
+    <tr>
+    <td>File Tools</td>
+    <td><code>:193</code></td>
+    <td>ZIP compression of a file or a folder, and GZip of a single file. See the note on formats below</td>
+    </tr>
+    <tr>
+    <td>PDF Tools</td>
+    <td><code>:198</code></td>
+    <td>Merge, split, extract pages, convert images and text to PDF, and sign</td>
+    </tr>
+    <tr>
+    <td>Image Tools</td>
+    <td><code>:203</code></td>
+    <td>Compress, convert, resize, and read image metadata</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <h2>Wireless</h2>
+    <p>Header at <code>MainWindow.xaml:209</code>.</p>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Page</th>
+    <th>Line</th>
+    <th>What it does</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Bluetooth</td>
+    <td><code>:210</code></td>
+    <td>Paired and discoverable device listing</td>
+    </tr>
+    <tr>
+    <td>WiFi Analyzer</td>
+    <td><code>:215</code></td>
+    <td>Nearby networks, channels, signal strength and security type</td>
+    </tr>
+    <tr>
+    <td>Network Mapper</td>
+    <td><code>:220</code></td>
+    <td>Devices on the local network with IP and MAC addresses</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <h2>Below the groups</h2>
+    <p>These five have no header of their own.</p>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Page</th>
+    <th>Line</th>
+    <th>What it does</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Performance</td>
+    <td><code>:228</code></td>
+    <td>Operation metrics and timing, with P95 and P99 figures and CSV export</td>
+    </tr>
+    <tr>
+    <td>History</td>
+    <td><code>:233</code></td>
+    <td>Thirty days of stored readings, charted</td>
+    </tr>
+    <tr>
+    <td>Settings</td>
+    <td><code>:238</code></td>
+    <td>See <a href="reference-settings-and-data.html">Settings and data</a></td>
+    </tr>
+    <tr>
+    <td>Donate</td>
+    <td><code>:243</code></td>
+    <td>Support the project</td>
+    </tr>
+    <tr>
+    <td>User's Guide</td>
+    <td><code>:248</code></td>
+    <td>The full guide, inside the app</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <h2>Compression formats</h2>
+    <p>File Tools offers two formats
+    (<code>src/SysMonitor.Core/Services/Utilities/IUtilities.cs:95-99</code>):</p>
+    <ul>
+    <li><strong>ZIP</strong>, for a file or a whole folder</li>
+    <li><strong>GZip</strong> (<code>.gz</code>), for a single file only. This is plain gzip, not a tar archive, so
+      it compresses one file rather than bundling several</li>
+    </ul>
+    <p>7z is not offered. It was removed in v3.0.0 because the code behind it wrote a ZIP and
+    changed the extension, so asking for 7z produced a ZIP named <code>.7z</code>.</p>
+    <h2>Keyboard input</h2>
+    <p>There are no application-wide keyboard shortcuts. The app registers no
+    <code>KeyboardAccelerator</code> anywhere. All five keys it handles are in the PDF editor
+    (<code>src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74</code>, <code>:314-321</code>, <code>:1360-1372</code>):</p>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Key</th>
+    <th>Where</th>
+    <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Delete</td>
+    <td>Editor canvas</td>
+    <td>Delete the selected annotation</td>
+    </tr>
+    <tr>
+    <td>Esc</td>
+    <td>Editor canvas</td>
+    <td>Clear the current selection</td>
+    </tr>
+    <tr>
+    <td>Enter</td>
+    <td>Search box</td>
+    <td>Run the annotation search</td>
+    </tr>
+    <tr>
+    <td>Enter</td>
+    <td>Text annotation box</td>
+    <td>Commit the text annotation</td>
+    </tr>
+    <tr>
+    <td>Esc</td>
+    <td>Text annotation box</td>
+    <td>Cancel the text annotation</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>Note that the PDF editor's search looks at annotations, not page text. The app does
+    not extract or search text inside a PDF.</p>
+    <h2>Related</h2>
+    <ul>
+    <li><a href="reference-settings-and-data.html">Settings and data</a></li>
+    <li><a href="explanation-honest-reporting.html">What v3.0.0 removed, and why</a></li>
+    </ul>
+    <div class="docnav">
+      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-pages.md">Edit this page on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p style="margin:0">
+      Copyright (c) 2024-2026 Rocky Stack. Released under the MIT License.
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to manage startup programs - STX.1 System Monitor</title>
+<meta name="description" content="Stop programs launching at sign-in with STX.1 System Monitor, reversibly, using the same mechanism Task Manager writes.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/howto-manage-startup-programs.html">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:title" content="How to manage startup programs - STX.1 System Monitor">
+<meta property="og:description" content="Stop programs launching at sign-in with STX.1 System Monitor, reversibly, using the same mechanism Task Manager writes.">
+<meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/howto-manage-startup-programs.html">
+<meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to manage startup programs - STX.1 System Monitor">
+<meta name="twitter:description" content="Stop programs launching at sign-in with STX.1 System Monitor, reversibly, using the same mechanism Task Manager writes.">
+<meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How to manage startup programs",
+  "description": "Stop programs launching at sign-in with STX.1 System Monitor, reversibly, using the same mechanism Task Manager writes.",
+  "url": "https://git-rocky-stack.github.io/sysmonitor-windows/howto-manage-startup-programs.html",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
+  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+}
+</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="./#download">Download</a>
+      <a href="./#whatsnew">What is new</a>
+      <a href="./#features">Features</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / How-to guide</p>
+    <h1>How to manage startup programs</h1>
+    <p>You will see what launches when you sign in, turn off the ones you do not want, and
+    be able to turn them back on. Changes you make here are visible to Task Manager and
+    reversible from either place.</p>
+    <h2>Prerequisites</h2>
+    <ul>
+    <li>STX.1 System Monitor v3.0.0 installed</li>
+    <li>Administrator rights, if you want to change machine-wide entries under HKLM. Your
+      own entries under HKCU do not need it</li>
+    </ul>
+    <h2>Before you start</h2>
+    <p>If you used an earlier version of STX.1 to disable startup items, read this.</p>
+    <p>Before v3.0.0, <strong>Enable</strong> logged a line and changed nothing, every item was listed as
+    enabled whatever its real state, and <strong>Disable</strong> moved the entry into a private key
+    that nothing read again. Disabling from inside the app was one-way, and Task Manager
+    knew nothing about it (<code>src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs</code>).</p>
+    <p>Entries now use <code>Explorer\StartupApproved</code>, which is the same mechanism Task Manager
+    writes (<code>StartupOptimizer.cs:12</code>, <code>:52-53</code>, <code>:61</code>). The app, Task Manager and Windows
+    now agree with each other.</p>
+    <h2>Steps</h2>
+    <ol>
+    <li>
+    <p>Open <strong>Startup</strong> from the navigation menu.</p>
+    </li>
+    <li>
+    <p>Read the list. Each entry shows where it is registered and an impact rating for how
+       much it costs you at sign-in.</p>
+    </li>
+    <li>
+    <p>Select an entry and click <strong>Disable</strong>.</p>
+    </li>
+    </ol>
+    <p>The entry stays where it is. What changes is its approval value under
+       <code>Explorer\StartupApproved</code>, which is how Windows itself records that an entry is
+       switched off.</p>
+    <ol start="4">
+    <li>To undo, select the entry and click <strong>Enable</strong> (<code>src/SysMonitor.App/Views/StartupPage.xaml:81</code>).</li>
+    </ol>
+    <h2>Verification</h2>
+    <p>Open Task Manager, go to the <strong>Startup apps</strong> tab, and find the entry. It should show
+    as Disabled there too. That agreement is the point. If the two disagree, the app has
+    a bug worth reporting.</p>
+    <h2>Troubleshooting</h2>
+    <p><strong>An entry will not change state.</strong> Machine-wide entries live under HKLM and need
+    administrator rights. Restart the app as administrator.</p>
+    <p><strong>An entry you enabled points at a program that is not installed any more.</strong> Earlier
+    versions could restore a stale copy of an entry that an older version of this app had
+    set aside, overwriting a newer one Windows already had. That is fixed
+    (<code>StartupOptimizer.cs</code>), but an entry set aside by an old version can still be stale.
+    Disable it and add the current program yourself.</p>
+    <p><strong>A program keeps coming back.</strong> Some applications rewrite their own startup entry
+    every time they run. Turn the behaviour off inside that application's own settings.</p>
+    <h2>Related</h2>
+    <ul>
+    <li><a href="reference-pages.html">Reference: pages</a></li>
+    <li><a href="howto-free-disk-space.html">Free up disk space</a></li>
+    </ul>
+    <div class="docnav">
+      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-manage-startup-programs.md">Edit this page on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p style="margin:0">
+      Copyright (c) 2024-2026 Rocky Stack. Released under the MIT License.
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

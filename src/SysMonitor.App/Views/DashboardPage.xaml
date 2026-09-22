@@ -272,7 +272,7 @@
                                             Style="{StaticResource RedButtonStyle}"
                                             IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                                 </Border>
-                                <!-- BOOST RAM with chrome bezel -->
+                                <!-- TRIM MEMORY with chrome bezel -->
                                 <Border CornerRadius="26" Padding="2">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -283,10 +283,11 @@
                                             <GradientStop Color="#505050" Offset="1.0"/>
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Button Content="BOOST RAM" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
+                                    <Button Content="TRIM MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
                                             Style="{StaticResource OutlinedButtonStyle}"
                                             Background="#000000"
-                                            IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                                            IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                            ToolTipService.ToolTip="Trim the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM."/>
                                 </Border>
                                 <!-- EXPORT with chrome bezel -->
                                 <Border CornerRadius="26" Padding="2">

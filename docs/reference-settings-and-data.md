@@ -28,18 +28,24 @@ Reset command restores exactly these values (`SettingsViewModel.cs:260-286`).
 | Memory Threshold | Percent | 80 (`:29`) | The usage level that raises a memory alert |
 
 The memory threshold raises an alert and nothing else. Nothing optimises memory on its
-own. The Dashboard's BOOST RAM button is the only thing that trims working sets,
+own. The Dashboard's TRIM MEMORY button is the only thing that trims working sets,
 and you start it (`ViewModels/DashboardViewModel.cs:298`).
 
 An "Auto-Optimize Memory" setting existed before v3.0.0 and was removed, because
 nothing read it.
 
-The button is labelled BOOST RAM (`Views/DashboardPage.xaml:286`). What it does is trim
-process working sets, which moves pages to the standby list, from which Windows can
-page them straight back. It does not free RAM in the sense of making more of it
-available, and the in-app wording was corrected in v3.0.0 to stop saying it does
-(`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs`). The button label itself
-still reads BOOST RAM.
+What the button does is trim process working sets, which moves pages to the standby
+list, from which Windows can page them straight back. It does not free RAM in the sense
+of making more of it available
+(`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91`). The result message
+has said so since v3.0.0: it reads "Trimmed N from background apps"
+(`ViewModels/DashboardViewModel.cs:311`).
+
+**In the v3.0.0 release the button reads BOOST RAM**, which was the last piece of that
+flow still claiming otherwise. It is labelled TRIM MEMORY
+(`Views/DashboardPage.xaml:286`) with a tooltip explaining the standby list, from the
+next release onwards. If your copy says BOOST RAM, you are on v3.0.0 and the button
+does the same thing either way.
 
 ## Temperature alerts
 

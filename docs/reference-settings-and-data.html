@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference: settings and data - STX.1 System Monitor</title>
+<meta name="description" content="Every setting in STX.1 System Monitor with its default value, and every location on disk the application writes to.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/reference-settings-and-data.html">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:title" content="Reference: settings and data - STX.1 System Monitor">
+<meta property="og:description" content="Every setting in STX.1 System Monitor with its default value, and every location on disk the application writes to.">
+<meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/reference-settings-and-data.html">
+<meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Reference: settings and data - STX.1 System Monitor">
+<meta name="twitter:description" content="Every setting in STX.1 System Monitor with its default value, and every location on disk the application writes to.">
+<meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Reference: settings and data",
+  "description": "Every setting in STX.1 System Monitor with its default value, and every location on disk the application writes to.",
+  "url": "https://git-rocky-stack.github.io/sysmonitor-windows/reference-settings-and-data.html",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
+  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+}
+</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="./#download">Download</a>
+      <a href="./#whatsnew">What is new</a>
+      <a href="./#features">Features</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / Reference</p>
+    <h1>Reference: settings and data</h1>
+    <p>Every setting on the Settings page of STX.1 System Monitor v3.0.0, with its default,
+    and every location the app writes to.</p>
+    <p>Defaults are read from <code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:20-52</code>. The
+    Reset command restores exactly these values (<code>SettingsViewModel.cs:260-286</code>).</p>
+    <h2>Appearance</h2>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Setting</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Effect</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Theme</td>
+    <td>Light, Dark, System</td>
+    <td>Dark (index 2)</td>
+    <td>Application colour scheme (<code>:20</code>)</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <h2>Behaviour</h2>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Setting</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Effect</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Run at Startup</td>
+    <td>On or off</td>
+    <td>Off (<code>:23</code>)</td>
+    <td>Launches the app when you sign in</td>
+    </tr>
+    <tr>
+    <td>Minimize to Tray</td>
+    <td>On or off</td>
+    <td>On (<code>:24</code>)</td>
+    <td>Closing the window keeps the app running in the notification area</td>
+    </tr>
+    <tr>
+    <td>Show Notifications</td>
+    <td>On or off</td>
+    <td>On (<code>:25</code>)</td>
+    <td>Enables alert toasts (<code>Views/SettingsPage.xaml:98</code>)</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <h2>Monitoring</h2>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Setting</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Effect</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Refresh Interval</td>
+    <td>1 to 10 seconds</td>
+    <td>2 seconds</td>
+    <td>How often readings update (<code>:28</code>, range at <code>Views/SettingsPage.xaml:122</code>)</td>
+    </tr>
+    <tr>
+    <td>Memory Threshold</td>
+    <td>Percent</td>
+    <td>80 (<code>:29</code>)</td>
+    <td>The usage level that raises a memory alert</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>The memory threshold raises an alert and nothing else. Nothing optimises memory on its
+    own. The Dashboard's TRIM MEMORY button is the only thing that trims working sets,
+    and you start it (<code>ViewModels/DashboardViewModel.cs:298</code>).</p>
+    <p>An "Auto-Optimize Memory" setting existed before v3.0.0 and was removed, because
+    nothing read it.</p>
+    <p>What the button does is trim process working sets, which moves pages to the standby
+    list, from which Windows can page them straight back. It does not free RAM in the sense
+    of making more of it available
+    (<code>src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91</code>). The result message
+    has said so since v3.0.0: it reads "Trimmed N from background apps"
+    (<code>ViewModels/DashboardViewModel.cs:311</code>).</p>
+    <p><strong>In the v3.0.0 release the button reads BOOST RAM</strong>, which was the last piece of that
+    flow still claiming otherwise. It is labelled TRIM MEMORY
+    (<code>Views/DashboardPage.xaml:286</code>) with a tooltip explaining the standby list, from the
+    next release onwards. If your copy says BOOST RAM, you are on v3.0.0 and the button
+    does the same thing either way.</p>
+    <h2>Temperature alerts</h2>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Setting</th>
+    <th>Default</th>
+    <th>Notes</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Enable temperature alerts</td>
+    <td>On (<code>:32</code>)</td>
+    <td></td>
+    </tr>
+    <tr>
+    <td>CPU warning</td>
+    <td>75 degrees C (<code>:33</code>)</td>
+    <td></td>
+    </tr>
+    <tr>
+    <td>CPU critical</td>
+    <td>90 degrees C (<code>:34</code>)</td>
+    <td></td>
+    </tr>
+    <tr>
+    <td>GPU warning</td>
+    <td>80 degrees C (<code>:35</code>)</td>
+    <td></td>
+    </tr>
+    <tr>
+    <td>GPU critical</td>
+    <td>95 degrees C (<code>:36</code>)</td>
+    <td></td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>Temperature readings need hardware sensor access. Run the app as administrator if the
+    values read as unavailable.</p>
+    <h2>Battery alerts</h2>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Setting</th>
+    <th>Default</th>
+    <th>Notes</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Enable battery alerts</td>
+    <td>On (<code>:50</code>)</td>
+    <td></td>
+    </tr>
+    <tr>
+    <td>Low battery warning</td>
+    <td>20 percent (<code>:51</code>)</td>
+    <td></td>
+    </tr>
+    <tr>
+    <td>Critical battery warning</td>
+    <td>10 percent (<code>:52</code>)</td>
+    <td></td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>A machine with no battery is handled as a machine with no battery. Before v3.0.0 the
+    alert service dereferenced a null reading, so every battery alert check threw and was
+    swallowed (<code>src/SysMonitor.Core/Services/Alerts/AlertService.cs</code>).</p>
+    <h2>Version</h2>
+    <p>The Settings page reads the version from the running assembly
+    (<code>SettingsViewModel.cs:87</code>), so it reports what is actually installed rather than a
+    number written by hand. For this release it reads 3.0.0.0.</p>
+    <h2>Where the app writes</h2>
+    <p>Everything the application stores about you is under one folder:</p>
+    <pre><code>%LocalAppData%\SysMonitor
+    </code></pre>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Path</th>
+    <th>Contents</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td><code>%LocalAppData%\SysMonitor</code></td>
+    <td>Settings, the SQLite history database, and application state (<code>src/SysMonitor.App/App.xaml.cs:72</code>)</td>
+    </tr>
+    <tr>
+    <td><code>%LocalAppData%\SysMonitor\Logs</code></td>
+    <td>Serilog output</td>
+    </tr>
+    <tr>
+    <td><code>%LocalAppData%\SysMonitor\Logs</code></td>
+    <td>Crash reports. These were written to the Desktop before v3.0.0</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>Deleting <code>%LocalAppData%\SysMonitor</code> resets the application completely. That statement
+    is true as written, which is why crash reports were moved into it.</p>
+    <p>The install folder holds the application, plus <code>LICENSE.txt</code> and
+    <code>THIRD-PARTY-NOTICES.txt</code> (<code>installer/SysMonitorSetup.iss:87-88</code>).</p>
+    <p>Exported reports go to your Documents folder
+    (<code>ViewModels/DashboardViewModel.cs:333-341</code>).</p>
+    <h2>What leaves your machine</h2>
+    <p>Nothing. Readings stay local. See <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/PRIVACY_POLICY.md">PRIVACY_POLICY.md</a>.</p>
+    <p>The app does not check for updates and cannot download a new version of itself. To
+    update, download the new release and run it.</p>
+    <h2>Clearing data</h2>
+    <p>The Settings page has a Clear All Data command
+    (<code>SettingsViewModel.cs:289</code>). It resets settings and stored data. Deleting
+    <code>%LocalAppData%\SysMonitor</code> by hand does the same thing.</p>
+    <h2>Related</h2>
+    <ul>
+    <li><a href="reference-pages.html">Pages reference</a></li>
+    <li><a href="tutorial-getting-started.html">Getting started</a></li>
+    </ul>
+    <div class="docnav">
+      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-settings-and-data.md">Edit this page on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p style="margin:0">
+      Copyright (c) 2024-2026 Rocky Stack. Released under the MIT License.
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

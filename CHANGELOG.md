@@ -9,6 +9,43 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **The memory button says what it does.** The Dashboard's middle button read `BOOST RAM`
+  while the operation trims process working sets, which moves pages to the standby list
+  where Windows can page them straight back. The result message has read "Trimmed N from
+  background apps" since 3.0.0, and the optimizer's own wording was corrected then; the
+  button label was the last part of that flow still claiming otherwise. It now reads
+  `TRIM MEMORY`, with a tooltip saying what happens to the pages.
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:286`)
+
+### Fixed
+
+- **The markdown user guide describes the app that shipped.** Five sections of
+  `FEATURES_AND_USER_GUIDE.md` were missed by the 3.0.0 documentation pass and still
+  described 2.x behaviour: the Secure File Wiper as putting files "beyond recovery",
+  with no mention of the read-back check or the solid-state limit; a Duplicate Finder
+  "name and size (fast)" matching mode that does not exist, since duplicates are decided
+  by SHA-256 of the whole file (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:221-223`);
+  registry "Undo capability via backup restore" rather than the `reg.exe` export that
+  actually happens; a Driver Updater "Outdated" status glossed as "Newer version may
+  exist", when the app only compares the driver's date against two years and never
+  consults any catalogue (`src/SysMonitor.Core/Services/Utilities/DriverUpdater.cs:99-100`,
+  `:277`); and "One-click RAM cleanup". The in-app guide
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:752`, `:760`, `:764`) was already
+  correct, and nothing reads the markdown file at runtime, so no shipped build showed
+  these claims.
+
+### Added
+
+- **A documentation site.** Nine documents under `docs/`, split tutorial / how-to /
+  reference / explanation, served from GitHub Pages at
+  https://git-rocky-stack.github.io/sysmonitor-windows/.
+
+---
+
 ## [3.0.0] - 2026-09-21
 
 A correctness release. Every item below is a behaviour that did not match what the

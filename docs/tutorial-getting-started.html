@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started with STX.1 System Monitor - STX.1 System Monitor</title>
+<meta name="description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:title" content="Getting started with STX.1 System Monitor - STX.1 System Monitor">
+<meta property="og:description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
+<meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html">
+<meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Getting started with STX.1 System Monitor - STX.1 System Monitor">
+<meta name="twitter:description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
+<meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Getting started with STX.1 System Monitor",
+  "description": "Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.",
+  "url": "https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
+  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+}
+</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="./#download">Download</a>
+      <a href="./#whatsnew">What is new</a>
+      <a href="./#features">Features</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / Tutorial</p>
+    <h1>Getting started with STX.1 System Monitor</h1>
+    <p>In about ten minutes you will install STX.1, read your machine's health score, clean
+    up disk space you can actually spare, and save a diagnostic report you can send to
+    someone. By the end you will know where the app keeps its data and how to undo
+    anything it did.</p>
+    <h2>What you will need</h2>
+    <ul>
+    <li>A PC running Windows 10 version 2004 (build 19041) or later, or Windows 11
+      (<code>src/SysMonitor.App/SysMonitor.App.csproj:5</code>)</li>
+    <li>An x64 processor. The released installer is x64 only
+      (<code>installer/SysMonitorSetup.iss:57</code>)</li>
+    <li>About 300 MB of free disk space</li>
+    <li>An administrator account. Windows will prompt you during installation</li>
+    </ul>
+    <p>You do not need to install .NET or any other runtime first. The release is
+    self-contained and carries the .NET 8 and Windows App SDK runtimes inside it
+    (<code>src/SysMonitor.App/SysMonitor.App.csproj:12</code>).</p>
+    <h2>Step 1: Install it</h2>
+    <p>Download <code>STX1-SystemMonitor-Setup-3.0.0.exe</code> from the
+    <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases">releases page</a>
+    and run it.</p>
+    <p>The installer shows you the MIT licence, which is the whole of the terms. There is no
+    separate end-user agreement. Accept it and continue through the wizard.</p>
+    <p>The build is not code signed, so Windows SmartScreen will warn you that the publisher
+    is unknown. If you want to check what you downloaded before running it, compare its
+    SHA-256 against the checksum published on the release page:</p>
+    <pre><code class="language-powershell">Get-FileHash .\STX1-SystemMonitor-Setup-3.0.0.exe -Algorithm SHA256
+    </code></pre>
+    <p>When setup finishes, the app is installed and <code>LICENSE.txt</code> and
+    <code>THIRD-PARTY-NOTICES.txt</code> sit next to the executable in the install folder
+    (<code>installer/SysMonitorSetup.iss:87-88</code>).</p>
+    <h2>Step 2: Read your health score</h2>
+    <p>Launch STX.1. It opens on the Dashboard, and the first thing you see is a health
+    score out of 100 (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:169-170</code>).</p>
+    <p>The score maps to a word (<code>DashboardViewModel.cs:242-246</code>):</p>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Score</th>
+    <th>Reads as</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>90 and above</td>
+    <td>Excellent</td>
+    </tr>
+    <tr>
+    <td>75 to 89</td>
+    <td>Good</td>
+    </tr>
+    <tr>
+    <td>60 to 74</td>
+    <td>Fair</td>
+    </tr>
+    <tr>
+    <td>40 to 59</td>
+    <td>Poor</td>
+    </tr>
+    <tr>
+    <td>Below 40</td>
+    <td>Critical</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>Around it are live cards for processor use, memory, disk, network, temperature and
+    uptime. If a card says "Not reported", that is the truth about your hardware, not an
+    error. Battery health in particular is computed from design capacity against
+    full-charge capacity, and many machines do not publish those figures to Windows at
+    all (<code>src/SysMonitor.Core/Services/Monitors/BatteryMonitor.cs</code>).</p>
+    <p>Run the app as administrator if temperature readings are missing. Hardware sensors
+    need it.</p>
+    <h2>Step 3: Reclaim some disk space</h2>
+    <p>On the Dashboard, click <strong>QUICK CLEAN</strong>
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:273</code>).</p>
+    <p>It removes temporary files and browser cache, and tells you how much it freed. This
+    is the safe subset. Nothing it touches is a document, a download or a setting.</p>
+    <p>If you want to choose exactly what goes, use the <strong>Directory Cleaner</strong> page instead
+    and read <a href="howto-free-disk-space.html">Free up disk space</a>. Quick Clean is the version
+    that does not ask questions.</p>
+    <h2>Step 4: Save a report you can send</h2>
+    <p>Still on the Dashboard, click <strong>EXPORT</strong>
+    (<code>DashboardViewModel.cs:325</code>).</p>
+    <p>The app writes a plain-text diagnostic summary into your Documents folder and tells
+    you the file name (<code>DashboardViewModel.cs:333-341</code>). It contains your health score,
+    hardware inventory and current readings. Open it before you send it to anyone, so you
+    know what is in it.</p>
+    <h2>What you built</h2>
+    <p>You now have STX.1 installed, you have read a health score you can interpret, you have
+    freed disk space without guessing, and you have a report on disk.</p>
+    <p>Everything the app stores about you lives in one folder:</p>
+    <pre><code>%LocalAppData%\SysMonitor
+    </code></pre>
+    <p>Logs are under <code>Logs</code> inside it (<code>src/SysMonitor.App/App.xaml.cs:72</code>). Deleting that
+    folder resets the application completely. Nothing is sent anywhere: readings stay on
+    your machine.</p>
+    <h2>Where to go next</h2>
+    <ul>
+    <li><a href="howto-free-disk-space.html">Free up disk space</a>, for the version with the controls</li>
+    <li><a href="howto-manage-startup-programs.html">Manage startup programs</a>, to make sign-in faster</li>
+    <li><a href="howto-back-up-and-restore.html">Back up and restore</a>, before you change anything big</li>
+    <li><a href="reference-pages.html">Pages reference</a>, for what every one of the 34 pages does</li>
+    <li><a href="explanation-honest-reporting.html">What v3.0.0 removed, and why</a>, if you used an
+      earlier version and something you relied on is gone</li>
+    </ul>
+    <div class="docnav">
+      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/tutorial-getting-started.md">Edit this page on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p style="margin:0">
+      Copyright (c) 2024-2026 Rocky Stack. Released under the MIT License.
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

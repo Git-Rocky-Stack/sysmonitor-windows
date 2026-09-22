@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to securely wipe files - STX.1 System Monitor</title>
+<meta name="description" content="Overwrite a file's contents with STX.1 System Monitor, choose a wipe method, and understand what wiping does and does not guarantee on a solid-state drive.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/howto-securely-wipe-files.html">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:title" content="How to securely wipe files - STX.1 System Monitor">
+<meta property="og:description" content="Overwrite a file's contents with STX.1 System Monitor, choose a wipe method, and understand what wiping does and does not guarantee on a solid-state drive.">
+<meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/howto-securely-wipe-files.html">
+<meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to securely wipe files - STX.1 System Monitor">
+<meta name="twitter:description" content="Overwrite a file's contents with STX.1 System Monitor, choose a wipe method, and understand what wiping does and does not guarantee on a solid-state drive.">
+<meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How to securely wipe files",
+  "description": "Overwrite a file's contents with STX.1 System Monitor, choose a wipe method, and understand what wiping does and does not guarantee on a solid-state drive.",
+  "url": "https://git-rocky-stack.github.io/sysmonitor-windows/howto-securely-wipe-files.html",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
+  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+}
+</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="./#download">Download</a>
+      <a href="./#whatsnew">What is new</a>
+      <a href="./#features">Features</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / How-to guide</p>
+    <h1>How to securely wipe files</h1>
+    <p>You will overwrite a file's contents so the old data is gone from the disk, choose how
+    thoroughly, and get a straight answer about whether the app could confirm it.</p>
+    <p>Read <a href="explanation-drive-wiper-and-ssds.html">The Drive Wiper and solid-state drives</a>
+    first if the files are on an SSD or an NVMe drive. The short version is at the bottom
+    of this page, but the explanation matters.</p>
+    <h2>Prerequisites</h2>
+    <ul>
+    <li>STX.1 System Monitor v3.0.0 installed</li>
+    <li>The files you intend to destroy, and a second copy of anything you might want back.
+      This operation is not reversible by design</li>
+    </ul>
+    <h2>Steps</h2>
+    <ol>
+    <li>
+    <p>Open <strong>Drive Wiper</strong> from the navigation menu.</p>
+    </li>
+    <li>
+    <p>Add the files or the folder you want to destroy.</p>
+    </li>
+    </ol>
+    <p>Directory wipes stay inside the folder you chose. They do not follow junctions or
+       symbolic links out of it. Before v3.0.0 they did, which meant files outside your
+       selection were overwritten and deleted
+       (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs</code>).</p>
+    <ol start="3">
+    <li>Choose a method (<code>DriveWiper.cs:27-32</code>, pass counts at <code>:498-505</code>):</li>
+    </ol>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Method</th>
+    <th>Passes</th>
+    <th>Use it when</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Single pass</td>
+    <td>1</td>
+    <td>The file is merely private, and you want it gone quickly</td>
+    </tr>
+    <tr>
+    <td>DoD 3-pass</td>
+    <td>3</td>
+    <td>A reasonable default for sensitive personal data</td>
+    </tr>
+    <tr>
+    <td>DoD 7-pass</td>
+    <td>7</td>
+    <td>Data you would be in trouble over</td>
+    </tr>
+    <tr>
+    <td>Gutmann</td>
+    <td>35</td>
+    <td>You have a specific reason and time to spare</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>The Gutmann passes now follow the table in Peter Gutmann's 1996 paper
+       (<code>DriveWiper.cs:561-566</code>). Before v3.0.0 the middle passes were filled with
+       <code>(pass * 17) % 256</code>, which is not that method.</p>
+    <ol start="4">
+    <li>Start the wipe and let it finish.</li>
+    </ol>
+    <h2>Verification</h2>
+    <p>This is the part that changed in v3.0.0, and it is the reason to trust the result.</p>
+    <p>Every wipe reads its last pass back off the disk and compares it against the pattern
+    that was supposed to be written (<code>DriveWiper.cs:406</code>, <code>:589</code>). A file that cannot be
+    confirmed is reported as <strong>unconfirmed</strong> rather than counted as wiped.</p>
+    <p>So read the result. "Wiped" means the app wrote the patterns and then read the final
+    one back and it matched. "Unconfirmed" means it could not prove that, and you should
+    treat the data as possibly still present.</p>
+    <p>Before v3.0.0 no pass was ever read back, and every wipe reported success.</p>
+    <h2>What this does not guarantee</h2>
+    <p>On a solid-state drive, overwriting a file cannot promise that the flash cells holding
+    the old contents were written over. The drive's controller decides where writes
+    physically land, and it generally does not put them back on the same cells. The app
+    detects this and says so on the page when your selection sits on an SSD
+    (<code>DriveWiper.cs:20</code>, <code>:309</code>, <code>:334</code>).</p>
+    <p>That warning is not boilerplate. If you need a guarantee on an SSD, the options are
+    full-disk encryption from before the data existed, or the drive's own secure-erase
+    command, or physical destruction. Overwriting one file is not one of them.</p>
+    <h2>Troubleshooting</h2>
+    <p><strong>The result says unconfirmed.</strong> The read-back did not match. Common causes are a file
+    held open by another program, a drive that is failing, or a filesystem that moved the
+    file. Do not assume the data is gone.</p>
+    <p><strong>The file is still visible afterwards.</strong> Wiping overwrites contents and then removes
+    the entry. If the name is still there, the removal failed. Check the log at
+    <code>%LocalAppData%\SysMonitor\Logs</code>.</p>
+    <p><strong>It is taking a very long time.</strong> Gutmann writes your file 35 times. On a large file
+    on a mechanical disk, hours is normal. Single pass is 35 times less work.</p>
+    <h2>Related</h2>
+    <ul>
+    <li><a href="explanation-drive-wiper-and-ssds.html">The Drive Wiper and solid-state drives</a></li>
+    <li><a href="howto-back-up-and-restore.html">Back up and restore</a>, for the opposite problem</li>
+    <li><a href="reference-pages.html">Reference: pages</a></li>
+    </ul>
+    <div class="docnav">
+      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-securely-wipe-files.md">Edit this page on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p style="margin:0">
+      Copyright (c) 2024-2026 Rocky Stack. Released under the MIT License.
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

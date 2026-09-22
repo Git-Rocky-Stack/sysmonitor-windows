@@ -20,15 +20,15 @@ Auto-Optimize Memory setting, and the Performance page frame rate card.
 ## Documentation
 
 - [Public page](https://git-rocky-stack.github.io/sysmonitor-windows/): downloads, checksums, feature overview, requirements
-- [Getting started](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/tutorial-getting-started.md): tutorial from install to first report
-- [Free up disk space](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-free-disk-space.md): how-to guide
-- [Securely wipe files](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-securely-wipe-files.md): how-to guide, including what wiping cannot guarantee
-- [Back up and restore](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-back-up-and-restore.md): how-to guide covering encryption and verification
-- [Manage startup programs](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-manage-startup-programs.md): how-to guide
-- [Pages reference](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-pages.md): all 34 navigation entries
-- [Settings and data reference](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-settings-and-data.md): every setting with its default, and every path written
-- [What 3.0.0 removed, and why](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/explanation-honest-reporting.md): design rationale
-- [The Drive Wiper and SSDs](https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/explanation-drive-wiper-and-ssds.md): why overwriting cannot promise unrecoverability on flash
+- [Getting started](https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html): tutorial from install to first report
+- [Free up disk space](https://git-rocky-stack.github.io/sysmonitor-windows/howto-free-disk-space.html): how-to guide
+- [Securely wipe files](https://git-rocky-stack.github.io/sysmonitor-windows/howto-securely-wipe-files.html): how-to guide, including what wiping cannot guarantee
+- [Back up and restore](https://git-rocky-stack.github.io/sysmonitor-windows/howto-back-up-and-restore.html): how-to guide covering encryption and verification
+- [Manage startup programs](https://git-rocky-stack.github.io/sysmonitor-windows/howto-manage-startup-programs.html): how-to guide
+- [Pages reference](https://git-rocky-stack.github.io/sysmonitor-windows/reference-pages.html): all 34 navigation entries
+- [Settings and data reference](https://git-rocky-stack.github.io/sysmonitor-windows/reference-settings-and-data.html): every setting with its default, and every path written
+- [What 3.0.0 removed, and why](https://git-rocky-stack.github.io/sysmonitor-windows/explanation-honest-reporting.html): design rationale
+- [The Drive Wiper and SSDs](https://git-rocky-stack.github.io/sysmonitor-windows/explanation-drive-wiper-and-ssds.html): why overwriting cannot promise unrecoverability on flash
 
 ## Project
 

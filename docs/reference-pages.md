@@ -12,7 +12,7 @@ header of their own. They are listed here in the order the menu shows them.
 
 | Page | Line | What it does |
 |---|---|---|
-| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, BOOST RAM and EXPORT (`ViewModels/DashboardViewModel.cs:273`, `:298`, `:325`) |
+| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (`ViewModels/DashboardViewModel.cs:273`, `:298`, `:325`). In the v3.0.0 release the middle button reads BOOST RAM; it was renamed after that release, see [Settings and data](reference-settings-and-data.md) |
 | CPU Monitor | `:78` | Processor usage, core counts, clock speeds, per-core figures where the hardware reports them |
 | GPU Monitor | `:83` | Graphics adapter load, memory and temperature |
 | Memory Monitor | `:88` | RAM in use and available, and working-set trimming |

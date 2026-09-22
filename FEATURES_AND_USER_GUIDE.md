@@ -123,7 +123,9 @@ RAM usage and management:
 - **Total Memory** - Installed RAM capacity
 - **Used/Available** - Current memory allocation
 - **Usage Percentage** - Memory utilization level
-- **Memory Optimization** - One-click RAM cleanup
+- **Trim Memory** - Trims the working sets of background apps. Windows moves those pages
+  to the standby list and can page them straight back, so this does not free RAM
+  (`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91`)
 
 ### Disk Monitor
 
@@ -218,15 +220,23 @@ Fix Windows Registry issues:
 - Invalid COM/ActiveX entries
 
 **Safety Features:**
-- Automatic backup before cleaning
-- Selective cleaning options
-- Undo capability via backup restore
+- Every key a selected fix will modify is exported with `reg.exe` before anything is
+  cleaned, and a failed export stops the clean
+  (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:913-915`, `:940`, `:973`)
+- Each key is exported on its own, because `reg.exe` exits 0 while silently omitting
+  subkeys it cannot read, so exporting a parent would hide a failure
+- Selective cleaning: only the issues you tick are fixed
+- To undo, import the exported `.reg` file
+
+Before v3.0.0 the backup wrote a `.reg` file containing only comment lines, for three
+fixed HKCU keys, while the cleaner deletes HKCU and HKLM values and whole subkey trees.
+There was no restore code at all.
 
 **How to Use:**
 1. Click **Scan** to analyze the registry
 2. Review detected issues
 3. Click **Fix Selected** to repair issues
-4. Backup is automatically created
+4. The backup is written before the first change. If the export fails, nothing is cleaned
 
 ### Startup Manager
 
@@ -326,28 +336,51 @@ Clean browser data across all installed browsers:
 
 ### Secure File Wiper
 
-Permanently delete sensitive files beyond recovery:
+Overwrite a file's contents so the old data is gone from the disk. Read the limits
+below before relying on it.
 
-**Wipe Methods:**
+**Wipe Methods** (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:27-32`, pass
+counts at `:498-505`):
 
-| Method | Passes | Security | Speed |
-|--------|--------|----------|-------|
-| Quick (1-Pass) | 1 | Basic | Fast |
-| DoD 3-Pass | 3 | Standard | Medium |
-| DoD 7-Pass | 7 | High | Slow |
-| Gutmann 35-Pass | 35 | Maximum | Very Slow |
+| Method | Passes | Speed |
+|--------|--------|-------|
+| Quick (1-Pass) | 1 | Fast |
+| DoD 3-Pass | 3 | Medium |
+| DoD 7-Pass | 7 | Slow |
+| Gutmann 35-Pass | 35 | Very Slow |
+
+The Gutmann passes follow the table in Peter Gutmann's 1996 paper
+(`DriveWiper.cs:561-566`). Before v3.0.0 the middle passes were filled with
+`(pass * 17) % 256`, which is not that method.
 
 **How It Works:**
-- Overwrites file data with patterns
-- Multiple passes prevent recovery
-- Works on files and folders
-- Progress indicator shows status
+- Overwrites file data with the pattern set you chose
+- Every wipe reads its last pass back off the disk and compares it against the pattern
+  that should be there (`DriveWiper.cs:406`, `:589`). A file that cannot be confirmed is
+  reported as **unconfirmed** rather than counted as wiped
+- Directory wipes stay inside the folder you chose, and do not follow junctions or
+  symbolic links out of it
+- Works on files and folders, with a progress indicator
+
+**What it does not guarantee:**
+
+On a solid-state drive, overwriting a file cannot promise the flash cells holding the
+old contents were written over. The drive's controller decides where writes physically
+land, and wear levelling actively avoids reusing the cells your file was on. The page
+says so when your selection sits on an SSD (`DriveWiper.cs:20`, `:309`, `:334`).
+
+If you need a guarantee on an SSD, the options are full-disk encryption applied before
+the data existed, the drive's own secure-erase command, or physical destruction.
+Overwriting a single file is not one of them. See
+[the explanation](docs/explanation-drive-wiper-and-ssds.md).
 
 **How to Use:**
 1. Click **Add Files** or **Add Folder**
 2. Select wipe method based on sensitivity
-3. Click **Wipe** to permanently destroy
-4. Confirm the action (cannot be undone)
+3. Click **Wipe**
+4. Confirm the action. This is not reversible
+5. Read the result. "Wiped" means the read-back matched. "Unconfirmed" means it did not,
+   and you should treat the data as possibly still present
 
 ---
 
@@ -397,18 +430,22 @@ Scan and manage system drivers:
 **Features:**
 - Full driver inventory scan
 - Problem driver detection
-- Outdated driver identification
+- Drivers older than two years flagged by date
 - Unsigned driver warnings
 - Device Manager integration
 - Windows Update access
 
 **Driver Status:**
-| Status | Icon | Description |
-|--------|------|-------------|
-| Up to Date | Green | Driver is current |
-| Outdated | Yellow | Newer version may exist |
-| Problem | Red | Driver has issues |
+| Status | Colour | Description |
+|--------|--------|-------------|
+| Up to Date | Green | Driver date is within the last two years |
+| Outdated | Yellow | Driver date is more than two years old (`src/SysMonitor.Core/Services/Utilities/DriverUpdater.cs:99-100`) |
+| Problem | Red | Windows reports a problem with the device |
 | Unsigned | Orange | Not digitally signed |
+
+The app does not compare your drivers against any vendor catalogue, so **Outdated means
+the driver is old, not that a newer one exists**. Use Windows Update or the device
+maker's own tool to find out whether there is a newer one.
 
 **How to Use:**
 1. Click **Scan Drivers** to inventory
@@ -494,19 +531,28 @@ File compression and archiving:
 Find and remove duplicate files:
 
 **Features:**
-- Scan by file hash (accurate matching)
-- Scan by name and size (fast)
-- Filter by file type
-- Filter by minimum size
+- Duplicates are decided by SHA-256 of the whole file
+  (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:221-223`). Files are
+  grouped by size first, but that is only a pre-filter: nothing is called a duplicate
+  without a full-file hash match
+- One physical file is counted once, so a file reached by two paths is not reported as
+  a pair with itself
+- The oldest copy is kept (`DuplicateFinder.cs:161`)
+- Filter by file type and by minimum size
 - Preview duplicates before deletion
+- Deletion goes to the Recycle Bin, after a confirmation naming the count and size
+  (`DuplicateFinder.cs:16-23`, `:186`)
+
+There is no faster name-and-size mode. Before v3.0.0, files over 10 MB were judged by
+their first megabyte, last megabyte and length, which matches for every file a program
+writes with the same header, footer and size, and those were offered up for deletion.
 
 **How to Use:**
 1. Select folder(s) to scan
-2. Choose matching method
-3. Click **Scan**
-4. Review duplicate groups
-5. Select duplicates to remove (keeps one copy)
-6. Click **Delete Selected**
+2. Click **Scan**
+3. Review duplicate groups
+4. Select duplicates to remove (the oldest copy is kept)
+5. Click **Delete Selected** and confirm
 
 ### Large Files Finder
 

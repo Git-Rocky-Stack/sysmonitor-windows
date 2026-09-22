@@ -33,7 +33,7 @@ sit below the groups listed here.
 ### Monitoring
 | Page | What it does |
 |---|---|
-| **Dashboard** | Health score, quick-access cards, and one-click Quick Clean / Boost RAM / Export |
+| **Dashboard** | Health score, quick-access cards, and one-click Quick Clean / Trim Memory / Export |
 | **CPU Monitor** | Per-core usage, clocks and processor details |
 | **GPU Monitor** | Graphics adapter load, memory and temperature |
 | **Memory Monitor** | RAM usage, with working-set trimming |

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What v3.0.0 removed, and why - STX.1 System Monitor</title>
+<meta name="description" content="Why STX.1 System Monitor 3.0.0 removed four working features rather than rewording them, and the trade-offs that came with that decision.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/explanation-honest-reporting.html">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:title" content="What v3.0.0 removed, and why - STX.1 System Monitor">
+<meta property="og:description" content="Why STX.1 System Monitor 3.0.0 removed four working features rather than rewording them, and the trade-offs that came with that decision.">
+<meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/explanation-honest-reporting.html">
+<meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What v3.0.0 removed, and why - STX.1 System Monitor">
+<meta name="twitter:description" content="Why STX.1 System Monitor 3.0.0 removed four working features rather than rewording them, and the trade-offs that came with that decision.">
+<meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "What v3.0.0 removed, and why",
+  "description": "Why STX.1 System Monitor 3.0.0 removed four working features rather than rewording them, and the trade-offs that came with that decision.",
+  "url": "https://git-rocky-stack.github.io/sysmonitor-windows/explanation-honest-reporting.html",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
+  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+}
+</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="./#download">Download</a>
+      <a href="./#whatsnew">What is new</a>
+      <a href="./#features">Features</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / Explanation</p>
+    <h1>What v3.0.0 removed, and why</h1>
+    <p>If you used STX.1 before version 3.0.0 and something you relied on has disappeared,
+    this page explains the reasoning. It is not a list of features cut for size. Every one
+    of them was a thing the app said it did and did not do.</p>
+    <h2>The problem</h2>
+    <p>A system utility is trusted with irreversible operations. It deletes files, edits the
+    registry, overwrites disks and terminates processes. The only thing a user has to go
+    on is what the application reports back.</p>
+    <p>An audit of the 2.x line found a consistent shape of defect: the operation completed,
+    the interface said it succeeded, and the underlying thing had not happened. Examples
+    that were all live in 2.2.2:</p>
+    <ul>
+    <li>The Drive Wiper's Gutmann 35-pass option filled its middle passes with a formula
+      that is not that method, and no pass was ever read back. Every wipe reported success
+      (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs</code>).</li>
+    <li>Registry backup wrote a <code>.reg</code> file containing only comment lines, for three fixed
+      keys, while the cleaner deleted values and whole subkey trees across two hives.
+      There was no restore code at all
+      (<code>src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs</code>).</li>
+    <li>Every backup made with Encrypt Backup was unrestorable, because no decryption code
+      existed (<code>src/SysMonitor.Core/Services/Backup/BackupEncryption.cs</code>).</li>
+    <li>Scheduled cleaning ran the app with a switch nothing read, so at every scheduled time
+      Windows opened the full interface as administrator and cleaned nothing
+      (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs</code>).</li>
+    <li>PDF Redact drew a black rectangle over text and imported the page content unchanged,
+      so the text underneath stayed in the file and could be selected and copied
+      (<code>src/SysMonitor.Core/Services/Utilities/PdfEditor.cs</code>).</li>
+    </ul>
+    <p>A user cannot detect any of these from the interface. That is what makes them worse
+    than crashes.</p>
+    <h2>The approach</h2>
+    <p>Every such defect got one of two treatments.</p>
+    <p><strong>Fix it, if the feature can do what its label says.</strong> Drive Wiper passes now follow
+    the 1996 paper's table and every wipe reads its last pass back and compares. Registry
+    cleaning exports every key a selected fix will touch with <code>reg.exe</code>, and a failed
+    export stops the clean. Encrypted backups got a real format, and the legacy one stayed
+    readable so old backups are not stranded.</p>
+    <p><strong>Remove it, if it cannot.</strong> Rewording a feature so the label matches a weaker reality
+    leaves the user with a control that looks useful and is not. Four were removed:</p>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Removed</th>
+    <th>What it actually was</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>RAM Cache</td>
+    <td>A folder on disk plus a <code>TEMP</code> variable set inside this one process that no other program could see. Its own code switched itself off on the next start. Doing it for real needs a RAM-disk driver</td>
+    </tr>
+    <tr>
+    <td>7z compression</td>
+    <td>Wrote a ZIP and changed the extension. Asking for 7z gave you a ZIP named <code>.7z</code></td>
+    </tr>
+    <tr>
+    <td>Auto-Optimize Memory setting</td>
+    <td>Nothing read it. The related threshold is now described as what it drives, which is a memory alert</td>
+    </tr>
+    <tr>
+    <td>Performance page frame-rate card</td>
+    <td>Displayed a hard-coded 60 that nothing set, next to memory and garbage-collection figures that are measured</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <p>Removing four user-visible features is what makes this a major version rather than a
+    patch.</p>
+    <h2>Trade-offs</h2>
+    <p>This was not free.</p>
+    <p><strong>Users lose controls they were using.</strong> Someone who had a cleaning schedule set up had
+    a schedule that did nothing, but they also had the belief that their machine was being
+    cleaned. Telling them the truth is worse in the short term than leaving it alone.</p>
+    <p><strong>The app now says no more often.</strong> Battery health reads "Not reported" on machines
+    where Windows does not publish design capacity. The FPS overlay reads <code>NO FPS SENSOR</code>
+    where LibreHardwareMonitor has no frame-rate sensor to read, which is most hardware.
+    A wipe can come back unconfirmed. These are less satisfying than a number, and they
+    are the honest answer.</p>
+    <p><strong>The feature count went down.</strong> For a product compared on feature lists, that is a
+    commercial cost. It was accepted.</p>
+    <h2>What this means for you as a user</h2>
+    <p>Treat the app's reports as load-bearing. When the Drive Wiper says a file is wiped, it
+    means it wrote the patterns and read the last one back and it matched. When it says
+    unconfirmed, it could not prove that and you should act accordingly.</p>
+    <p>Where the app cannot guarantee something, it now tells you, rather than staying quiet.
+    The clearest example is
+    <a href="explanation-drive-wiper-and-ssds.html">the Drive Wiper on solid-state drives</a>.</p>
+    <h2>Where to read the detail</h2>
+    <p><a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/CHANGELOG.md">CHANGELOG.md</a> lists every behaviour change in v3.0.0 with the file it
+    lives in. It is long, and it is specific on purpose.</p>
+    <h2>Related</h2>
+    <ul>
+    <li><a href="explanation-drive-wiper-and-ssds.html">The Drive Wiper and solid-state drives</a></li>
+    <li><a href="howto-back-up-and-restore.html">Back up and restore</a>, if you have pre-3.0.0 backups</li>
+    <li><a href="howto-manage-startup-programs.html">Manage startup programs</a>, if you disabled items in an earlier version</li>
+    </ul>
+    <div class="docnav">
+      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/explanation-honest-reporting.md">Edit this page on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p style="margin:0">
+      Copyright (c) 2024-2026 Rocky Stack. Released under the MIT License.
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

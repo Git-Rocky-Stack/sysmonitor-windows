@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to back up and restore files - STX.1 System Monitor</title>
+<meta name="description" content="Create an encrypted, verified backup with STX.1 System Monitor and restore files from it. Covers AES-256 encryption and what changed in version 3.0.0.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/howto-back-up-and-restore.html">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:title" content="How to back up and restore files - STX.1 System Monitor">
+<meta property="og:description" content="Create an encrypted, verified backup with STX.1 System Monitor and restore files from it. Covers AES-256 encryption and what changed in version 3.0.0.">
+<meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/howto-back-up-and-restore.html">
+<meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to back up and restore files - STX.1 System Monitor">
+<meta name="twitter:description" content="Create an encrypted, verified backup with STX.1 System Monitor and restore files from it. Covers AES-256 encryption and what changed in version 3.0.0.">
+<meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How to back up and restore files",
+  "description": "Create an encrypted, verified backup with STX.1 System Monitor and restore files from it. Covers AES-256 encryption and what changed in version 3.0.0.",
+  "url": "https://git-rocky-stack.github.io/sysmonitor-windows/howto-back-up-and-restore.html",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
+  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+}
+</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="./#download">Download</a>
+      <a href="./#whatsnew">What is new</a>
+      <a href="./#features">Features</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / How-to guide</p>
+    <h1>How to back up and restore files</h1>
+    <p>You will create a backup, optionally encrypt it with a password, confirm the backup
+    itself is intact, and restore files from it.</p>
+    <h2>Prerequisites</h2>
+    <ul>
+    <li>STX.1 System Monitor v3.0.0 installed</li>
+    <li>Somewhere to write the backup with enough free space</li>
+    <li>If you encrypt: a password you will not lose. There is no recovery path</li>
+    </ul>
+    <h2>Before you start, if you have older backups</h2>
+    <p>Two things changed in v3.0.0 that affect backups made by earlier versions.</p>
+    <p><strong>Encrypted backups made before v3.0.0 cannot be restored by those versions</strong>, because
+    no decryption code existed at all. Every backup made with "Encrypt Backup" was
+    unrestorable. v3.0.0 can still read the legacy format
+    (<code>src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:26</code>), so restore old ones
+    with this version.</p>
+    <p><strong>Backup verification used to check the wrong files.</strong> It hashed the live source files
+    instead of the backup, so a corrupted backup verified clean and a healthy one failed
+    once you edited the originals (<code>src/SysMonitor.Core/Services/Backup/BackupService.cs</code>).
+    Re-verify anything you are relying on.</p>
+    <h2>Steps</h2>
+    <ol>
+    <li>
+    <p>Open <strong>Backup Manager</strong> from the navigation menu and start a new backup.</p>
+    </li>
+    <li>
+    <p>Choose a type:</p>
+    </li>
+    </ol>
+    <div class="tablewrap"><table>
+    <thead>
+    <tr>
+    <th>Type</th>
+    <th>Copies</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Full</td>
+    <td>Everything you selected</td>
+    </tr>
+    <tr>
+    <td>Incremental</td>
+    <td>Only what changed since the last backup of any kind</td>
+    </tr>
+    <tr>
+    <td>Differential</td>
+    <td>Everything changed since the last full backup</td>
+    </tr>
+    </tbody>
+    </table></div>
+    <ol start="3">
+    <li>
+    <p>Select the folders to back up, then the destination.</p>
+    </li>
+    <li>
+    <p>Set the options.</p>
+    </li>
+    </ol>
+    <p>If you tick <strong>Encrypt Backup</strong>, the format is PBKDF2-HMAC-SHA256 with 600,000
+       iterations, AES-256-CBC, and encrypt-then-MAC with an HMAC-SHA256 tag that is
+       verified before any plaintext is written
+       (<code>BackupEncryption.cs:20-22</code>, <code>:31</code>, <code>:218</code>). In practice that means a tampered
+       backup fails to restore rather than quietly handing you altered files.</p>
+    <p>Compression can be None, Normal or Maximum. With None the backup is a folder rather
+       than a single file, which is fine and is no longer a failure case
+       (<code>BackupService.cs</code>).</p>
+    <ol start="5">
+    <li>Run it and wait for the summary.</li>
+    </ol>
+    <h2>Verification</h2>
+    <p>Use the <strong>Verify</strong> command on the completed backup. It hashes the backup and checks it
+    against what was recorded at the time it was written.</p>
+    <p>This is worth doing now rather than on the day you need it, because until v3.0.0 it
+    was checking the wrong thing.</p>
+    <h2>Restoring</h2>
+    <p>Select a backup from the history and restore it.</p>
+    <p>Restore decides where files go, rather than trusting the path recorded inside the
+    archive. Destinations are planned up front and confined to the folders the backup was
+    taken from, and anything refused is reported to you rather than silently skipped
+    (<code>BackupService.cs</code>).</p>
+    <p>That matters because before v3.0.0 an edited backup file could write its contents
+    anywhere you could write, including your Startup folder.</p>
+    <h2>Troubleshooting</h2>
+    <p><strong>The password does not work.</strong> There is no recovery. The key is derived from your
+    password with 600,000 PBKDF2 iterations, which is the point.</p>
+    <p><strong>Restore reported refused entries.</strong> Those files pointed outside the folders the
+    backup covered, so they were not written. The report names them. This is the safety
+    check doing its job.</p>
+    <p><strong>Verification fails on a backup that used to pass.</strong> If the backup was made before
+    v3.0.0, the original pass may have been meaningless, because verification hashed the
+    source files. Make a fresh backup.</p>
+    <h2>Related</h2>
+    <ul>
+    <li><a href="reference-pages.html">Reference: pages</a></li>
+    <li><a href="howto-securely-wipe-files.html">Securely wipe files</a></li>
+    <li><a href="explanation-honest-reporting.html">What v3.0.0 removed, and why</a></li>
+    </ul>
+    <div class="docnav">
+      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/howto-back-up-and-restore.md">Edit this page on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p style="margin:0">
+      Copyright (c) 2024-2026 Rocky Stack. Released under the MIT License.
+      <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
