@@ -6,7 +6,7 @@ reversible from either place.
 
 ## Prerequisites
 
-- STX.1 System Monitor v3.0.0 installed
+- STX.1 System Monitor v3.0.0 or later installed
 - Administrator rights, if you want to change machine-wide entries under HKLM. Your
   own entries under HKCU do not need it
 

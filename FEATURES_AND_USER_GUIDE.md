@@ -2,7 +2,7 @@
 
 **Strategic. Excellence. Engineered.**
 
-Version 3.0.0 | Windows Desktop Application | Built with WinUI 3 & .NET 8
+Version 3.0.1 | Windows Desktop Application | Built with WinUI 3 & .NET 8
 
 ---
 
@@ -45,7 +45,7 @@ STX.1 System Monitor is a comprehensive Windows system utility that provides rea
   (`src/SysMonitor.App/SysMonitor.App.csproj:5`, `src/SysMonitor.App/Package.appxmanifest:23`)
 - **Architecture:** x64. The projects also build for x86 and ARM64, but the released
   installer is x64 only (`Build-Release.ps1:81-82`, `installer/SysMonitorSetup.iss:57`)
-- **Runtime:** none to install — the release is self-contained and carries the .NET 8 and
+- **Runtime:** none to install - the release is self-contained and carries the .NET 8 and
   Windows App SDK runtimes with it (`src/SysMonitor.App/SysMonitor.App.csproj:12`)
 - **RAM:** 4 GB minimum (8 GB recommended)
 - **Disk Space:** 300 MB for installation
@@ -90,9 +90,9 @@ A real-time score (0-100) indicating overall system health:
 
 | Action | Description |
 |--------|-------------|
-| **Quick Clean** | Instantly removes temporary files and browser cache |
-| **Optimize Memory** | Frees up RAM by clearing unused memory |
-| **Export Report** | Generates a detailed system diagnostic report (saved to Documents) |
+| **QUICK CLEAN** | Deletes temporary files from eight fixed Windows locations and reports how many it removed. Browser cache is not included; that is Browser Privacy |
+| **TRIM MEMORY** | Trims the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM |
+| **EXPORT** | Generates a system diagnostic report, saved to Documents |
 
 ---
 
@@ -159,11 +159,11 @@ Hardware temperature tracking:
 Temperature Status Levels:
 | Status | CPU Range | GPU Range |
 |--------|-----------|-----------|
-| Cool | Below 113°F (45°C) | Below 113°F |
-| Normal | 113-149°F (45-65°C) | 113-149°F |
-| Warm | 149-176°F (65-80°C) | 149-176°F |
-| Hot | 176-194°F (80-90°C) | 176-194°F |
-| Critical | Above 194°F (90°C) | Above 194°F |
+| Cool | Below 113F (45C) | Below 113F |
+| Normal | 113-149F (45-65C) | 113-149F |
+| Warm | 149-176F (65-80C) | 149-176F |
+| Hot | 176-194F (80-90C) | 176-194F |
+| Critical | Above 194F (90C) | Above 194F |
 
 ### Network Monitor
 
@@ -514,8 +514,8 @@ Image processing and optimization:
 File compression and archiving:
 
 **Compression Formats** (`src/SysMonitor.Core/Services/Utilities/IUtilities.cs:95-99`)**:**
-- **ZIP** — a file or a whole folder (`FileConverter.cs:195-218`)
-- **GZip** (`.gz`) — a single file only. This is plain gzip, not a tar archive, so it
+- **ZIP** - a file or a whole folder (`FileConverter.cs:195-218`)
+- **GZip** (`.gz`) - a single file only. This is plain gzip, not a tar archive, so it
   compresses one file rather than bundling several (`FileConverter.cs:221-226`)
 
 7z is not offered: the code behind it wrote a zip file with a different name.
@@ -651,10 +651,10 @@ Detailed system specifications:
 ### Alert Thresholds
 
 **Temperature Alerts:**
-- CPU Warning Temperature (default: 167°F / 75°C)
-- CPU Critical Temperature (default: 194°F / 90°C)
-- GPU Warning Temperature (default: 176°F / 80°C)
-- GPU Critical Temperature (default: 203°F / 95°C)
+- CPU Warning Temperature (default: 167F / 75C)
+- CPU Critical Temperature (default: 194F / 90C)
+- GPU Warning Temperature (default: 176F / 80C)
+- GPU Critical Temperature (default: 203F / 95C)
 
 **Battery Alerts:**
 - Low Battery Warning (default: 20%)
@@ -671,7 +671,7 @@ Detailed system specifications:
 
 There are no application-wide keyboard shortcuts. The app registers no
 `KeyboardAccelerator` anywhere, so there is no key that opens a page, refreshes a
-page or cancels a running operation — use the navigation menu and the on-screen
+page or cancels a running operation - use the navigation menu and the on-screen
 buttons.
 
 All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1360-1372`):

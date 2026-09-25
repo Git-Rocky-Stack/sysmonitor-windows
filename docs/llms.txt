@@ -1,7 +1,7 @@
 # STX.1 System Monitor
 
 > A free and open source Windows desktop application for system monitoring and
-> maintenance, built with WinUI 3 and .NET 8. Version 3.0.0, MIT licensed. Readings
+> maintenance, built with WinUI 3 and .NET 8. Version 3.0.1, MIT licensed. Readings
 > stay on the user's machine: no account, no telemetry, no network call home.
 
 STX.1 reads Windows hardware in real time and provides maintenance tools across 34
@@ -17,9 +17,15 @@ match what the application reported. Four user-visible features were removed rat
 than reworded, which is why it is a major version: RAM Cache, 7z compression, the
 Auto-Optimize Memory setting, and the Performance page frame rate card.
 
+Version 3.0.1 finishes that pass in the interface text rather than the behaviour. The
+Dashboard button labelled BOOST RAM now reads TRIM MEMORY, Game Mode no longer reports
+"RAM Freed" for the same working-set trim, and the in-app guide describes what Quick
+Clean does instead of promising a speed-up. No feature was added or removed.
+
 ## Documentation
 
 - [Public page](https://git-rocky-stack.github.io/sysmonitor-windows/): downloads, checksums, feature overview, requirements
+- [Documentation index](https://git-rocky-stack.github.io/sysmonitor-windows/documentation.html): every guide, split tutorial / how-to / reference / explanation
 - [Getting started](https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html): tutorial from install to first report
 - [Free up disk space](https://git-rocky-stack.github.io/sysmonitor-windows/howto-free-disk-space.html): how-to guide
 - [Securely wipe files](https://git-rocky-stack.github.io/sysmonitor-windows/howto-securely-wipe-files.html): how-to guide, including what wiping cannot guarantee

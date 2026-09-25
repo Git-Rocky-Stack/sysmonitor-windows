@@ -69,4 +69,38 @@ public class GameModeClaimTests
                 "nothing in Game Mode calls Kill(); it asks a window to close and lets it refuse");
         }
     }
+
+    /// <summary>
+    /// The Game Mode page lists the applications it acts on, and captioned that list "These apps will be
+    /// closed when Game Mode is enabled". Neither path closes them unconditionally: the default action is
+    /// <see cref="BackgroundAppAction.LowerPriority"/>, which only moves them down the processor queue,
+    /// and the opt-in path asks and accepts a refusal. A user reading that caption and clicking Enable
+    /// was told their browser was about to be shut.
+    /// <para>
+    /// The dangerous direction is the caption promising less than the code does, so this fact reads both:
+    /// the default that ships, and the words above the list.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void TheTargetApplicationListSaysWhatHappensToTheAppsOnIt()
+    {
+        var options = Read("src/SysMonitor.Core/Services/GameMode/IGameModeService.cs");
+        var page = Read("src/SysMonitor.App/Views/GameModePage.xaml");
+
+        // The claim below is only correct while lowering priority is what happens unless you opt in.
+        options.Should().MatchRegex(
+            @"BackgroundApps\s*\{\s*get;\s*init;\s*\}\s*=\s*BackgroundAppAction\.LowerPriority",
+            "this fact describes the default, so it has to read the default rather than assume it");
+
+        page.Should().NotMatchRegex(@"apps will be closed when Game Mode is enabled",
+            "the default lowers priority and the opt-in only asks, so nothing here closes an app outright");
+
+        page.Should().Contain("Their priority is lowered",
+            "the caption above the list has to name what actually happens to the apps on it");
+        page.Should().Contain("anything that declines keeps running",
+            "the opt-in path asks, and an app that refuses is left alone; the caption has to say so");
+    }
+
+    private static string Read(string relative) =>
+        File.ReadAllText(Path.Combine(RepoSource.Root, relative.Replace('/', Path.DirectorySeparatorChar)));
 }

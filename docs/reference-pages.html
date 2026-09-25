@@ -52,9 +52,9 @@
 
 <main id="main" class="doc">
   <div class="wrap">
-    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / Reference</p>
+    <p class="crumbs"><a href="./">Home</a> / <a href="documentation.html">Documentation</a> / Reference</p>
     <h1>Reference: pages</h1>
-    <p>Every entry in the navigation menu of STX.1 System Monitor v3.0.0. There are 34,
+    <p>Every entry in the navigation menu of STX.1 System Monitor v3.0.1. There are 34,
     verified by counting <code>NavigationViewItem</code> entries in
     <code>src/SysMonitor.App/MainWindow.xaml</code>.</p>
     <p>The app defines three group headers (<code>MainWindow.xaml:119</code>, <code>:182</code>, <code>:209</code>). The nine
@@ -73,7 +73,7 @@
     <tr>
     <td>Dashboard</td>
     <td><code>:73</code></td>
-    <td>Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (<code>ViewModels/DashboardViewModel.cs:273</code>, <code>:298</code>, <code>:325</code>). In the v3.0.0 release the middle button reads BOOST RAM; it was renamed after that release, see <a href="reference-settings-and-data.html">Settings and data</a></td>
+    <td>Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:273</code>, <code>:298</code>, <code>:325</code>). The middle button read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see <a href="reference-settings-and-data.html">Settings and data</a></td>
     </tr>
     <tr>
     <td>CPU Monitor</td>
@@ -98,17 +98,17 @@
     <tr>
     <td>Directory Cleaner</td>
     <td><code>:98</code></td>
-    <td>Scans thirteen categories of reclaimable files and removes the ones you select (<code>Models/CleanerModels.cs:56-70</code>)</td>
+    <td>Scans thirteen categories of reclaimable files and removes the ones you select (<code>src/SysMonitor.Core/Models/CleanerModels.cs:56-70</code>)</td>
     </tr>
     <tr>
     <td>Registry Cleaner</td>
     <td><code>:103</code></td>
-    <td>Finds registry issues. Exports every key a selected fix will touch with <code>reg.exe</code> before changing anything, and a failed export stops the clean (<code>Services/Cleaners/RegistryCleaner.cs:913-915</code>, <code>:940</code>, <code>:973</code>)</td>
+    <td>Finds registry issues. Exports every key a selected fix will touch with <code>reg.exe</code> before changing anything, and a failed export stops the clean (<code>src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:913-915</code>, <code>:940</code>, <code>:973</code>)</td>
     </tr>
     <tr>
     <td>Startup</td>
     <td><code>:108</code></td>
-    <td>Enables and disables startup entries through <code>Explorer\StartupApproved</code>, the mechanism Task Manager uses (<code>Services/Optimizers/StartupOptimizer.cs:12</code>, <code>:52-53</code>)</td>
+    <td>Enables and disables startup entries through <code>Explorer\StartupApproved</code>, the mechanism Task Manager uses (<code>src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:12</code>, <code>:52-53</code>)</td>
     </tr>
     <tr>
     <td>Installed Programs</td>
@@ -136,7 +136,7 @@
     <tr>
     <td>Game Mode</td>
     <td><code>:125</code></td>
-    <td>Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (<code>Services/GameMode/GameModeService.cs</code>)</td>
+    <td>Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (<code>src/SysMonitor.Core/Services/GameMode/GameModeService.cs</code>)</td>
     </tr>
     <tr>
     <td>Browser Privacy</td>
@@ -146,17 +146,17 @@
     <tr>
     <td>Drive Wiper</td>
     <td><code>:135</code></td>
-    <td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (<code>Services/Utilities/DriveWiper.cs:406</code>, <code>:589</code>, <code>:20</code>)</td>
+    <td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406</code>, <code>:589</code>, <code>:20</code>)</td>
     </tr>
     <tr>
     <td>Scheduled Cleaning</td>
     <td><code>:140</code></td>
-    <td>Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (<code>Services/Utilities/ScheduledCleaningRun.cs</code>)</td>
+    <td>Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs</code>)</td>
     </tr>
     <tr>
     <td>Backup Manager</td>
     <td><code>:145</code></td>
-    <td>Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (<code>Services/Backup/BackupEncryption.cs:20-22</code>)</td>
+    <td>Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (<code>src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:20-22</code>)</td>
     </tr>
     <tr>
     <td>Driver Updater</td>
@@ -171,12 +171,12 @@
     <tr>
     <td>Network</td>
     <td><code>:161</code></td>
-    <td>Live throughput read from the adapter that actually carries your traffic, selected by routed interface rather than claimed link speed (<code>Services/Monitors/NetworkMonitor.cs</code>)</td>
+    <td>Live throughput read from the adapter that actually carries your traffic, selected by routed interface rather than claimed link speed (<code>src/SysMonitor.Core/Services/Monitors/NetworkMonitor.cs</code>)</td>
     </tr>
     <tr>
     <td>Battery</td>
     <td><code>:166</code></td>
-    <td>Charge, power state, and health from design capacity against full-charge capacity. Reports "Not reported" when Windows does not supply those figures (<code>Services/Monitors/BatteryMonitor.cs</code>)</td>
+    <td>Charge, power state, and health from design capacity against full-charge capacity. Reports "Not reported" when Windows does not supply those figures (<code>src/SysMonitor.Core/Services/Monitors/BatteryMonitor.cs</code>)</td>
     </tr>
     <tr>
     <td>Temperature</td>
@@ -204,12 +204,12 @@
     <tr>
     <td>Large Files</td>
     <td><code>:183</code></td>
-    <td>Finds large files. Deletion goes to the Recycle Bin and does not follow links (<code>Services/Utilities/LargeFileFinder.cs</code>)</td>
+    <td>Finds large files. Deletion goes to the Recycle Bin and does not follow links (<code>src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs</code>)</td>
     </tr>
     <tr>
     <td>Duplicate Finder</td>
     <td><code>:188</code></td>
-    <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size (<code>Services/Utilities/DuplicateFinder.cs:161</code>, <code>:223</code>)</td>
+    <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size (<code>src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161</code>, <code>:223</code>)</td>
     </tr>
     <tr>
     <td>File Tools</td>
@@ -352,7 +352,7 @@
     <li><a href="explanation-honest-reporting.html">What v3.0.0 removed, and why</a></li>
     </ul>
     <div class="docnav">
-      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="documentation.html">All documentation</a>
       <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-pages.md">Edit this page on GitHub</a>
     </div>
   </div>

@@ -81,7 +81,7 @@
                         <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextPrimaryBrush}">
                             <Run FontWeight="SemiBold">Quick Clean</Run>
-                            <Run> - One-click cleanup to free space and boost performance instantly.</Run>
+                            <Run> - One click deletes temporary files and tells you how many it removed.</Run>
                         </TextBlock>
 
                         <!-- Tip 3 -->
@@ -180,7 +180,7 @@
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Cleanup &amp; Optimization" FontSize="16" FontWeight="Bold"
                                        Foreground="{StaticResource SuccessBrush}"/>
-                            <TextBlock Text="Free space and boost performance" FontSize="12"
+                            <TextBlock Text="Reclaim disk space, clear traces, and control what runs at startup" FontSize="12"
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
                     </StackPanel>
@@ -265,12 +265,12 @@
 
                         <StackPanel Grid.Column="1" Spacing="8">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
-                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Free Up RAM</Run>
-                                <Run> - Optimizes memory for gaming</Run>
+                                <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Trim Memory</Run>
+                                <Run> - Trims the working sets of background apps. Windows can page them back, so this does not free RAM.</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Session Stats</Run>
-                                <Run> - Shows how many background apps were moved out of the way, which ones would not go, and the RAM freed</Run>
+                                <Run> - Shows how many background apps were moved out of the way, which ones would not go, and how much was trimmed from their working sets</Run>
                             </TextBlock>
                         </StackPanel>
                     </Grid>
@@ -710,16 +710,44 @@
                 </StackPanel>
             </Border>
 
-            <!-- Changelog Card - v3.0.0 -->
+            <!-- Changelog Card - v3.0.1 -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{StaticResource CyanAccentBrush}"/>
-                        <TextBlock Text="Release Notes - v3.0.0" FontSize="16" FontWeight="Bold"
+                        <TextBlock Text="Release Notes - v3.0.1" FontSize="16" FontWeight="Bold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                         <Border Background="{StaticResource WarningBrush}" CornerRadius="4" Padding="8,2">
                             <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
                         </Border>
+                    </StackPanel>
+
+                    <!-- Changed in v3.0.1 -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Changed in v3.0.1" FontWeight="SemiBold" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Margin="16,0,0,0"
+                                   Foreground="{StaticResource TextSecondaryBrush}">
+                            A wording release. 3.0.0 corrected the behaviour behind these claims and left
+                            the labels sitting on top of them. Nothing was added or removed.
+                        </TextBlock>
+                        <!-- claim-check:quoting-start - release notes name the labels they replaced, so
+                             the words below are quotations of corrected claims, not claims. Bounded and
+                             enforced by InAppGuideClaimTests; nothing outside these markers may use them. -->
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> The Dashboard button that read BOOST RAM now reads TRIM MEMORY, because trimming a working set moves pages to the standby list rather than freeing RAM</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> Game Mode said "Frees Up RAM" and reported "RAM Freed" for the same operation. It now says Trims Memory and Trimmed</Run>
+                            </TextBlock>
+                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> This guide described Quick Clean as boosting performance instantly. It deletes temporary files and counts them, which is what it now says</Run>
+                            </TextBlock>
+                        </StackPanel>
+                        <!-- claim-check:quoting-end -->
                     </StackPanel>
 
                     <!-- New in v3.0.0 -->

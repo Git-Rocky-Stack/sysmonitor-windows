@@ -17,7 +17,7 @@ grep -o '<license[^>]*>[^<]*</license>' \
   "$USERPROFILE/.nuget/packages/<package>/<version>/<package>.nuspec"
 ```
 
-Direct package references only — see `src/SysMonitor.App/SysMonitor.App.csproj` and
+Direct package references only - see `src/SysMonitor.App/SysMonitor.App.csproj` and
 `src/SysMonitor.Core/SysMonitor.Core.csproj`. Transitive dependencies carry their own
 terms, which are available through each project's own distribution.
 
@@ -31,7 +31,7 @@ terms, which are available through each project's own distribution.
 
 This library supplies the temperature sensors
 (`src/SysMonitor.Core/Services/Monitors/TemperatureMonitor.cs:92`) and the fan speed
-sensors (`:131-163`). It is the only place it is used — CPU and memory usage come from
+sensors (`:131-163`). It is the only place it is used - CPU and memory usage come from
 `GetSystemTimes` and WMI instead (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:53`).
 
 MPL-2.0 requires that recipients of the executable form be told how to obtain the
@@ -103,4 +103,4 @@ These are used to build and test the project and are **not** redistributed with 
 application:
 
 xunit, xunit.runner.visualstudio, Microsoft.NET.Test.Sdk, Moq, FluentAssertions,
-coverlet.collector — see `tests/SysMonitor.Tests/SysMonitor.Tests.csproj`.
+coverlet.collector - see `tests/SysMonitor.Tests/SysMonitor.Tests.csproj`.

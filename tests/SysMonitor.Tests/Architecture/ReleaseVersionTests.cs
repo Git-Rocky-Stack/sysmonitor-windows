@@ -114,7 +114,88 @@ public class ReleaseVersionTests
         }
     }
 
+    /// <summary>
+    /// The download page names a build that exists.
+    /// <para>
+    /// This is the same defect one layer out. The installer cannot disagree with the binary any more, but
+    /// the page offering it can: a version bump that does not reach <c>docs/</c> leaves the site linking to
+    /// <c>.../releases/download/v3.0.0/STX1-SystemMonitor-Setup-3.0.0.exe</c> for a 3.0.1 release, publishing
+    /// the checksum of a file nobody can download any more, and telling the reader to verify one filename
+    /// against another. The link 404s or, worse, serves the previous build.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void EveryDownloadTheDocumentationOffersNamesTheVersionTheProjectBuilds()
+    {
+        var version = ProjectVersion();
+
+        // Every way a release artifact is named: the two file names and the tag folder they live under.
+        var artifact = new Regex(
+            @"STX1-SystemMonitor-Setup-(?<v>\d+\.\d+\.\d+)\.exe"
+            + @"|STX1-SystemMonitor-(?<v>\d+\.\d+\.\d+)-Portable-x64\.zip"
+            + @"|/releases/download/v(?<v>\d+\.\d+\.\d+)/");
+
+        var stale = new List<string>();
+        var named = 0;
+
+        foreach (var document in PublishedDocuments())
+        {
+            var lines = File.ReadAllLines(document);
+
+            for (var number = 1; number <= lines.Length; number++)
+            {
+                foreach (Match match in artifact.Matches(lines[number - 1]))
+                {
+                    named++;
+                    if (match.Groups["v"].Value != version)
+                        stale.Add($"{RepoSource.Relative(document)}:{number} offers {match.Value}");
+                }
+            }
+        }
+
+        named.Should().BeGreaterThan(5,
+            "this test is worthless if it cannot find the downloads it is meant to check");
+        stale.Should().BeEmpty(
+            $"the project builds {version}; a document offering any other build links to a file that " +
+            "release does not contain");
+    }
+
+    /// <summary>
+    /// The changelog's newest release is the one being built. A version bumped in the csproj with the
+    /// changes still sitting under [Unreleased] ships a build whose release notes do not exist.
+    /// </summary>
+    [Fact]
+    public void TheChangelogsNewestReleaseIsTheVersionTheProjectBuilds()
+    {
+        var changelog = Read("CHANGELOG.md");
+
+        var released = Regex.Matches(changelog, @"^## \[(?<v>\d+\.\d+\.\d+)\]", RegexOptions.Multiline)
+            .Select(match => match.Groups["v"].Value)
+            .ToList();
+
+        released.Should().NotBeEmpty("this test is worthless if it cannot find a release heading");
+        released[0].Should().Be(ProjectVersion(),
+            "the newest released section of the changelog is the release notes for this build");
+    }
+
     // ---------------------------------------------------------------- helpers
+
+    /// <summary>Documents a reader downloads from, or is told to verify a download against.</summary>
+    private static IReadOnlyList<string> PublishedDocuments()
+    {
+        var paths = new List<string>
+        {
+            Path.Combine(RepoSource.Root, "README.md"),
+            Path.Combine(RepoSource.Root, "FEATURES_AND_USER_GUIDE.md"),
+            Path.Combine(RepoSource.Root, "CHANGELOG.md"),
+        };
+
+        var docs = Path.Combine(RepoSource.Root, "docs");
+        foreach (var pattern in new[] { "*.md", "*.html", "*.txt", "*.xml" })
+            paths.AddRange(Directory.EnumerateFiles(docs, pattern, SearchOption.TopDirectoryOnly));
+
+        return paths.Where(File.Exists).OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToList();
+    }
 
     /// <summary>The version in the app's csproj: the one every other copy derives from.</summary>
     private static string ProjectVersion()

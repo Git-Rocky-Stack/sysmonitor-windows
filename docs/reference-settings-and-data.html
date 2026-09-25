@@ -52,9 +52,9 @@
 
 <main id="main" class="doc">
   <div class="wrap">
-    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / Reference</p>
+    <p class="crumbs"><a href="./">Home</a> / <a href="documentation.html">Documentation</a> / Reference</p>
     <h1>Reference: settings and data</h1>
-    <p>Every setting on the Settings page of STX.1 System Monitor v3.0.0, with its default,
+    <p>Every setting on the Settings page of STX.1 System Monitor v3.0.1, with its default,
     and every location the app writes to.</p>
     <p>Defaults are read from <code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:20-52</code>. The
     Reset command restores exactly these values (<code>SettingsViewModel.cs:260-286</code>).</p>
@@ -104,7 +104,7 @@
     <td>Show Notifications</td>
     <td>On or off</td>
     <td>On (<code>:25</code>)</td>
-    <td>Enables alert toasts (<code>Views/SettingsPage.xaml:98</code>)</td>
+    <td>Enables alert toasts (<code>src/SysMonitor.App/Views/SettingsPage.xaml:98</code>)</td>
     </tr>
     </tbody>
     </table></div>
@@ -123,7 +123,7 @@
     <td>Refresh Interval</td>
     <td>1 to 10 seconds</td>
     <td>2 seconds</td>
-    <td>How often readings update (<code>:28</code>, range at <code>Views/SettingsPage.xaml:122</code>)</td>
+    <td>How often readings update (<code>:28</code>, range at <code>src/SysMonitor.App/Views/SettingsPage.xaml:122</code>)</td>
     </tr>
     <tr>
     <td>Memory Threshold</td>
@@ -135,7 +135,7 @@
     </table></div>
     <p>The memory threshold raises an alert and nothing else. Nothing optimises memory on its
     own. The Dashboard's TRIM MEMORY button is the only thing that trims working sets,
-    and you start it (<code>ViewModels/DashboardViewModel.cs:298</code>).</p>
+    and you start it (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:298</code>).</p>
     <p>An "Auto-Optimize Memory" setting existed before v3.0.0 and was removed, because
     nothing read it.</p>
     <p>What the button does is trim process working sets, which moves pages to the standby
@@ -143,12 +143,12 @@
     of making more of it available
     (<code>src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91</code>). The result message
     has said so since v3.0.0: it reads "Trimmed N from background apps"
-    (<code>ViewModels/DashboardViewModel.cs:311</code>).</p>
-    <p><strong>In the v3.0.0 release the button reads BOOST RAM</strong>, which was the last piece of that
-    flow still claiming otherwise. It is labelled TRIM MEMORY
-    (<code>Views/DashboardPage.xaml:286</code>) with a tooltip explaining the standby list, from the
-    next release onwards. If your copy says BOOST RAM, you are on v3.0.0 and the button
-    does the same thing either way.</p>
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:311</code>).</p>
+    <p>The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
+    of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY
+    (<code>src/SysMonitor.App/Views/DashboardPage.xaml:286</code>), with a tooltip explaining the
+    standby list. If your copy says BOOST RAM you are on v3.0.0 or earlier; the button does
+    the same thing either way.</p>
     <h2>Temperature alerts</h2>
     <div class="tablewrap"><table>
     <thead>
@@ -221,7 +221,7 @@
     <h2>Version</h2>
     <p>The Settings page reads the version from the running assembly
     (<code>SettingsViewModel.cs:87</code>), so it reports what is actually installed rather than a
-    number written by hand. For this release it reads 3.0.0.0.</p>
+    number written by hand. For this release it reads 3.0.1.0.</p>
     <h2>Where the app writes</h2>
     <p>Everything the application stores about you is under one folder:</p>
     <pre><code>%LocalAppData%\SysMonitor
@@ -253,7 +253,7 @@
     <p>The install folder holds the application, plus <code>LICENSE.txt</code> and
     <code>THIRD-PARTY-NOTICES.txt</code> (<code>installer/SysMonitorSetup.iss:87-88</code>).</p>
     <p>Exported reports go to your Documents folder
-    (<code>ViewModels/DashboardViewModel.cs:333-341</code>).</p>
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:333-341</code>).</p>
     <h2>What leaves your machine</h2>
     <p>Nothing. Readings stay local. See <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/PRIVACY_POLICY.md">PRIVACY_POLICY.md</a>.</p>
     <p>The app does not check for updates and cannot download a new version of itself. To
@@ -268,7 +268,7 @@
     <li><a href="tutorial-getting-started.html">Getting started</a></li>
     </ul>
     <div class="docnav">
-      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="documentation.html">All documentation</a>
       <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/reference-settings-and-data.md">Edit this page on GitHub</a>
     </div>
   </div>

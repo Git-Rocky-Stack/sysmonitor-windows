@@ -53,7 +53,11 @@ public class GameModeResult
 
     public int ProcessesAffected => BackgroundAppsAffected.Count;
 
-    public long MemoryFreedBytes { get; set; }
+    /// <summary>
+    /// Bytes trimmed out of background app working sets, not bytes of RAM made available. Windows
+    /// moves those pages to the standby list and can page them back as soon as the app touches them.
+    /// </summary>
+    public long MemoryTrimmedBytes { get; set; }
     public string? PreviousPowerPlanGuid { get; set; }
     public string? ErrorMessage { get; set; }
 }

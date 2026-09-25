@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Getting started with STX.1 System Monitor - STX.1 System Monitor</title>
+<title>Getting started with STX.1 System Monitor</title>
 <meta name="description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html">
 <link rel="icon" href="assets/favicon.png" type="image/png">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="STX.1 System Monitor">
-<meta property="og:title" content="Getting started with STX.1 System Monitor - STX.1 System Monitor">
+<meta property="og:title" content="Getting started with STX.1 System Monitor">
 <meta property="og:description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
 <meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html">
 <meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Getting started with STX.1 System Monitor - STX.1 System Monitor">
+<meta name="twitter:title" content="Getting started with STX.1 System Monitor">
 <meta name="twitter:description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
 <meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
 <script type="application/ld+json">
@@ -52,7 +52,7 @@
 
 <main id="main" class="doc">
   <div class="wrap">
-    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / Tutorial</p>
+    <p class="crumbs"><a href="./">Home</a> / <a href="documentation.html">Documentation</a> / Tutorial</p>
     <h1>Getting started with STX.1 System Monitor</h1>
     <p>In about ten minutes you will install STX.1, read your machine's health score, clean
     up disk space you can actually spare, and save a diagnostic report you can send to
@@ -71,7 +71,7 @@
     self-contained and carries the .NET 8 and Windows App SDK runtimes inside it
     (<code>src/SysMonitor.App/SysMonitor.App.csproj:12</code>).</p>
     <h2>Step 1: Install it</h2>
-    <p>Download <code>STX1-SystemMonitor-Setup-3.0.0.exe</code> from the
+    <p>Download <code>STX1-SystemMonitor-Setup-3.0.1.exe</code> from the
     <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases">releases page</a>
     and run it.</p>
     <p>The installer shows you the MIT licence, which is the whole of the terms. There is no
@@ -79,7 +79,7 @@
     <p>The build is not code signed, so Windows SmartScreen will warn you that the publisher
     is unknown. If you want to check what you downloaded before running it, compare its
     SHA-256 against the checksum published on the release page:</p>
-    <pre><code class="language-powershell">Get-FileHash .\STX1-SystemMonitor-Setup-3.0.0.exe -Algorithm SHA256
+    <pre><code class="language-powershell">Get-FileHash .\STX1-SystemMonitor-Setup-3.0.1.exe -Algorithm SHA256
     </code></pre>
     <p>When setup finishes, the app is installed and <code>LICENSE.txt</code> and
     <code>THIRD-PARTY-NOTICES.txt</code> sit next to the executable in the install folder
@@ -159,7 +159,7 @@
       earlier version and something you relied on is gone</li>
     </ul>
     <div class="docnav">
-      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="documentation.html">All documentation</a>
       <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/docs/tutorial-getting-started.md">Edit this page on GitHub</a>
     </div>
   </div>

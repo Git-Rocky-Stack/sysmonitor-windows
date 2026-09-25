@@ -5,7 +5,7 @@ goes, and delete only what you chose.
 
 ## Prerequisites
 
-- STX.1 System Monitor v3.0.0 installed
+- STX.1 System Monitor v3.0.0 or later installed
 - Run the app as administrator if you want the Windows temp folder included. Without
   it, files owned by the system are skipped
 

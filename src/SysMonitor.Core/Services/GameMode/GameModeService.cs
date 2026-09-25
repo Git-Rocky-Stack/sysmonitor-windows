@@ -108,7 +108,7 @@ public sealed class GameModeService : IGameModeService, IDisposable
 
             if (options.OptimizeMemory)
             {
-                result.MemoryFreedBytes = await _memoryOptimizer.OptimizeMemoryAsync();
+                result.MemoryTrimmedBytes = await _memoryOptimizer.OptimizeMemoryAsync();
             }
 
             _isEnabled = true;

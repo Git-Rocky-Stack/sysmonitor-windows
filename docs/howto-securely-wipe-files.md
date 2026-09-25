@@ -9,7 +9,7 @@ of this page, but the explanation matters.
 
 ## Prerequisites
 
-- STX.1 System Monitor v3.0.0 installed
+- STX.1 System Monitor v3.0.0 or later installed
 - The files you intend to destroy, and a second copy of anything you might want back.
   This operation is not reversible by design
 

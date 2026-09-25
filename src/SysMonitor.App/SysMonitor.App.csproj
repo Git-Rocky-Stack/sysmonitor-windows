@@ -13,7 +13,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseRidGraph>true</UseRidGraph>
-    <Version>3.0.0</Version>
+    <Version>3.0.1</Version>
     <Authors>Rocky Stack</Authors>
     <Company>Rocky Stack</Company>
     <Product>STX.1 System Monitor</Product>

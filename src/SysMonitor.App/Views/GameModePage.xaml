@@ -473,8 +473,8 @@
                                     <FontIcon Glyph="&#xE74C;" FontSize="16" Foreground="{StaticResource SuccessBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Frees Up RAM" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Optimizes memory for gaming" Style="{StaticResource CardSubtitleStyle}"/>
+                                    <TextBlock Text="Trims Memory" Style="{StaticResource CardTitleStyle}"/>
+                                    <TextBlock Text="Trims background app working sets; Windows can page them back" Style="{StaticResource CardSubtitleStyle}"/>
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -506,10 +506,10 @@
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.LastMemoryFreed, Mode=OneWay}"
+                                    <TextBlock Text="{x:Bind ViewModel.LastMemoryTrimmed, Mode=OneWay}"
                                                FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
                                                Foreground="{StaticResource SuccessBrush}"/>
-                                    <TextBlock Text="RAM Freed" FontSize="12"
+                                    <TextBlock Text="Trimmed" FontSize="12"
                                                Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
@@ -559,7 +559,8 @@
 
                 <Border Style="{StaticResource CardStyle}" Padding="16">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="These apps will be closed when Game Mode is enabled:"
+                        <TextBlock Text="The apps Game Mode acts on. Their priority is lowered; tick &quot;Ask them to close instead&quot; above and they are asked to close, and anything that declines keeps running:"
+                                   TextWrapping="Wrap"
                                    FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <ItemsControl ItemsSource="{x:Bind ViewModel.TargetApps, Mode=OneWay}">
                             <ItemsControl.ItemsPanel>

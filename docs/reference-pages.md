@@ -1,6 +1,6 @@
 # Reference: pages
 
-Every entry in the navigation menu of STX.1 System Monitor v3.0.0. There are 34,
+Every entry in the navigation menu of STX.1 System Monitor v3.0.1. There are 34,
 verified by counting `NavigationViewItem` entries in
 `src/SysMonitor.App/MainWindow.xaml`.
 
@@ -12,14 +12,14 @@ header of their own. They are listed here in the order the menu shows them.
 
 | Page | Line | What it does |
 |---|---|---|
-| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (`ViewModels/DashboardViewModel.cs:273`, `:298`, `:325`). In the v3.0.0 release the middle button reads BOOST RAM; it was renamed after that release, see [Settings and data](reference-settings-and-data.md) |
+| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:273`, `:298`, `:325`). The middle button read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see [Settings and data](reference-settings-and-data.md) |
 | CPU Monitor | `:78` | Processor usage, core counts, clock speeds, per-core figures where the hardware reports them |
 | GPU Monitor | `:83` | Graphics adapter load, memory and temperature |
 | Memory Monitor | `:88` | RAM in use and available, and working-set trimming |
 | Processes | `:93` | Running processes with per-process processor and memory use, and the ability to end one |
-| Directory Cleaner | `:98` | Scans thirteen categories of reclaimable files and removes the ones you select (`Models/CleanerModels.cs:56-70`) |
-| Registry Cleaner | `:103` | Finds registry issues. Exports every key a selected fix will touch with `reg.exe` before changing anything, and a failed export stops the clean (`Services/Cleaners/RegistryCleaner.cs:913-915`, `:940`, `:973`) |
-| Startup | `:108` | Enables and disables startup entries through `Explorer\StartupApproved`, the mechanism Task Manager uses (`Services/Optimizers/StartupOptimizer.cs:12`, `:52-53`) |
+| Directory Cleaner | `:98` | Scans thirteen categories of reclaimable files and removes the ones you select (`src/SysMonitor.Core/Models/CleanerModels.cs:56-70`) |
+| Registry Cleaner | `:103` | Finds registry issues. Exports every key a selected fix will touch with `reg.exe` before changing anything, and a failed export stops the clean (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:913-915`, `:940`, `:973`) |
+| Startup | `:108` | Enables and disables startup entries through `Explorer\StartupApproved`, the mechanism Task Manager uses (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:12`, `:52-53`) |
 | Installed Programs | `:113` | Inventory and uninstall. Exit codes are reported in words, including restart-needed and already-removed, which are not failures |
 
 ## Maintenance
@@ -29,15 +29,15 @@ Header at `MainWindow.xaml:119`.
 | Page | Line | What it does |
 |---|---|---|
 | Health Check | `:120` | System-wide checks producing a score, a grade, counts of critical issues and warnings, and recommended actions |
-| Game Mode | `:125` | Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (`Services/GameMode/GameModeService.cs`) |
+| Game Mode | `:125` | Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`) |
 | Browser Privacy | `:130` | Clears browsing traces across installed browsers, counted per browser actually found |
-| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`Services/Utilities/DriveWiper.cs:406`, `:589`, `:20`) |
-| Scheduled Cleaning | `:140` | Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (`Services/Utilities/ScheduledCleaningRun.cs`) |
-| Backup Manager | `:145` | Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (`Services/Backup/BackupEncryption.cs:20-22`) |
+| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406`, `:589`, `:20`) |
+| Scheduled Cleaning | `:140` | Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs`) |
+| Backup Manager | `:145` | Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (`src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:20-22`) |
 | Driver Updater | `:150` | Device driver inventory, with problem and unsigned drivers flagged, and links out to Device Manager and Windows Update |
 | Disk Analyzer | `:156` | Storage use per drive and drive health where SMART is available |
-| Network | `:161` | Live throughput read from the adapter that actually carries your traffic, selected by routed interface rather than claimed link speed (`Services/Monitors/NetworkMonitor.cs`) |
-| Battery | `:166` | Charge, power state, and health from design capacity against full-charge capacity. Reports "Not reported" when Windows does not supply those figures (`Services/Monitors/BatteryMonitor.cs`) |
+| Network | `:161` | Live throughput read from the adapter that actually carries your traffic, selected by routed interface rather than claimed link speed (`src/SysMonitor.Core/Services/Monitors/NetworkMonitor.cs`) |
+| Battery | `:166` | Charge, power state, and health from design capacity against full-charge capacity. Reports "Not reported" when Windows does not supply those figures (`src/SysMonitor.Core/Services/Monitors/BatteryMonitor.cs`) |
 | Temperature | `:171` | Processor and graphics thermal sensors and fan speeds, through LibreHardwareMonitor |
 | System Info | `:176` | Hardware and operating system inventory |
 
@@ -47,8 +47,8 @@ Header at `MainWindow.xaml:182`.
 
 | Page | Line | What it does |
 |---|---|---|
-| Large Files | `:183` | Finds large files. Deletion goes to the Recycle Bin and does not follow links (`Services/Utilities/LargeFileFinder.cs`) |
-| Duplicate Finder | `:188` | Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size (`Services/Utilities/DuplicateFinder.cs:161`, `:223`) |
+| Large Files | `:183` | Finds large files. Deletion goes to the Recycle Bin and does not follow links (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs`) |
+| Duplicate Finder | `:188` | Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161`, `:223`) |
 | File Tools | `:193` | ZIP compression of a file or a folder, and GZip of a single file. See the note on formats below |
 | PDF Tools | `:198` | Merge, split, extract pages, convert images and text to PDF, and sign |
 | Image Tools | `:203` | Compress, convert, resize, and read image metadata |

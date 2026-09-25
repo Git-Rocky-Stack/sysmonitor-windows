@@ -3,12 +3,12 @@
 **Strategic. Excellence. Engineered.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.1-blue.svg)](CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%202004%2B-lightgrey.svg)](#requirements)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4.svg)](https://dotnet.microsoft.com/)
 
 A Windows system monitoring and optimization desktop application, built with WinUI 3
-and .NET 8. **Free and open source under the MIT License** — use it, read it, change
+and .NET 8. **Free and open source under the MIT License** - use it, read it, change
 it, ship it.
 
 ![STX.1 System Monitor dashboard](App%20Screenshots/v%202.2.0.0%20%28Microsoft%20store%29/1.png)
@@ -51,7 +51,7 @@ sit below the groups listed here.
 |---|---|
 | **Directory Cleaner** | Temporary files, caches and system junk |
 | **Registry Cleaner** | Registry issues, with a real `reg.exe` export taken before any change |
-| **Startup** | Enable and disable startup items through `Explorer\StartupApproved` — the same mechanism Task Manager uses, so changes are reversible and visible to Windows |
+| **Startup** | Enable and disable startup items through `Explorer\StartupApproved` - the same mechanism Task Manager uses, so changes are reversible and visible to Windows |
 | **Installed Programs** | Inventory and uninstall, with the exit code reported in plain words |
 | **Health Check** | System-wide checks |
 | **Game Mode** | Lowers background apps below your game in the processor queue and restores them afterwards. Closing apps is a separate opt-in that only ever asks |
@@ -106,7 +106,7 @@ Listed because previous versions implied otherwise:
 - Administrator rights for hardware sensors, HKLM startup entries, and cleaning the
   Windows temp folder
 
-The released build is self-contained — the .NET 8 and Windows App SDK runtimes ship
+The released build is self-contained - the .NET 8 and Windows App SDK runtimes ship
 with it, so there is nothing to install separately.
 
 ## Documentation
@@ -159,7 +159,7 @@ A full release build, including the Inno Setup installer:
 .\Build-Release.ps1
 ```
 
-Code signing reads a certificate from the Windows certificate store by thumbprint —
+Code signing reads a certificate from the Windows certificate store by thumbprint -
 set `SYSMONITOR_SIGNING_THUMBPRINT`, or pass `-CertificateThumbprint`. No PFX file or
 password is used or stored.
 
@@ -167,25 +167,25 @@ password is used or stored.
 
 ```
 SysMonitor.sln
-├── src/SysMonitor.App/          # WinUI 3 front end (WinExe)
-│   ├── Views/                   # 35 XAML pages + the FPS overlay window
-│   ├── ViewModels/              # CommunityToolkit.Mvvm view models
-│   ├── Converters/              # Value converters
-│   └── Styles/                  # Colors and styles
-│
-├── src/SysMonitor.Core/         # Core library
-│   ├── Models/
-│   ├── Helpers/
-│   ├── Data/                    # EF Core context and entities (SQLite)
-│   └── Services/
-│       ├── Monitors/            # CPU, GPU, Memory, Disk, Network, Battery, Temperature
-│       ├── Cleaners/            # Temp files, browser cache, registry, browser privacy
-│       ├── Optimizers/          # Startup and memory
-│       ├── Backup/              # Backup, restore, encryption
-│       ├── GameMode/            # Game Mode and auto-detection
-│       └── Utilities/           # File, PDF, network and system tools
-│
-└── tests/SysMonitor.Tests/      # xUnit tests
++-- src/SysMonitor.App/          # WinUI 3 front end (WinExe)
+|   +-- Views/                   # 35 XAML pages + the FPS overlay window
+|   +-- ViewModels/              # CommunityToolkit.Mvvm view models
+|   +-- Converters/              # Value converters
+|   \-- Styles/                  # Colors and styles
+|
++-- src/SysMonitor.Core/         # Core library
+|   +-- Models/
+|   +-- Helpers/
+|   +-- Data/                    # EF Core context and entities (SQLite)
+|   \-- Services/
+|       +-- Monitors/            # CPU, GPU, Memory, Disk, Network, Battery, Temperature
+|       +-- Cleaners/            # Temp files, browser cache, registry, browser privacy
+|       +-- Optimizers/          # Startup and memory
+|       +-- Backup/              # Backup, restore, encryption
+|       +-- GameMode/            # Game Mode and auto-detection
+|       \-- Utilities/           # File, PDF, network and system tools
+|
+\-- tests/SysMonitor.Tests/      # xUnit tests
 ```
 
 Architecture notes for contributors are in [CLAUDE.md](CLAUDE.md); the end-user
@@ -222,7 +222,7 @@ Readings stay on your machine. See [PRIVACY_POLICY.md](PRIVACY_POLICY.md).
 
 ## License
 
-**MIT** — see [LICENSE](LICENSE).
+**MIT** - see [LICENSE](LICENSE).
 
 In plain terms: use, copy, modify, merge, publish, distribute, sublicense and sell
 copies of this software, for any purpose including commercial, provided the copyright
@@ -234,7 +234,7 @@ installer presents (`installer/SysMonitorSetup.iss:39`), what installs beside th
 application as `LICENSE.txt` (`installer/SysMonitorSetup.iss:87`), and the whole of the
 terms.
 
-Third-party components bundled into the self-contained build keep their own licences —
+Third-party components bundled into the self-contained build keep their own licences -
 notably **LibreHardwareMonitor under MPL-2.0** and **Serilog under Apache-2.0**. These
 are compatible with MIT but carry their own obligations, all listed in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

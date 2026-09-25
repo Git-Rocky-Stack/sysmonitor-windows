@@ -11,6 +11,17 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
+Nothing yet.
+
+---
+
+## [3.0.1] - 2026-09-21
+
+A wording release. Every change here is a sentence the application or its documentation
+showed the user that the code did not support. No feature was added or removed, which is
+what keeps it a patch: 3.0.0 corrected the behaviour behind the RAM claims and left the
+labels on top of them, and this release finishes that.
+
 ### Changed
 
 - **The memory button says what it does.** The Dashboard's middle button read `BOOST RAM`
@@ -20,6 +31,41 @@ Each entry describes a behaviour change and cites the file it lives in.
   button label was the last part of that flow still claiming otherwise. It now reads
   `TRIM MEMORY`, with a tooltip saying what happens to the pages.
   (`src/SysMonitor.App/Views/DashboardPage.xaml:286`)
+
+- **Game Mode stops claiming it frees RAM.** Game Mode's memory step calls the same
+  `IMemoryOptimizer.OptimizeMemoryAsync` the Dashboard button does
+  (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111`), so it trims working
+  sets and frees nothing - but the page said `Frees Up RAM`, subtitled it "Optimizes
+  memory for gaming", and labelled the result `RAM Freed`
+  (`src/SysMonitor.App/Views/GameModePage.xaml:476`, `:477`, `:512`). Three more copies
+  of the claim the Dashboard button had just been corrected for. They now read
+  `Trims Memory` and `Trimmed`. The field behind the label was called `MemoryFreedBytes`,
+  which is where each of those labels came from; it is now `MemoryTrimmedBytes`
+  (`src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:60`).
+
+- **The in-app guide describes Quick Clean rather than praising it.** "One-click cleanup
+  to free space and boost performance instantly" promised a speed-up nothing in the
+  application measures. Quick Clean deletes temporary files from eight fixed Windows
+  locations (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:72-79`) and reports
+  a file count, so that is what the guide now says. The card subtitle "Free space and
+  boost performance" headed six tools of which a registry cleaner and a startup manager
+  free no space; it now names what the tools under it do.
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:84`, `:183`)
+
+- **The Game Mode target list says what happens to the apps on it.** It was captioned
+  "These apps will be closed when Game Mode is enabled", above twenty-one named
+  applications including every browser. Neither path closes them: the default action is
+  `LowerPriority` (`src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:26`), which
+  moves them down the processor queue, and ticking "Ask them to close instead" asks and
+  accepts a refusal. The caption now says which of those happens and that an app which
+  declines keeps running. (`src/SysMonitor.App/Views/GameModePage.xaml:562`)
+
+- **The markdown guide's Quick Actions table matches the buttons.** It listed "Quick
+  Clean - Instantly removes temporary files and browser cache", and Quick Clean does not
+  touch browser cache: that is Browser Privacy, a separate tool behind a separate page.
+  It listed "Optimize Memory - Frees up RAM by clearing unused memory" for a button that
+  now reads TRIM MEMORY and never freed RAM. All three rows now carry the button's own
+  label. (`FEATURES_AND_USER_GUIDE.md:93-95`)
 
 ### Fixed
 
@@ -33,14 +79,35 @@ Each entry describes a behaviour change and cites the file it lives in.
   actually happens; a Driver Updater "Outdated" status glossed as "Newer version may
   exist", when the app only compares the driver's date against two years and never
   consults any catalogue (`src/SysMonitor.Core/Services/Utilities/DriverUpdater.cs:99-100`,
-  `:277`); and "One-click RAM cleanup". The in-app guide
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:752`, `:760`, `:764`) was already
-  correct, and nothing reads the markdown file at runtime, so no shipped build showed
-  these claims.
+  `:277`); and "One-click RAM cleanup". Nothing reads the markdown file at runtime, so no
+  shipped build showed these five. The in-app guide was correct on all five
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:780`, `:788`, `:792`) but wrong on
+  three others, which are the three Changed entries above; this entry said the in-app
+  guide "was already correct" without qualification, and that was not true of the file as
+  a whole.
+
+- **Every `path:line` citation in `docs/` resolves.** Thirteen of them were written
+  relative to `src/SysMonitor.App` or `src/SysMonitor.Core` rather than to the repository
+  root, so a citation of `ViewModels/DashboardViewModel.cs` with a line number after it
+  named no file a reader could open. They were checkable by hand and by
+  `DocumentationAnchorTests`, and failing for both. All are now repository-relative.
+
+- **The documentation index is served by the documentation site.** `docs/README.md` was
+  not in the generator's page list, so no HTML was produced for it, and the footer link
+  called "All documentation" sent the reader to the GitHub source view of a markdown file
+  instead. It is now published at `documentation.html`, is in the sitemap and `llms.txt`,
+  and the footer points at it. (`docs/build-docs.py:40-46`, `docs/index.html:560`)
+
+- **The published documents are plain ASCII.** `README.md` carried box-drawing characters
+  in its project tree and `FEATURES_AND_USER_GUIDE.md` carried degree signs in its
+  temperature tables; both, and `CHANGELOG.md` and `THIRD-PARTY-NOTICES.md`, carried em
+  dashes. Read as anything but UTF-8 - a console under the OEM code page, an editor
+  guessing Windows-1252 - each of those becomes two or three stray letters, and the
+  project tree stops lining up as a tree. `PublishedDocumentEncodingTests` keeps them out.
 
 ### Added
 
-- **A documentation site.** Nine documents under `docs/`, split tutorial / how-to /
+- **A documentation site.** Ten documents under `docs/`, split tutorial / how-to /
   reference / explanation, served from GitHub Pages at
   https://git-rocky-stack.github.io/sysmonitor-windows/.
 
@@ -109,7 +176,7 @@ which is what makes this a major version.
 ### Fixed
 
 - **Uninstalling actually uninstalls.** An `UninstallString` beginning `MsiExec.exe` was cut
-  exactly seven characters in, handing msiexec `.exe /X{...}` — it showed its usage dialog and
+  exactly seven characters in, handing msiexec `.exe /X{...}` - it showed its usage dialog and
   removed nothing, and after 60 seconds the app read an exit code from a process still running.
   The command is now parsed into program and arguments, the wait is five minutes, and exit
   codes are reported in words, including 3010/1641 (restart needed) and 1605/1614 (no longer
@@ -117,7 +184,7 @@ which is what makes this a major version.
   (`src/SysMonitor.Core/Services/Utilities/InstalledProgramsService.cs`)
 - **Startup items turn off the way Windows turns them off.** "Enable" logged a line and changed
   nothing, every item was listed as enabled regardless of its real state, and "Disable" moved
-  the value into a private key nothing read again — so disabling from inside the app was one-way
+  the value into a private key nothing read again - so disabling from inside the app was one-way
   and Task Manager knew nothing about it. Entries now use `Explorer\StartupApproved`, the same
   mechanism Task Manager writes, so all three views agree and every change is reversible.
   (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs`)
@@ -133,7 +200,7 @@ which is what makes this a major version.
   (`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs`, `src/SysMonitor.App/App.xaml.cs`)
 - **Network speed is read from the adapter carrying the traffic.** The monitor picked whichever
   adapter claimed the fastest link, which on any machine with WSL, Hyper-V or Docker is a
-  virtual switch claiming 10 Gb/s and carrying nothing — so the dashboard showed 0 B/s with the
+  virtual switch claiming 10 Gb/s and carrying nothing - so the dashboard showed 0 B/s with the
   wrong adapter name beside it, and history recorded those zeros. Selection now follows the
   routed interface, then a real default gateway, then link speed. The counters read are the
   interface's own, so a machine on IPv6 no longer looks idle.
@@ -164,7 +231,7 @@ which is what makes this a major version.
   (`src/SysMonitor.Core/Services/Utilities/PdfEditor.cs`)
 - **PDF annotations land where they are drawn.** Canvas pixel coordinates were handed to
   PDFsharp as points, so at 100% zoom every annotation saved 1.33x away from where it was drawn,
-  and further still on pages the file rotates or crops — a redaction box did not cover what the
+  and further still on pages the file rotates or crops - a redaction box did not cover what the
   user covered. Page identity was also confused between source page number and document
   position, so annotations on a document whose pages had been moved or deleted were dropped
   without a word. (`src/SysMonitor.Core/Services/Utilities/PdfEditor.cs`)
@@ -174,7 +241,7 @@ which is what makes this a major version.
   a family that genuinely is not installed falls back to Arial rather than losing the document.
   (`src/SysMonitor.Core/Services/Utilities/WindowsFontResolver.cs`)
 - **Registry cleaning takes a real backup, and restore works.** The backup wrote a `.reg` file
-  containing only comment lines — no keys, no values — for three fixed HKCU keys, while the
+  containing only comment lines - no keys, no values - for three fixed HKCU keys, while the
   cleaner deletes HKCU and HKLM values and whole subkey trees. There was no restore code at all.
   Every key a selected fix will modify is now exported with `reg.exe` before anything is cleaned,
   and a failed export stops the clean.
@@ -218,7 +285,7 @@ which is what makes this a major version.
 ### Changed
 
 - **Game Mode moves background apps out of the way instead of killing them.** Enabling it asked
-  twenty-one apps — browsers, Teams, Discord, Slack, Zoom, OneDrive, Dropbox — to close and killed
+  twenty-one apps - browsers, Teams, Discord, Slack, Zoom, OneDrive, Dropbox - to close and killed
   whatever had not gone one second later; anything without a window was killed outright, and
   unsaved work went with it. Background apps are now lowered below the game in the processor queue
   and put back exactly where they were when Game Mode ends, when the app closes, or on the next
@@ -226,7 +293,7 @@ which is what makes this a major version.
   with a ten-second wait, and auto mode never closes anything.
   (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`,
   `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs`)
-- **The power plan is always put back** — when Game Mode ends, when the app closes with it on, and
+- **The power plan is always put back** - when Game Mode ends, when the app closes with it on, and
   on the next start after a crash. The plan being replaced is written down before it is changed.
   (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`)
 - **The memory optimizer describes what it does.** Trimming a working set moves pages to the
@@ -246,11 +313,11 @@ which is what makes this a major version.
 
 - **The app says it is MIT, everywhere, for the first time.** The MIT text at `LICENSE`
   is what the installer has presented since 2025-12-15 (`installer/SysMonitorSetup.iss:39`),
-  but six other places told the user the opposite — the Settings page read
+  but six other places told the user the opposite - the Settings page read
   "All rights reserved", and `installer/LICENSE.rtf` was a proprietary end-user agreement
   forbidding copying, modification, distribution and reverse engineering.
-- **`installer/LICENSE.rtf` deleted.** It was never wired into the build — the installer
-  reads `..\LICENSE` — so it contradicted the actual terms while being documented as the
+- **`installer/LICENSE.rtf` deleted.** It was never wired into the build - the installer
+  reads `..\LICENSE` - so it contradicted the actual terms while being documented as the
   agreement shown during installation. `installer/INSTALLER_README.txt` now points at the
   real file.
 - **A License card was added to the in-app User's Guide**
@@ -262,7 +329,7 @@ which is what makes this a major version.
   source-availability obligation that was not being met; Serilog is Apache-2.0.
 - **The licence now installs with the application.** `Build-Release.ps1` stages only the
   publish output, and the installer copied only that folder, so `LICENSE` never reached
-  the installed app — while MIT requires the copyright and permission notice to travel
+  the installed app - while MIT requires the copyright and permission notice to travel
   with every copy. `LICENSE.txt` and `THIRD-PARTY-NOTICES.txt` are now installed beside
   the executable (`installer/SysMonitorSetup.iss`).
 - Copyright lines read 2024-2026 rather than 2024 or 2024-2025.
@@ -270,7 +337,7 @@ which is what makes this a major version.
 ### Documentation
 
 - The keyboard-shortcut table has been removed from the user guide. None of the six shortcuts it
-  listed were implemented — the app has no `KeyboardAccelerator` anywhere, and the only key
+  listed were implemented - the app has no `KeyboardAccelerator` anywhere, and the only key
   handling is Delete, Escape and Enter inside the PDF editor.
 - Compression formats are described as ZIP and GZip (`.gz`, single file). The previous "TAR.GZ"
   claim had no tar step behind it.
@@ -296,9 +363,9 @@ which is what makes this a major version.
 
 ### Added
 - Advanced Game Mode.
-- Auto Game Mode — detects a running game and enables optimisation
+- Auto Game Mode - detects a running game and enables optimisation
   (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:266`).
-- Performance Profiles — save and switch between optimisation presets.
+- Performance Profiles - save and switch between optimisation presets.
 - Game overlay showing live temperatures, load and power, repositionable by dragging.
 - Fan speed and power draw monitoring widgets.
 - Hardware sensor diagnostic viewer.
@@ -310,7 +377,7 @@ which is what makes this a major version.
 ## [2.1.1]
 
 ### Added
-- Game Mode — one-click gaming optimisation.
+- Game Mode - one-click gaming optimisation.
 - Session statistics covering background apps moved aside, apps that declined to close, and
   memory trimmed.
 

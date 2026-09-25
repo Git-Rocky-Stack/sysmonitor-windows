@@ -38,7 +38,7 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
     /// on screen; Game Mode does not close anything unless it comes back true.
     /// </summary>
     public Func<IReadOnlyList<string>, Task<bool>>? ConfirmCloseBackgroundApps { get; set; }
-    [ObservableProperty] private string _lastMemoryFreed = "0 MB";
+    [ObservableProperty] private string _lastMemoryTrimmed = "0 MB";
     [ObservableProperty] private bool _hasLastSession;
 
     // Auto Game Mode
@@ -242,7 +242,7 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
                 {
                     // Update last session info
                     LastBackgroundAppsAffected = result.ProcessesAffected;
-                    LastMemoryFreed = FormatBytes(result.MemoryFreedBytes);
+                    LastMemoryTrimmed = FormatBytes(result.MemoryTrimmedBytes);
                     HasLastSession = true;
                     LastSessionAppsLabel = action == BackgroundAppAction.AskToClose ? "Apps Closed" : "Apps Lowered";
 

@@ -1,6 +1,6 @@
 # Reference: settings and data
 
-Every setting on the Settings page of STX.1 System Monitor v3.0.0, with its default,
+Every setting on the Settings page of STX.1 System Monitor v3.0.1, with its default,
 and every location the app writes to.
 
 Defaults are read from `src/SysMonitor.App/ViewModels/SettingsViewModel.cs:20-52`. The
@@ -18,18 +18,18 @@ Reset command restores exactly these values (`SettingsViewModel.cs:260-286`).
 |---|---|---|---|
 | Run at Startup | On or off | Off (`:23`) | Launches the app when you sign in |
 | Minimize to Tray | On or off | On (`:24`) | Closing the window keeps the app running in the notification area |
-| Show Notifications | On or off | On (`:25`) | Enables alert toasts (`Views/SettingsPage.xaml:98`) |
+| Show Notifications | On or off | On (`:25`) | Enables alert toasts (`src/SysMonitor.App/Views/SettingsPage.xaml:98`) |
 
 ## Monitoring
 
 | Setting | Type | Default | Effect |
 |---|---|---|---|
-| Refresh Interval | 1 to 10 seconds | 2 seconds | How often readings update (`:28`, range at `Views/SettingsPage.xaml:122`) |
+| Refresh Interval | 1 to 10 seconds | 2 seconds | How often readings update (`:28`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:122`) |
 | Memory Threshold | Percent | 80 (`:29`) | The usage level that raises a memory alert |
 
 The memory threshold raises an alert and nothing else. Nothing optimises memory on its
 own. The Dashboard's TRIM MEMORY button is the only thing that trims working sets,
-and you start it (`ViewModels/DashboardViewModel.cs:298`).
+and you start it (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:298`).
 
 An "Auto-Optimize Memory" setting existed before v3.0.0 and was removed, because
 nothing read it.
@@ -39,13 +39,13 @@ list, from which Windows can page them straight back. It does not free RAM in th
 of making more of it available
 (`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91`). The result message
 has said so since v3.0.0: it reads "Trimmed N from background apps"
-(`ViewModels/DashboardViewModel.cs:311`).
+(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:311`).
 
-**In the v3.0.0 release the button reads BOOST RAM**, which was the last piece of that
-flow still claiming otherwise. It is labelled TRIM MEMORY
-(`Views/DashboardPage.xaml:286`) with a tooltip explaining the standby list, from the
-next release onwards. If your copy says BOOST RAM, you are on v3.0.0 and the button
-does the same thing either way.
+The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
+of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY
+(`src/SysMonitor.App/Views/DashboardPage.xaml:286`), with a tooltip explaining the
+standby list. If your copy says BOOST RAM you are on v3.0.0 or earlier; the button does
+the same thing either way.
 
 ## Temperature alerts
 
@@ -76,7 +76,7 @@ swallowed (`src/SysMonitor.Core/Services/Alerts/AlertService.cs`).
 
 The Settings page reads the version from the running assembly
 (`SettingsViewModel.cs:87`), so it reports what is actually installed rather than a
-number written by hand. For this release it reads 3.0.0.0.
+number written by hand. For this release it reads 3.0.1.0.
 
 ## Where the app writes
 
@@ -99,7 +99,7 @@ The install folder holds the application, plus `LICENSE.txt` and
 `THIRD-PARTY-NOTICES.txt` (`installer/SysMonitorSetup.iss:87-88`).
 
 Exported reports go to your Documents folder
-(`ViewModels/DashboardViewModel.cs:333-341`).
+(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:333-341`).
 
 ## What leaves your machine
 

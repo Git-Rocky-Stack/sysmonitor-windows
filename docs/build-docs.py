@@ -34,8 +34,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = "https://git-rocky-stack.github.io/sysmonitor-windows/"
 REPO = "https://github.com/Git-Rocky-Stack/sysmonitor-windows"
 
+# Where a generated page is published, when that is not the source's own stem. README.md is the file
+# GitHub renders when someone browses docs/ in the repository, so it keeps that name in the tree; on the
+# site it is the documentation index, and /README.html is not a URL to hand a reader.
+OUTPUT_NAMES = {
+    "README.md": "documentation",
+}
+
 # Every generated page: source markdown -> (kind shown in the eyebrow, meta description)
 PAGES = {
+    "README.md": (
+        "Documentation",
+        "Every guide for STX.1 System Monitor, split into tutorial, how-to, reference "
+        "and explanation, with a note on how each claim in them was checked."),
     "tutorial-getting-started.md": (
         "Tutorial",
         "Install STX.1 System Monitor, read your system health score, free up disk "
@@ -128,10 +139,10 @@ TEMPLATE = """<!DOCTYPE html>
 
 <main id="main" class="doc">
   <div class="wrap">
-    <p class="crumbs"><a href="./">Home</a> / <a href="./#docs">Documentation</a> / {kind}</p>
+    <p class="crumbs">{crumbs}</p>
 {body}
     <div class="docnav">
-      <a class="btn btn-secondary" href="./#docs">All documentation</a>
+      <a class="btn btn-secondary" href="{up}">{up_label}</a>
       <a class="btn btn-secondary" href="{repo}/blob/main/docs/{source}">Edit this page on GitHub</a>
     </div>
   </div>
@@ -149,6 +160,11 @@ TEMPLATE = """<!DOCTYPE html>
 </body>
 </html>
 """
+
+
+def output_name(source):
+    """The .html file a markdown source is published as."""
+    return OUTPUT_NAMES.get(source, source[:-3]) + ".html"
 
 
 def esc(s):
@@ -178,7 +194,7 @@ def render(source):
     # because those files are not published to the site.
     html = re.sub(r'href="\.\./([^"]+)"', r'href="%s/blob/main/\1"' % REPO, html)
     html = re.sub(r'href="([A-Za-z0-9._-]+)\.md(#[^"]*)?"',
-                  lambda m: 'href="%s.html%s"' % (m.group(1), m.group(2) or ""),
+                  lambda m: 'href="%s%s"' % (output_name(m.group(1) + ".md"), m.group(2) or ""),
                   html)
 
     # Tables need the horizontal-scroll wrapper the stylesheet expects.
@@ -187,14 +203,31 @@ def render(source):
 
     body = "\n".join("    " + line for line in html.splitlines())
 
+    # The index is the "Documentation" crumb, so it neither sits underneath itself in the breadcrumb
+    # nor offers a button back to the page you are already on.
+    is_index = source == "README.md"
+    if is_index:
+        crumbs = '<a href="./">Home</a> / Documentation'
+        up, up_label = "./", "Back to the front page"
+    else:
+        crumbs = ('<a href="./">Home</a> / <a href="%s">Documentation</a> / %s'
+                  % (output_name("README.md"), esc(kind)))
+        up, up_label = output_name("README.md"), "All documentation"
+
+    # "STX.1 System Monitor documentation - STX.1 System Monitor" is what appends the product name
+    # unconditionally; a title is read in a browser tab and a search result, where it is 60 characters wide.
+    title = heading if "STX.1" in heading else heading + " - STX.1 System Monitor"
+
     return TEMPLATE.format(
-        title=esc(heading + " - STX.1 System Monitor"),
+        title=esc(title),
         heading=esc(heading),
         description=esc(description),
-        canonical=SITE + source[:-3] + ".html",
+        canonical=SITE + output_name(source),
         site=SITE,
         repo=REPO,
-        kind=esc(kind),
+        crumbs=crumbs,
+        up=up,
+        up_label=up_label,
         source=source,
         body=body,
     )
@@ -211,16 +244,16 @@ def main():
         if not os.path.exists(os.path.join(HERE, source)):
             sys.exit("FAIL: missing source %s" % source)
 
-        target = os.path.join(HERE, source[:-3] + ".html")
+        target = os.path.join(HERE, output_name(source))
         fresh = render(source)
 
         if args.check:
             if not os.path.exists(target):
-                stale.append(source[:-3] + ".html (missing)")
+                stale.append(output_name(source) + " (missing)")
                 continue
             with io.open(target, "r", encoding="utf-8") as f:
                 if f.read() != fresh:
-                    stale.append(source[:-3] + ".html (out of date)")
+                    stale.append(output_name(source) + " (out of date)")
             continue
 
         with io.open(target, "w", encoding="utf-8", newline="") as f:

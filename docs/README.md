@@ -1,6 +1,6 @@
 # STX.1 System Monitor documentation
 
-Documentation for STX.1 System Monitor v3.0.0, a Windows desktop system monitoring
+Documentation for STX.1 System Monitor v3.0.1, a Windows desktop system monitoring
 and maintenance application.
 
 The public page built from these files is served at
@@ -47,7 +47,7 @@ Understanding oriented. Why the app behaves the way it does.
 ## Related files in the repository
 
 - [README.md](../README.md), project overview and build instructions
-- [CHANGELOG.md](../CHANGELOG.md), every behaviour change in v3.0.0 with the file it lives in
+- [CHANGELOG.md](../CHANGELOG.md), every behaviour change, release by release, with the file it lives in
 - [FEATURES_AND_USER_GUIDE.md](../FEATURES_AND_USER_GUIDE.md), the guide that also ships inside the app
 - [PRIVACY_POLICY.md](../PRIVACY_POLICY.md)
 - [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md)
