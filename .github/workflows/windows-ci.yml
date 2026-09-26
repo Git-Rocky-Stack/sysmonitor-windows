@@ -1,0 +1,65 @@
+# Build and test on Windows for every pull request and every push to main.
+#
+# WinUI 3 compiles its XAML with a Windows-only toolchain, so nothing that touches the app can be checked
+# anywhere else. This job is the gate: the docs site must match its markdown sources, the whole solution
+# must build, and the full test suite must pass.
+name: Windows CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer push to the same branch makes an older run's answer irrelevant.
+concurrency:
+  group: windows-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build and test (Debug x64)
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # docs/build-docs.py renders every docs/*.md into its .html page; --check fails if a page is missing
+      # or stale, which is what stops a hand-edited page drifting away from its source.
+      - name: Docs site matches its sources
+        run: |
+          python -m pip install --quiet markdown
+          python docs/build-docs.py --check
+
+      # Debug is the unpackaged configuration (SysMonitor.App.csproj), the same build `dotnet run` uses.
+      - name: Build
+        run: dotnet build SysMonitor.sln -c Debug -p:Platform=x64
+
+      - name: Test
+        run: >
+          dotnet test tests/SysMonitor.Tests/SysMonitor.Tests.csproj -c Debug -p:Platform=x64
+          --logger "trx;LogFileName=results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
+          if-no-files-found: ignore
