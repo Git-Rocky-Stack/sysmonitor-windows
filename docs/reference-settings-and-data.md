@@ -4,7 +4,7 @@ Every setting on the Settings page of STX.1 System Monitor v3.0.1, with its defa
 and every location the app writes to.
 
 Defaults are read from `src/SysMonitor.App/ViewModels/SettingsViewModel.cs:20-52`. The
-Reset command restores exactly these values (`SettingsViewModel.cs:260-286`).
+Reset command restores exactly these values (`SettingsViewModel.cs:133-159`).
 
 ## Appearance
 
@@ -75,7 +75,7 @@ swallowed (`src/SysMonitor.Core/Services/Alerts/AlertService.cs`).
 ## Version
 
 The Settings page reads the version from the running assembly
-(`SettingsViewModel.cs:87`), so it reports what is actually installed rather than a
+(`SettingsViewModel.cs:65`), so it reports what is actually installed rather than a
 number written by hand. For this release it reads 3.0.1.0.
 
 ## Where the app writes
@@ -88,18 +88,44 @@ Everything the application stores about you is under one folder:
 
 | Path | Contents |
 |---|---|
-| `%LocalAppData%\SysMonitor` | Settings, the SQLite history database, and application state (`src/SysMonitor.App/App.xaml.cs:72`) |
-| `%LocalAppData%\SysMonitor\Logs` | Serilog output |
+| `%LocalAppData%\SysMonitor` | The SQLite history database, `history.db` (`src/SysMonitor.Core/Data/HistoryDbContext.cs:26`), and application state |
+| `%LocalAppData%\SysMonitor\settings.json` | Settings (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:56`) |
+| `%LocalAppData%\SysMonitor\Logs` | Serilog output (`src/SysMonitor.App/App.xaml.cs:74`) |
 | `%LocalAppData%\SysMonitor\Logs` | Crash reports. These were written to the Desktop before v3.0.0 |
 
-Deleting `%LocalAppData%\SysMonitor` resets the application completely. That statement
-is true as written, which is why crash reports were moved into it.
+Deleting `%LocalAppData%\SysMonitor` resets everything the application keeps in files.
+That statement is true as written, which is why crash reports were moved into it.
+
+Two settings also leave an entry outside that folder, and deleting it does not remove
+them. Run at Startup adds a `SysMonitor` value under
+`HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+(`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:202`), and a cleaning schedule is a
+Task Scheduler task named `SysMonitor Scheduled Cleaning`
+(`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningService.cs:56`). Switch both off
+in the app before deleting the folder, and nothing is left behind.
 
 The install folder holds the application, plus `LICENSE.txt` and
 `THIRD-PARTY-NOTICES.txt` (`installer/SysMonitorSetup.iss:87-88`).
 
 Exported reports go to your Documents folder
 (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:333-341`).
+
+### The packaged build
+
+The same paths hold for the packaged (MSIX) build, as the app sees them. Windows
+redirects what a packaged app writes under `%LocalAppData%` into that app's own package
+data, under `%LocalAppData%\Packages`, and removes it when the app is uninstalled. For
+that build, uninstalling is what clears those files.
+
+Up to and including v3.0.1, the packaged build kept its settings somewhere else: in the
+package's `LocalSettings`, which the Settings page wrote and nothing else read. The alert
+service, the minimize-to-tray check and Auto Game Mode read `settings.json`, so in that
+build switching notifications off, changing an alert threshold or switching
+minimize-to-tray off was saved and then ignored. Later versions keep settings in
+`settings.json` in both builds, and every part of the app reads them from one shared store
+(`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:25`). On its first start, a later
+version copies across whatever an earlier packaged version left in `LocalSettings`, so
+updating loses nothing.
 
 ## What leaves your machine
 
@@ -111,8 +137,16 @@ update, download the new release and run it.
 ## Clearing data
 
 The Settings page has a Clear All Data command
-(`SettingsViewModel.cs:289`). It resets settings and stored data. Deleting
-`%LocalAppData%\SysMonitor` by hand does the same thing.
+(`SettingsViewModel.cs:162`). It resets every setting to its default and saves that
+straight away (`SettingsViewModel.cs:168-169`). It clears settings only: the history
+database and the logs stay where they are.
+
+Up to and including v3.0.1 it cleared the packaged build's `LocalSettings` and nothing
+else, so in the unpackaged build it changed nothing on disk. Later versions reset every
+setting in both builds.
+
+Deleting `%LocalAppData%\SysMonitor` by hand, with the app closed, removes the history
+database and the logs as well.
 
 ## Related
 

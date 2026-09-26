@@ -87,7 +87,7 @@ comment-only, 8 of those saying `// Log in production`.
 thing that calls `StartMonitoringAsync`. The toggle read ON after a restart and no game was ever
 detected until the user turned it off and on again.
 
-**Fix:** `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:84`. The settings path is now
+**Fix:** `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:86`. The settings path is now
 injectable so the test never touches the developer's real settings.
 
 Tests: `tests/SysMonitor.Tests/Services/AutoGameModeStartupTests.cs` (5).
@@ -101,7 +101,7 @@ Two defects in one gate:
 - It measured elapsed time on `DateTime.Now`. Local time goes backwards once a year; a negative elapsed
   time reads as "inside the cooldown", so **every** alert was suppressed for the whole repeated hour.
 
-**Fix:** `src/SysMonitor.Core/Services/Alerts/AlertService.cs:232` — UTC, no `IsActive` in the gate, and
+**Fix:** `src/SysMonitor.Core/Services/Alerts/AlertService.cs:237` — UTC, no `IsActive` in the gate, and
 a clock moved backwards means the alert is raised rather than swallowed. `ClearAlert(type)` remains the
 documented way to ask to be told again sooner.
 

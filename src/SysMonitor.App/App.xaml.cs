@@ -15,6 +15,7 @@ using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.History;
 using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.GameMode;
+using SysMonitor.Core.Services.Settings;
 using SysMonitor.App.Services;
 
 namespace SysMonitor.App;
@@ -100,6 +101,10 @@ public partial class App : Application
                 // initialization, file system scanning) until first use.
                 // This reduces startup time from 5+ seconds to <1 second.
                 // ============================================================
+
+                // Settings: one store every reader and writer shares, in the packaged build and the unpackaged one
+                services.AddSingleton<SettingsStore>();
+                services.AddSingleton<ISettingsStore>(sp => sp.GetRequiredService<SettingsStore>());
 
                 // Core Services - Monitors (Lazy: expensive PerformanceCounter/WMI init)
                 // These services have expensive constructors that query WMI or create

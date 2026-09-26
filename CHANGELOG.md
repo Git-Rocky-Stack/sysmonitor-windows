@@ -26,6 +26,20 @@ Each entry describes a behaviour change and cites the file it lives in.
   sampler is locked and hands back its last reading when asked again within 250 ms
   (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:56`). A sampler takes its baseline
   when it is created, so the history recorder no longer writes a 0% point at start-up.
+- **Every part of the app reads the settings the Settings page saved, in both builds.** In
+  the packaged (MSIX) build the page saved to `LocalSettings`, while the alert service, the
+  minimize-to-tray check and Auto Game Mode read `settings.json`, which nothing in that
+  build wrote: switching notifications off, changing an alert threshold or switching
+  minimize-to-tray off was saved and then ignored. In the unpackaged build, Save wrote the
+  whole file back from a copy the page took when it opened, erasing any custom game Auto
+  Game Mode had added since. One store now serves every reader and writer in both builds
+  (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:25`, registered at
+  `src/SysMonitor.App/App.xaml.cs:106`). A save reads the file again and writes only its
+  own changes on top, and a file it could not read is never written over. On its first
+  start the packaged build copies across what an earlier version left in `LocalSettings`.
+  Clear All Data resets every setting in both builds; it used to clear `LocalSettings`
+  alone, which changed nothing unpackaged. When a save fails, the Settings page now says
+  so instead of reporting success.
 
 ---
 
@@ -378,7 +392,7 @@ which is what makes this a major version.
 ### Added
 - Advanced Game Mode.
 - Auto Game Mode - detects a running game and enables optimisation
-  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:266`).
+  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:228`).
 - Performance Profiles - save and switch between optimisation presets.
 - Game overlay showing live temperatures, load and power, repositionable by dragging.
 - Fan speed and power draw monitoring widgets.

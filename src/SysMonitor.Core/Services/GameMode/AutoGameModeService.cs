@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Text.Json;
+using SysMonitor.Core.Services.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -12,7 +12,7 @@ public class AutoGameModeService : IAutoGameModeService
 {
     private readonly ILogger _logger;
     private readonly IGameModeService _gameModeService;
-    private readonly string _settingsPath;
+    private readonly ISettingsStore _settings;
     private readonly List<GameDefinition> _knownGames;
     private readonly List<GameDefinition> _customGames = new();
     private readonly List<GameDefinition> _runningGames = new();
@@ -61,13 +61,15 @@ public class AutoGameModeService : IAutoGameModeService
     /// Where the auto-mode setting and custom games live. Defaults to the per-user file the app uses; a test
     /// passes its own so it never reads or writes the developer's real settings.
     /// </param>
-    public AutoGameModeService(IGameModeService gameModeService, string? settingsPath = null, ILogger<AutoGameModeService>? logger = null)
+    /// <param name="settings">The store the rest of the app shares; see <see cref="SettingsStore"/>.</param>
+    public AutoGameModeService(IGameModeService gameModeService, string? settingsPath = null,
+        ILogger<AutoGameModeService>? logger = null, ISettingsStore? settings = null)
     {
         _logger = logger ?? NullLogger<AutoGameModeService>.Instance;
         _gameModeService = gameModeService;
-        _settingsPath = settingsPath ?? Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "settings.json");
+        _settings = settingsPath is not null
+            ? new SettingsStore(settingsPath, _logger)
+            : settings ?? new SettingsStore();
 
         // Initialize predefined games list
         _knownGames = CreateKnownGamesList();
@@ -182,85 +184,45 @@ public class AutoGameModeService : IAutoGameModeService
 
     private void LoadCustomGames()
     {
-        try
+        var games = _settings.Get<List<GameDefinition>?>("CustomGames", null);
+        if (games == null)
+            return;
+
+        foreach (var game in games)
         {
-            if (File.Exists(_settingsPath))
-            {
-                var json = File.ReadAllText(_settingsPath);
-                var settings = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                if (settings != null && settings.TryGetValue("CustomGames", out var customGamesElement))
-                {
-                    var games = customGamesElement.Deserialize<List<GameDefinition>>();
-                    if (games != null)
-                    {
-                        foreach (var game in games)
-                        {
-                            game.IsCustom = true;
-                            _customGames.Add(game);
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "The saved list of custom games could not be read");
+            game.IsCustom = true;
+            _customGames.Add(game);
         }
     }
 
     private void LoadAutoModeSetting()
     {
-        try
-        {
-            if (File.Exists(_settingsPath))
-            {
-                var json = File.ReadAllText(_settingsPath);
-                var settings = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                if (settings != null && settings.TryGetValue("AutoGameModeEnabled", out var autoElement))
-                {
-                    _autoModeEnabled = autoElement.GetBoolean();
-                }
-            }
-        }
-        catch
-        {
-            _autoModeEnabled = false;
-        }
+        _autoModeEnabled = _settings.Get("AutoGameModeEnabled", false);
     }
 
-    private async Task SaveSettingsAsync()
+    /// <summary>
+    /// Saves through the shared store, which writes only these two keys on top of the file - so a save here can
+    /// no longer race the Settings page's own save and erase what it wrote, nor be erased by it.
+    /// </summary>
+    private Task SaveSettingsAsync()
     {
-        try
+        // Copied on the calling thread - the one that changes them - and written on a pool thread.
+        var autoModeEnabled = _autoModeEnabled;
+        var customGames = _customGames.ToList();
+
+        return Task.Run(() =>
         {
-            Dictionary<string, object> settings;
-
-            if (File.Exists(_settingsPath))
+            try
             {
-                var json = await File.ReadAllTextAsync(_settingsPath);
-                settings = JsonSerializer.Deserialize<Dictionary<string, object>>(json) ?? new();
+                _settings.Set("AutoGameModeEnabled", autoModeEnabled);
+                _settings.Set("CustomGames", customGames);
+                _settings.Save();
             }
-            else
+            catch (Exception ex)
             {
-                settings = new();
+                _logger.LogWarning(ex, "Auto Game Mode settings could not be saved");
             }
-
-            settings["AutoGameModeEnabled"] = _autoModeEnabled;
-            settings["CustomGames"] = _customGames;
-
-            var outputJson = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
-
-            var directory = Path.GetDirectoryName(_settingsPath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            await File.WriteAllTextAsync(_settingsPath, outputJson);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Auto Game Mode settings could not be saved");
-        }
+        });
     }
 
     public async Task StartMonitoringAsync()

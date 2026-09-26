@@ -6,6 +6,7 @@ using SysMonitor.App.Services;
 using SysMonitor.App.Views;
 using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.History;
+using SysMonitor.Core.Services.Settings;
 using WinRT.Interop;
 using Serilog;
 
@@ -147,30 +148,11 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private bool IsMinimizeToTrayEnabled()
-    {
-        try
-        {
-            var settingsPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SysMonitor", "settings.json");
-
-            if (File.Exists(settingsPath))
-            {
-                var json = File.ReadAllText(settingsPath);
-                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(json);
-                if (settings != null && settings.TryGetValue("MinimizeToTray", out var element))
-                {
-                    return element.GetBoolean();
-                }
-            }
-        }
-        catch
-        {
-            // Best effort: an unreadable setting means the default below, which is what this returns.
-        }
-        return true; // Default to true
-    }
+    /// <summary>
+    /// Read from the store the Settings page writes to. This used to read settings.json itself, which the
+    /// packaged build never wrote, so in the Store build switching minimize-to-tray off did nothing.
+    /// </summary>
+    private static bool IsMinimizeToTrayEnabled() => App.GetService<ISettingsStore>().Get("MinimizeToTray", true);
 
     private void ShowWindow()
     {

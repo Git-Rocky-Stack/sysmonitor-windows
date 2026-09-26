@@ -662,7 +662,7 @@ Detailed system specifications:
 
 ### Data & Privacy
 
-- **Clear All Data** - Reset all app settings and data
+- **Clear All Data** - Reset every setting to its default. The history database and logs are kept
 - **Privacy Notice** - All data stays local on your device
 
 ---
