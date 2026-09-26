@@ -147,6 +147,24 @@ public class SettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public void TheLastAutoGameModeChangeBeforeShutdownIsTheOneOnDisk()
+    {
+        // Every write held back a little, as a busy disk would, so a shutdown that did not wait would be seen.
+        var store = new SlowSaves(new SettingsStore(SettingsPath), TimeSpan.FromMilliseconds(400));
+        var autoGameMode = AutoGameMode(settings: store);
+
+        // Three flicks of the switch, each saved on a pool thread without anyone waiting for it, and then the
+        // app closes. The writes must land in the order the changes were made, and before the service is gone.
+        autoGameMode.AutoModeEnabled = true;
+        autoGameMode.AutoModeEnabled = false;
+        autoGameMode.AutoModeEnabled = true;
+        autoGameMode.Dispose();
+
+        new SettingsStore(SettingsPath).Get("AutoGameModeEnabled", false).Should().BeTrue(
+            "the switch was left on, so that is what the next start has to find");
+    }
+
+    [Fact]
     public void ASaveKeepsWhatAnotherWriterSavedAfterThisStoreLastReadTheFile()
     {
         var page = new SettingsStore(SettingsPath);
@@ -347,6 +365,22 @@ public class SettingsStoreTests : IDisposable
     }
 
     // ---------------------------------------------------------------- helpers
+
+    /// <summary>A store whose saves take a while to reach the disk.</summary>
+    private sealed class SlowSaves(ISettingsStore inner, TimeSpan delay) : ISettingsStore
+    {
+        public T Get<T>(string key, T defaultValue) => inner.Get(key, defaultValue);
+
+        public void Set<T>(string key, T value) => inner.Set(key, value);
+
+        public void Clear() => inner.Clear();
+
+        public bool Save()
+        {
+            Thread.Sleep(delay);
+            return inner.Save();
+        }
+    }
 
     private AlertService Alerts(ISettingsStore? settings = null, string? settingsPath = null) =>
         new(Mock.Of<ICpuMonitor>(), _memory.Object, _temperature.Object, _battery.Object,

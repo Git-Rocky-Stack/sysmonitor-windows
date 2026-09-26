@@ -37,9 +37,10 @@ Each entry describes a behaviour change and cites the file it lives in.
   `src/SysMonitor.App/App.xaml.cs:106`). A save reads the file again and writes only its
   own changes on top, and a file it could not read is never written over. On its first
   start the packaged build copies across what an earlier version left in `LocalSettings`.
-  Clear All Data resets every setting in both builds; it used to clear `LocalSettings`
-  alone, which changed nothing unpackaged. When a save fails, the Settings page now says
-  so instead of reporting success.
+  Auto Game Mode's saves are written in the order they were made, and the last one lands
+  before the app closes. Clear All Data resets every setting in both builds; it used to
+  clear `LocalSettings` alone, which changed nothing unpackaged. When a save fails, the
+  Settings page now says so instead of reporting success.
 
 ---
 
@@ -392,7 +393,7 @@ which is what makes this a major version.
 ### Added
 - Advanced Game Mode.
 - Auto Game Mode - detects a running game and enables optimisation
-  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:228`).
+  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:237`).
 - Performance Profiles - save and switch between optimisation presets.
 - Game overlay showing live temperatures, load and power, repositionable by dragging.
 - Fan speed and power draw monitoring widgets.

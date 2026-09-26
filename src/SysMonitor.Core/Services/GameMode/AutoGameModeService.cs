@@ -16,14 +16,16 @@ public class AutoGameModeService : IAutoGameModeService
     private readonly List<GameDefinition> _knownGames;
     private readonly List<GameDefinition> _customGames = new();
     private readonly List<GameDefinition> _runningGames = new();
+    private readonly object _saveGate = new();
 
     private CancellationTokenSource? _cts;
     private Task? _monitoringTask;
+    private Task _saving = Task.CompletedTask;
     private bool _autoModeEnabled;
     private bool _gameModeWasAutoEnabled;
     private bool _disposed;
 
-    /// <summary>How long shutdown waits for the watch to notice it has been cancelled.</summary>
+    /// <summary>How long shutdown waits for the watch to notice it has been cancelled, and for a save to land.</summary>
     public static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(3);
 
     public bool IsMonitoring => _monitoringTask != null && !_monitoringTask.IsCompleted;
@@ -206,23 +208,30 @@ public class AutoGameModeService : IAutoGameModeService
     /// </summary>
     private Task SaveSettingsAsync()
     {
-        // Copied on the calling thread - the one that changes them - and written on a pool thread.
-        var autoModeEnabled = _autoModeEnabled;
-        var customGames = _customGames.ToList();
+        // Recorded on the calling thread, in the order the changes were made, so the store always holds the
+        // latest values. Only the writes to disk go to the pool, queued one behind another, and each writes
+        // whatever is latest by the time it runs; Dispose waits for the queue to empty.
+        _settings.Set("AutoGameModeEnabled", _autoModeEnabled);
+        _settings.Set("CustomGames", _customGames.ToList());
 
-        return Task.Run(() =>
+        lock (_saveGate)
         {
-            try
-            {
-                _settings.Set("AutoGameModeEnabled", autoModeEnabled);
-                _settings.Set("CustomGames", customGames);
-                _settings.Save();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Auto Game Mode settings could not be saved");
-            }
-        });
+            _saving = _saving.ContinueWith(_ => WriteSettings(), CancellationToken.None,
+                TaskContinuationOptions.None, TaskScheduler.Default);
+            return _saving;
+        }
+    }
+
+    private void WriteSettings()
+    {
+        try
+        {
+            _settings.Save();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Auto Game Mode settings could not be saved");
+        }
     }
 
     public async Task StartMonitoringAsync()
@@ -405,6 +414,15 @@ public class AutoGameModeService : IAutoGameModeService
         _cts?.Dispose();
         _cts = null;
         _monitoringTask = null;
+
+        // A change made just before shutdown may still be on its way to disk. It lands before the service goes,
+        // so it is there at the next start.
+        Task saving;
+        lock (_saveGate)
+            saving = _saving;
+
+        if (!saving.Wait(ShutdownTimeout))
+            _logger.LogWarning("Auto Game Mode settings were still being saved when the service shut down");
 
         GC.SuppressFinalize(this);
     }

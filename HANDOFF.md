@@ -87,7 +87,7 @@ comment-only, 8 of those saying `// Log in production`.
 thing that calls `StartMonitoringAsync`. The toggle read ON after a restart and no game was ever
 detected until the user turned it off and on again.
 
-**Fix:** `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:86`. The settings path is now
+**Fix:** `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:88`. The settings path is now
 injectable so the test never touches the developer's real settings.
 
 Tests: `tests/SysMonitor.Tests/Services/AutoGameModeStartupTests.cs` (5).
