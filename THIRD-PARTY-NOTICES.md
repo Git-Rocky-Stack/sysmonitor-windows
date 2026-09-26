@@ -32,7 +32,7 @@ terms, which are available through each project's own distribution.
 This library supplies the temperature sensors
 (`src/SysMonitor.Core/Services/Monitors/TemperatureMonitor.cs:92`) and the fan speed
 sensors (`:131-163`). It is the only place it is used - CPU and memory usage come from
-`GetSystemTimes` and WMI instead (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:53`).
+`GetSystemTimes` and WMI instead (`src/SysMonitor.Core/Services/Monitors/CpuSampler.cs:134`).
 
 MPL-2.0 requires that recipients of the executable form be told how to obtain the
 Source Code Form of the covered software. The source is at the repository link above,

@@ -13,7 +13,9 @@ public class FpsOverlayService : IFpsOverlayService
     /// <summary>How long shutdown waits for the update loop to notice it has been cancelled.</summary>
     public static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(2);
 
-    private readonly ICpuMonitor _cpuMonitor;
+    // Its own baseline: this reads on its own timer, and a shared one would let every other caller cut its
+    // measurement interval short (see CpuSampler).
+    private readonly CpuSampler _cpuSampler;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
 
@@ -52,7 +54,7 @@ public class FpsOverlayService : IFpsOverlayService
         IMemoryMonitor memoryMonitor,
         ITemperatureMonitor temperatureMonitor)
     {
-        _cpuMonitor = cpuMonitor;
+        _cpuSampler = cpuMonitor.CreateSampler();
         _memoryMonitor = memoryMonitor;
         _temperatureMonitor = temperatureMonitor;
     }
@@ -198,7 +200,7 @@ public class FpsOverlayService : IFpsOverlayService
         try
         {
             // CPU usage
-            stats.CpuUsage = await _cpuMonitor.GetUsagePercentAsync();
+            stats.CpuUsage = _cpuSampler.Sample();
 
             // Memory
             var memInfo = await _memoryMonitor.GetMemoryInfoAsync();

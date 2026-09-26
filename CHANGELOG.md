@@ -11,7 +11,21 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- **Every CPU reading covers its reader's own interval.** Usage is the share of the time
+  between two readings that the processors were busy, and the monitor kept one baseline for
+  the whole application: the page on screen, the FPS overlay's 500 ms loop, the tray tooltip
+  and the history recorder all read through it on their own timers, so each call cut short
+  the interval the next caller measured, and two calls a few milliseconds apart measured
+  nothing and reported 0. The baseline was also four fields updated with no lock. A
+  `CpuSampler` now owns its baseline
+  (`src/SysMonitor.Core/Services/Monitors/CpuSampler.cs:22`); the overlay, the tray and the
+  history recorder each hold one (`ICpuMonitor.CreateSampler`,
+  `src/SysMonitor.Core/Services/Monitors/IMonitors.cs:16`), and the monitor's own shared
+  sampler is locked and hands back its last reading when asked again within 250 ms
+  (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:56`). A sampler takes its baseline
+  when it is created, so the history recorder no longer writes a 0% point at start-up.
 
 ---
 

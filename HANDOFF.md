@@ -153,7 +153,7 @@ close the main window, and a WinUI app with a window still open does not exit.
 hard-placed at `MoveAndResize(100, 100, 220, 260)` whatever the label said.
 
 **Fix:** `IFpsOverlayService : IDisposable` (`src/SysMonitor.Core/Services/GameMode/IFpsOverlayService.cs:44`),
-`FpsOverlayService.Dispose` (`src/SysMonitor.App/Services/FpsOverlayService.cs:115`), and
+`FpsOverlayService.Dispose` (`src/SysMonitor.App/Services/FpsOverlayService.cs:117`), and
 `ApplyPosition` (`src/SysMonitor.App/Views/FpsOverlayWindow.xaml.cs:70`) driven by
 `OverlayPlacement.Place` (`src/SysMonitor.Core/Services/GameMode/OverlayPlacement.cs:16`) — the
 arithmetic lives in Core because the cases that matter (a monitor left of the primary has a negative X;
@@ -248,7 +248,7 @@ two callers could each open a `Computer` and the second would replace the first.
 `ITemperatureMonitor` declared `Dispose()` without extending `IDisposable`, so nothing could see there
 was a kernel driver to give back — `grep` found no caller.
 
-**Fix:** `TemperatureMonitor.cs:25` gates every touch of the hardware; `IMonitors.cs:94` makes the
+**Fix:** `TemperatureMonitor.cs:25` gates every touch of the hardware; `IMonitors.cs:100` makes the
 interface disposable.
 
 **Honest limit:** LibreHardwareMonitor needs administrator rights to open its driver, and the test shell
