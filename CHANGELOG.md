@@ -13,6 +13,14 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ### Changed
 
+- **Text is set in Public Sans, the first of the Command Console's faces.** STX.1 is
+  being restyled to match System-X, and the type comes first: Public Sans for text,
+  Archivo at the widths System-X draws for titles, caps and lamps, Departure Mono for live
+  numbers and Iosevka for code and paths. They ship as TrueType files built from System-X's
+  web fonts (`scripts/build-fonts.py`, `src/SysMonitor.App/Styles/Console/Fonts.xaml`),
+  each family with its copyright notice and the SIL Open Font License beside it, and are
+  listed in THIRD-PARTY-NOTICES.md. Pages and controls pick up Public Sans now; the other
+  faces arrive with the controls that use them.
 - **Drive Wiper and Large Files ask before they destroy anything.** WIPE NOW started
   overwriting the moment it was pressed, and DELETE SELECTED sent every ticked file away
   without a question. Both now ask first, naming how many items are involved and how much

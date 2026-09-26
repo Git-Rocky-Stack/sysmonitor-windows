@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Command Console's four faces, as System-X sets them (scripts/build-fonts.py builds the files).
+
+    A XAML FontFamily names one family in one file, so each face the design uses is a file and a family of its
+    own: the weight is in the file, not asked of it. Public Sans carries the text, Archivo the titles, caps and
+    lamps at the widths System-X draws them, Departure Mono every live number, and Iosevka code and paths.
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Public Sans: body text, descriptions, labels. -->
+    <FontFamily x:Key="ConsoleBodyFontFamily">ms-appx:///Assets/Fonts/PublicSans-Regular.ttf#Public Sans</FontFamily>
+    <FontFamily x:Key="ConsoleBodyMediumFontFamily">ms-appx:///Assets/Fonts/PublicSans-Medium.ttf#Public Sans Medium</FontFamily>
+    <FontFamily x:Key="ConsoleBodySemiBoldFontFamily">ms-appx:///Assets/Fonts/PublicSans-SemiBold.ttf#Public Sans SemiBold</FontFamily>
+    <FontFamily x:Key="ConsoleBodyBoldFontFamily">ms-appx:///Assets/Fonts/PublicSans-Bold.ttf#Public Sans Bold</FontFamily>
+
+    <!-- Archivo, expanded: view titles and the wordmark (800, width 118), placards (700/118), cap buttons (700/112), lamps (700/110). -->
+    <FontFamily x:Key="ConsoleTitleFontFamily">ms-appx:///Assets/Fonts/Archivo-W118-ExtraBold.ttf#Archivo W118 ExtraBold</FontFamily>
+    <FontFamily x:Key="ConsolePlacardFontFamily">ms-appx:///Assets/Fonts/Archivo-W118-Bold.ttf#Archivo W118 Bold</FontFamily>
+    <FontFamily x:Key="ConsoleCapFontFamily">ms-appx:///Assets/Fonts/Archivo-W112-Bold.ttf#Archivo W112 Bold</FontFamily>
+    <FontFamily x:Key="ConsoleLampFontFamily">ms-appx:///Assets/Fonts/Archivo-W110-Bold.ttf#Archivo W110 Bold</FontFamily>
+
+    <!-- Departure Mono: readouts, kickers, serials, the status strip - anything a machine reports. -->
+    <FontFamily x:Key="ConsoleTelemetryFontFamily">ms-appx:///Assets/Fonts/DepartureMono-Regular.ttf#Departure Mono</FontFamily>
+
+    <!-- Iosevka: code, paths and command lines. -->
+    <FontFamily x:Key="ConsoleCodeFontFamily">ms-appx:///Assets/Fonts/Iosevka-Regular.ttf#Iosevka</FontFamily>
+
+    <!-- The face every control's own template falls back to, so the framework's text is Public Sans as well. -->
+    <FontFamily x:Key="ContentControlThemeFontFamily">ms-appx:///Assets/Fonts/PublicSans-Regular.ttf#Public Sans</FontFamily>
+</ResourceDictionary>

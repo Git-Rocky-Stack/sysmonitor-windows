@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 using Serilog;
@@ -44,6 +45,17 @@ internal sealed class UiSmokeRun
         (ElementTheme.Dark, "night"),
         (ElementTheme.Light, "day"),
     ];
+
+    /// <summary>The console faces (Styles/Console/Fonts.xaml), each of which has to have loaded.</summary>
+    private static readonly string[] ConsoleFaces =
+    [
+        "ConsoleBodyFontFamily", "ConsoleBodyMediumFontFamily", "ConsoleBodySemiBoldFontFamily",
+        "ConsoleBodyBoldFontFamily", "ConsoleTitleFontFamily", "ConsolePlacardFontFamily", "ConsoleCapFontFamily",
+        "ConsoleLampFontFamily", "ConsoleTelemetryFontFamily", "ConsoleCodeFontFamily",
+    ];
+
+    /// <summary>Wide enough, and mixed enough, that no two of these faces set it to the same width.</summary>
+    private const string FontProbeText = "MOD - MONITOR - 23  S/N STX-2266-20  48%";
 
     private static readonly JsonSerializerOptions ReportOptions = new()
     {
@@ -126,6 +138,7 @@ internal sealed class UiSmokeRun
             }
 
             await LoadedAsync(root);
+            CheckFonts(root);
 
             foreach (var (theme, name) in Shifts)
             {
@@ -192,6 +205,54 @@ internal sealed class UiSmokeRun
             _current = null;
 
         WriteReport(finished: false);
+    }
+
+    /// <summary>
+    /// A face that fails to load does not throw: the text is quietly set in the system's fallback font and the page
+    /// looks nearly right. So each console face sets the same line as a font that does not exist - which is
+    /// exactly what a broken reference falls back to, on any machine - and one that comes out as wide never loaded.
+    /// </summary>
+    private void CheckFonts(FrameworkElement root)
+    {
+        if (root is not Panel panel)
+        {
+            Problem("The fonts could not be checked: the window's root is not a panel");
+            return;
+        }
+
+        var fallback = MeasureWidth(panel, new FontFamily("ms-appx:///Assets/Fonts/NotAFont.ttf#Not A Font"));
+        foreach (var key in ConsoleFaces)
+        {
+            FontFamily face;
+            try
+            {
+                face = (FontFamily)Application.Current.Resources[key];
+            }
+            catch (Exception ex)
+            {
+                Problem($"The font resource {key} could not be found: {ex.Message}");
+                continue;
+            }
+
+            if (Math.Abs(MeasureWidth(panel, face) - fallback) < 0.5)
+                Problem($"{key} ({face.Source}) did not load: it sets text exactly as wide as the fallback font does");
+        }
+    }
+
+    /// <summary>How wide a face sets the probe line, measured in the live tree where fonts load.</summary>
+    private static double MeasureWidth(Panel panel, FontFamily face)
+    {
+        var probe = new TextBlock { Text = FontProbeText, FontFamily = face, FontSize = 20, Opacity = 0, IsHitTestVisible = false };
+        panel.Children.Add(probe);
+        try
+        {
+            probe.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+            return probe.DesiredSize.Width;
+        }
+        finally
+        {
+            panel.Children.Remove(probe);
+        }
     }
 
     private static async Task<bool> LoadedAsync(FrameworkElement element)

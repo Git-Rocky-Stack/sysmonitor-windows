@@ -4,13 +4,15 @@ STX.1 System Monitor is itself released under the [MIT License](LICENSE). It shi
 self-contained build, so the components below are redistributed inside the installed
 application, and each keeps its own terms.
 
-All of them are compatible with MIT distribution, but two carry obligations beyond
+All of them are compatible with MIT distribution, but three carry obligations beyond
 attribution: **LibreHardwareMonitorLib (MPL-2.0)** requires that recipients be told how
-to obtain that library's source, and **Serilog (Apache-2.0)** requires its notices be
-preserved. Both are satisfied below.
+to obtain that library's source, **Serilog (Apache-2.0)** requires its notices be
+preserved, and the **fonts (SIL Open Font License 1.1)** must travel with their
+copyright notices and the license. All three are satisfied below.
 
-Every entry was read from the package's own `.nuspec` at the exact version this
-project references, not from memory. To re-check any line:
+Every package entry was read from the package's own `.nuspec` at the exact version this
+project references, not from memory, and every font entry from the font's own name
+table. To re-check a package line:
 
 ```bash
 grep -o '<license[^>]*>[^<]*</license>' \
@@ -76,6 +78,29 @@ Full text: https://www.apache.org/licenses/LICENSE-2.0
 Standard MIT terms: permission to use, copy, modify, merge, publish, distribute,
 sublicense and sell, provided the copyright notice and permission notice are included,
 and with no warranty. Each project's own copyright line is in its repository.
+
+---
+
+## SIL Open Font License 1.1
+
+The interface is set in four typefaces, shipped as TrueType files in
+`src/SysMonitor.App/Assets/Fonts`. Each family's copyright notice and the full license
+sit beside its fonts as `OFL-<family>.txt`, which is what condition 2 of the license
+asks for. Full text: https://openfontlicense.org
+
+| Family | Copyright | Project |
+|---|---|---|
+| Public Sans | Copyright 2015 The Public Sans Project Authors | https://github.com/uswds/public-sans |
+| Archivo | Copyright 2020 The Archivo Project Authors | https://github.com/Omnibus-Type/Archivo |
+| Departure Mono | Copyright 2022-2024 Helena Zhang | https://helenazhang.com |
+| Iosevka | Copyright 2015-2023, Renzhi Li (aka. Belleve Invis, belleve@typeof.net) | https://github.com/be5invis/Iosevka |
+
+They are built from the Latin web fonts STX.1's sister application, System-X, serves
+(`scripts/build-fonts.py`). Public Sans and Archivo are variable fonts there; what ships
+are static instances at the weights and widths the design uses, each named as a family
+of its own, which makes them Modified Versions under the license. No family declares a
+Reserved Font Name. Departure Mono and Iosevka are converted from WOFF2 to TrueType and
+otherwise unchanged.
 
 ---
 
