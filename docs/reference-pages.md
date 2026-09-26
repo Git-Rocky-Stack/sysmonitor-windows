@@ -47,8 +47,8 @@ Header at `MainWindow.xaml:182`.
 
 | Page | Line | What it does |
 |---|---|---|
-| Large Files | `:183` | Finds large files, largest first. Deletion goes to the Recycle Bin after a confirmation naming the count and size, and does not follow links; a file Windows cannot recycle is deleted permanently instead, as the confirmation says (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs`, `src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`) |
-| Duplicate Finder | `:188` | Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size; a file Windows cannot recycle is deleted permanently instead, as the confirmation says (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161`, `:223`) |
+| Large Files | `:183` | Finds large files, largest first. Deletion goes to the Recycle Bin after a confirmation naming the count and size, and does not follow links; a file Windows cannot recycle is left where it is, and the result says so (`src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`, `src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136`) |
+| Duplicate Finder | `:188` | Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size; a file Windows cannot recycle is left where it is, and the result says so (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161`, `:224`) |
 | File Tools | `:193` | ZIP compression of a file or a folder, and GZip of a single file. See the note on formats below |
 | PDF Tools | `:198` | Merge, split, extract pages, convert images and text to PDF, and sign |
 | Image Tools | `:203` | Compress, convert, resize, and read image metadata |
@@ -78,7 +78,7 @@ These five have no header of their own.
 ## Compression formats
 
 File Tools offers two formats
-(`src/SysMonitor.Core/Services/Utilities/IUtilities.cs:95-99`):
+(`src/SysMonitor.Core/Services/Utilities/IUtilities.cs:94-98`):
 
 - **ZIP**, for a file or a whole folder
 - **GZip** (`.gz`), for a single file only. This is plain gzip, not a tar archive, so

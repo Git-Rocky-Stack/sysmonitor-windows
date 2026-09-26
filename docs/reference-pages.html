@@ -204,12 +204,12 @@
     <tr>
     <td>Large Files</td>
     <td><code>:183</code></td>
-    <td>Finds large files, largest first. Deletion goes to the Recycle Bin after a confirmation naming the count and size, and does not follow links; a file Windows cannot recycle is deleted permanently instead, as the confirmation says (<code>src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs</code>, <code>src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31</code>)</td>
+    <td>Finds large files, largest first. Deletion goes to the Recycle Bin after a confirmation naming the count and size, and does not follow links; a file Windows cannot recycle is left where it is, and the result says so (<code>src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31</code>, <code>src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136</code>)</td>
     </tr>
     <tr>
     <td>Duplicate Finder</td>
     <td><code>:188</code></td>
-    <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size; a file Windows cannot recycle is deleted permanently instead, as the confirmation says (<code>src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161</code>, <code>:223</code>)</td>
+    <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size; a file Windows cannot recycle is left where it is, and the result says so (<code>src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161</code>, <code>:224</code>)</td>
     </tr>
     <tr>
     <td>File Tools</td>
@@ -296,7 +296,7 @@
     </table></div>
     <h2>Compression formats</h2>
     <p>File Tools offers two formats
-    (<code>src/SysMonitor.Core/Services/Utilities/IUtilities.cs:95-99</code>):</p>
+    (<code>src/SysMonitor.Core/Services/Utilities/IUtilities.cs:94-98</code>):</p>
     <ul>
     <li><strong>ZIP</strong>, for a file or a whole folder</li>
     <li><strong>GZip</strong> (<code>.gz</code>), for a single file only. This is plain gzip, not a tar archive, so

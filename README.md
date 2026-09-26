@@ -93,10 +93,10 @@ Listed because previous versions implied otherwise:
 - **No guarantee of unrecoverability from the Drive Wiper on an SSD.** The drive decides
   where writes land, so overwriting a file cannot promise the flash that held it was
   written over. The page says so when it detects one.
-- **No Recycle Bin copy of a file Windows cannot recycle.** Large Files and Duplicate
-  Finder send files to the Recycle Bin, but a file on a network or removable drive, or
-  one larger than the Recycle Bin is set to hold, is deleted permanently by Windows
-  instead. Their confirmations say so.
+- **No permanent deletion from Large Files or Duplicate Finder.** They only move files
+  to the Recycle Bin. A file Windows cannot recycle, such as one on a network or
+  removable drive or one larger than the Recycle Bin is set to hold, is left where it
+  is, and the result says so.
 - **No frame-rate reading on most hardware.** LibreHardwareMonitor exposes one
   frame-rate sensor and only some GPUs provide it. The overlay says `NO FPS SENSOR`
   rather than showing a zero.

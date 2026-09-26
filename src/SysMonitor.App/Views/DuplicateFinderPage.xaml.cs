@@ -29,8 +29,8 @@ public sealed partial class DuplicateFinderPage : Page
         ConsoleDialog.ConfirmAsync(this, "Move duplicates to the Recycle Bin?",
             $"{fileCount} file(s), {FormatSize(bytes)}. The oldest copy in each group is kept.\n\n" +
             "They go to the Recycle Bin, so they can be restored from there. A file Windows cannot recycle, such " +
-            "as one on a network or removable drive or one larger than the Recycle Bin is set to hold, is " +
-            "deleted permanently instead.",
+            "as one on a network or removable drive or one larger than the Recycle Bin is set to hold, is left " +
+            "where it is, and the result says so.",
             "Move to Recycle Bin");
 
     private static string FormatSize(long bytes) => bytes switch

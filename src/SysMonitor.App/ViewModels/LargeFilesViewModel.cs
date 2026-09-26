@@ -16,6 +16,10 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
     private readonly IPerformanceMonitor _performanceMonitor;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _scanCts;
+
+    /// <summary>Counts the messages shown, so a timer only clears the one it was started for.</summary>
+    private int _actionShown;
+
     private bool _isDisposed;
 
     public ObservableCollection<LargeFileDisplay> LargeFiles { get; } = [];
@@ -180,15 +184,16 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var deletedCount = 0;
-        long freedBytes = 0;
+        var results = new List<RecycledFile>();
 
         foreach (var file in selected)
         {
-            if (await _largeFileFinder.MoveToRecycleBinAsync(file.FullPath))
+            var result = await _largeFileFinder.MoveToRecycleBinAsync(file.FullPath);
+            results.Add(new RecycledFile(file.FullPath, file.SizeBytes, result));
+
+            // Only a file no longer where it was leaves the list; one Windows could not recycle is still there.
+            if (result.Outcome is RecycleOutcome.Recycled or RecycleOutcome.Missing or RecycleOutcome.NotInRecycleBin)
             {
-                deletedCount++;
-                freedBytes += file.SizeBytes;
                 _dispatcherQueue.TryEnqueue(() =>
                 {
                     LargeFiles.Remove(file);
@@ -197,11 +202,14 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
             }
         }
 
+        var succeeded = results.All(r => r.Result.Outcome is RecycleOutcome.Recycled or RecycleOutcome.Missing);
+        var report = RecycleReport.Describe(results, FormatSize);
+
         _dispatcherQueue.TryEnqueue(() =>
         {
             FilesFound = LargeFiles.Count;
             TotalSize = FormatSize(TotalSizeBytes);
-            ShowAction($"Moved {deletedCount} files ({FormatSize(freedBytes)}) to Recycle Bin", true);
+            ShowAction(report, succeeded);
         });
     }
 
@@ -235,13 +243,24 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
         ActionStatus = message;
         ActionStatusColor = isSuccess ? "#4CAF50" : "#F44336";
         HasActionStatus = true;
-        _ = ClearActionAfterDelayAsync();
+
+        // Good news fades after a few seconds. A report of anything left undone - files Windows could not
+        // recycle, a scan that failed - stays until the next message replaces it.
+        var shown = ++_actionShown;
+        if (isSuccess)
+            _ = ClearActionAfterDelayAsync(shown);
     }
 
-    private async Task ClearActionAfterDelayAsync()
+    private async Task ClearActionAfterDelayAsync(int shown)
     {
         await Task.Delay(5000);
-        _dispatcherQueue.TryEnqueue(() => HasActionStatus = false);
+
+        // Only the message this timer was started for: a later one is not cleared early by an old timer.
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            if (shown == _actionShown)
+                HasActionStatus = false;
+        });
     }
 
     private static string FormatSize(long bytes)

@@ -26,14 +26,14 @@ public sealed partial class LargeFilesPage : Page
 
     /// <summary>
     /// Asks before the selected files are removed, saying how many, how much, and where they go - including
-    /// the files the Recycle Bin cannot take, which Windows deletes outright. Cancel is the default.
+    /// what happens to a file the Recycle Bin cannot take. Cancel is the default.
     /// </summary>
     private Task<bool> AskBeforeDeletingAsync(int fileCount, string totalSize)
     {
         var files = fileCount == 1 ? "1 file" : $"{fileCount} files";
         var message = $"{files}, {totalSize} in total. They go to the Recycle Bin, where they can be restored. " +
                       "A file Windows cannot recycle, such as one on a network or removable drive or one larger " +
-                      "than the Recycle Bin is set to hold, is deleted permanently instead.";
+                      "than the Recycle Bin is set to hold, is left where it is, and the result says so.";
 
         return ConsoleDialog.ConfirmAsync(this, $"Move {files} to the Recycle Bin?", message, "Move to Recycle Bin");
     }

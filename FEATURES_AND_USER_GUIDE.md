@@ -515,7 +515,7 @@ Image processing and optimization:
 
 File compression and archiving:
 
-**Compression Formats** (`src/SysMonitor.Core/Services/Utilities/IUtilities.cs:95-99`)**:**
+**Compression Formats** (`src/SysMonitor.Core/Services/Utilities/IUtilities.cs:94-98`)**:**
 - **ZIP** - a file or a whole folder (`FileConverter.cs:195-218`)
 - **GZip** (`.gz`) - a single file only. This is plain gzip, not a tar archive, so it
   compresses one file rather than bundling several (`FileConverter.cs:221-226`)
@@ -534,7 +534,7 @@ Find and remove duplicate files:
 
 **Features:**
 - Duplicates are decided by SHA-256 of the whole file
-  (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:221-223`). Files are
+  (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:222-224`). Files are
   grouped by size first, but that is only a pre-filter: nothing is called a duplicate
   without a full-file hash match
 - One physical file is counted once, so a file reached by two paths is not reported as
@@ -544,8 +544,9 @@ Find and remove duplicate files:
 - Preview duplicates before deletion
 - Deletion goes to the Recycle Bin, after a confirmation naming the count and size
   (`DuplicateFinder.cs:16-23`, `:186`). A file Windows cannot recycle, such as one on a
-  network or removable drive or one larger than the Recycle Bin is set to hold, is
-  deleted permanently instead, and the confirmation says so
+  network or removable drive or one larger than the Recycle Bin is set to hold, is left
+  where it is, and the result says how many and why
+  (`src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136`)
 
 There is no faster name-and-size mode. Before v3.0.0, files over 10 MB were judged by
 their first megabyte, last megabyte and length, which matches for every file a program
@@ -570,7 +571,7 @@ Locate space-consuming files:
 - Deletion goes to the Recycle Bin, after a confirmation naming the count and size
   (`src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). A file Windows cannot
   recycle, such as one on a network or removable drive or one larger than the Recycle
-  Bin is set to hold, is deleted permanently instead, and the confirmation says so
+  Bin is set to hold, is left where it is, and the result says how many and why
 
 **How to Use:**
 1. Select a drive or folder

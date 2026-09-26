@@ -6,8 +6,7 @@ namespace SysMonitor.Core.Services.Utilities;
 public interface ILargeFileFinder
 {
     Task<List<LargeFileInfo>> ScanAsync(string path, long minSizeBytes = 100 * 1024 * 1024, IProgress<ScanProgress>? progress = null, CancellationToken cancellationToken = default);
-    Task<bool> DeleteFileAsync(string filePath);
-    Task<bool> MoveToRecycleBinAsync(string filePath);
+    Task<RecycleResult> MoveToRecycleBinAsync(string filePath);
 }
 
 /// <summary>
@@ -16,7 +15,7 @@ public interface ILargeFileFinder
 public interface IDuplicateFinder
 {
     Task<List<DuplicateGroup>> ScanAsync(string path, IProgress<ScanProgress>? progress = null, CancellationToken cancellationToken = default);
-    Task<long> DeleteDuplicatesAsync(IEnumerable<string> filesToDelete);
+    Task<IReadOnlyList<RecycledFile>> DeleteDuplicatesAsync(IEnumerable<string> filesToDelete);
 }
 
 /// <summary>

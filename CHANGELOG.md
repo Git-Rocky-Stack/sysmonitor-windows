@@ -20,11 +20,9 @@ Each entry describes a behaviour change and cites the file it lives in.
   (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35`,
   `src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). The wipe's question says none of
   it goes to the Recycle Bin, and repeats the page's SSD warning when it applies. The
-  Recycle Bin questions, here and in Duplicate Finder, now say what Windows does with a
-  file it cannot recycle, such as one on a network or removable drive or one larger than
-  the Recycle Bin is set to hold: it deletes it permanently. One helper builds these
-  dialogs, in the application's dialog style and the page's theme
-  (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:16`).
+  Recycle Bin questions, here and in Duplicate Finder, say what happens to a file Windows
+  cannot recycle. One helper builds these dialogs, in the application's dialog style and
+  the page's theme (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:16`).
 
 ### Fixed
 
@@ -56,6 +54,19 @@ Each entry describes a behaviour change and cites the file it lives in.
   before the app closes. Clear All Data resets every setting in both builds; it used to
   clear `LocalSettings` alone, which changed nothing unpackaged. When a save fails, the
   Settings page now says so instead of reporting success.
+- **Large Files and Duplicate Finder never delete a file permanently.** They asked
+  Windows to recycle without confirmation, and when Windows could not recycle a file -
+  on a network or removable drive, on a drive whose Recycle Bin is turned off, or larger
+  than the Recycle Bin is set to hold - it deleted the file permanently, while the page
+  said it had moved it to the Recycle Bin. Large Files lists files of 100 MB and more,
+  so the last case was not rare. Each of those cases now leaves the file where it is
+  (`src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136`), links are still never
+  followed, and a file is only reported as moved once it has been found in the Recycle
+  Bin afterwards (`RecycleBin.cs:126`). The result names how many files went, how many
+  were left where they are and why (`src/SysMonitor.Core/Services/Utilities/RecycleReport.cs:11`).
+  Duplicate Finder also stops taking a file off its list when it was not removed, and
+  stops calling what went to the Recycle Bin "freed": the space comes back when the
+  Recycle Bin is emptied.
 
 ---
 
@@ -118,7 +129,7 @@ labels on top of them, and this release finishes that.
   described 2.x behaviour: the Secure File Wiper as putting files "beyond recovery",
   with no mention of the read-back check or the solid-state limit; a Duplicate Finder
   "name and size (fast)" matching mode that does not exist, since duplicates are decided
-  by SHA-256 of the whole file (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:221-223`);
+  by SHA-256 of the whole file (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:222-224`);
   registry "Undo capability via backup restore" rather than the `reg.exe` export that
   actually happens; a Driver Updater "Outdated" status glossed as "Newer version may
   exist", when the app only compares the driver's date against two years and never

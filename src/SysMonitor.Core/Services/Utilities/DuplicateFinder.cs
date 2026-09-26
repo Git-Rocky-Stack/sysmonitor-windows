@@ -17,14 +17,14 @@ public class DuplicateFinder : IDuplicateFinder
     /// choice undoable; a test passes its own so that running the suite does not put anything in the
     /// developer's Recycle Bin, from where nothing can reliably take it out again.
     /// </summary>
-    private readonly Func<string, bool> _recycle;
+    private readonly Func<string, RecycleResult> _recycle;
 
     public DuplicateFinder(ILogger<DuplicateFinder>? logger = null)
         : this(FileScanning.SendToRecycleBin, logger)
     {
     }
 
-    internal DuplicateFinder(Func<string, bool> recycle, ILogger<DuplicateFinder>? logger = null)
+    internal DuplicateFinder(Func<string, RecycleResult> recycle, ILogger<DuplicateFinder>? logger = null)
     {
         _recycle = recycle;
         _logger = logger ?? NullLogger<DuplicateFinder>.Instance;
@@ -183,34 +183,35 @@ public class DuplicateFinder : IDuplicateFinder
     }
 
     /// <summary>
-    /// Removes the given files to the Recycle Bin and returns how much they took up. Nothing is deleted
-    /// outright: a wrong choice here costs someone their only copy.
+    /// Hands the given files to the Recycle Bin and says what became of each. Nothing is deleted outright: a
+    /// wrong choice here costs someone their only copy, so a file Windows cannot recycle is left where it is.
     /// </summary>
-    public async Task<long> DeleteDuplicatesAsync(IEnumerable<string> filesToDelete)
-    {
-        long bytesFreed = 0;
-
+    public async Task<IReadOnlyList<RecycledFile>> DeleteDuplicatesAsync(IEnumerable<string> filesToDelete) =>
         await Task.Run(() =>
         {
+            var results = new List<RecycledFile>();
             foreach (var filePath in filesToDelete)
             {
+                long size = 0;
                 try
                 {
-                    var size = new FileInfo(filePath).Length;
-                    if (_recycle(filePath))
-                    {
-                        bytesFreed += size;
-                    }
+                    size = new FileInfo(filePath).Length;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                 {
-                    _logger.LogDebug(ex, "DeleteDuplicatesAsync failed");
+                    // Gone or unreadable: the Recycle Bin says which, below.
+                    _logger.LogDebug(ex, "The size of {Path} could not be read", filePath);
                 }
-            }
-        });
 
-        return bytesFreed;
-    }
+                var result = _recycle(filePath);
+                if (result.Error is not null)
+                    _logger.LogWarning(result.Error, "{Path} was not moved to the Recycle Bin: {Reason}", filePath, result.Reason);
+
+                results.Add(new RecycledFile(filePath, size, result));
+            }
+
+            return (IReadOnlyList<RecycledFile>)results;
+        });
 
     /// <summary>
     /// Hashes the whole file. Files over 10 MB used to be judged by their first and last megabyte plus their

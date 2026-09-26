@@ -70,11 +70,15 @@ space is going to a handful of big files instead, use the **Large Files** page:
    (`src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). **Cancel** is the default.
    Confirm with **Move to Recycle Bin**.
 
-The files go to the Recycle Bin, where you can restore them, with one exception the
-question also states: a file Windows cannot recycle, such as one on a network or
-removable drive or one larger than the Recycle Bin is set to hold, is deleted
-permanently instead. Up to and including v3.0.1, Delete Selected removed the files
-without asking.
+The files go to the Recycle Bin, where you can restore them. A file Windows cannot
+recycle, such as one on a network or removable drive or one larger than the Recycle
+Bin is set to hold, is left where it is, and the result says how many and why
+(`src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136`). A file is only reported
+as moved once it has been found in the Recycle Bin.
+
+Up to and including v3.0.1, Delete Selected removed the files without asking, and
+Windows deleted any file it could not recycle permanently while the page reported it
+as moved to the Recycle Bin.
 
 A file in the Recycle Bin still takes up its space. The space comes back when the
 Recycle Bin is emptied, which the Directory Cleaner's Recycle Bin category does.
