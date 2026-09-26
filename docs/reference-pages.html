@@ -146,7 +146,7 @@
     <tr>
     <td>Drive Wiper</td>
     <td><code>:135</code></td>
-    <td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406</code>, <code>:589</code>, <code>:20</code>)</td>
+    <td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406</code>, <code>:589</code>, <code>:20</code>). It asks before it starts, naming the count and size, with Cancel as the default (<code>src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35</code>)</td>
     </tr>
     <tr>
     <td>Scheduled Cleaning</td>
@@ -204,12 +204,12 @@
     <tr>
     <td>Large Files</td>
     <td><code>:183</code></td>
-    <td>Finds large files. Deletion goes to the Recycle Bin and does not follow links (<code>src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs</code>)</td>
+    <td>Finds large files, largest first. Deletion goes to the Recycle Bin after a confirmation naming the count and size, and does not follow links; a file Windows cannot recycle is left where it is, and the result says so (<code>src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31</code>, <code>src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136</code>)</td>
     </tr>
     <tr>
     <td>Duplicate Finder</td>
     <td><code>:188</code></td>
-    <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size (<code>src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161</code>, <code>:223</code>)</td>
+    <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size; a file Windows cannot recycle is left where it is, and the result says so (<code>src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161</code>, <code>:224</code>)</td>
     </tr>
     <tr>
     <td>File Tools</td>
@@ -296,7 +296,7 @@
     </table></div>
     <h2>Compression formats</h2>
     <p>File Tools offers two formats
-    (<code>src/SysMonitor.Core/Services/Utilities/IUtilities.cs:95-99</code>):</p>
+    (<code>src/SysMonitor.Core/Services/Utilities/IUtilities.cs:94-98</code>):</p>
     <ul>
     <li><strong>ZIP</strong>, for a file or a whole folder</li>
     <li><strong>GZip</strong> (<code>.gz</code>), for a single file only. This is plain gzip, not a tar archive, so
@@ -307,7 +307,7 @@
     <h2>Keyboard input</h2>
     <p>There are no application-wide keyboard shortcuts. The app registers no
     <code>KeyboardAccelerator</code> anywhere. All five keys it handles are in the PDF editor
-    (<code>src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74</code>, <code>:314-321</code>, <code>:1360-1372</code>):</p>
+    (<code>src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74</code>, <code>:314-321</code>, <code>:1361-1373</code>):</p>
     <div class="tablewrap"><table>
     <thead>
     <tr>

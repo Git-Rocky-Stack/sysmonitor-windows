@@ -57,7 +57,7 @@
     <p>Every setting on the Settings page of STX.1 System Monitor v3.0.1, with its default,
     and every location the app writes to.</p>
     <p>Defaults are read from <code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:20-52</code>. The
-    Reset command restores exactly these values (<code>SettingsViewModel.cs:260-286</code>).</p>
+    Reset command restores exactly these values (<code>SettingsViewModel.cs:133-159</code>).</p>
     <h2>Appearance</h2>
     <div class="tablewrap"><table>
     <thead>
@@ -220,7 +220,7 @@
     swallowed (<code>src/SysMonitor.Core/Services/Alerts/AlertService.cs</code>).</p>
     <h2>Version</h2>
     <p>The Settings page reads the version from the running assembly
-    (<code>SettingsViewModel.cs:87</code>), so it reports what is actually installed rather than a
+    (<code>SettingsViewModel.cs:65</code>), so it reports what is actually installed rather than a
     number written by hand. For this release it reads 3.0.1.0.</p>
     <h2>Where the app writes</h2>
     <p>Everything the application stores about you is under one folder:</p>
@@ -236,11 +236,15 @@
     <tbody>
     <tr>
     <td><code>%LocalAppData%\SysMonitor</code></td>
-    <td>Settings, the SQLite history database, and application state (<code>src/SysMonitor.App/App.xaml.cs:72</code>)</td>
+    <td>The SQLite history database, <code>history.db</code> (<code>src/SysMonitor.Core/Data/HistoryDbContext.cs:26</code>), and application state</td>
+    </tr>
+    <tr>
+    <td><code>%LocalAppData%\SysMonitor\settings.json</code></td>
+    <td>Settings (<code>src/SysMonitor.Core/Services/Settings/SettingsStore.cs:56</code>)</td>
     </tr>
     <tr>
     <td><code>%LocalAppData%\SysMonitor\Logs</code></td>
-    <td>Serilog output</td>
+    <td>Serilog output (<code>src/SysMonitor.App/App.xaml.cs:82</code>)</td>
     </tr>
     <tr>
     <td><code>%LocalAppData%\SysMonitor\Logs</code></td>
@@ -248,20 +252,47 @@
     </tr>
     </tbody>
     </table></div>
-    <p>Deleting <code>%LocalAppData%\SysMonitor</code> resets the application completely. That statement
-    is true as written, which is why crash reports were moved into it.</p>
+    <p>Deleting <code>%LocalAppData%\SysMonitor</code> resets everything the application keeps in files.
+    That statement is true as written, which is why crash reports were moved into it.</p>
+    <p>Two settings also leave an entry outside that folder, and deleting it does not remove
+    them. Run at Startup adds a <code>SysMonitor</code> value under
+    <code>HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</code>
+    (<code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:202</code>), and a cleaning schedule is a
+    Task Scheduler task named <code>SysMonitor Scheduled Cleaning</code>
+    (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningService.cs:56</code>). Switch both off
+    in the app before deleting the folder, and nothing is left behind.</p>
     <p>The install folder holds the application, plus <code>LICENSE.txt</code> and
     <code>THIRD-PARTY-NOTICES.txt</code> (<code>installer/SysMonitorSetup.iss:87-88</code>).</p>
     <p>Exported reports go to your Documents folder
     (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:333-341</code>).</p>
+    <h3>The packaged build</h3>
+    <p>The same paths hold for the packaged (MSIX) build, as the app sees them. Windows
+    redirects what a packaged app writes under <code>%LocalAppData%</code> into that app's own package
+    data, under <code>%LocalAppData%\Packages</code>, and removes it when the app is uninstalled. For
+    that build, uninstalling is what clears those files.</p>
+    <p>Up to and including v3.0.1, the packaged build kept its settings somewhere else: in the
+    package's <code>LocalSettings</code>, which the Settings page wrote and nothing else read. The alert
+    service, the minimize-to-tray check and Auto Game Mode read <code>settings.json</code>, so in that
+    build switching notifications off, changing an alert threshold or switching
+    minimize-to-tray off was saved and then ignored. Later versions keep settings in
+    <code>settings.json</code> in both builds, and every part of the app reads them from one shared store
+    (<code>src/SysMonitor.Core/Services/Settings/SettingsStore.cs:25</code>). On its first start, a later
+    version copies across whatever an earlier packaged version left in <code>LocalSettings</code>, so
+    updating loses nothing.</p>
     <h2>What leaves your machine</h2>
     <p>Nothing. Readings stay local. See <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/PRIVACY_POLICY.md">PRIVACY_POLICY.md</a>.</p>
     <p>The app does not check for updates and cannot download a new version of itself. To
     update, download the new release and run it.</p>
     <h2>Clearing data</h2>
     <p>The Settings page has a Clear All Data command
-    (<code>SettingsViewModel.cs:289</code>). It resets settings and stored data. Deleting
-    <code>%LocalAppData%\SysMonitor</code> by hand does the same thing.</p>
+    (<code>SettingsViewModel.cs:162</code>). It resets every setting to its default and saves that
+    straight away (<code>SettingsViewModel.cs:168-169</code>). It clears settings only: the history
+    database and the logs stay where they are.</p>
+    <p>Up to and including v3.0.1 it cleared the packaged build's <code>LocalSettings</code> and nothing
+    else, so in the unpackaged build it changed nothing on disk. Later versions reset every
+    setting in both builds.</p>
+    <p>Deleting <code>%LocalAppData%\SysMonitor</code> by hand, with the app closed, removes the history
+    database and the logs as well.</p>
     <h2>Related</h2>
     <ul>
     <li><a href="reference-pages.html">Pages reference</a></li>

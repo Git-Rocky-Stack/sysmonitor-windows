@@ -17,6 +17,10 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
     private readonly IDuplicateFinder _duplicateFinder;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _scanCts;
+
+    /// <summary>Counts the messages shown, so a timer only clears the one it was started for.</summary>
+    private int _actionShown;
+
     private bool _isDisposed;
 
     public ObservableCollection<DuplicateGroupDisplay> DuplicateGroups { get; } = [];
@@ -191,14 +195,22 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var freedBytes = await _duplicateFinder.DeleteDuplicatesAsync(filesToDelete);
+        var results = await _duplicateFinder.DeleteDuplicatesAsync(filesToDelete);
+
+        // Only files no longer where they were leave the list. One Windows could not recycle is still there, and
+        // it used to vanish from the list as if it had gone.
+        var gone = results.Where(r => r.Result.Outcome is RecycleOutcome.Recycled or RecycleOutcome.Missing
+                                                        or RecycleOutcome.NotInRecycleBin)
+                          .Select(r => r.Path)
+                          .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var succeeded = results.All(r => r.Result.Outcome is RecycleOutcome.Recycled or RecycleOutcome.Missing);
+        var report = RecycleReport.Describe(results, FormatSize);
 
         _dispatcherQueue.TryEnqueue(() =>
         {
-            // Remove deleted files from the display
             foreach (var group in DuplicateGroups.ToList())
             {
-                var filesToRemove = group.Files.Where(f => f.IsSelected && !f.IsOriginal).ToList();
+                var filesToRemove = group.Files.Where(f => gone.Contains(f.FullPath)).ToList();
                 foreach (var file in filesToRemove)
                 {
                     group.Files.Remove(file);
@@ -217,7 +229,7 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
             WastedSpaceBytes = DuplicateGroups.Sum(g => g.WastedSpaceBytes);
             WastedSpace = FormatSize(WastedSpaceBytes);
 
-            ShowAction($"Deleted {filesToDelete.Count} files, freed {FormatSize(freedBytes)}", true);
+            ShowAction(report, succeeded);
         });
     }
 
@@ -250,13 +262,24 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
         ActionStatus = message;
         ActionStatusColor = isSuccess ? "#4CAF50" : "#F44336";
         HasActionStatus = true;
-        _ = ClearActionAfterDelayAsync();
+
+        // Good news fades after a few seconds. A report of anything left undone - files Windows could not
+        // recycle, a scan that failed - stays until the next message replaces it.
+        var shown = ++_actionShown;
+        if (isSuccess)
+            _ = ClearActionAfterDelayAsync(shown);
     }
 
-    private async Task ClearActionAfterDelayAsync()
+    private async Task ClearActionAfterDelayAsync(int shown)
     {
         await Task.Delay(5000);
-        _dispatcherQueue.TryEnqueue(() => HasActionStatus = false);
+
+        // Only the message this timer was started for: a later one is not cleared early by an old timer.
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            if (shown == _actionShown)
+                HasActionStatus = false;
+        });
     }
 
     private static string FormatSize(long bytes)

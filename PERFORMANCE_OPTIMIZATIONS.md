@@ -19,18 +19,21 @@ The changes below are real and worth describing. What they gained is not known, 
 
 ## 1. CPU usage is read from the kernel, not through a performance counter
 
-`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:159`
+`src/SysMonitor.Core/Services/Monitors/CpuSampler.cs:122`
 
 `GetSystemTimes` (kernel32) returns idle, kernel and user tick counts. Usage is the change in those between
-two calls, so the first reading of a session primes the counters and returns 0. The previous implementation
-called `PerformanceCounter.NextValue()`, which is kept as a fallback if `GetSystemTimes` fails (`:161`).
+two readings, measured by a `CpuSampler` that keeps a baseline of its own: the monitor's shared one serves the
+page on screen, and the FPS overlay, the tray tooltip and the history recorder each hold theirs, so no caller's
+reading shortens another's interval. A sampler takes its baseline when it is created, so even the first
+reading covers a real interval. The previous implementation called `PerformanceCounter.NextValue()`, which is
+kept as a fallback if `GetSystemTimes` fails (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:158`).
 
 Covered by `CpuMonitorTests.GetUsagePercentAsync_NoticesWorkTheMachineIsDoing`, which makes a core busy and
-requires the reading to notice.
+requires the reading to notice, and by `CpuSamplerTests`, which checks each sampler measures its own interval.
 
 ## 2. Temperature and per-core readings are cached briefly
 
-`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:35` — temperature for 2 seconds, since it comes from a
+`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:34` — temperature for 2 seconds, since it comes from a
 WMI query (`MSAcpi_ThermalZoneTemperature`) and the dashboard asks more often than the value changes.
 Per-core usage is cached the same way.
 

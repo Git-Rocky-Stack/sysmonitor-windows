@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Services.Monitors;
+using SysMonitor.Core.Services.Settings;
 using System.Collections.Concurrent;
-using System.Text.Json;
 
 namespace SysMonitor.Core.Services.Alerts;
 
@@ -21,7 +21,7 @@ public class AlertService : IAlertService
     private readonly IBatteryMonitor _batteryMonitor;
 
     private readonly ConcurrentDictionary<AlertType, AlertState> _alertStates = new();
-    private readonly string _settingsPath;
+    private readonly ISettingsStore _settings;
     private readonly TimeProvider _timeProvider;
 
     public event EventHandler<AlertNotification>? AlertTriggered;
@@ -37,6 +37,10 @@ public class AlertService : IAlertService
     /// <param name="timeProvider">
     /// The clock the cooldown is measured on. A test can move it; nothing else needs to.
     /// </param>
+    /// <param name="settings">
+    /// The store the Settings page writes to. The app passes the one every other part of it reads, which is
+    /// what makes a toggle on that page reach this service in the packaged build as well as the unpackaged one.
+    /// </param>
     public AlertService(
         ICpuMonitor cpuMonitor,
         IMemoryMonitor memoryMonitor,
@@ -44,7 +48,8 @@ public class AlertService : IAlertService
         IBatteryMonitor batteryMonitor,
         ILogger<AlertService>? logger = null,
         string? settingsPath = null,
-        TimeProvider? timeProvider = null)
+        TimeProvider? timeProvider = null,
+        ISettingsStore? settings = null)
     {
         _logger = logger ?? NullLogger<AlertService>.Instance;
         _cpuMonitor = cpuMonitor;
@@ -53,9 +58,9 @@ public class AlertService : IAlertService
         _batteryMonitor = batteryMonitor;
         _timeProvider = timeProvider ?? TimeProvider.System;
 
-        _settingsPath = settingsPath ?? Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "settings.json");
+        _settings = settingsPath is not null
+            ? new SettingsStore(settingsPath, _logger)
+            : settings ?? new SettingsStore();
     }
 
     public async Task CheckThresholdsAsync()
@@ -282,27 +287,5 @@ public class AlertService : IAlertService
         _alertStates.Clear();
     }
 
-    private T GetSetting<T>(string key, T defaultValue)
-    {
-        try
-        {
-            if (File.Exists(_settingsPath))
-            {
-                var json = File.ReadAllText(_settingsPath);
-                var settings = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                if (settings != null && settings.TryGetValue(key, out var element))
-                {
-                    if (typeof(T) == typeof(int) && element.TryGetInt32(out var intVal))
-                        return (T)(object)intVal;
-                    if (typeof(T) == typeof(bool))
-                        return (T)(object)element.GetBoolean();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "GetSetting failed");
-        }
-        return defaultValue;
-    }
+    private T GetSetting<T>(string key, T defaultValue) => _settings.Get(key, defaultValue);
 }

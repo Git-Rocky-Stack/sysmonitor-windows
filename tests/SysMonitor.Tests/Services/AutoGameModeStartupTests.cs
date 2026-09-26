@@ -20,8 +20,10 @@ public class AutoGameModeStartupTests : IDisposable
 
     public void Dispose()
     {
+        // The host's own teardown: it stops the watch and lets a save still being written land, before the
+        // folder that save is writing into is deleted.
         foreach (var service in _services)
-            service.StopMonitoringAsync().GetAwaiter().GetResult();
+            service.Dispose();
 
         _temp.Dispose();
     }

@@ -17,7 +17,9 @@ public class HistoryService : IHistoryService
 {
     private readonly ILogger _logger;
 
-    private readonly ICpuMonitor _cpuMonitor;
+    // Its own baseline: this reads on its own timer, and a shared one would let every other caller cut its
+    // measurement interval short (see CpuSampler).
+    private readonly CpuSampler _cpuSampler;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
     private readonly INetworkMonitor _networkMonitor;
@@ -47,7 +49,7 @@ public class HistoryService : IHistoryService
         ILogger<HistoryService>? logger = null)
     {
         _logger = logger ?? NullLogger<HistoryService>.Instance;
-        _cpuMonitor = cpuMonitor;
+        _cpuSampler = cpuMonitor.CreateSampler();
         _memoryMonitor = memoryMonitor;
         _temperatureMonitor = temperatureMonitor;
         _networkMonitor = networkMonitor;
@@ -104,7 +106,7 @@ public class HistoryService : IHistoryService
         // CPU Usage
         try
         {
-            var cpuUsage = await _cpuMonitor.GetUsagePercentAsync();
+            var cpuUsage = _cpuSampler.Sample();
             metrics.Add(new MetricSnapshot { Timestamp = timestamp, MetricType = MetricTypes.Cpu, Value = cpuUsage });
         }
         catch (Exception ex)

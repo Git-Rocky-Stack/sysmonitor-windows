@@ -56,7 +56,7 @@ sit below the groups listed here.
 | **Health Check** | System-wide checks |
 | **Game Mode** | Lowers background apps below your game in the processor queue and restores them afterwards. Closing apps is a separate opt-in that only ever asks |
 | **Browser Privacy** | Clears browsing traces, counted per browser found |
-| **Drive Wiper** | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD |
+| **Drive Wiper** | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD; asks before it starts |
 | **Scheduled Cleaning** | Daily, weekly or monthly cleans that run headlessly and report an exit code to Task Scheduler |
 | **Backup Manager** | File backup and restore, with optional AES-256 encryption that is authenticated and restorable |
 | **Driver Updater** | Device driver inventory |
@@ -64,7 +64,7 @@ sit below the groups listed here.
 ### Utilities
 | Page | What it does |
 |---|---|
-| **Large Files** | Find large files; deletion goes to the Recycle Bin |
+| **Large Files** | Find large files; deletion goes to the Recycle Bin after confirmation |
 | **Duplicate Finder** | Duplicates decided by SHA-256 of the whole file, never by sampling; deletion goes to the Recycle Bin after confirmation |
 | **File Tools** | ZIP and GZip compression, and file conversion |
 | **PDF Tools** | Merge, split, convert and manipulate PDFs |
@@ -93,6 +93,10 @@ Listed because previous versions implied otherwise:
 - **No guarantee of unrecoverability from the Drive Wiper on an SSD.** The drive decides
   where writes land, so overwriting a file cannot promise the flash that held it was
   written over. The page says so when it detects one.
+- **No permanent deletion from Large Files or Duplicate Finder.** They only move files
+  to the Recycle Bin. A file Windows cannot recycle, such as one on a network or
+  removable drive or one larger than the Recycle Bin is set to hold, is left where it
+  is, and the result says so.
 - **No frame-rate reading on most hardware.** LibreHardwareMonitor exposes one
   frame-rate sensor and only some GPUs provide it. The overlay says `NO FPS SENSOR`
   rather than showing a zero.
@@ -147,6 +151,10 @@ dotnet test
 
 # One test class
 dotnet test --filter "FullyQualifiedName~DriveWiperPatternTests"
+
+# Open every page in both themes, save a picture of each and a report, then exit
+# (non-zero if a page failed to load; src/SysMonitor.App/Diagnostics/UiSmokeRun.cs)
+dotnet run --project src/SysMonitor.App -- --ui-smoke ui-smoke
 
 # Self-contained x64 publish
 dotnet publish src/SysMonitor.App/SysMonitor.App.csproj \

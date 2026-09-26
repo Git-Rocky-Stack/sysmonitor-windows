@@ -177,14 +177,17 @@ public class LargeFileFinder : ILargeFileFinder
     }
 
     /// <summary>
-    /// Removes a file to the Recycle Bin. There is no outright delete here: this list is built from a scan,
-    /// and a scan can be wrong about what someone still wants.
+    /// Moves a file to the Recycle Bin, or leaves it where it is when Windows could not put it there. There is no
+    /// outright delete here: this list is built from a scan, and a scan can be wrong about what someone still
+    /// wants.
     /// </summary>
-    public async Task<bool> DeleteFileAsync(string filePath) =>
-        await Task.Run(() => FileScanning.SendToRecycleBin(filePath));
-
-    public async Task<bool> MoveToRecycleBinAsync(string filePath) =>
-        await Task.Run(() => FileScanning.SendToRecycleBin(filePath));
+    public async Task<RecycleResult> MoveToRecycleBinAsync(string filePath)
+    {
+        var result = await Task.Run(() => FileScanning.SendToRecycleBin(filePath));
+        if (result.Error is not null)
+            _logger.LogWarning(result.Error, "{Path} was not moved to the Recycle Bin: {Reason}", filePath, result.Reason);
+        return result;
+    }
 
     private static string GetFileType(string extension)
     {

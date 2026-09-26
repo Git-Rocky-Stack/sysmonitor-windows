@@ -8,6 +8,12 @@ public interface ICpuMonitor
     Task<double> GetUsagePercentAsync();
     Task<double> GetTemperatureAsync();
     Task<List<double>> GetCoreUsagesAsync();
+
+    /// <summary>
+    /// A sampler with a baseline of its own. A consumer that reads usage on its own schedule should hold one
+    /// rather than call <see cref="GetUsagePercentAsync"/>, which every other caller shares.
+    /// </summary>
+    CpuSampler CreateSampler();
 }
 
 public interface IMemoryMonitor

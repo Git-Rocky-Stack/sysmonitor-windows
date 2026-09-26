@@ -6,6 +6,7 @@ using SysMonitor.App.Services;
 using SysMonitor.App.Views;
 using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.History;
+using SysMonitor.Core.Services.Settings;
 using WinRT.Interop;
 using Serilog;
 
@@ -68,15 +69,20 @@ public sealed partial class MainWindow : Window
         // Set window icon
         SetWindowIcon();
 
-        // Initialize tray icon and services
-        InitializeTrayIcon();
-        InitializeServicesAsync();
-
-        // Handle window close to minimize to tray
-        var appWindow = GetAppWindow();
-        if (appWindow != null)
+        // A smoke run only opens pages and takes pictures of them: no tray icon, no history recording, and no
+        // hiding in the tray when it closes.
+        if (App.SmokeRun is null)
         {
-            appWindow.Closing += AppWindow_Closing;
+            // Initialize tray icon and services
+            InitializeTrayIcon();
+            InitializeServicesAsync();
+
+            // Handle window close to minimize to tray
+            var appWindow = GetAppWindow();
+            if (appWindow != null)
+            {
+                appWindow.Closing += AppWindow_Closing;
+            }
         }
 
         // Navigate to dashboard on startup
@@ -147,30 +153,11 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private bool IsMinimizeToTrayEnabled()
-    {
-        try
-        {
-            var settingsPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SysMonitor", "settings.json");
-
-            if (File.Exists(settingsPath))
-            {
-                var json = File.ReadAllText(settingsPath);
-                var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(json);
-                if (settings != null && settings.TryGetValue("MinimizeToTray", out var element))
-                {
-                    return element.GetBoolean();
-                }
-            }
-        }
-        catch
-        {
-            // Best effort: an unreadable setting means the default below, which is what this returns.
-        }
-        return true; // Default to true
-    }
+    /// <summary>
+    /// Read from the store the Settings page writes to. This used to read settings.json itself, which the
+    /// packaged build never wrote, so in the Store build switching minimize-to-tray off did nothing.
+    /// </summary>
+    private static bool IsMinimizeToTrayEnabled() => App.GetService<ISettingsStore>().Get("MinimizeToTray", true);
 
     private void ShowWindow()
     {
@@ -212,7 +199,13 @@ public sealed partial class MainWindow : Window
         Application.Current.Exit();
     }
 
-    private void NavigateToPage(string tag)
+    /// <summary>Every page the rail can open, by the tag its item carries. The smoke run opens each.</summary>
+    internal IReadOnlyDictionary<string, Type> Pages => _pageMap;
+
+    /// <summary>The frame the pages open in.</summary>
+    internal Frame PageFrame => ContentFrame;
+
+    internal void NavigateToPage(string tag)
     {
         if (_pageMap.TryGetValue(tag, out var pageType))
         {

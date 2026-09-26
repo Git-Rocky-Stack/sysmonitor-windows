@@ -87,7 +87,7 @@ comment-only, 8 of those saying `// Log in production`.
 thing that calls `StartMonitoringAsync`. The toggle read ON after a restart and no game was ever
 detected until the user turned it off and on again.
 
-**Fix:** `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:84`. The settings path is now
+**Fix:** `src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:88`. The settings path is now
 injectable so the test never touches the developer's real settings.
 
 Tests: `tests/SysMonitor.Tests/Services/AutoGameModeStartupTests.cs` (5).
@@ -101,7 +101,7 @@ Two defects in one gate:
 - It measured elapsed time on `DateTime.Now`. Local time goes backwards once a year; a negative elapsed
   time reads as "inside the cooldown", so **every** alert was suppressed for the whole repeated hour.
 
-**Fix:** `src/SysMonitor.Core/Services/Alerts/AlertService.cs:232` — UTC, no `IsActive` in the gate, and
+**Fix:** `src/SysMonitor.Core/Services/Alerts/AlertService.cs:237` — UTC, no `IsActive` in the gate, and
 a clock moved backwards means the alert is raised rather than swallowed. `ClearAlert(type)` remains the
 documented way to ask to be told again sooner.
 
@@ -153,7 +153,7 @@ close the main window, and a WinUI app with a window still open does not exit.
 hard-placed at `MoveAndResize(100, 100, 220, 260)` whatever the label said.
 
 **Fix:** `IFpsOverlayService : IDisposable` (`src/SysMonitor.Core/Services/GameMode/IFpsOverlayService.cs:44`),
-`FpsOverlayService.Dispose` (`src/SysMonitor.App/Services/FpsOverlayService.cs:115`), and
+`FpsOverlayService.Dispose` (`src/SysMonitor.App/Services/FpsOverlayService.cs:117`), and
 `ApplyPosition` (`src/SysMonitor.App/Views/FpsOverlayWindow.xaml.cs:70`) driven by
 `OverlayPlacement.Place` (`src/SysMonitor.Core/Services/GameMode/OverlayPlacement.cs:16`) — the
 arithmetic lives in Core because the cases that matter (a monitor left of the primary has a negative X;
@@ -248,7 +248,7 @@ two callers could each open a `Computer` and the second would replace the first.
 `ITemperatureMonitor` declared `Dispose()` without extending `IDisposable`, so nothing could see there
 was a kernel driver to give back — `grep` found no caller.
 
-**Fix:** `TemperatureMonitor.cs:25` gates every touch of the hardware; `IMonitors.cs:94` makes the
+**Fix:** `TemperatureMonitor.cs:25` gates every touch of the hardware; `IMonitors.cs:100` makes the
 interface disposable.
 
 **Honest limit:** LibreHardwareMonitor needs administrator rights to open its driver, and the test shell
@@ -315,7 +315,7 @@ test can exercise it without ever naming a file it could destroy.
 
 Also: `WipeResult.FailedPaths` records overwrites the wiper could not read back to confirm, and had
 **zero readers** anywhere in the app. "Successfully wiped" was printed over the top of them.
-`DriveWiperViewModel.cs:203` now reports them.
+`DriveWiperViewModel.cs:220` now reports them.
 
 ### 2.20 A scheduled clean that deleted files the moment you saved it
 
