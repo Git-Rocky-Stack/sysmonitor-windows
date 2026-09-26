@@ -213,6 +213,11 @@ public class GameModeTests : IDisposable
         })!;
 
         _started.Add(process);
+
+        // A child inherits its parent's priority class, and CI runners start the test host below normal - so an
+        // app started from here would already be at BelowNormal, which Game Mode rightly leaves alone
+        // (GameModeService.LowerPriority). The app these tests stand in for runs at Normal, so it is put there.
+        process.PriorityClass = ProcessPriorityClass.Normal;
         return process;
     }
 
