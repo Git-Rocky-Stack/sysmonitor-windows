@@ -665,7 +665,8 @@ public sealed partial class PdfEditorPage : Page
 
         var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right };
 
-        var saveButton = new Button { Content = "Save", Style = (Style)Resources["AccentButtonStyle"] };
+        // The page's own Resources do not look in App.xaml, where the Fluent styles are merged; asking the page threw.
+        var saveButton = new Button { Content = "Save", Style = (Style)Application.Current.Resources["AccentButtonStyle"] };
         saveButton.Click += async (s, args) =>
         {
             var title = titleBox.Text;

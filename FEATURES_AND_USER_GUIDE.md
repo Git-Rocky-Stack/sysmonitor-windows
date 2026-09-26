@@ -682,7 +682,7 @@ There are no application-wide keyboard shortcuts. The app registers no
 page or cancels a running operation - use the navigation menu and the on-screen
 buttons.
 
-All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1360-1372`):
+All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1361-1373`):
 
 | Key | Where | Action |
 |-----|-------|--------|

@@ -54,6 +54,12 @@ Each entry describes a behaviour change and cites the file it lives in.
   before the app closes. Clear All Data resets every setting in both builds; it used to
   clear `LocalSettings` alone, which changed nothing unpackaged. When a save fails, the
   Settings page now says so instead of reporting success.
+- **The PDF editor's sticky note opens instead of closing the app.** Clicking the page with
+  the Sticky Note tool built the note's Save button from `AccentButtonStyle`, asked of the
+  page's own resources, which do not look in App.xaml where the Fluent styles are merged. The
+  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:669`).
+  A new check reads every resource the XAML and the code ask for and fails when one cannot be
+  reached (`tests/SysMonitor.Tests/Architecture/ResourceKeyTests.cs`).
 - **Large Files and Duplicate Finder never delete a file permanently.** They asked
   Windows to recycle without confirmation, and when Windows could not recycle a file -
   on a network or removable drive, on a drive whose Recycle Bin is turned off, or larger

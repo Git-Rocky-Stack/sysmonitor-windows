@@ -10,13 +10,16 @@ internal static class RepoSource
     public static string Root { get; } = FindRoot();
 
     /// <summary>Every .cs file under a folder given relative to the root, excluding build output.</summary>
-    public static IReadOnlyList<string> FilesUnder(string relativeFolder)
+    public static IReadOnlyList<string> FilesUnder(string relativeFolder) => FilesUnder(relativeFolder, "*.cs");
+
+    /// <summary>Every file matching <paramref name="pattern"/> under a folder given relative to the root, excluding build output.</summary>
+    public static IReadOnlyList<string> FilesUnder(string relativeFolder, string pattern)
     {
         var folder = Path.Combine(Root, relativeFolder.Replace('/', Path.DirectorySeparatorChar));
         if (!Directory.Exists(folder))
             throw new DirectoryNotFoundException($"{folder} does not exist. The repository layout has changed.");
 
-        return Directory.GetFiles(folder, "*.cs", SearchOption.AllDirectories)
+        return Directory.GetFiles(folder, pattern, SearchOption.AllDirectories)
             .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
                         && !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
             .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)

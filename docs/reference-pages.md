@@ -91,7 +91,7 @@ changed the extension, so asking for 7z produced a ZIP named `.7z`.
 
 There are no application-wide keyboard shortcuts. The app registers no
 `KeyboardAccelerator` anywhere. All five keys it handles are in the PDF editor
-(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1360-1372`):
+(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1361-1373`):
 
 | Key | Where | Action |
 |---|---|---|
