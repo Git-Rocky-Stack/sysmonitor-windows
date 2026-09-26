@@ -331,7 +331,8 @@ public class CelsiusToFahrenheitConverter : IValueConverter
             var fahrenheit = (celsius * 1.8) + 32;
             return fahrenheit.ToString("F0");
         }
-        return "32";
+        // No sensor reads as 0, which this used to convert and show as a measured 32°F.
+        return "--";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

@@ -12,6 +12,8 @@ public sealed partial class DriveWiperPage : Page
     {
         ViewModel = App.GetService<DriveWiperViewModel>();
         InitializeComponent();
+        // Set DataContext for {Binding} expressions inside DataTemplates
+        DataContext = ViewModel;
     }
 
     /// <summary>

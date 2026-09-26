@@ -77,11 +77,14 @@ public static class FormatHelper
     /// </summary>
     /// <param name="celsius">Temperature in Celsius.</param>
     /// <param name="showUnit">Whether to include the unit suffix.</param>
-    /// <returns>Formatted temperature string in Fahrenheit.</returns>
+    /// <returns>
+    /// Formatted temperature string in Fahrenheit. With no reading - a missing sensor reports 0 - it is "N/A",
+    /// or "--" without the unit, because a caller that shows its own unit label would otherwise print "0" beside it.
+    /// </returns>
     public static string FormatTemperatureF(double celsius, bool showUnit = true)
     {
-        if (celsius <= 0)
-            return showUnit ? "N/A" : "0";
+        if (!IsReading(celsius))
+            return showUnit ? "N/A" : "--";
 
         var fahrenheit = (celsius * 1.8) + 32;
         return showUnit ? $"{fahrenheit:F0}°F" : $"{fahrenheit:F0}";
@@ -92,14 +95,20 @@ public static class FormatHelper
     /// </summary>
     /// <param name="celsius">Temperature in Celsius.</param>
     /// <param name="showUnit">Whether to include the unit suffix.</param>
-    /// <returns>Formatted temperature string in Celsius.</returns>
+    /// <returns>Formatted temperature string in Celsius; with no reading, "N/A", or "--" without the unit.</returns>
     public static string FormatTemperatureC(double celsius, bool showUnit = true)
     {
-        if (celsius <= 0)
-            return showUnit ? "N/A" : "0";
+        if (!IsReading(celsius))
+            return showUnit ? "N/A" : "--";
 
         return showUnit ? $"{celsius:F0}°C" : $"{celsius:F0}";
     }
+
+    /// <summary>
+    /// A sensor value worth showing. Written as "greater than zero" rather than "not at most zero" so that NaN,
+    /// which compares false with everything, counts as no reading instead of printing "NaN°F".
+    /// </summary>
+    private static bool IsReading(double celsius) => celsius > 0;
 
     /// <summary>
     /// Converts Celsius to Fahrenheit.

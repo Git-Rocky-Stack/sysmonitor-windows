@@ -42,9 +42,9 @@ When setup finishes, the app is installed and `LICENSE.txt` and
 ## Step 2: Read your health score
 
 Launch STX.1. It opens on the Dashboard, and the first thing you see is a health
-score out of 100 (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:169-170`).
+score out of 100 (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:166-167`).
 
-The score maps to a word (`DashboardViewModel.cs:242-246`):
+The score maps to a word (`DashboardViewModel.cs:236-240`):
 
 | Score | Reads as |
 |---|---|
@@ -66,10 +66,13 @@ need it.
 ## Step 3: Reclaim some disk space
 
 On the Dashboard, click **QUICK CLEAN**
-(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:273`).
+(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:267`).
 
-It removes temporary files and browser cache, and tells you how much it freed. This
-is the safe subset. Nothing it touches is a document, a download or a setting.
+It deletes temporary files from eight fixed Windows locations, such as the temp
+folders, the thumbnail cache and old crash dumps
+(`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:72-79`), and tells you how
+many files it removed. This is the safe subset. Nothing it touches is a document, a
+download or a setting.
 
 If you want to choose exactly what goes, use the **Directory Cleaner** page instead
 and read [Free up disk space](howto-free-disk-space.md). Quick Clean is the version
@@ -78,10 +81,10 @@ that does not ask questions.
 ## Step 4: Save a report you can send
 
 Still on the Dashboard, click **EXPORT**
-(`DashboardViewModel.cs:325`).
+(`DashboardViewModel.cs:319`).
 
 The app writes a plain-text diagnostic summary into your Documents folder and tells
-you the file name (`DashboardViewModel.cs:333-341`). It contains your health score,
+you the file name (`DashboardViewModel.cs:327-335`). It contains your health score,
 hardware inventory and current readings. Open it before you send it to anyone, so you
 know what is in it.
 

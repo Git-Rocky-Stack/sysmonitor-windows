@@ -20,7 +20,18 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
     private readonly IDriveWiper _driveWiper;
 
     [ObservableProperty] private ObservableCollection<FileToWipe> _filesToWipe = new();
-    [ObservableProperty] private bool _isWiping;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(AddFilesCommand), nameof(AddFolderCommand), nameof(RemoveFileCommand), nameof(ClearAllCommand))]
+    private bool _isWiping;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(WipeFilesCommand))]
+    private bool _isAdding;
+
+    /// <summary>Add Files and Add Folder can overlap, so <see cref="IsAdding"/> clears only when the last one ends.</summary>
+    private int _addsInProgress;
+
     [ObservableProperty] private bool _hasFiles;
     [ObservableProperty] private string _statusMessage = "Add files or folders to securely delete";
     [ObservableProperty] private WipeMethod _selectedMethod = WipeMethod.DoD3Pass;
@@ -73,9 +84,11 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
         };
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditList))]
     private async Task AddFilesAsync()
     {
+        _addsInProgress++;
+        IsAdding = true;
         try
         {
             var picker = new FileOpenPicker();
@@ -110,11 +123,17 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
         {
             StatusMessage = $"Error adding files: {ex.Message}";
         }
+        finally
+        {
+            IsAdding = --_addsInProgress > 0;
+        }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditList))]
     private async Task AddFolderAsync()
     {
+        _addsInProgress++;
+        IsAdding = true;
         try
         {
             var picker = new FolderPicker();
@@ -143,23 +162,41 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
         {
             StatusMessage = $"Error adding folder: {ex.Message}";
         }
+        finally
+        {
+            IsAdding = --_addsInProgress > 0;
+        }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditList))]
     private void RemoveFile(FileToWipe file)
     {
         FilesToWipe.Remove(file);
         UpdateFileStats();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditList))]
     private void ClearAll()
     {
         FilesToWipe.Clear();
         UpdateFileStats();
     }
 
-    [RelayCommand]
+    /// <summary>
+    /// The wipe works through a copy of the list taken when it starts, so an edit made while it runs changes the page
+    /// and not the wipe: a row removed mid-wipe is still destroyed, and Clear All emptied the list on screen while every
+    /// file on it was still wiped. Adding or removing also moved the count the progress bar divides by.
+    /// </summary>
+    private bool CanEditList() => !IsWiping;
+
+    /// <summary>
+    /// An add is not finished until what was picked is on the list: a folder is sized first, which can take a while.
+    /// A wipe started in that gap ran without the folder, which then appeared mid-wipe, was not wiped, and moved the
+    /// count the progress bar divides by.
+    /// </summary>
+    private bool CanWipe() => !IsAdding;
+
+    [RelayCommand(CanExecute = nameof(CanWipe))]
     private async Task WipeFilesAsync()
     {
         if (!HasFiles || IsWiping) return;
@@ -183,6 +220,9 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
             foreach (var file in filesToProcess)
             {
                 CurrentFile = file.Name;
+
+                // A retry starts clean; the reason the last attempt failed does not describe this one.
+                file.Error = null;
 
                 var progress = new Progress<double>(p =>
                 {
@@ -230,15 +270,15 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
 
             if (errorCount == 0 && unconfirmed.Count == 0)
             {
-                StatusMessage = $"Successfully wiped {successCount} items using {SelectedMethod}.{linkNote}";
+                StatusMessage = $"Successfully wiped {Items(successCount)} using {SelectedMethod}.{linkNote}";
             }
             else if (errorCount == 0)
             {
-                StatusMessage = $"Wiped {successCount} items using {SelectedMethod}.{linkNote}{unconfirmedNote}";
+                StatusMessage = $"Wiped {Items(successCount)} using {SelectedMethod}.{linkNote}{unconfirmedNote}";
             }
             else
             {
-                StatusMessage = $"Wiped {successCount} items, {errorCount} failed.{linkNote}{unconfirmedNote}";
+                StatusMessage = $"Wiped {Items(successCount)}, {errorCount} failed.{linkNote}{unconfirmedNote}";
             }
         }
         catch (Exception ex)
@@ -248,7 +288,7 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
         finally
         {
             IsWiping = false;
-            UpdateFileStats();
+            UpdateFileStats(describeList: false);
         }
     }
 
@@ -273,16 +313,24 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
             : "";
     }
 
-    private void UpdateFileStats()
+    /// <param name="describeList">
+    /// False once a wipe has finished, because its result is on the status line. Describing the list there replaced
+    /// every result before it was drawn: "Successfully wiped", "N failed" and the warning about overwrites that could
+    /// not be read back all gave way to "Add files or folders" or "N items ready to wipe".
+    /// </param>
+    private void UpdateFileStats(bool describeList = true)
     {
         UpdateMediaWarning();
         HasFiles = FilesToWipe.Count > 0;
         TotalFiles = FilesToWipe.Count;
 
+        if (!describeList)
+            return;
+
         if (HasFiles)
         {
             var totalSize = FilesToWipe.Sum(f => f.Size);
-            StatusMessage = $"{TotalFiles} items ({FormatSize(totalSize)}) ready to wipe";
+            StatusMessage = $"{Items(TotalFiles)} ({FormatSize(totalSize)}) ready to wipe";
         }
         else
         {
@@ -314,6 +362,8 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
         });
     }
 
+    private static string Items(int count) => count == 1 ? "1 item" : $"{count} items";
+
     private static string FormatSize(long bytes)
     {
         if (bytes >= 1_073_741_824) return $"{bytes / 1_073_741_824.0:F2} GB";
@@ -338,14 +388,20 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
     }
 }
 
-public class FileToWipe
+public partial class FileToWipe : ObservableObject
 {
     public string Path { get; set; } = "";
     public string Name { get; set; } = "";
     public long Size { get; set; }
     public string FormattedSize { get; set; } = "";
     public bool IsDirectory { get; set; }
-    public string? Error { get; set; }
+
+    /// <summary>
+    /// Why the wipe failed for this entry. It is set after the row is already on screen, so it has to announce the
+    /// change: as a plain property the row's error line was read once, while still empty, and never appeared.
+    /// </summary>
+    [ObservableProperty] private string? _error;
+
     public string Icon => IsDirectory ? "\uE8B7" : "\uE8A5";
 }
 

@@ -20,7 +20,7 @@ public class MemoryOptimizer : IMemoryOptimizer
     {
         return await Task.Run(() =>
         {
-            long totalFreed = 0;
+            long totalTrimmed = 0;
             var processesOptimized = 0;
 
             using var currentProcess = Process.GetCurrentProcess();
@@ -38,10 +38,10 @@ public class MemoryOptimizer : IMemoryOptimizer
 
                     try
                     {
-                        var freed = Trim(proc);
-                        if (freed > 0)
+                        var trimmed = Trim(proc);
+                        if (trimmed > 0)
                         {
-                            totalFreed += freed;
+                            totalTrimmed += trimmed;
                             processesOptimized++;
                         }
                     }
@@ -62,9 +62,9 @@ public class MemoryOptimizer : IMemoryOptimizer
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            _logger.LogInformation("Memory optimization complete: freed {TotalFreed} bytes from {ProcessCount} processes",
-                totalFreed, processesOptimized);
-            return totalFreed;
+            _logger.LogInformation("Memory optimization complete: trimmed {TotalTrimmed} bytes from {ProcessCount} processes",
+                totalTrimmed, processesOptimized);
+            return totalTrimmed;
         });
     }
 
@@ -75,9 +75,9 @@ public class MemoryOptimizer : IMemoryOptimizer
             try
             {
                 using var proc = Process.GetProcessById(processId);
-                var freed = Math.Max(0, Trim(proc));
-                _logger.LogDebug("Trimmed {Freed} bytes from process {ProcessId}", freed, processId);
-                return freed;
+                var trimmed = Math.Max(0, Trim(proc));
+                _logger.LogDebug("Trimmed {Trimmed} bytes from process {ProcessId}", trimmed, processId);
+                return trimmed;
             }
             catch (Exception ex)
             {

@@ -147,7 +147,7 @@
                                     <TextBlock x:Name="CpuTempText" Text="--"
                                                FontSize="10" FontWeight="SemiBold"
                                                Foreground="#FFFFA500" FontFamily="Consolas"/>
-                                    <TextBlock Text="C" FontSize="8" Foreground="#80FFA500"
+                                    <TextBlock Text="F" FontSize="8" Foreground="#80FFA500"
                                                VerticalAlignment="Top" Margin="1,1,0,0"/>
                                 </StackPanel>
                             </Grid>
@@ -189,7 +189,7 @@
                                     <TextBlock x:Name="GpuTempText" Text="--"
                                                FontSize="10" FontWeight="SemiBold"
                                                Foreground="#FF00BFFF" FontFamily="Consolas"/>
-                                    <TextBlock Text="C" FontSize="8" Foreground="#8000BFFF"
+                                    <TextBlock Text="F" FontSize="8" Foreground="#8000BFFF"
                                                VerticalAlignment="Top" Margin="1,1,0,0"/>
                                 </StackPanel>
                             </Grid>
