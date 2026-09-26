@@ -16,6 +16,7 @@ using SysMonitor.Core.Services.History;
 using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.GameMode;
 using SysMonitor.Core.Services.Settings;
+using SysMonitor.App.Diagnostics;
 using SysMonitor.App.Services;
 
 namespace SysMonitor.App;
@@ -24,8 +25,12 @@ public partial class App : Application
 {
     private static Window? _mainWindow;
     private static IHost? _host;
+    private static UiSmokeRun? _smokeRun;
 
     public static Window? MainWindow => _mainWindow;
+
+    /// <summary>The smoke run asked for with <c>--ui-smoke &lt;folder&gt;</c>, or null when started normally.</summary>
+    internal static UiSmokeRun? SmokeRun => _smokeRun;
 
     public App()
     {
@@ -60,6 +65,9 @@ public partial class App : Application
 
             return; // Don't initialize the rest of the app
         }
+
+        // CI opens every page with this and exits; see UiSmokeRun.
+        _smokeRun = UiSmokeRun.FromCommandLine(args);
 
         InitializeComponent();
 
@@ -313,6 +321,16 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        if (_smokeRun is not null)
+        {
+            _smokeRun.Attach(this);
+            var window = new MainWindow();
+            _mainWindow = window;
+            window.Activate();
+            _ = _smokeRun.RunAsync(window);
+            return;
+        }
+
         _mainWindow = new MainWindow();
 
         // A Game Mode session that never ended - a crash, or the machine going down with it on - leaves
@@ -454,11 +472,21 @@ public partial class App : Application
     private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         Log.Error(e.Exception, "UnobservedTaskException");
+        _smokeRun?.Absorb(e.Exception);
         e.SetObserved(); // Prevent crash
     }
 
     private void OnAppUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
+        // A smoke run records the failure against the page it happened on and goes on to the next one.
+        if (_smokeRun is not null)
+        {
+            Log.Error(e.Exception, "Unhandled during the UI smoke run: {Message}", e.Message);
+            _smokeRun.Absorb(e.Exception);
+            e.Handled = true;
+            return;
+        }
+
         Log.Fatal(e.Exception, "App UnhandledException: {Message}", e.Message);
         Log.CloseAndFlush();
 

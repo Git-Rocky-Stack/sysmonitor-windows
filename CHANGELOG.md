@@ -47,7 +47,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   whole file back from a copy the page took when it opened, erasing any custom game Auto
   Game Mode had added since. One store now serves every reader and writer in both builds
   (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:25`, registered at
-  `src/SysMonitor.App/App.xaml.cs:106`). A save reads the file again and writes only its
+  `src/SysMonitor.App/App.xaml.cs:114`). A save reads the file again and writes only its
   own changes on top, and a file it could not read is never written over. On its first
   start the packaged build copies across what an earlier version left in `LocalSettings`.
   Auto Game Mode's saves are written in the order they were made, and the last one lands

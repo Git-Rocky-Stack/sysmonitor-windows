@@ -96,7 +96,7 @@ Everything the app stores about you lives in one folder:
 %LocalAppData%\SysMonitor
 ```
 
-Logs are under `Logs` inside it (`src/SysMonitor.App/App.xaml.cs:74`). Deleting that
+Logs are under `Logs` inside it (`src/SysMonitor.App/App.xaml.cs:82`). Deleting that
 folder resets everything the app keeps in files. The
 [settings and data reference](reference-settings-and-data.md) covers the two entries Run
 at Startup and a cleaning schedule leave elsewhere, and where the packaged build keeps

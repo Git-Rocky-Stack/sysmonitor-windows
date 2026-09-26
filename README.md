@@ -152,6 +152,10 @@ dotnet test
 # One test class
 dotnet test --filter "FullyQualifiedName~DriveWiperPatternTests"
 
+# Open every page in both themes, save a picture of each and a report, then exit
+# (non-zero if a page failed to load; src/SysMonitor.App/Diagnostics/UiSmokeRun.cs)
+dotnet run --project src/SysMonitor.App -- --ui-smoke ui-smoke
+
 # Self-contained x64 publish
 dotnet publish src/SysMonitor.App/SysMonitor.App.csproj \
   -c Release -r win-x64 --self-contained true -o publish/
