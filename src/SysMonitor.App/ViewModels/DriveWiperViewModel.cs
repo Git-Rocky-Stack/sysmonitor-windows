@@ -48,6 +48,12 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private bool _hasMediaWarning;
 
+    /// <summary>
+    /// Asked before a wipe starts, with what it is about to destroy; the wipe goes ahead only on a yes. The page
+    /// sets it. Until it does nothing is wiped, because there is nobody to ask.
+    /// </summary>
+    public Func<WipeConfirmation, Task<bool>>? ConfirmWipe { get; set; }
+
     public DriveWiperViewModel(IDriveWiper driveWiper,
         ILogger<DriveWiperViewModel>? logger = null)
     {
@@ -163,6 +169,17 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
     private async Task WipeFilesAsync()
     {
         if (!HasFiles || IsWiping) return;
+
+        // An overwrite cannot be taken back, so the button only asks. Nothing below runs without a yes.
+        var folders = FilesToWipe.Count(f => f.IsDirectory);
+        var confirmation = new WipeConfirmation(
+            Files: FilesToWipe.Count - folders,
+            Folders: folders,
+            TotalSize: FormatSize(FilesToWipe.Sum(f => f.Size)),
+            MediaWarning: HasMediaWarning ? MediaWarning : null);
+
+        if (ConfirmWipe == null || !await ConfirmWipe(confirmation))
+            return;
 
         IsWiping = true;
         Progress = 0;
@@ -337,6 +354,13 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
         GC.SuppressFinalize(this);
     }
 }
+
+/// <summary>What a wipe is about to destroy, for the question asked before it starts.</summary>
+/// <param name="Files">Files chosen one by one.</param>
+/// <param name="Folders">Folders chosen whole; everything inside each goes too.</param>
+/// <param name="TotalSize">Their combined size, formatted as the page shows it.</param>
+/// <param name="MediaWarning">The page's solid-state drive warning, when the selection sits on one.</param>
+public sealed record WipeConfirmation(int Files, int Folders, string TotalSize, string? MediaWarning);
 
 public class FileToWipe
 {

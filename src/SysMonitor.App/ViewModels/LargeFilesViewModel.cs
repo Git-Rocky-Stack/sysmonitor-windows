@@ -44,6 +44,12 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _selectedFilter = "All";
     public string[] FileTypeFilters { get; } = ["All", "Video", "Image", "Audio", "Archive", "Document", "Executable", "Other"];
 
+    /// <summary>
+    /// Asked before the selected files are removed, with how many and how much; they go only on a yes. The page
+    /// sets it. Until it does nothing is removed, because there is nobody to ask.
+    /// </summary>
+    public Func<int, string, Task<bool>>? ConfirmDeletion { get; set; }
+
     public LargeFilesViewModel(ILargeFileFinder largeFileFinder, IPerformanceMonitor performanceMonitor)
     {
         _largeFileFinder = largeFileFinder;
@@ -165,6 +171,12 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
         if (selected.Count == 0)
         {
             ShowAction("No files selected", false);
+            return;
+        }
+
+        if (ConfirmDeletion == null ||
+            !await ConfirmDeletion(selected.Count, FormatSize(selected.Sum(f => f.SizeBytes))))
+        {
             return;
         }
 

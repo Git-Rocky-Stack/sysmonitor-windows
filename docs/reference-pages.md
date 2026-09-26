@@ -31,7 +31,7 @@ Header at `MainWindow.xaml:119`.
 | Health Check | `:120` | System-wide checks producing a score, a grade, counts of critical issues and warnings, and recommended actions |
 | Game Mode | `:125` | Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`) |
 | Browser Privacy | `:130` | Clears browsing traces across installed browsers, counted per browser actually found |
-| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406`, `:589`, `:20`) |
+| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406`, `:589`, `:20`). It asks before it starts, naming the count and size, with Cancel as the default (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35`) |
 | Scheduled Cleaning | `:140` | Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs`) |
 | Backup Manager | `:145` | Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (`src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:20-22`) |
 | Driver Updater | `:150` | Device driver inventory, with problem and unsigned drivers flagged, and links out to Device Manager and Windows Update |
@@ -47,8 +47,8 @@ Header at `MainWindow.xaml:182`.
 
 | Page | Line | What it does |
 |---|---|---|
-| Large Files | `:183` | Finds large files. Deletion goes to the Recycle Bin and does not follow links (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs`) |
-| Duplicate Finder | `:188` | Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161`, `:223`) |
+| Large Files | `:183` | Finds large files, largest first. Deletion goes to the Recycle Bin after a confirmation naming the count and size, and does not follow links; a file Windows cannot recycle is deleted permanently instead, as the confirmation says (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs`, `src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`) |
+| Duplicate Finder | `:188` | Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size; a file Windows cannot recycle is deleted permanently instead, as the confirmation says (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161`, `:223`) |
 | File Tools | `:193` | ZIP compression of a file or a folder, and GZip of a single file. See the note on formats below |
 | PDF Tools | `:198` | Merge, split, extract pages, convert images and text to PDF, and sign |
 | Image Tools | `:203` | Compress, convert, resize, and read image metadata |

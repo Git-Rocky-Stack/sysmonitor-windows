@@ -315,7 +315,7 @@ test can exercise it without ever naming a file it could destroy.
 
 Also: `WipeResult.FailedPaths` records overwrites the wiper could not read back to confirm, and had
 **zero readers** anywhere in the app. "Successfully wiped" was printed over the top of them.
-`DriveWiperViewModel.cs:203` now reports them.
+`DriveWiperViewModel.cs:220` now reports them.
 
 ### 2.20 A scheduled clean that deleted files the moment you saved it
 

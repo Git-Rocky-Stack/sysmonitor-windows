@@ -56,6 +56,29 @@ Get-PSDrive C | Select-Object Used, Free
 The difference should be close to the reported total. It will not match to the byte,
 because Windows writes to disk while you work.
 
+## If a few large files are taking the space
+
+The Directory Cleaner removes what Windows and your browsers leave behind. When the
+space is going to a handful of big files instead, use the **Large Files** page:
+
+1. Choose a folder, set the minimum size, and click **Scan**. The results are listed
+   largest first (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs:163`).
+
+2. Tick the files you no longer need, and click **Delete Selected**.
+
+3. The app asks first, naming how many files and how much they hold
+   (`src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). **Cancel** is the default.
+   Confirm with **Move to Recycle Bin**.
+
+The files go to the Recycle Bin, where you can restore them, with one exception the
+question also states: a file Windows cannot recycle, such as one on a network or
+removable drive or one larger than the Recycle Bin is set to hold, is deleted
+permanently instead. Up to and including v3.0.1, Delete Selected removed the files
+without asking.
+
+A file in the Recycle Bin still takes up its space. The space comes back when the
+Recycle Bin is emptied, which the Directory Cleaner's Recycle Bin category does.
+
 ## If you want this to happen on a schedule
 
 Use the **Scheduled Cleaning** page. It registers a Windows scheduled task that runs

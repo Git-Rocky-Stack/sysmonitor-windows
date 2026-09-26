@@ -11,6 +11,21 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
+### Changed
+
+- **Drive Wiper and Large Files ask before they destroy anything.** WIPE NOW started
+  overwriting the moment it was pressed, and DELETE SELECTED sent every ticked file away
+  without a question. Both now ask first, naming how many items are involved and how much
+  they hold, with Cancel as the default button, so Enter or Escape changes nothing
+  (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35`,
+  `src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). The wipe's question says none of
+  it goes to the Recycle Bin, and repeats the page's SSD warning when it applies. The
+  Recycle Bin questions, here and in Duplicate Finder, now say what Windows does with a
+  file it cannot recycle, such as one on a network or removable drive or one larger than
+  the Recycle Bin is set to hold: it deletes it permanently. One helper builds these
+  dialogs, in the application's dialog style and the page's theme
+  (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:16`).
+
 ### Fixed
 
 - **Every CPU reading covers its reader's own interval.** Usage is the share of the time

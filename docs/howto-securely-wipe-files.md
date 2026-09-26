@@ -37,7 +37,16 @@ of this page, but the explanation matters.
    (`DriveWiper.cs:561-566`). Before v3.0.0 the middle passes were filled with
    `(pass * 17) % 256`, which is not that method.
 
-4. Start the wipe and let it finish.
+4. Click **WIPE NOW**.
+
+   The app asks first. The question names how many files and folders are listed and
+   how much they hold, and says that none of it goes to the Recycle Bin. When the
+   selection sits on an SSD, the page's warning is repeated in it. **Cancel** is the
+   default, so Enter or Escape leaves everything where it is
+   (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35`). Up to and including v3.0.1
+   the wipe started the moment the button was pressed.
+
+5. Confirm with **Wipe**, and let it finish.
 
 ## Verification
 

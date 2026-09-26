@@ -377,8 +377,10 @@ Overwriting a single file is not one of them. See
 **How to Use:**
 1. Click **Add Files** or **Add Folder**
 2. Select wipe method based on sensitivity
-3. Click **Wipe**
-4. Confirm the action. This is not reversible
+3. Click **Wipe Now**
+4. Confirm with **Wipe**. The question names how many files and folders are listed and how
+   much they hold, and Cancel is the default
+   (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35`). This is not reversible
 5. Read the result. "Wiped" means the read-back matched. "Unconfirmed" means it did not,
    and you should treat the data as possibly still present
 
@@ -541,7 +543,9 @@ Find and remove duplicate files:
 - Filter by file type and by minimum size
 - Preview duplicates before deletion
 - Deletion goes to the Recycle Bin, after a confirmation naming the count and size
-  (`DuplicateFinder.cs:16-23`, `:186`)
+  (`DuplicateFinder.cs:16-23`, `:186`). A file Windows cannot recycle, such as one on a
+  network or removable drive or one larger than the Recycle Bin is set to hold, is
+  deleted permanently instead, and the confirmation says so
 
 There is no faster name-and-size mode. Before v3.0.0, files over 10 MB were judged by
 their first megabyte, last megabyte and length, which matches for every file a program
@@ -559,18 +563,21 @@ writes with the same header, footer and size, and those were offered up for dele
 Locate space-consuming files:
 
 **Features:**
-- Scan any drive or folder
-- Sort by file size
-- Filter by minimum size
-- Filter by file type
-- Quick delete or move options
+- Scan any drive or folder, down to a minimum size you set
+- Results listed largest first
+  (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs:163`)
+- Select files one by one, or all or none at once
+- Deletion goes to the Recycle Bin, after a confirmation naming the count and size
+  (`src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). A file Windows cannot
+  recycle, such as one on a network or removable drive or one larger than the Recycle
+  Bin is set to hold, is deleted permanently instead, and the confirmation says so
 
 **How to Use:**
-1. Select drive or folder
-2. Set minimum file size
+1. Select a drive or folder
+2. Set the minimum file size
 3. Click **Scan**
-4. Review large files list
-5. Delete or relocate as needed
+4. Tick the files to remove
+5. Click **Delete Selected** and confirm
 
 ### Installed Programs
 
