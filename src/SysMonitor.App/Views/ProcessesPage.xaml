@@ -145,7 +145,6 @@
                         </TextBlock>
                         <TextBlock Grid.Column="2" Foreground="{StaticResource TextSecondaryBrush}">
                             <Run Text="{Binding MemoryMB, Converter={StaticResource MBConverter}}"/>
-                            <Run Text=" MB"/>
                         </TextBlock>
                         <TextBlock Grid.Column="3" Text="{Binding Id}" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <TextBlock Grid.Column="4" Text="{Binding Status}" Foreground="{StaticResource SuccessBrush}"/>

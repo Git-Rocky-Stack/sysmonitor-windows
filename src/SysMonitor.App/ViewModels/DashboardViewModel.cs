@@ -63,9 +63,6 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _cpuTempStatus = "N/A";
     [ObservableProperty] private double _gpuTemperature = 0;
 
-    // Process count
-    [ObservableProperty] private int _processCount = 0;
-
     // Action status
     [ObservableProperty] private string _actionStatus = "";
     [ObservableProperty] private bool _hasActionStatus = false;
@@ -212,9 +209,6 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
                 GpuTemperature = gpuTemp;
                 CpuTempStatus = GetTempStatus(cpuTemp);
 
-                // Process count (estimate from CPU info)
-                ProcessCount = Environment.ProcessorCount * 10; // Rough estimate
-
                 IsLoading = false;
             });
 
@@ -298,7 +292,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private async Task OptimizeMemoryAsync()
     {
         IsOptimizing = true;
-        ShowActionStatus("Optimizing memory...", true);
+        ShowActionStatus("Trimming memory...", true);
 
         using var _ = _performanceMonitor.TrackOperation("Dashboard.OptimizeMemory");
 
@@ -313,7 +307,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            ShowActionStatus($"Optimization failed: {ex.Message}", false);
+            ShowActionStatus($"Trim failed: {ex.Message}", false);
         }
         finally
         {
@@ -383,8 +377,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         sb.AppendLine($"  Cores:     {info.Cpu.Cores} cores / {info.Cpu.LogicalProcessors} threads");
         sb.AppendLine($"  Speed:     {info.Cpu.MaxClockSpeedMHz} MHz");
         sb.AppendLine($"  Usage:     {info.Cpu.UsagePercent:F1}%");
-        var cpuTempF = cpuTemp > 0 ? (cpuTemp * 1.8) + 32 : 0;
-        sb.AppendLine($"  Temp:      {cpuTempF:F0}°F ({GetTempStatus(cpuTemp)})");
+        sb.AppendLine($"  Temp:      {ReportTemperature(cpuTemp)}");
         sb.AppendLine();
 
         sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
@@ -398,8 +391,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
         sb.AppendLine("│ GPU                                                               │");
         sb.AppendLine("└──────────────────────────────────────────────────────────────────┘");
-        var gpuTempF = gpuTemp > 0 ? (gpuTemp * 1.8) + 32 : 0;
-        sb.AppendLine($"  Temp:      {gpuTempF:F0}°F ({GetTempStatus(gpuTemp)})");
+        sb.AppendLine($"  Temp:      {ReportTemperature(gpuTemp)}");
         sb.AppendLine();
 
         sb.AppendLine("┌──────────────────────────────────────────────────────────────────┐");
@@ -439,6 +431,13 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
         return sb.ToString();
     }
+
+    /// <summary>
+    /// A temperature for the report: "77°F (Normal)", or "N/A" when there is no sensor. The monitors report a missing
+    /// reading as 0, which the report used to print as "0°F (N/A)".
+    /// </summary>
+    private static string ReportTemperature(double celsius) =>
+        celsius > 0 ? $"{FormatHelper.FormatTemperatureF(celsius)} ({GetTempStatus(celsius)})" : "N/A";
 
     private void ShowActionStatus(string message, bool success)
     {

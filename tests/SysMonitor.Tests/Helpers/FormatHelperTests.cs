@@ -104,6 +104,7 @@ public class FormatHelperTests
     [Theory]
     [InlineData(0, "N/A")]
     [InlineData(-10, "N/A")]
+    [InlineData(double.NaN, "N/A")]
     [InlineData(25, "77°F")]
     [InlineData(100, "212°F")]
     public void FormatTemperatureF_ReturnsCorrectFormat(double celsius, string expected)
@@ -117,12 +118,42 @@ public class FormatHelperTests
 
     [Theory]
     [InlineData(0, "N/A")]
+    [InlineData(double.NaN, "N/A")]
     [InlineData(25, "25°C")]
     [InlineData(100, "100°C")]
     public void FormatTemperatureC_ReturnsCorrectFormat(double celsius, string expected)
     {
         // Act
         var result = FormatHelper.FormatTemperatureC(celsius);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(0, "--")]
+    [InlineData(-10, "--")]
+    [InlineData(double.NaN, "--")]
+    [InlineData(25, "77")]
+    [InlineData(100, "212")]
+    public void FormatTemperatureF_WithoutUnit_ShowsNoReadingAsAPlaceholder(double celsius, string expected)
+    {
+        // Act
+        var result = FormatHelper.FormatTemperatureF(celsius, showUnit: false);
+
+        // Assert
+        result.Should().Be(expected,
+            "a caller that draws its own unit label was handed \"0\" for a missing sensor, which reads as a measurement");
+    }
+
+    [Theory]
+    [InlineData(0, "--")]
+    [InlineData(double.NaN, "--")]
+    [InlineData(25, "25")]
+    public void FormatTemperatureC_WithoutUnit_ShowsNoReadingAsAPlaceholder(double celsius, string expected)
+    {
+        // Act
+        var result = FormatHelper.FormatTemperatureC(celsius, showUnit: false);
 
         // Assert
         result.Should().Be(expected);

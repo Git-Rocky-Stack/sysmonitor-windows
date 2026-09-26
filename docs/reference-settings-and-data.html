@@ -133,9 +133,15 @@
     </tr>
     </tbody>
     </table></div>
-    <p>The memory threshold raises an alert and nothing else. Nothing optimises memory on its
-    own. The Dashboard's TRIM MEMORY button is the only thing that trims working sets,
-    and you start it (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:298</code>).</p>
+    <p>The memory threshold raises an alert and nothing else: crossing it trims nothing.
+    Working sets are trimmed by the TRIM MEMORY button on the Dashboard
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:292</code>) and on the Memory page
+    (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175</code>), and by Game Mode, whose memory
+    step is on unless a caller turns it off
+    (<code>src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111</code>,
+    <code>src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:31</code>). That includes Game Mode
+    switched on by auto mode when it sees a game start, if you have turned auto mode on
+    (<code>src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:374</code>).</p>
     <p>An "Auto-Optimize Memory" setting existed before v3.0.0 and was removed, because
     nothing read it.</p>
     <p>What the button does is trim process working sets, which moves pages to the standby
@@ -143,7 +149,10 @@
     of making more of it available
     (<code>src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91</code>). The result message
     has said so since v3.0.0: it reads "Trimmed N from background apps"
-    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:311</code>).</p>
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:306</code>). Up to and including v3.0.1
+    the Memory page's button read OPTIMIZE MEMORY and reported the drop in used memory as
+    memory freed; it now reads TRIM MEMORY and reports the same count in the same words
+    (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:178</code>).</p>
     <p>The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
     of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY
     (<code>src/SysMonitor.App/Views/DashboardPage.xaml:286</code>), with a tooltip explaining the
@@ -253,7 +262,7 @@
     <p>The install folder holds the application, plus <code>LICENSE.txt</code> and
     <code>THIRD-PARTY-NOTICES.txt</code> (<code>installer/SysMonitorSetup.iss:87-88</code>).</p>
     <p>Exported reports go to your Documents folder
-    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:333-341</code>).</p>
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:327-335</code>).</p>
     <h2>What leaves your machine</h2>
     <p>Nothing. Readings stay local. See <a href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/blob/main/PRIVACY_POLICY.md">PRIVACY_POLICY.md</a>.</p>
     <p>The app does not check for updates and cannot download a new version of itself. To

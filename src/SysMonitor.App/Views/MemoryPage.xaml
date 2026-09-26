@@ -110,7 +110,7 @@
                                 <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
                             </TextBlock>
                         </Border>
-                        <!-- OPTIMIZE MEMORY with chrome bezel -->
+                        <!-- TRIM MEMORY with chrome bezel -->
                         <Border CornerRadius="26" Padding="2" Margin="0,8,0,0">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -121,9 +121,10 @@
                                     <GradientStop Color="#505050" Offset="1.0"/>
                                 </LinearGradientBrush>
                             </Border.Background>
-                            <Button Content="OPTIMIZE MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
+                            <Button Content="TRIM MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
                                     Style="{StaticResource RedButtonStyle}"
-                                    IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                                    IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                    ToolTipService.ToolTip="Trim the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM."/>
                         </Border>
                     </StackPanel>
                 </Grid>
@@ -144,7 +145,9 @@
                         <ProgressRing IsActive="{x:Bind ViewModel.IsOptimizing, Mode=OneWay}"
                                       Width="24" Height="24"
                                       Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                        <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="{StaticResource SuccessBrush}"
+                        <FontIcon Glyph="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessGlyphConverter}}"
+                                  FontSize="20"
+                                  Foreground="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessColorConverter}}"
                                   Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
@@ -154,11 +157,11 @@
                                Foreground="{StaticResource TextPrimaryBrush}" FontSize="14"
                                VerticalAlignment="Center" Margin="12,0,0,0"/>
 
-                    <!-- Bytes Freed Display -->
+                    <!-- Shown once a trim has worked -->
                     <TextBlock Grid.Column="2" VerticalAlignment="Center"
-                               Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                               Visibility="{x:Bind ViewModel.HasTrimmed, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                                Foreground="{StaticResource CyanAccentBrush}" FontSize="12" FontWeight="SemiBold">
-                        <Run Text="MEMORY OPTIMIZED"/>
+                        <Run Text="MEMORY TRIMMED"/>
                     </TextBlock>
                 </Grid>
             </Border>
