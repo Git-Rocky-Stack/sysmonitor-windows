@@ -11,7 +11,118 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- **The Drive Wiper shows the result of a wipe.** Every wipe wrote its outcome to the
+  status line and then, in its `finally` block, described the list over it, so the
+  outcome was replaced before it was drawn. "Successfully wiped", "N failed" and the
+  warning that an overwrite could not be read back - "treat those files as not securely
+  erased" - have never reached the screen: a wipe with an unconfirmed overwrite ended on
+  "Add files or folders to securely delete", the same line as one that went perfectly.
+  The list's counts still update after a wipe, and the result stays until the list
+  changes. A single item is no longer "1 items".
+  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:291`, `:321`, `:365`)
+
+- **The Drive Wiper's remove button removes the file.** The X on each row was bound to
+  `RemoveFileCommand` through an element named `FilesToWipe` that does not exist, on a
+  page that never set a `DataContext`, so the binding found nothing and the button did
+  nothing. It now reaches the command the way Installed Programs and PDF Tools do, and
+  its tooltip says it removes the file from the list rather than wiping it.
+  (`src/SysMonitor.App/Views/DriveWiperPage.xaml:6`, `:197`,
+  `src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:16`)
+
+- **Nothing on the Drive Wiper page changes while a wipe runs.** The wipe works through
+  a copy of the list taken when it starts. Clear All emptied the list on screen while
+  every file on it was still wiped, and adding files moved the count the progress bar
+  divides by; with the X working, removing a row mid-wipe would have hidden a file that
+  was still destroyed. Add Files, Add Folder, Clear All and each row's X are disabled
+  until the wipe ends. So is the method selector: the wipe read it once per file, so
+  changing it mid-wipe changed how the remaining files were wiped while the result
+  named only the last choice. WIPE NOW also waits for an add to finish - a folder is
+  sized before it joins the list, and a wipe started in that gap ran without it.
+  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:25`, `:190`, `:197`,
+  `src/SysMonitor.App/Views/DriveWiperPage.xaml:125`)
+
+- **A file the wipe could not finish says why.** Each row has an error line, but the
+  entry behind it raised no change notification, so the line was read once, while still
+  empty, and a failed file showed nothing beyond the "N failed" count. A retry now clears
+  the previous reason before it starts.
+  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:403`, `:225`)
+
+- **Memory sizes carry one unit.** `MBConverter` already appends `MB` or `GB`; the
+  Dashboard's Cleanable Space line and the Processes page's Memory column appended
+  another, and read "512 MB MB" and "1.2 GB MB".
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:533`,
+  `src/SysMonitor.App/Views/ProcessesPage.xaml:147`)
+
+- **A missing temperature reads as missing.** With no sensor the monitors report 0 C,
+  which the Fahrenheit converter turned into 32F on the Dashboard, the Temperature page
+  and the GPU page, beside a status that said N/A. It now shows `--`, as the game overlay
+  already did. The exported report printed the same missing reading as "0F (N/A)" and now
+  says N/A. `FormatHelper` returned "0" for a missing reading when asked for the number
+  without its unit - the form a caller with its own unit label uses - and a NaN reading
+  came out as "NaN"; the first is now `--`, NaN counts as no reading, and tests cover both.
+  (`src/SysMonitor.App/Converters/Converters.cs:335`,
+  `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:439`,
+  `src/SysMonitor.Core/Helpers/FormatHelper.cs:111`)
+
+- **The game overlay labels its temperatures in the unit they are in.** Since v2.2.0 it
+  has computed Fahrenheit (`src/SysMonitor.App/Views/FpsOverlayWindow.xaml.cs:187`) and
+  labelled the number C, so a CPU at 60 C read "140 C", while the in-app guide says the
+  overlay shows Fahrenheit. The label now reads F.
+  (`src/SysMonitor.App/Views/FpsOverlayWindow.xaml:150`, `:192`)
+
+- **The Memory page stops claiming a trim frees memory.** Its button runs the same
+  working-set trim as the Dashboard's TRIM MEMORY, but the page subtracted used memory
+  after from used memory before - a number every other app on the machine moves - and
+  reported the difference as memory freed, or said memory was already optimized when the
+  difference was not positive. That is the claim v3.0.1 removed from the Dashboard and
+  Game Mode. The page now reports the optimizer's own count in the Dashboard's words,
+  and its button reads TRIM MEMORY. After a failed trim the banner showed a green tick
+  and "MEMORY OPTIMIZED" beside the failure; the tick is now a red cross on failure, and
+  the badge appears only once a trim has worked.
+  (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175`, `:51`,
+  `src/SysMonitor.App/Views/MemoryPage.xaml:124`, `:148`, `:161`)
+
+- **The in-app guide describes Game Mode's session stats as they read.** It listed
+  "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check
+  knew only the RAM wordings of this claim, which is how both this line and the Memory
+  page's message got past it; it now covers "memory" as well as "RAM".
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:872`,
+  `tests/SysMonitor.Tests/Architecture/InAppGuideClaimTests.cs:45`)
+
+- **The documentation says what trims memory.** The user guide and the settings
+  reference said the Dashboard's button is the only thing that trims working sets. The
+  Memory page's button does too, and so does Game Mode, including when auto mode switches
+  it on by itself because a game started
+  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:374`,
+  `src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:31`). The getting-started
+  tutorial said Quick Clean clears browser cache and tells you how much it freed; it
+  empties eight fixed Windows locations, none of them a browser's
+  (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:72-79`), and tells you how
+  many files it removed. The settings reference cited the comment above the Dashboard's
+  trim message instead of the line that prints it.
+  (`FEATURES_AND_USER_GUIDE.md`, `docs/reference-settings-and-data.md`,
+  `docs/tutorial-getting-started.md`)
+
+### Changed
+
+- **The memory optimizer logs what it did.** It logged "freed N bytes" for a trim, and
+  its locals were named for freeing, which is where wording like the Memory page's
+  comes from; they say trimmed now.
+  (`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:65`)
+
+- The Dashboard's TRIM MEMORY button says "Trimming memory..." while it runs and "Trim
+  failed" when it fails, matching its label and the Memory page.
+  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:295`)
+
+### Removed
+
+- **A process count nothing showed.** The Dashboard's view model set `ProcessCount` to
+  the number of processor cores times ten, commented as a rough estimate, and no page
+  bound it. A property holding a made-up number is one binding away from being shown as
+  a measurement. The citations into that file from the tutorial and the two reference
+  pages moved with the lines they cite.
 
 ---
 

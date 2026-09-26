@@ -27,9 +27,15 @@ Reset command restores exactly these values (`SettingsViewModel.cs:260-286`).
 | Refresh Interval | 1 to 10 seconds | 2 seconds | How often readings update (`:28`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:122`) |
 | Memory Threshold | Percent | 80 (`:29`) | The usage level that raises a memory alert |
 
-The memory threshold raises an alert and nothing else. Nothing optimises memory on its
-own. The Dashboard's TRIM MEMORY button is the only thing that trims working sets,
-and you start it (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:298`).
+The memory threshold raises an alert and nothing else: crossing it trims nothing.
+Working sets are trimmed by the TRIM MEMORY button on the Dashboard
+(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:292`) and on the Memory page
+(`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175`), and by Game Mode, whose memory
+step is on unless a caller turns it off
+(`src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111`,
+`src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:31`). That includes Game Mode
+switched on by auto mode when it sees a game start, if you have turned auto mode on
+(`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:374`).
 
 An "Auto-Optimize Memory" setting existed before v3.0.0 and was removed, because
 nothing read it.
@@ -39,7 +45,10 @@ list, from which Windows can page them straight back. It does not free RAM in th
 of making more of it available
 (`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91`). The result message
 has said so since v3.0.0: it reads "Trimmed N from background apps"
-(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:311`).
+(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:306`). Up to and including v3.0.1
+the Memory page's button read OPTIMIZE MEMORY and reported the drop in used memory as
+memory freed; it now reads TRIM MEMORY and reports the same count in the same words
+(`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:178`).
 
 The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
 of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY
@@ -99,7 +108,7 @@ The install folder holds the application, plus `LICENSE.txt` and
 `THIRD-PARTY-NOTICES.txt` (`installer/SysMonitorSetup.iss:87-88`).
 
 Exported reports go to your Documents folder
-(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:333-341`).
+(`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:327-335`).
 
 ## What leaves your machine
 

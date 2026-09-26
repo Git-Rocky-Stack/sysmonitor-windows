@@ -645,8 +645,9 @@ Detailed system specifications:
 ### Monitoring
 
 - **Refresh Interval** - Data update frequency (1-10 seconds)
-- **Memory Threshold** - The usage level that raises a memory alert. Nothing optimizes memory on its own;
-  the Dashboard's memory action is the only thing that trims working sets, and you start it.
+- **Memory Threshold** - The usage level that raises a memory alert. Crossing it trims nothing. Working
+  sets are trimmed only by TRIM MEMORY on the Dashboard or the Memory page, and by Game Mode - including
+  when auto mode, if you have turned it on, starts Game Mode because it saw a game launch.
 
 ### Alert Thresholds
 
@@ -694,7 +695,7 @@ All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Vi
 2. Run as Administrator
 3. Check Windows Event Viewer for errors
 
-### Temperature Readings Show N/A
+### Temperature Readings Show -- or N/A
 
 1. Ensure LibreHardwareMonitor drivers are loaded
 2. Run app as Administrator
