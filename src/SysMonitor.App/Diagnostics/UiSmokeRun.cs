@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
@@ -346,12 +347,13 @@ internal sealed class UiSmokeRun
     }
 
     /// <summary>
-    /// Three things only the live tree can say about the instruments. Each one drew its template: an implicit
-    /// style that did not apply leaves a control that draws nothing and raises nothing. Everything inside a well
-    /// or a display is in the dark theme, because displays stay dark in both shifts. And a line asking for Silver
-    /// inside a well gets Night Ops silver, while the same line on a faceplate gets the shift's own - the theme
-    /// reaching an element is not the same as its resources being looked up again in it, and text built before
-    /// it joined the window would pass the first half without following any theme at all.
+    /// What only the live tree can say about the instruments. Each one drew its template: an implicit style that
+    /// did not apply leaves a control that draws nothing and raises nothing. A lamp is heard by its word, and a VU
+    /// meter drew the segments it was set to. Everything inside a well or a display is in the dark theme, because
+    /// displays stay dark in both shifts. And a line asking for Silver inside a well gets Night Ops silver, while
+    /// the same line on a faceplate gets the shift's own - the theme reaching an element is not the same as its
+    /// resources being looked up again in it, and text built before it joined the window would pass the first
+    /// half without following any theme at all.
     /// </summary>
     private void CheckInstruments(ConsoleSpecimen specimen, ElementTheme theme, string shift)
     {
@@ -366,6 +368,22 @@ internal sealed class UiSmokeRun
 
         foreach (var instrument in instruments.Where(instrument => VisualTreeHelper.GetChildrenCount(instrument) == 0))
             Problem($"A {instrument.GetType().Name} drew nothing: its template was not applied");
+
+        // Status is a word first: a screen reader has to hear it, not only a colour on the screen.
+        foreach (var lamp in instruments.OfType<Lamp>())
+        {
+            var spoken = FrameworkElementAutomationPeer.CreatePeerForElement(lamp)?.GetName();
+            if (string.IsNullOrEmpty(spoken) || !spoken.Contains(lamp.Code, StringComparison.Ordinal))
+                Problem($"The {lamp.Code} lamp is read as \"{spoken}\": a screen reader has to hear its word");
+        }
+
+        foreach (var meter in instruments.OfType<VuMeter>())
+        {
+            var segments = Descendants(meter).OfType<Grid>().FirstOrDefault(grid => grid.Name == "PART_Segments");
+            var cells = segments?.Children.Count ?? 0;
+            if (cells != meter.Segments)
+                Problem($"A VU meter set to {meter.Segments} segments drew {cells}");
+        }
 
         foreach (var surface in instruments.Where(instrument => instrument is Well or Display))
         {

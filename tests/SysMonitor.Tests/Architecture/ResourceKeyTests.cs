@@ -239,17 +239,8 @@ public class ResourceKeyTests
         return keys;
     }
 
-    /// <summary>A merged dictionary's Source: <c>ms-appx:///</c> from the project, anything else from the file naming it.</summary>
-    private static (string Path, XDocument Document)? OpenDictionary(string declaringFile, string source)
-    {
-        const string AppScheme = "ms-appx:///";
-        var path = source.StartsWith(AppScheme, StringComparison.OrdinalIgnoreCase)
-            ? Path.Combine(RepoSource.Root, AppFolder, source[AppScheme.Length..])
-            : Path.Combine(Path.GetDirectoryName(declaringFile)!, source);
-
-        path = Path.GetFullPath(path.Replace('/', Path.DirectorySeparatorChar));
-        return File.Exists(path) ? (path, XDocument.Load(path)) : null;
-    }
+    private static (string Path, XDocument Document)? OpenDictionary(string declaringFile, string source) =>
+        ProjectDictionary.Open(declaringFile, source);
 
     private static int LineOf(string source, int index) => source.AsSpan(0, index).Count('\n') + 1;
 }

@@ -71,7 +71,7 @@
         </Grid>
 
         <!-- The palette, as each shift paints it: the chassis ramp and the armed family. -->
-        <instruments:Faceplate Kicker="SPECIMEN - PALETTE - 00D" Serial="{instruments:SerialFor Module=PALETTE}">
+        <instruments:Faceplate Kicker="SPECIMEN - PALETTE - 00D" Serial="{instruments:SerialFor Module=palette}">
             <StackPanel Spacing="12">
                 <TextBlock x:Name="FaceProbe" Style="{StaticResource DescriptionTextStyle}"
                            Text="The chassis stays neutral so the armed red commands the room."/>
@@ -121,6 +121,231 @@
                     <TextBlock Grid.Row="3" Grid.Column="2" Style="{StaticResource FieldLabelTextStyle}" Text="ARMED DEEP"/>
                     <TextBlock Grid.Row="3" Grid.Column="3" Style="{StaticResource FieldLabelTextStyle}" Text="CHROME"/>
                 </Grid>
+            </StackPanel>
+        </instruments:Faceplate>
+        <!-- The LED vocabulary: every lamp state as a word, what it means and how it behaves, in a well (System-X
+             Themes.tsx, LED VOCABULARY). An unlit lamp is graphite. -->
+        <instruments:Faceplate Kicker="SPECIMEN - LED VOCABULARY - 00E" Serial="{instruments:SerialFor Module=led-vocabulary}">
+            <StackPanel Spacing="16">
+                <TextBlock Style="{StaticResource DescriptionTextStyle}"
+                           Text="Red means LIVE, not error. Faults are told apart by form, not hue: a warning blinks until someone deals with it, a settled fault holds steady on the NO-GO tone, and armed red burns steady whenever the app is working on the machine."/>
+                <instruments:Well>
+                    <StackPanel>
+                        <Grid Padding="16,10" ColumnSpacing="16" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource HairlineBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp State="Go" Code="GO" Size="Small"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource DescriptionTextStyle}"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="Running, healthy, clean"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LcdLabelTextStyle}" FontSize="10" Text="STEADY"/>
+                        </Grid>
+                        <Grid Padding="16,10" ColumnSpacing="16" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource HairlineBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp State="Hold" Code="HOLD" Size="Small"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource DescriptionTextStyle}"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="Caution, pending, degraded"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LcdLabelTextStyle}" FontSize="10" Text="STEADY"/>
+                        </Grid>
+                        <Grid Padding="16,10" ColumnSpacing="16" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource HairlineBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp State="Warn" Code="WARN" Size="Small"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource DescriptionTextStyle}"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="Unacknowledged warning"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LcdLabelTextStyle}" FontSize="10" Text="BLINKS AT 1HZ UNTIL DEALT WITH"/>
+                        </Grid>
+                        <Grid Padding="16,10" ColumnSpacing="16" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource HairlineBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp State="NoGo" Code="NO-GO" Size="Small"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource DescriptionTextStyle}"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="Settled fault, failed"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LcdLabelTextStyle}" FontSize="10" Text="STEADY"/>
+                        </Grid>
+                        <Grid Padding="16,10" ColumnSpacing="16" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource HairlineBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp State="Exec" Code="EXEC" Size="Small"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource DescriptionTextStyle}"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="Informational, in progress"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LcdLabelTextStyle}" FontSize="10" Text="STEADY"/>
+                        </Grid>
+                        <Grid Padding="16,10" ColumnSpacing="16" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource HairlineBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp State="Armed" Code="LIVE" Size="Small"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource DescriptionTextStyle}"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="Armed, operating on your system"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LcdLabelTextStyle}" FontSize="10" Text="STEADY"/>
+                        </Grid>
+                        <Grid Padding="16,10" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp State="Off" Code="GAME" Size="Small"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource DescriptionTextStyle}"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="Unlit, nothing to report"/>
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LcdLabelTextStyle}" FontSize="10" Text="DARK"/>
+                        </Grid>
+                    </StackPanel>
+                </instruments:Well>
+            </StackPanel>
+        </instruments:Faceplate>
+
+        <!-- Lamps at the standard size on the faceplate, one striking; LEDs, one breathing like ON AIR. -->
+        <instruments:Faceplate Kicker="SPECIMEN - LAMPS - 00F" Serial="{instruments:SerialFor Module=LAMPS}">
+            <StackPanel Spacing="16">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <instruments:Lamp State="Off" Code="STBY"/>
+                    <instruments:Lamp State="Go" Code="GO"/>
+                    <instruments:Lamp State="Hold" Code="HOLD"/>
+                    <instruments:Lamp State="Warn" Code="WARN"/>
+                    <instruments:Lamp State="NoGo" Code="NO-GO"/>
+                    <instruments:Lamp State="Exec" Code="EXEC"/>
+                    <instruments:Lamp State="Armed" Code="ON AIR"/>
+                    <instruments:Lamp State="Armed" Code="ELEVATED" Strike="True"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <instruments:LedDot State="Go"/>
+                        <TextBlock Style="{StaticResource KickerTextStyle}" Text="CPU"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <instruments:LedDot State="Hold"/>
+                        <TextBlock Style="{StaticResource KickerTextStyle}" Text="MEM"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <instruments:LedDot State="Warn"/>
+                        <TextBlock Style="{StaticResource KickerTextStyle}" Text="DISK"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <instruments:LedDot State="NoGo"/>
+                        <TextBlock Style="{StaticResource KickerTextStyle}" Text="FAN"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <instruments:LedDot State="Exec"/>
+                        <TextBlock Style="{StaticResource KickerTextStyle}" Text="NET"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <instruments:LedDot State="Armed" IsPulsing="True"/>
+                        <TextBlock Style="{StaticResource KickerTextStyle}" Text="ON AIR"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <instruments:LedDot State="Off"/>
+                        <TextBlock Style="{StaticResource KickerTextStyle}" Text="GAME"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </instruments:Faceplate>
+
+        <!-- Readings: LCDs in every tone and a missing one; VU meters live, settled and standing; dense rows in a
+             shared well (System-X Themes.tsx, INSTRUMENTS). -->
+        <instruments:Faceplate Kicker="SPECIMEN - INSTRUMENTS - 00G" Serial="{instruments:SerialFor Module=instruments}">
+            <StackPanel Spacing="16">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <instruments:Lcd Label="PHOSPHOR" Value="41.2" Unit="GB"/>
+                    <instruments:Lcd Grid.Column="1" Label="CAUTION" Value="78" Unit="%" Tone="Amber"/>
+                    <instruments:Lcd Grid.Column="2" Label="ARMED" Value="LIVE" Tone="Red"/>
+                    <instruments:Lcd Grid.Column="3" Label="SCOPE" Value="1.2" Unit="MB/S" Tone="Scope"/>
+                    <instruments:Lcd Grid.Column="4" Label="FAULT" Value="3" Unit="FAILED" Tone="NoGo"/>
+                    <instruments:Lcd Grid.Column="5" Label="NO SENSOR" Value="--" Unit="C"/>
+                </Grid>
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="260"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="10">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="NOMINAL"/>
+                            <instruments:VuMeter Value="38"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="CAUTION"/>
+                            <instruments:VuMeter Value="72"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="CRITICAL"/>
+                            <instruments:VuMeter Value="96"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="SETTLED, TWELVE SEGMENTS"/>
+                            <instruments:VuMeter Value="50" Segments="12" IsStatic="True"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Height="120">
+                        <instruments:VuMeter Value="64" IsVertical="True"/>
+                        <instruments:VuMeter Value="88" IsVertical="True"/>
+                        <instruments:VuMeter Value="12" IsVertical="True"/>
+                    </StackPanel>
+                    <instruments:Well Grid.Column="2" Padding="14,12">
+                        <StackPanel Spacing="8">
+                            <instruments:LcdRow Label="CPU" Value="12%"/>
+                            <instruments:LcdRow Label="MEM" Value="62%" Tone="Amber"/>
+                            <instruments:LcdRow Label="DOWN" Value="1.2 MB/S" Tone="Scope"/>
+                            <instruments:LcdRow Label="TEMP" Value="--"/>
+                            <instruments:LcdRow Label="FAN" Value="STOPPED" Tone="NoGo"/>
+                            <instruments:LcdRow Label="RUN" Value="LIVE" Tone="Red"/>
+                        </StackPanel>
+                    </instruments:Well>
+                </Grid>
+            </StackPanel>
+        </instruments:Faceplate>
+
+        <!-- Chips: a rank or a kind in each state, on the faceplate, where Day Shift darkens each word along its
+             hue, and in a well, where the words go back to the LEDs. None of them blinks. -->
+        <instruments:Faceplate Kicker="SPECIMEN - CHIPS - 00H" Serial="{instruments:SerialFor Module=CHIPS}">
+            <StackPanel Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <instruments:Chip Content="NONE"/>
+                    <instruments:Chip State="Go" Content="GO"/>
+                    <instruments:Chip State="Hold" Content="HOLD"/>
+                    <instruments:Chip State="Warn" Content="HIGH"/>
+                    <instruments:Chip State="NoGo" Content="NO-GO"/>
+                    <instruments:Chip State="Exec" Content="EXEC"/>
+                    <instruments:Chip State="Armed" Content="ARMED"/>
+                </StackPanel>
+                <instruments:Well Padding="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <instruments:Chip Content="NONE"/>
+                        <instruments:Chip State="Go" Content="GO"/>
+                        <instruments:Chip State="Hold" Content="HOLD"/>
+                        <instruments:Chip State="Warn" Content="HIGH"/>
+                        <instruments:Chip State="NoGo" Content="NO-GO"/>
+                        <instruments:Chip State="Exec" Content="EXEC"/>
+                        <instruments:Chip State="Armed" Content="ARMED"/>
+                    </StackPanel>
+                </instruments:Well>
             </StackPanel>
         </instruments:Faceplate>
     </StackPanel>

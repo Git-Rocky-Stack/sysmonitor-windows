@@ -274,6 +274,20 @@
             <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
             <SolidColorBrush x:Key="WellLipBrush" Color="{StaticResource WellLipColor}"/>
 
+            <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
+                 lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
+                 :1265); a VU meter's unlit segment (:1915). -->
+            <Color x:Key="LampEdgeColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
+            <SolidColorBrush x:Key="LampEdgeBrush" Color="{StaticResource LampEdgeColor}"/>
+            <Color x:Key="LampLipColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
+            <SolidColorBrush x:Key="LampLipBrush" Color="{StaticResource LampLipColor}"/>
+            <Color x:Key="LampUnderColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
+            <SolidColorBrush x:Key="LampUnderBrush" Color="{StaticResource LampUnderColor}"/>
+            <Color x:Key="LampOffForegroundColor">#808080</Color>
+            <SolidColorBrush x:Key="LampOffForegroundBrush" Color="{StaticResource LampOffForegroundColor}"/>
+            <Color x:Key="VuSegmentOffColor">#131313</Color>
+            <SolidColorBrush x:Key="VuSegmentOffBrush" Color="{StaticResource VuSegmentOffColor}"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#0A0A0A</Color>
@@ -421,6 +435,13 @@
             <LinearGradientBrush x:Key="DisplayShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#E6000000"/>
                 <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+
+            <!-- An LCD's cover glass: a sheen from the top left, gone by 38% of the way across its 168 degree
+                 fall (:1852). -->
+            <LinearGradientBrush x:Key="LcdGlassBrush" StartPoint="0.396,0" EndPoint="0.604,1">
+                <GradientStop Offset="0" Color="#0DFFFFFF"/>
+                <GradientStop Offset="0.38" Color="#00FFFFFF"/>
             </LinearGradientBrush>
 
             <!-- Lamp caps, unlit and in each lit state, dark in both shifts (:1675, lit :1715-1779). -->
@@ -705,6 +726,20 @@
             <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
             <SolidColorBrush x:Key="WellLipBrush" Color="{StaticResource WellLipColor}"/>
 
+            <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
+                 lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
+                 :1265); a VU meter's unlit segment (:1915). -->
+            <Color x:Key="LampEdgeColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
+            <SolidColorBrush x:Key="LampEdgeBrush" Color="{StaticResource LampEdgeColor}"/>
+            <Color x:Key="LampLipColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
+            <SolidColorBrush x:Key="LampLipBrush" Color="{StaticResource LampLipColor}"/>
+            <Color x:Key="LampUnderColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
+            <SolidColorBrush x:Key="LampUnderBrush" Color="{StaticResource LampUnderColor}"/>
+            <Color x:Key="LampOffForegroundColor">#808080</Color>
+            <SolidColorBrush x:Key="LampOffForegroundBrush" Color="{StaticResource LampOffForegroundColor}"/>
+            <Color x:Key="VuSegmentOffColor">#131313</Color>
+            <SolidColorBrush x:Key="VuSegmentOffBrush" Color="{StaticResource VuSegmentOffColor}"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#F5F5F5</Color>
@@ -852,6 +887,13 @@
             <LinearGradientBrush x:Key="DisplayShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#E6000000"/>
                 <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+
+            <!-- An LCD's cover glass: a sheen from the top left, gone by 38% of the way across its 168 degree
+                 fall (:1852). -->
+            <LinearGradientBrush x:Key="LcdGlassBrush" StartPoint="0.396,0" EndPoint="0.604,1">
+                <GradientStop Offset="0" Color="#0DFFFFFF"/>
+                <GradientStop Offset="0.38" Color="#00FFFFFF"/>
             </LinearGradientBrush>
 
             <!-- Lamp caps, unlit and in each lit state, dark in both shifts (:1675, lit :1715-1779). -->
@@ -1136,6 +1178,20 @@
             <Color x:Key="WellLipColor">Transparent</Color>
             <SolidColorBrush x:Key="WellLipBrush" Color="Transparent"/>
 
+            <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
+                 lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
+                 :1265); a VU meter's unlit segment (:1915). -->
+            <StaticResource x:Key="LampEdgeColor" ResourceKey="SystemColorWindowTextColor"/>
+            <SolidColorBrush x:Key="LampEdgeBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+            <Color x:Key="LampLipColor">Transparent</Color>
+            <SolidColorBrush x:Key="LampLipBrush" Color="Transparent"/>
+            <Color x:Key="LampUnderColor">Transparent</Color>
+            <SolidColorBrush x:Key="LampUnderBrush" Color="Transparent"/>
+            <StaticResource x:Key="LampOffForegroundColor" ResourceKey="SystemColorGrayTextColor"/>
+            <SolidColorBrush x:Key="LampOffForegroundBrush" Color="{ThemeResource SystemColorGrayTextColor}"/>
+            <StaticResource x:Key="VuSegmentOffColor" ResourceKey="SystemColorGrayTextColor"/>
+            <SolidColorBrush x:Key="VuSegmentOffBrush" Color="{ThemeResource SystemColorGrayTextColor}"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <StaticResource x:Key="ChromeCapForegroundColor" ResourceKey="SystemColorButtonTextColor"/>
@@ -1166,6 +1222,7 @@
             <SolidColorBrush x:Key="WellShadeLeftBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="WellShadeRightBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="DisplayShadeTopBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="LcdGlassBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="LampFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampGoFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampHoldFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
@@ -1176,9 +1233,12 @@
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
-    <!-- Machined radii, the same in every shift (:697-702). -->
+    <!-- Machined radii, the same in every shift (:697-702): plates and panels, insets, and the caps a lamp, chip or
+         button is cut from - WinUI's ControlCornerRadius, restated so the instruments' dictionary needs nothing
+         from WinUI's own to resolve. -->
     <CornerRadius x:Key="PlateCornerRadius">2</CornerRadius>
     <CornerRadius x:Key="InsetCornerRadius">3</CornerRadius>
+    <CornerRadius x:Key="CapCornerRadius">4</CornerRadius>
     <CornerRadius x:Key="PillCornerRadius">9999</CornerRadius>
 
     <!-- Spacing, base 4 and Fibonacci-flavoured (:688-695). -->

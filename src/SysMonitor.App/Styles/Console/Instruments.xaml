@@ -235,4 +235,450 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- ============================================================ LAMP (:1675-1789) -->
+
+    <!-- A dark cap lit in its state's colour: the face and its edge, an inner ring of the state's soft light, the
+         light along the top and the shade along the bottom, and the stencil word in Archivo at width 110, tracked
+         .1em. Warn blinks the whole lamp at 1 Hz, down to 18% (:458-467); WarnSteady is the same lamp held lit,
+         for when animation effects are off. Striking brings it up from 35% in 80 ms, once. -->
+    <Style TargetType="instruments:Lamp">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Lamp">
+                    <Grid x:Name="Root">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="LampStates">
+                                <VisualState x:Name="Off"/>
+                                <VisualState x:Name="Go">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource LampGoFaceBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource GoEdgeBrush}"/>
+                                        <Setter Target="Glow.BorderBrush" Value="{ThemeResource GoSoftBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource LedGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Hold">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource LampHoldFaceBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource HoldEdgeBrush}"/>
+                                        <Setter Target="Glow.BorderBrush" Value="{ThemeResource HoldSoftBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Warn">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource LampWarnFaceBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
+                                        <Setter Target="Glow.BorderBrush" Value="{ThemeResource WarnSoftBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Cap" Storyboard.TargetProperty="Opacity"
+                                                                       Duration="0:0:1" RepeatBehavior="Forever">
+                                            <DiscreteDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.5" Value="0.18"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="WarnSteady">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource LampWarnFaceBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
+                                        <Setter Target="Glow.BorderBrush" Value="{ThemeResource WarnSoftBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource LampNoGoFaceBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource NoGoEdgeBrush}"/>
+                                        <Setter Target="Glow.BorderBrush" Value="{ThemeResource NoGoSoftBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource LedNoGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Exec">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource LampExecFaceBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource ScopeEdgeBrush}"/>
+                                        <Setter Target="Glow.BorderBrush" Value="{ThemeResource ScopeSoftBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource LedScopeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Armed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource LampArmedFaceBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+                                        <Setter Target="Glow.BorderBrush" Value="{ThemeResource ArmedSoftBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource ArmedDisplayBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="SizeStates">
+                                <VisualState x:Name="Medium"/>
+                                <VisualState x:Name="Small">
+                                    <VisualState.Setters>
+                                        <Setter Target="Cap.Height" Value="19"/>
+                                        <Setter Target="Cap.MinWidth" Value="36"/>
+                                        <Setter Target="Word.Margin" Value="7,0"/>
+                                        <Setter Target="Word.FontSize" Value="9"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="StrikeStates">
+                                <VisualState x:Name="Struck"/>
+                                <VisualState x:Name="Striking">
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity">
+                                            <DiscreteDoubleKeyFrame KeyTime="0" Value="0.35"/>
+                                            <LinearDoubleKeyFrame KeyTime="0:0:0.08" Value="1"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Grid x:Name="Cap" Height="26" MinWidth="46">
+                            <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource CapCornerRadius}"
+                                    Background="{ThemeResource LampFaceBrush}" BorderBrush="{ThemeResource LampEdgeBrush}"/>
+                            <Border x:Name="Glow" Margin="1" BorderThickness="2" CornerRadius="{StaticResource InsetCornerRadius}"/>
+                            <Border Height="1" Margin="1,1,1,0" VerticalAlignment="Top" Background="{ThemeResource LampLipBrush}"/>
+                            <Border Height="1" Margin="1,0,1,1" VerticalAlignment="Bottom" Background="{ThemeResource LampUnderBrush}"/>
+                            <TextBlock x:Name="Word" Margin="9,0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       FontFamily="{StaticResource ConsoleLampFontFamily}" FontSize="10.5" CharacterSpacing="100"
+                                       Foreground="{ThemeResource LampOffForegroundBrush}" Text="{TemplateBinding Code}"/>
+                        </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ LED DOT (:1792-1828) -->
+
+    <!-- A 7-across LED in its state's colour; unlit, it is graphite. Warn blinks at 1 Hz; Pulsing breathes to 55%
+         and back over 2 seconds, the ON AIR light (:469-478). -->
+    <Style TargetType="instruments:LedDot">
+        <Setter Property="Width" Value="7"/>
+        <Setter Property="Height" Value="7"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:LedDot">
+                    <Grid x:Name="Root">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="DotStates">
+                                <VisualState x:Name="Off"/>
+                                <VisualState x:Name="Go">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Hold">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Warn">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity"
+                                                                       Duration="0:0:1" RepeatBehavior="Forever">
+                                            <DiscreteDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.5" Value="0.18"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="WarnSteady">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedNoGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Exec">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedScopeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Armed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource ArmedDisplayBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="PulseStates">
+                                <VisualState x:Name="Steady"/>
+                                <VisualState x:Name="Pulsing">
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Light" Storyboard.TargetProperty="Opacity"
+                                                                       Duration="0:0:2" RepeatBehavior="Forever">
+                                            <DiscreteDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0.55">
+                                                <EasingDoubleKeyFrame.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1">
+                                                <EasingDoubleKeyFrame.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Ellipse x:Name="Light" Fill="{ThemeResource GraphiteBrush}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ LCD (:1831-1892) -->
+
+    <!-- A void-black window in a black edge, shaded from the top, with a glint along its lower lip and a cover
+         glass over the lot: the caption in silkscreen, the reading in phosphor, its unit smaller and quieter. The
+         tone changes the reading's colour and nothing else. -->
+    <Style TargetType="instruments:Lcd">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Lcd">
+                    <Border BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
+                            Background="{ThemeResource DisplayFaceBrush}" BorderBrush="{ThemeResource DisplayBorderBrush}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="ToneStates">
+                                <VisualState x:Name="Go"/>
+                                <VisualState x:Name="Amber">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource LedHoldBrush}"/>
+                                        <Setter Target="UnitText.Foreground" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Red">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource ArmedDisplayBrush}"/>
+                                        <Setter Target="UnitText.Foreground" Value="{ThemeResource ArmedDisplayBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Scope">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource LedScopeBrush}"/>
+                                        <Setter Target="UnitText.Foreground" Value="{ThemeResource LedScopeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource LedNoGoBrush}"/>
+                                        <Setter Target="UnitText.Foreground" Value="{ThemeResource LedNoGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="UnitStates">
+                                <VisualState x:Name="HasUnit"/>
+                                <VisualState x:Name="NoUnit">
+                                    <VisualState.Setters>
+                                        <Setter Target="UnitText.Visibility" Value="Collapsed"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid>
+                            <Border Height="7" VerticalAlignment="Top" Background="{ThemeResource DisplayShadeTopBrush}"/>
+                            <Border Height="1" VerticalAlignment="Bottom" Background="{ThemeResource WellLipBrush}"/>
+                            <StackPanel Padding="10,8" Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource LcdLabelTextStyle}" Text="{TemplateBinding Label}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="ValueText" Style="{StaticResource LcdValueTextStyle}" Text="{TemplateBinding Value}"/>
+                                    <TextBlock x:Name="UnitText" Margin="4,0,0,2" VerticalAlignment="Bottom" Opacity="0.7"
+                                               FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="11"
+                                               Foreground="{ThemeResource PhosphorBrush}" Text="{TemplateBinding Unit}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Border Background="{ThemeResource LcdGlassBrush}" IsHitTestVisible="False"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- One line of a shared well: the caption in silkscreen on the left, the reading in phosphor on the right. -->
+    <Style TargetType="instruments:LcdRow">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:LcdRow">
+                    <Grid ColumnSpacing="12">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="ToneStates">
+                                <VisualState x:Name="Go"/>
+                                <VisualState x:Name="Amber">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Red">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource ArmedDisplayBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Scope">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource LedScopeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="ValueText.Foreground" Value="{ThemeResource LedNoGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis"
+                                   FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="10" CharacterSpacing="120"
+                                   Foreground="{ThemeResource DisplayFgMuteBrush}" Text="{TemplateBinding Label}"/>
+                        <TextBlock x:Name="ValueText" Grid.Column="1" VerticalAlignment="Bottom"
+                                   FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="11"
+                                   Foreground="{ThemeResource PhosphorBrush}" Text="{TemplateBinding Value}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ VU METER (:1895-1943) -->
+
+    <!-- A dark track, shaded from the top, holding the segments the meter builds (VuMeter.cs), 2 apart. The zone
+         colours are theme resources handed to the meter, so High Contrast reaches them. -->
+    <Style TargetType="instruments:VuMeter">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="SegmentOffBrush" Value="{ThemeResource VuSegmentOffBrush}"/>
+        <Setter Property="SegmentGoBrush" Value="{ThemeResource LedGoBrush}"/>
+        <Setter Property="SegmentHoldBrush" Value="{ThemeResource LedHoldBrush}"/>
+        <Setter Property="SegmentOrangeBrush" Value="{ThemeResource LedOrangeBrush}"/>
+        <Setter Property="SegmentRedBrush" Value="{ThemeResource LedWarnBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:VuMeter">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="OrientationStates">
+                                <VisualState x:Name="Horizontal"/>
+                                <VisualState x:Name="Vertical">
+                                    <VisualState.Setters>
+                                        <Setter Target="Track.Height" Value="Auto"/>
+                                        <Setter Target="Track.Width" Value="10"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="Track" Height="10" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
+                                Background="{ThemeResource DisplayFaceBrush}" BorderBrush="{ThemeResource DisplayBorderBrush}">
+                            <Grid>
+                                <Border Height="4" VerticalAlignment="Top" Background="{ThemeResource DisplayShadeTopBrush}"/>
+                                <Grid x:Name="PART_Segments" Margin="2" ColumnSpacing="2" RowSpacing="2"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ CHIP (:2176-2228) -->
+
+    <!-- A flat cap, 24 high, with the lip along its top: neutral, it is the cap's face with Silver text; in a state,
+         its face is the state's soft colour, its edge the state's edge and its word the state's text colour. -->
+    <Style TargetType="instruments:Chip">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleTelemetryFontFamily}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="CharacterSpacing" Value="100"/>
+        <Setter Property="Foreground" Value="{ThemeResource SilverBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Chip">
+                    <Grid Height="24">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="ChipStates">
+                                <VisualState x:Name="Off"/>
+                                <VisualState x:Name="Go">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource GoSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource GoEdgeBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource StateGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Hold">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource HoldSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource HoldEdgeBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource StateHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Warn">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource WarnSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource StateWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource NoGoSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource NoGoEdgeBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource StateNoGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Exec">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource ScopeSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource ScopeEdgeBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource StateExecBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Armed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource ArmedSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource ArmedLitBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource CapCornerRadius}"
+                                Background="{ThemeResource ChipFaceBrush}" BorderBrush="{ThemeResource CapEdgeBrush}"/>
+                        <Border Height="1" Margin="1,1,1,0" VerticalAlignment="Top" Background="{ThemeResource PlateLipBrush}"/>
+                        <ContentPresenter x:Name="Word" Margin="9,0" VerticalAlignment="Center"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          FontFamily="{TemplateBinding FontFamily}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          CharacterSpacing="{TemplateBinding CharacterSpacing}"
+                                          Foreground="{TemplateBinding Foreground}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
