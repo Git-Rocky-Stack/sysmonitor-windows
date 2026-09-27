@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For the UI smoke run's shift measurement only: High Contrast's colour, merged into App.xaml's own
+     High Contrast dictionary. Removed with the fix the measurement decides. -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="ShiftProbeThemeFileBrush" Color="{ThemeResource SystemColorWindowColor}"/>
+</ResourceDictionary>

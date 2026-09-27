@@ -95,6 +95,8 @@
                 <StackPanel Orientation="Horizontal" Spacing="4">
                     <Border x:Name="AppThemeProbe" Width="8" Height="8" Background="{ThemeResource ShiftProbeAppBrush}"/>
                     <Border x:Name="LocalThemeProbe" Width="8" Height="8" Background="{ThemeResource ShiftProbeLocalBrush}"/>
+                    <Border x:Name="MergedThemeProbe" Width="8" Height="8" Background="{ThemeResource ShiftProbeMergedBrush}"/>
+                    <Border x:Name="ThemeFileProbe" Width="8" Height="8" Background="{ThemeResource ShiftProbeThemeFileBrush}"/>
                 </StackPanel>
                 <Grid ColumnSpacing="8" RowSpacing="6">
                     <Grid.ColumnDefinitions>

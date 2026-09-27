@@ -20,6 +20,7 @@
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Instruments.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Colors.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- For the UI smoke run's shift measurement only: one colour in the application's own theme dictionaries,
@@ -27,12 +28,21 @@
                  which are merged in from files. Removed with the fix the measurement decides. -->
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.Night.xaml"/>
+                    </ResourceDictionary.MergedDictionaries>
                     <SolidColorBrush x:Key="ShiftProbeAppBrush" Color="Black"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Light">
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.Day.xaml"/>
+                    </ResourceDictionary.MergedDictionaries>
                     <SolidColorBrush x:Key="ShiftProbeAppBrush" Color="White"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="HighContrast">
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.HighContrast.xaml"/>
+                    </ResourceDictionary.MergedDictionaries>
                     <SolidColorBrush x:Key="ShiftProbeAppBrush" Color="{ThemeResource SystemColorWindowColor}"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
