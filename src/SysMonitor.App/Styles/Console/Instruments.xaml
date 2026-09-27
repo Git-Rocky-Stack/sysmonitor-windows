@@ -1013,7 +1013,7 @@
                         </VisualStateManager.VisualStateGroups>
                         <instruments:Faceplate Padding="32,48" Kicker="{TemplateBinding Kicker}" Serial="{TemplateBinding SerialText}">
                             <instruments:Faceplate.StripeRight>
-                                <instruments:Lamp State="Exec" Code="STBY" Size="Small" AutomationProperties.Name="Standing by"/>
+                                <instruments:Lamp State="Exec" Code="STBY" Size="Small" AutomationProperties.Name="STBY, standing by"/>
                             </instruments:Faceplate.StripeRight>
                             <StackPanel HorizontalAlignment="Center">
                                 <instruments:Well Width="64" Height="64" HorizontalAlignment="Center"

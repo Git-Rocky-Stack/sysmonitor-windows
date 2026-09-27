@@ -16,7 +16,7 @@ namespace SysMonitor.App.Controls.Instruments;
 /// know how many files it will find until it has found them, and an invented percentage would be a lie. So a bar
 /// and a percentage appear only for a finite value. <see cref="CancelCommand"/>, when set, puts a cancel cap in the
 /// stripe beside the lamp. The lamp is armed - the app is working on the machine - and strikes when the panel is
-/// shown; a screen reader hears it as the title.
+/// shown; a screen reader hears its word and then the title, "EXEC, Scanning for large files".
 /// </para>
 /// </summary>
 public sealed class BusyPanel : Control
@@ -50,7 +50,7 @@ public sealed class BusyPanel : Control
 
     private ScanSweep? _sweep;
     private ProgressBar? _bar;
-    private Control? _lamp;
+    private Lamp? _lamp;
 
     public BusyPanel()
     {
@@ -66,7 +66,8 @@ public sealed class BusyPanel : Control
         set => SetValue(KickerProperty, value);
     }
 
-    /// <summary>What the machine is doing, in one line. It also names the panel's serial and its lamp.</summary>
+    /// <summary>What the machine is doing, in one line. It also names the panel's serial, and a screen reader hears
+    /// it after the lamp's word.</summary>
     public string Title
     {
         get => (string)GetValue(TitleProperty);
@@ -128,7 +129,7 @@ public sealed class BusyPanel : Control
 
         base.OnApplyTemplate();
         _bar = GetTemplateChild("PART_Bar") as ProgressBar;
-        _lamp = GetTemplateChild("PART_Lamp") as Control;
+        _lamp = GetTemplateChild("PART_Lamp") as Lamp;
         if (GetTemplateChild("PART_ScanArea") is FrameworkElement area && GetTemplateChild("PART_ScanBand") is FrameworkElement band)
         {
             _sweep = new ScanSweep(area, band);
@@ -161,8 +162,9 @@ public sealed class BusyPanel : Control
             AutomationProperties.SetName(_bar, title);
         }
 
+        // Word first, as every lamp is heard; without a title the lamp says what its state means instead.
         if (_lamp is not null)
-            AutomationProperties.SetName(_lamp, title);
+            AutomationProperties.SetName(_lamp, string.IsNullOrEmpty(title) ? string.Empty : $"{_lamp.Code}, {title}");
 
         VisualStateManager.GoToState(this, string.IsNullOrEmpty(Detail) ? "NoDetail" : "HasDetail", false);
         VisualStateManager.GoToState(this, IsDeterminate ? "Determinate"
