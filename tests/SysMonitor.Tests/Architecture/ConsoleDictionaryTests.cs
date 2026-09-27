@@ -25,6 +25,10 @@ public class ConsoleDictionaryTests
 
     private static readonly XNamespace Presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
 
+    /// <summary>App.xaml as the file system spells it, so it compares equal to the same file found by a search.</summary>
+    private static string AppPath =>
+        Path.GetFullPath(Path.Combine(RepoSource.Root, AppXaml.Replace('/', Path.DirectorySeparatorChar)));
+
     [Fact]
     public void TheMergeRuleCatchesAPaletteMergedBelowAppXaml()
     {
@@ -44,7 +48,7 @@ public class ConsoleDictionaryTests
     {
         var files = RepoSource.FilesUnder("src/SysMonitor.App", "*.xaml")
             .ToDictionary(file => file, file => XDocument.Load(file), StringComparer.OrdinalIgnoreCase);
-        var app = Path.Combine(RepoSource.Root, AppXaml);
+        var app = AppPath;
 
         ThemeDictionariesMergedBelowApp(files, app, ProjectDictionary.Open)
             .Select(merge => $"{RepoSource.Relative(merge.File)} merges {RepoSource.Relative(merge.Target)}")
@@ -76,7 +80,7 @@ public class ConsoleDictionaryTests
     [Fact]
     public void EveryConsoleDictionaryResolvesFromWhatAppXamlMergesAheadOfIt()
     {
-        var merges = AppMerges(Path.Combine(RepoSource.Root, AppXaml));
+        var merges = AppMerges(AppPath);
         merges.Count(merge => IsConsole(merge.Path)).Should().BeGreaterThan(4,
             "this test is worthless if it cannot find the console's dictionaries in App.xaml");
 
@@ -92,7 +96,7 @@ public class ConsoleDictionaryTests
     {
         foreach (var (file, document) in files)
         {
-            if (string.Equals(file, app, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Path.GetFullPath(file), Path.GetFullPath(app), StringComparison.OrdinalIgnoreCase))
                 continue;
 
             foreach (var source in document.Descendants(Presentation + "ResourceDictionary")
