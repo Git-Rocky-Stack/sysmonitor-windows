@@ -136,7 +136,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check
   knew only the RAM wordings of this claim, which is how both this line and the Memory
   page's message got past it; it now covers "memory" as well as "RAM".
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:872`,
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:947`,
   `tests/SysMonitor.Tests/Architecture/InAppGuideClaimTests.cs:45`)
 
 - **The documentation says what trims memory.** The user guide and the settings
@@ -304,7 +304,7 @@ labels on top of them, and this release finishes that.
   consults any catalogue (`src/SysMonitor.Core/Services/Utilities/DriverUpdater.cs:99-100`,
   `:277`); and "One-click RAM cleanup". Nothing reads the markdown file at runtime, so no
   shipped build showed these five. The in-app guide was correct on all five
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:780`, `:788`, `:792`) but wrong on
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:855`, `:863`, `:867`) but wrong on
   three others, which are the three Changed entries above; this entry said the in-app
   guide "was already correct" without qualification, and that was not true of the file as
   a whole.
