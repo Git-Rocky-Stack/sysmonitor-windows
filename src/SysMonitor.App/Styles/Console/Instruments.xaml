@@ -16,6 +16,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:instruments="using:SysMonitor.App.Controls.Instruments">
 
+    <!-- The text styles, and through them the faces and the palette, that the templates below name. A template
+         resolves its StaticResources in this dictionary and its merges when it is expanded, long after App.xaml
+         was read; a style in a sibling dictionary made WinUI load that file on its own, where its fonts could not
+         be found, and the first line of text drawn with it ended the process. -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
     <!-- ============================================================ HEX BOLT (:1557-1622) -->
 
     <!-- A flat-topped hexagon, as System-X clips it: 25% and 75% along the top and bottom, the middle of each

@@ -17,6 +17,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- The faces and the palette the styles name. A StaticResource in a merged dictionary resolves within that
+         dictionary and its own merges; WinUI can load this file on its own, as it does when an instrument's
+         template asks for one of these styles, and a reference to a sibling dictionary then finds nothing. -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///Styles/Console/Fonts.xaml"/>
+        <ResourceDictionary Source="ms-appx:///Styles/Console/Tokens.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
     <!-- ============================================================ STENCILS: Archivo, tracked caps -->
 
     <!-- The view title (:1659): Archivo 800 at width 118, 21 over 1.2, tracked .05em. -->
