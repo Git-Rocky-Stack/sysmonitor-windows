@@ -21,14 +21,33 @@ public class ConsoleRecipeTests
     private const string AppFolder = "src/SysMonitor.App";
     private const string CoreFolder = "src/SysMonitor.Core";
 
-    private static readonly Regex XamlColour = new(@"=\s*""#[0-9A-Fa-f]{3,8}""", RegexOptions.Compiled);
+    /// <summary>A colour written into XAML, as an attribute (<c>Color="#AA2024"</c>) or as an element's content.</summary>
+    private static readonly Regex XamlColour = new(@"=\s*""#[0-9A-Fa-f]{3,8}""|>\s*#[0-9A-Fa-f]{3,8}\s*<", RegexOptions.Compiled);
+
+    /// <summary>Where colours are meant to be written, and why. The XAML colour rule passes over these files.</summary>
+    private static readonly Dictionary<string, string> Palettes = new(StringComparer.Ordinal)
+    {
+        ["src/SysMonitor.App/Styles/Console/Tokens.xaml"] = "the console palette: every theme's colours, written once",
+    };
     private static readonly Regex CodeColour = new(@"""#[0-9A-Fa-f]{6,8}""", RegexOptions.Compiled);
     private static readonly Regex FontFamilyLiteral = new(@"FontFamily=""(?!\{)[^""]*""", RegexOptions.Compiled);
 
     [Fact]
     public void ColourLiteralsInXamlOnlyRemainWhereTheyAreListed() =>
-        Ratchet(Xaml(), source => XamlColour.IsMatch(source), XamlColourLiterals,
-            "a colour written into XAML ignores the theme; it belongs in the token dictionaries");
+        Ratchet(Xaml().Where(file => !Palettes.ContainsKey(RepoSource.Relative(file))), source => XamlColour.IsMatch(source),
+            XamlColourLiterals, "a colour written into XAML ignores the theme; it belongs in the token dictionaries");
+
+    [Fact]
+    public void EveryPaletteStillHoldsColours()
+    {
+        foreach (var palette in Palettes.Keys)
+        {
+            var path = Path.Combine(RepoSource.Root, palette);
+            File.Exists(path).Should().BeTrue($"{palette} is where colours are written; if it moves, its exemption moves with it");
+            XamlColour.IsMatch(File.ReadAllText(path)).Should().BeTrue(
+                $"{palette} holds no colours, so there is nothing left to pass over");
+        }
+    }
 
     [Fact]
     public void ColourStringsInCodeOnlyRemainWhereTheyAreListed() =>

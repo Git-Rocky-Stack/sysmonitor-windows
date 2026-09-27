@@ -67,6 +67,7 @@ internal sealed class UiSmokeRun
     private readonly List<PageResult> _pages = new();
     private readonly List<string> _problems = new();
     private readonly List<string> _notes = new();
+    private readonly List<string> _checks = new();
     private readonly DateTime _startedUtc = DateTime.UtcNow;
     private PageResult? _current;
     private Timer? _watchdog;
@@ -139,6 +140,7 @@ internal sealed class UiSmokeRun
 
             await LoadedAsync(root);
             CheckFonts(root);
+            CheckThemeResources();
 
             foreach (var (theme, name) in Shifts)
             {
@@ -237,6 +239,66 @@ internal sealed class UiSmokeRun
             if (Math.Abs(MeasureWidth(panel, face) - fallback) < 0.5)
                 Problem($"{key} ({face.Source}) did not load: it sets text exactly as wide as the fallback font does");
         }
+
+        Checked($"{ConsoleFaces.Length} console faces measured against a font that does not exist");
+    }
+
+    /// <summary>
+    /// Builds every resource in every theme of the app's own theme dictionaries: Night Ops, Day Shift and High
+    /// Contrast alike, whichever one this machine shows. A theme's resource is only built the first time something
+    /// shown in that theme asks for it, so one that cannot be built - a StaticResource its theme does not hold, a
+    /// value that does not parse - would otherwise wait for the first page to use it, in the first theme to show it.
+    /// WinUI's own dictionaries (XamlControlsResources) are its business, and are left out.
+    /// </summary>
+    private void CheckThemeResources()
+    {
+        var themes = 0;
+        var built = 0;
+        foreach (var dictionary in OwnDictionaries(Application.Current.Resources))
+        {
+            var name = dictionary.Source?.OriginalString ?? "App.xaml";
+            foreach (var (theme, content) in dictionary.ThemeDictionaries)
+            {
+                themes++;
+                if (content is not ResourceDictionary resources)
+                {
+                    Problem($"{name}: the {theme} theme is a {content?.GetType().Name ?? "null"}, not a resource dictionary");
+                    continue;
+                }
+
+                foreach (var key in resources.Keys.ToList())
+                {
+                    try
+                    {
+                        _ = resources[key];
+                        built++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Problem($"{name}: {key} could not be built in the {theme} theme: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        if (themes == 0)
+            Problem("The app's resources hold no theme dictionaries to check");
+        else
+            Checked($"{built} theme resources built across {themes} themes");
+    }
+
+    /// <summary>A dictionary and everything merged into it, except WinUI's own.</summary>
+    private static IEnumerable<ResourceDictionary> OwnDictionaries(ResourceDictionary dictionary)
+    {
+        if (dictionary is XamlControlsResources)
+            yield break;
+
+        yield return dictionary;
+        foreach (var merged in dictionary.MergedDictionaries)
+        {
+            foreach (var inner in OwnDictionaries(merged))
+                yield return inner;
+        }
     }
 
     /// <summary>How wide a face sets the probe line, measured in the live tree where fonts load.</summary>
@@ -323,6 +385,13 @@ internal sealed class UiSmokeRun
             (_current?.Problems ?? _problems).Add(text);
     }
 
+    /// <summary>A check that ran, so the report says what was checked and not only what failed.</summary>
+    private void Checked(string text)
+    {
+        lock (_gate)
+            _checks.Add(text);
+    }
+
     private void Note(string text)
     {
         lock (_gate)
@@ -346,6 +415,7 @@ internal sealed class UiSmokeRun
                 finished,
                 startedUtc = _startedUtc,
                 writtenUtc = DateTime.UtcNow,
+                checks = _checks,
                 problems = _problems,
                 notes = _notes,
                 pages = _pages,

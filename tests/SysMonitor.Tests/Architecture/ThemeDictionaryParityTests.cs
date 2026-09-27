@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using FluentAssertions;
 using SysMonitor.Tests.TestSupport;
@@ -14,6 +15,11 @@ namespace SysMonitor.Tests.Architecture;
 /// app shows: Default (the dark Night Ops shift, which Dark lookups fall back to), Light (Day Shift) and
 /// HighContrast.
 /// </para>
+/// <para>
+/// Inside a theme, a <c>StaticResource</c> is resolved once, when the dictionary loads, so it has to name a key of
+/// that same theme - a brush in the Light theme built from the Default theme's colour would be Night on Day - or
+/// one WinUI supplies, as the High Contrast theme's system colours are.
+/// </para>
 /// </summary>
 public class ThemeDictionaryParityTests
 {
@@ -22,10 +28,13 @@ public class ThemeDictionaryParityTests
     private static readonly string[] RequiredThemes = ["Default", "Light", "HighContrast"];
 
     /// <summary>
-    /// How many sets of theme dictionaries the app has at least. None yet: the restyle's token dictionary is the
-    /// first, and this rises with it so the test can never quietly pass over nothing.
+    /// How many sets of theme dictionaries the app has at least: Styles/Console/Tokens.xaml. It rises with each
+    /// new set, so the test can never quietly pass over nothing.
     /// </summary>
-    private const int MinimumThemeSets = 0;
+    private const int MinimumThemeSets = 1;
+
+    private static readonly Regex StaticReference = new(
+        @"\{StaticResource\s+(?:ResourceKey\s*=\s*)?(?<key>[^\s,{}]+)\s*\}", RegexOptions.Compiled);
 
     [Fact]
     public void TheRuleSeesAKeyMissingFromOneTheme()
@@ -50,6 +59,34 @@ public class ThemeDictionaryParityTests
     }
 
     [Fact]
+    public void TheRuleSeesAStaticResourceReachingOutOfItsTheme()
+    {
+        const string Dictionary = """
+            <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                <ResourceDictionary.ThemeDictionaries>
+                    <ResourceDictionary x:Key="Default">
+                        <Color x:Key="PlateColor">#1C1C1C</Color>
+                        <Color x:Key="NightOnlyColor">#000000</Color>
+                        <SolidColorBrush x:Key="PlateBrush" Color="{StaticResource PlateColor}"/>
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="Light">
+                        <SolidColorBrush x:Key="PlateBrush" Color="{StaticResource NightOnlyColor}"/>
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="HighContrast">
+                        <StaticResource x:Key="PlateColor" ResourceKey="SystemColorWindowColor"/>
+                        <SolidColorBrush x:Key="PlateBrush" Color="{ThemeResource SystemColorWindowColor}"/>
+                    </ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>
+            </ResourceDictionary>
+            """;
+
+        OutOfThemeReferences(XDocument.Parse(Dictionary), "tokens.xaml", new HashSet<string> { "SystemColorWindowColor" })
+            .Should().Equal(["tokens.xaml: Light asks for NightOnlyColor"],
+                "a sibling in the same theme and a key WinUI supplies are reachable; another theme's key is not");
+    }
+
+    [Fact]
     public void EveryThemeDefinesTheSameKeys()
     {
         var mismatches = new List<string>();
@@ -66,7 +103,33 @@ public class ThemeDictionaryParityTests
         mismatches.Should().BeEmpty("a key one theme lacks throws the first time a page opens in that theme");
     }
 
+    [Fact]
+    public void EveryStaticResourceInAThemeNamesAKeyOfThatTheme()
+    {
+        var reaching = RepoSource.FilesUnder("src/SysMonitor.App", "*.xaml")
+            .SelectMany(file => OutOfThemeReferences(XDocument.Load(file), RepoSource.Relative(file), WinUIResources.Keys));
+
+        reaching.Should().BeEmpty("a theme's StaticResource binds once, to that theme's key or to one WinUI supplies");
+    }
+
     private static bool IsThemeSet(XElement element) => element.Name.LocalName == "ResourceDictionary.ThemeDictionaries";
+
+    private static IEnumerable<string> OutOfThemeReferences(XDocument document, string file, IReadOnlySet<string> supplied)
+    {
+        foreach (var theme in document.Descendants().Where(IsThemeSet).SelectMany(set => set.Elements()))
+        {
+            var name = theme.Attribute(Xaml + "Key")?.Value ?? "(unnamed)";
+            var own = theme.Descendants().Select(entry => entry.Attribute(Xaml + "Key")?.Value).OfType<string>()
+                .ToHashSet(StringComparer.Ordinal);
+
+            var asked = theme.Descendants().SelectMany(entry => entry.Attributes()
+                    .SelectMany(attribute => StaticReference.Matches(attribute.Value).Select(match => match.Groups["key"].Value))
+                    .Concat(entry.Name.LocalName == "StaticResource" && entry.Attribute("ResourceKey") is { } key ? [key.Value] : []));
+
+            foreach (var key in asked.Distinct().Where(key => !own.Contains(key) && !supplied.Contains(key)).Order(StringComparer.Ordinal))
+                yield return $"{file}: {name} asks for {key}";
+        }
+    }
 
     private static IEnumerable<string> Mismatches(XDocument document, string file)
     {

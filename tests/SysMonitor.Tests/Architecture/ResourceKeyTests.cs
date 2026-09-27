@@ -12,8 +12,13 @@ namespace SysMonitor.Tests.Architecture;
 /// <para>
 /// The restyle replaces nearly every brush, style and font on every page with a named token, so this is checked
 /// here, statically, for every page at once. An element sees its own <c>Resources</c>, its ancestors', and the
-/// application's (App.xaml and the dictionaries it merges); the WinUI styles the app borrows are named below,
-/// each with the reason it is safe.
+/// application's: App.xaml, the dictionaries it merges, and through XamlControlsResources every key WinUI
+/// provides, as scripts/list-winui-keys.py read them out of the Windows App SDK (<see cref="WinUIResources"/>).
+/// </para>
+/// <para>
+/// The same list says when an app resource takes a WinUI name. That replaces WinUI's resource for every control
+/// that reads it, which is how the console restyles the framework's own controls - and, done by accident, how a
+/// token would quietly restyle them wrong. So each one the app makes is named below with its reason.
 /// </para>
 /// <para>
 /// Code is held to the same rule. <c>Application.Current.Resources["X"]</c> sees the application's dictionaries;
@@ -26,13 +31,17 @@ public class ResourceKeyTests
 {
     private const string AppFolder = "src/SysMonitor.App";
 
-    /// <summary>WinUI's own resources the app asks for by name. XamlControlsResources, merged first in App.xaml, defines them.</summary>
-    private static readonly Dictionary<string, string> FrameworkResources = new(StringComparer.Ordinal)
+    private static readonly XNamespace Xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+
+    private const string AppProject = "src/SysMonitor.App/SysMonitor.App.csproj";
+
+    /// <summary>The WinUI resources the app replaces on purpose, each with what it does.</summary>
+    private static readonly Dictionary<string, string> DeliberateOverrides = new(StringComparer.Ordinal)
     {
-        ["AccentButtonStyle"] = "Fluent's accent button style",
-        ["BodyTextBlockStyle"] = "Fluent's body text style",
-        ["DefaultContentDialogStyle"] = "Fluent's dialog style, which a dialog built in code has to be given by name",
-        ["DefaultTextBoxStyle"] = "Fluent's text box style",
+        ["ContentControlThemeFontFamily"] = "Fonts.xaml: the framework's own controls set their text in Public Sans",
+        ["NavigationViewContentBackground"] = "MainWindow.xaml: the page area behind the navigation rail",
+        ["NavigationViewDefaultPaneBackground"] = "MainWindow.xaml: the navigation rail's pane",
+        ["NavigationViewExpandedPaneBackground"] = "MainWindow.xaml: the navigation rail's pane, expanded",
     };
 
     private static readonly Regex CodeLookup = new(
@@ -150,27 +159,57 @@ public class ResourceKeyTests
     }
 
     [Fact]
-    public void EveryFrameworkResourceNamedHereIsStillUsed()
+    public void AResourceTakesAWinUINameOnlyOnPurpose()
     {
-        var used = XamlFiles().SelectMany(file => XDocument.Load(file).Descendants().SelectMany(ResourceKeyRule.ReferencesOn))
-            .Concat(RepoSource.FilesUnder(AppFolder).SelectMany(file =>
-                CodeLookup.Matches(File.ReadAllText(file)).Select(match => match.Groups["key"].Value)))
-            .ToHashSet(StringComparer.Ordinal);
+        // A theme dictionary's own key (Default, Light, HighContrast) names a theme, not a resource.
+        var defined = XamlFiles()
+            .SelectMany(file => XDocument.Load(file).Descendants()
+                .Where(element => element.Parent?.Name.LocalName != "ResourceDictionary.ThemeDictionaries")
+                .Select(element => element.Attribute(Xaml + "Key")?.Value)
+                .OfType<string>()
+                .Select(key => (File: RepoSource.Relative(file), Key: key)))
+            .ToList();
 
-        FrameworkResources.Keys.Where(key => !used.Contains(key)).Should().BeEmpty(
-            "an exception nothing needs is a hole for the next missing key to fall through");
+        defined.Where(entry => WinUIResources.Keys.Contains(entry.Key) && !DeliberateOverrides.ContainsKey(entry.Key))
+            .Select(entry => $"{entry.File}: {entry.Key}")
+            .Should().BeEmpty("a resource under a WinUI name replaces WinUI's for every control that reads it");
+
+        DeliberateOverrides.Keys.Where(key => defined.All(entry => entry.Key != key)).Should().BeEmpty(
+            "an override nothing defines any more is a hole for the next accidental one to fall through");
+    }
+
+    // ---------------------------------------------------------------- the list of WinUI's keys
+
+    [Fact]
+    public void TheWinUIKeysAreTheOnesOfTheWindowsAppSdkTheAppBuildsWith()
+    {
+        var reference = XDocument.Load(Path.Combine(RepoSource.Root, AppProject)).Descendants("PackageReference")
+            .Single(element => (string?)element.Attribute("Include") == "Microsoft.WindowsAppSDK");
+
+        WinUIResources.PackageVersion.Should().Be((string?)reference.Attribute("Version"),
+            "the list is read from one version of the Windows App SDK; after an upgrade, run scripts/list-winui-keys.py again");
+    }
+
+    [Fact]
+    public void TheWinUIKeysAreTheWholeThemeDictionary()
+    {
+        WinUIResources.Keys.Count.Should().BeGreaterThan(3000, "WinUI 1.5's theme dictionary defines more than 3,000 keys");
+        WinUIResources.Keys.Should().Contain(
+            ["AccentButtonStyle", "DefaultContentDialogStyle", "ControlCornerRadius", "TextFillColorPrimaryBrush",
+             "SystemColorWindowColor", "SystemColorWindowTextColor", "SystemColorHighlightColor", "SystemAccentColor"],
+            "these are keys the app relies on, from WinUI's styles, its theme brushes and the system colours it supplies");
     }
 
     // ---------------------------------------------------------------- helpers
 
     private static IReadOnlyList<string> XamlFiles() => RepoSource.FilesUnder(AppFolder, "*.xaml");
 
-    /// <summary>What every element can see: App.xaml's dictionaries and the framework resources named above.</summary>
+    /// <summary>What every element can see: App.xaml's dictionaries and WinUI's resources.</summary>
     private static HashSet<string> ApplicationKeys()
     {
         var app = Path.Combine(RepoSource.Root, AppFolder, "App.xaml");
         var document = XDocument.Load(app);
-        var keys = new HashSet<string>(FrameworkResources.Keys, StringComparer.Ordinal);
+        var keys = new HashSet<string>(WinUIResources.Keys, StringComparer.Ordinal);
 
         foreach (var resources in document.Root!.Elements().Where(element => element.Name.LocalName == "Application.Resources"))
             ResourceKeyRule.AddKeys(resources, app, keys, new HashSet<string>(StringComparer.OrdinalIgnoreCase), OpenDictionary);

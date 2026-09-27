@@ -96,6 +96,7 @@ jobs:
 
           $result = Get-Content $report -Raw | ConvertFrom-Json
           "Passed: $($result.passed), finished: $($result.finished), pages: $($result.pages.Count)"
+          $result.checks | ForEach-Object { "Checked: $_" }
           $result.problems | ForEach-Object { "Problem: $_" }
           $result.pages | Where-Object { $_.problems.Count -gt 0 } |
             ForEach-Object { "$($_.shift) $($_.page): $($_.problems -join ' | ')" }
