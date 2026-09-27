@@ -285,7 +285,7 @@ internal sealed class UiSmokeRun
                 return;
 
             Progress($"{shift} specimen: checking");
-            CheckInstruments(specimen, theme, shift);
+            var followedShift = CheckInstruments(specimen, theme, shift);
 
             // It is taller than the window: one picture per window's height of it.
             var shots = new List<string>();
@@ -305,6 +305,13 @@ internal sealed class UiSmokeRun
             }
 
             page.Screenshot = string.Join(", ", shots);
+
+            // After the pictures, because finding out changes the specimen.
+            if (!followedShift)
+            {
+                Progress($"{shift} specimen: why its text did not follow the shift");
+                await DescribeShiftAsync(specimen, theme, shift);
+            }
         }
         catch (Exception ex)
         {
@@ -353,17 +360,20 @@ internal sealed class UiSmokeRun
     /// displays stay dark in both shifts. And a line asking for Silver inside a well gets Night Ops silver, while
     /// the same line on a faceplate gets the shift's own - the theme reaching an element is not the same as its
     /// resources being looked up again in it, and text built before it joined the window would pass the first
-    /// half without following any theme at all.
+    /// half without following any theme at all. False when the faceplate's text missed the shift, so the visit can
+    /// measure why.
     /// </summary>
-    private void CheckInstruments(ConsoleSpecimen specimen, ElementTheme theme, string shift)
+    private bool CheckInstruments(ConsoleSpecimen specimen, ElementTheme theme, string shift)
     {
+        // Only what is shown: a collapsed instrument, such as a bolt on a faceplate too narrow for bolts, is never
+        // laid out, so it never builds its template.
         var instruments = Descendants(specimen).OfType<Control>()
-            .Where(control => control.GetType().Namespace == typeof(Faceplate).Namespace)
+            .Where(control => control.GetType().Namespace == typeof(Faceplate).Namespace && IsShown(control, specimen))
             .ToList();
         if (instruments.Count == 0)
         {
             Problem("The specimen shows no instruments");
-            return;
+            return true;
         }
 
         foreach (var instrument in instruments.Where(instrument => VisualTreeHelper.GetChildrenCount(instrument) == 0))
@@ -398,17 +408,75 @@ internal sealed class UiSmokeRun
         var shiftSilver = PaletteColour(theme, "SilverColor");
         var inWell = (specimen.InWell.Foreground as SolidColorBrush)?.Color;
         var onFace = (specimen.OnFace.Foreground as SolidColorBrush)?.Color;
+        var followedShift = true;
         if (nightSilver is null || shiftSilver is null)
+        {
             Problem("Styles/Console/Tokens.xaml has no SilverColor to compare the specimen's text with");
+        }
         else if (onFace != shiftSilver)
+        {
             Problem($"Silver on a faceplate is {onFace?.ToString() ?? "not a solid colour"}, not the {shift} shift's " +
                     $"{shiftSilver}: the specimen's text did not follow the shift, so the well's check proves nothing");
+            followedShift = false;
+        }
         else if (inWell != nightSilver)
+        {
             Problem($"Silver inside a well is {inWell?.ToString() ?? "not a solid colour"}, not Night Ops silver " +
                     $"{nightSilver}: the well's text follows the shift");
+        }
 
         Checked($"{instruments.Count} instruments drew their templates in the {shift} shift, " +
                 "with their wells and displays dark");
+        return followedShift;
+    }
+
+    /// <summary>
+    /// Why the specimen's text did not follow the shift, measured rather than guessed, as one line of the report:
+    /// the probe's own theme and colour; the colour the faceplate's style gave the faceplate itself, which was in
+    /// the tree when the shift reached it, where the probe, inside the faceplate's body, was not yet; the same text
+    /// style on a line made once the specimen was live; and the probe again once the specimen's own theme is set to
+    /// the shift, which walks everything now in the tree.
+    /// </summary>
+    private async Task DescribeShiftAsync(ConsoleSpecimen specimen, ElementTheme theme, string shift)
+    {
+        static string Colour(Brush? brush) =>
+            (brush as SolidColorBrush)?.Color.ToString() ?? brush?.GetType().Name ?? "nothing";
+
+        var probe = specimen.OnFace;
+        var probeTheme = probe.ActualTheme;
+        var probeColour = Colour(probe.Foreground);
+        var faceplate = Descendants(specimen).OfType<Faceplate>().FirstOrDefault(plate => IsShown(plate, specimen));
+
+        var styles = ConsoleTextStyles().ToDictionary(pair => pair.Key.ToString() ?? string.Empty, pair => pair.Style);
+        var late = new TextBlock { Text = FontProbeText, Style = styles.GetValueOrDefault("DescriptionTextStyle") };
+        var host = specimen.Content as Panel;
+        host?.Children.Add(late);
+        await RenderedAsync();
+        await RenderedAsync();
+        var lateColour = Colour(late.Foreground);
+        host?.Children.Remove(late);
+
+        specimen.RequestedTheme = theme;
+        await RenderedAsync();
+        await RenderedAsync();
+
+        Problem($"Why, measured in the {shift} shift: the probe is in the {probeTheme} theme with silver " +
+                $"{probeColour}; the faceplate's own foreground, from its style, is {Colour(faceplate?.Foreground)} " +
+                $"(the shift's platinum is {PaletteColour(theme, "PlatinumColor")}); a line in the same style made once " +
+                $"the specimen was live is {lateColour}; the probe, once the specimen's own theme is set to the shift, " +
+                $"is {Colour(probe.Foreground)}");
+    }
+
+    /// <summary>Whether an element and every ancestor up to <paramref name="root"/> are visible.</summary>
+    private static bool IsShown(DependencyObject element, DependencyObject root)
+    {
+        for (var current = element; current is not null && current != root; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is UIElement { Visibility: Visibility.Collapsed })
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>
