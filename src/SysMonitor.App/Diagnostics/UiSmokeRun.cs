@@ -261,6 +261,16 @@ internal sealed class UiSmokeRun
                 await RenderedAsync();
             }
 
+            // Then text in a console style inside each kind of theme scope, one at a time: a surface that sets its
+            // own theme changes how the styles inside it find their colours, and displays stay dark that way.
+            foreach (var (step, host) in ThemedTextHosts())
+            {
+                Progress($"{shift} specimen: {step}");
+                scroller.Content = host;
+                await RenderedAsync();
+                await RenderedAsync();
+            }
+
             Progress($"{shift} specimen: all of it");
             var specimen = new ConsoleSpecimen();
             scroller.Content = specimen;
@@ -354,6 +364,26 @@ internal sealed class UiSmokeRun
 
         Checked($"{instruments.Count} instruments drew their templates in the {shift} shift, " +
                 "with their wells and displays dark");
+    }
+
+    /// <summary>
+    /// Text in a console style held in each kind of theme scope: plain grids in the other theme and in the same
+    /// one, then the surfaces that set their own theme, and a faceplate, which does not.
+    /// </summary>
+    private static IEnumerable<(string Step, UIElement Host)> ThemedTextHosts()
+    {
+        var styles = ConsoleTextStyles().ToDictionary(pair => pair.Key.ToString() ?? string.Empty, pair => pair.Style);
+        TextBlock Text(string style) => new() { Text = FontProbeText, Style = styles.GetValueOrDefault(style) };
+
+        yield return ("a grid in the light theme holding DescriptionTextStyle",
+            new Grid { RequestedTheme = ElementTheme.Light, Children = { Text("DescriptionTextStyle") } });
+        yield return ("a grid in the dark theme holding DescriptionTextStyle",
+            new Grid { RequestedTheme = ElementTheme.Dark, Children = { Text("DescriptionTextStyle") } });
+        yield return ("a well holding DescriptionTextStyle", new Well { Content = Text("DescriptionTextStyle") });
+        yield return ("a well holding LcdValueTextStyle", new Well { Content = Text("LcdValueTextStyle") });
+        yield return ("a display in the go tone holding StreamTextStyle",
+            new Display { Tone = DisplayTone.Go, Content = Text("StreamTextStyle") });
+        yield return ("a faceplate holding BodyTextStyle", new Faceplate { Kicker = "PROBE", Content = Text("BodyTextStyle") });
     }
 
     /// <summary>Every console instrument: the public controls in <see cref="Faceplate"/>'s namespace.</summary>
