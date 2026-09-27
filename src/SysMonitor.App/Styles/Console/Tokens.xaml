@@ -249,6 +249,31 @@
             <Color x:Key="ScrollbarThumbHoverColor">#D1E8343A</Color> <!-- rgba(232, 52, 58, .82) -->
             <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="{StaticResource ScrollbarThumbHoverColor}"/>
 
+            <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
+                 faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
+                 stripe and the light below it (:1526-1529, Day :1532-1535); a bolt's drop shadows (:1579-1580,
+                 Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
+                 follow the blurred shadow's first rows. -->
+            <Color x:Key="FaceplateSideLightColor">#06FFFFFF</Color> <!-- rgba(255, 255, 255, .025) -->
+            <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="{StaticResource FaceplateSideLightColor}"/>
+            <Color x:Key="FaceplateSideShadeColor">#66000000</Color> <!-- rgba(0, 0, 0, .4) -->
+            <SolidColorBrush x:Key="FaceplateSideShadeBrush" Color="{StaticResource FaceplateSideShadeColor}"/>
+            <Color x:Key="StripeSeamColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
+            <SolidColorBrush x:Key="StripeSeamBrush" Color="{StaticResource StripeSeamColor}"/>
+            <Color x:Key="StripeSeamLightColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
+            <SolidColorBrush x:Key="StripeSeamLightBrush" Color="{StaticResource StripeSeamLightColor}"/>
+            <Color x:Key="HexShadowNearColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
+            <SolidColorBrush x:Key="HexShadowNearBrush" Color="{StaticResource HexShadowNearColor}"/>
+            <Color x:Key="HexShadowFarColor">#73000000</Color> <!-- rgba(0, 0, 0, .45) -->
+            <SolidColorBrush x:Key="HexShadowFarBrush" Color="{StaticResource HexShadowFarColor}"/>
+
+            <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
+                 is dark in both. -->
+            <Color x:Key="WellEdgeColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
+            <SolidColorBrush x:Key="WellEdgeBrush" Color="{StaticResource WellEdgeColor}"/>
+            <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
+            <SolidColorBrush x:Key="WellLipBrush" Color="{StaticResource WellLipColor}"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#0A0A0A</Color>
@@ -325,8 +350,9 @@
                 <GradientStop Offset="1" Color="{StaticResource StripeGrainCColor}"/>
             </LinearGradientBrush>
 
-            <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner, and the socket, lit from
-                 the opposite side (::after, :1589, Day :1602). -->
+            <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner; the faint machined ring
+                 round it, the same in both shifts (:1565); and the socket, lit from the opposite side (::after,
+                 :1589, Day :1602). -->
             <RadialGradientBrush x:Key="HexFaceBrush" Center="0.28,0.22" GradientOrigin="0.28,0.22"
                                  RadiusX="1.061" RadiusY="1.061">
                 <GradientStop Offset="0" Color="{StaticResource Hex1Color}"/>
@@ -335,6 +361,12 @@
                 <GradientStop Offset="0.55" Color="{StaticResource Hex4Color}"/>
                 <GradientStop Offset="0.8" Color="{StaticResource Hex5Color}"/>
                 <GradientStop Offset="1" Color="{StaticResource Hex6Color}"/>
+            </RadialGradientBrush>
+            <RadialGradientBrush x:Key="HexRingBrush" Center="0.5,0.5" GradientOrigin="0.5,0.5"
+                                 RadiusX="0.707" RadiusY="0.707">
+                <GradientStop Offset="0.62" Color="#00FFFFFF"/>
+                <GradientStop Offset="0.68" Color="#0AFFFFFF"/>
+                <GradientStop Offset="0.75" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <RadialGradientBrush x:Key="HexSocketBrush" Center="0.72,0.78" GradientOrigin="0.72,0.78"
                                  RadiusX="1.061" RadiusY="1.061">
@@ -368,6 +400,27 @@
             <LinearGradientBrush x:Key="AnnunciatorFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#0E0E0E"/>
                 <GradientStop Offset="1" Color="#090909"/>
+            </LinearGradientBrush>
+
+            <!-- The recess: WinUI has no inset shadow, so a well's is drawn as gradients over its face - from the
+                 top edge (inset 0 2px 4px, :1455) and in from each side (inset 1px 0 2px, :1457-1458) - and a
+                 display's deeper one from its top (inset 0 2px 5px, :1845). Each runs across the band it is drawn
+                 in. -->
+            <LinearGradientBrush x:Key="WellShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#CC000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="WellShadeLeftBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Offset="0" Color="#80000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="WellShadeRightBrush" StartPoint="1,0" EndPoint="0,0">
+                <GradientStop Offset="0" Color="#80000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="DisplayShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#E6000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
             </LinearGradientBrush>
 
             <!-- Lamp caps, unlit and in each lit state, dark in both shifts (:1675, lit :1715-1779). -->
@@ -627,6 +680,31 @@
             <Color x:Key="ScrollbarThumbHoverColor">#CCA31E23</Color> <!-- rgba(163, 30, 35, .8) -->
             <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="{StaticResource ScrollbarThumbHoverColor}"/>
 
+            <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
+                 faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
+                 stripe and the light below it (:1526-1529, Day :1532-1535); a bolt's drop shadows (:1579-1580,
+                 Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
+                 follow the blurred shadow's first rows. -->
+            <Color x:Key="FaceplateSideLightColor">#80FFFFFF</Color> <!-- rgba(255, 255, 255, .5) -->
+            <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="{StaticResource FaceplateSideLightColor}"/>
+            <Color x:Key="FaceplateSideShadeColor">#14000000</Color> <!-- rgba(0, 0, 0, .08) -->
+            <SolidColorBrush x:Key="FaceplateSideShadeBrush" Color="{StaticResource FaceplateSideShadeColor}"/>
+            <Color x:Key="StripeSeamColor">#2E000000</Color> <!-- rgba(0, 0, 0, .18) -->
+            <SolidColorBrush x:Key="StripeSeamBrush" Color="{StaticResource StripeSeamColor}"/>
+            <Color x:Key="StripeSeamLightColor">#66FFFFFF</Color> <!-- rgba(255, 255, 255, .4) -->
+            <SolidColorBrush x:Key="StripeSeamLightBrush" Color="{StaticResource StripeSeamLightColor}"/>
+            <Color x:Key="HexShadowNearColor">#33000000</Color> <!-- rgba(0, 0, 0, .2) -->
+            <SolidColorBrush x:Key="HexShadowNearBrush" Color="{StaticResource HexShadowNearColor}"/>
+            <Color x:Key="HexShadowFarColor">#26000000</Color> <!-- rgba(0, 0, 0, .15) -->
+            <SolidColorBrush x:Key="HexShadowFarBrush" Color="{StaticResource HexShadowFarColor}"/>
+
+            <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
+                 is dark in both. -->
+            <Color x:Key="WellEdgeColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
+            <SolidColorBrush x:Key="WellEdgeBrush" Color="{StaticResource WellEdgeColor}"/>
+            <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
+            <SolidColorBrush x:Key="WellLipBrush" Color="{StaticResource WellLipColor}"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#F5F5F5</Color>
@@ -703,8 +781,9 @@
                 <GradientStop Offset="1" Color="{StaticResource StripeGrainCColor}"/>
             </LinearGradientBrush>
 
-            <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner, and the socket, lit from
-                 the opposite side (::after, :1589, Day :1602). -->
+            <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner; the faint machined ring
+                 round it, the same in both shifts (:1565); and the socket, lit from the opposite side (::after,
+                 :1589, Day :1602). -->
             <RadialGradientBrush x:Key="HexFaceBrush" Center="0.28,0.22" GradientOrigin="0.28,0.22"
                                  RadiusX="1.061" RadiusY="1.061">
                 <GradientStop Offset="0" Color="{StaticResource Hex1Color}"/>
@@ -713,6 +792,12 @@
                 <GradientStop Offset="0.55" Color="{StaticResource Hex4Color}"/>
                 <GradientStop Offset="0.8" Color="{StaticResource Hex5Color}"/>
                 <GradientStop Offset="1" Color="{StaticResource Hex6Color}"/>
+            </RadialGradientBrush>
+            <RadialGradientBrush x:Key="HexRingBrush" Center="0.5,0.5" GradientOrigin="0.5,0.5"
+                                 RadiusX="0.707" RadiusY="0.707">
+                <GradientStop Offset="0.62" Color="#00FFFFFF"/>
+                <GradientStop Offset="0.68" Color="#0AFFFFFF"/>
+                <GradientStop Offset="0.75" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <RadialGradientBrush x:Key="HexSocketBrush" Center="0.72,0.78" GradientOrigin="0.72,0.78"
                                  RadiusX="1.061" RadiusY="1.061">
@@ -746,6 +831,27 @@
             <LinearGradientBrush x:Key="AnnunciatorFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#0E0E0E"/>
                 <GradientStop Offset="1" Color="#090909"/>
+            </LinearGradientBrush>
+
+            <!-- The recess: WinUI has no inset shadow, so a well's is drawn as gradients over its face - from the
+                 top edge (inset 0 2px 4px, :1455) and in from each side (inset 1px 0 2px, :1457-1458) - and a
+                 display's deeper one from its top (inset 0 2px 5px, :1845). Each runs across the band it is drawn
+                 in. -->
+            <LinearGradientBrush x:Key="WellShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#CC000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="WellShadeLeftBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Offset="0" Color="#80000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="WellShadeRightBrush" StartPoint="1,0" EndPoint="0,0">
+                <GradientStop Offset="0" Color="#80000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="DisplayShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#E6000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
             </LinearGradientBrush>
 
             <!-- Lamp caps, unlit and in each lit state, dark in both shifts (:1675, lit :1715-1779). -->
@@ -1005,6 +1111,31 @@
             <StaticResource x:Key="ScrollbarThumbHoverColor" ResourceKey="SystemColorHighlightColor"/>
             <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
 
+            <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
+                 faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
+                 stripe and the light below it (:1526-1529, Day :1532-1535); a bolt's drop shadows (:1579-1580,
+                 Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
+                 follow the blurred shadow's first rows. -->
+            <Color x:Key="FaceplateSideLightColor">Transparent</Color>
+            <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="Transparent"/>
+            <Color x:Key="FaceplateSideShadeColor">Transparent</Color>
+            <SolidColorBrush x:Key="FaceplateSideShadeBrush" Color="Transparent"/>
+            <StaticResource x:Key="StripeSeamColor" ResourceKey="SystemColorWindowTextColor"/>
+            <SolidColorBrush x:Key="StripeSeamBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+            <Color x:Key="StripeSeamLightColor">Transparent</Color>
+            <SolidColorBrush x:Key="StripeSeamLightBrush" Color="Transparent"/>
+            <Color x:Key="HexShadowNearColor">Transparent</Color>
+            <SolidColorBrush x:Key="HexShadowNearBrush" Color="Transparent"/>
+            <Color x:Key="HexShadowFarColor">Transparent</Color>
+            <SolidColorBrush x:Key="HexShadowFarBrush" Color="Transparent"/>
+
+            <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
+                 is dark in both. -->
+            <StaticResource x:Key="WellEdgeColor" ResourceKey="SystemColorWindowTextColor"/>
+            <SolidColorBrush x:Key="WellEdgeBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+            <Color x:Key="WellLipColor">Transparent</Color>
+            <SolidColorBrush x:Key="WellLipBrush" Color="Transparent"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <StaticResource x:Key="ChromeCapForegroundColor" ResourceKey="SystemColorButtonTextColor"/>
@@ -1024,12 +1155,17 @@
             <SolidColorBrush x:Key="StripeFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="StripeGrainBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="HexFaceBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="HexRingBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="HexSocketBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="ArmedCapFaceBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
             <SolidColorBrush x:Key="ChromeCapFaceBrush" Color="{ThemeResource SystemColorButtonFaceColor}"/>
             <SolidColorBrush x:Key="DisplayFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="WellFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="AnnunciatorFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
+            <SolidColorBrush x:Key="WellShadeTopBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="WellShadeLeftBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="WellShadeRightBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="DisplayShadeTopBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="LampFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampGoFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampHoldFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>

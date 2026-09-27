@@ -1,0 +1,19 @@
+using Microsoft.UI.Xaml.Controls;
+
+namespace SysMonitor.App.Diagnostics;
+
+/// <summary>Every console instrument in every state, for the UI smoke run to show in both shifts.</summary>
+public sealed partial class ConsoleSpecimen : UserControl
+{
+    public ConsoleSpecimen()
+    {
+        InitializeComponent();
+    }
+
+    /// <summary>A line of Silver text inside a well: Night Ops silver in both shifts, or the well leaks.</summary>
+    internal TextBlock InWell => WellProbe;
+
+    /// <summary>The same Silver on a faceplate, which follows the shift; without it the well's check could pass
+    /// on text that never followed any theme.</summary>
+    internal TextBlock OnFace => FaceProbe;
+}

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The console's instruments, as System-X draws them (system-x-app@eaba14b: src/components/console and
+    src/styles.css; the line numbers below are that file's). Each instrument's look is an implicit style here;
+    what it does is its class in Controls/Instruments.
+
+    CSS gives one box its shadows, lips and lights at once. WinUI draws each as an element of its own, so a
+    template stacks them in the order a browser paints them: the face, its key light, the inset edges, the
+    content, then the lights and bolts that sit over it. An inset shadow, which WinUI does not have, is a
+    gradient over the edge it falls from. Every colour is a token asked for with ThemeResource, so each
+    instrument follows the shift it is shown in, and the decoration goes in High Contrast, where those tokens
+    are transparent.
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments">
+
+    <!-- ============================================================ HEX BOLT (:1557-1622) -->
+
+    <!-- A flat-topped hexagon, as System-X clips it: 25% and 75% along the top and bottom, the middle of each
+         side. The drop shadow is two copies 1 and 2 below; the socket is the same hexagon, 30% in. -->
+    <Style TargetType="instruments:HexBolt">
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:HexBolt">
+                    <Grid>
+                        <Path Data="M4,2 L12,2 L16,10 L12,18 L4,18 L0,10 Z" Fill="{ThemeResource HexShadowFarBrush}"/>
+                        <Path Data="M4,1 L12,1 L16,9 L12,17 L4,17 L0,9 Z" Fill="{ThemeResource HexShadowNearBrush}"/>
+                        <Path Data="M4,0 L12,0 L16,8 L12,16 L4,16 L0,8 Z" Fill="{ThemeResource HexFaceBrush}"/>
+                        <Path Data="M4,0 L12,0 L16,8 L12,16 L4,16 L0,8 Z" Fill="{ThemeResource HexRingBrush}"/>
+                        <Path Data="M6.4,4.8 L9.6,4.8 L11.2,8 L9.6,11.2 L6.4,11.2 L4.8,8 Z"
+                              Fill="{ThemeResource HexSocketBrush}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ FACEPLATE (:1037-1119, stripe :1503-1555) -->
+
+    <Style TargetType="instruments:Faceplate">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Padding" Value="{StaticResource FaceplateBodyPadding}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        <Setter Property="Foreground" Value="{ThemeResource PlatinumBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Faceplate">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="StripeStates">
+                                <VisualState x:Name="Striped"/>
+                                <VisualState x:Name="Bare">
+                                    <VisualState.Setters>
+                                        <Setter Target="Stripe.Visibility" Value="Collapsed"/>
+                                        <Setter Target="StripeSeamLight.Visibility" Value="Collapsed"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="BoltStates">
+                                <VisualState x:Name="Bolted"/>
+                                <VisualState x:Name="Unbolted">
+                                    <VisualState.Setters>
+                                        <Setter Target="Bolts.Visibility" Value="Collapsed"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Border Background="{ThemeResource FaceplateFaceBrush}"
+                                BorderBrush="{ThemeResource PlateEdgeBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource PlateCornerRadius}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- The key light from above left, then the inset edges: the lip along the top, the
+                                     underside along the bottom, light down the left and shade down the right. -->
+                                <Border Grid.RowSpan="2" Background="{ThemeResource FaceplateKeyLightBrush}"/>
+                                <Border Grid.RowSpan="2" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource PlateLipBrush}"/>
+                                <Border Grid.RowSpan="2" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource PlateUnderBrush}"/>
+                                <Border Grid.RowSpan="2" BorderThickness="1,0,0,0" BorderBrush="{ThemeResource FaceplateSideLightBrush}"/>
+                                <Border Grid.RowSpan="2" BorderThickness="0,0,1,0" BorderBrush="{ThemeResource FaceplateSideShadeBrush}"/>
+
+                                <ContentPresenter Grid.Row="1"
+                                                  Padding="{TemplateBinding Padding}"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  ContentTransitions="{TemplateBinding ContentTransitions}"
+                                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+
+                                <!-- The second key light, over the top right corner. -->
+                                <Border Grid.RowSpan="2" Width="140" Height="60"
+                                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        CornerRadius="{StaticResource PlateCornerRadius}"
+                                        Background="{ThemeResource FaceplateCornerLightBrush}"
+                                        IsHitTestVisible="False"/>
+
+                                <!-- The brushed stripe: the face, its grain, the lip along its top and the seam below
+                                     it; the kicker and serial, and the right-hand slot. Padded 30 to clear the bolts. -->
+                                <Grid x:Name="Stripe" Height="{StaticResource StripeHeight}">
+                                    <Border Background="{ThemeResource StripeFaceBrush}" CornerRadius="1,1,0,0"/>
+                                    <Border Background="{ThemeResource StripeGrainBrush}" CornerRadius="1,1,0,0"/>
+                                    <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource PlateLipBrush}" CornerRadius="1,1,0,0"/>
+                                    <Border BorderThickness="0,0,0,1" BorderBrush="{ThemeResource StripeSeamBrush}"/>
+                                    <Grid Padding="{StaticResource StripePadding}" ColumnSpacing="14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Style="{StaticResource KickerTextStyle}" VerticalAlignment="Center"
+                                                   Text="{TemplateBinding Kicker}"/>
+                                        <TextBlock Grid.Column="1" Style="{StaticResource SerialTextStyle}" VerticalAlignment="Center"
+                                                   Text="{TemplateBinding Serial}"/>
+                                        <ContentPresenter Grid.Column="3" VerticalAlignment="Center"
+                                                          Content="{TemplateBinding StripeRight}"/>
+                                    </Grid>
+                                </Grid>
+                                <Border x:Name="StripeSeamLight" Grid.Row="1" Height="1" VerticalAlignment="Top"
+                                        Background="{ThemeResource StripeSeamLightBrush}" IsHitTestVisible="False"/>
+
+                                <!-- The edge light along the top lip, inset to clear the bolts. -->
+                                <Border Grid.RowSpan="2" Height="1" Margin="24,2,24,0" VerticalAlignment="Top"
+                                        Background="{ThemeResource FaceplateEdgeLightBrush}" IsHitTestVisible="False"/>
+
+                                <Grid x:Name="Bolts" Grid.RowSpan="2">
+                                    <instruments:HexBolt Margin="7,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                    <instruments:HexBolt Margin="0,10,7,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                    <instruments:HexBolt Margin="7,0,0,7" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                    <instruments:HexBolt Margin="0,0,7,7" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ WELL (:1451-1462) -->
+
+    <!-- The recess: a void-black face in a black edge, shaded in from the top and both sides, with a glint along
+         the lower lip. The well sets its own theme to Dark (Well.cs), so its content wears Night Ops colours in
+         both shifts. -->
+    <Style TargetType="instruments:Well">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        <Setter Property="Foreground" Value="{ThemeResource DisplayFgBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Well">
+                    <Border Background="{ThemeResource WellFaceBrush}"
+                            BorderBrush="{ThemeResource WellEdgeBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource PlateCornerRadius}">
+                        <Grid>
+                            <Border Height="6" VerticalAlignment="Top" Background="{ThemeResource WellShadeTopBrush}"/>
+                            <Border Width="3" HorizontalAlignment="Left" Background="{ThemeResource WellShadeLeftBrush}"/>
+                            <Border Width="3" HorizontalAlignment="Right" Background="{ThemeResource WellShadeRightBrush}"/>
+                            <Border Height="1" VerticalAlignment="Bottom" Background="{ThemeResource WellLipBrush}"/>
+                            <ContentPresenter Padding="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentTransitions="{TemplateBinding ContentTransitions}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ DISPLAY (:1427-1449) -->
+
+    <!-- The display gradient, always painted, with a result's tint laid over it rather than in place of it. -->
+    <Style TargetType="instruments:Display">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        <Setter Property="Foreground" Value="{ThemeResource DisplayFgBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Display">
+                    <Grid Background="{ThemeResource DisplayFaceBrush}" CornerRadius="{StaticResource PlateCornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="ToneStates">
+                                <VisualState x:Name="None"/>
+                                <VisualState x:Name="Go">
+                                    <VisualState.Setters>
+                                        <Setter Target="Tint.Background" Value="{ThemeResource GoSoftBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="Tint.Background" Value="{ThemeResource NoGoSoftBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="Tint" CornerRadius="{StaticResource PlateCornerRadius}"/>
+                        <ContentPresenter Padding="{TemplateBinding Padding}"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          ContentTransitions="{TemplateBinding ContentTransitions}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

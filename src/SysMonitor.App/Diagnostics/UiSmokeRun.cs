@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 using Serilog;
+using SysMonitor.App.Controls.Instruments;
 using Windows.Graphics;
 using WinRT.Interop;
 using Drawing = System.Drawing;
@@ -14,7 +15,8 @@ namespace SysMonitor.App.Diagnostics;
 
 /// <summary>
 /// Opens every page in both themes, takes a picture of each, and fails on the errors that only appear when XAML
-/// is loaded: a parse error, a navigation that fails, a resource that does not resolve.
+/// is loaded: a parse error, a navigation that fails, a resource that does not resolve. After each theme's pages
+/// it shows every console instrument, so a template that cannot be built fails before a page uses it.
 /// <para>
 /// Nothing else can see those. The build compiles the XAML, but a <c>{StaticResource}</c> that names no resource,
 /// or a style that only exists in the other theme, is found when the page is opened - by a user, if nobody opened
@@ -152,6 +154,8 @@ internal sealed class UiSmokeRun
                 var index = 0;
                 foreach (var (tag, pageType) in window.Pages)
                     await VisitAsync(window, name, ++index, tag, pageType);
+
+                await VisitSpecimenAsync(window, theme, name);
             }
         }
         catch (Exception ex)
@@ -209,6 +213,144 @@ internal sealed class UiSmokeRun
             _current = null;
 
         WriteReport(finished: false);
+    }
+
+    /// <summary>
+    /// Shows every console instrument in every state (<see cref="ConsoleSpecimen"/>) where a page would be, after
+    /// the shift's pages. An instrument's template is only built when something shows it, so one that cannot be
+    /// built fails here, on every push, before a page uses it. The pictures are the review copy; the run passes on
+    /// the checks.
+    /// </summary>
+    private async Task VisitSpecimenAsync(MainWindow window, ElementTheme theme, string shift)
+    {
+        var page = new PageResult { Shift = shift, Page = "specimen", Type = nameof(ConsoleSpecimen) };
+        lock (_gate)
+        {
+            _current = page;
+            _pages.Add(page);
+        }
+
+        File.WriteAllText(Path.Combine(Folder, "progress.txt"), $"{shift} specimen");
+        var timer = Stopwatch.StartNew();
+
+        try
+        {
+            var specimen = new ConsoleSpecimen();
+            var scroller = new ScrollViewer { Content = specimen };
+            window.PageFrame.Content = scroller;
+
+            if (!await LoadedAsync(specimen))
+                Problem($"The specimen did not load within {LoadTimeout.TotalSeconds:0} seconds");
+            else
+                page.Loaded = true;
+
+            await RenderedAsync();
+            await Task.Delay(Settle);
+            await RenderedAsync();
+
+            CheckInstruments(specimen, theme, shift);
+
+            // It is taller than the window: one picture per window's height of it.
+            var shots = new List<string>();
+            for (var offset = 0.0; shots.Count < 8; offset += scroller.ViewportHeight)
+            {
+                scroller.ChangeView(null, offset, null, disableAnimation: true);
+                await RenderedAsync();
+                await RenderedAsync();
+
+                var shot = $"{shift}-specimen-{shots.Count + 1}.png";
+                Capture(window, Path.Combine(Folder, shot));
+                shots.Add(shot);
+
+                if (scroller.ViewportHeight <= 0 || offset + scroller.ViewportHeight >= scroller.ExtentHeight)
+                    break;
+            }
+
+            page.Screenshot = string.Join(", ", shots);
+        }
+        catch (Exception ex)
+        {
+            Problem($"Showing the specimen threw: {ex}");
+        }
+
+        page.Milliseconds = timer.ElapsedMilliseconds;
+        lock (_gate)
+            _current = null;
+
+        WriteReport(finished: false);
+    }
+
+    /// <summary>
+    /// Three things only the live tree can say about the instruments. Each one drew its template: an implicit
+    /// style that did not apply leaves a control that draws nothing and raises nothing. Everything inside a well
+    /// or a display is in the dark theme, because displays stay dark in both shifts. And a line asking for Silver
+    /// inside a well gets Night Ops silver, while the same line on a faceplate gets the shift's own - the theme
+    /// reaching an element is not the same as its resources being looked up again in it, and text built before
+    /// it joined the window would pass the first half without following any theme at all.
+    /// </summary>
+    private void CheckInstruments(ConsoleSpecimen specimen, ElementTheme theme, string shift)
+    {
+        var instruments = Descendants(specimen).OfType<Control>()
+            .Where(control => control.GetType().Namespace == typeof(Faceplate).Namespace)
+            .ToList();
+        if (instruments.Count == 0)
+        {
+            Problem("The specimen shows no instruments");
+            return;
+        }
+
+        foreach (var instrument in instruments.Where(instrument => VisualTreeHelper.GetChildrenCount(instrument) == 0))
+            Problem($"A {instrument.GetType().Name} drew nothing: its template was not applied");
+
+        foreach (var surface in instruments.Where(instrument => instrument is Well or Display))
+        {
+            var light = Descendants(surface).OfType<FrameworkElement>()
+                .FirstOrDefault(element => element.ActualTheme != ElementTheme.Dark);
+            if (light is not null)
+                Problem($"A {light.GetType().Name} inside a {surface.GetType().Name} is in the {light.ActualTheme} theme: " +
+                        "displays stay dark in both shifts");
+        }
+
+        var nightSilver = PaletteColour(ElementTheme.Dark, "SilverColor");
+        var shiftSilver = PaletteColour(theme, "SilverColor");
+        var inWell = (specimen.InWell.Foreground as SolidColorBrush)?.Color;
+        var onFace = (specimen.OnFace.Foreground as SolidColorBrush)?.Color;
+        if (nightSilver is null || shiftSilver is null)
+            Problem("Styles/Console/Tokens.xaml has no SilverColor to compare the specimen's text with");
+        else if (onFace != shiftSilver)
+            Problem($"Silver on a faceplate is {onFace?.ToString() ?? "not a solid colour"}, not the {shift} shift's " +
+                    $"{shiftSilver}: the specimen's text did not follow the shift, so the well's check proves nothing");
+        else if (inWell != nightSilver)
+            Problem($"Silver inside a well is {inWell?.ToString() ?? "not a solid colour"}, not Night Ops silver " +
+                    $"{nightSilver}: the well's text follows the shift");
+
+        Checked($"{instruments.Count} instruments drew their templates in the {shift} shift, " +
+                "with their wells and displays dark");
+    }
+
+    /// <summary>A colour as Styles/Console/Tokens.xaml writes it for a shift: Night Ops for Dark, Day Shift for Light.</summary>
+    private static Windows.UI.Color? PaletteColour(ElementTheme shift, string key)
+    {
+        var tokens = OwnDictionaries(Application.Current.Resources).FirstOrDefault(dictionary =>
+            dictionary.Source?.OriginalString.EndsWith("Styles/Console/Tokens.xaml", StringComparison.OrdinalIgnoreCase) == true);
+        var themeKey = shift == ElementTheme.Light ? "Light" : "Default";
+        if (tokens is null || !tokens.ThemeDictionaries.TryGetValue(themeKey, out var theme) ||
+            theme is not ResourceDictionary colours || !colours.TryGetValue(key, out var colour))
+            return null;
+
+        return colour as Windows.UI.Color?;
+    }
+
+    /// <summary>An element's visual descendants, depth first.</summary>
+    private static IEnumerable<DependencyObject> Descendants(DependencyObject parent)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            yield return child;
+            foreach (var descendant in Descendants(child))
+                yield return descendant;
+        }
     }
 
     /// <summary>
