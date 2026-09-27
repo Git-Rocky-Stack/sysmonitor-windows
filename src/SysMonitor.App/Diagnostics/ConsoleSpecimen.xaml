@@ -16,6 +16,18 @@
 
     <StackPanel MaxWidth="1380" Padding="20" Spacing="20">
 
+        <!-- The panel that opens a page: kicker and serial from the module, a lamp in the stripe, the placard and a
+             line of description, and an action at the right. -->
+        <instruments:ViewHeader x:Name="HeaderProbe" Module="SPECIMEN" Index="00" Title="Console specimen"
+                                Description="Every instrument in every state, drawn by the UI smoke run in both shifts.">
+            <instruments:ViewHeader.Status>
+                <instruments:Lamp State="Armed" Code="LIVE" Size="Small"/>
+            </instruments:ViewHeader.Status>
+            <instruments:ViewHeader.Actions>
+                <Button Content="Export"/>
+            </instruments:ViewHeader.Actions>
+        </instruments:ViewHeader>
+
         <!-- Surfaces: the faceplate with its stripe and bolts; wells and displays, which stay dark in both
              shifts. WellProbe asks for Silver inside a well, and the run checks it is Night Ops silver on Day
              Shift too; FaceProbe, below, asks for the same on a faceplate, and has to follow the shift, or the
@@ -348,5 +360,115 @@
                 </instruments:Well>
             </StackPanel>
         </instruments:Faceplate>
+
+        <!-- Modules: a plate in each state reports it on the rail down its mounting edge, and in a word on the chip
+             beside it (System-X Themes.tsx, MODULES). Warn's rail blinks; NO-GO's holds. -->
+        <instruments:Faceplate Kicker="SPECIMEN - MODULES - 00I" Serial="{instruments:SerialFor Module=modules}">
+            <StackPanel Spacing="8">
+                <instruments:Plate>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" Content="NONE"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Neutral module, nothing to report"/>
+                    </StackPanel>
+                </instruments:Plate>
+                <instruments:Plate State="Go">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" State="Go" Content="GO"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Running, healthy, clean"/>
+                    </StackPanel>
+                </instruments:Plate>
+                <instruments:Plate State="Hold">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" State="Hold" Content="HOLD"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Caution, pending, degraded"/>
+                    </StackPanel>
+                </instruments:Plate>
+                <instruments:Plate State="Warn">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" State="Warn" Content="WARN"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Unacknowledged warning"/>
+                    </StackPanel>
+                </instruments:Plate>
+                <instruments:Plate State="NoGo">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" State="NoGo" Content="NO-GO"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Settled fault, failed"/>
+                    </StackPanel>
+                </instruments:Plate>
+                <instruments:Plate State="Exec">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" State="Exec" Content="EXEC"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Informational, in progress"/>
+                    </StackPanel>
+                </instruments:Plate>
+                <instruments:Plate State="Armed">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" State="Armed" Content="ARMED"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Staged by you, operating on your system"/>
+                    </StackPanel>
+                </instruments:Plate>
+                <instruments:Plate IsPressable="True">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <instruments:Chip Width="64" HorizontalContentAlignment="Center" Content="NONE"/>
+                        <TextBlock VerticalAlignment="Center" FontSize="13" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"
+                                   Foreground="{ThemeResource SilverBrush}" Text="Pressable: the pointer is a hand over it"/>
+                    </StackPanel>
+                </instruments:Plate>
+            </StackPanel>
+        </instruments:Faceplate>
+
+        <!-- Banners: a condition reported in a line, its word on a lamp. A fault by default, one the user can
+             dismiss, then a caution, a hold, a note, good news, a live operation and plain information, and one
+             that names its own word. -->
+        <instruments:Faceplate Kicker="SPECIMEN - BANNERS - 00J" Serial="{instruments:SerialFor Module=banners}">
+            <StackPanel Spacing="8">
+                <instruments:Banner x:Name="BannerProbe" Content="3 files could not be recycled, so nothing was deleted."/>
+                <instruments:Banner IsDismissible="True" DismissLabel="Dismiss scan error"
+                                    Content="The scan stopped: the folder is no longer there."/>
+                <instruments:Banner State="Warn" Content="Memory is above 90% and climbing."/>
+                <instruments:Banner State="Hold" Content="Waiting for the previous clean to finish."/>
+                <instruments:Banner State="Exec" Content="A note for the record: nothing here needs doing."/>
+                <instruments:Banner State="Go" Content="4.2 GB cleaned, nothing left behind."/>
+                <instruments:Banner State="Armed" Content="Game Mode is holding the power plan."/>
+                <instruments:Banner State="Off" Content="Nothing has been scanned yet."/>
+                <instruments:Banner State="Hold" Code="PENDING" Content="A restart finishes the update."/>
+            </StackPanel>
+        </instruments:Faceplate>
+
+        <!-- Work in progress: a busy well inside a panel that is already on screen, then whole busy panels, one that
+             does not know its extent and can be cancelled, one that does. -->
+        <instruments:Faceplate Kicker="SPECIMEN - BUSY - 00K" Serial="{instruments:SerialFor Module=busy}">
+            <instruments:BusyWell Title="Reading the startup list..."/>
+        </instruments:Faceplate>
+        <Grid ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <instruments:BusyPanel x:Name="CancellableBusy" Kicker="RUN - SPECIMEN - 00L" Title="Scanning for large files"
+                                   Detail="C:\Users" Readout="1,204 files read"/>
+            <instruments:BusyPanel x:Name="BusyProbe" Grid.Column="1" Kicker="RUN - SPECIMEN - 00M" Title="Wiping free space"
+                                   Detail="Pass 1 of 3 on drive D:" Value="42.5" Readout="12.4 of 29.2 GB"/>
+        </Grid>
+
+        <!-- Nothing to report: a standby panel with something to do about it, and one without. -->
+        <Grid ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <instruments:StandbyPanel x:Name="StandbyWithAction" Kicker="STBY - SPECIMEN - 00N" Title="No scan yet"
+                                      Description="Run a scan to list the files larger than the size you choose."
+                                      Glyph="&#xE721;" ActionText="Scan now"/>
+            <instruments:StandbyPanel Grid.Column="1" Kicker="STBY - SPECIMEN - 00O" Title="Nothing to clean"
+                                      Description="Every location this scan reads is already empty." Glyph="&#xE73E;"/>
+        </Grid>
     </StackPanel>
 </UserControl>

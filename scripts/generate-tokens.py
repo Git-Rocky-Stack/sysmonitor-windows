@@ -272,6 +272,8 @@ def composed(theme):
     glass = rgba(255, 255, 255, .05)
     add("An LCD's cover glass: a sheen from the top left, gone by 38% of the way across its 168 degree fall (:1852).",
         lin(c, 'LcdGlassBrush', [(0, glass), (0.38, fade(glass))], '0.396,0', '0.604,1'))
+    add("The busy sweep: a band of armed glow down a dark well, brightest at its middle (.scanline::after, :2521).\nIt only runs inside a well, so it shows Night Ops' glow in both shifts.",
+        lin(c, 'ScanBandBrush', [(0, fade(c['ArmedGlow'])), (0.5, 'ArmedGlow'), (1, fade(c['ArmedGlow']))]))
     lamps = [('LampFaceBrush', '131313', '0a0a0a'), ('LampGoFaceBrush', '0f1a12', '070b08'), ('LampHoldFaceBrush', '1a1508', '0b0905'),
              ('LampWarnFaceBrush', '1c0c0a', '0c0605'), ('LampNoGoFaceBrush', '1a0b0a', '0b0605'), ('LampExecFaceBrush', '08191a', '050b0b'),
              ('LampArmedFaceBrush', '1c0a0b', '0c0505')]
@@ -290,7 +292,7 @@ COMPOSED_HC = {  # key -> system colour (or Transparent) for the High Contrast t
     'ArmedCapFaceBrush': HL, 'ChromeCapFaceBrush': BF,
     'DisplayFaceBrush': W, 'WellFaceBrush': W, 'AnnunciatorFaceBrush': W,
     'WellShadeTopBrush': TR, 'WellShadeLeftBrush': TR, 'WellShadeRightBrush': TR, 'DisplayShadeTopBrush': TR,
-    'LcdGlassBrush': TR,
+    'LcdGlassBrush': TR, 'ScanBandBrush': TR,
     'LampFaceBrush': W, 'LampGoFaceBrush': W, 'LampHoldFaceBrush': W, 'LampWarnFaceBrush': W,
     'LampNoGoFaceBrush': W, 'LampExecFaceBrush': W, 'LampArmedFaceBrush': W,
 }

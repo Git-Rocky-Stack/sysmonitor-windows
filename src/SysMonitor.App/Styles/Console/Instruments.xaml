@@ -677,4 +677,407 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- ============================================================ PLATE (:1121-1247) -->
+
+    <!-- A module seated flush in the rack: the brushed face top to bottom in a 1px edge, the lip along its top and
+         the underside along its bottom. The rail runs down the mounting edge inside the border in the state's rail
+         colour, and the border takes the state's edge. Warn blinks the rail alone at 1 Hz, down to 18% (:1188,
+         :456-465); WarnSteady holds it lit. Armed lays the armed soft red over the brushing (:1206). System-X lifts
+         a hovered pressable plate on its outer shadow and never its border, which matches the rail (:1231); the
+         console draws no outer shadows yet, so PointerOver changes nothing for now. -->
+    <Style TargetType="instruments:Plate">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{ThemeResource PlatinumBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Plate">
+                    <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
+                            Background="{ThemeResource PlateFaceBrush}" BorderBrush="{ThemeResource PlateEdgeBrush}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="PlateStates">
+                                <VisualState x:Name="Off"/>
+                                <VisualState x:Name="Go">
+                                    <VisualState.Setters>
+                                        <Setter Target="Rail.Background" Value="{ThemeResource RailGoBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource GoEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Hold">
+                                    <VisualState.Setters>
+                                        <Setter Target="Rail.Background" Value="{ThemeResource RailHoldBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource HoldEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Warn">
+                                    <VisualState.Setters>
+                                        <Setter Target="Rail.Background" Value="{ThemeResource RailWarnBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Rail" Storyboard.TargetProperty="Opacity"
+                                                                       Duration="0:0:1" RepeatBehavior="Forever">
+                                            <DiscreteDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.5" Value="0.18"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="WarnSteady">
+                                    <VisualState.Setters>
+                                        <Setter Target="Rail.Background" Value="{ThemeResource RailWarnBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="Rail.Background" Value="{ThemeResource RailNoGoBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource NoGoEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Exec">
+                                    <VisualState.Setters>
+                                        <Setter Target="Rail.Background" Value="{ThemeResource RailExecBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource ScopeEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Armed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Rail.Background" Value="{ThemeResource ArmedLitBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+                                        <Setter Target="Face.Background" Value="{ThemeResource PlateArmedFaceBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="PointerStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid>
+                            <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource PlateLipBrush}"/>
+                            <Border BorderThickness="0,0,0,1" BorderBrush="{ThemeResource PlateUnderBrush}"/>
+                            <ContentPresenter Padding="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentTransitions="{TemplateBinding ContentTransitions}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Border x:Name="Rail" Width="3" HorizontalAlignment="Left" CornerRadius="2,0,0,2"
+                                    IsHitTestVisible="False"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ BANNER (:2230-2283) -->
+
+    <!-- A condition on a line: the cap's face in the cap's edge, or in a state the state's soft colour in its edge
+         colour; Armed has no banner colour of its own and keeps the cap's. A small lamp carries the word, level
+         with the first line of the message, which wraps in Silver at 13 over 1.5; a dismiss cap ends the line when
+         the banner can be dismissed. System-X's banners ask for a radius it never defines, so they draw square;
+         this one takes the plate's 2. -->
+    <Style TargetType="instruments:Banner">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Padding" Value="14,12"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Foreground" Value="{ThemeResource SilverBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:Banner">
+                    <Border x:Name="Face" Padding="{TemplateBinding Padding}" BorderThickness="1"
+                            CornerRadius="{StaticResource PlateCornerRadius}"
+                            Background="{ThemeResource Cap1Brush}" BorderBrush="{ThemeResource CapEdgeBrush}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="BannerStates">
+                                <VisualState x:Name="Off"/>
+                                <VisualState x:Name="Go">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource GoSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource GoEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Hold">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource HoldSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource HoldEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Warn">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource WarnSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource NoGoSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource NoGoEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Exec">
+                                    <VisualState.Setters>
+                                        <Setter Target="Face.Background" Value="{ThemeResource ScopeSoftBrush}"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource ScopeEdgeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Armed"/>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="DismissStates">
+                                <VisualState x:Name="Standing"/>
+                                <VisualState x:Name="Dismissible">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_Dismiss.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <instruments:Lamp Margin="0,1,12,0" VerticalAlignment="Top" Size="Small"
+                                              State="{TemplateBinding State}" Code="{TemplateBinding ShownCode}"/>
+                            <ContentPresenter Grid.Column="1"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              FontSize="{TemplateBinding FontSize}"
+                                              Foreground="{TemplateBinding Foreground}"
+                                              TextWrapping="Wrap" LineHeight="19.5" LineStackingStrategy="BlockLineHeight"/>
+                            <Button x:Name="PART_Dismiss" Grid.Column="2" Margin="12,0,0,0" Padding="6" MinWidth="0" MinHeight="0"
+                                    VerticalAlignment="Top" Visibility="Collapsed">
+                                <FontIcon FontSize="12" Glyph="&#xE711;"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ BUSY WELL (:2517-2535) -->
+
+    <!-- A well the busy sweep crosses (ScanSweep.cs), with one centred line padded 32 by 40, in the display's text
+         colour at 13 over 1.6. The band lies over the whole well, under the line, and shows once the sweep has
+         measured the well. -->
+    <Style TargetType="instruments:BusyWell">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:BusyWell">
+                    <instruments:Well>
+                        <Grid x:Name="PART_ScanArea">
+                            <Border x:Name="PART_ScanBand" Background="{ThemeResource ScanBandBrush}" Visibility="Collapsed"/>
+                            <TextBlock x:Name="PART_Title" Margin="32,40" HorizontalAlignment="Center"
+                                       TextAlignment="Center" TextWrapping="Wrap"
+                                       FontSize="13" LineHeight="20.8" LineStackingStrategy="BlockLineHeight"
+                                       Foreground="{ThemeResource DisplayFgBrush}" Text="{TemplateBinding Title}"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </Grid>
+                    </instruments:Well>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ BUSY PANEL (BusyState.tsx) -->
+
+    <!-- A faceplate. In its stripe, the armed EXEC lamp, struck when shown, and a cancel cap when the work can be
+         stopped. In its body, the busy sweep down a well padded 32 round the title (Public Sans 600, 16 over 1.25)
+         and the detail (13 over 1.6 in the display's text colour, 68 characters wide at most). Under the well, only
+         when the work knows its extent, the share done in Departure Mono 15 in the display's armed red with the
+         readout at the right, over the bar; without one, the readout alone, centred. Readouts are Silver Mute at
+         12 over 1.5. -->
+    <Style TargetType="instruments:BusyPanel">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:BusyPanel">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="DetailStates">
+                                <VisualState x:Name="NoDetail"/>
+                                <VisualState x:Name="HasDetail">
+                                    <VisualState.Setters>
+                                        <Setter Target="DetailText.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="ProgressStates">
+                                <VisualState x:Name="Indeterminate"/>
+                                <VisualState x:Name="IndeterminateReadout">
+                                    <VisualState.Setters>
+                                        <Setter Target="LooseReadout.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Determinate">
+                                    <VisualState.Setters>
+                                        <Setter Target="Progress.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="CancelStates">
+                                <VisualState x:Name="NotCancellable"/>
+                                <VisualState x:Name="Cancellable">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_Cancel.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <instruments:Faceplate Kicker="{TemplateBinding Kicker}" Serial="{TemplateBinding SerialText}">
+                            <instruments:Faceplate.StripeRight>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <instruments:Lamp x:Name="PART_Lamp" State="Armed" Code="EXEC" Size="Small" Strike="True"/>
+                                    <Button x:Name="PART_Cancel" Padding="10,2" MinHeight="0" VerticalAlignment="Center"
+                                            Visibility="Collapsed"
+                                            Content="{TemplateBinding CancelText}" Command="{TemplateBinding CancelCommand}"/>
+                                </StackPanel>
+                            </instruments:Faceplate.StripeRight>
+                            <StackPanel>
+                                <instruments:Well>
+                                    <Grid x:Name="PART_ScanArea">
+                                        <Border x:Name="PART_ScanBand" Background="{ThemeResource ScanBandBrush}" Visibility="Collapsed"/>
+                                        <StackPanel Margin="32" Spacing="8">
+                                            <TextBlock x:Name="TitleText" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                                       FontFamily="{StaticResource ConsoleBodySemiBoldFontFamily}" FontWeight="SemiBold"
+                                                       FontSize="16" LineHeight="20" LineStackingStrategy="BlockLineHeight"
+                                                       Foreground="{ThemeResource PlatinumBrush}" Text="{TemplateBinding Title}"/>
+                                            <TextBlock x:Name="DetailText" MaxWidth="530" HorizontalAlignment="Center" Visibility="Collapsed"
+                                                       TextAlignment="Center" TextWrapping="Wrap"
+                                                       FontSize="13" LineHeight="20.8" LineStackingStrategy="BlockLineHeight"
+                                                       Foreground="{ThemeResource DisplayFgBrush}" Text="{TemplateBinding Detail}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </instruments:Well>
+                                <Grid x:Name="Progress" Margin="0,16,0,0" ColumnSpacing="16" RowSpacing="8" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock VerticalAlignment="Bottom" FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="15"
+                                               Foreground="{ThemeResource ArmedDisplayBrush}" Text="{TemplateBinding PercentText}"/>
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                               TextTrimming="CharacterEllipsis" FontSize="12" LineHeight="18"
+                                               LineStackingStrategy="BlockLineHeight"
+                                               Foreground="{ThemeResource SilverMuteBrush}" Text="{TemplateBinding Readout}"/>
+                                    <ProgressBar x:Name="PART_Bar" Grid.Row="1" Grid.ColumnSpan="2" Maximum="100"/>
+                                </Grid>
+                                <TextBlock x:Name="LooseReadout" Margin="0,16,0,0" HorizontalAlignment="Center" Visibility="Collapsed"
+                                           TextTrimming="CharacterEllipsis" FontSize="12" LineHeight="18"
+                                           LineStackingStrategy="BlockLineHeight"
+                                           Foreground="{ThemeResource SilverMuteBrush}" Text="{TemplateBinding Readout}"/>
+                            </StackPanel>
+                        </instruments:Faceplate>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ STANDBY PANEL (EmptyState.tsx) -->
+
+    <!-- A faceplate with the STBY lamp in its stripe and one centred column padded 32 by 48: the icon in a 64 well
+         in the display's quiet text colour, 20 above the title (Public Sans 600, 16 over 1.3), 8 above the
+         description (13 over 1.55 in Silver, 52 characters wide at most), and the action 24 below that when there
+         is one. -->
+    <Style TargetType="instruments:StandbyPanel">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:StandbyPanel">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="ActionStates">
+                                <VisualState x:Name="NoAction"/>
+                                <VisualState x:Name="HasAction">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_Action.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <instruments:Faceplate Padding="32,48" Kicker="{TemplateBinding Kicker}" Serial="{TemplateBinding SerialText}">
+                            <instruments:Faceplate.StripeRight>
+                                <instruments:Lamp State="Exec" Code="STBY" Size="Small" AutomationProperties.Name="Standing by"/>
+                            </instruments:Faceplate.StripeRight>
+                            <StackPanel HorizontalAlignment="Center">
+                                <instruments:Well Width="64" Height="64" HorizontalAlignment="Center"
+                                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                    <FontIcon FontSize="28" Foreground="{ThemeResource DisplayFgMuteBrush}" Glyph="{TemplateBinding Glyph}"/>
+                                </instruments:Well>
+                                <TextBlock Margin="0,20,0,0" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                           FontFamily="{StaticResource ConsoleBodySemiBoldFontFamily}" FontWeight="SemiBold"
+                                           FontSize="16" LineHeight="20.8" LineStackingStrategy="BlockLineHeight"
+                                           Foreground="{ThemeResource PlatinumBrush}" Text="{TemplateBinding Title}"/>
+                                <TextBlock Margin="0,8,0,0" MaxWidth="405" HorizontalAlignment="Center" TextAlignment="Center"
+                                           Style="{StaticResource DescriptionTextStyle}" Text="{TemplateBinding Description}"/>
+                                <Button x:Name="PART_Action" Margin="0,24,0,0" HorizontalAlignment="Center" Visibility="Collapsed"
+                                        Content="{TemplateBinding ActionText}" Command="{TemplateBinding ActionCommand}"/>
+                            </StackPanel>
+                        </instruments:Faceplate>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ VIEW HEADER (ViewHeader.tsx) -->
+
+    <!-- A faceplate with the module's kicker and serial in its stripe and the page's status at the stripe's right.
+         In its body, the placard - the title in capitals, a level-one heading - over the description, 6 below it,
+         68 characters wide at most; the actions sit at the right, level with the foot of the text. -->
+    <Style TargetType="instruments:ViewHeader">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:ViewHeader">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="DescriptionStates">
+                                <VisualState x:Name="NoDescription"/>
+                                <VisualState x:Name="HasDescription">
+                                    <VisualState.Setters>
+                                        <Setter Target="DescriptionText.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <instruments:Faceplate Kicker="{TemplateBinding KickerText}" Serial="{TemplateBinding SerialText}"
+                                               StripeRight="{TemplateBinding Status}">
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Bottom">
+                                    <TextBlock Style="{StaticResource ViewTitleTextStyle}" TextWrapping="Wrap"
+                                               AutomationProperties.HeadingLevel="Level1" Text="{TemplateBinding TitleText}"/>
+                                    <TextBlock x:Name="DescriptionText" Margin="0,6,0,0" MaxWidth="530" HorizontalAlignment="Left"
+                                               Visibility="Collapsed" Style="{StaticResource DescriptionTextStyle}"
+                                               Text="{TemplateBinding Description}"/>
+                                </StackPanel>
+                                <ContentControl Grid.Column="1" VerticalAlignment="Bottom" IsTabStop="False"
+                                                Content="{TemplateBinding Actions}"/>
+                            </Grid>
+                        </instruments:Faceplate>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

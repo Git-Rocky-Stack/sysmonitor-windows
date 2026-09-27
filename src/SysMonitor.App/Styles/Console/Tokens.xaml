@@ -447,6 +447,14 @@
                 <GradientStop Offset="0.38" Color="#00FFFFFF"/>
             </LinearGradientBrush>
 
+            <!-- The busy sweep: a band of armed glow down a dark well, brightest at its middle (.scanline::after,
+                 :2521). It only runs inside a well, so it shows Night Ops' glow in both shifts. -->
+            <LinearGradientBrush x:Key="ScanBandBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#00E8343A"/>
+                <GradientStop Offset="0.5" Color="#38E8343A"/>
+                <GradientStop Offset="1" Color="#00E8343A"/>
+            </LinearGradientBrush>
+
             <!-- Lamp caps, unlit and in each lit state, dark in both shifts (:1675, lit :1715-1779). -->
             <LinearGradientBrush x:Key="LampFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#131313"/>
@@ -899,6 +907,14 @@
                 <GradientStop Offset="0.38" Color="#00FFFFFF"/>
             </LinearGradientBrush>
 
+            <!-- The busy sweep: a band of armed glow down a dark well, brightest at its middle (.scanline::after,
+                 :2521). It only runs inside a well, so it shows Night Ops' glow in both shifts. -->
+            <LinearGradientBrush x:Key="ScanBandBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#00A31E23"/>
+                <GradientStop Offset="0.5" Color="#33A31E23"/>
+                <GradientStop Offset="1" Color="#00A31E23"/>
+            </LinearGradientBrush>
+
             <!-- Lamp caps, unlit and in each lit state, dark in both shifts (:1675, lit :1715-1779). -->
             <LinearGradientBrush x:Key="LampFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#131313"/>
@@ -1226,6 +1242,7 @@
             <SolidColorBrush x:Key="WellShadeRightBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="DisplayShadeTopBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="LcdGlassBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="ScanBandBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="LampFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampGoFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampHoldFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>

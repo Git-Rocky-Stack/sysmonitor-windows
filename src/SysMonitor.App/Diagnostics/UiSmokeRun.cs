@@ -1,13 +1,16 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 using Serilog;
 using SysMonitor.App.Controls.Instruments;
+using SysMonitor.Core.Models;
 using Windows.Graphics;
 using WinRT.Interop;
 using Drawing = System.Drawing;
@@ -223,10 +226,11 @@ internal sealed class UiSmokeRun
     /// the checks.
     /// <para>
     /// Each instrument is shown alone, twice, since a page shows many copies and a first copy can leave something
-    /// behind that trips the next. Then text inside each kind of host, a faceplate one part at a time, and then the
-    /// whole specimen. Every step is laid out inside a <see cref="LayoutProbe"/>, so a template that fails in layout
-    /// is reported against its step and the run goes on to the next one. A failure while rendering still ends the
-    /// process, and then the step written last names what was on screen.
+    /// behind that trips the next. Then text inside each kind of host, a faceplate one part at a time, each panel
+    /// with all its slots filled, and then the whole specimen. Every step is laid out inside a
+    /// <see cref="LayoutProbe"/>, so a template that fails in layout is reported against its step and the run goes
+    /// on to the next one. A failure while rendering still ends the process, and then the step written last names
+    /// what was on screen.
     /// </para>
     /// </summary>
     private async Task VisitSpecimenAsync(MainWindow window, ElementTheme theme, string shift)
@@ -266,6 +270,10 @@ internal sealed class UiSmokeRun
             // Then text in a console style inside each kind of host, one at a time.
             foreach (var (step, host) in TextHosts())
                 await ShowAsync(scroller, $"{shift} specimen: {step}", host);
+
+            // Then each panel with every slot it has filled, since a slot is where a second parent comes from.
+            foreach (var (step, panel) in FilledPanels())
+                await ShowAsync(scroller, $"{shift} specimen: {step}", panel);
 
             Progress($"{shift} specimen: all of it");
             var specimen = new ConsoleSpecimen();
@@ -395,6 +403,8 @@ internal sealed class UiSmokeRun
                 Problem($"A VU meter set to {meter.Segments} segments drew {cells}");
         }
 
+        CheckPanels(specimen, instruments, shift);
+
         foreach (var surface in instruments.Where(instrument => instrument is Well or Display))
         {
             var light = Descendants(surface).OfType<FrameworkElement>()
@@ -428,6 +438,94 @@ internal sealed class UiSmokeRun
         Checked($"{instruments.Count} instruments drew their templates in the {shift} shift, " +
                 "with their wells and displays dark");
         return followedShift;
+    }
+
+    /// <summary>
+    /// What the panels have to show of what they were given. A banner is heard by its word and lights its lamp with
+    /// it, and a fault is announced at once. A view header's kicker reaches its faceplate's stripe, and its status
+    /// and actions are drawn inside it: each passes through the header's template and then the faceplate's. A plate
+    /// in a state lights its rail and a neutral one has none. A busy panel shows its bar only for a share it knows,
+    /// and 42.5% reads 43%, rounded half up as System-X rounds it; its title, which its template colours inside a
+    /// well, is Night Ops platinum in both shifts. The busy sweep shows while animation effects are on, and not at
+    /// all while they are off.
+    /// </summary>
+    private void CheckPanels(ConsoleSpecimen specimen, IReadOnlyList<Control> instruments, string shift)
+    {
+        var banners = instruments.OfType<Banner>().ToList();
+        foreach (var banner in banners)
+        {
+            var spoken = FrameworkElementAutomationPeer.CreatePeerForElement(banner)?.GetName();
+            if (string.IsNullOrEmpty(spoken) || !spoken.Contains(banner.ShownCode, StringComparison.Ordinal))
+                Problem($"The {banner.ShownCode} banner is read as \"{spoken}\": a screen reader has to hear its word");
+
+            var lamp = Descendants(banner).OfType<Lamp>().FirstOrDefault();
+            if (lamp is null || lamp.Code != banner.ShownCode || lamp.State != banner.State)
+                Problem($"The {banner.ShownCode} banner's lamp reads {lamp?.Code ?? "nothing"} in the " +
+                        $"{lamp?.State.ToString() ?? "no"} state, not its banner's word and state");
+
+            var live = AutomationProperties.GetLiveSetting(banner);
+            var expected = banner.State is LampState.NoGo or LampState.Warn ? AutomationLiveSetting.Assertive : AutomationLiveSetting.Polite;
+            if (live != expected)
+                Problem($"The {banner.ShownCode} banner is a {live} live region, not {expected}: faults are heard at once");
+        }
+
+        foreach (var header in instruments.OfType<ViewHeader>())
+        {
+            if (!Descendants(header).OfType<TextBlock>().Any(text => text.Text == header.KickerText))
+                Problem($"A view header's kicker \"{header.KickerText}\" did not reach its faceplate's stripe");
+
+            foreach (var (slot, content) in new[] { ("status", header.Status), ("actions", header.Actions) })
+            {
+                if (content is UIElement element && !IsWithin(element, header))
+                    Problem($"A view header's {slot} are not drawn inside it");
+            }
+        }
+
+        var plates = instruments.OfType<Plate>().ToList();
+        foreach (var plate in plates)
+        {
+            var lit = Named<Border>(plate, "Rail")?.Background is not null;
+            if (lit != (plate.State != LampState.Off))
+                Problem($"A plate in the {plate.State} state has its rail {(lit ? "lit" : "unlit")}: a plate in a state " +
+                        "lights its rail, and a neutral one has none");
+        }
+
+        foreach (var panel in instruments.OfType<BusyPanel>())
+        {
+            var bar = Named<ProgressBar>(panel, "PART_Bar");
+            var knows = double.IsFinite(panel.Value);
+            var barShown = bar is not null && IsShown(bar, panel);
+            if (barShown != knows)
+                Problem($"A busy panel at {panel.Value} {(barShown ? "shows" : "hides")} its bar: it shows one only for a share it knows");
+            else if (knows && Math.Abs(bar!.Value - Math.Clamp(panel.Value, 0, 100)) > 0.001)
+                Problem($"A busy panel at {panel.Value} set its bar to {bar.Value}");
+        }
+
+        // Platinum asked for inside a well by an attribute in a template, where the checks above ask through a
+        // style: Night Ops platinum in both shifts, as System-X's well declares it.
+        var nightPlatinum = PaletteColour(ElementTheme.Dark, "PlatinumColor");
+        var title = (Named<TextBlock>(specimen.Progress, "TitleText")?.Foreground as SolidColorBrush)?.Color;
+        if (nightPlatinum is not null && title != nightPlatinum)
+            Problem($"A busy panel's title, Platinum inside its well, is {title?.ToString() ?? "not a solid colour"}, " +
+                    $"not Night Ops platinum {nightPlatinum}: text in a well follows the shift");
+
+        if (specimen.Progress.PercentText != "43%")
+            Problem($"A busy panel at 42.5% reads \"{specimen.Progress.PercentText}\", not 43%: shares round half up");
+
+        var sweeps = instruments.Where(instrument => instrument is BusyWell or BusyPanel)
+            .Select(instrument => Named<Border>(instrument, "PART_ScanBand")).ToList();
+        foreach (var band in sweeps)
+        {
+            var sweeping = band is { Visibility: Visibility.Visible, ActualHeight: > 0 };
+            if (sweeping == Motion.IsReduced)
+                Problem(Motion.IsReduced
+                    ? "The busy sweep shows while animation effects are off"
+                    : "The busy sweep did not show while animation effects are on");
+        }
+
+        Checked($"The panels in the {shift} shift: {banners.Count} banners heard by their word and lit with it, the view " +
+                $"header's kicker, status and actions drawn in its faceplate, {plates.Count} plates' rails, busy bars only " +
+                $"for a known share, and {sweeps.Count} busy sweeps {(Motion.IsReduced ? "still, as animation effects are off" : "running")}");
     }
 
     /// <summary>
@@ -465,6 +563,22 @@ internal sealed class UiSmokeRun
                 $"{face?.GradientStops.FirstOrDefault()?.Color.ToString() ?? "nothing"} (the shift's plate is " +
                 $"{PaletteColour(theme, "Plate1Color")}); a stock button's text, in WinUI's own colours, is {buttonColour}");
     }
+
+    /// <summary>Whether <paramref name="element"/> is drawn somewhere inside <paramref name="ancestor"/>.</summary>
+    private static bool IsWithin(DependencyObject element, DependencyObject ancestor)
+    {
+        for (var current = VisualTreeHelper.GetParent(element); current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current == ancestor)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>The element of a type and name among a control's visual descendants: a part of its template.</summary>
+    private static T? Named<T>(DependencyObject parent, string name) where T : FrameworkElement =>
+        Descendants(parent).OfType<T>().FirstOrDefault(element => element.Name == name);
 
     /// <summary>Whether an element and every ancestor up to <paramref name="root"/> are visible.</summary>
     private static bool IsShown(DependencyObject element, DependencyObject root)
@@ -504,6 +618,43 @@ internal sealed class UiSmokeRun
             new Faceplate { Kicker = "PROBE", Serial = "S/N STX-0000-00", Content = Text("BodyTextStyle") });
         yield return ("a faceplate with something in its stripe, holding BodyTextStyle",
             new Faceplate { Kicker = "PROBE", StripeRight = Text("SerialTextStyle"), Content = Text("BodyTextStyle") });
+    }
+
+    /// <summary>
+    /// Each panel with every slot it has filled: content, a stripe's status, actions, a cancel cap, an action. A
+    /// panel that builds a faceplate into its template hands it what it was given, so each of these puts an element
+    /// through two templates; an element given two parents on the way ends the process from inside layout.
+    /// </summary>
+    private static IEnumerable<(string Step, UIElement Panel)> FilledPanels()
+    {
+        var styles = ConsoleTextStyles().ToDictionary(pair => pair.Key.ToString() ?? string.Empty, pair => pair.Style);
+        TextBlock Text(string style) => new() { Text = FontProbeText, Style = styles.GetValueOrDefault(style) };
+        var idle = new RelayCommand(() => { });
+
+        yield return ("a warn plate holding BodyTextStyle",
+            new Plate { State = LampState.Warn, IsPressable = true, Content = Text("BodyTextStyle") });
+        yield return ("a dismissible banner holding a line of text",
+            new Banner { IsDismissible = true, Content = "PROBE" });
+        yield return ("a banner holding DescriptionTextStyle",
+            new Banner { State = LampState.Exec, Content = Text("DescriptionTextStyle") });
+        yield return ("a view header with a status and actions",
+            new ViewHeader
+            {
+                Module = "PROBE", Title = "Probe", Description = FontProbeText,
+                Status = new Lamp { State = LampState.Go, Code = "GO", Size = LampSize.Small },
+                Actions = new Button { Content = "PROBE" },
+            });
+        yield return ("a busy well", new BusyWell { Title = FontProbeText });
+        yield return ("a busy panel that knows its extent, with a readout and a cancel cap",
+            new BusyPanel { Kicker = "PROBE", Title = "Probe", Detail = FontProbeText, Value = 42.5, Readout = "PROBE", CancelCommand = idle });
+        yield return ("a busy panel that does not know its extent, with a readout",
+            new BusyPanel { Kicker = "PROBE", Title = "Probe", Readout = "PROBE" });
+        yield return ("a standby panel with an action",
+            new StandbyPanel
+            {
+                Kicker = "PROBE", Title = "Probe", Description = FontProbeText, Glyph = "\uE721",
+                ActionText = "PROBE", ActionCommand = idle,
+            });
     }
 
     /// <summary>Every console instrument: the public controls in <see cref="Faceplate"/>'s namespace.</summary>
