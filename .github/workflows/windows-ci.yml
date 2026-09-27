@@ -75,10 +75,12 @@ jobs:
       # Opens every page in both themes and saves a picture of each (src/SysMonitor.App/Diagnostics/UiSmokeRun.cs).
       # It fails on what only shows when XAML loads: a parse error, a navigation that fails, a resource that does
       # not resolve, a console face that did not load. It reported without failing the job until it had passed
-      # three runs in a row on a hosted runner; it gates like the tests now. The report and pictures are
-      # uploaded either way.
+      # three runs in a row on a hosted runner; it gates like the tests now. It runs twice, with Windows' animation
+      # effects off and then on: the console's blink, flicker and busy sweep only run with them on, and what stands
+      # in for each only with them off, so either run alone leaves half of the instruments' code unexercised. The
+      # reports and pictures of both are uploaded either way.
       - name: UI smoke run
-        timeout-minutes: 20
+        timeout-minutes: 35
         shell: pwsh
         run: |
           # A crash dialog would hold the run open until the timeout.
@@ -88,11 +90,24 @@ jobs:
           $exe = Get-ChildItem -Path src/SysMonitor.App/bin/x64/Debug -Recurse -Filter SysMonitor.App.exe |
             Select-Object -First 1
           if (-not $exe) { throw 'SysMonitor.App.exe was not built' }
-          $out = Join-Path $env:GITHUB_WORKSPACE 'ui-smoke'
+
+          Add-Type -Namespace Win32 -Name Effects -MemberDefinition @'
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool SystemParametersInfo(uint action, uint param, System.IntPtr value, uint update);
+          '@
+
+          # Windows' Animation effects setting (Settings, Accessibility, Visual effects), which the app reads through
+          # UISettings.AnimationsEnabled. SPI_SETCLIENTAREAANIMATION takes the setting in place of a pointer; it is
+          # changed for this session only, before the app starts, so nothing needs telling.
+          function Set-AnimationEffects([bool] $on) {
+            if (-not [Win32.Effects]::SystemParametersInfo(0x1043, 0, [IntPtr][int]$on, 0)) {
+              throw "Windows would not turn animation effects $(if ($on) { 'on' } else { 'off' })"
+            }
+          }
 
           # A run that stops says where it was, what the app last logged and why Windows says it ended: a
           # failure inside XAML's own layout or rendering ends the process without an exception to catch.
-          function Show-WhyItStopped {
+          function Show-WhyItStopped([string] $out, [datetime] $started) {
             $progress = Join-Path $out 'progress.txt'
             if (Test-Path $progress) { "Last step: $(Get-Content $progress -Raw)" }
             $log = Get-ChildItem (Join-Path $env:LOCALAPPDATA 'SysMonitor\Logs') -Filter 'sysmonitor-*.log' -ErrorAction SilentlyContinue |
@@ -103,33 +118,42 @@ jobs:
               Select-Object -First 4 | ForEach-Object { "--- $($_.ProviderName), event $($_.Id)"; $_.Message }
           }
 
-          $started = Get-Date
-          $app = Start-Process -FilePath $exe.FullName -ArgumentList '--ui-smoke', "`"$out`"" -PassThru
-          $null = $app.Handle   # keeps the exit code readable once the process has gone
-          if (-not $app.WaitForExit(15 * 60 * 1000)) {
-            $app.Kill()
-            Show-WhyItStopped
-            throw 'The UI smoke run did not finish within 15 minutes'
+          function Invoke-SmokeRun([string] $pass, [bool] $animations) {
+            Set-AnimationEffects $animations
+            $out = Join-Path $env:GITHUB_WORKSPACE "ui-smoke/$pass"
+            "=== $pass"
+
+            $started = Get-Date
+            $app = Start-Process -FilePath $exe.FullName -ArgumentList '--ui-smoke', "`"$out`"" -PassThru
+            $null = $app.Handle   # keeps the exit code readable once the process has gone
+            if (-not $app.WaitForExit(15 * 60 * 1000)) {
+              $app.Kill()
+              Show-WhyItStopped $out $started
+              throw "The UI smoke run with $pass did not finish within 15 minutes"
+            }
+
+            $report = Join-Path $out 'report.json'
+            if (-not (Test-Path $report)) {
+              Show-WhyItStopped $out $started
+              throw "The UI smoke run with $pass wrote no report (exit code $($app.ExitCode))"
+            }
+
+            $result = Get-Content $report -Raw | ConvertFrom-Json
+            "Passed: $($result.passed), finished: $($result.finished), pages: $($result.pages.Count)"
+            $result.checks | ForEach-Object { "Checked: $_" }
+            $result.problems | ForEach-Object { "Problem: $_" }
+            $result.pages | Where-Object { $_.problems.Count -gt 0 } |
+              ForEach-Object { "$($_.shift) $($_.page): $($_.problems -join ' | ')" }
+
+            # A run that stopped early passes nothing, whatever its exit code says.
+            if ($app.ExitCode -ne 0 -or -not $result.finished -or -not $result.passed) {
+              Show-WhyItStopped $out $started
+              throw "The UI smoke run with $pass failed (exit code $($app.ExitCode))"
+            }
           }
 
-          $report = Join-Path $out 'report.json'
-          if (-not (Test-Path $report)) {
-            Show-WhyItStopped
-            throw "The UI smoke run wrote no report (exit code $($app.ExitCode))"
-          }
-
-          $result = Get-Content $report -Raw | ConvertFrom-Json
-          "Passed: $($result.passed), finished: $($result.finished), pages: $($result.pages.Count)"
-          $result.checks | ForEach-Object { "Checked: $_" }
-          $result.problems | ForEach-Object { "Problem: $_" }
-          $result.pages | Where-Object { $_.problems.Count -gt 0 } |
-            ForEach-Object { "$($_.shift) $($_.page): $($_.problems -join ' | ')" }
-
-          # A run that stopped early passes nothing, whatever its exit code says.
-          if ($app.ExitCode -ne 0 -or -not $result.finished -or -not $result.passed) {
-            Show-WhyItStopped
-            throw "The UI smoke run failed (exit code $($app.ExitCode))"
-          }
+          Invoke-SmokeRun 'animations-off' $false
+          Invoke-SmokeRun 'animations-on' $true
 
       - name: Upload UI smoke run
         if: always()
