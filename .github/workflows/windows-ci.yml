@@ -1,9 +1,10 @@
 # Build and test on Windows for every pull request and every push to main.
 #
 # WinUI 3 compiles its XAML with a Windows-only toolchain, so nothing that touches the app can be checked
-# anywhere else. This job is the gate: the docs site must match its markdown sources, the whole solution
-# must build, and the full test suite must pass. It then opens every page of the app itself, in both
-# themes, and uploads a picture of each.
+# anywhere else. The first job is the gate: the docs site must match its markdown sources, the whole
+# solution must build, the full test suite must pass, and every page of the app must open, in both themes,
+# with a picture of each uploaded. The second builds the release the way Build-Release.ps1 does and checks
+# that what it ships is what the repository holds.
 name: Windows CI
 
 on:
@@ -31,13 +32,13 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.0.x
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -59,7 +60,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-results
           path: TestResults
@@ -67,10 +68,10 @@ jobs:
 
       # Opens every page in both themes and saves a picture of each (src/SysMonitor.App/Diagnostics/UiSmokeRun.cs).
       # It fails on what only shows when XAML loads: a parse error, a navigation that fails, a resource that does
-      # not resolve. A hosted runner is an unproven place to open a WinUI window, so until this step has passed
-      # three runs in a row it reports without failing the job. The report and pictures are uploaded either way.
+      # not resolve, a console face that did not load. It reported without failing the job until it had passed
+      # three runs in a row on a hosted runner; it gates like the tests now. The report and pictures are
+      # uploaded either way.
       - name: UI smoke run
-        continue-on-error: true
         timeout-minutes: 20
         shell: pwsh
         run: |
@@ -106,8 +107,91 @@ jobs:
 
       - name: Upload UI smoke run
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ui-smoke
           path: ui-smoke
           if-no-files-found: ignore
+
+  release:
+    name: Release build (x64)
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      # The release as it is made by hand: Build-Release.ps1 publishes the self-contained x64 build into
+      # publish\installer-build and zips it with the licence files. The installer is left out because
+      # installer\SysMonitorSetup.iss packs publish\installer-build\* as it stands, so that folder is what it
+      # ships. A release build has never run on a hosted runner, so until this job has passed once, its steps
+      # report without failing the workflow.
+      - name: Release build (Build-Release.ps1)
+        id: release
+        continue-on-error: true
+        shell: pwsh
+        run: ./Build-Release.ps1 -SkipInstaller
+
+      # A face that is missing at run time throws nothing: the text quietly falls back to another font. So
+      # every file in Assets/Fonts - the faces and their licences - is compared, byte for byte, with what the
+      # publish folder and the portable zip hold.
+      - name: Fonts ship in the release
+        if: steps.release.outcome == 'success'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $fonts = @(Get-ChildItem -Path src/SysMonitor.App/Assets/Fonts -File)
+          if ($fonts.Count -eq 0) { throw 'src/SysMonitor.App/Assets/Fonts holds no files, so there is nothing to check' }
+
+          $zipFile = Get-ChildItem -Path publish -Filter 'STX1-SystemMonitor-*-Portable-x64.zip' | Select-Object -First 1
+          if (-not $zipFile) { throw 'Build-Release.ps1 made no portable zip' }
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($zipFile.FullName)
+          try {
+            $entries = @{}
+            foreach ($entry in $zip.Entries) { $entries[$entry.FullName.Replace('\', '/')] = $entry }
+
+            $wrong = foreach ($font in $fonts) {
+              $expected = (Get-FileHash -Path $font.FullName -Algorithm SHA256).Hash
+
+              $published = Join-Path 'publish/installer-build/Assets/Fonts' $font.Name
+              if (-not (Test-Path $published)) { "$($font.Name) is not in the publish folder" }
+              elseif ((Get-FileHash -Path $published -Algorithm SHA256).Hash -ne $expected) { "$($font.Name) differs in the publish folder" }
+
+              $entry = $entries["Assets/Fonts/$($font.Name)"]
+              if (-not $entry) { "$($font.Name) is not in $($zipFile.Name)" }
+              else {
+                $stream = $entry.Open()
+                try { $zipped = (Get-FileHash -InputStream $stream -Algorithm SHA256).Hash } finally { $stream.Dispose() }
+                if ($zipped -ne $expected) { "$($font.Name) differs in $($zipFile.Name)" }
+              }
+            }
+          }
+          finally { $zip.Dispose() }
+
+          if ($wrong) {
+            $wrong | ForEach-Object { "Wrong: $_" }
+            throw "$(@($wrong).Count) font file(s) do not ship as committed"
+          }
+          "$($fonts.Count) font files ship byte for byte in the publish folder and in $($zipFile.Name)"
+
+      # The portable build of every pull request, ready to run on Windows without building anything.
+      - name: Upload portable build
+        if: steps.release.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v5
+        with:
+          name: portable-x64
+          path: publish/STX1-SystemMonitor-*-Portable-x64.zip
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
