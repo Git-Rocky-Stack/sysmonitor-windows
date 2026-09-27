@@ -13,6 +13,8 @@ public sealed partial class DriveWiperPage : Page
     {
         ViewModel = App.GetService<DriveWiperViewModel>();
         InitializeComponent();
+        // Set DataContext for {Binding} expressions inside DataTemplates
+        DataContext = ViewModel;
 
         // Nothing is overwritten without being asked for, in the page where the person can see what is listed.
         ViewModel.ConfirmWipe = AskBeforeWipingAsync;

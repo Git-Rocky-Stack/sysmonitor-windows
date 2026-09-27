@@ -12,7 +12,7 @@ header of their own. They are listed here in the order the menu shows them.
 
 | Page | Line | What it does |
 |---|---|---|
-| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:273`, `:298`, `:325`). The middle button read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see [Settings and data](reference-settings-and-data.md) |
+| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:267`, `:292`, `:319`). The middle button read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see [Settings and data](reference-settings-and-data.md) |
 | CPU Monitor | `:78` | Processor usage, core counts, clock speeds, per-core figures where the hardware reports them |
 | GPU Monitor | `:83` | Graphics adapter load, memory and temperature |
 | Memory Monitor | `:88` | RAM in use and available, and working-set trimming |
@@ -31,7 +31,7 @@ Header at `MainWindow.xaml:119`.
 | Health Check | `:120` | System-wide checks producing a score, a grade, counts of critical issues and warnings, and recommended actions |
 | Game Mode | `:125` | Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`) |
 | Browser Privacy | `:130` | Clears browsing traces across installed browsers, counted per browser actually found |
-| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406`, `:589`, `:20`). It asks before it starts, naming the count and size, with Cancel as the default (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35`) |
+| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406`, `:589`, `:20`). It asks before it starts, naming the count and size, with Cancel as the default (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`) |
 | Scheduled Cleaning | `:140` | Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs`) |
 | Backup Manager | `:145` | Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (`src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:20-22`) |
 | Driver Updater | `:150` | Device driver inventory, with problem and unsigned drivers flagged, and links out to Device Manager and Windows Update |

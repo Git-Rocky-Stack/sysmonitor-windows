@@ -42,9 +42,11 @@ public class InAppGuideClaimTests
             "every operation here scans a filesystem or the registry before it does anything"),
         (Claim(@"speed(s)?[ _-]+up[ _-]+your"),
             "no operation is timed against a baseline, so there is no speed-up to report"),
-        (Claim(@"(free(s|d|ing)?[ _-]+up[ _-]+ram|ram[ _-]+freed|boost(s|ing|ed)?[ _-]*ram)"),
+        (Claim(@"(free(s|d|ing)?[ _-]+up[ _-]+(ram|memory)|(ram|memory)[ _-]+freed|freed\b.{0,24}\bof[ _-]+(ram|memory)|boost(s|ing|ed)?[ _-]*(ram|memory))"),
             "trimming a working set moves pages to the standby list; Windows can page them straight " +
-            "back, so no RAM is freed. This is the BOOST RAM claim under its other names"),
+            "back, so no RAM is freed. This is the BOOST RAM claim under its other names - and under " +
+            "\"memory\" as well as \"RAM\": the Memory page reported the same trim as freed memory, and " +
+            "the guide listed Game Mode's session stats as memory freed, after both RAM wordings had gone"),
     ];
 
     /// <summary>Every XAML page and view model the application ships: all the text a user can read in it.</summary>

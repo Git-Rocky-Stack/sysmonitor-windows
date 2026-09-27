@@ -869,7 +869,7 @@
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
                                 <Run Text="•"/>
-                                <Run> Session stats showing background apps moved out of the way, ones that declined to close, and memory freed</Run>
+                                <Run> Session stats showing background apps moved out of the way, ones that declined to close, and memory trimmed</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>

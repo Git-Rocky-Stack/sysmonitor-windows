@@ -531,7 +531,6 @@
                             <TextBlock Text="CLEANABLE SPACE" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock Foreground="{StaticResource WarningBrush}">
                                 <Run Text="{x:Bind ViewModel.CleanableSpaceMB, Mode=OneWay, Converter={StaticResource MBConverter}}"/>
-                                <Run Text="MB"/>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>

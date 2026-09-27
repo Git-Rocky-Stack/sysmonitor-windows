@@ -43,7 +43,7 @@ of this page, but the explanation matters.
    how much they hold, and says that none of it goes to the Recycle Bin. When the
    selection sits on an SSD, the page's warning is repeated in it. **Cancel** is the
    default, so Enter or Escape leaves everything where it is
-   (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:35`). Up to and including v3.0.1
+   (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`). Up to and including v3.0.1
    the wipe started the moment the button was pressed.
 
 5. Confirm with **Wipe**, and let it finish.

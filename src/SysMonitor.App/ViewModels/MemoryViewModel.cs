@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.Optimizers;
@@ -36,13 +37,18 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
 
     // State
     [ObservableProperty] private bool _isLoading = true;
-    [ObservableProperty] private bool _isOptimizing = false;
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(HasTrimmed))] private bool _isOptimizing = false;
 
     // Action Feedback
     [ObservableProperty] private string _actionStatus = "";
     [ObservableProperty] private bool _hasActionStatus = false;
-    [ObservableProperty] private bool _isActionSuccess = true;
-    [ObservableProperty] private long _bytesFreed = 0;
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(HasTrimmed))] private bool _isActionSuccess = true;
+
+    /// <summary>
+    /// A trim has finished and worked. The banner's tick and badge showed whenever nothing was running, so a
+    /// failure read "Optimization failed" beside a green tick and "MEMORY OPTIMIZED".
+    /// </summary>
+    public bool HasTrimmed => !IsOptimizing && IsActionSuccess;
 
     public MemoryViewModel(IMemoryMonitor memoryMonitor, IMemoryOptimizer memoryOptimizer, IPerformanceMonitor performanceMonitor)
     {
@@ -156,37 +162,24 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
         if (IsOptimizing) return;
 
         IsOptimizing = true;
-        ShowActionStatus("Optimizing memory...", true);
+        ShowActionStatus("Trimming memory...", true);
 
         using var perfTracker = _performanceMonitor.TrackOperation("Memory.Optimize");
 
         try
         {
-            // Capture memory before optimization
-            var beforeMemInfo = await _memoryMonitor.GetMemoryInfoAsync();
-            var beforeUsedBytes = beforeMemInfo.UsedBytes;
-
-            await _memoryOptimizer.OptimizeMemoryAsync();
+            // The optimizer's own count, in the Dashboard's words for the same operation. This used to take the drop in
+            // used memory from before to after - a number every other app on the machine moved - and report it as memory
+            // the trim had released, or say memory was already optimized when there was no drop. A trimmed page goes to
+            // the standby list, where Windows can page it straight back; nothing is released.
+            var trimmedBytes = await _memoryOptimizer.OptimizeMemoryAsync();
             await RefreshDataAsync();
 
-            // Calculate freed memory
-            var afterMemInfo = await _memoryMonitor.GetMemoryInfoAsync();
-            var freedBytes = beforeUsedBytes - afterMemInfo.UsedBytes;
-            BytesFreed = freedBytes > 0 ? freedBytes : 0;
-
-            if (BytesFreed > 0)
-            {
-                var freedMB = BytesFreed / (1024.0 * 1024);
-                ShowActionStatus($"Freed {freedMB:F1} MB of memory!", true);
-            }
-            else
-            {
-                ShowActionStatus("Memory already optimized!", true);
-            }
+            ShowActionStatus($"Trimmed {FormatHelper.FormatSize(trimmedBytes)} from background apps", true);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ShowActionStatus("Optimization failed", false);
+            ShowActionStatus($"Trim failed: {ex.Message}", false);
         }
         finally
         {
