@@ -166,7 +166,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 def ascii_only(text):
     """Notices ship as plain ASCII, like the rest of the published text."""
-    return text.replace("–", "-").replace("—", "-").encode("ascii", "replace").decode("ascii")
+    return text.replace("\u2013", "-").replace("\u2014", "-").encode("ascii", "replace").decode("ascii")
 
 
 def copyright_of(font):

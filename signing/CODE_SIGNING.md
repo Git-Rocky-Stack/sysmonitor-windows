@@ -10,7 +10,7 @@ Code signing provides:
 - **Integrity**: Ensures the code hasn't been tampered with
 - **Professional appearance**: Required for enterprise deployments
 
-## Retired Certificates — Action Required for Sideload Users
+## Retired Certificates - Action Required for Sideload Users
 
 The self-signed certificates below were used for sideloaded builds, and their key material was
 published in this repository's history. They are **retired**: no build will be signed with them again,
@@ -25,7 +25,7 @@ If you installed one of these certificates to sideload an older build, remove it
 with it is trusted on your machine:
 
 ```powershell
-# Elevated PowerShell — machine-wide Trusted People store
+# Elevated PowerShell - machine-wide Trusted People store
 Get-ChildItem Cert:\LocalMachine\TrustedPeople |
     Where-Object Thumbprint -in '52E78D80039EF8DC26D9EFD64A381B93133A8154', '0724EBBA9D97D28CB1E784218E29B870C442312D' |
     Remove-Item

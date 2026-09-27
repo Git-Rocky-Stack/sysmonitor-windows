@@ -305,7 +305,7 @@
                                     <StackPanel Spacing="2">
                                         <TextBlock FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" FontSize="12">Game Overlay</TextBlock>
                                         <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
-                                            Telemetry-style overlay showing CPU/GPU temps (°F), usage %, RAM, power draw and fan speed. Frame rate too, on a GPU that reports it - the overlay says so when yours does not. Drag to reposition.
+                                            Telemetry-style overlay showing CPU and GPU temperatures in Fahrenheit, usage %, RAM, power draw and fan speed. Frame rate too, on a GPU that reports it - the overlay says so when yours does not. Drag to reposition.
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
@@ -449,7 +449,7 @@
                         <StackPanel Grid.Column="1" Spacing="8">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Temperature Alerts</Run>
-                                <Run> - CPU (167°F/194°F) and GPU warnings</Run>
+                                <Run> - CPU (167 F and 194 F) and GPU warnings</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Memory Alerts</Run>
@@ -827,32 +827,32 @@
                         <TextBlock Text="Features from v2.2.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Auto Game Mode - detects a running game and enables optimization</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Performance Profiles - save and switch between optimization presets</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Game Overlay - live temperatures, load and power over your game (drag to reposition)</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Fan speed and power draw monitoring widgets</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Hardware sensor diagnostic viewer</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Admin rights requested at launch for full hardware sensor access</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
-                                <Run> All temperatures display in Fahrenheit (°F)</Run>
+                                <Run Text="-"/>
+                                <Run> All temperatures display in Fahrenheit</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>
@@ -864,11 +864,11 @@
                         <TextBlock Text="Features from v2.1.1" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Game Mode - One-click gaming optimization</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Session stats showing background apps moved out of the way, ones that declined to close, and memory trimmed</Run>
                             </TextBlock>
                         </StackPanel>
@@ -881,19 +881,19 @@
                         <TextBlock Text="Features from v2.1.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> System Tray Mode with live CPU/RAM stats tooltip</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Right-click tray menu, real-time alerts with toast notifications</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> History page with interactive LiveCharts2 graphs</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> 30-day historical data storage with SQLite</Run>
                             </TextBlock>
                         </StackPanel>
@@ -906,15 +906,15 @@
                         <TextBlock Text="Features from v2.0.1" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Performance Monitor page with operation metrics and timing</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> System overview cards, P95/P99 percentiles, CSV export</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Window icon and global crash logging</Run>
                             </TextBlock>
                         </StackPanel>
@@ -927,27 +927,27 @@
                         <TextBlock Text="Features from v1.0.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Complete system monitoring dashboard with real-time stats</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> CPU, GPU, Memory, Disk, Network, Battery, and Temperature monitoring</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Directory and Registry cleaning tools with Browser privacy cleaner</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Startup manager, Large file finder, Duplicate file detector</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> PDF and Image tools, WiFi analyzer, Bluetooth scanner, Network mapper</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Secure drive wiper, Health check, Backup manager, Scheduled cleaning</Run>
                             </TextBlock>
                         </StackPanel>
@@ -1029,15 +1029,15 @@
 
                     <StackPanel Spacing="4" Margin="8,0,0,0">
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
-                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                             <Run Text=" Use it for anything, including commercially"/>
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
-                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                             <Run Text=" Read, study and modify the source code"/>
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
-                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                             <Run Text=" Copy, redistribute, sublicense and sell copies"/>
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
@@ -1059,7 +1059,7 @@
                         LibreHardwareMonitor (Mozilla Public License 2.0), Serilog (Apache License 2.0),
                         and CommunityToolkit.Mvvm, LiveCharts2, PDFsharp, Entity Framework Core and
                         others under the MIT License. The Windows App SDK and Win2D ship under
-                        Microsoft&#8217;s own terms. Full details are in THIRD-PARTY-NOTICES.md.
+                        Microsoft's own terms. Full details are in THIRD-PARTY-NOTICES.md.
                     </TextBlock>
 
                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
@@ -1067,7 +1067,7 @@
                         <Run Text="github.com/Git-Rocky-Stack/sysmonitor-windows" Foreground="{StaticResource CyanAccentBrush}"/>
                     </TextBlock>
 
-                    <TextBlock Text="&#169; 2024-2026 Rocky Stack / Strategia-X"
+                    <TextBlock Text="Copyright (c) 2024-2026 Rocky Stack / Strategia-X"
                                Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                 </StackPanel>
             </Border>

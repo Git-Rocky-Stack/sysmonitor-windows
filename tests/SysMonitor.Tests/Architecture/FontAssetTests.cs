@@ -103,5 +103,5 @@ public class FontAssetTests
     }
 
     /// <summary>The notices ship as ASCII, so a dash in a font's notice is written as a hyphen.</summary>
-    private static string Ascii(string text) => text.Replace('–', '-').Replace('—', '-');
+    private static string Ascii(string text) => text.Replace('\u2013', '-').Replace('\u2014', '-');
 }

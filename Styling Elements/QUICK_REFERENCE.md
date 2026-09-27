@@ -41,10 +41,10 @@
 ## Button Chrome Effect
 
 ```
-Layer 1: gradient 135° #E8E8E8 → #A0A0A0 → #606060
-Layer 2: gradient 315° #FFFFFF → #C8C8C8 → #888888 (1px inset)
-Layer 3: gradient 135° #505050 → #383838 → #282828 (2px inset)
-Layer 4: gradient 90° #AA2024 → #C93437 (3px inset)
+Layer 1: gradient 135deg #E8E8E8 -> #A0A0A0 -> #606060
+Layer 2: gradient 315deg #FFFFFF -> #C8C8C8 -> #888888 (1px inset)
+Layer 3: gradient 135deg #505050 -> #383838 -> #282828 (2px inset)
+Layer 4: gradient 90deg #AA2024 -> #C93437 (3px inset)
 ```
 
 ## Spacing

@@ -21,7 +21,7 @@ v2.0.1: Performance Monitor & Improvements Latest
 v2.0.1
 205723b
 What's New in v2.0.1
-🚀 New Features
+New Features
 
     Performance Monitor Page - Track application operation metrics in real-time
         System overview cards: Memory usage, GC pressure, frame rate, tracked operations
@@ -34,17 +34,17 @@ What's New in v2.0.1
 
     Global Crash Logging - Detailed exception reporting with crash files saved to Desktop
 
-🎨 UI Improvements
+UI Improvements
 
     Chrome bezel styling on Performance page action buttons for consistency
     Performance page layout follows app design patterns with centered logo header
 
-📚 Documentation
+Documentation
 
     Updated User Guide with Performance Monitor documentation
     Updated release notes section with v2.0.1 changes
 
-🛠️ Technical
+Technical
 
     Performance tracking integrated across all major operations (Dashboard, Memory, CPU, Cleaner, Large Files, Processes)
     Version bumped to 2.0.1
@@ -67,7 +67,7 @@ Assets 2
     15 minutes ago
 
 Footer
-© 2025 GitHub, Inc.
+(c) 2025 GitHub, Inc.
 Footer navigation
 
     Terms

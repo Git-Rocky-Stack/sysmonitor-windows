@@ -171,28 +171,28 @@ The app uses a distinctive "chrome bezel" button style with layered gradients:
 **Outer Bezel (Chrome Effect)**
 ```
 Layer 1 - Outer Chrome:
-  Gradient: 135° linear
+  Gradient: 135deg linear
   Start: #E8E8E8
   Center: #A0A0A0
   End: #606060
   Corner Radius: 14dp
 
 Layer 2 - Inner Highlight (1dp inset):
-  Gradient: 315° linear
+  Gradient: 315deg linear
   Start: #FFFFFF
   Center: #C8C8C8
   End: #888888
   Corner Radius: 13dp
 
 Layer 3 - Dark Edge (2dp inset):
-  Gradient: 135° linear
+  Gradient: 135deg linear
   Start: #505050
   Center: #383838
   End: #282828
   Corner Radius: 12dp
 
 Layer 4 - Content (3dp inset):
-  Gradient: 90° linear
+  Gradient: 90deg linear
   Start: #AA2024 (Brand Red)
   End: #C93437 (Brand Red Light)
   Corner Radius: 10dp
@@ -296,7 +296,7 @@ Easing: ease-out
 
 ### Pulse (for alerts)
 ```
-Scale: 1.0 → 1.05 → 1.0
+Scale: 1.0 -> 1.05 -> 1.0
 Duration: 600ms
 Repeat: infinite
 ```
@@ -317,7 +317,7 @@ Repeat: infinite
 ### Header Gradient
 ```
 Type: Linear
-Angle: 135°
+Angle: 135deg
 Start: #AA2024
 End: #FF5252
 ```
@@ -325,7 +325,7 @@ End: #FF5252
 ### Card Gradient (Subtle)
 ```
 Type: Linear
-Angle: 180°
+Angle: 180deg
 Start: rgba(170, 32, 36, 0.1)
 End: transparent
 ```
