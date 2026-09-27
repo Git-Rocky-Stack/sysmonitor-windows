@@ -17,8 +17,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- The faces and the palette come from Fonts.xaml and Tokens.xaml, which App.xaml merges ahead of this file.
-         Not merged here: a theme dictionary merged below App.xaml does not follow an element's theme. -->
+    <!-- The faces and the palette come from Fonts.xaml and Tokens.xaml, which App.xaml merges ahead of this file,
+         and only App.xaml merges the palette (ConsoleDictionaryTests). -->
 
     <!-- ============================================================ STENCILS: Archivo, tracked caps -->
 

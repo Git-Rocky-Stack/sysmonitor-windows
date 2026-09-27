@@ -12,11 +12,9 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
                 <!-- The console's dictionaries, in the order they lean on each other: the faces and the palette, the
                      Fluent overrides, then the text styles and the instruments that use them. Each is merged here and
-                     nowhere else. WinUI chooses the theme dictionary for an element's theme - a well's Dark, a shift
-                     switched while the app runs - only in App.xaml's own and in the files App.xaml merges itself:
-                     the palette merged three files down stayed Night Ops on Day Shift, however a colour was named
-                     (ConsoleDictionaryTests). Sources are absolute: a relative one, looked up during layout, is "not
-                     a valid absolute URI". -->
+                     nowhere else, which is where the palette was measured to follow an element's theme - a well's
+                     Dark, a shift switched while the app runs (ConsoleDictionaryTests). Sources are absolute: a
+                     relative one, looked up during layout, is "not a valid absolute URI". -->
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Fonts.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Tokens.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/FluentOverrides.xaml" />

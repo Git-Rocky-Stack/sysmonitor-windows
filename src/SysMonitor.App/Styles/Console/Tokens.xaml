@@ -13,8 +13,10 @@
                     anything lit or armed the highlight colour, and decoration goes.
 
     Colours are written here and nowhere else (ConsoleRecipeTests). Consumers ask with {ThemeResource}, so an
-    element follows the theme it is shown in; inside a theme, a brush takes its colours from the same theme with
-    {StaticResource}, and every theme defines the same keys (ThemeDictionaryParityTests). Code cannot follow a
+    element follows the theme it is shown in, and every theme defines the same keys (ThemeDictionaryParityTests).
+    Inside a theme each brush writes its colour out rather than naming the Color beside it with {StaticResource}:
+    brushes that named their colours came out in Night Ops' on Day Shift when the shift was switched while the
+    app ran, where brushes that wrote them out followed it (the UI smoke run measured both). Code cannot follow a
     theme this way - Application.Current.Resources answers for the application's theme - so colours code needs
     live in one C# palette.
 -->
@@ -27,227 +29,227 @@
         <ResourceDictionary x:Key="Default">
             <!-- Surfaces: the chassis, darkest first (:545-552, Day :726-732). -->
             <Color x:Key="VoidColor">#000000</Color>
-            <SolidColorBrush x:Key="VoidBrush" Color="{StaticResource VoidColor}"/>
+            <SolidColorBrush x:Key="VoidBrush" Color="#000000"/>
             <Color x:Key="Carbon950Color">#050505</Color>
-            <SolidColorBrush x:Key="Carbon950Brush" Color="{StaticResource Carbon950Color}"/>
+            <SolidColorBrush x:Key="Carbon950Brush" Color="#050505"/>
             <Color x:Key="Carbon900Color">#0D0D0D</Color>
-            <SolidColorBrush x:Key="Carbon900Brush" Color="{StaticResource Carbon900Color}"/>
+            <SolidColorBrush x:Key="Carbon900Brush" Color="#0D0D0D"/>
             <Color x:Key="Carbon850Color">#101010</Color>
-            <SolidColorBrush x:Key="Carbon850Brush" Color="{StaticResource Carbon850Color}"/>
+            <SolidColorBrush x:Key="Carbon850Brush" Color="#101010"/>
             <Color x:Key="Carbon800Color">#141414</Color>
-            <SolidColorBrush x:Key="Carbon800Brush" Color="{StaticResource Carbon800Color}"/>
+            <SolidColorBrush x:Key="Carbon800Brush" Color="#141414"/>
             <Color x:Key="Carbon750Color">#1A1A1A</Color>
-            <SolidColorBrush x:Key="Carbon750Brush" Color="{StaticResource Carbon750Color}"/>
+            <SolidColorBrush x:Key="Carbon750Brush" Color="#1A1A1A"/>
             <Color x:Key="Carbon700Color">#262626</Color>
-            <SolidColorBrush x:Key="Carbon700Brush" Color="{StaticResource Carbon700Color}"/>
+            <SolidColorBrush x:Key="Carbon700Brush" Color="#262626"/>
             <Color x:Key="AnthraciteColor">#3A3A3A</Color>
-            <SolidColorBrush x:Key="AnthraciteBrush" Color="{StaticResource AnthraciteColor}"/>
+            <SolidColorBrush x:Key="AnthraciteBrush" Color="#3A3A3A"/>
 
             <!-- Text, brightest first (:555-577, Day :734-738). SilverMute is set by the lightest ground it
                  prints on, the stripe grain; Graphite only ever paints a lamp that is not lit. -->
             <Color x:Key="PlatinumColor">#F5F5F5</Color>
-            <SolidColorBrush x:Key="PlatinumBrush" Color="{StaticResource PlatinumColor}"/>
+            <SolidColorBrush x:Key="PlatinumBrush" Color="#F5F5F5"/>
             <Color x:Key="SilverBrightColor">#D1D1D1</Color>
-            <SolidColorBrush x:Key="SilverBrightBrush" Color="{StaticResource SilverBrightColor}"/>
+            <SolidColorBrush x:Key="SilverBrightBrush" Color="#D1D1D1"/>
             <Color x:Key="SilverColor">#B3B3B3</Color>
-            <SolidColorBrush x:Key="SilverBrush" Color="{StaticResource SilverColor}"/>
+            <SolidColorBrush x:Key="SilverBrush" Color="#B3B3B3"/>
             <Color x:Key="SilverMuteColor">#9C9C9C</Color>
-            <SolidColorBrush x:Key="SilverMuteBrush" Color="{StaticResource SilverMuteColor}"/>
+            <SolidColorBrush x:Key="SilverMuteBrush" Color="#9C9C9C"/>
             <Color x:Key="GraphiteColor">#808080</Color>
-            <SolidColorBrush x:Key="GraphiteBrush" Color="{StaticResource GraphiteColor}"/>
+            <SolidColorBrush x:Key="GraphiteBrush" Color="#808080"/>
 
             <!-- Armed red: LIVE, not error (:579-590, Day :766-770). Armed and ArmedDeep never change; ArmedLit
                  deepens on Day Shift for contrast on silver; ArmedDisplay is the bright form for armed text on
                  displays, which stay dark. -->
             <Color x:Key="ArmedColor">#AA2024</Color>
-            <SolidColorBrush x:Key="ArmedBrush" Color="{StaticResource ArmedColor}"/>
+            <SolidColorBrush x:Key="ArmedBrush" Color="#AA2024"/>
             <Color x:Key="ArmedLitColor">#E8343A</Color>
-            <SolidColorBrush x:Key="ArmedLitBrush" Color="{StaticResource ArmedLitColor}"/>
+            <SolidColorBrush x:Key="ArmedLitBrush" Color="#E8343A"/>
             <Color x:Key="ArmedDisplayColor">#E8343A</Color>
-            <SolidColorBrush x:Key="ArmedDisplayBrush" Color="{StaticResource ArmedDisplayColor}"/>
+            <SolidColorBrush x:Key="ArmedDisplayBrush" Color="#E8343A"/>
             <Color x:Key="ArmedDeepColor">#7F171A</Color>
-            <SolidColorBrush x:Key="ArmedDeepBrush" Color="{StaticResource ArmedDeepColor}"/>
+            <SolidColorBrush x:Key="ArmedDeepBrush" Color="#7F171A"/>
             <Color x:Key="ArmedEdgeColor">#59E8343A</Color> <!-- rgba(232, 52, 58, .35) -->
-            <SolidColorBrush x:Key="ArmedEdgeBrush" Color="{StaticResource ArmedEdgeColor}"/>
+            <SolidColorBrush x:Key="ArmedEdgeBrush" Color="#59E8343A"/>
             <Color x:Key="ArmedGlowColor">#38E8343A</Color> <!-- rgba(232, 52, 58, .22) -->
-            <SolidColorBrush x:Key="ArmedGlowBrush" Color="{StaticResource ArmedGlowColor}"/>
+            <SolidColorBrush x:Key="ArmedGlowBrush" Color="#38E8343A"/>
             <Color x:Key="ArmedSoftColor">#1FAA2024</Color> <!-- rgba(170, 32, 36, .12) -->
-            <SolidColorBrush x:Key="ArmedSoftBrush" Color="{StaticResource ArmedSoftColor}"/>
+            <SolidColorBrush x:Key="ArmedSoftBrush" Color="#1FAA2024"/>
             <Color x:Key="ArmedFgColor">#FFF3F0</Color>
-            <SolidColorBrush x:Key="ArmedFgBrush" Color="{StaticResource ArmedFgColor}"/>
+            <SolidColorBrush x:Key="ArmedFgBrush" Color="#FFF3F0"/>
 
             <!-- Chrome: the polished bits, used sparingly (:592-595, Day :774). -->
             <Color x:Key="ChromeColor">#E6E6E6</Color>
-            <SolidColorBrush x:Key="ChromeBrush" Color="{StaticResource ChromeColor}"/>
+            <SolidColorBrush x:Key="ChromeBrush" Color="#E6E6E6"/>
             <Color x:Key="ChromeEdgeColor">#47E6E6E6</Color> <!-- rgba(230, 230, 230, .28) -->
-            <SolidColorBrush x:Key="ChromeEdgeBrush" Color="{StaticResource ChromeEdgeColor}"/>
+            <SolidColorBrush x:Key="ChromeEdgeBrush" Color="#47E6E6E6"/>
             <Color x:Key="ChromeSoftColor">#1AE6E6E6</Color> <!-- rgba(230, 230, 230, .1) -->
-            <SolidColorBrush x:Key="ChromeSoftBrush" Color="{StaticResource ChromeSoftColor}"/>
+            <SolidColorBrush x:Key="ChromeSoftBrush" Color="#1AE6E6E6"/>
 
             <!-- LEDs, the same in both shifts (:597-613). Each state is a word first; in High Contrast the word
                  is all of it. -->
             <Color x:Key="LedGoColor">#41E25E</Color>
-            <SolidColorBrush x:Key="LedGoBrush" Color="{StaticResource LedGoColor}"/>
+            <SolidColorBrush x:Key="LedGoBrush" Color="#41E25E"/>
             <Color x:Key="LedHoldColor">#FFB000</Color>
-            <SolidColorBrush x:Key="LedHoldBrush" Color="{StaticResource LedHoldColor}"/>
+            <SolidColorBrush x:Key="LedHoldBrush" Color="#FFB000"/>
             <Color x:Key="LedWarnColor">#FF4438</Color>
-            <SolidColorBrush x:Key="LedWarnBrush" Color="{StaticResource LedWarnColor}"/>
+            <SolidColorBrush x:Key="LedWarnBrush" Color="#FF4438"/>
             <Color x:Key="LedNoGoColor">#C8453E</Color>
-            <SolidColorBrush x:Key="LedNoGoBrush" Color="{StaticResource LedNoGoColor}"/>
+            <SolidColorBrush x:Key="LedNoGoBrush" Color="#C8453E"/>
             <Color x:Key="LedScopeColor">#58C4BC</Color>
-            <SolidColorBrush x:Key="LedScopeBrush" Color="{StaticResource LedScopeColor}"/>
+            <SolidColorBrush x:Key="LedScopeBrush" Color="#58C4BC"/>
             <Color x:Key="LedOrangeColor">#FF7A1A</Color>
-            <SolidColorBrush x:Key="LedOrangeBrush" Color="{StaticResource LedOrangeColor}"/>
+            <SolidColorBrush x:Key="LedOrangeBrush" Color="#FF7A1A"/>
             <Color x:Key="GoSoftColor">#1A41E25E</Color> <!-- rgba(65, 226, 94, .1) -->
-            <SolidColorBrush x:Key="GoSoftBrush" Color="{StaticResource GoSoftColor}"/>
+            <SolidColorBrush x:Key="GoSoftBrush" Color="#1A41E25E"/>
             <Color x:Key="HoldSoftColor">#1AFFB000</Color> <!-- rgba(255, 176, 0, .1) -->
-            <SolidColorBrush x:Key="HoldSoftBrush" Color="{StaticResource HoldSoftColor}"/>
+            <SolidColorBrush x:Key="HoldSoftBrush" Color="#1AFFB000"/>
             <Color x:Key="WarnSoftColor">#1FFF4438</Color> <!-- rgba(255, 68, 56, .12) -->
-            <SolidColorBrush x:Key="WarnSoftBrush" Color="{StaticResource WarnSoftColor}"/>
+            <SolidColorBrush x:Key="WarnSoftBrush" Color="#1FFF4438"/>
             <Color x:Key="NoGoSoftColor">#1FC8453E</Color> <!-- rgba(200, 69, 62, .12) -->
-            <SolidColorBrush x:Key="NoGoSoftBrush" Color="{StaticResource NoGoSoftColor}"/>
+            <SolidColorBrush x:Key="NoGoSoftBrush" Color="#1FC8453E"/>
             <Color x:Key="ScopeSoftColor">#1A58C4BC</Color> <!-- rgba(88, 196, 188, .1) -->
-            <SolidColorBrush x:Key="ScopeSoftBrush" Color="{StaticResource ScopeSoftColor}"/>
+            <SolidColorBrush x:Key="ScopeSoftBrush" Color="#1A58C4BC"/>
             <Color x:Key="GoEdgeColor">#5941E25E</Color> <!-- rgba(65, 226, 94, .35) -->
-            <SolidColorBrush x:Key="GoEdgeBrush" Color="{StaticResource GoEdgeColor}"/>
+            <SolidColorBrush x:Key="GoEdgeBrush" Color="#5941E25E"/>
             <Color x:Key="HoldEdgeColor">#59FFB000</Color> <!-- rgba(255, 176, 0, .35) -->
-            <SolidColorBrush x:Key="HoldEdgeBrush" Color="{StaticResource HoldEdgeColor}"/>
+            <SolidColorBrush x:Key="HoldEdgeBrush" Color="#59FFB000"/>
             <Color x:Key="WarnEdgeColor">#66FF4438</Color> <!-- rgba(255, 68, 56, .4) -->
-            <SolidColorBrush x:Key="WarnEdgeBrush" Color="{StaticResource WarnEdgeColor}"/>
+            <SolidColorBrush x:Key="WarnEdgeBrush" Color="#66FF4438"/>
             <Color x:Key="NoGoEdgeColor">#66C8453E</Color> <!-- rgba(200, 69, 62, .4) -->
-            <SolidColorBrush x:Key="NoGoEdgeBrush" Color="{StaticResource NoGoEdgeColor}"/>
+            <SolidColorBrush x:Key="NoGoEdgeBrush" Color="#66C8453E"/>
             <Color x:Key="ScopeEdgeColor">#5258C4BC</Color> <!-- rgba(88, 196, 188, .32) -->
-            <SolidColorBrush x:Key="ScopeEdgeBrush" Color="{StaticResource ScopeEdgeColor}"/>
+            <SolidColorBrush x:Key="ScopeEdgeBrush" Color="#5258C4BC"/>
 
             <!-- State as text: the LED colour, safe to print on the chassis (:615-635, Day :740-764). Day Shift
                  darkens each along its own hue to clear 4.5:1 on Carbon950; warn and nogo share one red there,
                  which is why a warn rail blinks and the word is always printed. Inside a well or display the
                  Default values apply: the LEDs. -->
             <Color x:Key="StateGoColor">#41E25E</Color>
-            <SolidColorBrush x:Key="StateGoBrush" Color="{StaticResource StateGoColor}"/>
+            <SolidColorBrush x:Key="StateGoBrush" Color="#41E25E"/>
             <Color x:Key="StateHoldColor">#FFB000</Color>
-            <SolidColorBrush x:Key="StateHoldBrush" Color="{StaticResource StateHoldColor}"/>
+            <SolidColorBrush x:Key="StateHoldBrush" Color="#FFB000"/>
             <Color x:Key="StateWarnColor">#FF4438</Color>
-            <SolidColorBrush x:Key="StateWarnBrush" Color="{StaticResource StateWarnColor}"/>
+            <SolidColorBrush x:Key="StateWarnBrush" Color="#FF4438"/>
             <Color x:Key="StateNoGoColor">#C8453E</Color>
-            <SolidColorBrush x:Key="StateNoGoBrush" Color="{StaticResource StateNoGoColor}"/>
+            <SolidColorBrush x:Key="StateNoGoBrush" Color="#C8453E"/>
             <Color x:Key="StateExecColor">#58C4BC</Color>
-            <SolidColorBrush x:Key="StateExecBrush" Color="{StaticResource StateExecColor}"/>
+            <SolidColorBrush x:Key="StateExecBrush" Color="#58C4BC"/>
 
             <!-- Rails: the light pipe down a plate's mounting edge (:1149-1206), from the palette steps that
                  survive Day Shift (Night :261-309, Day :825-874). Wired to the LEDs, a rail would put #41E25E on
                  a near-white plate by day. -->
             <Color x:Key="RailGoColor">#41E25E</Color>
-            <SolidColorBrush x:Key="RailGoBrush" Color="{StaticResource RailGoColor}"/>
+            <SolidColorBrush x:Key="RailGoBrush" Color="#41E25E"/>
             <Color x:Key="RailHoldColor">#FFB000</Color>
-            <SolidColorBrush x:Key="RailHoldBrush" Color="{StaticResource RailHoldColor}"/>
+            <SolidColorBrush x:Key="RailHoldBrush" Color="#FFB000"/>
             <Color x:Key="RailWarnColor">#FF4438</Color>
-            <SolidColorBrush x:Key="RailWarnBrush" Color="{StaticResource RailWarnColor}"/>
+            <SolidColorBrush x:Key="RailWarnBrush" Color="#FF4438"/>
             <Color x:Key="RailNoGoColor">#C8453E</Color>
-            <SolidColorBrush x:Key="RailNoGoBrush" Color="{StaticResource RailNoGoColor}"/>
+            <SolidColorBrush x:Key="RailNoGoBrush" Color="#C8453E"/>
             <Color x:Key="RailExecColor">#58C4BC</Color>
-            <SolidColorBrush x:Key="RailExecBrush" Color="{StaticResource RailExecColor}"/>
+            <SolidColorBrush x:Key="RailExecBrush" Color="#58C4BC"/>
 
             <!-- Displays stay dark: defined once, the same in both shifts (:637-645). -->
             <Color x:Key="DisplayBgTopColor">#040404</Color>
-            <SolidColorBrush x:Key="DisplayBgTopBrush" Color="{StaticResource DisplayBgTopColor}"/>
+            <SolidColorBrush x:Key="DisplayBgTopBrush" Color="#040404"/>
             <Color x:Key="DisplayBgBottomColor">#070707</Color>
-            <SolidColorBrush x:Key="DisplayBgBottomBrush" Color="{StaticResource DisplayBgBottomColor}"/>
+            <SolidColorBrush x:Key="DisplayBgBottomBrush" Color="#070707"/>
             <Color x:Key="DisplayBorderColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
-            <SolidColorBrush x:Key="DisplayBorderBrush" Color="{StaticResource DisplayBorderColor}"/>
+            <SolidColorBrush x:Key="DisplayBorderBrush" Color="#CC000000"/>
             <Color x:Key="DisplayFgColor">#B3B3B3</Color>
-            <SolidColorBrush x:Key="DisplayFgBrush" Color="{StaticResource DisplayFgColor}"/>
+            <SolidColorBrush x:Key="DisplayFgBrush" Color="#B3B3B3"/>
             <Color x:Key="DisplayFgMuteColor">#8A8A86</Color>
-            <SolidColorBrush x:Key="DisplayFgMuteBrush" Color="{StaticResource DisplayFgMuteColor}"/>
+            <SolidColorBrush x:Key="DisplayFgMuteBrush" Color="#8A8A86"/>
             <Color x:Key="PhosphorColor">#41E25E</Color>
-            <SolidColorBrush x:Key="PhosphorBrush" Color="{StaticResource PhosphorColor}"/>
+            <SolidColorBrush x:Key="PhosphorBrush" Color="#41E25E"/>
             <Color x:Key="PhosphorDimColor">#2E5237</Color>
-            <SolidColorBrush x:Key="PhosphorDimBrush" Color="{StaticResource PhosphorDimColor}"/>
+            <SolidColorBrush x:Key="PhosphorDimBrush" Color="#2E5237"/>
             <Color x:Key="ScrimColor">#B8000000</Color> <!-- rgba(0, 0, 0, .72) -->
-            <SolidColorBrush x:Key="ScrimBrush" Color="{StaticResource ScrimColor}"/>
+            <SolidColorBrush x:Key="ScrimBrush" Color="#B8000000"/>
 
             <!-- Hairlines (:647-649, Day :772-773). -->
             <Color x:Key="HairlineColor">#14FFFFFF</Color> <!-- rgba(255, 255, 255, .08) -->
-            <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource HairlineColor}"/>
+            <SolidColorBrush x:Key="HairlineBrush" Color="#14FFFFFF"/>
             <Color x:Key="HairlineStrongColor">#29FFFFFF</Color> <!-- rgba(255, 255, 255, .16) -->
-            <SolidColorBrush x:Key="HairlineStrongBrush" Color="{StaticResource HairlineStrongColor}"/>
+            <SolidColorBrush x:Key="HairlineStrongBrush" Color="#29FFFFFF"/>
 
             <!-- Faceplate and module plate: brushed aluminium, top to bottom, with its key light, edge, lip and
                  underside (:651-659, Day :777-784). -->
             <Color x:Key="Plate1Color">#1C1C1C</Color>
-            <SolidColorBrush x:Key="Plate1Brush" Color="{StaticResource Plate1Color}"/>
+            <SolidColorBrush x:Key="Plate1Brush" Color="#1C1C1C"/>
             <Color x:Key="Plate2Color">#151515</Color>
-            <SolidColorBrush x:Key="Plate2Brush" Color="{StaticResource Plate2Color}"/>
+            <SolidColorBrush x:Key="Plate2Brush" Color="#151515"/>
             <Color x:Key="Plate3Color">#101010</Color>
-            <SolidColorBrush x:Key="Plate3Brush" Color="{StaticResource Plate3Color}"/>
+            <SolidColorBrush x:Key="Plate3Brush" Color="#101010"/>
             <Color x:Key="Plate4Color">#0C0C0C</Color>
-            <SolidColorBrush x:Key="Plate4Brush" Color="{StaticResource Plate4Color}"/>
+            <SolidColorBrush x:Key="Plate4Brush" Color="#0C0C0C"/>
             <Color x:Key="PlateKeyColor">#0AFFFFFF</Color> <!-- rgba(255, 255, 255, .04) -->
-            <SolidColorBrush x:Key="PlateKeyBrush" Color="{StaticResource PlateKeyColor}"/>
+            <SolidColorBrush x:Key="PlateKeyBrush" Color="#0AFFFFFF"/>
             <Color x:Key="PlateEdgeColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
-            <SolidColorBrush x:Key="PlateEdgeBrush" Color="{StaticResource PlateEdgeColor}"/>
+            <SolidColorBrush x:Key="PlateEdgeBrush" Color="#0FFFFFFF"/>
             <Color x:Key="PlateLipColor">#1AFFFFFF</Color> <!-- rgba(255, 255, 255, .1) -->
-            <SolidColorBrush x:Key="PlateLipBrush" Color="{StaticResource PlateLipColor}"/>
+            <SolidColorBrush x:Key="PlateLipBrush" Color="#1AFFFFFF"/>
             <Color x:Key="PlateUnderColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
-            <SolidColorBrush x:Key="PlateUnderBrush" Color="{StaticResource PlateUnderColor}"/>
+            <SolidColorBrush x:Key="PlateUnderBrush" Color="#B3000000"/>
 
             <!-- Machined caps: buttons, chips, switches (:661-665, Day :786-790). -->
             <Color x:Key="Cap1Color">#1F1F1F</Color>
-            <SolidColorBrush x:Key="Cap1Brush" Color="{StaticResource Cap1Color}"/>
+            <SolidColorBrush x:Key="Cap1Brush" Color="#1F1F1F"/>
             <Color x:Key="Cap2Color">#171717</Color>
-            <SolidColorBrush x:Key="Cap2Brush" Color="{StaticResource Cap2Color}"/>
+            <SolidColorBrush x:Key="Cap2Brush" Color="#171717"/>
             <Color x:Key="Cap3Color">#121212</Color>
-            <SolidColorBrush x:Key="Cap3Brush" Color="{StaticResource Cap3Color}"/>
+            <SolidColorBrush x:Key="Cap3Brush" Color="#121212"/>
             <Color x:Key="CapKeyColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
-            <SolidColorBrush x:Key="CapKeyBrush" Color="{StaticResource CapKeyColor}"/>
+            <SolidColorBrush x:Key="CapKeyBrush" Color="#0FFFFFFF"/>
             <Color x:Key="CapEdgeColor">#0AFFFFFF</Color> <!-- rgba(255, 255, 255, .04) -->
-            <SolidColorBrush x:Key="CapEdgeBrush" Color="{StaticResource CapEdgeColor}"/>
+            <SolidColorBrush x:Key="CapEdgeBrush" Color="#0AFFFFFF"/>
 
             <!-- Brushed stripe header, and its grain: directional machine brushing on a 3px period (:667-672, Day
                  :792-797). -->
             <Color x:Key="Stripe1Color">#2A2A2A</Color>
-            <SolidColorBrush x:Key="Stripe1Brush" Color="{StaticResource Stripe1Color}"/>
+            <SolidColorBrush x:Key="Stripe1Brush" Color="#2A2A2A"/>
             <Color x:Key="Stripe2Color">#1F1F1F</Color>
-            <SolidColorBrush x:Key="Stripe2Brush" Color="{StaticResource Stripe2Color}"/>
+            <SolidColorBrush x:Key="Stripe2Brush" Color="#1F1F1F"/>
             <Color x:Key="Stripe3Color">#181818</Color>
-            <SolidColorBrush x:Key="Stripe3Brush" Color="{StaticResource Stripe3Color}"/>
+            <SolidColorBrush x:Key="Stripe3Brush" Color="#181818"/>
             <Color x:Key="StripeGrainAColor">#09FFFFFF</Color> <!-- rgba(255, 255, 255, .035) -->
-            <SolidColorBrush x:Key="StripeGrainABrush" Color="{StaticResource StripeGrainAColor}"/>
+            <SolidColorBrush x:Key="StripeGrainABrush" Color="#09FFFFFF"/>
             <Color x:Key="StripeGrainBColor">#03FFFFFF</Color> <!-- rgba(255, 255, 255, .012) -->
-            <SolidColorBrush x:Key="StripeGrainBBrush" Color="{StaticResource StripeGrainBColor}"/>
+            <SolidColorBrush x:Key="StripeGrainBBrush" Color="#03FFFFFF"/>
             <Color x:Key="StripeGrainCColor">#0F000000</Color> <!-- rgba(0, 0, 0, .06) -->
-            <SolidColorBrush x:Key="StripeGrainCBrush" Color="{StaticResource StripeGrainCColor}"/>
+            <SolidColorBrush x:Key="StripeGrainCBrush" Color="#0F000000"/>
 
             <!-- Edge light along a faceplate's top lip (:674-675, Day :799-800). -->
             <Color x:Key="EdgeLightColor">#2EE6E6E6</Color> <!-- rgba(230, 230, 230, .18) -->
-            <SolidColorBrush x:Key="EdgeLightBrush" Color="{StaticResource EdgeLightColor}"/>
+            <SolidColorBrush x:Key="EdgeLightBrush" Color="#2EE6E6E6"/>
             <Color x:Key="EdgeLightMidColor">#52E6E6E6</Color> <!-- rgba(230, 230, 230, .32) -->
-            <SolidColorBrush x:Key="EdgeLightMidBrush" Color="{StaticResource EdgeLightMidColor}"/>
+            <SolidColorBrush x:Key="EdgeLightMidBrush" Color="#52E6E6E6"/>
 
             <!-- Hex socket-cap bolts, lit from the top left (:677-682, Day :802-807). Decoration: gone in High
                  Contrast. -->
             <Color x:Key="Hex1Color">#A4A4A4</Color>
-            <SolidColorBrush x:Key="Hex1Brush" Color="{StaticResource Hex1Color}"/>
+            <SolidColorBrush x:Key="Hex1Brush" Color="#A4A4A4"/>
             <Color x:Key="Hex2Color">#7C7C7C</Color>
-            <SolidColorBrush x:Key="Hex2Brush" Color="{StaticResource Hex2Color}"/>
+            <SolidColorBrush x:Key="Hex2Brush" Color="#7C7C7C"/>
             <Color x:Key="Hex3Color">#525252</Color>
-            <SolidColorBrush x:Key="Hex3Brush" Color="{StaticResource Hex3Color}"/>
+            <SolidColorBrush x:Key="Hex3Brush" Color="#525252"/>
             <Color x:Key="Hex4Color">#323232</Color>
-            <SolidColorBrush x:Key="Hex4Brush" Color="{StaticResource Hex4Color}"/>
+            <SolidColorBrush x:Key="Hex4Brush" Color="#323232"/>
             <Color x:Key="Hex5Color">#181818</Color>
-            <SolidColorBrush x:Key="Hex5Brush" Color="{StaticResource Hex5Color}"/>
+            <SolidColorBrush x:Key="Hex5Brush" Color="#181818"/>
             <Color x:Key="Hex6Color">#0A0A0A</Color>
-            <SolidColorBrush x:Key="Hex6Brush" Color="{StaticResource Hex6Color}"/>
+            <SolidColorBrush x:Key="Hex6Brush" Color="#0A0A0A"/>
 
             <!-- Selection, focus and the scrollbar thumb (:684-686, :710-712, Day :775, :809-810). -->
             <Color x:Key="SelectionBgColor">#59AA2024</Color> <!-- rgba(170, 32, 36, .35) -->
-            <SolidColorBrush x:Key="SelectionBgBrush" Color="{StaticResource SelectionBgColor}"/>
+            <SolidColorBrush x:Key="SelectionBgBrush" Color="#59AA2024"/>
             <Color x:Key="FocusColor">#E6E6E6</Color>
-            <SolidColorBrush x:Key="FocusBrush" Color="{StaticResource FocusColor}"/>
+            <SolidColorBrush x:Key="FocusBrush" Color="#E6E6E6"/>
             <Color x:Key="ScrollbarThumbColor">#94AA2024</Color> <!-- rgba(170, 32, 36, .58) -->
-            <SolidColorBrush x:Key="ScrollbarThumbBrush" Color="{StaticResource ScrollbarThumbColor}"/>
+            <SolidColorBrush x:Key="ScrollbarThumbBrush" Color="#94AA2024"/>
             <Color x:Key="ScrollbarThumbHoverColor">#D1E8343A</Color> <!-- rgba(232, 52, 58, .82) -->
-            <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="{StaticResource ScrollbarThumbHoverColor}"/>
+            <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="#D1E8343A"/>
 
             <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
                  faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
@@ -255,76 +257,76 @@
                  Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
                  follow the blurred shadow's first rows. -->
             <Color x:Key="FaceplateSideLightColor">#06FFFFFF</Color> <!-- rgba(255, 255, 255, .025) -->
-            <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="{StaticResource FaceplateSideLightColor}"/>
+            <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="#06FFFFFF"/>
             <Color x:Key="FaceplateSideShadeColor">#66000000</Color> <!-- rgba(0, 0, 0, .4) -->
-            <SolidColorBrush x:Key="FaceplateSideShadeBrush" Color="{StaticResource FaceplateSideShadeColor}"/>
+            <SolidColorBrush x:Key="FaceplateSideShadeBrush" Color="#66000000"/>
             <Color x:Key="StripeSeamColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
-            <SolidColorBrush x:Key="StripeSeamBrush" Color="{StaticResource StripeSeamColor}"/>
+            <SolidColorBrush x:Key="StripeSeamBrush" Color="#CC000000"/>
             <Color x:Key="StripeSeamLightColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
-            <SolidColorBrush x:Key="StripeSeamLightBrush" Color="{StaticResource StripeSeamLightColor}"/>
+            <SolidColorBrush x:Key="StripeSeamLightBrush" Color="#08FFFFFF"/>
             <Color x:Key="HexShadowNearColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
-            <SolidColorBrush x:Key="HexShadowNearBrush" Color="{StaticResource HexShadowNearColor}"/>
+            <SolidColorBrush x:Key="HexShadowNearBrush" Color="#B3000000"/>
             <Color x:Key="HexShadowFarColor">#73000000</Color> <!-- rgba(0, 0, 0, .45) -->
-            <SolidColorBrush x:Key="HexShadowFarBrush" Color="{StaticResource HexShadowFarColor}"/>
+            <SolidColorBrush x:Key="HexShadowFarBrush" Color="#73000000"/>
 
             <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
                  is dark in both. -->
             <Color x:Key="WellEdgeColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
-            <SolidColorBrush x:Key="WellEdgeBrush" Color="{StaticResource WellEdgeColor}"/>
+            <SolidColorBrush x:Key="WellEdgeBrush" Color="#B3000000"/>
             <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
-            <SolidColorBrush x:Key="WellLipBrush" Color="{StaticResource WellLipColor}"/>
+            <SolidColorBrush x:Key="WellLipBrush" Color="#08FFFFFF"/>
 
             <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
                  lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
                  :1265); a VU meter's unlit segment (:1915). -->
             <Color x:Key="LampEdgeColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
-            <SolidColorBrush x:Key="LampEdgeBrush" Color="{StaticResource LampEdgeColor}"/>
+            <SolidColorBrush x:Key="LampEdgeBrush" Color="#0FFFFFFF"/>
             <Color x:Key="LampLipColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
-            <SolidColorBrush x:Key="LampLipBrush" Color="{StaticResource LampLipColor}"/>
+            <SolidColorBrush x:Key="LampLipBrush" Color="#0FFFFFFF"/>
             <Color x:Key="LampUnderColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
-            <SolidColorBrush x:Key="LampUnderBrush" Color="{StaticResource LampUnderColor}"/>
+            <SolidColorBrush x:Key="LampUnderBrush" Color="#CC000000"/>
             <Color x:Key="LampOffForegroundColor">#808080</Color>
-            <SolidColorBrush x:Key="LampOffForegroundBrush" Color="{StaticResource LampOffForegroundColor}"/>
+            <SolidColorBrush x:Key="LampOffForegroundBrush" Color="#808080"/>
             <Color x:Key="VuSegmentOffColor">#131313</Color>
-            <SolidColorBrush x:Key="VuSegmentOffBrush" Color="{StaticResource VuSegmentOffColor}"/>
+            <SolidColorBrush x:Key="VuSegmentOffBrush" Color="#131313"/>
 
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#0A0A0A</Color>
-            <SolidColorBrush x:Key="ChromeCapForegroundBrush" Color="{StaticResource ChromeCapForegroundColor}"/>
+            <SolidColorBrush x:Key="ChromeCapForegroundBrush" Color="#0A0A0A"/>
 
             <!-- Faceplate (:1037): the face, top to bottom, and its key light from above left; the second key
                  light, over the top right corner's 140 x 60 (::after, :1098); the edge light along the top lip,
                  inset to clear the bolts (::before, :1078). -->
             <LinearGradientBrush x:Key="FaceplateFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Plate1Color}"/>
-                <GradientStop Offset="0.35" Color="{StaticResource Plate2Color}"/>
-                <GradientStop Offset="0.7" Color="{StaticResource Plate3Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Plate4Color}"/>
+                <GradientStop Offset="0" Color="#1C1C1C"/>
+                <GradientStop Offset="0.35" Color="#151515"/>
+                <GradientStop Offset="0.7" Color="#101010"/>
+                <GradientStop Offset="1" Color="#0C0C0C"/>
             </LinearGradientBrush>
             <RadialGradientBrush x:Key="FaceplateKeyLightBrush" Center="0.3,-0.1" GradientOrigin="0.3,-0.1"
                                  RadiusX="0.8" RadiusY="0.6">
-                <GradientStop Offset="0" Color="{StaticResource PlateKeyColor}"/>
+                <GradientStop Offset="0" Color="#0AFFFFFF"/>
                 <GradientStop Offset="0.6" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <RadialGradientBrush x:Key="FaceplateCornerLightBrush" Center="0.8,0" GradientOrigin="0.8,0"
                                  RadiusX="1.131" RadiusY="1.414">
-                <GradientStop Offset="0" Color="{StaticResource PlateKeyColor}"/>
+                <GradientStop Offset="0" Color="#0AFFFFFF"/>
                 <GradientStop Offset="0.7" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <LinearGradientBrush x:Key="FaceplateEdgeLightBrush" StartPoint="0,0" EndPoint="1,0">
                 <GradientStop Offset="0" Color="#00E6E6E6"/>
-                <GradientStop Offset="0.2" Color="{StaticResource EdgeLightColor}"/>
-                <GradientStop Offset="0.5" Color="{StaticResource EdgeLightMidColor}"/>
-                <GradientStop Offset="0.8" Color="{StaticResource EdgeLightColor}"/>
+                <GradientStop Offset="0.2" Color="#2EE6E6E6"/>
+                <GradientStop Offset="0.5" Color="#52E6E6E6"/>
+                <GradientStop Offset="0.8" Color="#2EE6E6E6"/>
                 <GradientStop Offset="1" Color="#00E6E6E6"/>
             </LinearGradientBrush>
 
             <!-- Module plate (:1136); armed, staged for a destructive run, lays ArmedSoft over the same face
                  (:1206), composited here because one brush cannot layer two. -->
             <LinearGradientBrush x:Key="PlateFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Plate1Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Plate3Color}"/>
+                <GradientStop Offset="0" Color="#1C1C1C"/>
+                <GradientStop Offset="1" Color="#101010"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="PlateArmedFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#2D1C1D"/>
@@ -334,34 +336,34 @@
             <!-- Cap: the face and its key light (:1467, and every button, :2062), and a chip's flatter face
                  (:2176). -->
             <LinearGradientBrush x:Key="CapFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Cap1Color}"/>
-                <GradientStop Offset="0.6" Color="{StaticResource Cap2Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Cap3Color}"/>
+                <GradientStop Offset="0" Color="#1F1F1F"/>
+                <GradientStop Offset="0.6" Color="#171717"/>
+                <GradientStop Offset="1" Color="#121212"/>
             </LinearGradientBrush>
             <RadialGradientBrush x:Key="CapKeyLightBrush" Center="0.5,0" GradientOrigin="0.5,0"
                                  RadiusX="0.8" RadiusY="0.5">
-                <GradientStop Offset="0" Color="{StaticResource CapKeyColor}"/>
+                <GradientStop Offset="0" Color="#0FFFFFFF"/>
                 <GradientStop Offset="0.6" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <LinearGradientBrush x:Key="ChipFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Cap1Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Cap3Color}"/>
+                <GradientStop Offset="0" Color="#1F1F1F"/>
+                <GradientStop Offset="1" Color="#121212"/>
             </LinearGradientBrush>
 
             <!-- Stripe header (:1503): the face, and the grain as hard 1px bands repeating every 3px. -->
             <LinearGradientBrush x:Key="StripeFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Stripe1Color}"/>
-                <GradientStop Offset="0.55" Color="{StaticResource Stripe2Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Stripe3Color}"/>
+                <GradientStop Offset="0" Color="#2A2A2A"/>
+                <GradientStop Offset="0.55" Color="#1F1F1F"/>
+                <GradientStop Offset="1" Color="#181818"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="StripeGrainBrush" StartPoint="0,0" EndPoint="3,0"
                                  MappingMode="Absolute" SpreadMethod="Repeat">
-                <GradientStop Offset="0" Color="{StaticResource StripeGrainAColor}"/>
-                <GradientStop Offset="0.3333" Color="{StaticResource StripeGrainAColor}"/>
-                <GradientStop Offset="0.3333" Color="{StaticResource StripeGrainBColor}"/>
-                <GradientStop Offset="0.6667" Color="{StaticResource StripeGrainBColor}"/>
-                <GradientStop Offset="0.6667" Color="{StaticResource StripeGrainCColor}"/>
-                <GradientStop Offset="1" Color="{StaticResource StripeGrainCColor}"/>
+                <GradientStop Offset="0" Color="#09FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#09FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#03FFFFFF"/>
+                <GradientStop Offset="0.6667" Color="#03FFFFFF"/>
+                <GradientStop Offset="0.6667" Color="#0F000000"/>
+                <GradientStop Offset="1" Color="#0F000000"/>
             </LinearGradientBrush>
 
             <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner; the faint machined ring
@@ -369,12 +371,12 @@
                  :1589, Day :1602). -->
             <RadialGradientBrush x:Key="HexFaceBrush" Center="0.28,0.22" GradientOrigin="0.28,0.22"
                                  RadiusX="1.061" RadiusY="1.061">
-                <GradientStop Offset="0" Color="{StaticResource Hex1Color}"/>
-                <GradientStop Offset="0.12" Color="{StaticResource Hex2Color}"/>
-                <GradientStop Offset="0.3" Color="{StaticResource Hex3Color}"/>
-                <GradientStop Offset="0.55" Color="{StaticResource Hex4Color}"/>
-                <GradientStop Offset="0.8" Color="{StaticResource Hex5Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Hex6Color}"/>
+                <GradientStop Offset="0" Color="#A4A4A4"/>
+                <GradientStop Offset="0.12" Color="#7C7C7C"/>
+                <GradientStop Offset="0.3" Color="#525252"/>
+                <GradientStop Offset="0.55" Color="#323232"/>
+                <GradientStop Offset="0.8" Color="#181818"/>
+                <GradientStop Offset="1" Color="#0A0A0A"/>
             </RadialGradientBrush>
             <RadialGradientBrush x:Key="HexRingBrush" Center="0.5,0.5" GradientOrigin="0.5,0.5"
                                  RadiusX="0.707" RadiusY="0.707">
@@ -393,8 +395,8 @@
                  polished call to action, inverting to black gloss on Day Shift (:2116, Day :2131). -->
             <LinearGradientBrush x:Key="ArmedCapFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#C8333A"/>
-                <GradientStop Offset="0.55" Color="{StaticResource ArmedColor}"/>
-                <GradientStop Offset="1" Color="{StaticResource ArmedDeepColor}"/>
+                <GradientStop Offset="0.55" Color="#AA2024"/>
+                <GradientStop Offset="1" Color="#7F171A"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="ChromeCapFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#FBFBFB"/>
@@ -404,8 +406,8 @@
 
             <!-- Displays, wells and the annunciator strip: dark in both shifts (:1427, :1451, :1946). -->
             <LinearGradientBrush x:Key="DisplayFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource DisplayBgTopColor}"/>
-                <GradientStop Offset="1" Color="{StaticResource DisplayBgBottomColor}"/>
+                <GradientStop Offset="0" Color="#040404"/>
+                <GradientStop Offset="1" Color="#070707"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="WellFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#080808"/>
@@ -479,227 +481,227 @@
         <ResourceDictionary x:Key="Light">
             <!-- Surfaces: the chassis, darkest first (:545-552, Day :726-732). -->
             <Color x:Key="VoidColor">#000000</Color>
-            <SolidColorBrush x:Key="VoidBrush" Color="{StaticResource VoidColor}"/>
+            <SolidColorBrush x:Key="VoidBrush" Color="#000000"/>
             <Color x:Key="Carbon950Color">#C8C8C4</Color>
-            <SolidColorBrush x:Key="Carbon950Brush" Color="{StaticResource Carbon950Color}"/>
+            <SolidColorBrush x:Key="Carbon950Brush" Color="#C8C8C4"/>
             <Color x:Key="Carbon900Color">#D2D2CE</Color>
-            <SolidColorBrush x:Key="Carbon900Brush" Color="{StaticResource Carbon900Color}"/>
+            <SolidColorBrush x:Key="Carbon900Brush" Color="#D2D2CE"/>
             <Color x:Key="Carbon850Color">#CECEC9</Color>
-            <SolidColorBrush x:Key="Carbon850Brush" Color="{StaticResource Carbon850Color}"/>
+            <SolidColorBrush x:Key="Carbon850Brush" Color="#CECEC9"/>
             <Color x:Key="Carbon800Color">#D8D8D4</Color>
-            <SolidColorBrush x:Key="Carbon800Brush" Color="{StaticResource Carbon800Color}"/>
+            <SolidColorBrush x:Key="Carbon800Brush" Color="#D8D8D4"/>
             <Color x:Key="Carbon750Color">#DEDEDA</Color>
-            <SolidColorBrush x:Key="Carbon750Brush" Color="{StaticResource Carbon750Color}"/>
+            <SolidColorBrush x:Key="Carbon750Brush" Color="#DEDEDA"/>
             <Color x:Key="Carbon700Color">#B0B0AC</Color>
-            <SolidColorBrush x:Key="Carbon700Brush" Color="{StaticResource Carbon700Color}"/>
+            <SolidColorBrush x:Key="Carbon700Brush" Color="#B0B0AC"/>
             <Color x:Key="AnthraciteColor">#96968F</Color>
-            <SolidColorBrush x:Key="AnthraciteBrush" Color="{StaticResource AnthraciteColor}"/>
+            <SolidColorBrush x:Key="AnthraciteBrush" Color="#96968F"/>
 
             <!-- Text, brightest first (:555-577, Day :734-738). SilverMute is set by the lightest ground it
                  prints on, the stripe grain; Graphite only ever paints a lamp that is not lit. -->
             <Color x:Key="PlatinumColor">#1A1A1A</Color>
-            <SolidColorBrush x:Key="PlatinumBrush" Color="{StaticResource PlatinumColor}"/>
+            <SolidColorBrush x:Key="PlatinumBrush" Color="#1A1A1A"/>
             <Color x:Key="SilverBrightColor">#2E2E2C</Color>
-            <SolidColorBrush x:Key="SilverBrightBrush" Color="{StaticResource SilverBrightColor}"/>
+            <SolidColorBrush x:Key="SilverBrightBrush" Color="#2E2E2C"/>
             <Color x:Key="SilverColor">#44443F</Color>
-            <SolidColorBrush x:Key="SilverBrush" Color="{StaticResource SilverColor}"/>
+            <SolidColorBrush x:Key="SilverBrush" Color="#44443F"/>
             <Color x:Key="SilverMuteColor">#4F4F4B</Color>
-            <SolidColorBrush x:Key="SilverMuteBrush" Color="{StaticResource SilverMuteColor}"/>
+            <SolidColorBrush x:Key="SilverMuteBrush" Color="#4F4F4B"/>
             <Color x:Key="GraphiteColor">#96968F</Color>
-            <SolidColorBrush x:Key="GraphiteBrush" Color="{StaticResource GraphiteColor}"/>
+            <SolidColorBrush x:Key="GraphiteBrush" Color="#96968F"/>
 
             <!-- Armed red: LIVE, not error (:579-590, Day :766-770). Armed and ArmedDeep never change; ArmedLit
                  deepens on Day Shift for contrast on silver; ArmedDisplay is the bright form for armed text on
                  displays, which stay dark. -->
             <Color x:Key="ArmedColor">#AA2024</Color>
-            <SolidColorBrush x:Key="ArmedBrush" Color="{StaticResource ArmedColor}"/>
+            <SolidColorBrush x:Key="ArmedBrush" Color="#AA2024"/>
             <Color x:Key="ArmedLitColor">#A31E23</Color>
-            <SolidColorBrush x:Key="ArmedLitBrush" Color="{StaticResource ArmedLitColor}"/>
+            <SolidColorBrush x:Key="ArmedLitBrush" Color="#A31E23"/>
             <Color x:Key="ArmedDisplayColor">#E8343A</Color>
-            <SolidColorBrush x:Key="ArmedDisplayBrush" Color="{StaticResource ArmedDisplayColor}"/>
+            <SolidColorBrush x:Key="ArmedDisplayBrush" Color="#E8343A"/>
             <Color x:Key="ArmedDeepColor">#7F171A</Color>
-            <SolidColorBrush x:Key="ArmedDeepBrush" Color="{StaticResource ArmedDeepColor}"/>
+            <SolidColorBrush x:Key="ArmedDeepBrush" Color="#7F171A"/>
             <Color x:Key="ArmedEdgeColor">#73A31E23</Color> <!-- rgba(163, 30, 35, .45) -->
-            <SolidColorBrush x:Key="ArmedEdgeBrush" Color="{StaticResource ArmedEdgeColor}"/>
+            <SolidColorBrush x:Key="ArmedEdgeBrush" Color="#73A31E23"/>
             <Color x:Key="ArmedGlowColor">#33A31E23</Color> <!-- rgba(163, 30, 35, .2) -->
-            <SolidColorBrush x:Key="ArmedGlowBrush" Color="{StaticResource ArmedGlowColor}"/>
+            <SolidColorBrush x:Key="ArmedGlowBrush" Color="#33A31E23"/>
             <Color x:Key="ArmedSoftColor">#1FAA2024</Color> <!-- rgba(170, 32, 36, .12) -->
-            <SolidColorBrush x:Key="ArmedSoftBrush" Color="{StaticResource ArmedSoftColor}"/>
+            <SolidColorBrush x:Key="ArmedSoftBrush" Color="#1FAA2024"/>
             <Color x:Key="ArmedFgColor">#FFF3F0</Color>
-            <SolidColorBrush x:Key="ArmedFgBrush" Color="{StaticResource ArmedFgColor}"/>
+            <SolidColorBrush x:Key="ArmedFgBrush" Color="#FFF3F0"/>
 
             <!-- Chrome: the polished bits, used sparingly (:592-595, Day :774). -->
             <Color x:Key="ChromeColor">#E6E6E6</Color>
-            <SolidColorBrush x:Key="ChromeBrush" Color="{StaticResource ChromeColor}"/>
+            <SolidColorBrush x:Key="ChromeBrush" Color="#E6E6E6"/>
             <Color x:Key="ChromeEdgeColor">#4D000000</Color> <!-- rgba(0, 0, 0, .3) -->
-            <SolidColorBrush x:Key="ChromeEdgeBrush" Color="{StaticResource ChromeEdgeColor}"/>
+            <SolidColorBrush x:Key="ChromeEdgeBrush" Color="#4D000000"/>
             <Color x:Key="ChromeSoftColor">#1AE6E6E6</Color> <!-- rgba(230, 230, 230, .1) -->
-            <SolidColorBrush x:Key="ChromeSoftBrush" Color="{StaticResource ChromeSoftColor}"/>
+            <SolidColorBrush x:Key="ChromeSoftBrush" Color="#1AE6E6E6"/>
 
             <!-- LEDs, the same in both shifts (:597-613). Each state is a word first; in High Contrast the word
                  is all of it. -->
             <Color x:Key="LedGoColor">#41E25E</Color>
-            <SolidColorBrush x:Key="LedGoBrush" Color="{StaticResource LedGoColor}"/>
+            <SolidColorBrush x:Key="LedGoBrush" Color="#41E25E"/>
             <Color x:Key="LedHoldColor">#FFB000</Color>
-            <SolidColorBrush x:Key="LedHoldBrush" Color="{StaticResource LedHoldColor}"/>
+            <SolidColorBrush x:Key="LedHoldBrush" Color="#FFB000"/>
             <Color x:Key="LedWarnColor">#FF4438</Color>
-            <SolidColorBrush x:Key="LedWarnBrush" Color="{StaticResource LedWarnColor}"/>
+            <SolidColorBrush x:Key="LedWarnBrush" Color="#FF4438"/>
             <Color x:Key="LedNoGoColor">#C8453E</Color>
-            <SolidColorBrush x:Key="LedNoGoBrush" Color="{StaticResource LedNoGoColor}"/>
+            <SolidColorBrush x:Key="LedNoGoBrush" Color="#C8453E"/>
             <Color x:Key="LedScopeColor">#58C4BC</Color>
-            <SolidColorBrush x:Key="LedScopeBrush" Color="{StaticResource LedScopeColor}"/>
+            <SolidColorBrush x:Key="LedScopeBrush" Color="#58C4BC"/>
             <Color x:Key="LedOrangeColor">#FF7A1A</Color>
-            <SolidColorBrush x:Key="LedOrangeBrush" Color="{StaticResource LedOrangeColor}"/>
+            <SolidColorBrush x:Key="LedOrangeBrush" Color="#FF7A1A"/>
             <Color x:Key="GoSoftColor">#1A41E25E</Color> <!-- rgba(65, 226, 94, .1) -->
-            <SolidColorBrush x:Key="GoSoftBrush" Color="{StaticResource GoSoftColor}"/>
+            <SolidColorBrush x:Key="GoSoftBrush" Color="#1A41E25E"/>
             <Color x:Key="HoldSoftColor">#1AFFB000</Color> <!-- rgba(255, 176, 0, .1) -->
-            <SolidColorBrush x:Key="HoldSoftBrush" Color="{StaticResource HoldSoftColor}"/>
+            <SolidColorBrush x:Key="HoldSoftBrush" Color="#1AFFB000"/>
             <Color x:Key="WarnSoftColor">#1FFF4438</Color> <!-- rgba(255, 68, 56, .12) -->
-            <SolidColorBrush x:Key="WarnSoftBrush" Color="{StaticResource WarnSoftColor}"/>
+            <SolidColorBrush x:Key="WarnSoftBrush" Color="#1FFF4438"/>
             <Color x:Key="NoGoSoftColor">#1FC8453E</Color> <!-- rgba(200, 69, 62, .12) -->
-            <SolidColorBrush x:Key="NoGoSoftBrush" Color="{StaticResource NoGoSoftColor}"/>
+            <SolidColorBrush x:Key="NoGoSoftBrush" Color="#1FC8453E"/>
             <Color x:Key="ScopeSoftColor">#1A58C4BC</Color> <!-- rgba(88, 196, 188, .1) -->
-            <SolidColorBrush x:Key="ScopeSoftBrush" Color="{StaticResource ScopeSoftColor}"/>
+            <SolidColorBrush x:Key="ScopeSoftBrush" Color="#1A58C4BC"/>
             <Color x:Key="GoEdgeColor">#5941E25E</Color> <!-- rgba(65, 226, 94, .35) -->
-            <SolidColorBrush x:Key="GoEdgeBrush" Color="{StaticResource GoEdgeColor}"/>
+            <SolidColorBrush x:Key="GoEdgeBrush" Color="#5941E25E"/>
             <Color x:Key="HoldEdgeColor">#59FFB000</Color> <!-- rgba(255, 176, 0, .35) -->
-            <SolidColorBrush x:Key="HoldEdgeBrush" Color="{StaticResource HoldEdgeColor}"/>
+            <SolidColorBrush x:Key="HoldEdgeBrush" Color="#59FFB000"/>
             <Color x:Key="WarnEdgeColor">#66FF4438</Color> <!-- rgba(255, 68, 56, .4) -->
-            <SolidColorBrush x:Key="WarnEdgeBrush" Color="{StaticResource WarnEdgeColor}"/>
+            <SolidColorBrush x:Key="WarnEdgeBrush" Color="#66FF4438"/>
             <Color x:Key="NoGoEdgeColor">#66C8453E</Color> <!-- rgba(200, 69, 62, .4) -->
-            <SolidColorBrush x:Key="NoGoEdgeBrush" Color="{StaticResource NoGoEdgeColor}"/>
+            <SolidColorBrush x:Key="NoGoEdgeBrush" Color="#66C8453E"/>
             <Color x:Key="ScopeEdgeColor">#5258C4BC</Color> <!-- rgba(88, 196, 188, .32) -->
-            <SolidColorBrush x:Key="ScopeEdgeBrush" Color="{StaticResource ScopeEdgeColor}"/>
+            <SolidColorBrush x:Key="ScopeEdgeBrush" Color="#5258C4BC"/>
 
             <!-- State as text: the LED colour, safe to print on the chassis (:615-635, Day :740-764). Day Shift
                  darkens each along its own hue to clear 4.5:1 on Carbon950; warn and nogo share one red there,
                  which is why a warn rail blinks and the word is always printed. Inside a well or display the
                  Default values apply: the LEDs. -->
             <Color x:Key="StateGoColor">#135724</Color>
-            <SolidColorBrush x:Key="StateGoBrush" Color="{StaticResource StateGoColor}"/>
+            <SolidColorBrush x:Key="StateGoBrush" Color="#135724"/>
             <Color x:Key="StateHoldColor">#6F4700</Color>
-            <SolidColorBrush x:Key="StateHoldBrush" Color="{StaticResource StateHoldColor}"/>
+            <SolidColorBrush x:Key="StateHoldBrush" Color="#6F4700"/>
             <Color x:Key="StateWarnColor">#9E120A</Color>
-            <SolidColorBrush x:Key="StateWarnBrush" Color="{StaticResource StateWarnColor}"/>
+            <SolidColorBrush x:Key="StateWarnBrush" Color="#9E120A"/>
             <Color x:Key="StateNoGoColor">#9E120A</Color>
-            <SolidColorBrush x:Key="StateNoGoBrush" Color="{StaticResource StateNoGoColor}"/>
+            <SolidColorBrush x:Key="StateNoGoBrush" Color="#9E120A"/>
             <Color x:Key="StateExecColor">#1D5854</Color>
-            <SolidColorBrush x:Key="StateExecBrush" Color="{StaticResource StateExecColor}"/>
+            <SolidColorBrush x:Key="StateExecBrush" Color="#1D5854"/>
 
             <!-- Rails: the light pipe down a plate's mounting edge (:1149-1206), from the palette steps that
                  survive Day Shift (Night :261-309, Day :825-874). Wired to the LEDs, a rail would put #41E25E on
                  a near-white plate by day. -->
             <Color x:Key="RailGoColor">#0F5C2C</Color>
-            <SolidColorBrush x:Key="RailGoBrush" Color="{StaticResource RailGoColor}"/>
+            <SolidColorBrush x:Key="RailGoBrush" Color="#0F5C2C"/>
             <Color x:Key="RailHoldColor">#6F4700</Color>
-            <SolidColorBrush x:Key="RailHoldBrush" Color="{StaticResource RailHoldColor}"/>
+            <SolidColorBrush x:Key="RailHoldBrush" Color="#6F4700"/>
             <Color x:Key="RailWarnColor">#A3140C</Color>
-            <SolidColorBrush x:Key="RailWarnBrush" Color="{StaticResource RailWarnColor}"/>
+            <SolidColorBrush x:Key="RailWarnBrush" Color="#A3140C"/>
             <Color x:Key="RailNoGoColor">#870F09</Color>
-            <SolidColorBrush x:Key="RailNoGoBrush" Color="{StaticResource RailNoGoColor}"/>
+            <SolidColorBrush x:Key="RailNoGoBrush" Color="#870F09"/>
             <Color x:Key="RailExecColor">#1A524E</Color>
-            <SolidColorBrush x:Key="RailExecBrush" Color="{StaticResource RailExecColor}"/>
+            <SolidColorBrush x:Key="RailExecBrush" Color="#1A524E"/>
 
             <!-- Displays stay dark: defined once, the same in both shifts (:637-645). -->
             <Color x:Key="DisplayBgTopColor">#040404</Color>
-            <SolidColorBrush x:Key="DisplayBgTopBrush" Color="{StaticResource DisplayBgTopColor}"/>
+            <SolidColorBrush x:Key="DisplayBgTopBrush" Color="#040404"/>
             <Color x:Key="DisplayBgBottomColor">#070707</Color>
-            <SolidColorBrush x:Key="DisplayBgBottomBrush" Color="{StaticResource DisplayBgBottomColor}"/>
+            <SolidColorBrush x:Key="DisplayBgBottomBrush" Color="#070707"/>
             <Color x:Key="DisplayBorderColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
-            <SolidColorBrush x:Key="DisplayBorderBrush" Color="{StaticResource DisplayBorderColor}"/>
+            <SolidColorBrush x:Key="DisplayBorderBrush" Color="#CC000000"/>
             <Color x:Key="DisplayFgColor">#B3B3B3</Color>
-            <SolidColorBrush x:Key="DisplayFgBrush" Color="{StaticResource DisplayFgColor}"/>
+            <SolidColorBrush x:Key="DisplayFgBrush" Color="#B3B3B3"/>
             <Color x:Key="DisplayFgMuteColor">#8A8A86</Color>
-            <SolidColorBrush x:Key="DisplayFgMuteBrush" Color="{StaticResource DisplayFgMuteColor}"/>
+            <SolidColorBrush x:Key="DisplayFgMuteBrush" Color="#8A8A86"/>
             <Color x:Key="PhosphorColor">#41E25E</Color>
-            <SolidColorBrush x:Key="PhosphorBrush" Color="{StaticResource PhosphorColor}"/>
+            <SolidColorBrush x:Key="PhosphorBrush" Color="#41E25E"/>
             <Color x:Key="PhosphorDimColor">#2E5237</Color>
-            <SolidColorBrush x:Key="PhosphorDimBrush" Color="{StaticResource PhosphorDimColor}"/>
+            <SolidColorBrush x:Key="PhosphorDimBrush" Color="#2E5237"/>
             <Color x:Key="ScrimColor">#B8000000</Color> <!-- rgba(0, 0, 0, .72) -->
-            <SolidColorBrush x:Key="ScrimBrush" Color="{StaticResource ScrimColor}"/>
+            <SolidColorBrush x:Key="ScrimBrush" Color="#B8000000"/>
 
             <!-- Hairlines (:647-649, Day :772-773). -->
             <Color x:Key="HairlineColor">#1A000000</Color> <!-- rgba(0, 0, 0, .1) -->
-            <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource HairlineColor}"/>
+            <SolidColorBrush x:Key="HairlineBrush" Color="#1A000000"/>
             <Color x:Key="HairlineStrongColor">#33000000</Color> <!-- rgba(0, 0, 0, .2) -->
-            <SolidColorBrush x:Key="HairlineStrongBrush" Color="{StaticResource HairlineStrongColor}"/>
+            <SolidColorBrush x:Key="HairlineStrongBrush" Color="#33000000"/>
 
             <!-- Faceplate and module plate: brushed aluminium, top to bottom, with its key light, edge, lip and
                  underside (:651-659, Day :777-784). -->
             <Color x:Key="Plate1Color">#F5F5F3</Color>
-            <SolidColorBrush x:Key="Plate1Brush" Color="{StaticResource Plate1Color}"/>
+            <SolidColorBrush x:Key="Plate1Brush" Color="#F5F5F3"/>
             <Color x:Key="Plate2Color">#EAEAE7</Color>
-            <SolidColorBrush x:Key="Plate2Brush" Color="{StaticResource Plate2Color}"/>
+            <SolidColorBrush x:Key="Plate2Brush" Color="#EAEAE7"/>
             <Color x:Key="Plate3Color">#E0E0DC</Color>
-            <SolidColorBrush x:Key="Plate3Brush" Color="{StaticResource Plate3Color}"/>
+            <SolidColorBrush x:Key="Plate3Brush" Color="#E0E0DC"/>
             <Color x:Key="Plate4Color">#D8D8D4</Color>
-            <SolidColorBrush x:Key="Plate4Brush" Color="{StaticResource Plate4Color}"/>
+            <SolidColorBrush x:Key="Plate4Brush" Color="#D8D8D4"/>
             <Color x:Key="PlateKeyColor">#8CFFFFFF</Color> <!-- rgba(255, 255, 255, .55) -->
-            <SolidColorBrush x:Key="PlateKeyBrush" Color="{StaticResource PlateKeyColor}"/>
+            <SolidColorBrush x:Key="PlateKeyBrush" Color="#8CFFFFFF"/>
             <Color x:Key="PlateEdgeColor">#1F000000</Color> <!-- rgba(0, 0, 0, .12) -->
-            <SolidColorBrush x:Key="PlateEdgeBrush" Color="{StaticResource PlateEdgeColor}"/>
+            <SolidColorBrush x:Key="PlateEdgeBrush" Color="#1F000000"/>
             <Color x:Key="PlateLipColor">#EBFFFFFF</Color> <!-- rgba(255, 255, 255, .92) -->
-            <SolidColorBrush x:Key="PlateLipBrush" Color="{StaticResource PlateLipColor}"/>
+            <SolidColorBrush x:Key="PlateLipBrush" Color="#EBFFFFFF"/>
             <Color x:Key="PlateUnderColor">#29000000</Color> <!-- rgba(0, 0, 0, .16) -->
-            <SolidColorBrush x:Key="PlateUnderBrush" Color="{StaticResource PlateUnderColor}"/>
+            <SolidColorBrush x:Key="PlateUnderBrush" Color="#29000000"/>
 
             <!-- Machined caps: buttons, chips, switches (:661-665, Day :786-790). -->
             <Color x:Key="Cap1Color">#F7F7F5</Color>
-            <SolidColorBrush x:Key="Cap1Brush" Color="{StaticResource Cap1Color}"/>
+            <SolidColorBrush x:Key="Cap1Brush" Color="#F7F7F5"/>
             <Color x:Key="Cap2Color">#EBEBE8</Color>
-            <SolidColorBrush x:Key="Cap2Brush" Color="{StaticResource Cap2Color}"/>
+            <SolidColorBrush x:Key="Cap2Brush" Color="#EBEBE8"/>
             <Color x:Key="Cap3Color">#DEDEDA</Color>
-            <SolidColorBrush x:Key="Cap3Brush" Color="{StaticResource Cap3Color}"/>
+            <SolidColorBrush x:Key="Cap3Brush" Color="#DEDEDA"/>
             <Color x:Key="CapKeyColor">#BFFFFFFF</Color> <!-- rgba(255, 255, 255, .75) -->
-            <SolidColorBrush x:Key="CapKeyBrush" Color="{StaticResource CapKeyColor}"/>
+            <SolidColorBrush x:Key="CapKeyBrush" Color="#BFFFFFFF"/>
             <Color x:Key="CapEdgeColor">#1A000000</Color> <!-- rgba(0, 0, 0, .1) -->
-            <SolidColorBrush x:Key="CapEdgeBrush" Color="{StaticResource CapEdgeColor}"/>
+            <SolidColorBrush x:Key="CapEdgeBrush" Color="#1A000000"/>
 
             <!-- Brushed stripe header, and its grain: directional machine brushing on a 3px period (:667-672, Day
                  :792-797). -->
             <Color x:Key="Stripe1Color">#F0F0ED</Color>
-            <SolidColorBrush x:Key="Stripe1Brush" Color="{StaticResource Stripe1Color}"/>
+            <SolidColorBrush x:Key="Stripe1Brush" Color="#F0F0ED"/>
             <Color x:Key="Stripe2Color">#E0E0DC</Color>
-            <SolidColorBrush x:Key="Stripe2Brush" Color="{StaticResource Stripe2Color}"/>
+            <SolidColorBrush x:Key="Stripe2Brush" Color="#E0E0DC"/>
             <Color x:Key="Stripe3Color">#D5D5D1</Color>
-            <SolidColorBrush x:Key="Stripe3Brush" Color="{StaticResource Stripe3Color}"/>
+            <SolidColorBrush x:Key="Stripe3Brush" Color="#D5D5D1"/>
             <Color x:Key="StripeGrainAColor">#09000000</Color> <!-- rgba(0, 0, 0, .035) -->
-            <SolidColorBrush x:Key="StripeGrainABrush" Color="{StaticResource StripeGrainAColor}"/>
+            <SolidColorBrush x:Key="StripeGrainABrush" Color="#09000000"/>
             <Color x:Key="StripeGrainBColor">#03000000</Color> <!-- rgba(0, 0, 0, .012) -->
-            <SolidColorBrush x:Key="StripeGrainBBrush" Color="{StaticResource StripeGrainBColor}"/>
+            <SolidColorBrush x:Key="StripeGrainBBrush" Color="#03000000"/>
             <Color x:Key="StripeGrainCColor">#73FFFFFF</Color> <!-- rgba(255, 255, 255, .45) -->
-            <SolidColorBrush x:Key="StripeGrainCBrush" Color="{StaticResource StripeGrainCColor}"/>
+            <SolidColorBrush x:Key="StripeGrainCBrush" Color="#73FFFFFF"/>
 
             <!-- Edge light along a faceplate's top lip (:674-675, Day :799-800). -->
             <Color x:Key="EdgeLightColor">#99FFFFFF</Color> <!-- rgba(255, 255, 255, .6) -->
-            <SolidColorBrush x:Key="EdgeLightBrush" Color="{StaticResource EdgeLightColor}"/>
+            <SolidColorBrush x:Key="EdgeLightBrush" Color="#99FFFFFF"/>
             <Color x:Key="EdgeLightMidColor">#F2FFFFFF</Color> <!-- rgba(255, 255, 255, .95) -->
-            <SolidColorBrush x:Key="EdgeLightMidBrush" Color="{StaticResource EdgeLightMidColor}"/>
+            <SolidColorBrush x:Key="EdgeLightMidBrush" Color="#F2FFFFFF"/>
 
             <!-- Hex socket-cap bolts, lit from the top left (:677-682, Day :802-807). Decoration: gone in High
                  Contrast. -->
             <Color x:Key="Hex1Color">#FFFFFF</Color>
-            <SolidColorBrush x:Key="Hex1Brush" Color="{StaticResource Hex1Color}"/>
+            <SolidColorBrush x:Key="Hex1Brush" Color="#FFFFFF"/>
             <Color x:Key="Hex2Color">#D8D8D4</Color>
-            <SolidColorBrush x:Key="Hex2Brush" Color="{StaticResource Hex2Color}"/>
+            <SolidColorBrush x:Key="Hex2Brush" Color="#D8D8D4"/>
             <Color x:Key="Hex3Color">#AAAAA4</Color>
-            <SolidColorBrush x:Key="Hex3Brush" Color="{StaticResource Hex3Color}"/>
+            <SolidColorBrush x:Key="Hex3Brush" Color="#AAAAA4"/>
             <Color x:Key="Hex4Color">#868680</Color>
-            <SolidColorBrush x:Key="Hex4Brush" Color="{StaticResource Hex4Color}"/>
+            <SolidColorBrush x:Key="Hex4Brush" Color="#868680"/>
             <Color x:Key="Hex5Color">#5C5C58</Color>
-            <SolidColorBrush x:Key="Hex5Brush" Color="{StaticResource Hex5Color}"/>
+            <SolidColorBrush x:Key="Hex5Brush" Color="#5C5C58"/>
             <Color x:Key="Hex6Color">#44443F</Color>
-            <SolidColorBrush x:Key="Hex6Brush" Color="{StaticResource Hex6Color}"/>
+            <SolidColorBrush x:Key="Hex6Brush" Color="#44443F"/>
 
             <!-- Selection, focus and the scrollbar thumb (:684-686, :710-712, Day :775, :809-810). -->
             <Color x:Key="SelectionBgColor">#59AA2024</Color> <!-- rgba(170, 32, 36, .35) -->
-            <SolidColorBrush x:Key="SelectionBgBrush" Color="{StaticResource SelectionBgColor}"/>
+            <SolidColorBrush x:Key="SelectionBgBrush" Color="#59AA2024"/>
             <Color x:Key="FocusColor">#2A2A2A</Color>
-            <SolidColorBrush x:Key="FocusBrush" Color="{StaticResource FocusColor}"/>
+            <SolidColorBrush x:Key="FocusBrush" Color="#2A2A2A"/>
             <Color x:Key="ScrollbarThumbColor">#80AA2024</Color> <!-- rgba(170, 32, 36, .5) -->
-            <SolidColorBrush x:Key="ScrollbarThumbBrush" Color="{StaticResource ScrollbarThumbColor}"/>
+            <SolidColorBrush x:Key="ScrollbarThumbBrush" Color="#80AA2024"/>
             <Color x:Key="ScrollbarThumbHoverColor">#CCA31E23</Color> <!-- rgba(163, 30, 35, .8) -->
-            <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="{StaticResource ScrollbarThumbHoverColor}"/>
+            <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="#CCA31E23"/>
 
             <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
                  faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
@@ -707,76 +709,76 @@
                  Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
                  follow the blurred shadow's first rows. -->
             <Color x:Key="FaceplateSideLightColor">#80FFFFFF</Color> <!-- rgba(255, 255, 255, .5) -->
-            <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="{StaticResource FaceplateSideLightColor}"/>
+            <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="#80FFFFFF"/>
             <Color x:Key="FaceplateSideShadeColor">#14000000</Color> <!-- rgba(0, 0, 0, .08) -->
-            <SolidColorBrush x:Key="FaceplateSideShadeBrush" Color="{StaticResource FaceplateSideShadeColor}"/>
+            <SolidColorBrush x:Key="FaceplateSideShadeBrush" Color="#14000000"/>
             <Color x:Key="StripeSeamColor">#2E000000</Color> <!-- rgba(0, 0, 0, .18) -->
-            <SolidColorBrush x:Key="StripeSeamBrush" Color="{StaticResource StripeSeamColor}"/>
+            <SolidColorBrush x:Key="StripeSeamBrush" Color="#2E000000"/>
             <Color x:Key="StripeSeamLightColor">#66FFFFFF</Color> <!-- rgba(255, 255, 255, .4) -->
-            <SolidColorBrush x:Key="StripeSeamLightBrush" Color="{StaticResource StripeSeamLightColor}"/>
+            <SolidColorBrush x:Key="StripeSeamLightBrush" Color="#66FFFFFF"/>
             <Color x:Key="HexShadowNearColor">#33000000</Color> <!-- rgba(0, 0, 0, .2) -->
-            <SolidColorBrush x:Key="HexShadowNearBrush" Color="{StaticResource HexShadowNearColor}"/>
+            <SolidColorBrush x:Key="HexShadowNearBrush" Color="#33000000"/>
             <Color x:Key="HexShadowFarColor">#26000000</Color> <!-- rgba(0, 0, 0, .15) -->
-            <SolidColorBrush x:Key="HexShadowFarBrush" Color="{StaticResource HexShadowFarColor}"/>
+            <SolidColorBrush x:Key="HexShadowFarBrush" Color="#26000000"/>
 
             <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
                  is dark in both. -->
             <Color x:Key="WellEdgeColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
-            <SolidColorBrush x:Key="WellEdgeBrush" Color="{StaticResource WellEdgeColor}"/>
+            <SolidColorBrush x:Key="WellEdgeBrush" Color="#B3000000"/>
             <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
-            <SolidColorBrush x:Key="WellLipBrush" Color="{StaticResource WellLipColor}"/>
+            <SolidColorBrush x:Key="WellLipBrush" Color="#08FFFFFF"/>
 
             <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
                  lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
                  :1265); a VU meter's unlit segment (:1915). -->
             <Color x:Key="LampEdgeColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
-            <SolidColorBrush x:Key="LampEdgeBrush" Color="{StaticResource LampEdgeColor}"/>
+            <SolidColorBrush x:Key="LampEdgeBrush" Color="#0FFFFFFF"/>
             <Color x:Key="LampLipColor">#0FFFFFFF</Color> <!-- rgba(255, 255, 255, .06) -->
-            <SolidColorBrush x:Key="LampLipBrush" Color="{StaticResource LampLipColor}"/>
+            <SolidColorBrush x:Key="LampLipBrush" Color="#0FFFFFFF"/>
             <Color x:Key="LampUnderColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
-            <SolidColorBrush x:Key="LampUnderBrush" Color="{StaticResource LampUnderColor}"/>
+            <SolidColorBrush x:Key="LampUnderBrush" Color="#CC000000"/>
             <Color x:Key="LampOffForegroundColor">#808080</Color>
-            <SolidColorBrush x:Key="LampOffForegroundBrush" Color="{StaticResource LampOffForegroundColor}"/>
+            <SolidColorBrush x:Key="LampOffForegroundBrush" Color="#808080"/>
             <Color x:Key="VuSegmentOffColor">#131313</Color>
-            <SolidColorBrush x:Key="VuSegmentOffBrush" Color="{StaticResource VuSegmentOffColor}"/>
+            <SolidColorBrush x:Key="VuSegmentOffBrush" Color="#131313"/>
 
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#F5F5F5</Color>
-            <SolidColorBrush x:Key="ChromeCapForegroundBrush" Color="{StaticResource ChromeCapForegroundColor}"/>
+            <SolidColorBrush x:Key="ChromeCapForegroundBrush" Color="#F5F5F5"/>
 
             <!-- Faceplate (:1037): the face, top to bottom, and its key light from above left; the second key
                  light, over the top right corner's 140 x 60 (::after, :1098); the edge light along the top lip,
                  inset to clear the bolts (::before, :1078). -->
             <LinearGradientBrush x:Key="FaceplateFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Plate1Color}"/>
-                <GradientStop Offset="0.35" Color="{StaticResource Plate2Color}"/>
-                <GradientStop Offset="0.7" Color="{StaticResource Plate3Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Plate4Color}"/>
+                <GradientStop Offset="0" Color="#F5F5F3"/>
+                <GradientStop Offset="0.35" Color="#EAEAE7"/>
+                <GradientStop Offset="0.7" Color="#E0E0DC"/>
+                <GradientStop Offset="1" Color="#D8D8D4"/>
             </LinearGradientBrush>
             <RadialGradientBrush x:Key="FaceplateKeyLightBrush" Center="0.3,-0.1" GradientOrigin="0.3,-0.1"
                                  RadiusX="0.8" RadiusY="0.6">
-                <GradientStop Offset="0" Color="{StaticResource PlateKeyColor}"/>
+                <GradientStop Offset="0" Color="#8CFFFFFF"/>
                 <GradientStop Offset="0.6" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <RadialGradientBrush x:Key="FaceplateCornerLightBrush" Center="0.8,0" GradientOrigin="0.8,0"
                                  RadiusX="1.131" RadiusY="1.414">
-                <GradientStop Offset="0" Color="{StaticResource PlateKeyColor}"/>
+                <GradientStop Offset="0" Color="#8CFFFFFF"/>
                 <GradientStop Offset="0.7" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <LinearGradientBrush x:Key="FaceplateEdgeLightBrush" StartPoint="0,0" EndPoint="1,0">
                 <GradientStop Offset="0" Color="#00FFFFFF"/>
-                <GradientStop Offset="0.2" Color="{StaticResource EdgeLightColor}"/>
-                <GradientStop Offset="0.5" Color="{StaticResource EdgeLightMidColor}"/>
-                <GradientStop Offset="0.8" Color="{StaticResource EdgeLightColor}"/>
+                <GradientStop Offset="0.2" Color="#99FFFFFF"/>
+                <GradientStop Offset="0.5" Color="#F2FFFFFF"/>
+                <GradientStop Offset="0.8" Color="#99FFFFFF"/>
                 <GradientStop Offset="1" Color="#00FFFFFF"/>
             </LinearGradientBrush>
 
             <!-- Module plate (:1136); armed, staged for a destructive run, lays ArmedSoft over the same face
                  (:1206), composited here because one brush cannot layer two. -->
             <LinearGradientBrush x:Key="PlateFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Plate1Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Plate3Color}"/>
+                <GradientStop Offset="0" Color="#F5F5F3"/>
+                <GradientStop Offset="1" Color="#E0E0DC"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="PlateArmedFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#ECDBDA"/>
@@ -786,34 +788,34 @@
             <!-- Cap: the face and its key light (:1467, and every button, :2062), and a chip's flatter face
                  (:2176). -->
             <LinearGradientBrush x:Key="CapFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Cap1Color}"/>
-                <GradientStop Offset="0.6" Color="{StaticResource Cap2Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Cap3Color}"/>
+                <GradientStop Offset="0" Color="#F7F7F5"/>
+                <GradientStop Offset="0.6" Color="#EBEBE8"/>
+                <GradientStop Offset="1" Color="#DEDEDA"/>
             </LinearGradientBrush>
             <RadialGradientBrush x:Key="CapKeyLightBrush" Center="0.5,0" GradientOrigin="0.5,0"
                                  RadiusX="0.8" RadiusY="0.5">
-                <GradientStop Offset="0" Color="{StaticResource CapKeyColor}"/>
+                <GradientStop Offset="0" Color="#BFFFFFFF"/>
                 <GradientStop Offset="0.6" Color="#00FFFFFF"/>
             </RadialGradientBrush>
             <LinearGradientBrush x:Key="ChipFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Cap1Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Cap3Color}"/>
+                <GradientStop Offset="0" Color="#F7F7F5"/>
+                <GradientStop Offset="1" Color="#DEDEDA"/>
             </LinearGradientBrush>
 
             <!-- Stripe header (:1503): the face, and the grain as hard 1px bands repeating every 3px. -->
             <LinearGradientBrush x:Key="StripeFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource Stripe1Color}"/>
-                <GradientStop Offset="0.55" Color="{StaticResource Stripe2Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Stripe3Color}"/>
+                <GradientStop Offset="0" Color="#F0F0ED"/>
+                <GradientStop Offset="0.55" Color="#E0E0DC"/>
+                <GradientStop Offset="1" Color="#D5D5D1"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="StripeGrainBrush" StartPoint="0,0" EndPoint="3,0"
                                  MappingMode="Absolute" SpreadMethod="Repeat">
-                <GradientStop Offset="0" Color="{StaticResource StripeGrainAColor}"/>
-                <GradientStop Offset="0.3333" Color="{StaticResource StripeGrainAColor}"/>
-                <GradientStop Offset="0.3333" Color="{StaticResource StripeGrainBColor}"/>
-                <GradientStop Offset="0.6667" Color="{StaticResource StripeGrainBColor}"/>
-                <GradientStop Offset="0.6667" Color="{StaticResource StripeGrainCColor}"/>
-                <GradientStop Offset="1" Color="{StaticResource StripeGrainCColor}"/>
+                <GradientStop Offset="0" Color="#09000000"/>
+                <GradientStop Offset="0.3333" Color="#09000000"/>
+                <GradientStop Offset="0.3333" Color="#03000000"/>
+                <GradientStop Offset="0.6667" Color="#03000000"/>
+                <GradientStop Offset="0.6667" Color="#73FFFFFF"/>
+                <GradientStop Offset="1" Color="#73FFFFFF"/>
             </LinearGradientBrush>
 
             <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner; the faint machined ring
@@ -821,12 +823,12 @@
                  :1589, Day :1602). -->
             <RadialGradientBrush x:Key="HexFaceBrush" Center="0.28,0.22" GradientOrigin="0.28,0.22"
                                  RadiusX="1.061" RadiusY="1.061">
-                <GradientStop Offset="0" Color="{StaticResource Hex1Color}"/>
-                <GradientStop Offset="0.12" Color="{StaticResource Hex2Color}"/>
-                <GradientStop Offset="0.3" Color="{StaticResource Hex3Color}"/>
-                <GradientStop Offset="0.55" Color="{StaticResource Hex4Color}"/>
-                <GradientStop Offset="0.8" Color="{StaticResource Hex5Color}"/>
-                <GradientStop Offset="1" Color="{StaticResource Hex6Color}"/>
+                <GradientStop Offset="0" Color="#FFFFFF"/>
+                <GradientStop Offset="0.12" Color="#D8D8D4"/>
+                <GradientStop Offset="0.3" Color="#AAAAA4"/>
+                <GradientStop Offset="0.55" Color="#868680"/>
+                <GradientStop Offset="0.8" Color="#5C5C58"/>
+                <GradientStop Offset="1" Color="#44443F"/>
             </RadialGradientBrush>
             <RadialGradientBrush x:Key="HexRingBrush" Center="0.5,0.5" GradientOrigin="0.5,0.5"
                                  RadiusX="0.707" RadiusY="0.707">
@@ -845,8 +847,8 @@
                  polished call to action, inverting to black gloss on Day Shift (:2116, Day :2131). -->
             <LinearGradientBrush x:Key="ArmedCapFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#C8333A"/>
-                <GradientStop Offset="0.55" Color="{StaticResource ArmedColor}"/>
-                <GradientStop Offset="1" Color="{StaticResource ArmedDeepColor}"/>
+                <GradientStop Offset="0.55" Color="#AA2024"/>
+                <GradientStop Offset="1" Color="#7F171A"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="ChromeCapFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#303030"/>
@@ -856,8 +858,8 @@
 
             <!-- Displays, wells and the annunciator strip: dark in both shifts (:1427, :1451, :1946). -->
             <LinearGradientBrush x:Key="DisplayFaceBrush" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Offset="0" Color="{StaticResource DisplayBgTopColor}"/>
-                <GradientStop Offset="1" Color="{StaticResource DisplayBgBottomColor}"/>
+                <GradientStop Offset="0" Color="#040404"/>
+                <GradientStop Offset="1" Color="#070707"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="WellFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#080808"/>

@@ -436,7 +436,8 @@ internal sealed class UiSmokeRun
     /// colour its text style sets; the faceplate's own foreground, from its implicit style; the swatch beside the
     /// probe, which names Silver on the element itself; the first stop of the faceplate's face, which its template
     /// names; and a stock WinUI button, whose colours are WinUI's own. When only the last followed the shift, the
-    /// console's palette had been merged too far below App.xaml for an element's theme to reach it.
+    /// palette's brushes were not taking their colours from the element's theme, as when they named their colours
+    /// with {StaticResource} instead of writing them out (ConsoleDictionaryTests).
     /// </summary>
     private async Task DescribeShiftAsync(ConsoleSpecimen specimen, ElementTheme theme, string shift)
     {

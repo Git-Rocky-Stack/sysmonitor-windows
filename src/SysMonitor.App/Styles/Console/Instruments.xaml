@@ -17,7 +17,7 @@
     xmlns:instruments="using:SysMonitor.App.Controls.Instruments">
 
     <!-- The palette and the text styles come from Tokens.xaml and Typography.xaml, which App.xaml merges ahead of
-         this file. Not merged here: a theme dictionary merged below App.xaml does not follow an element's theme. -->
+         this file, and only App.xaml merges the palette (ConsoleDictionaryTests). -->
 
     <!-- ============================================================ HEX BOLT (:1557-1622) -->
 

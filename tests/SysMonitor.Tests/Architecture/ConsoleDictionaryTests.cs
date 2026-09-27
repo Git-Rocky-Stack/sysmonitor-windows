@@ -8,14 +8,15 @@ namespace SysMonitor.Tests.Architecture;
 /// <summary>
 /// How the console's dictionaries are put together, which decides whether its colours follow the shift.
 /// <para>
-/// WinUI chooses the theme dictionary for an element's theme - a well's Dark, or a shift switched while the app
-/// runs - only in App.xaml's own theme dictionaries and in those of the files App.xaml merges itself. The UI smoke
-/// run measured it on Day Shift: a colour from App.xaml's own theme dictionaries, from a file App.xaml merges, and
-/// from an element's own came out light, while the palette, whose file was merged into the text styles, which were
-/// merged into the instruments, which App.xaml merged, stayed Night Ops however a colour was named - by a style, on
-/// an element, or in a template. So a file that has theme dictionaries is merged by App.xaml and by nothing else,
-/// and the console's other dictionaries find the palette, the faces and each other among the files App.xaml merges
-/// ahead of them.
+/// The UI smoke run switches the shift the way the app will while it runs - the window's theme set to Light while
+/// the application's stays Dark - and reads colours back. A brush that wrote its colour out followed the shift in
+/// every place its theme dictionary was tried: App.xaml's own, an element's own, a file App.xaml merges, and a file
+/// merged into App.xaml's theme dictionary. The palette's brushes, which named their colours with
+/// <c>{StaticResource XColor}</c> from the same theme, stayed Night Ops however they were used - by a style, on an
+/// element, in a template - and still did once App.xaml merged the palette itself. So a brush in a shift's theme
+/// dictionary writes its colour out. The palette also stays where it was measured to follow, merged by App.xaml
+/// itself rather than three files down as it once was, and the console's other dictionaries find the palette, the
+/// faces and each other among the files App.xaml merges ahead of them.
 /// </para>
 /// </summary>
 public class ConsoleDictionaryTests
@@ -24,6 +25,7 @@ public class ConsoleDictionaryTests
     private const string ConsoleFolder = "src/SysMonitor.App/Styles/Console";
 
     private static readonly XNamespace Presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+    private static readonly XNamespace Xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
 
     /// <summary>App.xaml as the file system spells it, so it compares equal to the same file found by a search.</summary>
     private static string AppPath =>
@@ -32,15 +34,29 @@ public class ConsoleDictionaryTests
     [Fact]
     public void TheMergeRuleCatchesAPaletteMergedBelowAppXaml()
     {
-        var palette = Dictionary("""<ResourceDictionary.ThemeDictionaries><ResourceDictionary x:Key="Default"/></ResourceDictionary.ThemeDictionaries>""");
-        var styles = Dictionary("""<ResourceDictionary.MergedDictionaries><ResourceDictionary Source="Palette.xaml"/></ResourceDictionary.MergedDictionaries>""");
-        var app = Dictionary("""<ResourceDictionary.MergedDictionaries><ResourceDictionary Source="Palette.xaml"/></ResourceDictionary.MergedDictionaries>""");
-        var files = new Dictionary<string, XDocument> { ["App.xaml"] = app, ["Styles.xaml"] = styles, ["Palette.xaml"] = palette };
-        (string, XDocument)? Open(string declaring, string source) => files.TryGetValue(source, out var document) ? (source, document) : null;
+        const string MergesPalette = """
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Palette.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            """;
+        var palette = Dictionary("""
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default"/>
+            </ResourceDictionary.ThemeDictionaries>
+            """);
+        var files = new Dictionary<string, XDocument>
+        {
+            ["App.xaml"] = Dictionary(MergesPalette),
+            ["Styles.xaml"] = Dictionary(MergesPalette),
+            ["Palette.xaml"] = palette,
+        };
+        (string, XDocument)? Open(string declaring, string source) =>
+            files.TryGetValue(source, out var document) ? (source, document) : null;
 
         ThemeDictionariesMergedBelowApp(files, "App.xaml", Open).Select(merge => $"{merge.File} merges {merge.Target}")
             .Should().Equal(["Styles.xaml merges Palette.xaml"],
-            "a palette App.xaml merges itself follows an element's theme, and the same palette merged by another file does not");
+                "a palette App.xaml merges itself is where it was measured to follow an element's theme, and another " +
+                "file merging it takes it somewhere that never was");
     }
 
     [Fact]
@@ -57,6 +73,41 @@ public class ConsoleDictionaryTests
         AppMerges(app).Select(merge => RepoSource.Relative(merge.Path)).Should().Contain(
             [$"{ConsoleFolder}/Tokens.xaml", $"{ConsoleFolder}/FluentOverrides.xaml"],
             "the palette and the Fluent overrides are the dictionaries whose themes have to follow an element's");
+    }
+
+    [Fact]
+    public void TheColourRuleCatchesANamedColourInAShiftAndLeavesHighContrastAlone()
+    {
+        var palette = Dictionary("""
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <Color x:Key="InkColor">#101010</Color>
+                    <SolidColorBrush x:Key="InkBrush" Color="{StaticResource InkColor}"/>
+                    <SolidColorBrush x:Key="PaperBrush" Color="#F0F0F0"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <StaticResource x:Key="InkColor" ResourceKey="SystemColorWindowTextColor"/>
+                    <SolidColorBrush x:Key="InkBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+            """);
+
+        NamedColoursInAShift(palette).Should().Equal(["Light InkBrush"],
+            "a brush in a shift that names its colour is caught, and one that writes it out, or High Contrast's " +
+            "system colours, are not");
+    }
+
+    [Fact]
+    public void ABrushInAShiftWritesItsColourOut()
+    {
+        var offenders = RepoSource.FilesUnder("src/SysMonitor.App", "*.xaml")
+            .SelectMany(file => NamedColoursInAShift(XDocument.Load(file))
+                .Select(entry => $"{RepoSource.Relative(file)}: {entry}"))
+            .ToList();
+
+        offenders.Should().BeEmpty(
+            "a brush that names its colour from the same theme comes out in Night Ops' colour on Day Shift when the " +
+            "shift is switched while the app runs");
     }
 
     [Fact]
@@ -87,6 +138,30 @@ public class ConsoleDictionaryTests
         Unresolved(merges, IsConsole, ProjectDictionary.Open).Should().BeEmpty(
             "App.xaml merges the console's dictionaries in the order they lean on each other, and a key that only " +
             "arrives after a dictionary is not there when that dictionary is read");
+    }
+
+    /// <summary>
+    /// "Theme Key" for each entry of a Night, Day or Dark theme dictionary that names another resource rather than
+    /// writing its value out. High Contrast's are left alone: its colours are the system's, which it has to name.
+    /// </summary>
+    private static IEnumerable<string> NamedColoursInAShift(XDocument document)
+    {
+        var shifts = document.Descendants()
+            .Where(element => element.Name.LocalName == "ResourceDictionary.ThemeDictionaries")
+            .SelectMany(themes => themes.Elements(Presentation + "ResourceDictionary"))
+            .Where(theme => theme.Attribute(Xaml + "Key")?.Value is "Default" or "Light" or "Dark");
+
+        foreach (var theme in shifts)
+        {
+            foreach (var entry in theme.Elements().Where(entry => entry.Attribute(Xaml + "Key") is not null))
+            {
+                var named = entry.Name.LocalName is "StaticResource" or "ThemeResource" ||
+                            entry.DescendantsAndSelf().Attributes()
+                                .Any(attribute => attribute.Value.Contains("Resource ", StringComparison.Ordinal));
+                if (named)
+                    yield return $"{theme.Attribute(Xaml + "Key")!.Value} {entry.Attribute(Xaml + "Key")!.Value}";
+            }
+        }
     }
 
     /// <summary>Each merge of a file that has theme dictionaries, by anything but App.xaml.</summary>
