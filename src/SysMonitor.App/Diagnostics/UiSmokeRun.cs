@@ -221,8 +221,11 @@ internal sealed class UiSmokeRun
     /// built fails here, on every push, before a page uses it. The pictures are the review copy; the run passes on
     /// the checks.
     /// <para>
-    /// Each instrument is shown alone first. A failure inside XAML's own layout or rendering ends the process
-    /// without an exception anything can catch, and then the step written last names what was on screen.
+    /// Each instrument is shown alone first, and then built again: the second copy of a template is not built the
+    /// way the first one is, and the faceplate's second copy was the one that failed. Every step is laid out inside
+    /// a <see cref="LayoutProbe"/>, so a template that fails in layout is reported against its step and the run goes
+    /// on to the next one. A failure while rendering still ends the process, and then the step written last names
+    /// what was on screen.
     /// </para>
     /// </summary>
     private async Task VisitSpecimenAsync(MainWindow window, ElementTheme theme, string shift)
@@ -246,34 +249,27 @@ internal sealed class UiSmokeRun
 
             foreach (var type in Instruments())
             {
-                Progress($"{shift} specimen: {type.Name} alone");
-                scroller.Content = (UIElement)Activator.CreateInstance(type)!;
-                await RenderedAsync();
-                await RenderedAsync();
+                await ShowAsync(scroller, $"{shift} specimen: {type.Name} alone",
+                    (UIElement)Activator.CreateInstance(type)!);
+                await ShowAsync(scroller, $"{shift} specimen: {type.Name} alone, built again",
+                    (UIElement)Activator.CreateInstance(type)!);
             }
 
             // The text styles were measured at the start, but measuring draws nothing; this draws each one.
             foreach (var (key, style) in ConsoleTextStyles())
             {
-                Progress($"{shift} specimen: the text style {key} drawn");
-                scroller.Content = new TextBlock { Text = FontProbeText, Style = style };
-                await RenderedAsync();
-                await RenderedAsync();
+                await ShowAsync(scroller, $"{shift} specimen: the text style {key} drawn",
+                    new TextBlock { Text = FontProbeText, Style = style });
             }
 
-            // Then text in a console style inside each kind of theme scope, one at a time: a surface that sets its
-            // own theme changes how the styles inside it find their colours, and displays stay dark that way.
-            foreach (var (step, host) in ThemedTextHosts())
-            {
-                Progress($"{shift} specimen: {step}");
-                scroller.Content = host;
-                await RenderedAsync();
-                await RenderedAsync();
-            }
+            // Then text in a console style inside each kind of host, one at a time.
+            foreach (var (step, host) in TextHosts())
+                await ShowAsync(scroller, $"{shift} specimen: {step}", host);
 
             Progress($"{shift} specimen: all of it");
             var specimen = new ConsoleSpecimen();
-            scroller.Content = specimen;
+            var probe = new LayoutProbe(specimen);
+            scroller.Content = probe;
 
             if (!await LoadedAsync(specimen))
                 Problem($"The specimen did not load within {LoadTimeout.TotalSeconds:0} seconds");
@@ -283,6 +279,9 @@ internal sealed class UiSmokeRun
             await RenderedAsync();
             await Task.Delay(Settle);
             await RenderedAsync();
+
+            if (!Survived(probe, $"{shift} specimen: all of it"))
+                return;
 
             Progress($"{shift} specimen: checking");
             CheckInstruments(specimen, theme, shift);
@@ -310,12 +309,40 @@ internal sealed class UiSmokeRun
         {
             Problem($"Showing the specimen threw: {ex}");
         }
+        finally
+        {
+            page.Milliseconds = timer.ElapsedMilliseconds;
+            lock (_gate)
+                _current = null;
 
-        page.Milliseconds = timer.ElapsedMilliseconds;
-        lock (_gate)
-            _current = null;
+            WriteReport(finished: false);
+        }
+    }
 
-        WriteReport(finished: false);
+    /// <summary>
+    /// Shows one element where a page would be and lets it draw. A failure in its layout is reported against the
+    /// step, and does not end the run.
+    /// </summary>
+    private async Task ShowAsync(ScrollViewer scroller, string step, UIElement element)
+    {
+        Progress(step);
+        var probe = new LayoutProbe(element);
+        scroller.Content = probe;
+        await RenderedAsync();
+        await RenderedAsync();
+        Survived(probe, step);
+    }
+
+    /// <summary>False, with the failure reported against the step, when the probed element failed in layout.</summary>
+    private bool Survived(LayoutProbe probe, string step)
+    {
+        if (probe.Failure is not { } failure)
+            return true;
+
+        Log.Error(failure, "UI smoke: {Step} failed in layout", step);
+        Problem($"{step} failed in layout: {failure.GetType().Name} 0x{failure.HResult:X8} " +
+                failure.Message.ReplaceLineEndings(" "));
+        return false;
     }
 
     /// <summary>
@@ -367,10 +394,11 @@ internal sealed class UiSmokeRun
     }
 
     /// <summary>
-    /// Text in a console style held in each kind of theme scope: plain grids in the other theme and in the same
-    /// one, then the surfaces that set their own theme, and a faceplate, which does not.
+    /// Text in a console style held in each kind of host: plain grids in the other theme and in the same one, then
+    /// the surfaces that set their own theme, which changes how the styles inside them find their colours, and
+    /// then a faceplate, which does not, one part at a time and then whole.
     /// </summary>
-    private static IEnumerable<(string Step, UIElement Host)> ThemedTextHosts()
+    private static IEnumerable<(string Step, UIElement Host)> TextHosts()
     {
         var styles = ConsoleTextStyles().ToDictionary(pair => pair.Key.ToString() ?? string.Empty, pair => pair.Style);
         TextBlock Text(string style) => new() { Text = FontProbeText, Style = styles.GetValueOrDefault(style) };
@@ -383,7 +411,11 @@ internal sealed class UiSmokeRun
         yield return ("a well holding LcdValueTextStyle", new Well { Content = Text("LcdValueTextStyle") });
         yield return ("a display in the go tone holding StreamTextStyle",
             new Display { Tone = DisplayTone.Go, Content = Text("StreamTextStyle") });
-        yield return ("a faceplate holding BodyTextStyle", new Faceplate { Kicker = "PROBE", Content = Text("BodyTextStyle") });
+        yield return ("a faceplate with a kicker", new Faceplate { Kicker = "PROBE" });
+        yield return ("a faceplate with a serial", new Faceplate { Serial = "S/N STX-0000-00" });
+        yield return ("a faceplate holding BodyTextStyle", new Faceplate { Content = Text("BodyTextStyle") });
+        yield return ("a faceplate with a kicker and a serial, holding BodyTextStyle",
+            new Faceplate { Kicker = "PROBE", Serial = "S/N STX-0000-00", Content = Text("BodyTextStyle") });
     }
 
     /// <summary>Every console instrument: the public controls in <see cref="Faceplate"/>'s namespace.</summary>

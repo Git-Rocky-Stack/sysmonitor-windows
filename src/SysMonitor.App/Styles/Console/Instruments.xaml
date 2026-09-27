@@ -16,10 +16,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:instruments="using:SysMonitor.App.Controls.Instruments">
 
-    <!-- The text styles, and through them the faces and the palette, that the templates below name. A template
-         resolves its StaticResources in this dictionary and its merges when it is expanded, long after App.xaml
-         was read; a style in a sibling dictionary made WinUI load that file on its own, where its fonts could not
-         be found, and the first line of text drawn with it ended the process. -->
+    <!-- The text styles, and through them the faces and the palette, that the templates below name. Merged here
+         rather than beside this file in App.xaml, so this dictionary resolves everything it names on its own,
+         wherever WinUI reads it from. -->
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml"/>
     </ResourceDictionary.MergedDictionaries>
@@ -114,7 +113,11 @@
                                         IsHitTestVisible="False"/>
 
                                 <!-- The brushed stripe: the face, its grain, the lip along its top and the seam below
-                                     it; the kicker and serial, and the right-hand slot. Padded 30 to clear the bolts. -->
+                                     it; the kicker and serial, and the right-hand slot. Padded 30 to clear the bolts.
+                                     The text styles are named by ThemeResource, as the brushes are. Named by
+                                     StaticResource, the first faceplate drew and the second one ended the process
+                                     from inside XAML's layout; ThemeResource looks the style up for each element as it
+                                     is built. -->
                                 <Grid x:Name="Stripe" Height="{StaticResource StripeHeight}">
                                     <Border Background="{ThemeResource StripeFaceBrush}" CornerRadius="1,1,0,0"/>
                                     <Border Background="{ThemeResource StripeGrainBrush}" CornerRadius="1,1,0,0"/>
@@ -127,9 +130,9 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Style="{StaticResource KickerTextStyle}" VerticalAlignment="Center"
+                                        <TextBlock Style="{ThemeResource KickerTextStyle}" VerticalAlignment="Center"
                                                    Text="{TemplateBinding Kicker}"/>
-                                        <TextBlock Grid.Column="1" Style="{StaticResource SerialTextStyle}" VerticalAlignment="Center"
+                                        <TextBlock Grid.Column="1" Style="{ThemeResource SerialTextStyle}" VerticalAlignment="Center"
                                                    Text="{TemplateBinding Serial}"/>
                                         <ContentPresenter Grid.Column="3" VerticalAlignment="Center"
                                                           Content="{TemplateBinding StripeRight}"/>
