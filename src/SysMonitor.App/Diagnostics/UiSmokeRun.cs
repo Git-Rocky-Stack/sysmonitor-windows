@@ -431,13 +431,12 @@ internal sealed class UiSmokeRun
     }
 
     /// <summary>
-    /// Why the specimen's text did not follow the shift, measured rather than guessed, as one line of the report:
-    /// the probe's own theme and colour; the colour the faceplate's style gave the faceplate itself, which was in
-    /// the tree when the shift reached it, where the probe, inside the faceplate's body, was not yet; the same
-    /// Silver named on an element rather than by a style, the swatch beside the probe; the first stop of the
-    /// faceplate's face, named in its template; a stock WinUI button's text, which WinUI's own style colours; the
-    /// same text style on a line made once the specimen was live; and the probe again once the specimen's own theme
-    /// is set to the shift, which walks everything now in the tree.
+    /// Why the specimen's text did not follow the shift, measured rather than guessed, as one line of the report.
+    /// Each reading names the same palette a different way, so the one that fails says where: the probe, whose
+    /// colour its text style sets; the faceplate's own foreground, from its implicit style; the swatch beside the
+    /// probe, which names Silver on the element itself; the first stop of the faceplate's face, which its template
+    /// names; and a stock WinUI button, whose colours are WinUI's own. When only the last followed the shift, the
+    /// console's palette had been merged too far below App.xaml for an element's theme to reach it.
     /// </summary>
     private async Task DescribeShiftAsync(ConsoleSpecimen specimen, ElementTheme theme, string shift)
     {
@@ -445,44 +444,25 @@ internal sealed class UiSmokeRun
             (brush as SolidColorBrush)?.Color.ToString() ?? brush?.GetType().Name ?? "nothing";
 
         var probe = specimen.OnFace;
-        var probeTheme = probe.ActualTheme;
-        var probeColour = Colour(probe.Foreground);
         var faceplate = Descendants(specimen).OfType<Faceplate>().FirstOrDefault(plate => IsShown(plate, specimen));
-
-        var swatchColour = Colour(specimen.Swatch.Background);
         var face = faceplate is null ? null : Descendants(faceplate).OfType<Border>()
             .Select(border => border.Background).OfType<LinearGradientBrush>().FirstOrDefault();
-        var faceColour = face?.GradientStops.FirstOrDefault()?.Color.ToString() ?? "nothing";
 
-        var styles = ConsoleTextStyles().ToDictionary(pair => pair.Key.ToString() ?? string.Empty, pair => pair.Style);
-        var late = new TextBlock { Text = FontProbeText, Style = styles.GetValueOrDefault("DescriptionTextStyle") };
         var button = new Button { Content = "PROBE" };
         var host = specimen.Content as Panel;
-        host?.Children.Add(late);
         host?.Children.Add(button);
         await RenderedAsync();
         await RenderedAsync();
-        var lateColour = Colour(late.Foreground);
         var buttonColour = Colour(button.Foreground);
-        host?.Children.Remove(late);
         host?.Children.Remove(button);
 
-        specimen.RequestedTheme = theme;
-        await RenderedAsync();
-        await RenderedAsync();
-
-        Problem($"Theme dictionaries, measured in the {shift} shift (Black is the default one, White the light " +
-                $"one): the application's own gives {Colour(specimen.FromApp.Background)}; the specimen's own gives " +
-                $"{Colour(specimen.FromElement.Background)}; a file merged straight into App.xaml gives " +
-                $"{Colour(specimen.FromMergedFile.Background)}; a file merged into App.xaml's theme dictionary for the " +
-                $"shift gives {Colour(specimen.FromThemeFile.Background)}");
-        Problem($"Why, measured in the {shift} shift: the probe is in the {probeTheme} theme with silver " +
-                $"{probeColour}; the faceplate's own foreground, from its style, is {Colour(faceplate?.Foreground)} " +
-                $"(the shift's platinum is {PaletteColour(theme, "PlatinumColor")}); the swatch beside the probe, Silver " +
-                $"named on the element, is {swatchColour}; the faceplate's face, from its template, starts at " +
-                $"{faceColour} (the shift's plate is {PaletteColour(theme, "Plate1Color")}); a stock button's text is " +
-                $"{buttonColour}; a line in the same style made once the specimen was live is {lateColour}; the probe, " +
-                $"once the specimen's own theme is set to the shift, is {Colour(probe.Foreground)}");
+        Problem($"Why, measured in the {shift} shift: the probe is in the {probe.ActualTheme} theme with silver " +
+                $"{Colour(probe.Foreground)}; the faceplate's own foreground, from its style, is " +
+                $"{Colour(faceplate?.Foreground)} (the shift's platinum is {PaletteColour(theme, "PlatinumColor")}); the " +
+                $"swatch beside the probe, Silver named on the element, is {Colour(specimen.Swatch.Background)}; the " +
+                $"faceplate's face, from its template, starts at " +
+                $"{face?.GradientStops.FirstOrDefault()?.Color.ToString() ?? "nothing"} (the shift's plate is " +
+                $"{PaletteColour(theme, "Plate1Color")}); a stock button's text, in WinUI's own colours, is {buttonColour}");
     }
 
     /// <summary>Whether an element and every ancestor up to <paramref name="root"/> are visible.</summary>

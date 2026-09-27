@@ -10,42 +10,21 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
-                <!-- Absolute, not relative to this file: a resource looked up while an element is laid out can be
-                     resolved away from App.xaml, and there a relative Source is "not a valid absolute URI". That
-                     ended the first smoke run to show the console specimen, from inside XAML's layout.
-                     The console's dictionaries each merge what they name, so Instruments.xaml brings the text
-                     styles, which bring the faces and the palette: each file is read once, and each resolves on
-                     its own wherever WinUI loads it. -->
+                <!-- The console's dictionaries, in the order they lean on each other: the faces and the palette, the
+                     Fluent overrides, then the text styles and the instruments that use them. Each is merged here and
+                     nowhere else. WinUI chooses the theme dictionary for an element's theme - a well's Dark, a shift
+                     switched while the app runs - only in App.xaml's own and in the files App.xaml merges itself:
+                     the palette merged three files down stayed Night Ops on Day Shift, however a colour was named
+                     (ConsoleDictionaryTests). Sources are absolute: a relative one, looked up during layout, is "not
+                     a valid absolute URI". -->
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Fonts.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Tokens.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/FluentOverrides.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Instruments.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Colors.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml" />
-                <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- For the UI smoke run's shift measurement only: one colour in the application's own theme dictionaries,
-                 so the run can tell whether an element's theme reaches these, as it does not reach the console's,
-                 which are merged in from files. Removed with the fix the measurement decides. -->
-            <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Default">
-                    <ResourceDictionary.MergedDictionaries>
-                        <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.Night.xaml"/>
-                    </ResourceDictionary.MergedDictionaries>
-                    <SolidColorBrush x:Key="ShiftProbeAppBrush" Color="Black"/>
-                </ResourceDictionary>
-                <ResourceDictionary x:Key="Light">
-                    <ResourceDictionary.MergedDictionaries>
-                        <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.Day.xaml"/>
-                    </ResourceDictionary.MergedDictionaries>
-                    <SolidColorBrush x:Key="ShiftProbeAppBrush" Color="White"/>
-                </ResourceDictionary>
-                <ResourceDictionary x:Key="HighContrast">
-                    <ResourceDictionary.MergedDictionaries>
-                        <ResourceDictionary Source="ms-appx:///Diagnostics/ShiftProbes.HighContrast.xaml"/>
-                    </ResourceDictionary.MergedDictionaries>
-                    <SolidColorBrush x:Key="ShiftProbeAppBrush" Color="{ThemeResource SystemColorWindowColor}"/>
-                </ResourceDictionary>
-            </ResourceDictionary.ThemeDictionaries>
 
             <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>

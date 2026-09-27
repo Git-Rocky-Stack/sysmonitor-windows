@@ -16,12 +16,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:instruments="using:SysMonitor.App.Controls.Instruments">
 
-    <!-- The text styles, and through them the faces and the palette, that the templates below name. Merged here
-         rather than beside this file in App.xaml, so this dictionary resolves everything it names on its own,
-         wherever WinUI reads it from. -->
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml"/>
-    </ResourceDictionary.MergedDictionaries>
+    <!-- The palette and the text styles come from Tokens.xaml and Typography.xaml, which App.xaml merges ahead of
+         this file. Not merged here: a theme dictionary merged below App.xaml does not follow an element's theme. -->
 
     <!-- ============================================================ HEX BOLT (:1557-1622) -->
 
