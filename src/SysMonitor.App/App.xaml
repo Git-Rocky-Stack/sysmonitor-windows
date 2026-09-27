@@ -10,13 +10,16 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
-                <ResourceDictionary Source="Styles/Console/Fonts.xaml" />
-                <ResourceDictionary Source="Styles/Console/Tokens.xaml" />
-                <ResourceDictionary Source="Styles/Console/FluentOverrides.xaml" />
-                <ResourceDictionary Source="Styles/Console/Typography.xaml" />
-                <ResourceDictionary Source="Styles/Console/Instruments.xaml" />
-                <ResourceDictionary Source="Styles/Colors.xaml" />
-                <ResourceDictionary Source="Styles/Styles.xaml" />
+                <!-- Absolute, not relative to this file: a resource looked up while an element is laid out can be
+                     resolved away from App.xaml, and there a relative Source is "not a valid absolute URI". That
+                     ended the first smoke run to show the console specimen, from inside XAML's layout. -->
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Fonts.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Tokens.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/FluentOverrides.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Instruments.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Colors.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Converters -->
