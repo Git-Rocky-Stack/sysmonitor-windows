@@ -471,6 +471,9 @@ internal sealed class UiSmokeRun
         await RenderedAsync();
         await RenderedAsync();
 
+        Problem($"Theme dictionaries, measured in the {shift} shift (Black is the default one, White the light " +
+                $"one): the application's own gives {Colour(specimen.FromApp.Background)}; the specimen's own gives " +
+                $"{Colour(specimen.FromElement.Background)}");
         Problem($"Why, measured in the {shift} shift: the probe is in the {probeTheme} theme with silver " +
                 $"{probeColour}; the faceplate's own foreground, from its style, is {Colour(faceplate?.Foreground)} " +
                 $"(the shift's platinum is {PaletteColour(theme, "PlatinumColor")}); the swatch beside the probe, Silver " +

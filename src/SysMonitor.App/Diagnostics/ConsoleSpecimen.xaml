@@ -14,6 +14,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:instruments="using:SysMonitor.App.Controls.Instruments">
 
+    <!-- For the shift measurement only (UiSmokeRun): a colour in an element's own theme dictionaries. -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="ShiftProbeLocalBrush" Color="Black"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ShiftProbeLocalBrush" Color="White"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SolidColorBrush x:Key="ShiftProbeLocalBrush" Color="{ThemeResource SystemColorWindowColor}"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <StackPanel MaxWidth="1380" Padding="20" Spacing="20">
 
         <!-- Surfaces: the faceplate with its stripe and bolts; wells and displays, which stay dark in both
@@ -75,6 +92,10 @@
             <StackPanel Spacing="12">
                 <TextBlock x:Name="FaceProbe" Style="{StaticResource DescriptionTextStyle}"
                            Text="The chassis stays neutral so the armed red commands the room."/>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Border x:Name="AppThemeProbe" Width="8" Height="8" Background="{ThemeResource ShiftProbeAppBrush}"/>
+                    <Border x:Name="LocalThemeProbe" Width="8" Height="8" Background="{ThemeResource ShiftProbeLocalBrush}"/>
+                </StackPanel>
                 <Grid ColumnSpacing="8" RowSpacing="6">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
