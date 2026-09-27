@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-results
           path: TestResults
@@ -107,7 +107,7 @@ jobs:
 
       - name: Upload UI smoke run
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ui-smoke
           path: ui-smoke
@@ -132,11 +132,8 @@ jobs:
       # The release as it is made by hand: Build-Release.ps1 publishes the self-contained x64 build into
       # publish\installer-build and zips it with the licence files. The installer is left out because
       # installer\SysMonitorSetup.iss packs publish\installer-build\* as it stands, so that folder is what it
-      # ships. A release build has never run on a hosted runner, so until this job has passed once, its steps
-      # report without failing the workflow.
+      # ships.
       - name: Release build (Build-Release.ps1)
-        id: release
-        continue-on-error: true
         shell: pwsh
         run: ./Build-Release.ps1 -SkipInstaller
 
@@ -144,8 +141,6 @@ jobs:
       # every file in Assets/Fonts - the faces and their licences - is compared, byte for byte, with what the
       # publish folder and the portable zip hold.
       - name: Fonts ship in the release
-        if: steps.release.outcome == 'success'
-        continue-on-error: true
         shell: pwsh
         run: |
           $fonts = @(Get-ChildItem -Path src/SysMonitor.App/Assets/Fonts -File)
@@ -186,9 +181,7 @@ jobs:
 
       # The portable build of every pull request, ready to run on Windows without building anything.
       - name: Upload portable build
-        if: steps.release.outcome == 'success'
-        continue-on-error: true
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: portable-x64
           path: publish/STX1-SystemMonitor-*-Portable-x64.zip
