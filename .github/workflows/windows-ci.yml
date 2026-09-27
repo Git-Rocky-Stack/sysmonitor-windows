@@ -84,15 +84,33 @@ jobs:
           if (-not $exe) { throw 'SysMonitor.App.exe was not built' }
           $out = Join-Path $env:GITHUB_WORKSPACE 'ui-smoke'
 
+          # A run that stops says where it was, what the app last logged and why Windows says it ended: a
+          # failure inside XAML's own layout or rendering ends the process without an exception to catch.
+          function Show-WhyItStopped {
+            $progress = Join-Path $out 'progress.txt'
+            if (Test-Path $progress) { "Last step: $(Get-Content $progress -Raw)" }
+            $log = Get-ChildItem (Join-Path $env:LOCALAPPDATA 'SysMonitor\Logs') -Filter 'sysmonitor-*.log' -ErrorAction SilentlyContinue |
+              Sort-Object LastWriteTime | Select-Object -Last 1
+            if ($log) { "--- $($log.Name), last 40 lines"; Get-Content $log.FullName -Tail 40 }
+            Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $started } -ErrorAction SilentlyContinue |
+              Where-Object { $_.ProviderName -in 'Application Error', 'Windows Error Reporting', '.NET Runtime' } |
+              Select-Object -First 4 | ForEach-Object { "--- $($_.ProviderName), event $($_.Id)"; $_.Message }
+          }
+
+          $started = Get-Date
           $app = Start-Process -FilePath $exe.FullName -ArgumentList '--ui-smoke', "`"$out`"" -PassThru
           $null = $app.Handle   # keeps the exit code readable once the process has gone
           if (-not $app.WaitForExit(15 * 60 * 1000)) {
             $app.Kill()
+            Show-WhyItStopped
             throw 'The UI smoke run did not finish within 15 minutes'
           }
 
           $report = Join-Path $out 'report.json'
-          if (-not (Test-Path $report)) { throw "The UI smoke run wrote no report (exit code $($app.ExitCode))" }
+          if (-not (Test-Path $report)) {
+            Show-WhyItStopped
+            throw "The UI smoke run wrote no report (exit code $($app.ExitCode))"
+          }
 
           $result = Get-Content $report -Raw | ConvertFrom-Json
           "Passed: $($result.passed), finished: $($result.finished), pages: $($result.pages.Count)"
@@ -103,6 +121,7 @@ jobs:
 
           # A run that stopped early passes nothing, whatever its exit code says.
           if ($app.ExitCode -ne 0 -or -not $result.finished -or -not $result.passed) {
+            Show-WhyItStopped
             throw "The UI smoke run failed (exit code $($app.ExitCode))"
           }
 

@@ -176,7 +176,7 @@ internal sealed class UiSmokeRun
         }
 
         // Written before the step, so a run that hangs here says where.
-        File.WriteAllText(Path.Combine(Folder, "progress.txt"), $"{shift} {index:00} {tag}");
+        Progress($"{shift} {index:00} {tag}");
         var timer = Stopwatch.StartNew();
 
         try
@@ -220,6 +220,10 @@ internal sealed class UiSmokeRun
     /// the shift's pages. An instrument's template is only built when something shows it, so one that cannot be
     /// built fails here, on every push, before a page uses it. The pictures are the review copy; the run passes on
     /// the checks.
+    /// <para>
+    /// Each instrument is shown alone first. A failure inside XAML's own layout or rendering ends the process
+    /// without an exception anything can catch, and then the step written last names what was on screen.
+    /// </para>
     /// </summary>
     private async Task VisitSpecimenAsync(MainWindow window, ElementTheme theme, string shift)
     {
@@ -230,14 +234,36 @@ internal sealed class UiSmokeRun
             _pages.Add(page);
         }
 
-        File.WriteAllText(Path.Combine(Folder, "progress.txt"), $"{shift} specimen");
         var timer = Stopwatch.StartNew();
 
         try
         {
-            var specimen = new ConsoleSpecimen();
-            var scroller = new ScrollViewer { Content = specimen };
+            Progress($"{shift} specimen: an empty scroller in the frame");
+            var scroller = new ScrollViewer();
             window.PageFrame.Content = scroller;
+            await RenderedAsync();
+            await RenderedAsync();
+
+            foreach (var type in Instruments())
+            {
+                Progress($"{shift} specimen: {type.Name} alone");
+                scroller.Content = (UIElement)Activator.CreateInstance(type)!;
+                await RenderedAsync();
+                await RenderedAsync();
+            }
+
+            // The text styles were measured at the start, but measuring draws nothing; this draws each one.
+            foreach (var (key, style) in ConsoleTextStyles())
+            {
+                Progress($"{shift} specimen: the text style {key} drawn");
+                scroller.Content = new TextBlock { Text = FontProbeText, Style = style };
+                await RenderedAsync();
+                await RenderedAsync();
+            }
+
+            Progress($"{shift} specimen: all of it");
+            var specimen = new ConsoleSpecimen();
+            scroller.Content = specimen;
 
             if (!await LoadedAsync(specimen))
                 Problem($"The specimen did not load within {LoadTimeout.TotalSeconds:0} seconds");
@@ -248,6 +274,7 @@ internal sealed class UiSmokeRun
             await Task.Delay(Settle);
             await RenderedAsync();
 
+            Progress($"{shift} specimen: checking");
             CheckInstruments(specimen, theme, shift);
 
             // It is taller than the window: one picture per window's height of it.
@@ -259,6 +286,7 @@ internal sealed class UiSmokeRun
                 await RenderedAsync();
 
                 var shot = $"{shift}-specimen-{shots.Count + 1}.png";
+                Progress($"{shift} specimen: picture {shots.Count + 1}");
                 Capture(window, Path.Combine(Folder, shot));
                 shots.Add(shot);
 
@@ -327,6 +355,16 @@ internal sealed class UiSmokeRun
         Checked($"{instruments.Count} instruments drew their templates in the {shift} shift, " +
                 "with their wells and displays dark");
     }
+
+    /// <summary>Every console instrument: the public controls in <see cref="Faceplate"/>'s namespace.</summary>
+    private static IEnumerable<Type> Instruments() =>
+        typeof(Faceplate).Assembly.GetTypes()
+            .Where(type => type.Namespace == typeof(Faceplate).Namespace && type.IsPublic && !type.IsAbstract &&
+                           typeof(Control).IsAssignableFrom(type) && type.GetConstructor(Type.EmptyTypes) is not null)
+            .OrderBy(type => type.Name, StringComparer.Ordinal);
+
+    /// <summary>Where the run is, written before the step, so a run that stops there says so.</summary>
+    private void Progress(string step) => File.WriteAllText(Path.Combine(Folder, "progress.txt"), step);
 
     /// <summary>A colour as Styles/Console/Tokens.xaml writes it for a shift: Night Ops for Dark, Day Shift for Light.</summary>
     private static Windows.UI.Color? PaletteColour(ElementTheme shift, string key)
@@ -472,20 +510,17 @@ internal sealed class UiSmokeRun
     /// </summary>
     private void CheckTextStyles(FrameworkElement root)
     {
-        var typography = OwnDictionaries(Application.Current.Resources).FirstOrDefault(dictionary =>
-            dictionary.Source?.OriginalString.EndsWith("Styles/Console/Typography.xaml", StringComparison.OrdinalIgnoreCase) == true);
-        if (typography is null || root is not Panel panel)
+        var styles = ConsoleTextStyles().ToList();
+        if (styles.Count == 0 || root is not Panel panel)
         {
-            Problem("The console text styles could not be checked: Styles/Console/Typography.xaml is not merged, or the root is not a panel");
+            Problem("The console text styles could not be checked: Styles/Console/Typography.xaml is not merged or holds none, " +
+                    "or the root is not a panel");
             return;
         }
 
         var applied = 0;
-        foreach (var (key, value) in typography)
+        foreach (var (key, style) in styles)
         {
-            if (value is not Style style)
-                continue;
-
             var sample = new TextBlock { Text = FontProbeText, Opacity = 0, IsHitTestVisible = false };
             try
             {
@@ -506,8 +541,21 @@ internal sealed class UiSmokeRun
 
         if (applied > 0)
             Checked($"{applied} console text styles applied");
-        else
-            Problem("Styles/Console/Typography.xaml holds no text styles to apply");
+    }
+
+    /// <summary>The text styles in Styles/Console/Typography.xaml, by key.</summary>
+    private static IEnumerable<(object Key, Style Style)> ConsoleTextStyles()
+    {
+        var typography = OwnDictionaries(Application.Current.Resources).FirstOrDefault(dictionary =>
+            dictionary.Source?.OriginalString.EndsWith("Styles/Console/Typography.xaml", StringComparison.OrdinalIgnoreCase) == true);
+        if (typography is null)
+            yield break;
+
+        foreach (var (key, value) in typography)
+        {
+            if (value is Style style)
+                yield return (key, style);
+        }
     }
 
     /// <summary>A dictionary and everything merged into it, except WinUI's own.</summary>
