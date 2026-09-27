@@ -24,7 +24,7 @@ Reset command restores exactly these values (`SettingsViewModel.cs:133-159`).
 
 | Setting | Type | Default | Effect |
 |---|---|---|---|
-| Refresh Interval | 1 to 10 seconds | 2 seconds | How often readings update (`:28`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:122`) |
+| Refresh Interval | 1 to 10 seconds | 2 seconds | Saved, but no page reads it yet: each page refreshes on a fixed timer of its own (`:28`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:122`) |
 | Memory Threshold | Percent | 80 (`:29`) | The usage level that raises a memory alert |
 
 The memory threshold raises an alert and nothing else: crossing it trims nothing.

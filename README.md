@@ -23,6 +23,46 @@ part: if a tool says it removed something, verified something, or restored somet
 that is what happened. Where a feature could not deliver what its label promised, the
 feature was removed rather than reworded. See [CHANGELOG.md](CHANGELOG.md).
 
+## What's new
+
+Changes since v3.0.1. Each one is described in full, with the file it lives in, in
+[CHANGELOG.md](CHANGELOG.md) under Unreleased.
+
+**A new look is on its way.** STX.1 is being restyled to match System-X, its sister app,
+so the two read as one family. The type comes first: text is now set in Public Sans,
+and the faces the rest of the look uses (Archivo, Departure Mono and Iosevka) ship with
+the app under the SIL Open Font License.
+
+**Nothing is destroyed without asking.**
+- Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many
+  items are involved and how much they hold. Cancel is the default, so Enter or Escape
+  changes nothing.
+- Large Files and Duplicate Finder never delete a file permanently. A file Windows
+  cannot recycle, on a network or removable drive or larger than the Recycle Bin is set
+  to hold, is left where it is, and the result says so. A file is only reported as moved
+  once it has been found in the Recycle Bin.
+- The Drive Wiper's X removes a file from the list, and nothing on the page can change
+  while a wipe runs.
+
+**What the app reports is what happened.**
+- The Drive Wiper shows the result of a wipe, including overwrites it could not read
+  back. Before, the result was replaced before it reached the screen.
+- A missing temperature reads `--` instead of a measured-looking 32F, sizes carry one
+  unit, and the game overlay labels its Fahrenheit readings F.
+- The Memory page reports what a trim did, in the Dashboard's words, and shows success
+  only when the trim worked.
+- Every CPU reading covers its reader's own interval, so two views reading at once no
+  longer shorten each other's measurement or report 0%.
+
+**Settings are honoured everywhere.** The Microsoft Store (packaged) build saved the
+Settings page to a place the rest of the app never read, so turning notifications off,
+changing an alert threshold or turning minimize-to-tray off had no effect there. Both
+builds now keep every setting in one file, and the Settings page says so when a save
+fails.
+
+**Fixed:** clicking the PDF editor's page with the Sticky Note tool closed the app. It
+opens the note now.
+
 ## Features
 
 Thirty-four entries in the navigation menu, grouped the way the app groups them
@@ -66,7 +106,7 @@ sit below the groups listed here.
 |---|---|
 | **Large Files** | Find large files; deletion goes to the Recycle Bin after confirmation |
 | **Duplicate Finder** | Duplicates decided by SHA-256 of the whole file, never by sampling; deletion goes to the Recycle Bin after confirmation |
-| **File Tools** | ZIP and GZip compression, and file conversion |
+| **File Tools** | Compress a file or folder to ZIP, or a single file to GZip, and extract archives |
 | **PDF Tools** | Merge, split, convert and manipulate PDFs |
 | **Image Tools** | Image conversion and processing |
 
@@ -178,8 +218,13 @@ SysMonitor.sln
 +-- src/SysMonitor.App/          # WinUI 3 front end (WinExe)
 |   +-- Views/                   # 35 XAML pages + the FPS overlay window
 |   +-- ViewModels/              # CommunityToolkit.Mvvm view models
+|   +-- Controls/Instruments/    # Console controls, starting with the dialog helper
+|   +-- Services/                # Tray icon and the FPS overlay
+|   +-- Helpers/                 # Dispatcher and PDF page rendering helpers
 |   +-- Converters/              # Value converters
-|   \-- Styles/                  # Colors and styles
+|   +-- Diagnostics/             # The UI smoke run (--ui-smoke)
+|   +-- Assets/Fonts/            # The console typefaces and their licences
+|   \-- Styles/                  # Colors and styles; Console/ holds the fonts and the palette
 |
 +-- src/SysMonitor.Core/         # Core library
 |   +-- Models/
@@ -187,13 +232,19 @@ SysMonitor.sln
 |   +-- Data/                    # EF Core context and entities (SQLite)
 |   \-- Services/
 |       +-- Monitors/            # CPU, GPU, Memory, Disk, Network, Battery, Temperature
+|       +-- Monitoring/          # Operation timings for the Performance page
+|       +-- History/             # Readings recorded for the History page
+|       +-- Alerts/              # Temperature, memory and battery alerts
+|       +-- Settings/            # The one settings store every part of the app reads
 |       +-- Cleaners/            # Temp files, browser cache, registry, browser privacy
 |       +-- Optimizers/          # Startup and memory
 |       +-- Backup/              # Backup, restore, encryption
 |       +-- GameMode/            # Game Mode and auto-detection
 |       \-- Utilities/           # File, PDF, network and system tools
 |
-\-- tests/SysMonitor.Tests/      # xUnit tests
++-- tests/SysMonitor.Tests/      # xUnit tests
++-- scripts/                     # Font build, and the WinUI resource key list the tests use
+\-- docs/                        # The user documentation site
 ```
 
 Architecture notes for contributors are in [CLAUDE.md](CLAUDE.md); the end-user
@@ -216,6 +267,7 @@ guide ships inside the app under **User's Guide**.
 | Serilog | 4.0.0 | Logging to `%LocalAppData%\SysMonitor\Logs` |
 | H.NotifyIcon.WinUI | 2.1.3 | System tray |
 | Win2D | 1.2.0 | Canvas rendering |
+| Public Sans, Archivo, Departure Mono, Iosevka | - | Typefaces, built by `scripts/build-fonts.py` |
 
 Third-party license terms are listed in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
@@ -243,9 +295,10 @@ application as `LICENSE.txt` (`installer/SysMonitorSetup.iss:87`), and the whole
 terms.
 
 Third-party components bundled into the self-contained build keep their own licences -
-notably **LibreHardwareMonitor under MPL-2.0** and **Serilog under Apache-2.0**. These
-are compatible with MIT but carry their own obligations, all listed in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+notably **LibreHardwareMonitor under MPL-2.0**, **Serilog under Apache-2.0**, and the
+four typefaces under the **SIL Open Font License 1.1**, whose notice and licence ship
+beside each font. These are compatible with MIT but carry their own obligations, all
+listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ### Contributing
 

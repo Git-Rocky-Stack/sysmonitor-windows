@@ -195,6 +195,38 @@ Each entry describes a behaviour change and cites the file it lives in.
   stops calling what went to the Recycle Bin "freed": the space comes back when the
   Recycle Bin is emptied.
 
+### Documentation
+
+- **The README says what changed.** A What's new section lists the changes since v3.0.1 for
+  anyone arriving at the repository, and the project tree, the components table and the
+  licence notes now include the typefaces and the folders this release adds.
+
+- **The in-app guide describes this build.** A "Changes since v3.0.1" card sits above the
+  v3.0.1 release notes; the Drive Wiper, Large Files and Duplicate Finder lines say that
+  each asks first and what reaches the Recycle Bin; and the licence card names the
+  typefaces (`src/SysMonitor.App/Views/UserGuidePage.xaml`). Its longer lines now wrap:
+  24 of them ran off the edge of their card.
+
+- **File Tools is described as it is.** The in-app guide said it renamed files in batches
+  and converted formats, and the README said it converted files. It compresses a file or
+  folder to ZIP, or a file to GZip, and extracts archives
+  (`src/SysMonitor.App/ViewModels/FileToolsViewModel.cs:142`, `:203`).
+
+- **Refresh Interval is described as it is.** The user guide and the settings reference
+  said it sets how often readings update. It is saved and nothing reads it: each page
+  refreshes on a fixed timer of its own
+  (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:79`). The troubleshooting steps
+  built on it, and on an auto-refresh switch the app does not have, are replaced by steps
+  that work, and the advice to install the .NET runtime is gone: the released builds carry
+  it.
+
+- **Every document is plain ASCII.** Every document in the repository, the contributor
+  notes included, and every word of the in-app guide is written without em dashes, emoji
+  or other decoration, which read as mojibake wherever a file is opened as anything but
+  UTF-8. A test finds the documents by walking the repository, so a new one is covered
+  from the day it appears
+  (`tests/SysMonitor.Tests/Architecture/PublishedDocumentEncodingTests.cs`).
+
 ---
 
 ## [3.0.1] - 2026-09-21

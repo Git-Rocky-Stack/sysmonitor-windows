@@ -652,7 +652,8 @@ Detailed system specifications:
 
 ### Monitoring
 
-- **Refresh Interval** - Data update frequency (1-10 seconds)
+- **Refresh Interval** - Saved, but no page reads it yet: each page refreshes on a fixed timer of its own,
+  and stops when you move to another page (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:79`)
 - **Memory Threshold** - The usage level that raises a memory alert. Crossing it trims nothing. Working
   sets are trimmed only by TRIM MEMORY on the Dashboard or the Memory page, and by Game Mode - including
   when auto mode, if you have turned it on, starts Game Mode because it saw a game launch.
@@ -699,9 +700,10 @@ All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Vi
 
 ### App Won't Start
 
-1. Ensure .NET 8.0 Desktop Runtime is installed
+1. Nothing needs installing beside it: the installer and the portable zip carry the .NET 8 and
+   Windows App SDK runtimes themselves
 2. Run as Administrator
-3. Check Windows Event Viewer for errors
+3. Check Windows Event Viewer for errors, and `%LocalAppData%\SysMonitor\Logs` for the app's own log
 
 ### Temperature Readings Show -- or N/A
 
@@ -717,15 +719,19 @@ All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Vi
 
 ### Settings Not Saving
 
-1. App stores settings in `%LocalAppData%\SysMonitor\`
-2. Ensure write permissions to that folder
-3. Check for disk space issues
+1. The app keeps every setting in `%LocalAppData%\SysMonitor\settings.json`, in the installed and the
+   Microsoft Store builds alike (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:56`)
+2. When a save fails, the Settings page says "Settings could not be saved; the log says why", and the
+   reason is in `%LocalAppData%\SysMonitor\Logs`
+3. Ensure write permissions to that folder, and check for disk space issues
 
 ### High CPU Usage
 
-1. Reduce refresh interval in Settings
-2. Close unused monitoring pages
-3. Disable auto-refresh when not needed
+1. Move off a monitoring page you are not watching: a page reads only while it is on screen, and
+   stops when you go to another
+2. Hide the game overlay when you are not playing: it reads the sensors twice a second
+   (`src/SysMonitor.App/Services/FpsOverlayService.cs:26`)
+3. Turn off Game Mode's auto mode if you do not use it: it watches for games starting
 
 ### Network Features Not Working
 
