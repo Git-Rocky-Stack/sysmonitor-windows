@@ -142,6 +142,7 @@ internal sealed class UiSmokeRun
             CheckFonts(root);
             CheckThemeResources();
             CheckFluentOverrides();
+            CheckTextStyles(root);
 
             foreach (var (theme, name) in Shifts)
             {
@@ -320,6 +321,51 @@ internal sealed class UiSmokeRun
             Problem($"{key} is {actual?.ToString() ?? "not a solid brush"} where the Fluent overrides say {expected}: WinUI did not pick them up");
             return false;
         }
+    }
+
+    /// <summary>
+    /// Applies every console text style to a text block in the live tree and measures it. A style is only
+    /// resolved when something uses it - its font, its theme colour, each setter's value - so one that cannot
+    /// be would otherwise wait for the first page that asks for it.
+    /// </summary>
+    private void CheckTextStyles(FrameworkElement root)
+    {
+        var typography = OwnDictionaries(Application.Current.Resources).FirstOrDefault(dictionary =>
+            dictionary.Source?.OriginalString.EndsWith("Styles/Console/Typography.xaml", StringComparison.OrdinalIgnoreCase) == true);
+        if (typography is null || root is not Panel panel)
+        {
+            Problem("The console text styles could not be checked: Styles/Console/Typography.xaml is not merged, or the root is not a panel");
+            return;
+        }
+
+        var applied = 0;
+        foreach (var (key, value) in typography)
+        {
+            if (value is not Style style)
+                continue;
+
+            var sample = new TextBlock { Text = FontProbeText, Opacity = 0, IsHitTestVisible = false };
+            try
+            {
+                sample.Style = style;
+                panel.Children.Add(sample);
+                sample.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+                applied++;
+            }
+            catch (Exception ex)
+            {
+                Problem($"The text style {key} could not be applied: {ex.Message}");
+            }
+            finally
+            {
+                panel.Children.Remove(sample);
+            }
+        }
+
+        if (applied > 0)
+            Checked($"{applied} console text styles applied");
+        else
+            Problem("Styles/Console/Typography.xaml holds no text styles to apply");
     }
 
     /// <summary>A dictionary and everything merged into it, except WinUI's own.</summary>
