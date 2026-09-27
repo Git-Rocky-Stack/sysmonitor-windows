@@ -12,13 +12,14 @@
       HighContrast  the user's system colours. Surfaces take the window colour, text the window text colour,
                     anything lit or armed the highlight colour, and decoration goes.
 
-    Colours are written here and nowhere else (ConsoleRecipeTests). Consumers ask with {ThemeResource}, so an
-    element follows the theme it is shown in, and every theme defines the same keys (ThemeDictionaryParityTests).
-    Inside a theme each brush writes its colour out rather than naming the Color beside it with {StaticResource}:
-    brushes that named their colours came out in Night Ops' on Day Shift when the shift was switched while the
-    app ran, where brushes that wrote them out followed it (the UI smoke run measured both). Code cannot follow a
-    theme this way - Application.Current.Resources answers for the application's theme - so colours code needs
-    live in one C# palette.
+    Written by scripts/generate-tokens.py, which is where a colour changes; CI fails when this file and the
+    script disagree. Colours are written here and nowhere else (ConsoleRecipeTests). Consumers ask with
+    {ThemeResource}, so an element follows the theme it is shown in, and every theme defines the same keys
+    (ThemeDictionaryParityTests). Inside a theme each brush writes its colour out rather than naming the Color
+    beside it with {StaticResource}: brushes that named their colours came out in Night Ops' on Day Shift when
+    the shift was switched while the app ran, where brushes that wrote them out followed it (the UI smoke run
+    measured both). Code cannot follow a theme this way - Application.Current.Resources answers for the
+    application's theme - so colours code needs live in one C# palette.
 -->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

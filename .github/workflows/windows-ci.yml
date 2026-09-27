@@ -1,10 +1,10 @@
 # Build and test on Windows for every pull request and every push to main.
 #
 # WinUI 3 compiles its XAML with a Windows-only toolchain, so nothing that touches the app can be checked
-# anywhere else. The first job is the gate: the docs site must match its markdown sources, the whole
-# solution must build, the full test suite must pass, and every page of the app must open, in both themes,
-# with a picture of each uploaded. The second builds the release the way Build-Release.ps1 does and checks
-# that what it ships is what the repository holds.
+# anywhere else. The first job is the gate: the docs site must match its markdown sources and the palette
+# its generator, the whole solution must build, the full test suite must pass, and every page of the app
+# must open, in both themes, with a picture of each uploaded. The second builds the release the way
+# Build-Release.ps1 does and checks that what it ships is what the repository holds.
 name: Windows CI
 
 on:
@@ -48,6 +48,12 @@ jobs:
         run: |
           python -m pip install --quiet markdown
           python docs/build-docs.py --check
+
+      # The palette, Styles/Console/Tokens.xaml, is written by scripts/generate-tokens.py from System-X's values;
+      # --check fails when the file is not what the script writes, so a colour cannot be changed by hand in one
+      # theme and forgotten in another.
+      - name: Palette matches its generator
+        run: python scripts/generate-tokens.py --check
 
       # Debug is the unpackaged configuration (SysMonitor.App.csproj), the same build `dotnet run` uses.
       - name: Build
