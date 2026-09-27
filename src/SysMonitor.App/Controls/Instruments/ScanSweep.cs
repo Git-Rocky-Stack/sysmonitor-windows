@@ -84,7 +84,11 @@ internal sealed class ScanSweep
 
         // CSS's ease-in-out is cubic-bezier(0.42, 0, 0.58, 1): a key spline gives the same curve exactly.
         var travel = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
-        travel.KeyFrames.Add(new DiscreteDoubleKeyFrame { KeyTime = KeyTime.FromTimeSpan(TimeSpan.Zero), Value = -1.2 * band });
+        travel.KeyFrames.Add(new DiscreteDoubleKeyFrame
+        {
+            KeyTime = KeyTime.FromTimeSpan(TimeSpan.Zero),
+            Value = -1.2 * band,
+        });
         travel.KeyFrames.Add(new SplineDoubleKeyFrame
         {
             KeyTime = KeyTime.FromTimeSpan(Period),

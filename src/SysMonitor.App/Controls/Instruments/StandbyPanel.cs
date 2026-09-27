@@ -65,14 +65,16 @@ public sealed class StandbyPanel : Control
         set => SetValue(DescriptionProperty, value);
     }
 
-    /// <summary>The icon in the well: a character of Windows' symbol font, written <c>&amp;#xE721;</c> for a search.</summary>
+    /// <summary>
+    /// The icon in the well: a character of Windows' symbol font, written <c>&amp;#xE721;</c> for a search.
+    /// </summary>
     public string Glyph
     {
         get => (string)GetValue(GlyphProperty);
         set => SetValue(GlyphProperty, value);
     }
 
-    /// <summary>The action's word. With <see cref="ActionCommand"/>, it puts the action under the description.</summary>
+    /// <summary>The action's word; with <see cref="ActionCommand"/> it puts the action under the description.</summary>
     public string ActionText
     {
         get => (string)GetValue(ActionTextProperty);

@@ -196,6 +196,15 @@ GROUPS = [
   ("LampOffForeground", hexc('808080'), hexc('808080'), GT),
   ("VuSegmentOff", hexc('131313'), hexc('131313'), GT),
  ]),
+ ("Shadows cast outside a panel, which composition draws (CastShadow.cs): the faceplate's four, lighter on Day\nShift (:1059-1062, Day :1071-1074); a module plate's, and its lift when a pressable one is hovered, the same in\nboth shifts (:1144, :1241); a lamp cap's (:1697). High Contrast has none.", [
+  ("FaceplateShadowEdge", rgba(0, 0, 0, .9), rgba(0, 0, 0, .2), TR),
+  ("FaceplateShadowContact", rgba(0, 0, 0, .7), rgba(0, 0, 0, .16), TR),
+  ("FaceplateShadowDrop", rgba(0, 0, 0, .55), rgba(0, 0, 0, .14), TR),
+  ("FaceplateShadowAmbient", rgba(0, 0, 0, .4), rgba(0, 0, 0, .1), TR),
+  ("PlateShadow", rgba(0, 0, 0, .5), rgba(0, 0, 0, .5), TR),
+  ("PlateShadowRaised", rgba(0, 0, 0, .55), rgba(0, 0, 0, .55), TR),
+  ("LampShadow", rgba(0, 0, 0, .8), rgba(0, 0, 0, .8), TR),
+ ]),
 ]
 
 def colours(theme):

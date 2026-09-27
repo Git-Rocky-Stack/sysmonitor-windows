@@ -131,7 +131,8 @@ public sealed class Banner : ContentControl
     private void UpdateReport()
     {
         ShownCode = string.IsNullOrEmpty(Code) ? DefaultCode(State) : Code;
-        AutomationProperties.SetLiveSetting(this, IsFault ? AutomationLiveSetting.Assertive : AutomationLiveSetting.Polite);
+        AutomationProperties.SetLiveSetting(this,
+            IsFault ? AutomationLiveSetting.Assertive : AutomationLiveSetting.Polite);
         VisualStateManager.GoToState(this, State.ToString(), false);
     }
 
@@ -148,7 +149,8 @@ public sealed class Banner : ContentControl
         if (!IsLoaded || !AutomationPeer.ListenerExists(AutomationEvents.LiveRegionChanged))
             return;
 
-        var peer = FrameworkElementAutomationPeer.FromElement(this) ?? FrameworkElementAutomationPeer.CreatePeerForElement(this);
+        var peer = FrameworkElementAutomationPeer.FromElement(this) ??
+                   FrameworkElementAutomationPeer.CreatePeerForElement(this);
         peer?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
     }
 
@@ -180,7 +182,9 @@ public sealed class Banner : ContentControl
             if (!string.IsNullOrEmpty(named))
                 return named;
 
-            return string.IsNullOrEmpty(banner.MessageText) ? banner.ShownCode : $"{banner.ShownCode}: {banner.MessageText}";
+            return string.IsNullOrEmpty(banner.MessageText)
+                ? banner.ShownCode
+                : $"{banner.ShownCode}: {banner.MessageText}";
         }
     }
 }

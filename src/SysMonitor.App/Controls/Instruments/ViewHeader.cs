@@ -27,7 +27,8 @@ public sealed class ViewHeader : Control
         nameof(Title), typeof(string), typeof(ViewHeader), new PropertyMetadata(string.Empty, OnNamingChanged));
 
     public static readonly DependencyProperty DescriptionProperty = DependencyProperty.Register(
-        nameof(Description), typeof(string), typeof(ViewHeader), new PropertyMetadata(string.Empty, OnDescriptionChanged));
+        nameof(Description), typeof(string), typeof(ViewHeader),
+        new PropertyMetadata(string.Empty, OnDescriptionChanged));
 
     public static readonly DependencyProperty StatusProperty = DependencyProperty.Register(
         nameof(Status), typeof(object), typeof(ViewHeader), new PropertyMetadata(null));
@@ -99,7 +100,9 @@ public sealed class ViewHeader : Control
         private set => SetValue(KickerTextProperty, value);
     }
 
-    /// <summary>The module's serial (<see cref="PanelSerial"/>), the same one System-X stamps on a module of that name.</summary>
+    /// <summary>
+    /// The module's serial (<see cref="PanelSerial"/>), the same one System-X stamps on a module of that name.
+    /// </summary>
     public string SerialText
     {
         get => (string)GetValue(SerialTextProperty);
@@ -134,5 +137,6 @@ public sealed class ViewHeader : Control
     }
 
     private void UpdateDescription() =>
-        VisualStateManager.GoToState(this, string.IsNullOrEmpty(Description) ? "NoDescription" : "HasDescription", false);
+        VisualStateManager.GoToState(this,
+            string.IsNullOrEmpty(Description) ? "NoDescription" : "HasDescription", false);
 }

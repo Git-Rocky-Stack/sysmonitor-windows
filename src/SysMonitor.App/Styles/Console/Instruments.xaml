@@ -51,6 +51,10 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         <Setter Property="Foreground" Value="{ThemeResource PlatinumBrush}"/>
+        <Setter Property="EdgeShadowColor" Value="{ThemeResource FaceplateShadowEdgeColor}"/>
+        <Setter Property="ContactShadowColor" Value="{ThemeResource FaceplateShadowContactColor}"/>
+        <Setter Property="DropShadowColor" Value="{ThemeResource FaceplateShadowDropColor}"/>
+        <Setter Property="AmbientShadowColor" Value="{ThemeResource FaceplateShadowAmbientColor}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="instruments:Faceplate">
@@ -74,6 +78,9 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
+
+                        <!-- The shadows it casts on the chassis, drawn by composition behind the face (Faceplate.cs). -->
+                        <Border x:Name="PART_ShadowHost" IsHitTestVisible="False"/>
 
                         <Border Background="{ThemeResource FaceplateFaceBrush}"
                                 BorderBrush="{ThemeResource PlateEdgeBrush}"
@@ -236,12 +243,14 @@
 
     <!-- A dark cap lit in its state's colour: the face and its edge, an inner ring of the state's soft light, the
          light along the top and the shade along the bottom, and the stencil word in Archivo at width 110, tracked
-         .1em. Warn blinks the whole lamp at 1 Hz, down to 18% (:458-467); WarnSteady is the same lamp held lit,
-         for when animation effects are off. Striking brings it up from 35% in 80 ms, once. -->
+         .1em. It sits on a small shadow, and lit it glows outside in its soft colour and round its word in its
+         LED's (:1697-1789). Warn blinks the whole lamp at 1 Hz, down to 18% (:458-467); WarnSteady is the same
+         lamp held lit, for when animation effects are off. Striking brings it up from 35% in 80 ms, once. -->
     <Style TargetType="instruments:Lamp">
         <Setter Property="IsTabStop" Value="False"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="ShadowColor" Value="{ThemeResource LampShadowColor}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="instruments:Lamp">
@@ -251,6 +260,7 @@
                                 <VisualState x:Name="Off"/>
                                 <VisualState x:Name="Go">
                                     <VisualState.Setters>
+                                        <Setter Target="PART_OuterGlow.Background" Value="{ThemeResource GoSoftBrush}"/>
                                         <Setter Target="Face.Background" Value="{ThemeResource LampGoFaceBrush}"/>
                                         <Setter Target="Face.BorderBrush" Value="{ThemeResource GoEdgeBrush}"/>
                                         <Setter Target="Glow.BorderBrush" Value="{ThemeResource GoSoftBrush}"/>
@@ -259,6 +269,7 @@
                                 </VisualState>
                                 <VisualState x:Name="Hold">
                                     <VisualState.Setters>
+                                        <Setter Target="PART_OuterGlow.Background" Value="{ThemeResource HoldSoftBrush}"/>
                                         <Setter Target="Face.Background" Value="{ThemeResource LampHoldFaceBrush}"/>
                                         <Setter Target="Face.BorderBrush" Value="{ThemeResource HoldEdgeBrush}"/>
                                         <Setter Target="Glow.BorderBrush" Value="{ThemeResource HoldSoftBrush}"/>
@@ -267,6 +278,7 @@
                                 </VisualState>
                                 <VisualState x:Name="Warn">
                                     <VisualState.Setters>
+                                        <Setter Target="PART_OuterGlow.Background" Value="{ThemeResource WarnSoftBrush}"/>
                                         <Setter Target="Face.Background" Value="{ThemeResource LampWarnFaceBrush}"/>
                                         <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
                                         <Setter Target="Glow.BorderBrush" Value="{ThemeResource WarnSoftBrush}"/>
@@ -282,6 +294,7 @@
                                 </VisualState>
                                 <VisualState x:Name="WarnSteady">
                                     <VisualState.Setters>
+                                        <Setter Target="PART_OuterGlow.Background" Value="{ThemeResource WarnSoftBrush}"/>
                                         <Setter Target="Face.Background" Value="{ThemeResource LampWarnFaceBrush}"/>
                                         <Setter Target="Face.BorderBrush" Value="{ThemeResource WarnEdgeBrush}"/>
                                         <Setter Target="Glow.BorderBrush" Value="{ThemeResource WarnSoftBrush}"/>
@@ -290,6 +303,7 @@
                                 </VisualState>
                                 <VisualState x:Name="NoGo">
                                     <VisualState.Setters>
+                                        <Setter Target="PART_OuterGlow.Background" Value="{ThemeResource NoGoSoftBrush}"/>
                                         <Setter Target="Face.Background" Value="{ThemeResource LampNoGoFaceBrush}"/>
                                         <Setter Target="Face.BorderBrush" Value="{ThemeResource NoGoEdgeBrush}"/>
                                         <Setter Target="Glow.BorderBrush" Value="{ThemeResource NoGoSoftBrush}"/>
@@ -298,6 +312,7 @@
                                 </VisualState>
                                 <VisualState x:Name="Exec">
                                     <VisualState.Setters>
+                                        <Setter Target="PART_OuterGlow.Background" Value="{ThemeResource ScopeSoftBrush}"/>
                                         <Setter Target="Face.Background" Value="{ThemeResource LampExecFaceBrush}"/>
                                         <Setter Target="Face.BorderBrush" Value="{ThemeResource ScopeEdgeBrush}"/>
                                         <Setter Target="Glow.BorderBrush" Value="{ThemeResource ScopeSoftBrush}"/>
@@ -306,6 +321,7 @@
                                 </VisualState>
                                 <VisualState x:Name="Armed">
                                     <VisualState.Setters>
+                                        <Setter Target="PART_OuterGlow.Background" Value="{ThemeResource ArmedGlowBrush}"/>
                                         <Setter Target="Face.Background" Value="{ThemeResource LampArmedFaceBrush}"/>
                                         <Setter Target="Face.BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
                                         <Setter Target="Glow.BorderBrush" Value="{ThemeResource ArmedSoftBrush}"/>
@@ -338,11 +354,16 @@
                         </VisualStateManager.VisualStateGroups>
 
                         <Grid x:Name="Cap" Height="26" MinWidth="46">
+                            <!-- The cap's shadow and, lit, its outer glow in the colour PART_OuterGlow carries for
+                                 the state; then, over the face, the glow round the word (Lamp.cs). -->
+                            <Border x:Name="PART_ShadowHost" IsHitTestVisible="False"/>
+                            <Border x:Name="PART_OuterGlow" Visibility="Collapsed"/>
                             <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource CapCornerRadius}"
                                     Background="{ThemeResource LampFaceBrush}" BorderBrush="{ThemeResource LampEdgeBrush}"/>
                             <Border x:Name="Glow" Margin="1" BorderThickness="2" CornerRadius="{StaticResource InsetCornerRadius}"/>
                             <Border Height="1" Margin="1,1,1,0" VerticalAlignment="Top" Background="{ThemeResource LampLipBrush}"/>
                             <Border Height="1" Margin="1,0,1,1" VerticalAlignment="Bottom" Background="{ThemeResource LampUnderBrush}"/>
+                            <Border x:Name="PART_WordGlowHost" IsHitTestVisible="False"/>
                             <TextBlock x:Name="Word" Margin="9,0" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontFamily="{StaticResource ConsoleLampFontFamily}" FontSize="10.5" CharacterSpacing="100"
                                        Foreground="{ThemeResource LampOffForegroundBrush}" Text="{TemplateBinding Code}"/>
@@ -355,8 +376,9 @@
 
     <!-- ============================================================ LED DOT (:1792-1828) -->
 
-    <!-- A 7-across LED in its state's colour; unlit, it is graphite. Warn blinks at 1 Hz; Pulsing breathes to 55%
-         and back over 2 seconds, the ON AIR light (:469-478). -->
+    <!-- A 7-across LED in its state's colour; unlit, it is graphite. Lit, it has a halo drawn behind it
+         (LedDot.cs). Warn blinks at 1 Hz; Pulsing breathes to 55% and back over 2 seconds, the ON AIR light
+         (:469-478). -->
     <Style TargetType="instruments:LedDot">
         <Setter Property="Width" Value="7"/>
         <Setter Property="Height" Value="7"/>
@@ -434,6 +456,7 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="PART_GlowHost" IsHitTestVisible="False"/>
                         <Ellipse x:Name="Light" Fill="{ThemeResource GraphiteBrush}"/>
                     </Grid>
                 </ControlTemplate>
@@ -444,8 +467,8 @@
     <!-- ============================================================ LCD (:1831-1892) -->
 
     <!-- A void-black window in a black edge, shaded from the top, with a glint along its lower lip and a cover
-         glass over the lot: the caption in silkscreen, the reading in phosphor, its unit smaller and quieter. The
-         tone changes the reading's colour and nothing else. -->
+         glass over the lot: the caption in silkscreen, the reading in phosphor with its glow behind it (Lcd.cs),
+         its unit smaller and quieter. The tone changes the reading's colour and nothing else. -->
     <Style TargetType="instruments:Lcd">
         <Setter Property="IsTabStop" Value="False"/>
         <Setter Property="Template">
@@ -496,7 +519,10 @@
                             <StackPanel Padding="10,8" Spacing="2" VerticalAlignment="Center">
                                 <TextBlock Style="{StaticResource LcdLabelTextStyle}" Text="{TemplateBinding Label}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock x:Name="ValueText" Style="{StaticResource LcdValueTextStyle}" Text="{TemplateBinding Value}"/>
+                                    <Grid>
+                                        <Border x:Name="PART_ValueGlowHost" IsHitTestVisible="False"/>
+                                        <TextBlock x:Name="ValueText" Style="{StaticResource LcdValueTextStyle}" Text="{TemplateBinding Value}"/>
+                                    </Grid>
                                     <TextBlock x:Name="UnitText" Margin="4,0,0,2" VerticalAlignment="Bottom" Opacity="0.7"
                                                FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="11"
                                                Foreground="{ThemeResource PhosphorBrush}" Text="{TemplateBinding Unit}"/>
@@ -683,20 +709,22 @@
     <!-- A module seated flush in the rack: the brushed face top to bottom in a 1px edge, the lip along its top and
          the underside along its bottom. The rail runs down the mounting edge inside the border in the state's rail
          colour, and the border takes the state's edge. Warn blinks the rail alone at 1 Hz, down to 18% (:1188,
-         :456-465); WarnSteady holds it lit. Armed lays the armed soft red over the brushing (:1206). System-X lifts
-         a hovered pressable plate on its outer shadow and never its border, which matches the rail (:1231); the
-         console draws no outer shadows yet, so PointerOver changes nothing for now. -->
+         :456-465); WarnSteady holds it lit. Armed lays the armed soft red over the brushing (:1206). It sits on a
+         small shadow (:1144), which a hovered pressable plate trades for a deeper one - System-X lifts it on its
+         shadow and never its border, which matches the rail (:1241). Composition draws both behind the face
+         (Plate.cs), so PointerOver needs no setters. -->
     <Style TargetType="instruments:Plate">
         <Setter Property="IsTabStop" Value="False"/>
         <Setter Property="Padding" Value="16,10"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Foreground" Value="{ThemeResource PlatinumBrush}"/>
+        <Setter Property="ShadowColor" Value="{ThemeResource PlateShadowColor}"/>
+        <Setter Property="RaisedShadowColor" Value="{ThemeResource PlateShadowRaisedColor}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="instruments:Plate">
-                    <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
-                            Background="{ThemeResource PlateFaceBrush}" BorderBrush="{ThemeResource PlateEdgeBrush}">
+                    <Grid>
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="PlateStates">
                                 <VisualState x:Name="Off"/>
@@ -756,19 +784,23 @@
                                 <VisualState x:Name="PointerOver"/>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Grid>
-                            <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource PlateLipBrush}"/>
-                            <Border BorderThickness="0,0,0,1" BorderBrush="{ThemeResource PlateUnderBrush}"/>
-                            <ContentPresenter Padding="{TemplateBinding Padding}"
-                                              Content="{TemplateBinding Content}"
-                                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                                              ContentTransitions="{TemplateBinding ContentTransitions}"
-                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                            <Border x:Name="Rail" Width="3" HorizontalAlignment="Left" CornerRadius="2,0,0,2"
-                                    IsHitTestVisible="False"/>
-                        </Grid>
-                    </Border>
+                        <Border x:Name="PART_ShadowHost" IsHitTestVisible="False"/>
+                        <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
+                                Background="{ThemeResource PlateFaceBrush}" BorderBrush="{ThemeResource PlateEdgeBrush}">
+                            <Grid>
+                                <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource PlateLipBrush}"/>
+                                <Border BorderThickness="0,0,0,1" BorderBrush="{ThemeResource PlateUnderBrush}"/>
+                                <ContentPresenter Padding="{TemplateBinding Padding}"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  ContentTransitions="{TemplateBinding ContentTransitions}"
+                                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <Border x:Name="Rail" Width="3" HorizontalAlignment="Left" CornerRadius="2,0,0,2"
+                                        IsHitTestVisible="False"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

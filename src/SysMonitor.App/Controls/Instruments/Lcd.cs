@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace SysMonitor.App.Controls.Instruments;
 
@@ -22,7 +23,8 @@ public enum LcdTone
 /// what keeps the phosphor identical across them.
 /// <para>
 /// <see cref="Value"/> is the reading as it is shown, already formatted, and <see cref="Unit"/> trails it,
-/// quieter. A missing reading is <c>--</c>, as everywhere else in the app.
+/// quieter. A missing reading is <c>--</c>, as everywhere else in the app. The reading glows in its own colour
+/// (:1877), which composition draws round the letters (<see cref="Glow"/>).
 /// </para>
 /// </summary>
 public sealed class Lcd : Control
@@ -39,9 +41,13 @@ public sealed class Lcd : Control
     public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(
         nameof(Tone), typeof(LcdTone), typeof(Lcd), new PropertyMetadata(LcdTone.Go, OnLookChanged));
 
+    private readonly GlowPart _phosphor;
+    private TextBlock? _reading;
+
     public Lcd()
     {
         IsTabStop = false;
+        _phosphor = new GlowPart(this, 8, 0, () => (_reading?.Foreground as SolidColorBrush)?.Color ?? default);
     }
 
     /// <summary>The caption, in capitals as it is shown.</summary>
@@ -69,9 +75,15 @@ public sealed class Lcd : Control
         set => SetValue(ToneProperty, value);
     }
 
+    /// <summary>Whether the reading glows now, for the smoke run to check.</summary>
+    internal bool IsGlowing => _phosphor.IsLit;
+
     protected override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
+        _reading = GetTemplateChild("ValueText") as TextBlock;
+        _phosphor.Attach(GetTemplateChild("PART_ValueGlowHost") as FrameworkElement, _reading, _reading,
+            TextBlock.ForegroundProperty);
         UpdateStates();
     }
 
@@ -85,6 +97,7 @@ public sealed class Lcd : Control
     {
         VisualStateManager.GoToState(this, Tone.ToString(), false);
         VisualStateManager.GoToState(this, string.IsNullOrEmpty(Unit) ? "NoUnit" : "HasUnit", false);
+        _phosphor.Refresh();
     }
 
     /// <summary>A reading as a screen reader says it: "HEALTH SCORE, 92 %".</summary>

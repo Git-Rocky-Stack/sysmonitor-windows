@@ -291,6 +291,25 @@
             <Color x:Key="VuSegmentOffColor">#131313</Color>
             <SolidColorBrush x:Key="VuSegmentOffBrush" Color="#131313"/>
 
+            <!-- Shadows cast outside a panel, which composition draws (CastShadow.cs): the faceplate's four,
+                 lighter on Day Shift (:1059-1062, Day :1071-1074); a module plate's, and its lift when a
+                 pressable one is hovered, the same in both shifts (:1144, :1241); a lamp cap's (:1697). High
+                 Contrast has none. -->
+            <Color x:Key="FaceplateShadowEdgeColor">#E6000000</Color> <!-- rgba(0, 0, 0, .9) -->
+            <SolidColorBrush x:Key="FaceplateShadowEdgeBrush" Color="#E6000000"/>
+            <Color x:Key="FaceplateShadowContactColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
+            <SolidColorBrush x:Key="FaceplateShadowContactBrush" Color="#B3000000"/>
+            <Color x:Key="FaceplateShadowDropColor">#8C000000</Color> <!-- rgba(0, 0, 0, .55) -->
+            <SolidColorBrush x:Key="FaceplateShadowDropBrush" Color="#8C000000"/>
+            <Color x:Key="FaceplateShadowAmbientColor">#66000000</Color> <!-- rgba(0, 0, 0, .4) -->
+            <SolidColorBrush x:Key="FaceplateShadowAmbientBrush" Color="#66000000"/>
+            <Color x:Key="PlateShadowColor">#80000000</Color> <!-- rgba(0, 0, 0, .5) -->
+            <SolidColorBrush x:Key="PlateShadowBrush" Color="#80000000"/>
+            <Color x:Key="PlateShadowRaisedColor">#8C000000</Color> <!-- rgba(0, 0, 0, .55) -->
+            <SolidColorBrush x:Key="PlateShadowRaisedBrush" Color="#8C000000"/>
+            <Color x:Key="LampShadowColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
+            <SolidColorBrush x:Key="LampShadowBrush" Color="#CC000000"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#0A0A0A</Color>
@@ -751,6 +770,25 @@
             <Color x:Key="VuSegmentOffColor">#131313</Color>
             <SolidColorBrush x:Key="VuSegmentOffBrush" Color="#131313"/>
 
+            <!-- Shadows cast outside a panel, which composition draws (CastShadow.cs): the faceplate's four,
+                 lighter on Day Shift (:1059-1062, Day :1071-1074); a module plate's, and its lift when a
+                 pressable one is hovered, the same in both shifts (:1144, :1241); a lamp cap's (:1697). High
+                 Contrast has none. -->
+            <Color x:Key="FaceplateShadowEdgeColor">#33000000</Color> <!-- rgba(0, 0, 0, .2) -->
+            <SolidColorBrush x:Key="FaceplateShadowEdgeBrush" Color="#33000000"/>
+            <Color x:Key="FaceplateShadowContactColor">#29000000</Color> <!-- rgba(0, 0, 0, .16) -->
+            <SolidColorBrush x:Key="FaceplateShadowContactBrush" Color="#29000000"/>
+            <Color x:Key="FaceplateShadowDropColor">#24000000</Color> <!-- rgba(0, 0, 0, .14) -->
+            <SolidColorBrush x:Key="FaceplateShadowDropBrush" Color="#24000000"/>
+            <Color x:Key="FaceplateShadowAmbientColor">#1A000000</Color> <!-- rgba(0, 0, 0, .1) -->
+            <SolidColorBrush x:Key="FaceplateShadowAmbientBrush" Color="#1A000000"/>
+            <Color x:Key="PlateShadowColor">#80000000</Color> <!-- rgba(0, 0, 0, .5) -->
+            <SolidColorBrush x:Key="PlateShadowBrush" Color="#80000000"/>
+            <Color x:Key="PlateShadowRaisedColor">#8C000000</Color> <!-- rgba(0, 0, 0, .55) -->
+            <SolidColorBrush x:Key="PlateShadowRaisedBrush" Color="#8C000000"/>
+            <Color x:Key="LampShadowColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
+            <SolidColorBrush x:Key="LampShadowBrush" Color="#CC000000"/>
+
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->
             <Color x:Key="ChromeCapForegroundColor">#F5F5F5</Color>
@@ -1210,6 +1248,25 @@
             <SolidColorBrush x:Key="LampOffForegroundBrush" Color="{ThemeResource SystemColorGrayTextColor}"/>
             <StaticResource x:Key="VuSegmentOffColor" ResourceKey="SystemColorGrayTextColor"/>
             <SolidColorBrush x:Key="VuSegmentOffBrush" Color="{ThemeResource SystemColorGrayTextColor}"/>
+
+            <!-- Shadows cast outside a panel, which composition draws (CastShadow.cs): the faceplate's four,
+                 lighter on Day Shift (:1059-1062, Day :1071-1074); a module plate's, and its lift when a
+                 pressable one is hovered, the same in both shifts (:1144, :1241); a lamp cap's (:1697). High
+                 Contrast has none. -->
+            <Color x:Key="FaceplateShadowEdgeColor">Transparent</Color>
+            <SolidColorBrush x:Key="FaceplateShadowEdgeBrush" Color="Transparent"/>
+            <Color x:Key="FaceplateShadowContactColor">Transparent</Color>
+            <SolidColorBrush x:Key="FaceplateShadowContactBrush" Color="Transparent"/>
+            <Color x:Key="FaceplateShadowDropColor">Transparent</Color>
+            <SolidColorBrush x:Key="FaceplateShadowDropBrush" Color="Transparent"/>
+            <Color x:Key="FaceplateShadowAmbientColor">Transparent</Color>
+            <SolidColorBrush x:Key="FaceplateShadowAmbientBrush" Color="Transparent"/>
+            <Color x:Key="PlateShadowColor">Transparent</Color>
+            <SolidColorBrush x:Key="PlateShadowBrush" Color="Transparent"/>
+            <Color x:Key="PlateShadowRaisedColor">Transparent</Color>
+            <SolidColorBrush x:Key="PlateShadowRaisedBrush" Color="Transparent"/>
+            <Color x:Key="LampShadowColor">Transparent</Color>
+            <SolidColorBrush x:Key="LampShadowBrush" Color="Transparent"/>
 
             <!-- Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day
                  :2135). -->

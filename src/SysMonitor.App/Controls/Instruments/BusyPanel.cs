@@ -130,7 +130,8 @@ public sealed class BusyPanel : Control
         base.OnApplyTemplate();
         _bar = GetTemplateChild("PART_Bar") as ProgressBar;
         _lamp = GetTemplateChild("PART_Lamp") as Lamp;
-        if (GetTemplateChild("PART_ScanArea") is FrameworkElement area && GetTemplateChild("PART_ScanBand") is FrameworkElement band)
+        if (GetTemplateChild("PART_ScanArea") is FrameworkElement area &&
+            GetTemplateChild("PART_ScanBand") is FrameworkElement band)
         {
             _sweep = new ScanSweep(area, band);
             if (IsLoaded)

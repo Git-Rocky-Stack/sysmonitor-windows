@@ -43,7 +43,8 @@ public sealed class BusyWell : Control
 
         base.OnApplyTemplate();
         _line = GetTemplateChild("PART_Title") as FrameworkElement;
-        if (GetTemplateChild("PART_ScanArea") is FrameworkElement area && GetTemplateChild("PART_ScanBand") is FrameworkElement band)
+        if (GetTemplateChild("PART_ScanArea") is FrameworkElement area &&
+            GetTemplateChild("PART_ScanBand") is FrameworkElement band)
         {
             _sweep = new ScanSweep(area, band);
             if (IsLoaded)
@@ -58,12 +59,14 @@ public sealed class BusyWell : Control
     private static void OnTitleChanged(DependencyObject owner, DependencyPropertyChangedEventArgs args)
     {
         var well = (BusyWell)owner;
-        if (!well.IsLoaded || well._line is not { } line || !AutomationPeer.ListenerExists(AutomationEvents.LiveRegionChanged))
+        if (!well.IsLoaded || well._line is not { } line ||
+            !AutomationPeer.ListenerExists(AutomationEvents.LiveRegionChanged))
             return;
 
         well.DispatcherQueue.TryEnqueue(() =>
         {
-            var peer = FrameworkElementAutomationPeer.FromElement(line) ?? FrameworkElementAutomationPeer.CreatePeerForElement(line);
+            var peer = FrameworkElementAutomationPeer.FromElement(line) ??
+                       FrameworkElementAutomationPeer.CreatePeerForElement(line);
             peer?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
         });
     }

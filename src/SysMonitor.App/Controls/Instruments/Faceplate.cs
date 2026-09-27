@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.UI;
 
 namespace SysMonitor.App.Controls.Instruments;
 
@@ -12,6 +13,11 @@ namespace SysMonitor.App.Controls.Instruments;
 /// The body is padded to clear the bolts (<c>FaceplateBodyPadding</c>); a body that is its own grid sets
 /// <see cref="Control.Padding"/> to 0. The body row takes whatever height is left, so a list hosted in it keeps
 /// its virtualisation.
+/// </para>
+/// <para>
+/// It stands off the chassis on System-X's four shadows (:1059-1062): a hard line under its edge, a contact shadow,
+/// the drop and a wide ambient one, each a colour from the palette, far lighter on Day Shift and none in High
+/// Contrast. Composition draws them (<see cref="CastShadow"/>).
 /// </para>
 /// </summary>
 public sealed class Faceplate : ContentControl
@@ -30,6 +36,35 @@ public sealed class Faceplate : ContentControl
 
     public static readonly DependencyProperty ShowBoltsProperty = DependencyProperty.Register(
         nameof(ShowBolts), typeof(bool), typeof(Faceplate), new PropertyMetadata(true, OnLayoutChanged));
+
+    public static readonly DependencyProperty EdgeShadowColorProperty = DependencyProperty.Register(
+        nameof(EdgeShadowColor), typeof(Color), typeof(Faceplate),
+        new PropertyMetadata(default(Color), OnShadowChanged));
+
+    public static readonly DependencyProperty ContactShadowColorProperty = DependencyProperty.Register(
+        nameof(ContactShadowColor), typeof(Color), typeof(Faceplate),
+        new PropertyMetadata(default(Color), OnShadowChanged));
+
+    public static readonly DependencyProperty DropShadowColorProperty = DependencyProperty.Register(
+        nameof(DropShadowColor), typeof(Color), typeof(Faceplate),
+        new PropertyMetadata(default(Color), OnShadowChanged));
+
+    public static readonly DependencyProperty AmbientShadowColorProperty = DependencyProperty.Register(
+        nameof(AmbientShadowColor), typeof(Color), typeof(Faceplate),
+        new PropertyMetadata(default(Color), OnShadowChanged));
+
+    private readonly ShadowPart _shadow;
+
+    public Faceplate()
+    {
+        _shadow = new ShadowPart(this, 2, () =>
+        [
+            new ShadowLayer(1, 0, 0, EdgeShadowColor),
+            new ShadowLayer(2, 4, 0, ContactShadowColor),
+            new ShadowLayer(12, 28, 0, DropShadowColor),
+            new ShadowLayer(40, 80, 0, AmbientShadowColor),
+        ]);
+    }
 
     /// <summary>
     /// The stripe's kicker, in Departure Mono caps: conventionally <c>MODULE - NAME - 01A</c>, the panel's code.
@@ -71,14 +106,49 @@ public sealed class Faceplate : ContentControl
         set => SetValue(ShowBoltsProperty, value);
     }
 
+    /// <summary>The hard line along its lower edge, <c>0 1px 0</c>.</summary>
+    public Color EdgeShadowColor
+    {
+        get => (Color)GetValue(EdgeShadowColorProperty);
+        set => SetValue(EdgeShadowColorProperty, value);
+    }
+
+    /// <summary>The contact shadow, <c>0 2px 4px</c>.</summary>
+    public Color ContactShadowColor
+    {
+        get => (Color)GetValue(ContactShadowColorProperty);
+        set => SetValue(ContactShadowColorProperty, value);
+    }
+
+    /// <summary>The drop shadow, <c>0 12px 28px</c>.</summary>
+    public Color DropShadowColor
+    {
+        get => (Color)GetValue(DropShadowColorProperty);
+        set => SetValue(DropShadowColorProperty, value);
+    }
+
+    /// <summary>The wide ambient shadow, <c>0 40px 80px</c>.</summary>
+    public Color AmbientShadowColor
+    {
+        get => (Color)GetValue(AmbientShadowColorProperty);
+        set => SetValue(AmbientShadowColorProperty, value);
+    }
+
+    /// <summary>The shadows drawn now, for the smoke run to count.</summary>
+    internal int ShadowLayers => _shadow.LayerCount;
+
     protected override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
+        _shadow.Attach(GetTemplateChild("PART_ShadowHost") as FrameworkElement);
         UpdateStates();
     }
 
     private static void OnLayoutChanged(DependencyObject owner, DependencyPropertyChangedEventArgs args) =>
         ((Faceplate)owner).UpdateStates();
+
+    private static void OnShadowChanged(DependencyObject owner, DependencyPropertyChangedEventArgs args) =>
+        ((Faceplate)owner)._shadow.Refresh();
 
     private void UpdateStates()
     {

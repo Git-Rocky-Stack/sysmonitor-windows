@@ -275,6 +275,10 @@ internal sealed class UiSmokeRun
             foreach (var (step, panel) in FilledPanels())
                 await ShowAsync(scroller, $"{shift} specimen: {step}", panel);
 
+            // Day Shift's chassis is light enough for a shadow to show on; Night Ops' is near black already.
+            if (theme == ElementTheme.Light)
+                await CheckShadowPixelsAsync(window, scroller, shift);
+
             Progress($"{shift} specimen: all of it");
             var specimen = new ConsoleSpecimen();
             var probe = new LayoutProbe(specimen);
@@ -404,6 +408,7 @@ internal sealed class UiSmokeRun
         }
 
         CheckPanels(specimen, instruments, shift);
+        CheckDepth(instruments, shift);
 
         foreach (var surface in instruments.Where(instrument => instrument is Well or Display))
         {
@@ -526,6 +531,111 @@ internal sealed class UiSmokeRun
         Checked($"The panels in the {shift} shift: {banners.Count} banners heard by their word and lit with it, the view " +
                 $"header's kicker, status and actions drawn in its faceplate, {plates.Count} plates' rails, busy bars only " +
                 $"for a known share, and {sweeps.Count} busy sweeps {(Motion.IsReduced ? "still, as animation effects are off" : "running")}");
+    }
+
+    /// <summary>
+    /// The console's depth, as far as the tree can say it: each shown faceplate casts its four shadows, a plate its
+    /// one, and a lamp one more when lit, its outer glow; each lit lamp's word, lit LED and LCD reading glows, and
+    /// nothing unlit does. Whether the shadows reach the screen is a question for pixels
+    /// (<see cref="CheckShadowPixelsAsync"/>).
+    /// </summary>
+    private void CheckDepth(IReadOnlyList<Control> instruments, string shift)
+    {
+        var faceplates = instruments.OfType<Faceplate>().ToList();
+        foreach (var faceplate in faceplates.Where(faceplate => faceplate.ShadowLayers != 4))
+            Problem($"A faceplate (\"{faceplate.Kicker}\") casts {faceplate.ShadowLayers} shadows, not its 4");
+
+        var plates = instruments.OfType<Plate>().ToList();
+        foreach (var plate in plates.Where(plate => plate.ShadowLayers != 1))
+            Problem($"A plate in the {plate.State} state casts {plate.ShadowLayers} shadows, not its 1");
+
+        var lamps = instruments.OfType<Lamp>().ToList();
+        foreach (var lamp in lamps)
+        {
+            var lit = lamp.State != LampState.Off;
+            if (lamp.ShadowLayers != (lit ? 2 : 1))
+                Problem($"The {lamp.Code} lamp casts {lamp.ShadowLayers} shadows, not " +
+                        (lit ? "2, its own and its glow" : "1"));
+            if (lamp.IsWordGlowing != lit)
+                Problem($"The {lamp.Code} lamp's word " +
+                        (lit ? "does not glow, though the lamp is lit" : "glows, though the lamp is not lit"));
+        }
+
+        var dots = instruments.OfType<LedDot>().ToList();
+        foreach (var dot in dots.Where(dot => dot.IsGlowing != (dot.State != LampState.Off)))
+            Problem($"An LED in the {dot.State} state {(dot.IsGlowing ? "has a halo" : "has no halo")}");
+
+        var readings = instruments.OfType<Lcd>().ToList();
+        foreach (var lcd in readings.Where(lcd => !lcd.IsGlowing))
+            Problem($"The {lcd.Label} LCD's reading does not glow");
+
+        Checked($"Depth in the {shift} shift: {faceplates.Count} faceplates cast their four shadows, {plates.Count} plates " +
+                $"and {lamps.Count} lamps theirs, and lit lamps' words, {dots.Count(dot => dot.IsGlowing)} LEDs and " +
+                $"{readings.Count} LCD readings glow");
+    }
+
+    /// <summary>
+    /// Whether the faceplate's shadows reach the screen. Composition draws them outside the XAML tree, so the tree
+    /// can say they were built and only a picture can say they show: a faceplate is shown alone on Day Shift's
+    /// chassis, and the chassis 6 below its foot has to be darker than the chassis well clear of it, as the drop
+    /// and ambient shadows darken it there (styles.css :1071-1074).
+    /// </summary>
+    private async Task CheckShadowPixelsAsync(MainWindow window, ScrollViewer scroller, string shift)
+    {
+        var step = $"{shift} specimen: a faceplate's shadows on the chassis";
+        if (PaletteColour(ElementTheme.Light, "Carbon950Color") is not { } chassis)
+        {
+            Problem("Styles/Console/Tokens.xaml has no Carbon950Color to lay the shadow probe on");
+            return;
+        }
+
+        var faceplate = new Faceplate
+        {
+            Kicker = "PROBE", Width = 360, Height = 120, Margin = new Thickness(60, 40, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top,
+        };
+        var ground = new Grid { Height = 420, Background = new SolidColorBrush(chassis), Children = { faceplate } };
+        await ShowAsync(scroller, step, ground);
+        await Task.Delay(Settle);
+        await RenderedAsync();
+
+        using var picture = CaptureBitmap(window);
+        var under = Brightness(window, picture, faceplate, faceplate.ActualWidth / 2, faceplate.ActualHeight + 6);
+        var clear = Brightness(window, picture, faceplate, faceplate.ActualWidth / 2, faceplate.ActualHeight + 220);
+        if (under is null || clear is null)
+            Problem($"{step}: the probe was outside the picture");
+        else if (clear - under < 6)
+            Problem($"{step}: the chassis under a faceplate is {under:0} and {clear:0} clear of it, " +
+                    "so its shadows do not show");
+        else
+            Checked($"A faceplate's shadows darken Day Shift's chassis under it: {under:0} against {clear:0} clear of it");
+    }
+
+    /// <summary>
+    /// The brightness, 0 to 255, of the picture's pixel at a point in an element, or null when the point is not in
+    /// the picture. The picture is the whole window; the element's point is taken to the window's client area and
+    /// scaled to its pixels.
+    /// </summary>
+    private static double? Brightness(MainWindow window, Drawing.Bitmap picture, FrameworkElement element,
+        double x, double y)
+    {
+        if (window.Content is not UIElement root || element.XamlRoot is not { } xamlRoot)
+            return null;
+
+        var handle = WindowNative.GetWindowHandle(window);
+        var origin = new NativePoint();
+        if (!GetWindowRect(handle, out var bounds) || !ClientToScreen(handle, ref origin))
+            return null;
+
+        var point = element.TransformToVisual(root).TransformPoint(new Windows.Foundation.Point(x, y));
+        var scale = xamlRoot.RasterizationScale;
+        var column = (int)Math.Round(origin.X - bounds.Left + point.X * scale);
+        var row = (int)Math.Round(origin.Y - bounds.Top + point.Y * scale);
+        if (column < 0 || row < 0 || column >= picture.Width || row >= picture.Height)
+            return null;
+
+        var pixel = picture.GetPixel(column, row);
+        return 0.2126 * pixel.R + 0.7152 * pixel.G + 0.0722 * pixel.B;
     }
 
     /// <summary>
@@ -928,13 +1038,21 @@ internal sealed class UiSmokeRun
     /// </summary>
     private static void Capture(MainWindow window, string path)
     {
+        using var bitmap = CaptureBitmap(window);
+        bitmap.Save(path, Drawing.Imaging.ImageFormat.Png);
+    }
+
+    /// <summary>The whole window as it is drawn, composition included, which the caller disposes of.</summary>
+    private static Drawing.Bitmap CaptureBitmap(MainWindow window)
+    {
         var handle = WindowNative.GetWindowHandle(window);
         if (!GetWindowRect(handle, out var bounds) || bounds.Right <= bounds.Left || bounds.Bottom <= bounds.Top)
             throw new InvalidOperationException("The window has no size to capture");
 
-        using var bitmap = new Drawing.Bitmap(bounds.Right - bounds.Left, bounds.Bottom - bounds.Top);
-        using (var graphics = Drawing.Graphics.FromImage(bitmap))
+        var bitmap = new Drawing.Bitmap(bounds.Right - bounds.Left, bounds.Bottom - bounds.Top);
+        try
         {
+            using var graphics = Drawing.Graphics.FromImage(bitmap);
             var context = graphics.GetHdc();
             try
             {
@@ -945,9 +1063,14 @@ internal sealed class UiSmokeRun
             {
                 graphics.ReleaseHdc(context);
             }
-        }
 
-        bitmap.Save(path, Drawing.Imaging.ImageFormat.Png);
+            return bitmap;
+        }
+        catch
+        {
+            bitmap.Dispose();
+            throw;
+        }
     }
 
     private void Problem(string text)
@@ -1056,4 +1179,15 @@ internal sealed class UiSmokeRun
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool PrintWindow(IntPtr window, IntPtr context, uint flags);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ClientToScreen(IntPtr window, ref NativePoint point);
 }
