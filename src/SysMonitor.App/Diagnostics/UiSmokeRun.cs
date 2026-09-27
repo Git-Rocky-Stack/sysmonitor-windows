@@ -221,11 +221,11 @@ internal sealed class UiSmokeRun
     /// built fails here, on every push, before a page uses it. The pictures are the review copy; the run passes on
     /// the checks.
     /// <para>
-    /// Each instrument is shown alone first, and then built again: the second copy of a template is not built the
-    /// way the first one is, and the faceplate's second copy was the one that failed. Every step is laid out inside
-    /// a <see cref="LayoutProbe"/>, so a template that fails in layout is reported against its step and the run goes
-    /// on to the next one. A failure while rendering still ends the process, and then the step written last names
-    /// what was on screen.
+    /// Each instrument is shown alone, twice, since a page shows many copies and a first copy can leave something
+    /// behind that trips the next. Then text inside each kind of host, a faceplate one part at a time, and then the
+    /// whole specimen. Every step is laid out inside a <see cref="LayoutProbe"/>, so a template that fails in layout
+    /// is reported against its step and the run goes on to the next one. A failure while rendering still ends the
+    /// process, and then the step written last names what was on screen.
     /// </para>
     /// </summary>
     private async Task VisitSpecimenAsync(MainWindow window, ElementTheme theme, string shift)
@@ -396,7 +396,8 @@ internal sealed class UiSmokeRun
     /// <summary>
     /// Text in a console style held in each kind of host: plain grids in the other theme and in the same one, then
     /// the surfaces that set their own theme, which changes how the styles inside them find their colours, and
-    /// then a faceplate, which does not, one part at a time and then whole.
+    /// then a faceplate, which does not, one part at a time and then whole. A faceplate holding a body with its
+    /// stripe's slot empty is the case that once gave the body two parents (Styles/Console/Instruments.xaml).
     /// </summary>
     private static IEnumerable<(string Step, UIElement Host)> TextHosts()
     {
@@ -416,6 +417,8 @@ internal sealed class UiSmokeRun
         yield return ("a faceplate holding BodyTextStyle", new Faceplate { Content = Text("BodyTextStyle") });
         yield return ("a faceplate with a kicker and a serial, holding BodyTextStyle",
             new Faceplate { Kicker = "PROBE", Serial = "S/N STX-0000-00", Content = Text("BodyTextStyle") });
+        yield return ("a faceplate with something in its stripe, holding BodyTextStyle",
+            new Faceplate { Kicker = "PROBE", StripeRight = Text("SerialTextStyle"), Content = Text("BodyTextStyle") });
     }
 
     /// <summary>Every console instrument: the public controls in <see cref="Faceplate"/>'s namespace.</summary>

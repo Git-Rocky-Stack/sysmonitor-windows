@@ -113,11 +113,7 @@
                                         IsHitTestVisible="False"/>
 
                                 <!-- The brushed stripe: the face, its grain, the lip along its top and the seam below
-                                     it; the kicker and serial, and the right-hand slot. Padded 30 to clear the bolts.
-                                     The text styles are named by ThemeResource, as the brushes are. Named by
-                                     StaticResource, the first faceplate drew and the second one ended the process
-                                     from inside XAML's layout; ThemeResource looks the style up for each element as it
-                                     is built. -->
+                                     it; the kicker and serial, and the right-hand slot. Padded 30 to clear the bolts. -->
                                 <Grid x:Name="Stripe" Height="{StaticResource StripeHeight}">
                                     <Border Background="{ThemeResource StripeFaceBrush}" CornerRadius="1,1,0,0"/>
                                     <Border Background="{ThemeResource StripeGrainBrush}" CornerRadius="1,1,0,0"/>
@@ -130,12 +126,18 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Style="{ThemeResource KickerTextStyle}" VerticalAlignment="Center"
+                                        <TextBlock Style="{StaticResource KickerTextStyle}" VerticalAlignment="Center"
                                                    Text="{TemplateBinding Kicker}"/>
-                                        <TextBlock Grid.Column="1" Style="{ThemeResource SerialTextStyle}" VerticalAlignment="Center"
+                                        <TextBlock Grid.Column="1" Style="{StaticResource SerialTextStyle}" VerticalAlignment="Center"
                                                    Text="{TemplateBinding Serial}"/>
-                                        <ContentPresenter Grid.Column="3" VerticalAlignment="Center"
-                                                          Content="{TemplateBinding StripeRight}"/>
+                                        <!-- A ContentControl, not a ContentPresenter. WinUI binds a presenter in a
+                                             ContentControl's template to the control's own Content while its Content
+                                             is unset, and a TemplateBinding to a property the app registers does not
+                                             count as set. An empty slot then took the faceplate's body as well, and a
+                                             body that is an element, given a second parent, ended the process from
+                                             inside layout. -->
+                                        <ContentControl Grid.Column="3" VerticalAlignment="Center" IsTabStop="False"
+                                                        Content="{TemplateBinding StripeRight}"/>
                                     </Grid>
                                 </Grid>
                                 <Border x:Name="StripeSeamLight" Grid.Row="1" Height="1" VerticalAlignment="Top"
