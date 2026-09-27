@@ -433,9 +433,11 @@ internal sealed class UiSmokeRun
     /// <summary>
     /// Why the specimen's text did not follow the shift, measured rather than guessed, as one line of the report:
     /// the probe's own theme and colour; the colour the faceplate's style gave the faceplate itself, which was in
-    /// the tree when the shift reached it, where the probe, inside the faceplate's body, was not yet; the same text
-    /// style on a line made once the specimen was live; and the probe again once the specimen's own theme is set to
-    /// the shift, which walks everything now in the tree.
+    /// the tree when the shift reached it, where the probe, inside the faceplate's body, was not yet; the same
+    /// Silver named on an element rather than by a style, the swatch beside the probe; the first stop of the
+    /// faceplate's face, named in its template; a stock WinUI button's text, which WinUI's own style colours; the
+    /// same text style on a line made once the specimen was live; and the probe again once the specimen's own theme
+    /// is set to the shift, which walks everything now in the tree.
     /// </summary>
     private async Task DescribeShiftAsync(ConsoleSpecimen specimen, ElementTheme theme, string shift)
     {
@@ -447,14 +449,23 @@ internal sealed class UiSmokeRun
         var probeColour = Colour(probe.Foreground);
         var faceplate = Descendants(specimen).OfType<Faceplate>().FirstOrDefault(plate => IsShown(plate, specimen));
 
+        var swatchColour = Colour(specimen.Swatch.Background);
+        var face = faceplate is null ? null : Descendants(faceplate).OfType<Border>()
+            .Select(border => border.Background).OfType<LinearGradientBrush>().FirstOrDefault();
+        var faceColour = face?.GradientStops.FirstOrDefault()?.Color.ToString() ?? "nothing";
+
         var styles = ConsoleTextStyles().ToDictionary(pair => pair.Key.ToString() ?? string.Empty, pair => pair.Style);
         var late = new TextBlock { Text = FontProbeText, Style = styles.GetValueOrDefault("DescriptionTextStyle") };
+        var button = new Button { Content = "PROBE" };
         var host = specimen.Content as Panel;
         host?.Children.Add(late);
+        host?.Children.Add(button);
         await RenderedAsync();
         await RenderedAsync();
         var lateColour = Colour(late.Foreground);
+        var buttonColour = Colour(button.Foreground);
         host?.Children.Remove(late);
+        host?.Children.Remove(button);
 
         specimen.RequestedTheme = theme;
         await RenderedAsync();
@@ -462,9 +473,11 @@ internal sealed class UiSmokeRun
 
         Problem($"Why, measured in the {shift} shift: the probe is in the {probeTheme} theme with silver " +
                 $"{probeColour}; the faceplate's own foreground, from its style, is {Colour(faceplate?.Foreground)} " +
-                $"(the shift's platinum is {PaletteColour(theme, "PlatinumColor")}); a line in the same style made once " +
-                $"the specimen was live is {lateColour}; the probe, once the specimen's own theme is set to the shift, " +
-                $"is {Colour(probe.Foreground)}");
+                $"(the shift's platinum is {PaletteColour(theme, "PlatinumColor")}); the swatch beside the probe, Silver " +
+                $"named on the element, is {swatchColour}; the faceplate's face, from its template, starts at " +
+                $"{faceColour} (the shift's plate is {PaletteColour(theme, "Plate1Color")}); a stock button's text is " +
+                $"{buttonColour}; a line in the same style made once the specimen was live is {lateColour}; the probe, " +
+                $"once the specimen's own theme is set to the shift, is {Colour(probe.Foreground)}");
     }
 
     /// <summary>Whether an element and every ancestor up to <paramref name="root"/> are visible.</summary>

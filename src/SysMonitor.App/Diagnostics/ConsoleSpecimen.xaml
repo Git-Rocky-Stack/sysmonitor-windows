@@ -98,7 +98,7 @@
                             BorderBrush="{ThemeResource HairlineBrush}" Background="{ThemeResource Carbon800Brush}"/>
                     <Border Grid.Column="3" CornerRadius="{StaticResource PlateCornerRadius}" BorderThickness="1"
                             BorderBrush="{ThemeResource HairlineBrush}" Background="{ThemeResource Carbon700Brush}"/>
-                    <Border Grid.Column="4" CornerRadius="{StaticResource PlateCornerRadius}" BorderThickness="1"
+                    <Border x:Name="SwatchProbe" Grid.Column="4" CornerRadius="{StaticResource PlateCornerRadius}" BorderThickness="1"
                             BorderBrush="{ThemeResource HairlineBrush}" Background="{ThemeResource SilverBrush}"/>
                     <Border Grid.Column="5" CornerRadius="{StaticResource PlateCornerRadius}" BorderThickness="1"
                             BorderBrush="{ThemeResource HairlineBrush}" Background="{ThemeResource PlatinumBrush}"/>

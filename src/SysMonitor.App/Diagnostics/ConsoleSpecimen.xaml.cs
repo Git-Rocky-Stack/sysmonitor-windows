@@ -16,4 +16,7 @@ public sealed partial class ConsoleSpecimen : UserControl
     /// <summary>The same Silver on a faceplate, which follows the shift; without it the well's check could pass
     /// on text that never followed any theme.</summary>
     internal TextBlock OnFace => FaceProbe;
+
+    /// <summary>The body-text swatch on the same faceplate: Silver named on the element itself, not by a style.</summary>
+    internal Border Swatch => SwatchProbe;
 }
