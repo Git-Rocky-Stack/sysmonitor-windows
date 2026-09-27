@@ -35,7 +35,13 @@ public class ResourceKeyTests
 
     private const string AppProject = "src/SysMonitor.App/SysMonitor.App.csproj";
 
-    /// <summary>The WinUI resources the app replaces on purpose, each with what it does.</summary>
+    /// <summary>
+    /// Every key in the Fluent overrides replaces one of WinUI's, which is that file's whole purpose;
+    /// FluentOverrideTests holds it to that. Everywhere else, an override has to be named below.
+    /// </summary>
+    private const string FluentOverrides = "src/SysMonitor.App/Styles/Console/FluentOverrides.xaml";
+
+    /// <summary>The WinUI resources the app replaces on purpose outside the Fluent overrides, each with what it does.</summary>
     private static readonly Dictionary<string, string> DeliberateOverrides = new(StringComparer.Ordinal)
     {
         ["ContentControlThemeFontFamily"] = "Fonts.xaml: the framework's own controls set their text in Public Sans",
@@ -163,6 +169,7 @@ public class ResourceKeyTests
     {
         // A theme dictionary's own key (Default, Light, HighContrast) names a theme, not a resource.
         var defined = XamlFiles()
+            .Where(file => RepoSource.Relative(file) != FluentOverrides)
             .SelectMany(file => XDocument.Load(file).Descendants()
                 .Where(element => element.Parent?.Name.LocalName != "ResourceDictionary.ThemeDictionaries")
                 .Select(element => element.Attribute(Xaml + "Key")?.Value)

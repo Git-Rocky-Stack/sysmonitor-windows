@@ -141,6 +141,7 @@ internal sealed class UiSmokeRun
             await LoadedAsync(root);
             CheckFonts(root);
             CheckThemeResources();
+            CheckFluentOverrides();
 
             foreach (var (theme, name) in Shifts)
             {
@@ -285,6 +286,40 @@ internal sealed class UiSmokeRun
             Problem("The app's resources hold no theme dictionaries to check");
         else
             Checked($"{built} theme resources built across {themes} themes");
+    }
+
+    /// <summary>
+    /// The Fluent overrides only work if WinUI's own brushes pick them up, and an override WinUI ignores raises
+    /// nothing. WinUI's accent fill reads the accent ramp through ThemeResource, and the accent button's
+    /// foreground is one of the control keys replaced outright. The application's theme is the dark one, so
+    /// each has to come out as the overrides' Night Ops values say.
+    /// </summary>
+    private void CheckFluentOverrides()
+    {
+        var overrides = OwnDictionaries(Application.Current.Resources).FirstOrDefault(dictionary =>
+            dictionary.Source?.OriginalString.EndsWith("Styles/Console/FluentOverrides.xaml", StringComparison.OrdinalIgnoreCase) == true);
+        if (overrides is null)
+        {
+            Problem("Styles/Console/FluentOverrides.xaml is not merged into the application's resources");
+            return;
+        }
+
+        var night = (ResourceDictionary)overrides.ThemeDictionaries["Default"];
+        var reached = Reaches("AccentFillColorDefaultBrush", (Windows.UI.Color)overrides["SystemAccentColorLight2"])
+                    & Reaches("AccentButtonForeground", ((SolidColorBrush)night["AccentButtonForeground"]).Color);
+
+        if (reached)
+            Checked("The accent ramp and the control overrides reach WinUI's own brushes");
+
+        bool Reaches(string key, Windows.UI.Color expected)
+        {
+            var actual = (Application.Current.Resources[key] as SolidColorBrush)?.Color;
+            if (actual == expected)
+                return true;
+
+            Problem($"{key} is {actual?.ToString() ?? "not a solid brush"} where the Fluent overrides say {expected}: WinUI did not pick them up");
+            return false;
+        }
     }
 
     /// <summary>A dictionary and everything merged into it, except WinUI's own.</summary>

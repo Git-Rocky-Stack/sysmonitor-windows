@@ -22,6 +22,15 @@ Each entry describes a behaviour change and cites the file it lives in.
   listed in THIRD-PARTY-NOTICES.md. Pages and controls pick up Public Sans now; the other
   faces arrive with the controls that use them.
 
+- **The accent colour is System-X's armed red.** Check boxes, switches, radio buttons,
+  sliders, progress bars, selections and accent buttons took whatever accent colour
+  Windows was set to, blue unless it had been changed. They now take the armed red
+  `#AA2024`, as System-X's form controls do, with its warm white on top where WinUI
+  wrote black, and the scroll bars wear System-X's armed thumb
+  (`src/SysMonitor.App/Styles/Console/FluentOverrides.xaml:120`, `:33`). High
+  Contrast is untouched: its entries restate the system colours WinUI gives those
+  controls. The smoke run checks that WinUI's own brushes pick the new colours up.
+
 - **Drive Wiper and Large Files ask before they destroy anything.** WIPE NOW started
   overwriting the moment it was pressed, and DELETE SELECTED sent every ticked file away
   without a question. Both now ask first, naming how many items are involved and how much

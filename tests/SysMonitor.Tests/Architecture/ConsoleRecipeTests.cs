@@ -28,6 +28,8 @@ public class ConsoleRecipeTests
     private static readonly Dictionary<string, string> Palettes = new(StringComparer.Ordinal)
     {
         ["src/SysMonitor.App/Styles/Console/Tokens.xaml"] = "the console palette: every theme's colours, written once",
+        ["src/SysMonitor.App/Styles/Console/FluentOverrides.xaml"] =
+            "WinUI's own resources restated in the palette's colours, each checked to be one of them (FluentOverrideTests)",
     };
     private static readonly Regex CodeColour = new(@"""#[0-9A-Fa-f]{6,8}""", RegexOptions.Compiled);
     private static readonly Regex FontFamilyLiteral = new(@"FontFamily=""(?!\{)[^""]*""", RegexOptions.Compiled);

@@ -781,7 +781,7 @@
                             </TextBlock>
                             <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
-                                <Run> Text is set in Public Sans, the first part of a new look that matches System-X</Run>
+                                <Run> Text is set in Public Sans, and check boxes, switches, sliders, progress bars and scroll bars use System-X's armed red in place of the Windows accent colour: the first parts of a new look that matches System-X. High Contrast keeps your own colours</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>

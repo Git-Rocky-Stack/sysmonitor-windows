@@ -20,6 +20,10 @@ namespace SysMonitor.Tests.Architecture;
 /// that same theme - a brush in the Light theme built from the Default theme's colour would be Night on Day - or
 /// one WinUI supplies, as the High Contrast theme's system colours are.
 /// </para>
+/// <para>
+/// And the High Contrast theme draws only in the user's system colours, or in nothing: a palette colour or a
+/// gradient there would put the console's look over the one a person chose in order to read the screen at all.
+/// </para>
 /// </summary>
 public class ThemeDictionaryParityTests
 {
@@ -28,10 +32,13 @@ public class ThemeDictionaryParityTests
     private static readonly string[] RequiredThemes = ["Default", "Light", "HighContrast"];
 
     /// <summary>
-    /// How many sets of theme dictionaries the app has at least: Styles/Console/Tokens.xaml. It rises with each
-    /// new set, so the test can never quietly pass over nothing.
+    /// How many sets of theme dictionaries the app has at least: Styles/Console/Tokens.xaml and
+    /// FluentOverrides.xaml. It rises with each new set, so the test can never quietly pass over nothing.
     /// </summary>
-    private const int MinimumThemeSets = 1;
+    private const int MinimumThemeSets = 2;
+
+    /// <summary>A brush colour taken from the user's High Contrast scheme, as WinUI's own High Contrast theme writes it.</summary>
+    private static readonly Regex SystemColourReference = new(@"^\{ThemeResource\s+SystemColor\w+\}$", RegexOptions.Compiled);
 
     private static readonly Regex StaticReference = new(
         @"\{StaticResource\s+(?:ResourceKey\s*=\s*)?(?<key>[^\s,{}]+)\s*\}", RegexOptions.Compiled);
@@ -104,6 +111,41 @@ public class ThemeDictionaryParityTests
     }
 
     [Fact]
+    public void TheRuleSeesAHighContrastResourceThatIsNotASystemColour()
+    {
+        const string Dictionary = """
+            <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                <ResourceDictionary.ThemeDictionaries>
+                    <ResourceDictionary x:Key="HighContrast">
+                        <SolidColorBrush x:Key="TextBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+                        <StaticResource x:Key="TextColor" ResourceKey="SystemColorWindowTextColor"/>
+                        <Color x:Key="GlowColor">Transparent</Color>
+                        <SolidColorBrush x:Key="GrainBrush" Color="Transparent"/>
+                        <CornerRadius x:Key="PlateCornerRadius">2</CornerRadius>
+                        <SolidColorBrush x:Key="ArmedBrush" Color="#AA2024"/>
+                        <StaticResource x:Key="PlateColor" ResourceKey="Plate1Color"/>
+                        <LinearGradientBrush x:Key="FaceBrush"/>
+                    </ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>
+            </ResourceDictionary>
+            """;
+
+        NotSystemColours(XDocument.Parse(Dictionary), "tokens.xaml").Should().BeEquivalentTo(
+            ["tokens.xaml: HighContrast ArmedBrush", "tokens.xaml: HighContrast PlateColor", "tokens.xaml: HighContrast FaceBrush"],
+            "system colours, transparency and values that are not colours at all are allowed; the palette and gradients are not");
+    }
+
+    [Fact]
+    public void EveryHighContrastResourceIsASystemColour()
+    {
+        var offences = RepoSource.FilesUnder("src/SysMonitor.App", "*.xaml")
+            .SelectMany(file => NotSystemColours(XDocument.Load(file), RepoSource.Relative(file)));
+
+        offences.Should().BeEmpty("High Contrast draws in the colours the user chose, so that the screen can be read");
+    }
+
+    [Fact]
     public void EveryStaticResourceInAThemeNamesAKeyOfThatTheme()
     {
         var reaching = RepoSource.FilesUnder("src/SysMonitor.App", "*.xaml")
@@ -113,6 +155,28 @@ public class ThemeDictionaryParityTests
     }
 
     private static bool IsThemeSet(XElement element) => element.Name.LocalName == "ResourceDictionary.ThemeDictionaries";
+
+    private static IEnumerable<string> NotSystemColours(XDocument document, string file)
+    {
+        var highContrast = document.Descendants().Where(IsThemeSet).SelectMany(set => set.Elements())
+            .Where(theme => theme.Attribute(Xaml + "Key")?.Value == "HighContrast");
+
+        foreach (var entry in highContrast.SelectMany(theme => theme.Elements()))
+        {
+            var allowed = entry.Name.LocalName switch
+            {
+                "SolidColorBrush" => entry.Attribute("Color")?.Value is { } colour
+                                      && (colour == "Transparent" || SystemColourReference.IsMatch(colour)),
+                "Color" => entry.Value.Trim() == "Transparent",
+                "StaticResource" => entry.Attribute("ResourceKey")?.Value.StartsWith("SystemColor", StringComparison.Ordinal) == true,
+                "LinearGradientBrush" or "RadialGradientBrush" => false,
+                _ => true,
+            };
+
+            if (!allowed)
+                yield return $"{file}: HighContrast {entry.Attribute(Xaml + "Key")?.Value ?? "(no key)"}";
+        }
+    }
 
     private static IEnumerable<string> OutOfThemeReferences(XDocument document, string file, IReadOnlySet<string> supplied)
     {

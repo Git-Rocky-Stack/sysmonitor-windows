@@ -31,7 +31,10 @@ Changes since v3.0.1. Each one is described in full, with the file it lives in, 
 **A new look is on its way.** STX.1 is being restyled to match System-X, its sister app,
 so the two read as one family. The type comes first: text is now set in Public Sans,
 and the faces the rest of the look uses (Archivo, Departure Mono and Iosevka) ship with
-the app under the SIL Open Font License.
+the app under the SIL Open Font License. The accent follows: check boxes, switches,
+radio buttons, sliders, progress bars, selections and scroll bars use System-X's armed
+red instead of whatever accent colour Windows is set to. High Contrast keeps your own
+colours.
 
 **Nothing is destroyed without asking.**
 - Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many
