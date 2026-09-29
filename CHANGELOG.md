@@ -18,11 +18,11 @@ Each entry describes a behaviour change and cites the file it lives in.
   either side of the word, the word itself Archivo at 11.5 tracked .08em on the 4px control
   radius, over the palette's cap face with a key light across the top - going in under the
   finger and fading to Graphite when they are disabled, which is the user's own GrayText in
-  High Contrast (`src/SysMonitor.App/Styles/Console/Controls.xaml:63`,
+  High Contrast (`src/SysMonitor.App/Styles/Console/Controls.xaml:64`,
   `src/SysMonitor.App/App.xaml:24`). Two caps carry more weight and differ only in their
   face: the armed cap for a command that cannot simply be undone
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:157`) and the chrome cap for a page's
-  single call to action (`:164`). The palette had written all three faces and Fonts.xaml
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:158`) and the chrome cap for a page's
+  single call to action (`:165`). The palette had written all three faces and Fonts.xaml
   the cap face since the tokens were generated; until this dictionary existed nothing read
   any of them. The smoke run builds each cap in the live tree, in both shifts, and checks
   the face it came out with against the palette
@@ -30,6 +30,25 @@ Each entry describes a behaviour change and cites the file it lives in.
   the rule it was read from, so a cap cannot be quietly resized
   (`tests/SysMonitor.Tests/Architecture/ConsoleCapTests.cs:131`).
 
+- **A switch is a bat lever.** A toggle was WinUI's pill with a round knob sliding in it. It is
+  now a recess cut into the chassis with a machined cap for a thumb: 42 by 22 on the 4px control
+  radius, the thumb 16 square on the 3px inset radius, and the shade the top edge casts into the
+  recess drawn as a gradient, since WinUI has no inset shadow. Turned on it arms - the track, its
+  rim and the thumb all going over to armed red together, the thumb travelling 20
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:186`). Locked, the thumb and the words go to
+  Graphite, which is the user's own GrayText in High Contrast, as a locked cap does. The palette
+  gains the eight colours the lever needs, written for all three shifts by the generator
+  (`scripts/generate-tokens.py:192`, `:299`).
+
+  WinUI's template parts are kept name for name, because ToggleSwitch's own code drives them: it
+  measures two of them to work out how far the knob travels and how far a drag may go, and writes
+  a third while a finger drags it. A template that renames one still builds and still draws, and
+  loses what that part drove with nothing to say so, so the list of them is a test
+  (`tests/SysMonitor.Tests/Architecture/ConsoleSwitchTests.cs:26`). The header and the on and off
+  words stay for the same reason: the pages use both. The smoke run builds a switch in both
+  shifts, turns it on and off again, and checks every face against the palette and the travel
+  against the number WinUI works out for itself
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:662`).
 - **A confirmation arms the button that does the thing, not Cancel.** WinUI hands a
   dialog's default button the accent style from a visual state, and that state beats any
   style the dialog sets; with the accent armed red since this release, every confirmation

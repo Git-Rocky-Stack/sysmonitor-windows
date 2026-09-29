@@ -277,6 +277,15 @@
             <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
             <SolidColorBrush x:Key="WellLipBrush" Color="#08FFFFFF"/>
 
+            <!-- The bat-lever switch's edge, and the light along the top of its thumb unlit and armed (:2330,
+                 :2345, :2360). The same in both shifts: a switch is a recess, and a recess is dark in both. -->
+            <Color x:Key="SwitchEdgeColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
+            <SolidColorBrush x:Key="SwitchEdgeBrush" Color="#CC000000"/>
+            <Color x:Key="SwitchThumbLipColor">#29FFFFFF</Color> <!-- rgba(255, 255, 255, .16) -->
+            <SolidColorBrush x:Key="SwitchThumbLipBrush" Color="#29FFFFFF"/>
+            <Color x:Key="SwitchThumbArmedLipColor">#47FFFFFF</Color> <!-- rgba(255, 255, 255, .28) -->
+            <SolidColorBrush x:Key="SwitchThumbArmedLipBrush" Color="#47FFFFFF"/>
+
             <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
                  lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
                  :1265); a VU meter's unlit segment (:1915). -->
@@ -502,6 +511,31 @@
             <LinearGradientBrush x:Key="LampArmedFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#1C0A0B"/>
                 <GradientStop Offset="1" Color="#0C0505"/>
+            </LinearGradientBrush>
+
+            <!-- The bat-lever switch (:2323): the recessed track, the inset shade over its top edge that WinUI
+                 has no inset shadow for (inset 0 2px 4px, :2331), the armed track it shows when it is on (:2350),
+                 and the machined thumb unlit and armed (::after, :2343, :2358). Dark in both shifts, as the
+                 recess is. -->
+            <LinearGradientBrush x:Key="SwitchTrackBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#070707"/>
+                <GradientStop Offset="1" Color="#0C0C0C"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchTrackArmedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#3B0D0F"/>
+                <GradientStop Offset="1" Color="#240809"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#D9000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#2A2A2A"/>
+                <GradientStop Offset="1" Color="#161616"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbArmedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#C8333A"/>
+                <GradientStop Offset="1" Color="#7F171A"/>
             </LinearGradientBrush>
         </ResourceDictionary>
 
@@ -756,6 +790,15 @@
             <Color x:Key="WellLipColor">#08FFFFFF</Color> <!-- rgba(255, 255, 255, .03) -->
             <SolidColorBrush x:Key="WellLipBrush" Color="#08FFFFFF"/>
 
+            <!-- The bat-lever switch's edge, and the light along the top of its thumb unlit and armed (:2330,
+                 :2345, :2360). The same in both shifts: a switch is a recess, and a recess is dark in both. -->
+            <Color x:Key="SwitchEdgeColor">#CC000000</Color> <!-- rgba(0, 0, 0, .8) -->
+            <SolidColorBrush x:Key="SwitchEdgeBrush" Color="#CC000000"/>
+            <Color x:Key="SwitchThumbLipColor">#29FFFFFF</Color> <!-- rgba(255, 255, 255, .16) -->
+            <SolidColorBrush x:Key="SwitchThumbLipBrush" Color="#29FFFFFF"/>
+            <Color x:Key="SwitchThumbArmedLipColor">#47FFFFFF</Color> <!-- rgba(255, 255, 255, .28) -->
+            <SolidColorBrush x:Key="SwitchThumbArmedLipBrush" Color="#47FFFFFF"/>
+
             <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
                  lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
                  :1265); a VU meter's unlit segment (:1915). -->
@@ -981,6 +1024,31 @@
             <LinearGradientBrush x:Key="LampArmedFaceBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#1C0A0B"/>
                 <GradientStop Offset="1" Color="#0C0505"/>
+            </LinearGradientBrush>
+
+            <!-- The bat-lever switch (:2323): the recessed track, the inset shade over its top edge that WinUI
+                 has no inset shadow for (inset 0 2px 4px, :2331), the armed track it shows when it is on (:2350),
+                 and the machined thumb unlit and armed (::after, :2343, :2358). Dark in both shifts, as the
+                 recess is. -->
+            <LinearGradientBrush x:Key="SwitchTrackBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#070707"/>
+                <GradientStop Offset="1" Color="#0C0C0C"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchTrackArmedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#3B0D0F"/>
+                <GradientStop Offset="1" Color="#240809"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#D9000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#2A2A2A"/>
+                <GradientStop Offset="1" Color="#161616"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbArmedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#C8333A"/>
+                <GradientStop Offset="1" Color="#7F171A"/>
             </LinearGradientBrush>
         </ResourceDictionary>
 
@@ -1235,6 +1303,15 @@
             <Color x:Key="WellLipColor">Transparent</Color>
             <SolidColorBrush x:Key="WellLipBrush" Color="Transparent"/>
 
+            <!-- The bat-lever switch's edge, and the light along the top of its thumb unlit and armed (:2330,
+                 :2345, :2360). The same in both shifts: a switch is a recess, and a recess is dark in both. -->
+            <StaticResource x:Key="SwitchEdgeColor" ResourceKey="SystemColorWindowTextColor"/>
+            <SolidColorBrush x:Key="SwitchEdgeBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+            <Color x:Key="SwitchThumbLipColor">Transparent</Color>
+            <SolidColorBrush x:Key="SwitchThumbLipBrush" Color="Transparent"/>
+            <Color x:Key="SwitchThumbArmedLipColor">Transparent</Color>
+            <SolidColorBrush x:Key="SwitchThumbArmedLipBrush" Color="Transparent"/>
+
             <!-- A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit
                  lamp shows, which stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697,
                  :1265); a VU meter's unlit segment (:1915). -->
@@ -1307,6 +1384,11 @@
             <SolidColorBrush x:Key="LampNoGoFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampExecFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="LampArmedFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
+            <SolidColorBrush x:Key="SwitchTrackBrush" Color="{ThemeResource SystemColorWindowColor}"/>
+            <SolidColorBrush x:Key="SwitchTrackArmedBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="SwitchShadeTopBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="SwitchThumbBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+            <SolidColorBrush x:Key="SwitchThumbArmedBrush" Color="{ThemeResource SystemColorHighlightTextColor}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

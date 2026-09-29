@@ -306,7 +306,10 @@ internal sealed class UiSmokeRun
             else
                 Problem($"The specimen's content is not a panel, so the caps could not be measured in the {shift} shift");
 
-            await CheckDialogsAsync(specimen, theme, shift);
+            if (specimen.Content is Panel leverHost)
+            await CheckSwitchAsync(leverHost, theme, shift);
+
+        await CheckDialogsAsync(specimen, theme, shift);
 
             // It is taller than the window: one picture per window's height of it.
             var shots = new List<string>();
@@ -646,6 +649,134 @@ internal sealed class UiSmokeRun
 
         static Button Styled(string key) =>
             new() { Content = "CAP", Style = Application.Current.Resources[key] as Style };
+    }
+
+    /// <summary>
+    /// What a switch actually draws, off and then on. The dictionary can be read without running anything
+    /// (ConsoleSwitchTests), but none of this can: WinUI applies an implicit style only where nothing nearer has
+    /// styled the element, the armed track and the armed thumb are revealed by a visual state rather than by any
+    /// value the template carries, and the knob's travel is a number the control works out for itself from two of
+    /// the template's parts. So a switch is built here, in this shift, turned on, turned off again, and asked at
+    /// each step what it came out as.
+    /// </summary>
+    private async Task CheckSwitchAsync(Panel host, ElementTheme theme, string shift)
+    {
+        Progress($"{shift} specimen: the bat-lever switch, off and on");
+
+        var lever = new ToggleSwitch { Header = "SPECIMEN", Opacity = 0, IsHitTestVisible = false };
+        host.Children.Add(lever);
+        try
+        {
+            await SettledAsync();
+
+            // Why InstrumentTemplateTests turns its presenter rule off for this one template: the hazard needs a
+            // Content on the templated parent to hand a presenter a second time, and a Control that is not a
+            // ContentControl has none. That is a fact about the framework, so it is asked of the framework here
+            // rather than asserted in a comment there.
+            if (lever.GetType().IsSubclassOf(typeof(ContentControl)))
+                Problem("ToggleSwitch is a ContentControl after all, so a presenter in its template can be given " +
+                        "the control's own content a second time, and the exemption in InstrumentTemplateTests " +
+                        "reopens the crash it was written for");
+
+            var track = Named<Border>(lever, "OuterBorder");
+            var armedTrack = Named<Border>(lever, "SwitchKnobBounds");
+            var thumbOff = Named<Border>(lever, "SwitchKnobOff");
+            var thumbOn = Named<Border>(lever, "SwitchKnobOn");
+            var knob = Named<Grid>(lever, "SwitchKnob");
+            if (track is null || armedTrack is null || thumbOff is null || thumbOn is null || knob is null)
+            {
+                Problem($"The switch in the {shift} shift is missing a part the bat lever is drawn from, so it " +
+                        "came out as WinUI's pill or not at all");
+                return;
+            }
+
+            var problems = 0;
+            void Face(string what, Brush? drawn, string token)
+            {
+                var wanted = Describe(PaletteBrush(theme, token));
+                if (wanted is null)
+                {
+                    problems++;
+                    Problem($"The {shift} palette does not write {token}, so {what} cannot be checked");
+                }
+                else if (Describe(drawn) != wanted)
+                {
+                    problems++;
+                    Problem($"In the {shift} shift {what} came out {Describe(drawn)}, where the palette's {token} " +
+                            $"is {wanted}");
+                }
+            }
+
+            Face("the switch's track", track.Background, "SwitchTrackBrush");
+            Face("the switch's edge", track.BorderBrush, "SwitchEdgeBrush");
+            Face("the thumb", thumbOff.Background, "SwitchThumbBrush");
+            Face("the armed track", armedTrack.Background, "SwitchTrackArmedBrush");
+            Face("the armed thumb", thumbOn.Background, "SwitchThumbArmedBrush");
+
+            if (Travel(knob) != 0)
+            {
+                problems++;
+                Problem($"The switch in the {shift} shift starts with its thumb {Travel(knob)} over, not at rest");
+            }
+
+            if (armedTrack.Opacity > 0.01)
+            {
+                problems++;
+                Problem($"The switch in the {shift} shift shows its armed track while it is off");
+            }
+
+            lever.IsOn = true;
+            await SettledAsync();
+
+            // 20 is translateX(20px), and also what WinUI computes from SwitchKnobBounds less SwitchKnob. A
+            // template whose two parts disagree with the state's own number lands the thumb in one place when it
+            // is clicked and another when it is dragged, which is the thing ConsoleSwitchTests cannot see.
+            if (Travel(knob) != 20)
+            {
+                problems++;
+                Problem($"Turned on, the switch in the {shift} shift moved its thumb {Travel(knob)}, not the 20 " +
+                        "the lever travels");
+            }
+
+            if (armedTrack.Opacity < 0.99 || thumbOn.Opacity < 0.99)
+            {
+                problems++;
+                Problem($"Turned on, the switch in the {shift} shift left its armed track at " +
+                        $"{armedTrack.Opacity:0.##} and its armed thumb at {thumbOn.Opacity:0.##}, so it does not " +
+                        "read as armed");
+            }
+
+            lever.IsOn = false;
+            await SettledAsync();
+
+            if (Travel(knob) != 0)
+            {
+                problems++;
+                Problem($"Turned off again, the switch in the {shift} shift left its thumb {Travel(knob)} over");
+            }
+
+            if (problems == 0)
+                Checked($"The bat-lever switch in the {shift} shift drew the palette's recess, edge and thumb, and " +
+                        "armed itself and travelled 20 when it was turned on");
+        }
+        catch (Exception ex)
+        {
+            Problem($"The switch could not be measured in the {shift} shift: {ex.Message}");
+        }
+        finally
+        {
+            host.Children.Remove(lever);
+        }
+
+        static double Travel(Grid knob) => (knob.RenderTransform as TranslateTransform)?.X ?? double.NaN;
+    }
+
+    /// <summary>A frame, time for a 160ms state to finish, and another frame.</summary>
+    private static async Task SettledAsync()
+    {
+        await RenderedAsync();
+        await Task.Delay(Settle);
+        await RenderedAsync();
     }
 
     /// <summary>

@@ -24,6 +24,19 @@ public class InstrumentTemplateTests
 {
     private const string ConsoleFolder = "src/SysMonitor.App/Styles/Console";
 
+    /// <summary>
+    /// Controls the hazard above cannot reach, because WinUI's fallback is to the templated parent's own
+    /// Content and a Control that is not a ContentControl has none. ToggleSwitch is the case: Header, OnContent
+    /// and OffContent are all it has, WinUI's own template binds presenters to exactly those three, and the
+    /// substitute this rule prescribes elsewhere - a ContentControl - is not what the control's code looks for
+    /// when it shows and hides HeaderContentPresenter, so it would cost every switch its header.
+    /// <para>
+    /// The exemption is checked, not taken on trust: TheExemptedControlsReallyHaveNoContentOfTheirOwn asks the
+    /// framework itself, so listing a ContentControl here fails rather than quietly reopening the crash.
+    /// </para>
+    /// </summary>
+    private static readonly string[] ControlsWithNoContentOfTheirOwn = ["ToggleSwitch"];
+
     /// <summary>The one thing a template's presenter may show: the control's own Content.</summary>
     private static readonly Regex OwnContent = new(@"^\{TemplateBinding\s+Content\}$", RegexOptions.Compiled);
 
@@ -55,6 +68,44 @@ public class InstrumentTemplateTests
             "a presenter of anything but the control's own Content is caught, and a ContentControl slot is not");
     }
 
+    /// <summary>
+    /// The exemption is narrow: it turns the rule off for one template, not for the file it sits in, and not
+    /// for a presenter of something else in any other template. Without this, adding a control to the list
+    /// could quietly stop the rule reading its neighbours.
+    /// </summary>
+    [Fact]
+    public void TheExemptionReachesOnlyTheTemplateItIsFor()
+    {
+        var dictionary = XDocument.Parse("""
+            <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                <Style TargetType="ToggleSwitch">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ToggleSwitch">
+                                <ContentPresenter Content="{TemplateBinding Header}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ContentControl">
+                                <ContentPresenter Content="{TemplateBinding Tag}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ResourceDictionary>
+            """, LoadOptions.SetLineInfo);
+
+        PresentersOfSomethingElse(dictionary).Should().Equal(
+            ["16 {TemplateBinding Tag}"],
+            "the switch's header presenter is exempt and the ContentControl's Tag presenter in the very same " +
+            "dictionary is still caught");
+    }
+
     [Fact]
     public void EveryPresenterInAConsoleTemplatePresentsTheControlsOwnContent()
     {
@@ -76,6 +127,8 @@ public class InstrumentTemplateTests
     private static IEnumerable<string> PresentersOfSomethingElse(XDocument document) =>
         document.Descendants()
             .Where(element => element.Name.LocalName == "ControlTemplate")
+            .Where(template => !ControlsWithNoContentOfTheirOwn.Contains(
+                template.Attribute("TargetType")?.Value, StringComparer.Ordinal))
             .SelectMany(template => template.Descendants())
             .Where(element => element.Name.LocalName == "ContentPresenter")
             .Select(presenter => (Presenter: presenter, Content: presenter.Attribute("Content")?.Value))

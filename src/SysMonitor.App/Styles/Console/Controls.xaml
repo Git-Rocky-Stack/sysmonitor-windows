@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
     WinUI's stock controls, re-templated as the Command Console's own. FluentOverrides.xaml restates the colours
-    WinUI reads, which is as far as a colour can reach; this is where a control's shape changes.
+    WinUI reads, which is as far as a colour can reach; this is where a control's shape changes. Two so far: the
+    cap that every button takes, and the bat-lever switch at the foot of the file.
 
     The cap. A button on the console is a machined key cut from the chassis: the palette's cap face, a key light
     across the top, the machined radius, and its word in Archivo at the cap width. The palette has written the
@@ -165,5 +166,301 @@
         <Setter Property="Background" Value="{ThemeResource ChromeCapFaceBrush}"/>
         <Setter Property="Foreground" Value="{ThemeResource ChromeCapForegroundBrush}"/>
         <Setter Property="BorderBrush" Value="{ThemeResource ChromeEdgeBrush}"/>
+    </Style>
+    <!-- ============================================================ BAT-LEVER SWITCH (.switch, :2323) -->
+
+    <!-- A switch on the console is a lever, not a pill: a recess cut into the chassis with a machined cap for a
+         thumb, armed red when it is on. FluentOverrides.xaml can only reach the colours, so the shape is cut here.
+
+         WinUI's own parts are kept, name for name, because ToggleSwitch's code drives them. It measures
+         SwitchKnobBounds against SwitchKnob to know how far the knob travels and how far a drag may go, writes
+         KnobTranslateTransform while a finger drags it, and puts the focus rectangle on SwitchAreaGrid. A template
+         that renames one of them still builds and still draws, and loses what that part drove with nothing to say
+         so, which is why the list of them is a test (ConsoleSwitchTests). The header and the on and off words stay
+         for the same reason: the pages use both.
+
+         The travel is WinUI's reposition animation, not the transcribed 160ms on the snap easing (:2347). The
+         control works the knob's offsets out for itself and hands them to these animations; replacing them with a
+         spline of the right duration is the one change here that could break dragging, and a drag is not something
+         the smoke run can press. -->
+    <Style TargetType="ToggleSwitch">
+        <Setter Property="Foreground" Value="{ThemeResource SilverBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleBodyFontFamily}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="ManipulationMode" Value="System,TranslateX"/>
+        <Setter Property="UseSystemFocusVisuals" Value="True"/>
+        <Setter Property="FocusVisualMargin" Value="-3"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleSwitch">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+
+                                <!-- Under the pointer the recess edge sharpens, as a cap's does. -->
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="OuterBorder.BorderBrush" Value="{ThemeResource HairlineStrongBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed"/>
+
+                                <!-- Locked: the thumb and the words go to Graphite, which is GrayText in High
+                                     Contrast. CSS dims the whole lever to .42 opacity and desaturates it (:2365);
+                                     recolouring is the treatment the caps use, and it is the one that survives
+                                     High Contrast, where dimming a control against its own ground is the thing
+                                     that must not happen. -->
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="OuterBorder.BorderBrush" Value="{ThemeResource GraphiteBrush}"/>
+                                        <Setter Target="SwitchKnobOff.Background" Value="{ThemeResource GraphiteBrush}"/>
+                                        <Setter Target="SwitchKnobOn.Background" Value="{ThemeResource GraphiteBrush}"/>
+                                        <Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource GraphiteBrush}"/>
+                                        <Setter Target="OnContentPresenter.Foreground" Value="{ThemeResource GraphiteBrush}"/>
+                                        <Setter Target="OffContentPresenter.Foreground" Value="{ThemeResource GraphiteBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="ToggleStates">
+                                <VisualStateGroup.Transitions>
+                                    <VisualTransition x:Name="DraggingToOnTransition" From="Dragging" To="On" GeneratedDuration="0">
+                                        <Storyboard>
+                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobCurrentToOnOffset}"/>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ArmedRim" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOn" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOff" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="0"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualTransition>
+
+                                    <VisualTransition x:Name="OnToDraggingTransition" From="On" To="Dragging" GeneratedDuration="0">
+                                        <Storyboard>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ArmedRim" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOn" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOff" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0" Value="0"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualTransition>
+
+                                    <VisualTransition x:Name="DraggingToOffTransition" From="Dragging" To="Off" GeneratedDuration="0">
+                                        <Storyboard>
+                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobCurrentToOffOffset}"/>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="0"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ArmedRim" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="0"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOn" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="0"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOff" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualTransition>
+
+                                    <VisualTransition x:Name="OnToOffTransition" From="On" To="Off" GeneratedDuration="0">
+                                        <Storyboard>
+                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobOnToOffOffset}"/>
+                                        </Storyboard>
+                                    </VisualTransition>
+
+                                    <VisualTransition x:Name="OffToOnTransition" From="Off" To="On" GeneratedDuration="0">
+                                        <Storyboard>
+                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobOffToOnOffset}"/>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ArmedRim" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOn" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOff" Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="0"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualTransition>
+                                </VisualStateGroup.Transitions>
+
+                                <VisualState x:Name="Dragging"/>
+                                <VisualState x:Name="Off"/>
+
+                                <!-- On: the thumb sits 20 over, which is translateX(20px) and also exactly
+                                     SwitchKnobBounds less SwitchKnob, the distance WinUI works out for a drag. -->
+                                <VisualState x:Name="On">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="KnobTranslateTransform" Storyboard.TargetProperty="X" To="20" Duration="0"/>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
+                                            <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ArmedRim" Storyboard.TargetProperty="Opacity">
+                                            <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOn" Storyboard.TargetProperty="Opacity">
+                                            <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobOff" Storyboard.TargetProperty="Opacity">
+                                            <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="0"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="ContentStates">
+                                <VisualState x:Name="OffContent">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="OffContentPresenter" Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OffContentPresenter" Storyboard.TargetProperty="IsHitTestVisible">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="True"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="OnContent">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="OnContentPresenter" Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="OnContentPresenter" Storyboard.TargetProperty="IsHitTestVisible">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="True"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <ContentPresenter x:Name="HeaderContentPresenter"
+                                          Grid.Row="0"
+                                          Content="{TemplateBinding Header}"
+                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          FontFamily="{TemplateBinding FontFamily}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          Margin="0,0,0,6"
+                                          TextWrapping="Wrap"
+                                          VerticalAlignment="Top"
+                                          Visibility="Collapsed"
+                                          AutomationProperties.AccessibilityView="Raw"/>
+
+                        <Grid Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="12" MaxWidth="12"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid x:Name="SwitchAreaGrid" Grid.ColumnSpan="3" Background="Transparent"
+                                  CornerRadius="{StaticResource CapCornerRadius}"
+                                  Control.IsTemplateFocusTarget="True"/>
+
+                            <ContentPresenter x:Name="OffContentPresenter" Grid.Column="2" Opacity="0"
+                                              Content="{TemplateBinding OffContent}"
+                                              ContentTemplate="{TemplateBinding OffContentTemplate}"
+                                              Foreground="{TemplateBinding Foreground}"
+                                              FontFamily="{TemplateBinding FontFamily}"
+                                              FontSize="{TemplateBinding FontSize}"
+                                              IsHitTestVisible="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"
+                                              AutomationProperties.AccessibilityView="Raw"/>
+
+                            <ContentPresenter x:Name="OnContentPresenter" Grid.Column="2" Opacity="0"
+                                              Content="{TemplateBinding OnContent}"
+                                              ContentTemplate="{TemplateBinding OnContentTemplate}"
+                                              Foreground="{TemplateBinding Foreground}"
+                                              FontFamily="{TemplateBinding FontFamily}"
+                                              FontSize="{TemplateBinding FontSize}"
+                                              IsHitTestVisible="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"
+                                              AutomationProperties.AccessibilityView="Raw"/>
+
+                            <!-- The recess: the track, its edge, and the shade the top edge casts into it. -->
+                            <Border x:Name="OuterBorder" Width="42" Height="22"
+                                    Background="{ThemeResource SwitchTrackBrush}"
+                                    BorderBrush="{ThemeResource SwitchEdgeBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource CapCornerRadius}"/>
+
+                            <!-- Armed, the rim goes to armed deep and the track to the armed recess. -->
+                            <Border x:Name="ArmedRim" Width="42" Height="22" Opacity="0"
+                                    BorderBrush="{ThemeResource ArmedDeepBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource CapCornerRadius}"
+                                    IsHitTestVisible="False"/>
+
+                            <!-- Inside the 1px edge: 40 by 20, which is what the knob travels in. -->
+                            <Grid Width="40" Height="20">
+                                <Border x:Name="SwitchKnobBounds" Width="40" Height="20" Opacity="0"
+                                        Background="{ThemeResource SwitchTrackArmedBrush}"
+                                        CornerRadius="{StaticResource InsetCornerRadius}"
+                                        IsHitTestVisible="False"/>
+
+                                <Border x:Name="Shade" Height="4" VerticalAlignment="Top"
+                                        Background="{ThemeResource SwitchShadeTopBrush}"
+                                        IsHitTestVisible="False"/>
+
+                                <Grid x:Name="SwitchKnob" Width="20" Height="20" HorizontalAlignment="Left">
+                                    <Border x:Name="SwitchKnobOff" Width="16" Height="16"
+                                            Background="{ThemeResource SwitchThumbBrush}"
+                                            CornerRadius="{StaticResource InsetCornerRadius}">
+                                        <Border Height="1" VerticalAlignment="Top" Margin="1,0"
+                                                Background="{ThemeResource SwitchThumbLipBrush}"/>
+                                    </Border>
+
+                                    <Border x:Name="SwitchKnobOn" Width="16" Height="16" Opacity="0"
+                                            Background="{ThemeResource SwitchThumbArmedBrush}"
+                                            CornerRadius="{StaticResource InsetCornerRadius}">
+                                        <Border Height="1" VerticalAlignment="Top" Margin="1,0"
+                                                Background="{ThemeResource SwitchThumbArmedLipBrush}"/>
+                                    </Border>
+
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform x:Name="KnobTranslateTransform"/>
+                                    </Grid.RenderTransform>
+                                </Grid>
+                            </Grid>
+
+                            <Thumb x:Name="SwitchThumb" Grid.ColumnSpan="3"
+                                   AutomationProperties.AccessibilityView="Raw">
+                                <Thumb.Template>
+                                    <ControlTemplate TargetType="Thumb">
+                                        <Rectangle Fill="Transparent"/>
+                                    </ControlTemplate>
+                                </Thumb.Template>
+                            </Thumb>
+                        </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>

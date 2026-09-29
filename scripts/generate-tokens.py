@@ -189,6 +189,11 @@ GROUPS = [
   ("WellEdge", rgba(0, 0, 0, .7), rgba(0, 0, 0, .7), WT),
   ("WellLip", rgba(255, 255, 255, .03), rgba(255, 255, 255, .03), TR),
  ]),
+ ("The bat-lever switch's edge, and the light along the top of its thumb unlit and armed (:2330, :2345, :2360).\nThe same in both shifts: a switch is a recess, and a recess is dark in both.", [
+  ("SwitchEdge", rgba(0, 0, 0, .8), rgba(0, 0, 0, .8), WT),
+  ("SwitchThumbLip", rgba(255, 255, 255, .16), rgba(255, 255, 255, .16), TR),
+  ("SwitchThumbArmedLip", rgba(255, 255, 255, .28), rgba(255, 255, 255, .28), TR),
+ ]),
  ("A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit lamp shows,\nwhich stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697, :1265); a VU meter's unlit\nsegment (:1915).", [
   ("LampEdge", rgba(255, 255, 255, .06), rgba(255, 255, 255, .06), WT),
   ("LampLip", rgba(255, 255, 255, .06), rgba(255, 255, 255, .06), TR),
@@ -290,6 +295,13 @@ def composed(theme):
     for key, top, bottom in lamps:
         lines += lin(c, key, [(0, hexc(top)), (1, hexc(bottom))])
     add("Lamp caps, unlit and in each lit state, dark in both shifts (:1675, lit :1715-1779).", lines)
+    recess = rgba(0, 0, 0, .85)
+    add("The bat-lever switch (:2323): the recessed track, the inset shade over its top edge that WinUI has no\ninset shadow for (inset 0 2px 4px, :2331), the armed track it shows when it is on (:2350), and the machined\nthumb unlit and armed (::after, :2343, :2358). Dark in both shifts, as the recess is.",
+        lin(c, 'SwitchTrackBrush', [(0, hexc('070707')), (1, hexc('0c0c0c'))])
+        + lin(c, 'SwitchTrackArmedBrush', [(0, hexc('3b0d0f')), (1, hexc('240809'))])
+        + lin(c, 'SwitchShadeTopBrush', [(0, recess), (1, fade(recess))])
+        + lin(c, 'SwitchThumbBrush', [(0, hexc('2a2a2a')), (1, hexc('161616'))])
+        + lin(c, 'SwitchThumbArmedBrush', [(0, hexc('c8333a')), (1, 'ArmedDeep')]))
     return out
 
 COMPOSED_HC = {  # key -> system colour (or Transparent) for the High Contrast theme
@@ -304,6 +316,10 @@ COMPOSED_HC = {  # key -> system colour (or Transparent) for the High Contrast t
     'LcdGlassBrush': TR, 'ScanBandBrush': TR,
     'LampFaceBrush': W, 'LampGoFaceBrush': W, 'LampHoldFaceBrush': W, 'LampWarnFaceBrush': W,
     'LampNoGoFaceBrush': W, 'LampExecFaceBrush': W, 'LampArmedFaceBrush': W,
+    # A switch has to read on and off in High Contrast, so its track takes Window and Highlight and its thumb
+    # the text colour that sits on each. The inset shade is decoration and goes.
+    'SwitchTrackBrush': W, 'SwitchTrackArmedBrush': HL, 'SwitchShadeTopBrush': TR,
+    'SwitchThumbBrush': WT, 'SwitchThumbArmedBrush': HLT,
 }
 
 # Solid pairs that are not palette tokens but recipe colours that change with the shift.
