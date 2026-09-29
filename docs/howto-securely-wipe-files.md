@@ -41,8 +41,9 @@ of this page, but the explanation matters.
 
    The app asks first. The question names how many files and folders are listed and
    how much they hold, and says that none of it goes to the Recycle Bin. When the
-   selection sits on an SSD, the page's warning is repeated in it. **Cancel** is the
-   default, so Enter or Escape leaves everything where it is
+   selection sits on an SSD, the page's warning is repeated in it. **Wipe** is the armed
+   button and **Cancel** the plain one; neither is the default, so Enter arms nothing and
+   Escape leaves everything where it is
    (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`). Up to and including v3.0.1
    the wipe started the moment the button was pressed.
 

@@ -379,7 +379,7 @@ Overwriting a single file is not one of them. See
 2. Select wipe method based on sensitivity
 3. Click **Wipe Now**
 4. Confirm with **Wipe**. The question names how many files and folders are listed and how
-   much they hold, and Cancel is the default
+   much they hold. **Wipe** is armed red, **Cancel** is plain, and neither is the default
    (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`). This is not reversible
 5. Read the result. "Wiped" means the read-back matched. "Unconfirmed" means it did not,
    and you should treat the data as possibly still present

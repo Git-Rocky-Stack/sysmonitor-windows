@@ -733,7 +733,7 @@
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
-                                <Run> Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many items are involved and how much they hold. Cancel is the default, so Enter or Escape changes nothing</Run>
+                                <Run> Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many items are involved and how much they hold. The button that does it is drawn in armed red and Cancel plain, and neither is the default, so Enter changes nothing and Escape cancels</Run>
                             </TextBlock>
                             <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>

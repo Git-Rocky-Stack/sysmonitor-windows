@@ -299,6 +299,15 @@ internal sealed class UiSmokeRun
             Progress($"{shift} specimen: checking");
             var followedShift = CheckInstruments(specimen, theme, shift);
 
+            // The caps and the confirmation, in the live tree and in this shift: both are questions only a
+            // running WinUI answers. The specimen's own root is the host, so they inherit the shift with it.
+            if (specimen.Content is Panel capHost)
+                CheckCaps(capHost, theme, shift);
+            else
+                Problem($"The specimen's content is not a panel, so the caps could not be measured in the {shift} shift");
+
+            await CheckDialogsAsync(specimen, theme, shift);
+
             // It is taller than the window: one picture per window's height of it.
             var shots = new List<string>();
             for (var offset = 0.0; shots.Count < 8; offset += scroller.ViewportHeight)
@@ -572,6 +581,176 @@ internal sealed class UiSmokeRun
         Checked($"Depth in the {shift} shift: {faceplates.Count} faceplates cast their four shadows, {plates.Count} plates " +
                 $"and {lamps.Count} lamps theirs, and lit lamps' words, {dots.Count(dot => dot.IsGlowing)} LEDs and " +
                 $"{readings.Count} LCD readings glow");
+    }
+
+    /// <summary>
+    /// Whether a button nobody styled is a cap, and whether the two caps that carry more weight are the faces
+    /// they are meant to be.
+    /// <para>
+    /// The dictionary can be read without running anything (ConsoleCapTests), but whether an implicit style
+    /// actually reaches a button cannot: WinUI applies one only when nothing nearer has already styled the
+    /// element, and every control template in the framework that holds a button of its own defends it with a
+    /// local implicit style. So each cap is built here, in the live tree, in this shift, and asked what face it
+    /// came out with - against the palette, which is the only thing that says what the answer should be.
+    /// </para>
+    /// </summary>
+    private void CheckCaps(Panel host, ElementTheme theme, string shift)
+    {
+        // The plain cap has no key: a bare button, with nothing asked of it, is the only way to ask for it.
+        var caps = new (string What, string Face, string? Key, Button Cap)[]
+        {
+            ("a button nobody styled", "CapFaceBrush", null, new Button { Content = "CAP" }),
+            ("an armed cap", "ArmedCapFaceBrush", "ArmedCapButtonStyle", Styled("ArmedCapButtonStyle")),
+            ("a chrome cap", "ChromeCapFaceBrush", "ChromeCapButtonStyle", Styled("ChromeCapButtonStyle")),
+        };
+
+        var measured = 0;
+        foreach (var (what, face, key, cap) in caps)
+        {
+            if (key is not null && cap.Style is null)
+            {
+                Problem($"{what} could not be built in the {shift} shift: {key} is not in the application's resources");
+                continue;
+            }
+
+            cap.Opacity = 0;
+            cap.IsHitTestVisible = false;
+            host.Children.Add(cap);
+            try
+            {
+                cap.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+
+                var wanted = Describe(PaletteBrush(theme, face));
+                var drawn = Describe(cap.Background);
+                if (wanted is null)
+                    Problem($"The {shift} palette does not write {face}, so {what} cannot be checked");
+                else if (drawn != wanted)
+                    Problem($"In the {shift} shift {what} came out {drawn}, where the palette's {face} is {wanted}: " +
+                            "the cap did not reach it");
+                else
+                    measured++;
+            }
+            catch (Exception ex)
+            {
+                Problem($"{what} could not be measured in the {shift} shift: {ex.Message}");
+            }
+            finally
+            {
+                host.Children.Remove(cap);
+            }
+        }
+
+        if (measured == caps.Length)
+            Checked($"The caps in the {shift} shift: a button nobody styled, an armed cap and a chrome cap each " +
+                    "drew the palette's face for it");
+
+        static Button Styled(string key) =>
+            new() { Content = "CAP", Style = Application.Current.Resources[key] as Style };
+    }
+
+    /// <summary>
+    /// Which button a confirmation actually draws in the armed face. This is the one thing about a dialog that
+    /// cannot be read from the code that builds it: WinUI's own template gives the dialog's default button
+    /// <c>AccentButtonStyle</c> from a visual state when the dialog opens (generic.xaml, DefaultButtonStates),
+    /// and Phase 1 made the accent armed red. So a confirmation whose default button is Cancel draws Cancel in
+    /// armed red and the destructive button plain - the emphasis exactly backwards - and nothing anywhere says
+    /// so. The dialog is opened here and both buttons are asked what face they came out with.
+    /// </summary>
+    private async Task CheckDialogsAsync(FrameworkElement owner, ElementTheme theme, string shift)
+    {
+        const string Destructive = "Wipe it";
+        var step = $"{shift} specimen: which button a confirmation arms";
+        Progress(step);
+
+        var armed = Describe(PaletteBrush(theme, "ArmedCapFaceBrush"));
+        var plain = Describe(PaletteBrush(theme, "CapFaceBrush"));
+        if (armed is null || plain is null)
+        {
+            Problem($"The {shift} palette does not write {(armed is null ? "ArmedCapFaceBrush" : "CapFaceBrush")}, " +
+                    "so the dialog cannot be checked");
+            return;
+        }
+
+        var dialog = ConsoleDialog.Confirm(owner, "Specimen", "This dialog does nothing; the run opens it to " +
+                                                              "see which of its buttons is armed.", Destructive);
+        var showing = dialog.ShowAsync();
+        try
+        {
+            await RenderedAsync();
+            await Task.Delay(Settle);
+            await RenderedAsync();
+
+            var primary = Named<Button>(dialog, "PrimaryButton");
+            var close = Named<Button>(dialog, "CloseButton");
+            if (primary is null || close is null)
+            {
+                Problem($"The confirmation in the {shift} shift has no {(primary is null ? "primary" : "close")} " +
+                        "button to read, so the run cannot tell which one is armed");
+                return;
+            }
+
+            var problems = 0;
+            if (Describe(primary.Background) != armed)
+            {
+                problems++;
+                Problem($"In the {shift} shift the confirmation draws \"{Destructive}\" {Describe(primary.Background)}, " +
+                        $"where the armed cap is {armed}: the button that does the thing is not the armed one");
+            }
+
+            // Cancel has to be the plain cap exactly, not merely "not the armed cap": the face WinUI's accent
+            // state hands it is a solid armed red, which is not the armed cap's gradient and would slip past a
+            // check that only asked whether the two matched.
+            if (Describe(close.Background) != plain)
+            {
+                problems++;
+                Problem($"In the {shift} shift the confirmation draws Cancel {Describe(close.Background)}, where the " +
+                        $"plain cap is {plain}: Cancel is emphasised, and on a confirmation that reads backwards");
+            }
+
+            if (problems == 0)
+                Checked($"The confirmation in the {shift} shift arms \"{Destructive}\" and draws Cancel plain");
+        }
+        catch (Exception ex)
+        {
+            Problem($"Opening the confirmation in the {shift} shift threw: {ex.Message}");
+        }
+        finally
+        {
+            // A dialog left open holds the run until the watchdog.
+            dialog.Hide();
+            try
+            {
+                await showing;
+            }
+            catch (Exception ex)
+            {
+                Note($"Closing the confirmation in the {shift} shift threw: {ex.Message}");
+            }
+
+            await RenderedAsync();
+        }
+    }
+
+    /// <summary>A brush as it reads in a report: a colour, or a gradient's stops in order.</summary>
+    private static string? Describe(Brush? brush) => brush switch
+    {
+        SolidColorBrush solid => solid.Color.ToString(),
+        GradientBrush gradient => string.Join(" ", gradient.GradientStops.Select(stop => $"{stop.Offset:0.##}:{stop.Color}")),
+        null => null,
+        _ => brush.GetType().Name,
+    };
+
+    /// <summary>A brush as Styles/Console/Tokens.xaml writes it for a shift.</summary>
+    private static Brush? PaletteBrush(ElementTheme shift, string key)
+    {
+        var tokens = OwnDictionaries(Application.Current.Resources).FirstOrDefault(dictionary =>
+            dictionary.Source?.OriginalString.EndsWith("Styles/Console/Tokens.xaml", StringComparison.OrdinalIgnoreCase) == true);
+        var themeKey = shift == ElementTheme.Light ? "Light" : "Default";
+        if (tokens is null || !tokens.ThemeDictionaries.TryGetValue(themeKey, out var theme) ||
+            theme is not ResourceDictionary brushes || !brushes.TryGetValue(key, out var brush))
+            return null;
+
+        return brush as Brush;
     }
 
     /// <summary>

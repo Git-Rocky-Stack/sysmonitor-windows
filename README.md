@@ -38,8 +38,9 @@ colours.
 
 **Nothing is destroyed without asking.**
 - Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many
-  items are involved and how much they hold. Cancel is the default, so Enter or Escape
-  changes nothing.
+  items are involved and how much they hold. The button that does it is drawn in armed
+  red and Cancel plain, and neither is the default, so Enter changes nothing and Escape
+  cancels.
 - Large Files and Duplicate Finder never delete a file permanently. A file Windows
   cannot recycle, on a network or removable drive or larger than the Recycle Bin is set
   to hold, is left where it is, and the result says so. A file is only reported as moved
@@ -227,7 +228,7 @@ SysMonitor.sln
 |   +-- Converters/              # Value converters
 |   +-- Diagnostics/             # The UI smoke run (--ui-smoke)
 |   +-- Assets/Fonts/            # The console typefaces and their licences
-|   \-- Styles/                  # Colors and styles; Console/ holds the fonts and the palette
+|   \-- Styles/                  # Colors and styles; Console/ holds the faces, palette, text, controls and instruments
 |
 +-- src/SysMonitor.Core/         # Core library
 |   +-- Models/

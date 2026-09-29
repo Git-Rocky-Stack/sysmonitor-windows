@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using SysMonitor.App.Controls.Instruments;
 using SysMonitor.App.ViewModels;
 
 namespace SysMonitor.App.Views;
@@ -31,19 +32,11 @@ public sealed partial class RegistryCleanerPage : Page
         if (!ViewModel.HasBackup)
             return;
 
-        var dialog = new ContentDialog
-        {
-            Title = "Restore Registry Backup",
-            Content = $"Import the backup created at {System.IO.File.GetLastWriteTime(ViewModel.LastBackupPath):g}?\n\n" +
+        var message = $"Import the backup created at {System.IO.File.GetLastWriteTime(ViewModel.LastBackupPath):g}?\n\n" +
                       "This puts back the registry keys and values that the last cleaning changed. " +
-                      "Windows asks for administrator permission if the backup contains system-wide keys.",
-            PrimaryButtonText = "Restore",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = this.XamlRoot
-        };
+                      "Windows asks for administrator permission if the backup contains system-wide keys.";
 
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        if (await ConsoleDialog.ConfirmAsync(this, "Restore Registry Backup", message, "Restore"))
         {
             await ViewModel.RestoreLastBackupAsync();
         }

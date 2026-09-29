@@ -31,8 +31,8 @@ public sealed partial class DriveWiperPage : Page
     }
 
     /// <summary>
-    /// Asks before a wipe starts, saying how much is listed and that none of it can be brought back. Cancel is
-    /// the default, so Enter or Escape leaves every file where it is.
+    /// Asks before a wipe starts, saying how much is listed and that none of it can be brought back. No button
+    /// is the default, so Enter arms nothing and Escape leaves every file where it is.
     /// </summary>
     private Task<bool> AskBeforeWipingAsync(WipeConfirmation wipe)
     {

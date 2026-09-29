@@ -13,6 +13,44 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ### Changed
 
+- **A button is a machined cap.** Buttons that asked for no style of their own were drawn
+  by WinUI. They are now cut from the chassis: the palette's cap face, a key light across
+  the top, the machined radius, and their word in Archivo at the width System-X sets for
+  caps - going in under the finger and fading to Graphite when they are disabled, which is
+  the user's own GrayText in High Contrast
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:38`,
+  `src/SysMonitor.App/App.xaml:24`). Two caps carry more weight and differ only in their
+  face: the armed cap for a command that cannot simply be undone
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:132`) and the chrome cap for a page's
+  single call to action (`:139`). The palette had written all three faces and Fonts.xaml
+  the cap face since the tokens were generated; until this dictionary existed nothing read
+  any of them. The smoke run builds each cap in the live tree, in both shifts, and checks
+  the face it came out with against the palette
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:597`).
+
+- **A confirmation arms the button that does the thing, not Cancel.** WinUI hands a
+  dialog's default button the accent style from a visual state, and that state beats any
+  style the dialog sets; with the accent armed red since this release, every confirmation
+  that made Cancel its default - Drive Wiper, Large Files, Duplicate Finder, and the
+  Registry Cleaner and Backup questions - drew **Cancel** in armed red and the destructive
+  button plain. The emphasis was backwards on exactly the dialogs where it matters most.
+  Confirmations now have no default button at all, so that state never runs: the
+  destructive button is the armed cap, Cancel is the plain one, Enter still arms nothing
+  and Escape still cancels
+  (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:92`, `:93`). Because no
+  test could have caught this by reading the code, the smoke run now opens a confirmation
+  in both shifts and asks both buttons which face they were drawn in
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:659`).
+
+- **Every dialog comes from the one helper.** Nine dialogs across four pages were still
+  built by hand, so each missed whatever it was not told: the application's dialog style,
+  the page's theme, and now the caps. The Registry Cleaner's restore, Game Mode's
+  close-these-apps question, sensor list and error, Backup's password prompt, delete and
+  restore questions, and the PDF editor's watermark and signature prompts all go through
+  it (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:52`, `:83`). A dialog that
+  only says something now takes one button and arms nothing. The sensor list is read in
+  Iosevka, the console's code face, in place of a hard-coded Consolas.
+
 - **Text is set in Public Sans, the first of the Command Console's faces.** STX.1 is
   being restyled to match System-X, and the type comes first: Public Sans for text,
   Archivo at the widths System-X draws for titles, caps and lamps, Departure Mono for live
@@ -34,7 +72,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **Drive Wiper and Large Files ask before they destroy anything.** WIPE NOW started
   overwriting the moment it was pressed, and DELETE SELECTED sent every ticked file away
   without a question. Both now ask first, naming how many items are involved and how much
-  they hold, with Cancel as the default button, so Enter or Escape changes nothing
+  they hold, and no button is the default, so Enter arms nothing and Escape cancels
   (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`,
   `src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). The wipe's question says none of
   it goes to the Recycle Bin, and repeats the page's SSD warning when it applies. The
@@ -208,7 +246,13 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 - **The README says what changed.** A What's new section lists the changes since v3.0.1 for
   anyone arriving at the repository, and the project tree, the components table and the
-  licence notes now include the typefaces and the folders this release adds.
+  licence notes now include the typefaces and the folders this release adds - the four
+  families ship with their licences beside them
+  (`src/SysMonitor.App/Assets/Fonts/OFL-PublicSans.txt:1`,
+  `src/SysMonitor.App/Assets/Fonts/OFL-Archivo.txt:1`,
+  `src/SysMonitor.App/Assets/Fonts/OFL-DepartureMono.txt:1`,
+  `src/SysMonitor.App/Assets/Fonts/OFL-Iosevka.txt:1`), and every one of them is
+  compared byte for byte with what the release ships (`.github/workflows/windows-ci.yml:191`).
 
 - **The in-app guide describes this build.** A "Changes since v3.0.1" card sits above the
   v3.0.1 release notes; the Drive Wiper, Large Files and Duplicate Finder lines say that

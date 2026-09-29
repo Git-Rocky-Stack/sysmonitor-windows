@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
+using SysMonitor.App.Controls.Instruments;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Utilities;
 using System.Runtime.InteropServices;
@@ -379,15 +380,12 @@ public sealed partial class PdfEditorPage : Page
     private async void WatermarkTool_Click(object sender, RoutedEventArgs e)
     {
         // Show watermark dialog
-        var dialog = new ContentDialog
-        {
-            Title = "Add Watermark",
-            XamlRoot = this.XamlRoot,
-            PrimaryButtonText = "Add to All Pages",
-            SecondaryButtonText = "Add to Current Page",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary
-        };
+        var dialog = ConsoleDialog.Create(this);
+        dialog.Title = "Add Watermark";
+        dialog.PrimaryButtonText = "Add to All Pages";
+        dialog.SecondaryButtonText = "Add to Current Page";
+        dialog.CloseButtonText = "Cancel";
+        dialog.DefaultButton = ContentDialogButton.Primary;
 
         var panel = new StackPanel { Spacing = 12 };
         var textBox = new TextBox
@@ -916,14 +914,11 @@ public sealed partial class PdfEditorPage : Page
 
     private async Task<string> ShowSignerNameDialog()
     {
-        var dialog = new ContentDialog
-        {
-            Title = "Sign Document",
-            Content = new TextBox { PlaceholderText = "Enter your name", Width = 300 },
-            PrimaryButtonText = "Sign",
-            CloseButtonText = "Cancel",
-            XamlRoot = this.XamlRoot
-        };
+        var dialog = ConsoleDialog.Create(this);
+        dialog.Title = "Sign Document";
+        dialog.Content = new TextBox { PlaceholderText = "Enter your name", Width = 300 };
+        dialog.PrimaryButtonText = "Sign";
+        dialog.CloseButtonText = "Cancel";
 
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary && dialog.Content is TextBox textBox)

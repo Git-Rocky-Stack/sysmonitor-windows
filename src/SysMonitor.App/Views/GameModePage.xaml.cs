@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using SysMonitor.App.Controls.Instruments;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Monitors;
 using Serilog;
@@ -67,19 +68,11 @@ public sealed partial class GameModePage : Page
     /// </summary>
     private async Task<bool> AskBeforeClosingAppsAsync(IReadOnlyList<string> apps)
     {
-        var dialog = new ContentDialog
-        {
-            XamlRoot = XamlRoot,
-            Title = "Close these apps?",
-            Content = "Game Mode will ask these to close, which can lose unsaved work:\n\n" +
+        var message = "Game Mode will ask these to close, which can lose unsaved work:\n\n" +
                       string.Join(", ", apps) +
-                      "\n\nAnything that will not close is left running. Clear the checkbox to lower them out of the way instead.",
-            PrimaryButtonText = "Close them",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Close,
-        };
+                      "\n\nAnything that will not close is left running. Clear the checkbox to lower them out of the way instead.";
 
-        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+        return await ConsoleDialog.ConfirmAsync(this, "Close these apps?", message, "Close them");
     }
 
     private async void UpdateTimer_Tick(object? sender, object e)
@@ -165,38 +158,26 @@ public sealed partial class GameModePage : Page
             var sensors = await _temperatureMonitor.GetAllSensorsDiagnosticAsync();
             var content = string.Join("\n", sensors);
 
-            var dialog = new ContentDialog
+            // A sensor list is a machine's own report, so it is read in the console's code face, not Consolas.
+            var reading = new ScrollViewer
             {
-                Title = "All Hardware Sensors",
-                Content = new ScrollViewer
+                Content = new TextBlock
                 {
-                    Content = new TextBlock
-                    {
-                        Text = content,
-                        FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Consolas"),
-                        FontSize = 11,
-                        TextWrapping = TextWrapping.NoWrap
-                    },
-                    HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                    MaxHeight = 400
+                    Text = content,
+                    FontFamily = Application.Current.Resources["ConsoleCodeFontFamily"] as Microsoft.UI.Xaml.Media.FontFamily,
+                    FontSize = 11,
+                    TextWrapping = TextWrapping.NoWrap
                 },
-                CloseButtonText = "Close",
-                XamlRoot = this.XamlRoot
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                MaxHeight = 400
             };
 
-            await dialog.ShowAsync();
+            await ConsoleDialog.TellAsync(this, "All Hardware Sensors", reading);
         }
         catch (Exception ex)
         {
-            var dialog = new ContentDialog
-            {
-                Title = "Error",
-                Content = $"Failed to get sensors: {ex.Message}",
-                CloseButtonText = "Close",
-                XamlRoot = this.XamlRoot
-            };
-            await dialog.ShowAsync();
+            await ConsoleDialog.TellAsync(this, "Error", $"Failed to get sensors: {ex.Message}");
         }
     }
 }

@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+    WinUI's stock controls, re-templated as the Command Console's own. FluentOverrides.xaml restates the colours
+    WinUI reads, which is as far as a colour can reach; this is where a control's shape changes.
+
+    The cap. A button on the console is a machined key cut from the chassis: the palette's cap face, a key light
+    across the top, the machined radius, and its word in Archivo at the cap width. The palette has written the
+    three faces - plain, armed and chrome - and Fonts.xaml the cap face, since the tokens were generated; until
+    this dictionary existed nothing read any of them, so the cap was a colour that could not appear.
+
+    Three styles, and only the face differs:
+
+      ConsoleCapButtonStyle   every button, unless it asks for another (System-X styles.css :2062)
+      ArmedCapButtonStyle     a consequential command, and only those (:2093)
+      ChromeCapButtonStyle    a page's single polished call to action (:2116)
+
+    The implicit style below carries nothing but ConsoleCapButtonStyle, so a button nobody styled is a cap and
+    the cap is still defined in one place (ConsoleCapTests). Its variants are BasedOn it and restate a face; a
+    template of their own would be the plain cap's states copied, which is what stops following it.
+
+    What is transcribed and what is not. The three faces, the edge, the key light, the lip, the radius and the
+    Archivo face are the palette's and Fonts.xaml's, every one transcribed from System-X. The metrics - 36 high, 20 of
+    side padding, 12pt at 60 of spacing - and the hover, press and disabled behaviour are chosen to sit on the
+    same 8-point grid and the same proportions as the chip, the flat cap beside it (Instruments.xaml, :2176).
+    They are not transcribed: System-X's styles.css is not in this repository, so :2062's own metrics could not
+    be read. Reconciling them against it is the one thing about this cap that is still open.
+
+    High Contrast needs nothing here. Every token below resolves to a system colour in that shift - the face to
+    ButtonFace, the armed face to Highlight with HighlightText on it, the disabled word to GrayText - so the cap
+    is drawn in the user's own colours without this file naming one.
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ============================================================ CAP (:2062) -->
+
+    <Style x:Key="ConsoleCapButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource CapFaceBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource SilverBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource CapEdgeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CapCornerRadius}"/>
+        <Setter Property="Padding" Value="20,0"/>
+        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleCapFontFamily}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="CharacterSpacing" Value="60"/>
+        <Setter Property="UseSystemFocusVisuals" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid x:Name="Root" MinHeight="{TemplateBinding MinHeight}"
+                          Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}">
+
+                        <!-- The cap moves under the finger, so the whole key travels, face and word together. -->
+                        <Grid.RenderTransform>
+                            <TranslateTransform x:Name="Press"/>
+                        </Grid.RenderTransform>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+
+                                <!-- Under the pointer the key light comes up and the edge sharpens. -->
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="KeyLight.Opacity" Value="1"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource HairlineStrongBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <!-- Pressed, it goes in: the key light off, the lip gone, the key down one pixel. -->
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="KeyLight.Opacity" Value="0"/>
+                                        <Setter Target="Lip.Opacity" Value="0"/>
+                                        <Setter Target="Press.Y" Value="1"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <!-- Unlit: the word goes to Graphite, which is GrayText in High Contrast. -->
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="KeyLight.Opacity" Value="0"/>
+                                        <Setter Target="Lip.Opacity" Value="0"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource GraphiteBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Border x:Name="Face" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
+
+                        <Border x:Name="KeyLight" Opacity="0.85" Margin="1"
+                                Background="{ThemeResource CapKeyLightBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                IsHitTestVisible="False"/>
+
+                        <Border x:Name="Lip" Height="1" Margin="1,1,1,0" VerticalAlignment="Top"
+                                Background="{ThemeResource PlateLipBrush}" IsHitTestVisible="False"/>
+
+                        <ContentPresenter x:Name="Word" Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          ContentTransitions="{TemplateBinding ContentTransitions}"
+                                          Padding="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          FontFamily="{TemplateBinding FontFamily}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          CharacterSpacing="{TemplateBinding CharacterSpacing}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          AutomationProperties.AccessibilityView="Raw"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A button that asks for nothing is a cap. This is the only reason that is true: a keyed style is never
+         applied by itself. It adds nothing, so the cap stays defined once, above. -->
+    <Style TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}"/>
+
+    <!-- Armed (:2093): consequential commands only - wiping, deleting, anything that cannot simply be undone.
+         ArmedFg is the warm white System-X writes on armed red, and the one FluentOverrides already puts on
+         WinUI's accent, so an armed cap and an accent control read the same. -->
+    <Style x:Key="ArmedCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource ArmedCapFaceBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource ArmedFgBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+    </Style>
+
+    <!-- Chrome (:2116): the one polished call to action on a page, black gloss on Day Shift. -->
+    <Style x:Key="ChromeCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource ChromeCapFaceBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource ChromeCapForegroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource ChromeEdgeBrush}"/>
+    </Style>
+</ResourceDictionary>

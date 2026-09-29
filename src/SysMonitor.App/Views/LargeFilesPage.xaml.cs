@@ -26,7 +26,7 @@ public sealed partial class LargeFilesPage : Page
 
     /// <summary>
     /// Asks before the selected files are removed, saying how many, how much, and where they go - including
-    /// what happens to a file the Recycle Bin cannot take. Cancel is the default.
+    /// what happens to a file the Recycle Bin cannot take. No button is the default.
     /// </summary>
     private Task<bool> AskBeforeDeletingAsync(int fileCount, string totalSize)
     {

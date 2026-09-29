@@ -232,11 +232,5 @@ public class ConsoleRecipeTests
         "src/SysMonitor.App/Views/UserGuidePage.xaml",
     ];
 
-    private static readonly string[] HandBuiltDialogs =
-    [
-        "src/SysMonitor.App/Views/BackupPage.xaml.cs",
-        "src/SysMonitor.App/Views/GameModePage.xaml.cs",
-        "src/SysMonitor.App/Views/PdfEditorPage.xaml.cs",
-        "src/SysMonitor.App/Views/RegistryCleanerPage.xaml.cs",
-    ];
+    private static readonly string[] HandBuiltDialogs = [];
 }

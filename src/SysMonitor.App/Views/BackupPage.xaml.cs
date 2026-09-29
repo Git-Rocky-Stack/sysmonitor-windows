@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using SysMonitor.App.Controls.Instruments;
 using SysMonitor.App.ViewModels;
 using SysMonitor.Core.Services.Backup;
 
@@ -198,15 +199,13 @@ public sealed partial class BackupPage : Page
         });
         content.Children.Add(passwordBox);
 
-        var dialog = new ContentDialog
-        {
-            Title = "Encrypted Backup",
-            Content = content,
-            PrimaryButtonText = actionText,
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = this.XamlRoot
-        };
+        // Nothing is destroyed here, so the affirmative button is the default and Enter submits the password.
+        var dialog = ConsoleDialog.Create(this);
+        dialog.Title = "Encrypted Backup";
+        dialog.Content = content;
+        dialog.PrimaryButtonText = actionText;
+        dialog.CloseButtonText = "Cancel";
+        dialog.DefaultButton = ContentDialogButton.Primary;
 
         return await dialog.ShowAsync() == ContentDialogResult.Primary && !string.IsNullOrEmpty(passwordBox.Password)
             ? passwordBox.Password
@@ -217,19 +216,8 @@ public sealed partial class BackupPage : Page
     {
         if (sender is Button button && button.Tag is BackupArchiveViewModel archive)
         {
-            // Confirm deletion
-            var dialog = new ContentDialog
-            {
-                Title = "Delete Backup",
-                Content = $"Are you sure you want to delete '{archive.Name}'?\n\nThis action cannot be undone.",
-                PrimaryButtonText = "Delete",
-                CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.XamlRoot
-            };
-
-            var result = await dialog.ShowAsync();
-            if (result == ContentDialogResult.Primary)
+            var message = $"Are you sure you want to delete '{archive.Name}'?\n\nThis action cannot be undone.";
+            if (await ConsoleDialog.ConfirmAsync(this, "Delete Backup", message, "Delete"))
             {
                 await ViewModel.DeleteBackupCommand.ExecuteAsync(archive);
             }
@@ -257,17 +245,7 @@ public sealed partial class BackupPage : Page
             message += "\n\nThis backup was made before the app recorded where files came from, so check the folders above.";
         }
 
-        var dialog = new ContentDialog
-        {
-            XamlRoot = XamlRoot,
-            Title = "Restore these files?",
-            Content = message,
-            PrimaryButtonText = "Restore",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Close,
-        };
-
-        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+        return await ConsoleDialog.ConfirmAsync(this, "Restore these files?", message, "Restore");
     }
 
     private static string FormatBytes(long bytes)
