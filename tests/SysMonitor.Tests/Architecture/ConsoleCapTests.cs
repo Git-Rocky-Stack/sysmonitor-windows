@@ -7,9 +7,9 @@ namespace SysMonitor.Tests.Architecture;
 
 /// <summary>
 /// A button on the console is a cap: a machined key with the palette's face, its key light across the top and a
-/// machined radius (System-X styles.css :2062). Two carry more weight - the armed cap for a consequential command
-/// (:2093) and the chrome cap for a page's single call to action (:2116) - and they differ from the plain cap only
-/// in the face they are given.
+/// machined radius (System-X styles.css .btn). Two carry more weight - the armed cap for a consequential command
+/// (.btn-armed) and the chrome cap for a page's single call to action (.btn-chrome) - and they differ from the
+/// plain cap only in the face they are given. Selectors, not lines: .btn has moved twice since it was first cited.
 /// <para>
 /// The palette has written all three faces since the tokens were generated, and until the styles below existed
 /// nothing read them: a brush the generator writes and no style names is a colour that cannot appear, and neither
@@ -104,6 +104,38 @@ public class ConsoleCapTests
         }
     }
 
+    /// <summary>
+    /// The cap is cut to System-X's own measurements, not to a guess at them. One rule sizes .btn and its three
+    /// siblings together - 34 high, nothing above or below the word and 14 either side, Archivo at 11.5 tracked
+    /// .08em, on the 4px control radius (styles.css, the rule shared by .btn, .btn-armed, .btn-chrome and
+    /// .btn-ghost). The word is --silver-bright, a step brighter than the chip's --silver, and the only colour the
+    /// plain cap states that the palette did not already hand it a face for.
+    /// CharacterSpacing is thousandths of an em, so .08em is 80, as the text styles already write it
+    /// (Typography.xaml). Weight 700 and width 112% are not setters here: the face is the instance the font build
+    /// cuts at that weight and that width, so asking for them again would be asking a Bold-only family for Bold
+    /// (Fonts.xaml, ConsoleCapFontFamily).
+    /// <para>
+    /// These were chosen, not transcribed, until System-X's stylesheet came within reach: 36, 20 of side padding
+    /// and 12 at 60, reasoned from the chip beside them. Four of the six were wrong. The variants the same rule
+    /// carries - a small cap, a large one, a square icon cap - are not here yet.
+    /// </para>
+    /// </summary>
+    [Theory]
+    [InlineData("MinHeight", "34")]
+    [InlineData("Foreground", "{ThemeResource SilverBrightBrush}")]
+    [InlineData("Padding", "14,0")]
+    [InlineData("FontSize", "11.5")]
+    [InlineData("CharacterSpacing", "80")]
+    [InlineData("CornerRadius", "{StaticResource CapCornerRadius}")]
+    [InlineData("FontFamily", "{StaticResource ConsoleCapFontFamily}")]
+    public void ThePlainCapIsCutToSystemXsMetrics(string property, string value)
+    {
+        var plain = ButtonStyles().Single(style => style.Attribute(Xaml + "Key")?.Value == PlainCap);
+
+        Setter(plain, property).Should().Be(value,
+            $"{property} is transcribed from System-X's cap; a key measured differently is a different key, and " +
+            "the variants and the chip are all cut against these");
+    }
     /// <summary>
     /// Every face a cap names has to be in the palette, in every shift it has. A style naming a brush the palette
     /// does not write throws when the dictionary loads - at startup, on the first page - and High Contrast is the
