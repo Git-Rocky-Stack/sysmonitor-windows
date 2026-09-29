@@ -1,0 +1,240 @@
+# Build and test on Windows for every pull request and every push to main.
+#
+# WinUI 3 compiles its XAML with a Windows-only toolchain, so nothing that touches the app can be checked
+# anywhere else. The first job is the gate: the docs site must match its markdown sources and the palette
+# its generator, the whole solution must build, the full test suite must pass, and every page of the app
+# must open, in both themes, with a picture of each uploaded. The second builds the release the way
+# Build-Release.ps1 does and checks that what it ships is what the repository holds.
+name: Windows CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer push to the same branch makes an older run's answer irrelevant.
+concurrency:
+  group: windows-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build and test (Debug x64)
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      # docs/build-docs.py renders every docs/*.md into its .html page; --check fails if a page is missing
+      # or stale, which is what stops a hand-edited page drifting away from its source.
+      - name: Docs site matches its sources
+        run: |
+          python -m pip install --quiet markdown
+          python docs/build-docs.py --check
+
+      # The palette, Styles/Console/Tokens.xaml, is written by scripts/generate-tokens.py from System-X's values;
+      # --check fails when the file is not what the script writes, so a colour cannot be changed by hand in one
+      # theme and forgotten in another.
+      - name: Palette matches its generator
+        run: python scripts/generate-tokens.py --check
+
+      # Debug is the unpackaged configuration (SysMonitor.App.csproj), the same build `dotnet run` uses.
+      - name: Build
+        run: dotnet build SysMonitor.sln -c Debug -p:Platform=x64
+
+      - name: Test
+        run: >
+          dotnet test tests/SysMonitor.Tests/SysMonitor.Tests.csproj -c Debug -p:Platform=x64
+          --logger "trx;LogFileName=results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-results
+          path: TestResults
+          if-no-files-found: ignore
+
+      # Opens every page in both themes and saves a picture of each (src/SysMonitor.App/Diagnostics/UiSmokeRun.cs).
+      # It fails on what only shows when XAML loads: a parse error, a navigation that fails, a resource that does
+      # not resolve, a console face that did not load. It reported without failing the job until it had passed
+      # three runs in a row on a hosted runner; it gates like the tests now. It runs twice, with Windows' animation
+      # effects off and then on: the console's blink, flicker and busy sweep only run with them on, and what stands
+      # in for each only with them off, so either run alone leaves half of the instruments' code unexercised. The
+      # reports and pictures of both are uploaded either way.
+      - name: UI smoke run
+        timeout-minutes: 35
+        shell: pwsh
+        run: |
+          # A crash dialog would hold the run open until the timeout.
+          New-Item -Path 'HKCU:\Software\Microsoft\Windows\Windows Error Reporting' -Force | Out-Null
+          Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\Windows Error Reporting' -Name DontShowUI -Value 1
+
+          $exe = Get-ChildItem -Path src/SysMonitor.App/bin/x64/Debug -Recurse -Filter SysMonitor.App.exe |
+            Select-Object -First 1
+          if (-not $exe) { throw 'SysMonitor.App.exe was not built' }
+
+          Add-Type -Namespace Win32 -Name Effects -MemberDefinition @'
+          [DllImport("user32.dll", SetLastError = true)]
+          public static extern bool SystemParametersInfo(uint action, uint param, System.IntPtr value, uint update);
+          '@
+
+          # Windows' Animation effects setting (Settings, Accessibility, Visual effects), which the app reads through
+          # UISettings.AnimationsEnabled. SPI_SETCLIENTAREAANIMATION takes the setting in place of a pointer; it is
+          # changed for this session only, before the app starts, so nothing needs telling.
+          function Set-AnimationEffects([bool] $on) {
+            if (-not [Win32.Effects]::SystemParametersInfo(0x1043, 0, [IntPtr][int]$on, 0)) {
+              throw "Windows would not turn animation effects $(if ($on) { 'on' } else { 'off' })"
+            }
+          }
+
+          # A run that stops says where it was, what the app last logged and why Windows says it ended: a
+          # failure inside XAML's own layout or rendering ends the process without an exception to catch.
+          function Show-WhyItStopped([string] $out, [datetime] $started) {
+            $progress = Join-Path $out 'progress.txt'
+            if (Test-Path $progress) { "Last step: $(Get-Content $progress -Raw)" }
+            $log = Get-ChildItem (Join-Path $env:LOCALAPPDATA 'SysMonitor\Logs') -Filter 'sysmonitor-*.log' -ErrorAction SilentlyContinue |
+              Sort-Object LastWriteTime | Select-Object -Last 1
+            if ($log) { "--- $($log.Name), last 40 lines"; Get-Content $log.FullName -Tail 40 }
+            Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $started } -ErrorAction SilentlyContinue |
+              Where-Object { $_.ProviderName -in 'Application Error', 'Windows Error Reporting', '.NET Runtime' } |
+              Select-Object -First 4 | ForEach-Object { "--- $($_.ProviderName), event $($_.Id)"; $_.Message }
+          }
+
+          function Invoke-SmokeRun([string] $pass, [bool] $animations) {
+            Set-AnimationEffects $animations
+            $out = Join-Path $env:GITHUB_WORKSPACE "ui-smoke/$pass"
+            "=== $pass"
+
+            $started = Get-Date
+            $app = Start-Process -FilePath $exe.FullName -ArgumentList '--ui-smoke', "`"$out`"" -PassThru
+            $null = $app.Handle   # keeps the exit code readable once the process has gone
+            if (-not $app.WaitForExit(15 * 60 * 1000)) {
+              $app.Kill()
+              Show-WhyItStopped $out $started
+              throw "The UI smoke run with $pass did not finish within 15 minutes"
+            }
+
+            $report = Join-Path $out 'report.json'
+            if (-not (Test-Path $report)) {
+              Show-WhyItStopped $out $started
+              throw "The UI smoke run with $pass wrote no report (exit code $($app.ExitCode))"
+            }
+
+            $result = Get-Content $report -Raw | ConvertFrom-Json
+            "Passed: $($result.passed), finished: $($result.finished), pages: $($result.pages.Count)"
+            $result.checks | ForEach-Object { "Checked: $_" }
+            $result.problems | ForEach-Object { "Problem: $_" }
+            $result.pages | Where-Object { $_.problems.Count -gt 0 } |
+              ForEach-Object { "$($_.shift) $($_.page): $($_.problems -join ' | ')" }
+
+            # A run that stopped early passes nothing, whatever its exit code says.
+            if ($app.ExitCode -ne 0 -or -not $result.finished -or -not $result.passed) {
+              Show-WhyItStopped $out $started
+              throw "The UI smoke run with $pass failed (exit code $($app.ExitCode))"
+            }
+          }
+
+          Invoke-SmokeRun 'animations-off' $false
+          Invoke-SmokeRun 'animations-on' $true
+
+      - name: Upload UI smoke run
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ui-smoke
+          path: ui-smoke
+          if-no-files-found: ignore
+
+  release:
+    name: Release build (x64)
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      # The release as it is made by hand: Build-Release.ps1 publishes the self-contained x64 build into
+      # publish\installer-build and zips it with the licence files. The installer is left out because
+      # installer\SysMonitorSetup.iss packs publish\installer-build\* as it stands, so that folder is what it
+      # ships.
+      - name: Release build (Build-Release.ps1)
+        shell: pwsh
+        run: ./Build-Release.ps1 -SkipInstaller
+
+      # A face that is missing at run time throws nothing: the text quietly falls back to another font. So
+      # every file in Assets/Fonts - the faces and their licences - is compared, byte for byte, with what the
+      # publish folder and the portable zip hold.
+      - name: Fonts ship in the release
+        shell: pwsh
+        run: |
+          $fonts = @(Get-ChildItem -Path src/SysMonitor.App/Assets/Fonts -File)
+          if ($fonts.Count -eq 0) { throw 'src/SysMonitor.App/Assets/Fonts holds no files, so there is nothing to check' }
+
+          $zipFile = Get-ChildItem -Path publish -Filter 'STX1-SystemMonitor-*-Portable-x64.zip' | Select-Object -First 1
+          if (-not $zipFile) { throw 'Build-Release.ps1 made no portable zip' }
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($zipFile.FullName)
+          try {
+            $entries = @{}
+            foreach ($entry in $zip.Entries) { $entries[$entry.FullName.Replace('\', '/')] = $entry }
+
+            $wrong = foreach ($font in $fonts) {
+              $expected = (Get-FileHash -Path $font.FullName -Algorithm SHA256).Hash
+
+              $published = Join-Path 'publish/installer-build/Assets/Fonts' $font.Name
+              if (-not (Test-Path $published)) { "$($font.Name) is not in the publish folder" }
+              elseif ((Get-FileHash -Path $published -Algorithm SHA256).Hash -ne $expected) { "$($font.Name) differs in the publish folder" }
+
+              $entry = $entries["Assets/Fonts/$($font.Name)"]
+              if (-not $entry) { "$($font.Name) is not in $($zipFile.Name)" }
+              else {
+                $stream = $entry.Open()
+                try { $zipped = (Get-FileHash -InputStream $stream -Algorithm SHA256).Hash } finally { $stream.Dispose() }
+                if ($zipped -ne $expected) { "$($font.Name) differs in $($zipFile.Name)" }
+              }
+            }
+          }
+          finally { $zip.Dispose() }
+
+          if ($wrong) {
+            $wrong | ForEach-Object { "Wrong: $_" }
+            throw "$(@($wrong).Count) font file(s) do not ship as committed"
+          }
+          "$($fonts.Count) font files ship byte for byte in the publish folder and in $($zipFile.Name)"
+
+      # The portable build of every pull request, ready to run on Windows without building anything.
+      - name: Upload portable build
+        uses: actions/upload-artifact@v6
+        with:
+          name: portable-x64
+          path: publish/STX1-SystemMonitor-*-Portable-x64.zip
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

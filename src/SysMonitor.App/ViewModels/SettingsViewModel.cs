@@ -3,8 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Reflection;
-using System.Text.Json;
-using Windows.Storage;
+using SysMonitor.Core.Services.Settings;
 
 namespace SysMonitor.App.ViewModels;
 
@@ -12,9 +11,10 @@ public partial class SettingsViewModel : ObservableObject
 {
     private readonly ILogger _logger;
 
-    private readonly ApplicationDataContainer? _localSettings;
-    private readonly string _settingsFilePath;
-    private readonly bool _useFileStorage;
+    // The store the whole app shares (SettingsStore). This page used to keep a private one - LocalSettings when
+    // packaged, its own copy of settings.json otherwise - which nothing else read in the packaged build, and which
+    // it wrote back whole on Save, erasing whatever another writer had saved since the page opened.
+    private readonly ISettingsStore _settings;
 
     // Appearance
     [ObservableProperty] private int _selectedThemeIndex = 2; // Default to Dark
@@ -56,32 +56,10 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private bool _hasStatusMessage = false;
 
-    public SettingsViewModel(ILogger<SettingsViewModel>? logger = null)
+    public SettingsViewModel(ISettingsStore settings, ILogger<SettingsViewModel>? logger = null)
     {
         _logger = logger ?? NullLogger<SettingsViewModel>.Instance;
-        // Try to use ApplicationData (packaged app), fall back to file storage (unpackaged)
-        _settingsFilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "settings.json");
-
-        try
-        {
-            _localSettings = ApplicationData.Current.LocalSettings;
-            _useFileStorage = false;
-        }
-        catch (InvalidOperationException)
-        {
-            // App is running unpackaged - use file-based storage
-            _localSettings = null;
-            _useFileStorage = true;
-
-            // Ensure directory exists
-            var dir = Path.GetDirectoryName(_settingsFilePath);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-        }
+        _settings = settings;
 
         LoadSettings();
         Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
@@ -113,113 +91,9 @@ public partial class SettingsViewModel : ObservableObject
         BatteryCriticalWarning = GetSetting("BatteryCriticalWarning", 10);
     }
 
-    private Dictionary<string, object>? _fileSettings;
+    private T GetSetting<T>(string key, T defaultValue) => _settings.Get(key, defaultValue);
 
-    private T GetSetting<T>(string key, T defaultValue)
-    {
-        try
-        {
-            if (_useFileStorage)
-            {
-                // Load from file if not already loaded
-                if (_fileSettings == null)
-                {
-                    LoadFileSettings();
-                }
-
-                if (_fileSettings != null && _fileSettings.TryGetValue(key, out var value))
-                {
-                    if (value is JsonElement element)
-                    {
-                        if (typeof(T) == typeof(int) && element.TryGetInt32(out var intVal))
-                            return (T)(object)intVal;
-                        if (typeof(T) == typeof(bool) && element.ValueKind == JsonValueKind.True)
-                            return (T)(object)true;
-                        if (typeof(T) == typeof(bool) && element.ValueKind == JsonValueKind.False)
-                            return (T)(object)false;
-                        if (typeof(T) == typeof(string))
-                            return (T)(object)(element.GetString() ?? defaultValue?.ToString() ?? "");
-                    }
-                    else if (value is T typedValue)
-                    {
-                        return typedValue;
-                    }
-                }
-            }
-            else if (_localSettings != null)
-            {
-                if (_localSettings.Values.TryGetValue(key, out var value) && value is T typedValue)
-                {
-                    return typedValue;
-                }
-            }
-        }
-        catch
-        {
-            // Best effort: an unreadable setting means the default returned below, which is the
-            // answer this method exists to give.
-        }
-        return defaultValue;
-    }
-
-    private void LoadFileSettings()
-    {
-        try
-        {
-            if (File.Exists(_settingsFilePath))
-            {
-                var json = File.ReadAllText(_settingsFilePath);
-                _fileSettings = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-            }
-            else
-            {
-                _fileSettings = new Dictionary<string, object>();
-            }
-        }
-        catch
-        {
-            _fileSettings = new Dictionary<string, object>();
-        }
-    }
-
-    private void SaveSetting<T>(string key, T value)
-    {
-        try
-        {
-            if (_useFileStorage)
-            {
-                if (_fileSettings == null)
-                {
-                    _fileSettings = new Dictionary<string, object>();
-                }
-                _fileSettings[key] = value!;
-            }
-            else if (_localSettings != null)
-            {
-                _localSettings.Values[key] = value;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "A setting could not be saved");
-        }
-    }
-
-    private void SaveAllFileSettings()
-    {
-        if (_useFileStorage && _fileSettings != null)
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(_fileSettings, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_settingsFilePath, json);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "The settings file could not be written");
-            }
-        }
-    }
+    private void SaveSetting<T>(string key, T value) => _settings.Set(key, value);
 
     [RelayCommand]
     private void SaveSettings()
@@ -247,13 +121,12 @@ public partial class SettingsViewModel : ObservableObject
         SaveSetting("BatteryLowWarning", BatteryLowWarning);
         SaveSetting("BatteryCriticalWarning", BatteryCriticalWarning);
 
-        // Save to file if using file storage
-        SaveAllFileSettings();
+        var saved = _settings.Save();
 
         // Handle startup registration
         UpdateStartupRegistration();
 
-        ShowStatus("Settings saved successfully");
+        ShowStatus(saved ? "Settings saved successfully" : "Settings could not be saved; the log says why");
     }
 
     [RelayCommand]
@@ -290,13 +163,18 @@ public partial class SettingsViewModel : ObservableObject
     {
         try
         {
-            // Clear local settings
-            _localSettings?.Values.Clear();
+            // Every setting, in both builds. This used to clear LocalSettings alone, which the unpackaged build
+            // never wrote, so there it cleared nothing.
+            _settings.Clear();
+            var saved = _settings.Save();
 
             // Reload defaults
             LoadSettings();
 
-            ShowStatus("All data cleared successfully");
+            // Settings are all this clears: the history database and the logs stay where they are.
+            ShowStatus(saved
+                ? "Every setting is back to its default"
+                : "Settings were reset but could not be saved; the log says why");
         }
         catch (Exception ex)
         {
@@ -349,81 +227,5 @@ public partial class SettingsViewModel : ObservableObject
             HasStatusMessage = false;
             StatusMessage = "";
         });
-    }
-
-    // Static accessors for other ViewModels to read settings
-    private static T GetStaticSetting<T>(string key, T defaultValue)
-    {
-        try
-        {
-            // Try ApplicationData first (packaged app)
-            var settings = ApplicationData.Current.LocalSettings;
-            if (settings.Values.TryGetValue(key, out var value) && value is T typedValue)
-            {
-                return typedValue;
-            }
-        }
-        catch (InvalidOperationException)
-        {
-            // Unpackaged app - try file-based settings
-            try
-            {
-                var settingsPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "SysMonitor", "settings.json");
-
-                if (File.Exists(settingsPath))
-                {
-                    var json = File.ReadAllText(settingsPath);
-                    var fileSettings = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                    if (fileSettings != null && fileSettings.TryGetValue(key, out var element))
-                    {
-                        if (typeof(T) == typeof(int) && element.TryGetInt32(out var intVal))
-                            return (T)(object)intVal;
-                        if (typeof(T) == typeof(bool))
-                            return (T)(object)element.GetBoolean();
-                        if (typeof(T) == typeof(string))
-                            return (T)(object)(element.GetString() ?? defaultValue?.ToString() ?? "");
-                    }
-                }
-            }
-            catch
-            {
-                // Best effort: an unreadable setting falls back to the default below, which is the answer
-                // this method is for.
-            }
-        }
-        catch
-        {
-            // Best effort: see above - there is no logger to reach from a static helper.
-        }
-        return defaultValue;
-    }
-
-    public static int GetRefreshIntervalMs()
-    {
-        var interval = GetStaticSetting("RefreshInterval", 2);
-        return interval * 1000;
-    }
-
-    public static (int warning, int critical) GetCpuTempThresholds()
-    {
-        var warning = GetStaticSetting("CpuTempWarning", 75);
-        var critical = GetStaticSetting("CpuTempCritical", 90);
-        return (warning, critical);
-    }
-
-    public static (int warning, int critical) GetGpuTempThresholds()
-    {
-        var warning = GetStaticSetting("GpuTempWarning", 80);
-        var critical = GetStaticSetting("GpuTempCritical", 95);
-        return (warning, critical);
-    }
-
-    public static (int low, int critical) GetBatteryThresholds()
-    {
-        var low = GetStaticSetting("BatteryLowWarning", 20);
-        var critical = GetStaticSetting("BatteryCriticalWarning", 10);
-        return (low, critical);
     }
 }

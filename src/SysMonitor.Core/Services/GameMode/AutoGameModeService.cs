@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Text.Json;
+using SysMonitor.Core.Services.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -12,18 +12,20 @@ public class AutoGameModeService : IAutoGameModeService
 {
     private readonly ILogger _logger;
     private readonly IGameModeService _gameModeService;
-    private readonly string _settingsPath;
+    private readonly ISettingsStore _settings;
     private readonly List<GameDefinition> _knownGames;
     private readonly List<GameDefinition> _customGames = new();
     private readonly List<GameDefinition> _runningGames = new();
+    private readonly object _saveGate = new();
 
     private CancellationTokenSource? _cts;
     private Task? _monitoringTask;
+    private Task _saving = Task.CompletedTask;
     private bool _autoModeEnabled;
     private bool _gameModeWasAutoEnabled;
     private bool _disposed;
 
-    /// <summary>How long shutdown waits for the watch to notice it has been cancelled.</summary>
+    /// <summary>How long shutdown waits for the watch to notice it has been cancelled, and for a save to land.</summary>
     public static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(3);
 
     public bool IsMonitoring => _monitoringTask != null && !_monitoringTask.IsCompleted;
@@ -61,13 +63,15 @@ public class AutoGameModeService : IAutoGameModeService
     /// Where the auto-mode setting and custom games live. Defaults to the per-user file the app uses; a test
     /// passes its own so it never reads or writes the developer's real settings.
     /// </param>
-    public AutoGameModeService(IGameModeService gameModeService, string? settingsPath = null, ILogger<AutoGameModeService>? logger = null)
+    /// <param name="settings">The store the rest of the app shares; see <see cref="SettingsStore"/>.</param>
+    public AutoGameModeService(IGameModeService gameModeService, string? settingsPath = null,
+        ILogger<AutoGameModeService>? logger = null, ISettingsStore? settings = null)
     {
         _logger = logger ?? NullLogger<AutoGameModeService>.Instance;
         _gameModeService = gameModeService;
-        _settingsPath = settingsPath ?? Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "SysMonitor", "settings.json");
+        _settings = settingsPath is not null
+            ? new SettingsStore(settingsPath, _logger)
+            : settings ?? new SettingsStore();
 
         // Initialize predefined games list
         _knownGames = CreateKnownGamesList();
@@ -182,80 +186,47 @@ public class AutoGameModeService : IAutoGameModeService
 
     private void LoadCustomGames()
     {
-        try
+        var games = _settings.Get<List<GameDefinition>?>("CustomGames", null);
+        if (games == null)
+            return;
+
+        foreach (var game in games)
         {
-            if (File.Exists(_settingsPath))
-            {
-                var json = File.ReadAllText(_settingsPath);
-                var settings = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                if (settings != null && settings.TryGetValue("CustomGames", out var customGamesElement))
-                {
-                    var games = customGamesElement.Deserialize<List<GameDefinition>>();
-                    if (games != null)
-                    {
-                        foreach (var game in games)
-                        {
-                            game.IsCustom = true;
-                            _customGames.Add(game);
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "The saved list of custom games could not be read");
+            game.IsCustom = true;
+            _customGames.Add(game);
         }
     }
 
     private void LoadAutoModeSetting()
     {
-        try
+        _autoModeEnabled = _settings.Get("AutoGameModeEnabled", false);
+    }
+
+    /// <summary>
+    /// Saves through the shared store, which writes only these two keys on top of the file - so a save here can
+    /// no longer race the Settings page's own save and erase what it wrote, nor be erased by it.
+    /// </summary>
+    private Task SaveSettingsAsync()
+    {
+        // Recorded on the calling thread, in the order the changes were made, so the store always holds the
+        // latest values. Only the writes to disk go to the pool, queued one behind another, and each writes
+        // whatever is latest by the time it runs; Dispose waits for the queue to empty.
+        _settings.Set("AutoGameModeEnabled", _autoModeEnabled);
+        _settings.Set("CustomGames", _customGames.ToList());
+
+        lock (_saveGate)
         {
-            if (File.Exists(_settingsPath))
-            {
-                var json = File.ReadAllText(_settingsPath);
-                var settings = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                if (settings != null && settings.TryGetValue("AutoGameModeEnabled", out var autoElement))
-                {
-                    _autoModeEnabled = autoElement.GetBoolean();
-                }
-            }
-        }
-        catch
-        {
-            _autoModeEnabled = false;
+            _saving = _saving.ContinueWith(_ => WriteSettings(), CancellationToken.None,
+                TaskContinuationOptions.None, TaskScheduler.Default);
+            return _saving;
         }
     }
 
-    private async Task SaveSettingsAsync()
+    private void WriteSettings()
     {
         try
         {
-            Dictionary<string, object> settings;
-
-            if (File.Exists(_settingsPath))
-            {
-                var json = await File.ReadAllTextAsync(_settingsPath);
-                settings = JsonSerializer.Deserialize<Dictionary<string, object>>(json) ?? new();
-            }
-            else
-            {
-                settings = new();
-            }
-
-            settings["AutoGameModeEnabled"] = _autoModeEnabled;
-            settings["CustomGames"] = _customGames;
-
-            var outputJson = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
-
-            var directory = Path.GetDirectoryName(_settingsPath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            await File.WriteAllTextAsync(_settingsPath, outputJson);
+            _settings.Save();
         }
         catch (Exception ex)
         {
@@ -443,6 +414,15 @@ public class AutoGameModeService : IAutoGameModeService
         _cts?.Dispose();
         _cts = null;
         _monitoringTask = null;
+
+        // A change made just before shutdown may still be on its way to disk. It lands before the service goes,
+        // so it is there at the next start.
+        Task saving;
+        lock (_saveGate)
+            saving = _saving;
+
+        if (!saving.Wait(ShutdownTimeout))
+            _logger.LogWarning("Auto Game Mode settings were still being saved when the service shut down");
 
         GC.SuppressFinalize(this);
     }

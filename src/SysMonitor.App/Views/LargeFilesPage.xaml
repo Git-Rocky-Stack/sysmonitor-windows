@@ -130,7 +130,8 @@
                         </FontIcon.Foreground>
                     </FontIcon>
                     <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
-                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"
+                               TextWrapping="Wrap"/>
                 </Grid>
             </Border>
 

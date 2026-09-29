@@ -63,7 +63,7 @@
                         <!-- Tip 1 -->
                         <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="12" Width="24" Height="24">
-                            <TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            <TextBlock TextWrapping="Wrap" Text="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontWeight="Bold" Foreground="White" FontSize="12"/>
                         </Border>
                         <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
@@ -75,7 +75,7 @@
                         <!-- Tip 2 -->
                         <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource SuccessBrush}"
                                 CornerRadius="12" Width="24" Height="24">
-                            <TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            <TextBlock TextWrapping="Wrap" Text="2" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontWeight="Bold" Foreground="White" FontSize="12"/>
                         </Border>
                         <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
@@ -87,7 +87,7 @@
                         <!-- Tip 3 -->
                         <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource CyanAccentBrush}"
                                 CornerRadius="12" Width="24" Height="24">
-                            <TextBlock Text="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            <TextBlock TextWrapping="Wrap" Text="3" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontWeight="Bold" Foreground="White" FontSize="12"/>
                         </Border>
                         <TextBlock Grid.Row="2" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
@@ -211,9 +211,9 @@
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Startup Manager</Run>
                                 <Run> - Control which apps run at boot</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Drive Wiper</Run>
-                                <Run> - Overwrites files before deleting them, and reads the last pass back</Run>
+                                <Run> - Overwrites files before deleting them and reads the last pass back. It asks first, and nothing it wipes goes to the Recycle Bin</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Scheduled Cleaning</Run>
@@ -253,7 +253,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Spacing="8">
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Close Background Apps</Run>
                                 <Run> - Asks browsers, Discord, Spotify and the rest to close, or just lowers their priority. Anything that declines keeps running.</Run>
                             </TextBlock>
@@ -264,11 +264,11 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Spacing="8">
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Trim Memory</Run>
                                 <Run> - Trims the working sets of background apps. Windows can page them back, so this does not free RAM.</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}">Session Stats</Run>
                                 <Run> - Shows how many background apps were moved out of the way, which ones would not go, and how much was trimmed from their working sets</Run>
                             </TextBlock>
@@ -305,7 +305,7 @@
                                     <StackPanel Spacing="2">
                                         <TextBlock FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" FontSize="12">Game Overlay</TextBlock>
                                         <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11">
-                                            Telemetry-style overlay showing CPU/GPU temps (°F), usage %, RAM, power draw and fan speed. Frame rate too, on a GPU that reports it - the overlay says so when yours does not. Drag to reposition.
+                                            Telemetry-style overlay showing CPU and GPU temperatures in Fahrenheit, usage %, RAM, power draw and fan speed. Frame rate too, on a GPU that reports it - the overlay says so when yours does not. Drag to reposition.
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
@@ -316,7 +316,7 @@
                     <!-- System Monitoring -->
                     <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="12">
                         <StackPanel Spacing="8">
-                            <TextBlock Text="Real-time System Monitoring" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"/>
+                            <TextBlock TextWrapping="Wrap" Text="Real-time System Monitoring" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"/>
                             <Grid ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -375,15 +375,15 @@
                         <StackPanel Grid.Column="0" Spacing="8">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource CyanAccentBrush}">Large Files</Run>
-                                <Run> - Find space-hogging files quickly</Run>
+                                <Run> - Finds the largest files. The ones you pick go to the Recycle Bin once you confirm</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource CyanAccentBrush}">Duplicate Finder</Run>
-                                <Run> - Locate and remove duplicate files</Run>
+                                <Run> - Finds files with identical contents. The copies you pick go to the Recycle Bin once you confirm</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource CyanAccentBrush}">File Tools</Run>
-                                <Run> - Batch rename, convert formats</Run>
+                                <Run> - Compress to ZIP or GZip, and extract archives</Run>
                             </TextBlock>
                         </StackPanel>
 
@@ -449,7 +449,7 @@
                         <StackPanel Grid.Column="1" Spacing="8">
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Temperature Alerts</Run>
-                                <Run> - CPU (167°F/194°F) and GPU warnings</Run>
+                                <Run> - CPU (167 F and 194 F) and GPU warnings</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}">Memory Alerts</Run>
@@ -710,6 +710,84 @@
                 </StackPanel>
             </Border>
 
+            <!-- Changelog Card - since v3.0.1 -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <TextBlock Text="Changes since v3.0.1" FontSize="16" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <Border Background="{StaticResource WarningBrush}" CornerRadius="4" Padding="8,2">
+                            <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Margin="16,0,0,0"
+                               Foreground="{StaticResource TextSecondaryBrush}">
+                        What this build does differently from v3.0.1. The full list, with the file each change
+                        lives in, is in CHANGELOG.md in the repository.
+                    </TextBlock>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Nothing is destroyed without asking" FontWeight="SemiBold" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many items are involved and how much they hold. Cancel is the default, so Enter or Escape changes nothing</Run>
+                            </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> Large Files and Duplicate Finder never delete a file permanently. A file Windows cannot recycle, on a network or removable drive or larger than the Recycle Bin is set to hold, is left where it is, and the result says so</Run>
+                            </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> The Drive Wiper's X removes a file from the list, and nothing on the page can change while a wipe runs</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="What the app reports is what happened" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> The Drive Wiper shows the result of a wipe, including overwrites it could not read back</Run>
+                            </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> A missing temperature reads -- instead of 32F, sizes carry one unit, and the game overlay labels its Fahrenheit readings F</Run>
+                            </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> The Memory page reports what a trim did, in the Dashboard's words, and shows success only when the trim worked</Run>
+                            </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> Every CPU reading covers its reader's own interval, so two views reading at once no longer shorten each other's measurement</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Settings, fixes and a new look" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}"/>
+                        <StackPanel Spacing="4" Margin="16,0,0,0">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> The Microsoft Store build honours the Settings page: notifications, alert thresholds and minimize-to-tray used to be saved there and then ignored. The page says so when a save fails</Run>
+                            </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> Clicking a PDF page with the Sticky Note tool opens the note instead of closing the app</Run>
+                            </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
+                                <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
+                                <Run> Text is set in Public Sans, and check boxes, switches, sliders, progress bars and scroll bars use System-X's armed red in place of the Windows accent colour: the first parts of a new look that matches System-X. High Contrast keeps your own colours</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!-- Changelog Card - v3.0.1 -->
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="16">
@@ -717,9 +795,6 @@
                         <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{StaticResource CyanAccentBrush}"/>
                         <TextBlock Text="Release Notes - v3.0.1" FontSize="16" FontWeight="Bold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <Border Background="{StaticResource WarningBrush}" CornerRadius="4" Padding="8,2">
-                            <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                        </Border>
                     </StackPanel>
 
                     <!-- Changed in v3.0.1 -->
@@ -734,15 +809,15 @@
                              the words below are quotations of corrected claims, not claims. Bounded and
                              enforced by InAppGuideClaimTests; nothing outside these markers may use them. -->
                         <StackPanel Spacing="4" Margin="16,0,0,0">
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
                                 <Run> The Dashboard button that read BOOST RAM now reads TRIM MEMORY, because trimming a working set moves pages to the standby list rather than freeing RAM</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
                                 <Run> Game Mode said "Frees Up RAM" and reported "RAM Freed" for the same operation. It now says Trims Memory and Trimmed</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold"/>
                                 <Run> This guide described Quick Clean as boosting performance instantly. It deletes temporary files and counts them, which is what it now says</Run>
                             </TextBlock>
@@ -759,43 +834,43 @@
                             doing without doing it. The full list is in CHANGELOG.md in the repository.
                         </TextBlock>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Game Mode lowers background apps below your game instead of closing them, and always restores your power plan</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Uninstalling a program actually uninstalls it, and reports the result in words</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Startup items use the same mechanism as Task Manager, so turning one off is reversible and all three views agree</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Scheduled cleaning now cleans - it previously opened the app and did nothing</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Duplicates are decided by the whole file, and deleting one goes to the Recycle Bin after asking</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> PDF redaction removes the text underneath, and annotations save where you drew them</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Drive Wiper writes the patterns it names and reads the last pass back to confirm it</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Encrypted backups can be restored, and registry cleaning takes a real backup first</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Network speed reads the adapter carrying your traffic, not a virtual switch</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}">
                                 <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                                 <Run> Battery health reports capacity, not charge level, and says "Not reported" when Windows does not supply it</Run>
                             </TextBlock>
@@ -803,7 +878,7 @@
                     </StackPanel>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Removed in v3.0.0" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}"/>
+                        <TextBlock TextWrapping="Wrap" Text="Removed in v3.0.0" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
                                 <Run Text="-" FontWeight="Bold"/>
@@ -827,32 +902,32 @@
                         <TextBlock Text="Features from v2.2.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Auto Game Mode - detects a running game and enables optimization</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Performance Profiles - save and switch between optimization presets</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="-"/>
                                 <Run> Game Overlay - live temperatures, load and power over your game (drag to reposition)</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Fan speed and power draw monitoring widgets</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Hardware sensor diagnostic viewer</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
+                                <Run Text="-"/>
                                 <Run> Admin rights requested at launch for full hardware sensor access</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="&#8226;"/>
-                                <Run> All temperatures display in Fahrenheit (°F)</Run>
+                                <Run Text="-"/>
+                                <Run> All temperatures display in Fahrenheit</Run>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>
@@ -864,11 +939,11 @@
                         <TextBlock Text="Features from v2.1.1" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Game Mode - One-click gaming optimization</Run>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                                <Run Text="-"/>
                                 <Run> Session stats showing background apps moved out of the way, ones that declined to close, and memory trimmed</Run>
                             </TextBlock>
                         </StackPanel>
@@ -881,19 +956,19 @@
                         <TextBlock Text="Features from v2.1.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> System Tray Mode with live CPU/RAM stats tooltip</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Right-click tray menu, real-time alerts with toast notifications</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> History page with interactive LiveCharts2 graphs</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> 30-day historical data storage with SQLite</Run>
                             </TextBlock>
                         </StackPanel>
@@ -906,15 +981,15 @@
                         <TextBlock Text="Features from v2.0.1" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Performance Monitor page with operation metrics and timing</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> System overview cards, P95/P99 percentiles, CSV export</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Window icon and global crash logging</Run>
                             </TextBlock>
                         </StackPanel>
@@ -927,27 +1002,27 @@
                         <TextBlock Text="Features from v1.0.0" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <StackPanel Spacing="4" Margin="16,0,0,0">
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Complete system monitoring dashboard with real-time stats</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> CPU, GPU, Memory, Disk, Network, Battery, and Temperature monitoring</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Directory and Registry cleaning tools with Browser privacy cleaner</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Startup manager, Large file finder, Duplicate file detector</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> PDF and Image tools, WiFi analyzer, Bluetooth scanner, Network mapper</Run>
                             </TextBlock>
                             <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
-                                <Run Text="•"/>
+                                <Run Text="-"/>
                                 <Run> Secure drive wiper, Health check, Backup manager, Scheduled cleaning</Run>
                             </TextBlock>
                         </StackPanel>
@@ -1029,15 +1104,15 @@
 
                     <StackPanel Spacing="4" Margin="8,0,0,0">
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
-                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                             <Run Text=" Use it for anything, including commercially"/>
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
-                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                             <Run Text=" Read, study and modify the source code"/>
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
-                            <Run Text="&#10003;" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
+                            <Run Text="+" Foreground="{StaticResource SuccessBrush}" FontWeight="Bold"/>
                             <Run Text=" Copy, redistribute, sublicense and sell copies"/>
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
@@ -1058,8 +1133,10 @@
                         This app bundles open-source libraries that keep their own licenses:
                         LibreHardwareMonitor (Mozilla Public License 2.0), Serilog (Apache License 2.0),
                         and CommunityToolkit.Mvvm, LiveCharts2, PDFsharp, Entity Framework Core and
-                        others under the MIT License. The Windows App SDK and Win2D ship under
-                        Microsoft&#8217;s own terms. Full details are in THIRD-PARTY-NOTICES.md.
+                        others under the MIT License. Its typefaces, Public Sans, Archivo, Departure Mono
+                        and Iosevka, are under the SIL Open Font License 1.1, with each font's notice and
+                        licence beside it. The Windows App SDK and Win2D ship under Microsoft's own terms.
+                        Full details are in THIRD-PARTY-NOTICES.md.
                     </TextBlock>
 
                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
@@ -1067,7 +1144,7 @@
                         <Run Text="github.com/Git-Rocky-Stack/sysmonitor-windows" Foreground="{StaticResource CyanAccentBrush}"/>
                     </TextBlock>
 
-                    <TextBlock Text="&#169; 2024-2026 Rocky Stack / Strategia-X"
+                    <TextBlock Text="Copyright (c) 2024-2026 Rocky Stack / Strategia-X"
                                Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
                 </StackPanel>
             </Border>

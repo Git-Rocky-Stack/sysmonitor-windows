@@ -11,6 +11,54 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
+### Changed
+
+- **Text is set in Public Sans, the first of the Command Console's faces.** STX.1 is
+  being restyled to match System-X, and the type comes first: Public Sans for text,
+  Archivo at the widths System-X draws for titles, caps and lamps, Departure Mono for live
+  numbers and Iosevka for code and paths. They ship as TrueType files built from System-X's
+  web fonts (`scripts/build-fonts.py`, `src/SysMonitor.App/Styles/Console/Fonts.xaml`),
+  each family with its copyright notice and the SIL Open Font License beside it, and are
+  listed in THIRD-PARTY-NOTICES.md. Pages and controls pick up Public Sans now; the other
+  faces arrive with the controls that use them.
+
+- **The accent colour is System-X's armed red.** Check boxes, switches, radio buttons,
+  sliders, progress bars, selections and accent buttons took whatever accent colour
+  Windows was set to, blue unless it had been changed. They now take the armed red
+  `#AA2024`, as System-X's form controls do, with its warm white on top where WinUI
+  wrote black, and the scroll bars wear System-X's armed thumb
+  (`src/SysMonitor.App/Styles/Console/FluentOverrides.xaml:120`, `:33`). High
+  Contrast is untouched: its entries restate the system colours WinUI gives those
+  controls. The smoke run checks that WinUI's own brushes pick the new colours up.
+
+- **Drive Wiper and Large Files ask before they destroy anything.** WIPE NOW started
+  overwriting the moment it was pressed, and DELETE SELECTED sent every ticked file away
+  without a question. Both now ask first, naming how many items are involved and how much
+  they hold, with Cancel as the default button, so Enter or Escape changes nothing
+  (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`,
+  `src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). The wipe's question says none of
+  it goes to the Recycle Bin, and repeats the page's SSD warning when it applies. The
+  Recycle Bin questions, here and in Duplicate Finder, say what happens to a file Windows
+  cannot recycle. One helper builds these dialogs, in the application's dialog style and
+  the page's theme (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:16`).
+
+- **The memory optimizer logs what it did.** It logged "freed N bytes" for a trim, and
+  its locals were named for freeing, which is where wording like the Memory page's
+  comes from; they say trimmed now.
+  (`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:65`)
+
+- The Dashboard's TRIM MEMORY button says "Trimming memory..." while it runs and "Trim
+  failed" when it fails, matching its label and the Memory page.
+  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:295`)
+
+### Removed
+
+- **A process count nothing showed.** The Dashboard's view model set `ProcessCount` to
+  the number of processor cores times ten, commented as a rough estimate, and no page
+  bound it. A property holding a made-up number is one binding away from being shown as
+  a measurement. The citations into that file from the tutorial and the two reference
+  pages moved with the lines they cite.
+
 ### Fixed
 
 - **The Drive Wiper shows the result of a wipe.** Every wipe wrote its outcome to the
@@ -21,7 +69,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   "Add files or folders to securely delete", the same line as one that went perfectly.
   The list's counts still update after a wipe, and the result stays until the list
   changes. A single item is no longer "1 items".
-  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:291`, `:321`, `:365`)
+  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:308`, `:338`, `:382`)
 
 - **The Drive Wiper's remove button removes the file.** The X on each row was bound to
   `RemoveFileCommand` through an element named `FilesToWipe` that does not exist, on a
@@ -29,7 +77,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   nothing. It now reaches the command the way Installed Programs and PDF Tools do, and
   its tooltip says it removes the file from the list rather than wiping it.
   (`src/SysMonitor.App/Views/DriveWiperPage.xaml:6`, `:197`,
-  `src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:16`)
+  `src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:17`)
 
 - **Nothing on the Drive Wiper page changes while a wipe runs.** The wipe works through
   a copy of the list taken when it starts. Clear All emptied the list on screen while
@@ -40,14 +88,14 @@ Each entry describes a behaviour change and cites the file it lives in.
   changing it mid-wipe changed how the remaining files were wiped while the result
   named only the last choice. WIPE NOW also waits for an add to finish - a folder is
   sized before it joins the list, and a wipe started in that gap ran without it.
-  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:25`, `:190`, `:197`,
+  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:25`, `:196`, `:203`,
   `src/SysMonitor.App/Views/DriveWiperPage.xaml:125`)
 
 - **A file the wipe could not finish says why.** Each row has an error line, but the
   entry behind it raised no change notification, so the line was read once, while still
   empty, and a failed file showed nothing beyond the "N failed" count. A retry now clears
   the previous reason before it starts.
-  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:403`, `:225`)
+  (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:427`, `:242`)
 
 - **Memory sizes carry one unit.** `MBConverter` already appends `MB` or `GB`; the
   Dashboard's Cleanable Space line and the Processes page's Memory column appended
@@ -88,14 +136,14 @@ Each entry describes a behaviour change and cites the file it lives in.
   "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check
   knew only the RAM wordings of this claim, which is how both this line and the Memory
   page's message got past it; it now covers "memory" as well as "RAM".
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:872`,
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:947`,
   `tests/SysMonitor.Tests/Architecture/InAppGuideClaimTests.cs:45`)
 
 - **The documentation says what trims memory.** The user guide and the settings
   reference said the Dashboard's button is the only thing that trims working sets. The
   Memory page's button does too, and so does Game Mode, including when auto mode switches
   it on by itself because a game started
-  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:374`,
+  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:345`,
   `src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:31`). The getting-started
   tutorial said Quick Clean clears browser cache and tells you how much it freed; it
   empties eight fixed Windows locations, none of them a browser's
@@ -105,24 +153,88 @@ Each entry describes a behaviour change and cites the file it lives in.
   (`FEATURES_AND_USER_GUIDE.md`, `docs/reference-settings-and-data.md`,
   `docs/tutorial-getting-started.md`)
 
-### Changed
+- **Every CPU reading covers its reader's own interval.** Usage is the share of the time
+  between two readings that the processors were busy, and the monitor kept one baseline for
+  the whole application: the page on screen, the FPS overlay's 500 ms loop, the tray tooltip
+  and the history recorder all read through it on their own timers, so each call cut short
+  the interval the next caller measured, and two calls a few milliseconds apart measured
+  nothing and reported 0. The baseline was also four fields updated with no lock. A
+  `CpuSampler` now owns its baseline
+  (`src/SysMonitor.Core/Services/Monitors/CpuSampler.cs:22`); the overlay, the tray and the
+  history recorder each hold one (`ICpuMonitor.CreateSampler`,
+  `src/SysMonitor.Core/Services/Monitors/IMonitors.cs:16`), and the monitor's own shared
+  sampler is locked and hands back its last reading when asked again within 250 ms
+  (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:56`). A sampler takes its baseline
+  when it is created, so the history recorder no longer writes a 0% point at start-up.
 
-- **The memory optimizer logs what it did.** It logged "freed N bytes" for a trim, and
-  its locals were named for freeing, which is where wording like the Memory page's
-  comes from; they say trimmed now.
-  (`src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:65`)
+- **Every part of the app reads the settings the Settings page saved, in both builds.** In
+  the packaged (MSIX) build the page saved to `LocalSettings`, while the alert service, the
+  minimize-to-tray check and Auto Game Mode read `settings.json`, which nothing in that
+  build wrote: switching notifications off, changing an alert threshold or switching
+  minimize-to-tray off was saved and then ignored. In the unpackaged build, Save wrote the
+  whole file back from a copy the page took when it opened, erasing any custom game Auto
+  Game Mode had added since. One store now serves every reader and writer in both builds
+  (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:25`, registered at
+  `src/SysMonitor.App/App.xaml.cs:114`). A save reads the file again and writes only its
+  own changes on top, and a file it could not read is never written over. On its first
+  start the packaged build copies across what an earlier version left in `LocalSettings`.
+  Auto Game Mode's saves are written in the order they were made, and the last one lands
+  before the app closes. Clear All Data resets every setting in both builds; it used to
+  clear `LocalSettings` alone, which changed nothing unpackaged. When a save fails, the
+  Settings page now says so instead of reporting success.
 
-- The Dashboard's TRIM MEMORY button says "Trimming memory..." while it runs and "Trim
-  failed" when it fails, matching its label and the Memory page.
-  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:295`)
+- **The PDF editor's sticky note opens instead of closing the app.** Clicking the page with
+  the Sticky Note tool built the note's Save button from `AccentButtonStyle`, asked of the
+  page's own resources, which do not look in App.xaml where the Fluent styles are merged. The
+  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:669`).
+  A new check reads every resource the XAML and the code ask for and fails when one cannot be
+  reached (`tests/SysMonitor.Tests/Architecture/ResourceKeyTests.cs`).
 
-### Removed
+- **Large Files and Duplicate Finder never delete a file permanently.** They asked
+  Windows to recycle without confirmation, and when Windows could not recycle a file -
+  on a network or removable drive, on a drive whose Recycle Bin is turned off, or larger
+  than the Recycle Bin is set to hold - it deleted the file permanently, while the page
+  said it had moved it to the Recycle Bin. Large Files lists files of 100 MB and more,
+  so the last case was not rare. Each of those cases now leaves the file where it is
+  (`src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136`), links are still never
+  followed, and a file is only reported as moved once it has been found in the Recycle
+  Bin afterwards (`RecycleBin.cs:126`). The result names how many files went, how many
+  were left where they are and why (`src/SysMonitor.Core/Services/Utilities/RecycleReport.cs:11`).
+  Duplicate Finder also stops taking a file off its list when it was not removed, and
+  stops calling what went to the Recycle Bin "freed": the space comes back when the
+  Recycle Bin is emptied.
 
-- **A process count nothing showed.** The Dashboard's view model set `ProcessCount` to
-  the number of processor cores times ten, commented as a rough estimate, and no page
-  bound it. A property holding a made-up number is one binding away from being shown as
-  a measurement. The citations into that file from the tutorial and the two reference
-  pages moved with the lines they cite.
+### Documentation
+
+- **The README says what changed.** A What's new section lists the changes since v3.0.1 for
+  anyone arriving at the repository, and the project tree, the components table and the
+  licence notes now include the typefaces and the folders this release adds.
+
+- **The in-app guide describes this build.** A "Changes since v3.0.1" card sits above the
+  v3.0.1 release notes; the Drive Wiper, Large Files and Duplicate Finder lines say that
+  each asks first and what reaches the Recycle Bin; and the licence card names the
+  typefaces (`src/SysMonitor.App/Views/UserGuidePage.xaml`). Its longer lines now wrap:
+  24 of them ran off the edge of their card.
+
+- **File Tools is described as it is.** The in-app guide said it renamed files in batches
+  and converted formats, and the README said it converted files. It compresses a file or
+  folder to ZIP, or a file to GZip, and extracts archives
+  (`src/SysMonitor.App/ViewModels/FileToolsViewModel.cs:142`, `:203`).
+
+- **Refresh Interval is described as it is.** The user guide and the settings reference
+  said it sets how often readings update. It is saved and nothing reads it: each page
+  refreshes on a fixed timer of its own
+  (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:79`). The troubleshooting steps
+  built on it, and on an auto-refresh switch the app does not have, are replaced by steps
+  that work, and the advice to install the .NET runtime is gone: the released builds carry
+  it.
+
+- **Every document is plain ASCII.** Every document in the repository, the contributor
+  notes included, and every word of the in-app guide is written without em dashes, emoji
+  or other decoration, which read as mojibake wherever a file is opened as anything but
+  UTF-8. A test finds the documents by walking the repository, so a new one is covered
+  from the day it appears
+  (`tests/SysMonitor.Tests/Architecture/PublishedDocumentEncodingTests.cs`).
 
 ---
 
@@ -185,14 +297,14 @@ labels on top of them, and this release finishes that.
   described 2.x behaviour: the Secure File Wiper as putting files "beyond recovery",
   with no mention of the read-back check or the solid-state limit; a Duplicate Finder
   "name and size (fast)" matching mode that does not exist, since duplicates are decided
-  by SHA-256 of the whole file (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:221-223`);
+  by SHA-256 of the whole file (`src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:222-224`);
   registry "Undo capability via backup restore" rather than the `reg.exe` export that
   actually happens; a Driver Updater "Outdated" status glossed as "Newer version may
   exist", when the app only compares the driver's date against two years and never
   consults any catalogue (`src/SysMonitor.Core/Services/Utilities/DriverUpdater.cs:99-100`,
   `:277`); and "One-click RAM cleanup". Nothing reads the markdown file at runtime, so no
   shipped build showed these five. The in-app guide was correct on all five
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:780`, `:788`, `:792`) but wrong on
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:855`, `:863`, `:867`) but wrong on
   three others, which are the three Changed entries above; this entry said the in-app
   guide "was already correct" without qualification, and that was not true of the file as
   a whole.
@@ -475,7 +587,7 @@ which is what makes this a major version.
 ### Added
 - Advanced Game Mode.
 - Auto Game Mode - detects a running game and enables optimisation
-  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:266`).
+  (`src/SysMonitor.Core/Services/GameMode/AutoGameModeService.cs:237`).
 - Performance Profiles - save and switch between optimisation presets.
 - Game overlay showing live temperatures, load and power, repositionable by dragging.
 - Fan speed and power draw monitoring widgets.

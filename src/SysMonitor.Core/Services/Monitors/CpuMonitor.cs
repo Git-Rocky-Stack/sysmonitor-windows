@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Management;
-using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Models;
 
@@ -34,11 +33,9 @@ public class CpuMonitor : ICpuMonitor, IDisposable
     private DateTime _lastTempCacheTime = DateTime.MinValue;
     private readonly TimeSpan _tempCacheDuration = TimeSpan.FromSeconds(2);
 
-    // CPU usage calculation via kernel32 (faster than PerformanceCounter)
-    private long _previousIdleTime;
-    private long _previousKernelTime;
-    private long _previousUserTime;
-    private DateTime _previousSampleTime = DateTime.MinValue;
+    // Total usage for the callers that still share this monitor: the page on screen, through GetCpuInfoAsync.
+    // Long-lived consumers hold their own sampler (CreateSampler) so their intervals are theirs alone.
+    private readonly CpuSampler _sharedSampler;
 
     // Core usage tracking
     private readonly double[] _lastCoreUsages;
@@ -48,22 +45,15 @@ public class CpuMonitor : ICpuMonitor, IDisposable
     private bool _isDisposed;
     private readonly object _lock = new();
 
-    // Kernel32 imports for efficient CPU time calculation
-    [DllImport("kernel32.dll")]
-    private static extern bool GetSystemTimes(out FILETIME lpIdleTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct FILETIME
-    {
-        public uint dwLowDateTime;
-        public uint dwHighDateTime;
-        public long ToLong() => ((long)dwHighDateTime << 32) | dwLowDateTime;
-    }
-
     public CpuMonitor(ILogger<CpuMonitor> logger)
     {
         _logger = logger;
         _lastCoreUsages = new double[Environment.ProcessorCount];
+
+        // Callers sharing one sampler can arrive within milliseconds of each other. Within 250 ms the second is
+        // handed the first one's reading rather than a measurement of an interval too short to mean anything;
+        // CpuMonitorTests waits 400 ms between readings, so it still sees a fresh one.
+        _sharedSampler = new CpuSampler(TimeSpan.FromMilliseconds(250), ReadPerformanceCounter);
 
         // OPTIMIZATION: Lazy initialization - counters are NOT created here
         // They will be created on first access, reducing startup time
@@ -152,54 +142,24 @@ public class CpuMonitor : ICpuMonitor, IDisposable
     /// OPTIMIZATION: Uses kernel32 GetSystemTimes instead of PerformanceCounter.
     /// PerformanceCounter.NextValue() takes 9-50ms, GetSystemTimes takes <1ms.
     /// </summary>
-    private double GetCurrentUsageFast()
+    private double GetCurrentUsageFast() => _sharedSampler.Sample();
+
+    /// <summary>A sampler with a baseline of its own, for a consumer that reads on its own schedule.</summary>
+    public CpuSampler CreateSampler() => new(TimeSpan.Zero, ReadPerformanceCounter);
+
+    /// <summary>
+    /// The performance counter the monitor used before GetSystemTimes, kept as the fallback for when the kernel
+    /// will not report its times.
+    /// </summary>
+    private double ReadPerformanceCounter()
     {
         try
         {
-            if (!GetSystemTimes(out var idleTime, out var kernelTime, out var userTime))
-            {
-                // Fallback to PerformanceCounter if GetSystemTimes fails
-                return _lazyCpuCounter.Value?.NextValue() ?? 0;
-            }
-
-            var idle = idleTime.ToLong();
-            var kernel = kernelTime.ToLong();
-            var user = userTime.ToLong();
-            var now = DateTime.UtcNow;
-
-            // Need two samples to calculate delta
-            if (_previousSampleTime == DateTime.MinValue)
-            {
-                _previousIdleTime = idle;
-                _previousKernelTime = kernel;
-                _previousUserTime = user;
-                _previousSampleTime = now;
-                return 0;
-            }
-
-            // Calculate deltas
-            var idleDelta = idle - _previousIdleTime;
-            var kernelDelta = kernel - _previousKernelTime;
-            var userDelta = user - _previousUserTime;
-
-            // Total time = kernel + user (kernel includes idle)
-            var totalTime = kernelDelta + userDelta;
-            var busyTime = totalTime - idleDelta;
-
-            // Update previous values
-            _previousIdleTime = idle;
-            _previousKernelTime = kernel;
-            _previousUserTime = user;
-            _previousSampleTime = now;
-
-            if (totalTime == 0) return 0;
-
-            var usage = (busyTime * 100.0) / totalTime;
-            return Math.Max(0, Math.Min(100, usage));
+            return _lazyCpuCounter.Value?.NextValue() ?? 0;
         }
         catch (Exception ex)
         {
-            _logger.LogTrace(ex, "Failed to read CPU usage via GetSystemTimes");
+            _logger.LogTrace(ex, "Failed to read CPU usage from the performance counter fallback");
             return 0;
         }
     }

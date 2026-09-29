@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    WinUI's own resources, restated in the console palette, so the framework's stock controls - check boxes,
+    switches, radio buttons, sliders, progress bars, selection, scroll bars and accent buttons - read as the
+    Command Console before the instruments re-template any of them.
+
+    Every key here replaces one of WinUI's (ResourceKeyTests), and every colour is one of the palette's
+    (ConsoleRecipeTests): these are the palette applied, not new colours. They come in two kinds.
+
+    The accent ramp. WinUI builds its accent brushes from SystemAccentColor and its lighter and darker steps
+    with ThemeResource, so restating the ramp reaches every control that uses the accent. It is the same in
+    every shift, and the steps are chosen for what WinUI takes from them: the dark theme fills with Light2
+    and writes accent text in Light3, the light theme fills with Dark1 and writes in Dark2 and Dark3. So the
+    accent is armed red, #AA2024, in both shifts, as System-X draws its form controls (styles.css :999-1003),
+    and accent text is the armed red each shift can read: ArmedLit, #E8343A on Night Ops and #A31E23 on Day
+    Shift. High Contrast never reads the ramp; its accent brushes are system colours.
+
+    Control keys. A control's foreground on the accent is a StaticResource inside WinUI's own dictionary, so
+    only the control's key reaches it. WinUI writes black on the accent in the dark theme; System-X writes
+    ArmedFg, its warm white, on armed red in both. The scroll bar thumb is System-X's armed thumb
+    (:710-712). Their High Contrast entries restate the system colours WinUI's own High Contrast theme gives
+    those keys, so High Contrast is exactly what it was.
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.ThemeDictionaries>
+
+        <!-- ============================================================ NIGHT OPS -->
+        <ResourceDictionary x:Key="Default">
+            <!-- On the accent: ArmedFg, never WinUI's black. -->
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminate" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFill" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFillPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFillPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="#FFF3F0"/>
+
+            <!-- The armed scroll bar thumb: ScrollbarThumb, brightening to ScrollbarThumbHover, ArmedLit when held. -->
+            <SolidColorBrush x:Key="ScrollBarThumbFill" Color="#94AA2024"/>
+            <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="#D1E8343A"/>
+            <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="#E8343A"/>
+            <SolidColorBrush x:Key="ScrollBarPanningThumbBackground" Color="#94AA2024"/>
+        </ResourceDictionary>
+
+        <!-- ============================================================ DAY SHIFT -->
+        <ResourceDictionary x:Key="Light">
+            <!-- ArmedFg on the accent is constant across shifts. -->
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminate" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFill" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFillPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFillPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="#FFF3F0"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="#FFF3F0"/>
+
+            <!-- Day Shift's thumb, a little lighter, and its hover and held reds deepened for the silver chassis. -->
+            <SolidColorBrush x:Key="ScrollBarThumbFill" Color="#80AA2024"/>
+            <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="#CCA31E23"/>
+            <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="#A31E23"/>
+            <SolidColorBrush x:Key="ScrollBarPanningThumbBackground" Color="#80AA2024"/>
+        </ResourceDictionary>
+
+        <!-- ============================================================ HIGH CONTRAST -->
+        <ResourceDictionary x:Key="HighContrast">
+            <!-- WinUI's own High Contrast values for these keys, restated. -->
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="{ThemeResource SystemColorButtonFaceColor}"/>
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="{ThemeResource SystemColorButtonFaceColor}"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="{ThemeResource SystemColorButtonTextColor}"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminate" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePointerOver" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePressed" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFill" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFillPointerOver" Color="{ThemeResource SystemColorButtonTextColor}"/>
+            <SolidColorBrush x:Key="RadioButtonCheckGlyphFillPressed" Color="{ThemeResource SystemColorButtonTextColor}"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="{ThemeResource SystemColorButtonTextColor}"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="{ThemeResource SystemColorButtonTextColor}"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="{ThemeResource SystemColorButtonFaceColor}"/>
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="{ThemeResource SystemColorHighlightColor}"/>
+
+            <SolidColorBrush x:Key="ScrollBarThumbFill" Color="{ThemeResource SystemColorButtonTextColor}"/>
+            <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="ScrollBarPanningThumbBackground" Color="{ThemeResource SystemColorButtonTextColor}"/>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <!-- The accent ramp, the same in every shift: Armed (#AA2024) wherever WinUI fills with the accent, ArmedLit
+         where it writes with it (Light3 on Night Ops, Dark2 on Day Shift), ArmedDeep below that, and the armed
+         cap's own top stop as the one step lighter than the fill. -->
+    <Color x:Key="SystemAccentColor">#AA2024</Color>
+    <Color x:Key="SystemAccentColorLight1">#C8333A</Color>
+    <Color x:Key="SystemAccentColorLight2">#AA2024</Color>
+    <Color x:Key="SystemAccentColorLight3">#E8343A</Color>
+    <Color x:Key="SystemAccentColorDark1">#AA2024</Color>
+    <Color x:Key="SystemAccentColorDark2">#A31E23</Color>
+    <Color x:Key="SystemAccentColorDark3">#7F171A</Color>
+</ResourceDictionary>

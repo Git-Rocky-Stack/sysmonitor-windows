@@ -78,6 +78,13 @@
     </Content>
   </ItemGroup>
 
+  <!-- The console faces and their licences (scripts/build-fonts.py) -->
+  <ItemGroup>
+    <Content Include="Assets\Fonts\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <!-- Store Logo Assets -->
   <ItemGroup>
     <Content Include="Assets\StoreLogo\**\*">

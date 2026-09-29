@@ -15,7 +15,9 @@ namespace SysMonitor.App.Services;
 /// </summary>
 public class TrayIconService : IDisposable
 {
-    private readonly ICpuMonitor _cpuMonitor;
+    // Its own baseline: this reads on its own timer, and a shared one would let every other caller cut its
+    // measurement interval short (see CpuSampler).
+    private readonly CpuSampler _cpuSampler;
     private readonly IMemoryMonitor _memoryMonitor;
     private readonly IAlertService _alertService;
     private readonly DispatcherQueue _dispatcherQueue;
@@ -34,7 +36,7 @@ public class TrayIconService : IDisposable
         IMemoryMonitor memoryMonitor,
         IAlertService alertService)
     {
-        _cpuMonitor = cpuMonitor;
+        _cpuSampler = cpuMonitor.CreateSampler();
         _memoryMonitor = memoryMonitor;
         _alertService = alertService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
@@ -135,7 +137,7 @@ public class TrayIconService : IDisposable
         {
             try
             {
-                var cpuUsage = await _cpuMonitor.GetUsagePercentAsync();
+                var cpuUsage = _cpuSampler.Sample();
                 var memInfo = await _memoryMonitor.GetMemoryInfoAsync();
 
                 var tooltip = $"SysMonitor\nCPU: {cpuUsage:F0}% | RAM: {memInfo.UsagePercent:F0}%";

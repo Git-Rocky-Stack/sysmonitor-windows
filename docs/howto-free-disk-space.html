@@ -152,6 +152,33 @@
     </code></pre>
     <p>The difference should be close to the reported total. It will not match to the byte,
     because Windows writes to disk while you work.</p>
+    <h2>If a few large files are taking the space</h2>
+    <p>The Directory Cleaner removes what Windows and your browsers leave behind. When the
+    space is going to a handful of big files instead, use the <strong>Large Files</strong> page:</p>
+    <ol>
+    <li>
+    <p>Choose a folder, set the minimum size, and click <strong>Scan</strong>. The results are listed
+       largest first (<code>src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs:163</code>).</p>
+    </li>
+    <li>
+    <p>Tick the files you no longer need, and click <strong>Delete Selected</strong>.</p>
+    </li>
+    <li>
+    <p>The app asks first, naming how many files and how much they hold
+       (<code>src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31</code>). <strong>Cancel</strong> is the default.
+       Confirm with <strong>Move to Recycle Bin</strong>.</p>
+    </li>
+    </ol>
+    <p>The files go to the Recycle Bin, where you can restore them. A file Windows cannot
+    recycle, such as one on a network or removable drive or one larger than the Recycle
+    Bin is set to hold, is left where it is, and the result says how many and why
+    (<code>src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136</code>). A file is only reported
+    as moved once it has been found in the Recycle Bin.</p>
+    <p>Up to and including v3.0.1, Delete Selected removed the files without asking, and
+    Windows deleted any file it could not recycle permanently while the page reported it
+    as moved to the Recycle Bin.</p>
+    <p>A file in the Recycle Bin still takes up its space. The space comes back when the
+    Recycle Bin is emptied, which the Directory Cleaner's Recycle Bin category does.</p>
     <h2>If you want this to happen on a schedule</h2>
     <p>Use the <strong>Scheduled Cleaning</strong> page. It registers a Windows scheduled task that runs
     headlessly, writes its outcome to the log, and returns an exit code so Task Scheduler

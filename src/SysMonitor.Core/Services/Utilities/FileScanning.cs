@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using Microsoft.VisualBasic.FileIO;
 using Microsoft.Win32.SafeHandles;
 
 namespace SysMonitor.Core.Services.Utilities;
@@ -154,32 +153,11 @@ public static class FileScanning
     }
 
     /// <summary>
-    /// Removes a file to the Recycle Bin, where the person who did not mean it can get it back. Returns false
-    /// when it is gone already, is a link, or will not go.
+    /// Moves a file to the Recycle Bin, where the person who did not mean it can get it back - and leaves it where
+    /// it is when Windows could not put it there, rather than letting Windows delete it outright. Links are never
+    /// followed. See <see cref="RecycleBin"/>.
     /// </summary>
-    public static bool SendToRecycleBin(string path)
-    {
-        try
-        {
-            if (!File.Exists(path))
-            {
-                return false;
-            }
-
-            // Deleting a link would remove someone's shortcut to a file, not a copy of it.
-            if (File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint))
-            {
-                return false;
-            }
-
-            FileSystem.DeleteFile(path, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
+    public static RecycleResult SendToRecycleBin(string path) => RecycleBin.Windows.Send(path);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

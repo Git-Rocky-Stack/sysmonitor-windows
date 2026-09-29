@@ -32,7 +32,8 @@ public class CpuMonitorTests : IDisposable
     [Fact]
     public async Task GetUsagePercentAsync_NoticesWorkTheMachineIsDoing()
     {
-        // The first reading only starts the clock: usage is the difference between two samples.
+        // Usage is the difference between two samples. The monitor took its baseline when it was built, so this
+        // first reading covers only the moments since then; the burn below is what the next one has to see.
         await _cpuMonitor.GetUsagePercentAsync();
 
         BurnCpu(TimeSpan.FromMilliseconds(400));

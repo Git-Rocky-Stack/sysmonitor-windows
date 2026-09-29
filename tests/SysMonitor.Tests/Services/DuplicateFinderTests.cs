@@ -111,27 +111,29 @@ public class DuplicateFinderTests : IDisposable
         {
             recycled.Add(path);
             File.Delete(path);
-            return true;
+            return new RecycleResult(RecycleOutcome.Recycled, "moved to the Recycle Bin");
         });
 
-        var freed = await finder.DeleteDuplicatesAsync([copy]);
+        var results = await finder.DeleteDuplicatesAsync([copy]);
 
         recycled.Should().ContainSingle("the copy is the one that goes, and nothing else")
                 .Which.Should().Be(copy);
-        freed.Should().Be(new FileInfo(kept).Length);
+        results.Should().ContainSingle().Which.Should().Be(new RecycledFile(copy, new FileInfo(kept).Length,
+            new RecycleResult(RecycleOutcome.Recycled, "moved to the Recycle Bin")));
         File.Exists(copy).Should().BeFalse();
         File.Exists(kept).Should().BeTrue();
     }
 
     [Fact]
-    public async Task NothingIsCountedAsFreedWhenItCouldNotBeRemoved()
+    public async Task AFileWindowsCannotRecycleIsReportedAsLeftWhereItIs()
     {
         var copy = _temp.File(@"copy\photo.txt", "a photo");
 
-        var finder = new DuplicateFinder(_ => false);
-        var freed = await finder.DeleteDuplicatesAsync([copy]);
+        var finder = new DuplicateFinder(_ => new RecycleResult(RecycleOutcome.Refused, "on a network drive"));
+        var results = await finder.DeleteDuplicatesAsync([copy]);
 
-        freed.Should().Be(0, "a file that is still there has freed nothing");
+        results.Should().ContainSingle().Which.Result.Outcome.Should().Be(RecycleOutcome.Refused,
+            "a file that is still there has gone nowhere, and the page has to say so");
         File.Exists(copy).Should().BeTrue();
     }
 
@@ -143,9 +145,10 @@ public class DuplicateFinderTests : IDisposable
         var link = Path.Combine(_temp.Path, "link.txt");
         FileSystemLinks.CreateFileSymlink(link, original);
 
-        var freed = await _finder.DeleteDuplicatesAsync([link]);
+        var results = await _finder.DeleteDuplicatesAsync([link]);
 
-        freed.Should().Be(0);
+        results.Should().ContainSingle().Which.Result.Should().Be(
+            new RecycleResult(RecycleOutcome.Refused, "linking to another file"));
         File.Exists(link).Should().BeTrue("removing someone's shortcut is not freeing space");
         File.Exists(original).Should().BeTrue();
     }

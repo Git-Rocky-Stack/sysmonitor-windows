@@ -10,8 +10,18 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
-                <ResourceDictionary Source="Styles/Colors.xaml" />
-                <ResourceDictionary Source="Styles/Styles.xaml" />
+                <!-- The console's dictionaries, in the order they lean on each other: the faces and the palette, the
+                     Fluent overrides, then the text styles and the instruments that use them. Each is merged here and
+                     nowhere else, which is where the palette was measured to follow an element's theme - a well's
+                     Dark, a shift switched while the app runs (ConsoleDictionaryTests). Sources are absolute: a
+                     relative one, looked up during layout, is "not a valid absolute URI". -->
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Fonts.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Tokens.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/FluentOverrides.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Console/Instruments.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Colors.xaml" />
+                <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Converters -->
