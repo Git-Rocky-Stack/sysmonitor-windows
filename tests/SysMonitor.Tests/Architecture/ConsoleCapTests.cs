@@ -7,9 +7,9 @@ namespace SysMonitor.Tests.Architecture;
 
 /// <summary>
 /// A button on the console is a cap: a machined key with the palette's face, its key light across the top and a
-/// machined radius (System-X styles.css .btn). Two carry more weight - the armed cap for a consequential command
-/// (.btn-armed) and the chrome cap for a page's single call to action (.btn-chrome) - and they differ from the
-/// plain cap only in the face they are given. Selectors, not lines: .btn has moved twice since it was first cited.
+/// machined radius (System-X styles.css .btn, :2062, at the pinned system-x-app@eaba14b). Two carry more weight
+/// - the armed cap for a consequential command (.btn-armed, :2093) and the chrome cap for a page's single call to
+/// action (.btn-chrome, :2116) - and they differ from the plain cap only in the face they are given.
 /// <para>
 /// The palette has written all three faces since the tokens were generated, and until the styles below existed
 /// nothing read them: a brush the generator writes and no style names is a colour that cannot appear, and neither
@@ -115,9 +115,10 @@ public class ConsoleCapTests
     /// cuts at that weight and that width, so asking for them again would be asking a Bold-only family for Bold
     /// (Fonts.xaml, ConsoleCapFontFamily).
     /// <para>
-    /// These were chosen, not transcribed, until System-X's stylesheet came within reach: 36, 20 of side padding
-    /// and 12 at 60, reasoned from the chip beside them. Four of the six were wrong. The variants the same rule
-    /// carries - a small cap, a large one, a square icon cap - are not here yet.
+    /// These were chosen, not transcribed, until the pinned stylesheet came within reach: 36 high, 20 of side
+    /// padding, 12 at 60 and the chip's step of the silver ramp, reasoned from the chip beside them. Five of the
+    /// seven were wrong; the radius and the Archivo face were right. The size variants System-X has since added
+    /// to the same rule are not in the pinned revision and are not transcribed.
     /// </para>
     /// </summary>
     [Theory]

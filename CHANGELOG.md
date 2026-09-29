@@ -18,11 +18,11 @@ Each entry describes a behaviour change and cites the file it lives in.
   either side of the word, the word itself Archivo at 11.5 tracked .08em on the 4px control
   radius, over the palette's cap face with a key light across the top - going in under the
   finger and fading to Graphite when they are disabled, which is the user's own GrayText in
-  High Contrast (`src/SysMonitor.App/Styles/Console/Controls.xaml:59`,
+  High Contrast (`src/SysMonitor.App/Styles/Console/Controls.xaml:63`,
   `src/SysMonitor.App/App.xaml:24`). Two caps carry more weight and differ only in their
   face: the armed cap for a command that cannot simply be undone
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:153`) and the chrome cap for a page's
-  single call to action (`:160`). The palette had written all three faces and Fonts.xaml
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:157`) and the chrome cap for a page's
+  single call to action (`:164`). The palette had written all three faces and Fonts.xaml
   the cap face since the tokens were generated; until this dictionary existed nothing read
   any of them. The smoke run builds each cap in the live tree, in both shifts, and checks
   the face it came out with against the palette

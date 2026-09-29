@@ -10,26 +10,28 @@
 
     Three styles, and only the face differs:
 
-      ConsoleCapButtonStyle   every button, unless it asks for another (System-X styles.css .btn)
-      ArmedCapButtonStyle     a consequential command, and only those (.btn-armed)
-      ChromeCapButtonStyle    a page's single polished call to action (.btn-chrome)
+      ConsoleCapButtonStyle   every button, unless it asks for another (System-X styles.css .btn, :2062)
+      ArmedCapButtonStyle     a consequential command, and only those (.btn-armed, :2093)
+      ChromeCapButtonStyle    a page's single polished call to action (.btn-chrome, :2116)
 
     The implicit style below carries nothing but ConsoleCapButtonStyle, so a button nobody styled is a cap and
     the cap is still defined in one place (ConsoleCapTests). Its variants are BasedOn it and restate a face; a
     template of their own would be the plain cap's states copied, which is what stops following it.
 
-    Sources here name a selector, not a line. A line anchor into styles.css rots: .btn sat at :2062 when the
-    earlier phases cited it and sits at :1801 now, the file having gone from 2655 lines to 2398 in a sweep. The
-    selector is the thing that does not move.
+    Sources are the stylesheet at the revision this console is transcribed from, system-x-app@eaba14b, which
+    Instruments.xaml and the token generator both name, and the line numbers are that file's. Each selector is
+    written beside its line because System-X has moved on since the pin - .btn is at :1801 in its working tree
+    now - and the selector is the part that survives a re-pin.
 
     Transcribed. The faces, the edge, the key light, the lip and the radius are the palette's and Fonts.xaml's,
     read from System-X in earlier phases. The metrics are read from it here, off the one rule that sizes .btn,
-    .btn-armed, .btn-chrome and .btn-ghost together: 34 high, 14 either side of the word and nothing above or
-    below it, Archivo at 11.5 tracked .08em - CharacterSpacing is thousandths of an em, so 80 - on the 4px
-    control radius. The word is the silver ramp's bright step, one brighter than the chip's, which the palette
-    writes as SilverBrightBrush. Weight 700 and width 112% are not setters: the face is the instance
+    .btn-armed, .btn-chrome and .btn-ghost together (:1984-2009): 34 high, 14 either side of the word and
+    nothing above or below it, Archivo at 11.5 tracked .08em - CharacterSpacing is thousandths of an em, so 80 -
+    on the 4px control radius. The word is the silver ramp's bright step, one brighter than the chip's, which the
+    palette writes as SilverBrightBrush. Weight 700 and width 112% are not setters: the face is the instance
     build-fonts.py cuts at that weight and that width, so asking a Bold-only family for Bold is asking twice
-    (Fonts.xaml, scripts/build-fonts.py:14).
+    (Fonts.xaml, scripts/build-fonts.py:14). Every one of these is the same in System-X's working tree, so the
+    pin costs nothing here.
 
     Translated, where the CSS says it in something WinUI has not got:
 
@@ -42,9 +44,11 @@
       the rest   `gap: 8px` between an icon and its word, `text-transform: uppercase` and `white-space: nowrap`
                  have no Button property to carry them. Words are typed in capitals at the call site.
 
-    Not here. The same rule carries .btn.sm (26 high, 10 of padding, 10pt), .btn.lg (44, 22, 13pt) and a square
-    .btn.icon whose width is the cap's height at each size. Three styles no page names would be three new
-    orphans, which is the thing this dictionary was written to end; they arrive with the page that asks.
+    Not here. System-X has since given the same rule three size variants - .btn.sm at 26 high with 10 of padding
+    and 10pt, .btn.lg at 44, 22 and 13pt, and a square .btn.icon whose width is the cap's own height at each
+    size. They are not in the pinned revision, so they are not transcribed, and three styles no page names would
+    be three new orphans in any case: the thing this dictionary was written to end. They arrive with the page
+    that asks for one, and with a re-pin, which is a decision of its own and not one to take inside a control.
 
     High Contrast needs nothing here. Every token below resolves to a system colour in that shift - the face to
     ButtonFace, the armed face to Highlight with HighlightText on it, the disabled word to GrayText - so the cap
@@ -54,7 +58,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ============================================================ CAP (.btn) -->
+    <!-- ============================================================ CAP (.btn, :2062) -->
 
     <Style x:Key="ConsoleCapButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{ThemeResource CapFaceBrush}"/>
@@ -147,7 +151,7 @@
          applied by itself. It adds nothing, so the cap stays defined once, above. -->
     <Style TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}"/>
 
-    <!-- Armed (.btn-armed): consequential commands only - wiping, deleting, anything that cannot simply be undone.
+    <!-- Armed (.btn-armed, :2093): consequential commands only - wiping, deleting, anything that cannot simply be undone.
          ArmedFg is the warm white System-X writes on armed red, and the one FluentOverrides already puts on
          WinUI's accent, so an armed cap and an accent control read the same. -->
     <Style x:Key="ArmedCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
@@ -156,7 +160,7 @@
         <Setter Property="BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
     </Style>
 
-    <!-- Chrome (.btn-chrome): the one polished call to action on a page, black gloss on Day Shift. -->
+    <!-- Chrome (.btn-chrome, :2116): the one polished call to action on a page, black gloss on Day Shift. -->
     <Style x:Key="ChromeCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
         <Setter Property="Background" Value="{ThemeResource ChromeCapFaceBrush}"/>
         <Setter Property="Foreground" Value="{ThemeResource ChromeCapForegroundBrush}"/>
