@@ -310,6 +310,7 @@ internal sealed class UiSmokeRun
             {
                 await CheckSwitchAsync(leverHost, theme, shift);
                 await CheckFieldsAsync(leverHost, theme, shift);
+                await CheckStateBrushAsync(leverHost, theme, shift);
             }
 
             await CheckDialogsAsync(specimen, theme, shift);
@@ -912,6 +913,71 @@ internal sealed class UiSmokeRun
         {
             foreach (var field in fields)
                 host.Children.Remove(field);
+        }
+    }
+
+    /// <summary>
+    /// What a state colours, in the live tree. StateBrush asks the palette for the brush of the shift the element
+    /// is shown in, which only a running WinUI can say - an element's theme is the window's until it joins the
+    /// tree, and the lookup depends on it. So a word, a fill and a wash are built here in this shift and asked
+    /// what they came out as, against the palette's own brushes for the shift.
+    /// </summary>
+    private async Task CheckStateBrushAsync(Panel host, ElementTheme theme, string shift)
+    {
+        Progress($"{shift} specimen: colours a state gives a word, a fill and a wash");
+
+        var word = new TextBlock { Text = "HOT", Opacity = 0 };
+        var fill = new Border { Width = 8, Height = 8, Opacity = 0 };
+        var wash = new Border { Width = 8, Height = 8, Opacity = 0 };
+        var unwashed = new Border { Width = 8, Height = 8, Opacity = 0 };
+        StateBrush.SetForeground(word, LampState.Warn);
+        StateBrush.SetBackground(fill, LampState.Go);
+        StateBrush.SetWash(wash, LampState.Armed);
+        StateBrush.SetWash(unwashed, LampState.Off);
+
+        var parts = new FrameworkElement[] { word, fill, wash, unwashed };
+        foreach (var part in parts)
+            host.Children.Add(part);
+
+        try
+        {
+            await RenderedAsync();
+            await RenderedAsync();
+
+            var problems = 0;
+            void Expect(string what, Brush? drawn, string token)
+            {
+                var wanted = Describe(PaletteBrush(theme, token));
+                if (wanted is null || Describe(drawn) != wanted)
+                {
+                    problems++;
+                    Problem($"In the {shift} shift {what} came out {Describe(drawn) ?? "uncoloured"}, where the " +
+                            $"palette's {token} is {wanted ?? "missing"}");
+                }
+            }
+
+            Expect("a Warn word", word.Foreground, "StateWarnBrush");
+            Expect("a Go fill", fill.Background, "RailGoBrush");
+            Expect("an Armed wash", wash.Background, "ArmedSoftBrush");
+
+            if (unwashed.Background is SolidColorBrush { Color.A: > 0 })
+            {
+                problems++;
+                Problem($"In the {shift} shift an Off wash drew {Describe(unwashed.Background)}; Off has no wash");
+            }
+
+            if (problems == 0)
+                Checked($"The state colours in the {shift} shift: a word, a fill and a wash each took the palette's " +
+                        "brush for that shift, and Off washed nothing");
+        }
+        catch (Exception ex)
+        {
+            Problem($"The state colours could not be measured in the {shift} shift: {ex.Message}");
+        }
+        finally
+        {
+            foreach (var part in parts)
+                host.Children.Remove(part);
         }
     }
 

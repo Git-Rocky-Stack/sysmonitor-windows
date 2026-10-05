@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using SysMonitor.Core.Models;
 using Windows.Storage.Streams;
 
 namespace SysMonitor.App.Converters;
@@ -545,4 +546,22 @@ public class GameModeTextConverter : IValueConverter
         return "ENABLE GAME MODE";
     }
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}
+
+/// <summary>
+/// A yes or no as a lamp state, for <c>StateBrush</c> to colour: plugged in or not, connected or not, a tool
+/// selected or not. Which state each answer is belongs to the page, so App.xaml declares one instance per pairing
+/// rather than this deciding that true is good.
+/// </summary>
+public class BoolToLampStateConverter : IValueConverter
+{
+    public LampState WhenTrue { get; set; } = LampState.Go;
+
+    public LampState WhenFalse { get; set; } = LampState.NoGo;
+
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value is true ? WhenTrue : WhenFalse;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotImplementedException();
 }
