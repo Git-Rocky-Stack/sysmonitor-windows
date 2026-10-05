@@ -3,7 +3,7 @@
     x:Class="SysMonitor.App.Views.HealthCheckPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
         <Grid.RowDefinitions>
@@ -24,7 +24,7 @@
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="HEALTH CHECK" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                     <TextBlock Text="One-Click System Analysis &amp; Optimization" Style="{StaticResource PageSubtitleStyle}"
                                Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
                 </StackPanel>
@@ -98,7 +98,7 @@
                                         </LinearGradientBrush>
                                     </TextBlock.Foreground>
                                 </TextBlock>
-                                <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                                <TextBlock FontSize="12" Foreground="{ThemeResource SilverBrush}"
                                            HorizontalAlignment="Center">
                                     <Run Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"/>
                                     <Run Text="/100"/>
@@ -113,22 +113,22 @@
                                    Style="{StaticResource CardTitleStyle}" TextWrapping="Wrap"/>
                         <StackPanel Orientation="Horizontal" Spacing="16">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <FontIcon Glyph="&#xE783;" FontSize="14" Foreground="{StaticResource ErrorBrush}"/>
-                                <TextBlock Foreground="{StaticResource ErrorBrush}">
+                                <FontIcon Glyph="&#xE783;" FontSize="14" Foreground="{ThemeResource StateNoGoBrush}"/>
+                                <TextBlock Foreground="{ThemeResource StateNoGoBrush}">
                                     <Run Text="{x:Bind ViewModel.CriticalCount, Mode=OneWay}"/>
                                     <Run Text=" Critical"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{StaticResource WarningBrush}"/>
-                                <TextBlock Foreground="{StaticResource WarningBrush}">
+                                <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource StateHoldBrush}"/>
+                                <TextBlock Foreground="{ThemeResource StateHoldBrush}">
                                     <Run Text="{x:Bind ViewModel.WarningCount, Mode=OneWay}"/>
                                     <Run Text=" Warnings"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <FontIcon Glyph="&#xE946;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Foreground="{StaticResource TextSecondaryBrush}">
+                                <FontIcon Glyph="&#xE946;" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
+                                <TextBlock Foreground="{ThemeResource SilverBrush}">
                                     <Run Text="{x:Bind ViewModel.InfoCount, Mode=OneWay}"/>
                                     <Run Text=" Info"/>
                                 </TextBlock>
@@ -136,7 +136,7 @@
                         </StackPanel>
                         <TextBlock Style="{StaticResource CardSubtitleStyle}">
                             <Run Text="Potential savings: "/>
-                            <Run Text="{x:Bind ViewModel.FormattedSpaceSavings, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}"/>
+                            <Run Text="{x:Bind ViewModel.FormattedSpaceSavings, Mode=OneWay}" Foreground="{ThemeResource StateGoBrush}"/>
                         </TextBlock>
                     </StackPanel>
 
@@ -197,26 +197,26 @@
                                 <Border Grid.Column="1" Style="{StaticResource IconContainerStyle}"
                                         Width="40" Height="40" Margin="8,0,12,0">
                                     <FontIcon Glyph="{Binding SeverityIcon}" FontSize="18"
-                                              Foreground="{StaticResource TextPrimaryBrush}"/>
+                                              Foreground="{ThemeResource PlatinumBrush}"/>
                                 </Border>
 
                                 <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Title}" Style="{StaticResource CardTitleStyle}"/>
                                     <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"
                                                TextWrapping="Wrap" MaxWidth="400"/>
-                                    <TextBlock Text="{Binding FixAction}" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock Text="{Binding FixAction}" Foreground="{ThemeResource SilverBrush}"
                                                FontSize="11" FontStyle="Italic" Margin="0,4,0,0"
                                                Visibility="{Binding CanAutoFix, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                    <Border CornerRadius="4" Padding="8,4" Background="{StaticResource CardBrush}">
+                                    <Border CornerRadius="4" Padding="8,4" Background="{ThemeResource Carbon750Brush}">
                                         <TextBlock Text="{Binding Category}" FontSize="11"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                   Foreground="{ThemeResource SilverBrush}"/>
                                     </Border>
                                     <TextBlock Text="{Binding Severity}" FontSize="12" FontWeight="SemiBold"
                                                HorizontalAlignment="Center" Margin="0,4,0,0"
-                                               Foreground="{StaticResource WarningBrush}"/>
+                                               Foreground="{ThemeResource StateHoldBrush}"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -229,11 +229,11 @@
         <Grid Grid.Row="3">
             <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
                        Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
-            <TextBlock HorizontalAlignment="Right" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+            <TextBlock HorizontalAlignment="Right" Foreground="{ThemeResource SilverBrush}" FontSize="12">
                 <Run Text="Last scan: "/>
                 <Run Text="{x:Bind ViewModel.LastScanTime, Mode=OneWay}"/>
             </TextBlock>
-            <ProgressBar IsIndeterminate="True" Foreground="{StaticResource PrimaryBrush}"
+            <ProgressBar IsIndeterminate="True" Foreground="{ThemeResource ArmedBrush}"
                          Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                          VerticalAlignment="Bottom" Margin="0,8,0,0"/>
         </Grid>

@@ -3,7 +3,7 @@
     x:Class="SysMonitor.App.Views.DonationPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="16" Padding="0,0,0,24">
@@ -20,7 +20,7 @@
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="DONATE" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Support STX.1 System Monitor" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
@@ -42,19 +42,19 @@
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="20">
                     <!-- Introduction Text -->
-                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" LineHeight="24">
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
                         STX.1 System Monitor is a free app created with love to help you get the most out of your PC.
                         It's designed to keep your system running smoothly without cost - because everyone deserves
                         access to good tools.
                     </TextBlock>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" LineHeight="24">
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
                         But building and maintaining software takes time and resources. If this app has been helpful to you,
                         consider buying us a coffee (or helping with the electric bill). Your support helps us keep improving
                         STX.1 and creating more useful tools.
                     </TextBlock>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" FontStyle="Italic">
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="13" FontStyle="Italic">
                         Every bit helps - and we truly appreciate it.
                     </TextBlock>
                 </StackPanel>
@@ -81,12 +81,12 @@
                                 <FontIcon Glyph="&#xE719;" FontSize="20" Foreground="White"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="PayPal" FontWeight="Bold" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <TextBlock Text="Secure donation via PayPal" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                                <TextBlock Text="PayPal" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                <TextBlock Text="Secure donation via PayPal" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                             </StackPanel>
                         </StackPanel>
 
-                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13">
+                        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="13">
                             Click the button below to make a secure donation through PayPal.
                             You can choose your own amount.
                         </TextBlock>
@@ -104,14 +104,14 @@
 
                     <!-- QR Code Section -->
                     <StackPanel Grid.Column="1" Spacing="12" HorizontalAlignment="Center">
-                        <TextBlock Text="Or scan QR code" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock Text="Or scan QR code" Foreground="{ThemeResource SilverBrush}"
                                    FontSize="12" HorizontalAlignment="Center"/>
                         <Border Background="White" CornerRadius="8" Padding="12">
                             <Image Source="ms-appx:///Assets/DonateQR.png"
                                    Width="150" Height="150"
                                    Stretch="Uniform"/>
                         </Border>
-                        <TextBlock Text="Scan with PayPal app" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock Text="Scan with PayPal app" Foreground="{ThemeResource SilverBrush}"
                                    FontSize="11" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
@@ -128,22 +128,22 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="16">
                         <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
-                            <FontIcon Glyph="&#xEB51;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xEB51;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Your Support Matters" FontWeight="Bold" FontSize="16"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                       Foreground="{ThemeResource PlatinumBrush}"/>
                             <TextBlock Text="Thank you for using STX.1 System Monitor"
-                                       Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                                       Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="14" LineHeight="24">
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
                         Whether you donate or not, we're grateful that you're using STX.1 System Monitor.
                         Your feedback, reviews, and word-of-mouth recommendations help us grow and improve.
                     </TextBlock>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource SuccessBrush}" FontSize="14" FontWeight="SemiBold">
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource StateGoBrush}" FontSize="14" FontWeight="SemiBold">
                         Thank you for being part of the STX.1 community!
                     </TextBlock>
                 </StackPanel>
@@ -156,7 +156,7 @@
                        Stretch="Uniform" Opacity="0.7"/>
                 <TextBlock Text="Strategic. Excellence. Engineered."
                            HorizontalAlignment="Center"
-                           Foreground="{StaticResource PrimaryBrush}"
+                           Foreground="{ThemeResource ArmedLitBrush}"
                            FontSize="12"/>
             </StackPanel>
 

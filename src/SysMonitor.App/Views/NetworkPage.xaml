@@ -4,7 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:SysMonitor.Core.Models"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
@@ -21,7 +21,7 @@
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="NETWORK MONITOR" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Real-time connectivity analytics" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
@@ -52,7 +52,7 @@
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                         <Border Width="64" Height="64" CornerRadius="12"
                                 Background="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToSuccessBrushConverter}}">
-                            <FontIcon Glyph="&#xE774;" FontSize="32" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE774;" FontSize="32" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                     </StackPanel>
 
@@ -87,7 +87,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Ellipse Width="8" Height="8" Fill="White" VerticalAlignment="Center"/>
                             <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                       Foreground="{ThemeResource PlatinumBrush}" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -116,8 +116,8 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource SuccessBrush}">
-                                <FontIcon Glyph="&#xE896;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}">
+                                <FontIcon Glyph="&#xE896;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="DOWNLOAD" Style="{StaticResource StatLabelStyle}"/>
@@ -169,8 +169,8 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource CyanAccentBrush}">
-                                <FontIcon Glyph="&#xE898;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailExecBrush}">
+                                <FontIcon Glyph="&#xE898;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="UPLOAD" Style="{StaticResource StatLabelStyle}"/>
@@ -233,48 +233,48 @@
                     <!-- IP Address -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE968;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE968;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="IP ADDRESS" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.IpAddress, Mode=OneWay}"
-                                       Foreground="{StaticResource CyanAccentBrush}" FontFamily="Consolas"/>
+                                       Foreground="{ThemeResource StateExecBrush}" FontFamily="Consolas"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- MAC Address -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="MAC ADDRESS" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.MacAddress, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}" FontFamily="Consolas" FontSize="12"/>
+                                       Foreground="{ThemeResource PlatinumBrush}" FontFamily="Consolas" FontSize="12"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Connection Type -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE774;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE774;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="CONNECTION TYPE" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                       Foreground="{ThemeResource PlatinumBrush}"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Adapter Name -->
                     <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="ADAPTER" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"
+                                       Foreground="{ThemeResource PlatinumBrush}" TextTrimming="CharacterEllipsis"
                                        MaxWidth="200"/>
                         </StackPanel>
                     </StackPanel>
@@ -304,7 +304,7 @@
 
                                 <!-- Adapter Icon -->
                                 <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}">
-                                    <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                                 </Border>
 
                                 <!-- Adapter Info -->
@@ -315,20 +315,20 @@
                                     <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
                                         <TextBlock Style="{StaticResource CardSubtitleStyle}">
                                             <Run Text="Type:"/>
-                                            <Run Text="{x:Bind Type}" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <Run Text="{x:Bind Type}" Foreground="{ThemeResource PlatinumBrush}"/>
                                         </TextBlock>
                                         <TextBlock Style="{StaticResource CardSubtitleStyle}">
                                             <Run Text="IP:"/>
-                                            <Run Text="{x:Bind IpAddress}" Foreground="{StaticResource CyanAccentBrush}"/>
+                                            <Run Text="{x:Bind IpAddress}" Foreground="{ThemeResource StateExecBrush}"/>
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
 
                                 <!-- Status Badge -->
                                 <Border Grid.Column="2" CornerRadius="4" Padding="8,4"
-                                        Background="{StaticResource SurfaceLightBrush}" VerticalAlignment="Center">
+                                        Background="{ThemeResource Carbon700Brush}" VerticalAlignment="Center">
                                     <TextBlock Text="{x:Bind Status}" FontSize="12"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                               Foreground="{ThemeResource SilverBrush}"/>
                                 </Border>
                             </Grid>
                         </Border>
@@ -343,7 +343,7 @@
                        Stretch="Uniform" Opacity="0.7"/>
                 <TextBlock Text="Powered by Strategia-X Technology"
                            HorizontalAlignment="Center"
-                           Foreground="{StaticResource PrimaryBrush}"
+                           Foreground="{ThemeResource ArmedLitBrush}"
                            FontSize="12"/>
             </StackPanel>
 

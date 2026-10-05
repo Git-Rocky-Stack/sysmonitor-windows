@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
         <Grid.RowDefinitions>
@@ -25,7 +25,7 @@
                 <!-- Left: Header text -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="NETWORK MAPPER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                     <TextBlock Text="Discover Devices On Your Local Network" Style="{StaticResource PageSubtitleStyle}"
                                Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                 </StackPanel>
@@ -121,7 +121,7 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBox Text="{x:Bind ViewModel.ScanSubnet, Mode=TwoWay}" PlaceholderText="192.168.1"/>
-                                        <TextBlock Grid.Column="1" Text=".x" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Grid.Column="1" Text=".x" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{ThemeResource SilverBrush}"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -166,10 +166,10 @@
                         <StackPanel Spacing="8">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <ProgressRing IsActive="True" Width="20" Height="20"/>
-                                <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{ThemeResource SilverBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
                             <ProgressBar Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}" Maximum="100"/>
-                            <TextBlock Text="{x:Bind ViewModel.CurrentTarget, Mode=OneWay}" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.CurrentTarget, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                         </StackPanel>
                     </Border>
 
@@ -211,12 +211,12 @@
                                                     <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
                                                         <TextBlock Text="{x:Bind Hostname}" Style="{StaticResource CardTitleStyle}"/>
                                                         <TextBlock Text="{x:Bind IpAddress}" FontSize="12" Foreground="#00BCD4" Margin="0,2,0,0"/>
-                                                        <TextBlock Text="{x:Bind MacAddress}" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                                        <TextBlock Text="{x:Bind MacAddress}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,2,0,0"/>
                                                     </StackPanel>
 
                                                     <!-- Response Time -->
                                                     <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                        <TextBlock Text="Latency" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}" HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="Latency" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                                                         <TextBlock Text="{x:Bind ResponseTimeText}" FontSize="14" FontWeight="SemiBold" Foreground="#4CAF50" HorizontalAlignment="Center"/>
                                                     </StackPanel>
 
@@ -234,8 +234,8 @@
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                             Visibility="{x:Bind ViewModel.DevicesFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
                                     <FontIcon Glyph="&#xE968;" FontSize="48" Foreground="#404040"/>
-                                    <TextBlock Text="No devices discovered" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,12,0,0"/>
-                                    <TextBlock Text="Click 'SCAN' to discover devices" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                                    <TextBlock Text="No devices discovered" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
+                                    <TextBlock Text="Click 'SCAN' to discover devices" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -262,7 +262,7 @@
                         <StackPanel Visibility="{x:Bind ViewModel.HasSelectedDevice, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
                                     HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,40,0,0">
                             <FontIcon Glyph="&#xE946;" FontSize="48" Foreground="#404040"/>
-                            <TextBlock Text="Select a device to view details" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,12,0,0" TextAlignment="Center"/>
+                            <TextBlock Text="Select a device to view details" FontSize="13" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0" TextAlignment="Center"/>
                         </StackPanel>
 
                         <!-- Device Selected -->
@@ -290,7 +290,7 @@
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="IP Address" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Text="IP Address" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
                                             <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.IpAddress, Mode=OneWay}" FontSize="12" Foreground="#00BCD4"/>
                                         </Grid>
                                         <Grid>
@@ -298,7 +298,7 @@
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="MAC Address" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Text="MAC Address" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
                                             <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.MacAddress, Mode=OneWay}" FontSize="12" Foreground="White"/>
                                         </Grid>
                                         <Grid>
@@ -306,7 +306,7 @@
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Manufacturer" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Text="Manufacturer" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
                                             <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.Manufacturer, Mode=OneWay}" FontSize="12" Foreground="White"/>
                                         </Grid>
                                         <Grid>
@@ -314,7 +314,7 @@
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Latency" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                            <TextBlock Text="Latency" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
                                             <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.ResponseTimeText, Mode=OneWay}" FontSize="12" Foreground="#4CAF50"/>
                                         </Grid>
                                     </StackPanel>
@@ -343,14 +343,14 @@
                                     Visibility="{x:Bind ViewModel.IsPortScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel Orientation="Horizontal" Spacing="12">
                                     <ProgressRing IsActive="True" Width="16" Height="16"/>
-                                    <TextBlock Text="{x:Bind ViewModel.PortScanStatus, Mode=OneWay}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.PortScanStatus, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                                 </StackPanel>
                             </Border>
 
                             <!-- Open Ports -->
                             <Border Background="#141414" CornerRadius="8" Padding="16">
                                 <StackPanel Spacing="8">
-                                    <TextBlock Text="OPEN PORTS" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="OPEN PORTS" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource SilverBrush}"/>
                                     <ListView ItemsSource="{x:Bind ViewModel.OpenPorts, Mode=OneWay}" SelectionMode="None" MaxHeight="200">
                                         <ListView.ItemTemplate>
                                             <DataTemplate x:DataType="vm:PortDisplay">
@@ -361,7 +361,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="{x:Bind Port}" FontSize="13" FontWeight="SemiBold" Foreground="#00BCD4"/>
-                                                    <TextBlock Grid.Column="1" Text="{x:Bind Service}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                    <TextBlock Grid.Column="1" Text="{x:Bind Service}" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                                                     <Border Grid.Column="2" Background="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}" CornerRadius="3" Padding="6,2">
                                                         <TextBlock Text="{x:Bind Status}" FontSize="10" Foreground="White"/>
                                                     </Border>
@@ -369,7 +369,7 @@
                                             </DataTemplate>
                                         </ListView.ItemTemplate>
                                     </ListView>
-                                    <TextBlock Text="No open ports found" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"
+                                    <TextBlock Text="No open ports found" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"
                                                Visibility="{x:Bind ViewModel.OpenPorts.Count, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}"/>
                                 </StackPanel>
                             </Border>

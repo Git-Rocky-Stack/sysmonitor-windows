@@ -4,7 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewmodels="using:SysMonitor.App.ViewModels"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
@@ -21,7 +21,7 @@
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="DISK ANALYZER" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Storage space and drive analytics" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
@@ -69,13 +69,13 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource PrimaryBrush}"
+                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource ArmedBrush}"
                                     Width="56" Height="56">
-                                <FontIcon Glyph="&#xE8B7;" FontSize="28" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE8B7;" FontSize="28" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="TOTAL STORAGE" Style="{StaticResource StatLabelStyle}" FontSize="14"/>
-                                <TextBlock Foreground="{StaticResource TextPrimaryBrush}" FontWeight="Bold" FontSize="28">
+                                <TextBlock Foreground="{ThemeResource PlatinumBrush}" FontWeight="Bold" FontSize="28">
                                     <Run Text="{x:Bind ViewModel.TotalStorageGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
                                     <Run Text="GB" FontWeight="Normal" FontSize="16"/>
                                 </TextBlock>
@@ -104,8 +104,8 @@
                     <Grid Grid.Row="1">
                         <ProgressBar Value="{x:Bind ViewModel.TotalUsagePercent, Mode=OneWay}"
                                      Maximum="100" Height="12" CornerRadius="6"
-                                     Background="{StaticResource SurfaceLightBrush}"
-                                     Foreground="{StaticResource PrimaryBrush}"/>
+                                     Background="{ThemeResource Carbon700Brush}"
+                                     Foreground="{ThemeResource ArmedBrush}"/>
                     </Grid>
 
                     <!-- Stats Row -->
@@ -119,7 +119,7 @@
                         <!-- Used Space -->
                         <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                             <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Foreground="{StaticResource PrimaryBrush}"
+                            <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource ArmedLitBrush}"
                                        FontWeight="SemiBold" FontSize="18">
                                 <Run Text="{x:Bind ViewModel.TotalUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
                                 <Run Text="GB" FontSize="12"/>
@@ -129,7 +129,7 @@
                         <!-- Free Space -->
                         <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                             <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Foreground="{StaticResource SuccessBrush}"
+                            <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource StateGoBrush}"
                                        FontWeight="SemiBold" FontSize="18">
                                 <Run Text="{x:Bind ViewModel.TotalFreeGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
                                 <Run Text="GB" FontSize="12"/>
@@ -139,7 +139,7 @@
                         <!-- Usage Percent -->
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                             <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Foreground="{StaticResource CyanAccentBrush}"
+                            <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource StateExecBrush}"
                                        FontWeight="SemiBold" FontSize="18">
                                 <Run Text="{x:Bind ViewModel.TotalUsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
                                 <Run Text="%" FontSize="12"/>
@@ -181,9 +181,9 @@
 
                                     <!-- Drive Icon -->
                                     <Border Grid.Column="0" Width="48" Height="48" CornerRadius="10"
-                                            Background="{StaticResource SurfaceLightBrush}">
+                                            Background="{ThemeResource Carbon700Brush}">
                                         <FontIcon Glyph="{x:Bind DriveIcon}" FontSize="24"
-                                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                  Foreground="{ThemeResource PlatinumBrush}"/>
                                     </Border>
 
                                     <!-- Drive Info -->
@@ -227,10 +227,10 @@
                                         </Border>
                                         <!-- Storage Type Badge -->
                                         <Border CornerRadius="8" Padding="12,4"
-                                                Background="{StaticResource SurfaceLightBrush}"
+                                                Background="{ThemeResource Carbon700Brush}"
                                                 HorizontalAlignment="Right">
                                             <TextBlock Text="{x:Bind StorageType}" FontWeight="SemiBold" FontSize="11"
-                                                       Foreground="{StaticResource CyanAccentBrush}"/>
+                                                       Foreground="{ThemeResource StateExecBrush}"/>
                                         </Border>
                                     </StackPanel>
                                 </Grid>
@@ -244,7 +244,7 @@
 
                                     <ProgressBar Grid.Column="0" Value="{x:Bind UsagePercent}"
                                                  Maximum="100" Height="10" CornerRadius="5"
-                                                 Background="{StaticResource SurfaceLightBrush}"
+                                                 Background="{ThemeResource Carbon700Brush}"
                                                  Margin="0,0,16,0">
                                         <ProgressBar.Foreground>
                                             <SolidColorBrush Color="{x:Bind UsageColor}"/>
@@ -269,7 +269,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Used -->
-                                    <Border Grid.Column="0" Background="{StaticResource SurfaceLightBrush}"
+                                    <Border Grid.Column="0" Background="{ThemeResource Carbon700Brush}"
                                             CornerRadius="8" Padding="12,8">
                                         <StackPanel>
                                             <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}"
@@ -284,25 +284,25 @@
                                     </Border>
 
                                     <!-- Free -->
-                                    <Border Grid.Column="1" Background="{StaticResource SurfaceLightBrush}"
+                                    <Border Grid.Column="1" Background="{ThemeResource Carbon700Brush}"
                                             CornerRadius="8" Padding="12,8">
                                         <StackPanel>
                                             <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}"
                                                        HorizontalAlignment="Center" FontSize="10"/>
                                             <TextBlock Text="{x:Bind FormattedFree}" HorizontalAlignment="Center"
-                                                       Foreground="{StaticResource SuccessBrush}"
+                                                       Foreground="{ThemeResource StateGoBrush}"
                                                        FontWeight="SemiBold"/>
                                         </StackPanel>
                                     </Border>
 
                                     <!-- Total -->
-                                    <Border Grid.Column="2" Background="{StaticResource SurfaceLightBrush}"
+                                    <Border Grid.Column="2" Background="{ThemeResource Carbon700Brush}"
                                             CornerRadius="8" Padding="12,8">
                                         <StackPanel>
                                             <TextBlock Text="TOTAL" Style="{StaticResource StatLabelStyle}"
                                                        HorizontalAlignment="Center" FontSize="10"/>
                                             <TextBlock Text="{x:Bind FormattedTotal}" HorizontalAlignment="Center"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       Foreground="{ThemeResource PlatinumBrush}"
                                                        FontWeight="SemiBold"/>
                                         </StackPanel>
                                     </Border>
@@ -324,19 +324,19 @@
                     Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE8C8;" Foreground="{StaticResource CyanAccentBrush}" FontSize="18"/>
+                        <FontIcon Glyph="&#xE8C8;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
                         <TextBlock Text="Keep at least 10-15% of each drive free for optimal performance"
-                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE74D;" Foreground="{StaticResource CyanAccentBrush}" FontSize="18"/>
+                        <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
                         <TextBlock Text="Use the Cleaner tool to remove temporary and cache files"
-                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE8B7;" Foreground="{StaticResource CyanAccentBrush}" FontSize="18"/>
+                        <FontIcon Glyph="&#xE8B7;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
                         <TextBlock Text="Consider using an SSD for your operating system for faster boot times"
-                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -348,7 +348,7 @@
                        Stretch="Uniform" Opacity="0.7"/>
                 <TextBlock Text="Powered by Strategia-X Technology"
                            HorizontalAlignment="Center"
-                           Foreground="{StaticResource PrimaryBrush}"
+                           Foreground="{ThemeResource ArmedLitBrush}"
                            FontSize="12"/>
             </StackPanel>
 

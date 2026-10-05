@@ -3,7 +3,7 @@
     x:Class="SysMonitor.App.Views.MemoryPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
@@ -20,7 +20,7 @@
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="MEMORY MONITOR" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Real-time RAM analytics" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
@@ -50,7 +50,7 @@
                     <!-- Memory Icon -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                         <Border Style="{StaticResource IconContainerRedStyle}" Width="64" Height="64" CornerRadius="12">
-                            <FontIcon Glyph="&#xE964;" FontSize="32" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE964;" FontSize="32" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                     </StackPanel>
 
@@ -96,7 +96,7 @@
                             <TextBlock Text="{x:Bind ViewModel.UsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"
                                        Style="{StaticResource LargeStatValueStyle}" FontSize="48"/>
                             <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,12"
-                                       Foreground="{StaticResource TextSecondaryBrush}" FontSize="20"/>
+                                       Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
                         </StackPanel>
                         <!-- Status Badge -->
                         <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right">
@@ -119,7 +119,7 @@
             </Border>
 
             <!-- Action Feedback Banner -->
-            <Border Background="{StaticResource CardBrush}" CornerRadius="8" Padding="16"
+            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
                     Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -142,13 +142,13 @@
 
                     <!-- Status Message -->
                     <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
-                               Foreground="{StaticResource TextPrimaryBrush}" FontSize="14"
+                               Foreground="{ThemeResource PlatinumBrush}" FontSize="14"
                                VerticalAlignment="Center" Margin="12,0,0,0"/>
 
                     <!-- Shown once a trim has worked -->
                     <TextBlock Grid.Column="2" VerticalAlignment="Center"
                                Visibility="{x:Bind ViewModel.HasTrimmed, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                               Foreground="{StaticResource CyanAccentBrush}" FontSize="12" FontWeight="SemiBold">
+                               Foreground="{ThemeResource StateExecBrush}" FontSize="12" FontWeight="SemiBold">
                         <Run Text="MEMORY TRIMMED"/>
                     </TextBlock>
                 </Grid>
@@ -178,7 +178,7 @@
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource IconContainerRedStyle}">
-                                <FontIcon Glyph="&#xE73A;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE73A;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}"/>
@@ -187,9 +187,9 @@
                         </StackPanel>
 
                         <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{StaticResource PrimaryBrush}">
+                                   Foreground="{ThemeResource ArmedLitBrush}">
                             <Run Text="{x:Bind ViewModel.UsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.UsagePercent, Mode=OneWay}"
@@ -207,8 +207,8 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{StaticResource SuccessBrush}">
-                                <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}">
+                                <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="AVAILABLE" Style="{StaticResource StatLabelStyle}"/>
@@ -217,9 +217,9 @@
                         </StackPanel>
 
                         <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{StaticResource SuccessBrush}">
+                                   Foreground="{ThemeResource StateGoBrush}">
                             <Run Text="{x:Bind ViewModel.AvailableGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.AvailableGB, Mode=OneWay}"
@@ -239,7 +239,7 @@
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource IconContainerStyle}">
-                                <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="TOTAL" Style="{StaticResource StatLabelStyle}"/>
@@ -248,9 +248,9 @@
                         </StackPanel>
 
                         <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{StaticResource CyanAccentBrush}">
+                                   Foreground="{ThemeResource StateExecBrush}">
                             <Run Text="{x:Bind ViewModel.TotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="100" Maximum="100"
@@ -281,11 +281,11 @@
                     <!-- Page File Used -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xEDA2;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xEDA2;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="PAGE FILE USED" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Foreground="{StaticResource WarningBrush}">
+                            <TextBlock Foreground="{ThemeResource StateHoldBrush}">
                                 <Run Text="{x:Bind ViewModel.PageFileUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
                                 <Run Text="GB"/>
                             </TextBlock>
@@ -295,11 +295,11 @@
                     <!-- Page File Total -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE958;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE958;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="PAGE FILE TOTAL" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}">
+                            <TextBlock Foreground="{ThemeResource PlatinumBrush}">
                                 <Run Text="{x:Bind ViewModel.PageFileTotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
                                 <Run Text="GB"/>
                             </TextBlock>
@@ -309,11 +309,11 @@
                     <!-- Page File Usage -->
                     <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Foreground="{StaticResource CyanAccentBrush}">
+                            <TextBlock Foreground="{ThemeResource StateExecBrush}">
                                 <Run Text="{x:Bind ViewModel.PageFileUsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
                                 <Run Text="%"/>
                             </TextBlock>
@@ -334,7 +334,7 @@
                        Stretch="Uniform" Opacity="0.7"/>
                 <TextBlock Text="Powered by Strategia-X Technology"
                            HorizontalAlignment="Center"
-                           Foreground="{StaticResource PrimaryBrush}"
+                           Foreground="{ThemeResource ArmedLitBrush}"
                            FontSize="12"/>
             </StackPanel>
 

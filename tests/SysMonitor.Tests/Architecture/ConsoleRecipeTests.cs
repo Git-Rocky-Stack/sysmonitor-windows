@@ -95,8 +95,6 @@ public class ConsoleRecipeTests
     private static readonly string[] XamlColourLiterals =
     [
         "src/SysMonitor.App/MainWindow.xaml",
-        "src/SysMonitor.App/Styles/Colors.xaml",
-        "src/SysMonitor.App/Styles/Styles.xaml",
         "src/SysMonitor.App/Views/BackupPage.xaml",
         "src/SysMonitor.App/Views/BatteryPage.xaml",
         "src/SysMonitor.App/Views/BluetoothPage.xaml",

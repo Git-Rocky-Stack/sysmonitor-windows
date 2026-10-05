@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:utilities="using:SysMonitor.Core.Services.Utilities"
     xmlns:vm="using:SysMonitor.App.ViewModels"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
@@ -22,7 +22,7 @@
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="IMAGE TOOLS" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Compress, convert, and resize images" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
@@ -69,7 +69,7 @@
                     </StackPanel>
 
                     <!-- Selected Images Summary -->
-                    <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="16"
+                    <Border Grid.Row="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
                             Visibility="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid ColumnSpacing="16">
                             <Grid.ColumnDefinitions>
@@ -79,13 +79,13 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0" Width="48" Height="48" CornerRadius="8"
-                                    Background="{StaticResource CyanAccentBrush}">
-                                <FontIcon Glyph="&#xEB9F;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    Background="{ThemeResource RailExecBrush}">
+                                <FontIcon Glyph="&#xEB9F;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock FontWeight="SemiBold" FontSize="16"
-                                           Foreground="{StaticResource TextPrimaryBrush}">
+                                           Foreground="{ThemeResource PlatinumBrush}">
                                     <Run Text="{x:Bind ViewModel.SelectedImagesCount, Mode=OneWay}"/>
                                     <Run Text=" image(s) selected"/>
                                 </TextBlock>
@@ -97,14 +97,14 @@
                                 <TextBlock Text="TOTAL SIZE" Style="{StaticResource StatLabelStyle}"
                                            HorizontalAlignment="Right"/>
                                 <TextBlock Text="{x:Bind ViewModel.TotalSelectedSize, Mode=OneWay}"
-                                           Foreground="{StaticResource CyanAccentBrush}"
+                                           Foreground="{ThemeResource StateExecBrush}"
                                            FontWeight="Bold" FontSize="18"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- Image Info (single image) -->
-                    <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="16"
+                    <Border Grid.Row="2" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
                             Visibility="{x:Bind ViewModel.HasImageInfo, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid ColumnSpacing="24">
                             <Grid.ColumnDefinitions>
@@ -117,28 +117,28 @@
                             <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                                 <TextBlock Text="DIMENSIONS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.ImageDimensions, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                                 <TextBlock Text="FORMAT" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.ImageFormatName, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{StaticResource CyanAccentBrush}"
+                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource StateExecBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                                 <TextBlock Text="COLOR DEPTH" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.ImageColorDepth, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3" HorizontalAlignment="Center">
                                 <TextBlock Text="RESOLUTION" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.ImageResolution, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
@@ -147,7 +147,7 @@
             </Border>
 
             <!-- Action Feedback -->
-            <Border Background="{StaticResource CardBrush}" CornerRadius="8" Padding="16"
+            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
                     Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
@@ -161,7 +161,7 @@
                         </FontIcon.Foreground>
                     </FontIcon>
                     <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
-                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"
+                               Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
                                TextWrapping="Wrap"/>
                 </Grid>
             </Border>
@@ -179,20 +179,20 @@
                     <StackPanel Spacing="16">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Width="48" Height="48" CornerRadius="8"
-                                    Background="{StaticResource SuccessBrush}">
+                                    Background="{ThemeResource RailGoBrush}">
                                 <FontIcon Glyph="&#xE81E;" FontSize="24"
-                                          Foreground="{StaticResource TextPrimaryBrush}"/>
+                                          Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="COMPRESS" FontWeight="Bold" FontSize="16"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                           Foreground="{ThemeResource PlatinumBrush}"/>
                                 <TextBlock Text="Reduce file size"
                                            Style="{StaticResource CardSubtitleStyle}"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Spacing="8">
-                            <TextBlock Text="Quality:" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="Quality:" Foreground="{ThemeResource SilverBrush}"/>
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -201,7 +201,7 @@
                                 <Slider Grid.Column="0" Minimum="10" Maximum="100"
                                         Value="{x:Bind ViewModel.CompressionQuality, Mode=TwoWay}"/>
                                 <TextBlock Grid.Column="1" VerticalAlignment="Center"
-                                           Foreground="{StaticResource CyanAccentBrush}" FontWeight="Bold">
+                                           Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold">
                                     <Run Text="{x:Bind ViewModel.CompressionQuality, Mode=OneWay}"/>
                                     <Run Text="%"/>
                                 </TextBlock>
@@ -228,20 +228,20 @@
                     <StackPanel Spacing="16">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Width="48" Height="48" CornerRadius="8"
-                                    Background="{StaticResource CyanAccentBrush}">
+                                    Background="{ThemeResource RailExecBrush}">
                                 <FontIcon Glyph="&#xE8AB;" FontSize="24"
-                                          Foreground="{StaticResource TextPrimaryBrush}"/>
+                                          Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="CONVERT" FontWeight="Bold" FontSize="16"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                           Foreground="{ThemeResource PlatinumBrush}"/>
                                 <TextBlock Text="Change image format"
                                            Style="{StaticResource CardSubtitleStyle}"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Spacing="8">
-                            <TextBlock Text="Target Format:" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="Target Format:" Foreground="{ThemeResource SilverBrush}"/>
                             <ComboBox ItemsSource="{x:Bind ViewModel.ImageFormats}"
                                       SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}"
                                       HorizontalAlignment="Stretch"/>
@@ -269,11 +269,11 @@
                             <Border Width="48" Height="48" CornerRadius="8"
                                     Background="#9C27B0">
                                 <FontIcon Glyph="&#xE799;" FontSize="24"
-                                          Foreground="{StaticResource TextPrimaryBrush}"/>
+                                          Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="RESIZE" FontWeight="Bold" FontSize="16"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                           Foreground="{ThemeResource PlatinumBrush}"/>
                                 <TextBlock Text="Change dimensions"
                                            Style="{StaticResource CardSubtitleStyle}"/>
                             </StackPanel>
@@ -294,7 +294,7 @@
                                        Value="{x:Bind ViewModel.ResizeWidth, Mode=TwoWay}"
                                        Minimum="1" Maximum="10000" SpinButtonPlacementMode="Compact"/>
                             <TextBlock Grid.Column="1" Grid.Row="0" Text="x" VerticalAlignment="Bottom"
-                                       Margin="0,0,0,8" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                       Margin="0,0,0,8" Foreground="{ThemeResource SilverBrush}"/>
                             <NumberBox Grid.Column="2" Grid.Row="0" Header="Height"
                                        Value="{x:Bind ViewModel.ResizeHeight, Mode=TwoWay}"
                                        Minimum="1" Maximum="10000" SpinButtonPlacementMode="Compact"/>
@@ -302,7 +302,7 @@
                             <CheckBox Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
                                       Content="Maintain aspect ratio"
                                       IsChecked="{x:Bind ViewModel.MaintainAspectRatio, Mode=TwoWay}"
-                                      Foreground="{StaticResource TextSecondaryBrush}"/>
+                                      Foreground="{ThemeResource SilverBrush}"/>
                         </Grid>
 
                         <Button Content="RESIZE" Command="{x:Bind ViewModel.ResizeCommand}"
@@ -328,7 +328,7 @@
                     <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center">
                         <ProgressRing IsActive="True" Width="24" Height="24"/>
                         <TextBlock Text="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
-                                   VerticalAlignment="Center" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
                     </StackPanel>
                     <ProgressBar Value="{x:Bind ViewModel.ProcessingProgress, Mode=OneWay}"
                                  Maximum="100" Height="4"/>
@@ -340,9 +340,9 @@
                     Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE73E;" FontSize="28" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE73E;" FontSize="28" Foreground="{ThemeResource StateGoBrush}"/>
                         <TextBlock Text="OPERATION COMPLETE" FontWeight="Bold" FontSize="18"
-                                   VerticalAlignment="Center" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
                     </StackPanel>
 
                     <Grid ColumnSpacing="24">
@@ -353,50 +353,50 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}"
+                        <Border Grid.Column="0" Background="{ThemeResource Carbon800Brush}"
                                 CornerRadius="8" Padding="16">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="FILES PROCESSED" Style="{StaticResource StatLabelStyle}"
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.FilesProcessed, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="20"
-                                           Foreground="{StaticResource CyanAccentBrush}"
+                                           Foreground="{ThemeResource StateExecBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}"
+                        <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}"
                                 CornerRadius="8" Padding="16">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="ORIGINAL SIZE" Style="{StaticResource StatLabelStyle}"
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.ResultOriginalSize, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="20"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           Foreground="{ThemeResource SilverBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="2" Background="{StaticResource SurfaceBrush}"
+                        <Border Grid.Column="2" Background="{ThemeResource Carbon800Brush}"
                                 CornerRadius="8" Padding="16">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="NEW SIZE" Style="{StaticResource StatLabelStyle}"
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.ResultNewSize, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="20"
-                                           Foreground="{StaticResource SuccessBrush}"
+                                           Foreground="{ThemeResource StateGoBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="3" Background="{StaticResource SurfaceBrush}"
+                        <Border Grid.Column="3" Background="{ThemeResource Carbon800Brush}"
                                 CornerRadius="8" Padding="16">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="SPACE SAVED" Style="{StaticResource StatLabelStyle}"
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.ResultSaved, Mode=OneWay}"
                                            FontWeight="Bold" FontSize="20"
-                                           Foreground="{StaticResource CyanAccentBrush}"
+                                           Foreground="{ThemeResource StateExecBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
@@ -425,19 +425,19 @@
             <Border Style="{StaticResource CardStyle}" Padding="20">
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xEB9F;" Foreground="{StaticResource CyanAccentBrush}" FontSize="18"/>
+                        <FontIcon Glyph="&#xEB9F;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
                         <TextBlock Text="JPEG is best for photos - offers good compression with minimal quality loss"
-                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE81E;" Foreground="{StaticResource CyanAccentBrush}" FontSize="18"/>
+                        <FontIcon Glyph="&#xE81E;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
                         <TextBlock Text="PNG preserves transparency and is ideal for graphics and logos"
-                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE799;" Foreground="{StaticResource CyanAccentBrush}" FontSize="18"/>
+                        <FontIcon Glyph="&#xE799;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
                         <TextBlock Text="Lower quality settings result in smaller files but may introduce artifacts"
-                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -449,7 +449,7 @@
                        Stretch="Uniform" Opacity="0.7"/>
                 <TextBlock Text="Powered by Strategia-X Technology"
                            HorizontalAlignment="Center"
-                           Foreground="{StaticResource PrimaryBrush}"
+                           Foreground="{ThemeResource ArmedLitBrush}"
                            FontSize="12"/>
             </StackPanel>
 

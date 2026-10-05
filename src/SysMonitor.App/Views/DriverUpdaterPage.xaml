@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
         <Grid.RowDefinitions>
@@ -25,7 +25,7 @@
                 <!-- Left: Header text -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="DRIVER UPDATER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                     <TextBlock Text="Scan &amp; Manage System Drivers" Style="{StaticResource PageSubtitleStyle}"
                                Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                 </StackPanel>
@@ -175,7 +175,7 @@
                         Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <ProgressRing IsActive="True" Width="20" Height="20"/>
-                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{ThemeResource SilverBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
@@ -231,7 +231,7 @@
                     <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
                         <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
                         <TextBlock Text="ALL DRIVERS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                        <TextBlock Text="{x:Bind ViewModel.LastScanTime, Mode=OneWay}" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                        <TextBlock Text="{x:Bind ViewModel.LastScanTime, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"
                                    VerticalAlignment="Center" Margin="8,0,0,0"/>
                     </StackPanel>
 
@@ -284,15 +284,15 @@
 
                                                 <!-- Version -->
                                                 <StackPanel Grid.Column="2" Margin="12,0" VerticalAlignment="Center" MinWidth="100">
-                                                    <TextBlock Text="Version" FontSize="10" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                                    <TextBlock Text="{x:Bind DriverVersion}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                                                    <TextBlock Text="Version" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="{x:Bind DriverVersion}" FontSize="12" Foreground="{ThemeResource SilverBrush}"
                                                                TextTrimming="CharacterEllipsis" MaxWidth="100"/>
                                                 </StackPanel>
 
                                                 <!-- Date -->
                                                 <StackPanel Grid.Column="3" Margin="12,0" VerticalAlignment="Center" MinWidth="90">
-                                                    <TextBlock Text="Driver Date" FontSize="10" Foreground="{StaticResource TextTertiaryBrush}"/>
-                                                    <TextBlock Text="{x:Bind DriverDateText}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                    <TextBlock Text="Driver Date" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="{x:Bind DriverDateText}" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                                                 </StackPanel>
 
                                                 <!-- Signed Status -->
@@ -310,8 +310,8 @@
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                         Visibility="{x:Bind ViewModel.HasScanned, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
                                 <FontIcon Glyph="&#xE964;" FontSize="48" Foreground="#404040"/>
-                                <TextBlock Text="No drivers scanned yet" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,12,0,0" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Click 'SCAN' to analyze your system drivers" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                                <TextBlock Text="No drivers scanned yet" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Click 'SCAN' to analyze your system drivers" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
                     </Border>

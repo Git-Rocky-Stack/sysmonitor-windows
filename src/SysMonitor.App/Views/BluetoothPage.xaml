@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:utils="using:SysMonitor.Core.Services.Utilities"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
         <Grid.RowDefinitions>
@@ -25,7 +25,7 @@
                 <!-- Left: Header text -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="BLUETOOTH ANALYZER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                     <TextBlock Text="Scan &amp; Analyze Bluetooth Devices" Style="{StaticResource PageSubtitleStyle}"
                                Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                 </StackPanel>
@@ -75,7 +75,7 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                                <FontIcon Glyph="&#xE702;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE702;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -136,7 +136,7 @@
                         Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <ProgressRing IsActive="True" Width="20" Height="20"/>
-                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{ThemeResource SilverBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
@@ -177,12 +177,12 @@
                                                 <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
                                                     <TextBlock Text="{x:Bind Name}" Style="{StaticResource CardTitleStyle}"/>
                                                     <TextBlock Text="{x:Bind DeviceType}" Style="{StaticResource CardSubtitleStyle}" Margin="0,2,0,0"/>
-                                                    <TextBlock Text="{x:Bind Address}" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                                    <TextBlock Text="{x:Bind Address}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,2,0,0"/>
                                                 </StackPanel>
 
                                                 <!-- Signal -->
                                                 <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                    <TextBlock Text="Signal" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="Signal" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                                                     <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,2,0,0"
                                                                Foreground="{x:Bind SignalColor, Converter={StaticResource StringToBrushConverter}}">
                                                         <Run Text="{x:Bind SignalStrength}"/><Run Text="%"/>
@@ -210,8 +210,8 @@
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                         Visibility="{x:Bind ViewModel.DevicesFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
                                 <FontIcon Glyph="&#xE702;" FontSize="48" Foreground="#404040"/>
-                                <TextBlock Text="No Bluetooth devices found" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,12,0,0"/>
-                                <TextBlock Text="Click 'SCAN' to search for nearby devices" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                                <TextBlock Text="No Bluetooth devices found" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
+                                <TextBlock Text="Click 'SCAN' to search for nearby devices" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>

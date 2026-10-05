@@ -4,7 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewmodels="using:SysMonitor.App.ViewModels"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
@@ -21,7 +21,7 @@
                     <!-- Left: Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="PERFORMANCE" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Real-time application performance metrics" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
                     </StackPanel>
@@ -50,18 +50,18 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                            <FontIcon Glyph="&#xE9D9;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE9D9;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
 
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource CardTitleStyle}">
                                 <Run Text="Status: "/>
                                 <Run Text="{x:Bind ViewModel.IsMonitoring, Mode=OneWay, Converter={StaticResource BoolToMonitoringTextConverter}}"
-                                     Foreground="{StaticResource SuccessBrush}"/>
+                                     Foreground="{ThemeResource StateGoBrush}"/>
                             </TextBlock>
                             <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
                                 <Run Text="Tracked Operations: "/>
-                                <Run Text="{x:Bind ViewModel.Metrics.Count, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
+                                <Run Text="{x:Bind ViewModel.Metrics.Count, Mode=OneWay}" Foreground="{ThemeResource StateHoldBrush}"/>
                             </TextBlock>
                         </StackPanel>
 
@@ -98,13 +98,13 @@
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="MEMORY" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource CyanAccentBrush}">
+                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}">
                             <Run Text="{x:Bind ViewModel.MemoryUsageMB, Mode=OneWay, Converter={StaticResource DoubleToStringConverter}}"/>
-                            <Run Text="MB" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="MB" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
                         <TextBlock Text="Working Set" Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
@@ -115,11 +115,11 @@
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE74D;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE74D;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="GC PRESSURE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}">
+                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}">
                             <Run Text="{x:Bind ViewModel.GcPressure, Mode=OneWay, Converter={StaticResource DoubleToStringConverter}}"/>
                         </TextBlock>
                         <TextBlock Text="Collection Score" Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
@@ -131,11 +131,11 @@
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE9D9;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE9D9;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="TRACKED OPS" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}">
+                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}">
                             <Run Text="{x:Bind ViewModel.Metrics.Count, Mode=OneWay}"/>
                         </TextBlock>
                         <TextBlock Text="Operations Monitored" Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
@@ -208,30 +208,30 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0" Text="{x:Bind Operation}"
-                                                   Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"
+                                                   Foreground="{ThemeResource PlatinumBrush}" FontSize="13"
                                                    VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1" Text="{x:Bind Count}"
-                                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13"
+                                                   Foreground="{ThemeResource SilverBrush}" FontSize="13"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="2" Text="{x:Bind AverageMsFormatted}"
-                                                   Foreground="{StaticResource CyanAccentBrush}" FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="{ThemeResource StateExecBrush}" FontSize="13" FontWeight="SemiBold"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="3" Text="{x:Bind MinMsFormatted}"
-                                                   Foreground="{StaticResource SuccessBrush}" FontSize="13"
+                                                   Foreground="{ThemeResource StateGoBrush}" FontSize="13"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="4" Text="{x:Bind MaxMsFormatted}"
-                                                   Foreground="{StaticResource WarningBrush}" FontSize="13"
+                                                   Foreground="{ThemeResource StateHoldBrush}" FontSize="13"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="5" Text="{x:Bind P95MsFormatted}"
-                                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13"
+                                                   Foreground="{ThemeResource SilverBrush}" FontSize="13"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="6" Text="{x:Bind P99MsFormatted}"
-                                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13"
+                                                   Foreground="{ThemeResource SilverBrush}" FontSize="13"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         <Border Grid.Column="7" Background="#4CAF50"
                                                 CornerRadius="4" Padding="8,4" HorizontalAlignment="Center">
                                             <TextBlock Text="{x:Bind Status}" FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                       Foreground="{ThemeResource PlatinumBrush}"/>
                                         </Border>
                                     </Grid>
                                 </Border>
@@ -248,23 +248,23 @@
                     <StackPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Border Background="#4CAF50" Width="16" Height="16" CornerRadius="4"/>
-                            <TextBlock Text="Excellent (&lt;16ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="Excellent (&lt;16ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Border Background="#8BC34A" Width="16" Height="16" CornerRadius="4"/>
-                            <TextBlock Text="Good (&lt;50ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="Good (&lt;50ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Border Background="#FF9800" Width="16" Height="16" CornerRadius="4"/>
-                            <TextBlock Text="Fair (&lt;100ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="Fair (&lt;100ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Border Background="#FF5722" Width="16" Height="16" CornerRadius="4"/>
-                            <TextBlock Text="Poor (&lt;200ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="Poor (&lt;200ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Border Background="#F44336" Width="16" Height="16" CornerRadius="4"/>
-                            <TextBlock Text="Critical (&gt;200ms)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="Critical (&gt;200ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -274,10 +274,10 @@
             <Border Style="{StaticResource CardStyle}" Padding="16" Background="#1A1A1A">
                 <StackPanel Spacing="8">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE946;" FontSize="16" Foreground="{StaticResource CyanAccentBrush}"/>
-                        <TextBlock Text="About Performance Monitoring" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                        <FontIcon Glyph="&#xE946;" FontSize="16" Foreground="{ThemeResource StateExecBrush}"/>
+                        <TextBlock Text="About Performance Monitoring" Foreground="{ThemeResource PlatinumBrush}" FontWeight="SemiBold"/>
                     </StackPanel>
-                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" LineHeight="20">
+                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="12" LineHeight="20">
                         This page displays real-time performance metrics for SysMonitor operations. Use the TrackOperation API in your code to monitor custom operations.
                         Metrics include execution count, average/min/max times, and P95/P99 percentiles. Export to CSV for detailed analysis.
                     </TextBlock>

@@ -4,7 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:SysMonitor.Core.Models"
-    Background="{StaticResource BackgroundBrush}">
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid RowSpacing="16" Padding="0,0,0,24">
@@ -28,7 +28,7 @@
 
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                         <TextBlock Text="GAME MODE" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                         <TextBlock Text="Optimize Your System for Gaming" Style="{StaticResource PageSubtitleStyle}"
                                    Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
                     </StackPanel>
@@ -77,9 +77,9 @@
 
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                                               FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                               FontSize="24" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
                                     <TextBlock Text="Click the button to toggle" FontSize="13"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                               Foreground="{ThemeResource SilverBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -98,7 +98,7 @@
                             </Button>
                             <ProgressRing IsActive="{x:Bind ViewModel.IsActivating, Mode=OneWay}"
                                           Width="24" Height="24" Margin="0,8,0,0"
-                                          Foreground="{StaticResource PrimaryBrush}"
+                                          Foreground="{ThemeResource ArmedLitBrush}"
                                           Visibility="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                         </StackPanel>
                     </Grid>
@@ -124,7 +124,7 @@
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="{StaticResource PrimaryBrush}"/>
+                                    <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="{ThemeResource ArmedLitBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="AUTO MODE" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
@@ -137,7 +137,7 @@
                                           Margin="0"/>
 
                             <TextBlock Text="{x:Bind ViewModel.DetectedGamesText, Mode=OneWay}"
-                                       FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                       FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                         </StackPanel>
                     </Border>
 
@@ -146,7 +146,7 @@
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE9D5;" FontSize="18" Foreground="{StaticResource WarningBrush}"/>
+                                    <FontIcon Glyph="&#xE9D5;" FontSize="18" Foreground="{ThemeResource StateHoldBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="PROFILES" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
@@ -182,7 +182,7 @@
                         <StackPanel Spacing="10">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{StaticResource SuccessBrush}"/>
+                                    <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{ThemeResource StateGoBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="GAME OVERLAY" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
@@ -196,15 +196,15 @@
 
                             <StackPanel Spacing="4" Margin="0,4,0,0">
                                 <TextBlock Text="Drag overlay to reposition"
-                                           FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="11" Foreground="{ThemeResource SilverBrush}"
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="Frame rate needs a GPU that reports it; the overlay says so when yours does not."
-                                           FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="11" Foreground="{ThemeResource SilverBrush}"
                                            HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
-                                    <FontIcon Glyph="&#xE7C2;" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <FontIcon Glyph="&#xE7C2;" FontSize="10" Foreground="{ThemeResource SilverBrush}"/>
                                     <TextBlock Text="Click &amp; drag anywhere"
-                                               FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.7"/>
+                                               FontSize="10" Foreground="{ThemeResource SilverBrush}" Opacity="0.7"/>
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -238,7 +238,7 @@
                             <!-- Header -->
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
-                                    <FontIcon Glyph="&#xE9CA;" FontSize="22" Foreground="{StaticResource SuccessBrush}"/>
+                                    <FontIcon Glyph="&#xE9CA;" FontSize="22" Foreground="{ThemeResource StateGoBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="FAN SPEEDS" Style="{StaticResource CardTitleStyle}" FontWeight="Bold" FontSize="16"/>
@@ -259,7 +259,7 @@
                                         <!-- Outer ring -->
                                         <Ellipse Stroke="#40FFFFFF" StrokeThickness="3"/>
                                         <!-- Progress ring background -->
-                                        <Ellipse Stroke="{StaticResource CardBrush}" StrokeThickness="6" Margin="4"/>
+                                        <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
                                         <!-- Progress ring -->
                                         <Ellipse x:Name="CpuFanRing" Stroke="#FF00FF00" StrokeThickness="6" Margin="4"
                                                  StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
@@ -268,15 +268,15 @@
                                             </Ellipse.RenderTransform>
                                         </Ellipse>
                                         <!-- Center icon -->
-                                        <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"
+                                        <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Grid>
                                     <StackPanel HorizontalAlignment="Center">
                                         <TextBlock x:Name="CpuFanSpeedText" Text="N/A"
                                                    FontSize="14" FontWeight="Bold" FontFamily="Consolas"
-                                                   Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                   Foreground="{ThemeResource PlatinumBrush}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="CPU Fan" FontSize="11"
-                                                   Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                                   Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </StackPanel>
 
@@ -284,22 +284,22 @@
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="8">
                                     <Grid Width="80" Height="80">
                                         <Ellipse Stroke="#40FFFFFF" StrokeThickness="3"/>
-                                        <Ellipse Stroke="{StaticResource CardBrush}" StrokeThickness="6" Margin="4"/>
+                                        <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
                                         <Ellipse x:Name="SysFanRing" Stroke="#FF00BFFF" StrokeThickness="6" Margin="4"
                                                  StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
                                             <Ellipse.RenderTransform>
                                                 <RotateTransform Angle="0"/>
                                             </Ellipse.RenderTransform>
                                         </Ellipse>
-                                        <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{StaticResource TextPrimaryBrush}"
+                                        <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"
                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Grid>
                                     <StackPanel HorizontalAlignment="Center">
                                         <TextBlock x:Name="SysFanSpeedText" Text="N/A"
                                                    FontSize="14" FontWeight="Bold" FontFamily="Consolas"
-                                                   Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                   Foreground="{ThemeResource PlatinumBrush}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="System Fan" FontSize="11"
-                                                   Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                                   Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
@@ -309,12 +309,12 @@
                                 <Border Background="#20FFFFFF" CornerRadius="6" Padding="12,8">
                                     <StackPanel Spacing="4">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                                             <TextBlock Text="Hardware sensor support required"
-                                                       FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                       FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
                                         </StackPanel>
                                         <TextBlock Text="Your system must expose fan sensors to display readings here."
-                                                   FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="10" Foreground="{ThemeResource SilverBrush}"
                                                    TextWrapping="Wrap" Opacity="0.7"/>
                                     </StackPanel>
                                 </Border>
@@ -337,7 +337,7 @@
                             <!-- Header -->
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
-                                    <FontIcon Glyph="&#xEA91;" FontSize="22" Foreground="{StaticResource WarningBrush}"/>
+                                    <FontIcon Glyph="&#xEA91;" FontSize="22" Foreground="{ThemeResource StateHoldBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="POWER DRAW" Style="{StaticResource CardTitleStyle}" FontWeight="Bold" FontSize="16"/>
@@ -355,7 +355,7 @@
 
                                 <!-- CPU Power -->
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="4">
-                                    <Border Background="{StaticResource CardBrush}" CornerRadius="8" Padding="12,8">
+                                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="12,8">
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock x:Name="CpuPowerText" Text="--W"
                                                        FontSize="24" FontWeight="Bold" FontFamily="Consolas"
@@ -363,12 +363,12 @@
                                         </StackPanel>
                                     </Border>
                                     <TextBlock Text="CPU" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
 
                                 <!-- GPU Power -->
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">
-                                    <Border Background="{StaticResource CardBrush}" CornerRadius="8" Padding="12,8">
+                                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="12,8">
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock x:Name="GpuPowerText" Text="--W"
                                                        FontSize="24" FontWeight="Bold" FontFamily="Consolas"
@@ -376,7 +376,7 @@
                                         </StackPanel>
                                     </Border>
                                     <TextBlock Text="GPU" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
 
                                 <!-- Total Power -->
@@ -395,7 +395,7 @@
                                         </StackPanel>
                                     </Border>
                                     <TextBlock Text="TOTAL" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
                         </Grid>
@@ -421,7 +421,7 @@
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
-                                    <FontIcon Glyph="&#xE71A;" FontSize="16" Foreground="{StaticResource ErrorBrush}"/>
+                                    <FontIcon Glyph="&#xE71A;" FontSize="16" Foreground="{ThemeResource StateNoGoBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="Lowers Background Apps" Style="{StaticResource CardTitleStyle}"/>
@@ -435,7 +435,7 @@
 
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
-                                    <FontIcon Glyph="&#xE945;" FontSize="16" Foreground="{StaticResource WarningBrush}"/>
+                                    <FontIcon Glyph="&#xE945;" FontSize="16" Foreground="{ThemeResource StateHoldBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="High Performance Mode" Style="{StaticResource CardTitleStyle}"/>
@@ -445,7 +445,7 @@
 
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
-                                    <FontIcon Glyph="&#xE74C;" FontSize="16" Foreground="{StaticResource SuccessBrush}"/>
+                                    <FontIcon Glyph="&#xE74C;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="Trims Memory" Style="{StaticResource CardTitleStyle}"/>
@@ -475,24 +475,24 @@
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                                     <TextBlock Text="{x:Bind ViewModel.LastBackgroundAppsAffected, Mode=OneWay}"
                                                FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
-                                               Foreground="{StaticResource PrimaryBrush}"/>
+                                               Foreground="{ThemeResource ArmedLitBrush}"/>
                                     <TextBlock Text="{x:Bind ViewModel.LastSessionAppsLabel, Mode=OneWay}" FontSize="12"
-                                               Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                                     <TextBlock Text="{x:Bind ViewModel.LastMemoryTrimmed, Mode=OneWay}"
                                                FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
-                                               Foreground="{StaticResource SuccessBrush}"/>
+                                               Foreground="{ThemeResource StateGoBrush}"/>
                                     <TextBlock Text="Trimmed" FontSize="12"
-                                               Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
 
                             <!-- Killed Apps List -->
                             <StackPanel Visibility="{x:Bind ViewModel.AffectedApps.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
                                 <TextBlock Text="Closed Applications:" FontSize="12" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8"/>
+                                           Foreground="{ThemeResource SilverBrush}" Margin="0,0,0,8"/>
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.AffectedApps, Mode=OneWay}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -501,8 +501,8 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="x:String">
-                                            <Border Background="{StaticResource CardBrush}" CornerRadius="4" Padding="8,4">
-                                                <TextBlock Text="{x:Bind}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="4" Padding="8,4">
+                                                <TextBlock Text="{x:Bind}" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -514,12 +514,12 @@
                     <Border Style="{StaticResource CardStyle}" Padding="16"
                             Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-                            <FontIcon Glyph="&#xE946;" FontSize="32" Foreground="{StaticResource TextSecondaryBrush}"
+                            <FontIcon Glyph="&#xE946;" FontSize="32" Foreground="{ThemeResource SilverBrush}"
                                       HorizontalAlignment="Center"/>
                             <TextBlock Text="No session data yet" FontSize="14"
-                                       Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                             <TextBlock Text="Enable Game Mode to see results" FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -536,7 +536,7 @@
                     <StackPanel Spacing="8">
                         <TextBlock Text="The apps Game Mode acts on. Their priority is lowered; tick &quot;Ask them to close instead&quot; above and they are asked to close, and anything that declines keeps running:"
                                    TextWrapping="Wrap"
-                                   FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                         <ItemsControl ItemsSource="{x:Bind ViewModel.TargetApps, Mode=OneWay}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -545,8 +545,8 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
-                                    <Border Background="{StaticResource CardBrush}" CornerRadius="4" Padding="10,6">
-                                        <TextBlock Text="{x:Bind}" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="4" Padding="10,6">
+                                        <TextBlock Text="{x:Bind}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

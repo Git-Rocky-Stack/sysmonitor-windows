@@ -12,8 +12,8 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
                 <!-- The console's dictionaries, in the order they lean on each other: the faces and the palette, the
                      Fluent overrides, then the text styles, the stock controls and the instruments that use them.
-                     Controls.xaml comes before Styles.xaml, whose named button styles are the look its caps replace:
-                     merged after them, an implicit style there would take the bare buttons back. Each is merged here
+                     Styles.xaml comes last: it maps the first generation's style names onto all of the above, and
+                     an implicit style in it would beat the console's own, so it holds none. Each is merged here
                      and nowhere else, which is where the palette was measured to follow an element's theme - a well's
                      Dark, a shift switched while the app runs (ConsoleDictionaryTests). Sources are absolute: a
                      relative one, looked up during layout, is "not a valid absolute URI". -->
@@ -23,7 +23,6 @@
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Controls.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Instruments.xaml" />
-                <ResourceDictionary Source="ms-appx:///Styles/Colors.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 

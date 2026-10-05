@@ -51,6 +51,20 @@ Each entry describes a behaviour change and cites the file it lives in.
   shifts, turns it on and off again, and checks every face against the palette and the travel
   against the number WinUI works out for itself
   (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:665`).
+- **The pages speak the console's colours.** Every reference a page made to the first
+  generation's brushes - 1,016 of them, on every page - now asks for the console palette with
+  `{ThemeResource}`, so it follows the shift: words are Platinum, Silver and Silver Mute, armed
+  text is ArmedLit, a status word is the state colour System-X darkens on Day Shift so it stays
+  readable on silver, and a status fill is the matching rail. `Styles/Colors.xaml` had nothing
+  left reading it and is gone.
+
+- **The first generation's style names are answered by the console.** A page that still asks for
+  `CardStyle` gets System-X's plate - its face, edge and 2px radius; `PageHeaderStyle` the view
+  title; `SectionHeaderStyle` a placard with the plate's armed light pipe beside it; stat labels
+  and values the Departure Mono kicker and telemetry faces; titles and subtitles the console's
+  headings and descriptions; progress bars a dark well with an LED lit along it
+  (`src/SysMonitor.App/Styles/Styles.xaml:31`). Twenty styles nothing asked for are deleted.
+
 - **A form field is a recessed well.** Text boxes, password boxes and number boxes were WinUI's,
   or a legacy style with a pill radius and hardcoded colours. They are now System-X's `.field`:
   a dark well cut into the plate, dark in both shifts as the stylesheet says, 8 above and below
@@ -153,6 +167,13 @@ Each entry describes a behaviour change and cites the file it lives in.
   pages moved with the lines they cite.
 
 ### Fixed
+
+- **The resource check knows a name from a key.** WinUI declares a few resources with `x:Name`
+  rather than `x:Key` - NumberBox's spin button styles among them - and nothing outside its own
+  dictionary can find those. The list of keys WinUI provides counted them as provided, so a
+  template that asked for one passed the resource check and crashed the first page that laid out
+  a number box. The list is now written without them (`scripts/list-winui-keys.py:75`), and the
+  number box restates the two styles where its buttons can reach them.
 
 - **The Drive Wiper shows the result of a wipe.** Every wipe wrote its outcome to the
   status line and then, in its `finally` block, described the list over it, so the

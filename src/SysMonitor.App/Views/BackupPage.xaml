@@ -3,7 +3,7 @@
     x:Class="SysMonitor.App.Views.BackupPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{StaticResource BackgroundBrush}"
+    Background="{ThemeResource Carbon950Brush}"
     Loaded="Page_Loaded">
 
     <Grid>
@@ -23,7 +23,7 @@
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="{x:Bind ViewModel.WizardTitle, Mode=OneWay}" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
+                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
                     <TextBlock Text="{x:Bind ViewModel.WizardSubtitle, Mode=OneWay}" Style="{StaticResource PageSubtitleStyle}"
                                Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
                 </StackPanel>
@@ -586,7 +586,7 @@
                 <Grid Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsFiveToVisibilityConverter}}">
                     <Border Style="{StaticResource CardStyle}" Padding="32" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="500">
                         <StackPanel Spacing="24" HorizontalAlignment="Center">
-                            <ProgressRing IsActive="True" Width="64" Height="64" Foreground="{StaticResource PrimaryBrush}"/>
+                            <ProgressRing IsActive="True" Width="64" Height="64" Foreground="{ThemeResource ArmedLitBrush}"/>
 
                             <StackPanel Spacing="8" HorizontalAlignment="Center">
                                 <TextBlock Text="{x:Bind ViewModel.ProgressStatus, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center"/>
