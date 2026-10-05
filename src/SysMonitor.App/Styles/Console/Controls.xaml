@@ -952,6 +952,21 @@
                 <ControlTemplate TargetType="NumberBox">
                     <Grid Height="{TemplateBinding Height}">
 
+                        <!-- WinUI's own spin button styles are declared by x:Name, which nothing outside its
+                             dictionary can find - asked for from here they throw as the number box lays out. So
+                             they are restated, as WinUI writes them, where the buttons can reach them. -->
+                        <Grid.Resources>
+                            <Style x:Key="FieldSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
+                                <Setter Property="IsTabStop" Value="False"/>
+                                <Setter Property="MinWidth" Value="32"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                                <Setter Property="BorderThickness" Value="{ThemeResource NumberBoxSpinButtonBorderThickness}"/>
+                                <Setter Property="FontSize" Value="12"/>
+                                <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}"/>
+                            </Style>
+                        </Grid.Resources>
+
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="CommonStates">
                                 <VisualState x:Name="Normal"/>
@@ -1042,13 +1057,26 @@
                                   BorderBrush="{ThemeResource NumberBoxPopupBorderBrush}"
                                   BorderThickness="{ThemeResource NumberBoxPopupBorderThickness}"
                                   CornerRadius="{ThemeResource OverlayCornerRadius}">
+                                <Grid.Resources>
+                                    <Style x:Key="FieldPopupSpinButtonStyle" TargetType="RepeatButton">
+                                        <Setter Property="AutomationProperties.AccessibilityView" Value="Raw"/>
+                                        <Setter Property="IsTabStop" Value="False"/>
+                                        <Setter Property="Width" Value="36"/>
+                                        <Setter Property="Height" Value="36"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="BorderThickness" Value="{ThemeResource NumberBoxPopupSpinButtonBorderThickness}"/>
+                                        <Setter Property="FontSize" Value="16"/>
+                                        <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}"/>
+                                        <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}"/>
+                                    </Style>
+                                </Grid.Resources>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <RepeatButton x:Name="PopupUpSpinButton" Style="{StaticResource NumberBoxPopupSpinButtonStyle}"
+                                <RepeatButton x:Name="PopupUpSpinButton" Style="{StaticResource FieldPopupSpinButtonStyle}"
                                               Margin="0,0,0,4" Content="&#xE70E;"/>
-                                <RepeatButton x:Name="PopupDownSpinButton" Style="{StaticResource NumberBoxPopupSpinButtonStyle}"
+                                <RepeatButton x:Name="PopupDownSpinButton" Style="{StaticResource FieldPopupSpinButtonStyle}"
                                               Grid.Row="1" Content="&#xE70D;"/>
                             </Grid>
                         </Popup>
@@ -1065,11 +1093,11 @@
 
                         <RepeatButton x:Name="UpSpinButton" Grid.Row="1" Grid.Column="1" RequestedTheme="Dark" Visibility="Collapsed"
                                       FontSize="{TemplateBinding FontSize}" Content="&#xE70E;"
-                                      Style="{StaticResource NumberBoxSpinButtonStyle}" Margin="4"
+                                      Style="{StaticResource FieldSpinButtonStyle}" Margin="4"
                                       CornerRadius="{TemplateBinding CornerRadius}"/>
                         <RepeatButton x:Name="DownSpinButton" Grid.Row="1" Grid.Column="2" RequestedTheme="Dark" Visibility="Collapsed"
                                       FontSize="{TemplateBinding FontSize}" Content="&#xE70D;"
-                                      Style="{StaticResource NumberBoxSpinButtonStyle}" Margin="0,4,4,4"
+                                      Style="{StaticResource FieldSpinButtonStyle}" Margin="0,4,4,4"
                                       CornerRadius="{TemplateBinding CornerRadius}"/>
 
                         <ContentPresenter x:Name="DescriptionPresenter" Grid.Row="2" Grid.ColumnSpan="3"

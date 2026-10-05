@@ -1068,7 +1068,6 @@ DefaultToggleSwitchStyle
 DefaultToolTipStyle
 DefaultTreeViewStyle
 DefaultTwoPaneViewStyle
-DeleteButtonStyle
 DesktopAcrylicTransparentBrush
 DisplayTextBlockFontSize
 DisplayTextBlockStyle
@@ -1845,10 +1844,8 @@ NumberBoxPopupIndicatorMargin
 NumberBoxPopupShadowDepth
 NumberBoxPopupSpinButtonBackground
 NumberBoxPopupSpinButtonBorderThickness
-NumberBoxPopupSpinButtonStyle
 NumberBoxPopupVerticalOffset
 NumberBoxSpinButtonBorderThickness
-NumberBoxSpinButtonStyle
 NumberBoxTextBoxStyle
 OverlayClosingAnimation
 OverlayCornerRadius
@@ -2027,7 +2024,6 @@ ProgressBarTrackHeight
 ProgressRingBackgroundThemeBrush
 ProgressRingForegroundThemeBrush
 ProgressRingStrokeThickness
-QueryButtonStyle
 RadioButtonBackground
 RadioButtonBackgroundDisabled
 RadioButtonBackgroundPointerOver
@@ -2140,7 +2136,6 @@ RepeatButtonRevealBorderThemeThickness
 RepeatButtonRevealStyle
 RepeatButtonTemplate
 RequiredHeaderContent
-RevealButtonStyle
 RichEditBoxLeftHeaderMargin
 RichEditBoxLeftHeaderMaxWidth
 RichEditBoxTopHeaderMargin
@@ -2231,7 +2226,6 @@ ScrollButtonForegroundPointerOver
 ScrollButtonForegroundPressed
 ScrollButtonStyle
 ScrollButtonStyleBorderThickness
-ScrollViewerScrollBarlessTemplate
 ScrollViewerScrollBarMargin
 ScrollViewerScrollBarSeparatorBackground
 ScrollViewerSeparatorContractBeginTime
@@ -2724,7 +2718,6 @@ SystemRevealChromeMediumLowColor
 SystemRevealChromeWhiteColor
 SystemRevealListLowColor
 SystemRevealListMediumColor
-TabScrollViewerStyle
 TabViewBackground
 TabViewBorderBrush
 TabViewButtonBackground
@@ -2742,7 +2735,6 @@ TabViewButtonForegroundActiveTab
 TabViewButtonForegroundDisabled
 TabViewButtonForegroundPointerOver
 TabViewButtonForegroundPressed
-TabViewButtonStyle
 TabViewCloseButtonStyle
 TabViewHeaderPadding
 TabViewItemAddButtonContainerPadding
@@ -2821,7 +2813,6 @@ TabViewScrollButtonForeground
 TabViewScrollButtonForegroundDisabled
 TabViewScrollButtonForegroundPointerOver
 TabViewScrollButtonForegroundPressed
-TabViewScrollButtonStyle
 TabViewSelectedItemBorderBrush
 TabViewSelectedItemBorderThickness
 TabViewSelectedItemHeaderMargin
