@@ -1,4 +1,4 @@
-# Handoff - fields, buttons and the pages' colours, headers and spinners are on the console; code colours are next
+# Handoff - fields, buttons, page colours, headers, spinners and code colours are on the console; instruments are next
 
 **Date:** 2026-10-05
 **Branch:** `claude/peaceful-mendel-xkext6`, draft PR against `main`
@@ -116,25 +116,36 @@ CHANGELOG anchors re-pointed through a line diff after the pages moved.
 - **The resource check now knows `x:Name` from `x:Key`** (`scripts/list-winui-keys.py:75`); nine names left the
   list, and NumberBox restates WinUI's two spin button styles where its buttons can reach them.
 
+### 2.5 Code colours are lamp states
+
+Services and view models carry a `LampState` beside each status word instead of a Material hex string;
+pages colour by state with `StateBrush` (`src/SysMonitor.App/Controls/Instruments/StateBrush.cs:30`), which reads
+the palette through `ConsolePalette` for the element's own shift, High Contrast included. Words take the State
+colours, fills the rails, washes the soft tints. Category colours are removed; Game Mode on is armed. The four
+hex/bool brush converters are replaced by one `BoolToLampStateConverter`. Guarded by `ConsoleStateBrushTests` and
+the smoke run's `CheckStateBrushAsync`. Mappings that follow the old colour over the word, worth a look: driver
+code 45 "Disconnected" is Off and 51 "Unknown Problem" NoGo; a disk at 50-75% reads "Normal" on a Hold lamp; an
+unplugged battery is NoGo.
+
 ---
 
 ## 3. What is left to match System-X, counted
 
 | Surface | Left | Where it is tracked |
 |---|---|---|
-| Colour strings in code: view models and converters choosing Material hex per status | 32 files, about 240 strings; pages bind them as fills and words | `ConsoleRecipeTests.CodeColourLiterals` |
+| Colour strings in code | 2 files, both PDF annotation colours (document data, kept on purpose) | `ConsoleRecipeTests.CodeColourLiterals` |
 | Font names in XAML | 7 files | `ConsoleRecipeTests.FontFamilyLiterals` |
 | Cards are bordered plates, not the `Plate`/`Faceplate` instruments (no lip, no shadow, no state rail) | every page, through `CardStyle` | Styles.xaml header |
 | Card-like and icon buttons with local overrides | Backup tiles and history icons, Driver Updater quick actions, Installed Programs row icons, Registry Cleaner's folder icon | not tracked |
 | Status badges and dots as filled Borders rather than `Chip`/`LedDot`/`Lamp` | most status pages | not tracked |
 | CheckBox, RadioButton, Slider, ComboBox | System-X gives them only the armed accent, which FluentOverrides applies: nothing more to transcribe | - |
-| Words from converters in mixed case | Performance's Pause/Resume (`Converters.cs:522`) | not tracked |
+| Words from converters in mixed case | Performance's Pause/Resume (`Converters.cs:441`) | not tracked |
 | Excellent and Good thresholds share one green | Performance and User's Guide legends | not tracked |
 | `saturate(.5)` on locked controls; NumberBox spinners as caps | not drawn | Controls.xaml comments |
 
-The next step with the most reach is the code colours: a status should carry a word and a `LampState`
-(`src/SysMonitor.Core/Models/LampState.cs`), and the page draw it as a lamp, chip or state colour. That turns
-the remaining fixed-colour fills into shift-aware ones and lets the badges become instruments.
+Statuses now carry a `LampState` and pages colour them with `StateBrush` (section 2.5). The next step with
+the most reach is the instruments: the status badges and dots are still filled Borders, where System-X draws
+chips, LED dots and lamps, and the cards are bordered plates rather than the `Plate`/`Faceplate` instruments.
 
 ---
 

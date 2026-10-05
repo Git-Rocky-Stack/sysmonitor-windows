@@ -26,7 +26,7 @@ public partial class DiskViewModel : ObservableObject, IDisposable
 
     // Total Storage Status
     [ObservableProperty] private string _totalStorageStatus = "Checking...";
-    [ObservableProperty] private string _totalStorageColor = "#4CAF50";
+    [ObservableProperty] private LampState _totalStorageState = LampState.Go;
 
     // State
     [ObservableProperty] private bool _isLoading = true;
@@ -107,7 +107,7 @@ public partial class DiskViewModel : ObservableObject, IDisposable
                         UsagePercent = disk.UsagePercent,
                         IsSSD = disk.IsSSD,
                         DriveIcon = GetDriveIcon(disk.DriveType, disk.IsSSD),
-                        UsageColor = GetUsageColor(disk.UsagePercent),
+                        UsageState = GetUsageState(disk.UsagePercent),
                         UsageStatus = GetUsageStatus(disk.UsagePercent),
                         StorageType = disk.IsSSD ? "SSD" : "HDD"
                     });
@@ -119,7 +119,7 @@ public partial class DiskViewModel : ObservableObject, IDisposable
                 TotalUsagePercent = totalStorage > 0 ? (totalUsed / totalStorage) * 100 : 0;
 
                 // Update total storage status
-                (TotalStorageStatus, TotalStorageColor) = GetStorageStatus(TotalUsagePercent);
+                (TotalStorageStatus, TotalStorageState) = GetStorageStatus(TotalUsagePercent);
 
                 HasDisks = Disks.Count > 0;
                 IsLoading = false;
@@ -147,25 +147,25 @@ public partial class DiskViewModel : ObservableObject, IDisposable
         };
     }
 
-    private static string GetUsageColor(double usagePercent)
+    private static LampState GetUsageState(double usagePercent)
     {
         return usagePercent switch
         {
-            >= 90 => "#F44336", // Red - Critical
-            >= 75 => "#FF9800", // Orange - Warning
-            >= 50 => "#FFC107", // Yellow - Moderate
-            _ => "#4CAF50"      // Green - Good
+            >= 90 => LampState.NoGo,
+            >= 75 => LampState.Hold,
+            >= 50 => LampState.Hold,
+            _ => LampState.Go
         };
     }
 
-    private static (string status, string color) GetStorageStatus(double usagePercent)
+    private static (string status, LampState state) GetStorageStatus(double usagePercent)
     {
         return usagePercent switch
         {
-            >= 90 => ("Critical - Free up space immediately", "#F44336"),
-            >= 75 => ("Warning - Consider cleaning up", "#FF9800"),
-            >= 50 => ("Moderate - Storage usage normal", "#8BC34A"),
-            _ => ("Excellent - Plenty of free space", "#4CAF50")
+            >= 90 => ("Critical - Free up space immediately", LampState.NoGo),
+            >= 75 => ("Warning - Consider cleaning up", LampState.Hold),
+            >= 50 => ("Moderate - Storage usage normal", LampState.Go),
+            _ => ("Excellent - Plenty of free space", LampState.Go)
         };
     }
 
@@ -201,7 +201,7 @@ public class DiskDisplayInfo
     public double UsagePercent { get; set; }
     public bool IsSSD { get; set; }
     public string DriveIcon { get; set; } = string.Empty;
-    public string UsageColor { get; set; } = string.Empty;
+    public LampState UsageState { get; set; } = LampState.Off;
     public string UsageStatus { get; set; } = string.Empty;
     public string StorageType { get; set; } = string.Empty;
 

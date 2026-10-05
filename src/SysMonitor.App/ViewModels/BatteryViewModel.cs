@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitors;
 using Serilog;
 
@@ -22,9 +23,9 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isCharging;
     [ObservableProperty] private bool _isPluggedIn;
     [ObservableProperty] private string _chargingStatus = "Checking...";
-    [ObservableProperty] private string _chargeStatusColor = "#4CAF50";
+    [ObservableProperty] private LampState _chargeStatusState = LampState.Go;
     [ObservableProperty] private string _chargeLevelStatus = "Checking...";
-    [ObservableProperty] private string _chargingStatusColor = "#808080";
+    [ObservableProperty] private LampState _chargingStatusState = LampState.Off;
 
     // Runtime
     [ObservableProperty] private string _estimatedRuntime = "";
@@ -32,7 +33,7 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
 
     // Health
     [ObservableProperty] private string _healthStatus = "";
-    [ObservableProperty] private string _healthColor = "#4CAF50";
+    [ObservableProperty] private LampState _healthState = LampState.Go;
 
     // Status Icon
     [ObservableProperty] private string _batteryIcon = "\uE83F";
@@ -108,25 +109,25 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
                 IsCharging = batteryInfo.IsCharging;
                 IsPluggedIn = batteryInfo.IsPluggedIn;
 
-                // Status text and colors
+                // Status text and state
                 if (batteryInfo.IsCharging)
                 {
                     ChargingStatus = "Charging";
-                    ChargingStatusColor = "#4CAF50"; // Green
+                    ChargingStatusState = LampState.Go;
                 }
                 else if (batteryInfo.IsPluggedIn)
                 {
                     ChargingStatus = "Plugged in, not charging";
-                    ChargingStatusColor = "#00BCD4"; // Cyan
+                    ChargingStatusState = LampState.Exec;
                 }
                 else
                 {
                     ChargingStatus = "On battery power";
-                    ChargingStatusColor = "#FF9800"; // Orange
+                    ChargingStatusState = LampState.Hold;
                 }
 
-                // Charge level status and color
-                (ChargeLevelStatus, ChargeStatusColor) = GetChargeLevelStatus(batteryInfo.ChargePercent);
+                // Charge level status and state
+                (ChargeLevelStatus, ChargeStatusState) = GetChargeLevelStatus(batteryInfo.ChargePercent);
 
                 // Estimated runtime
                 if (batteryInfo.EstimatedRuntime > TimeSpan.Zero && !batteryInfo.IsPluggedIn)
@@ -142,7 +143,7 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
 
                 // Health status
                 HealthStatus = batteryInfo.HealthStatus;
-                HealthColor = GetHealthColor(batteryInfo.HealthStatus);
+                HealthState = GetHealthState(batteryInfo.HealthStatus);
 
                 // Battery icon
                 BatteryIcon = GetBatteryIcon(batteryInfo.ChargePercent, batteryInfo.IsCharging);
@@ -167,29 +168,29 @@ public partial class BatteryViewModel : ObservableObject, IDisposable
         return $"{runtime.Minutes}m";
     }
 
-    private static string GetHealthColor(string health)
+    private static LampState GetHealthState(string health)
     {
         // These are the words BatteryMonitor uses for how worn the battery is. "Low" and "Critical" were
         // among them while this showed the charge level instead.
         return health switch
         {
-            "Good" => "#4CAF50",    // Green
-            "Fair" => "#FF9800",    // Orange
-            "Worn" => "#FF5722",    // Deep Orange
-            "Poor" => "#F44336",    // Red
-            _ => "#808080"          // Gray: not reported
+            "Good" => LampState.Go,
+            "Fair" => LampState.Hold,
+            "Worn" => LampState.Warn,
+            "Poor" => LampState.NoGo,
+            _ => LampState.Off          // not reported
         };
     }
 
-    private static (string status, string color) GetChargeLevelStatus(int percent)
+    private static (string status, LampState state) GetChargeLevelStatus(int percent)
     {
         return percent switch
         {
-            >= 80 => ("Excellent", "#4CAF50"),      // Green
-            >= 50 => ("Good", "#8BC34A"),           // Light green
-            >= 20 => ("Low", "#FF9800"),            // Orange
-            >= 10 => ("Very Low", "#FF5722"),       // Deep orange
-            _ => ("Critical", "#F44336")             // Red
+            >= 80 => ("Excellent", LampState.Go),
+            >= 50 => ("Good", LampState.Go),
+            >= 20 => ("Low", LampState.Hold),
+            >= 10 => ("Very Low", LampState.Warn),
+            _ => ("Critical", LampState.NoGo)
         };
     }
 

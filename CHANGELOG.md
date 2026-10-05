@@ -51,6 +51,21 @@ Each entry describes a behaviour change and cites the file it lives in.
   shifts, turns it on and off again, and checks every face against the palette and the travel
   against the number WinUI works out for itself
   (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:665`).
+- **A status is a word and a lamp state, all the way down.** Services and view models graded
+  their readings into Material hex colours - a temperature "Hot" in `#FF5722`, a driver problem
+  in `#F44336` - and the pages parsed those strings into brushes that ignored the shift. Every
+  status now carries a `LampState` beside its word, graded exactly where its colour used to change,
+  and the page colours it with `StateBrush`: a word in the state colour System-X darkens for Day
+  Shift, a badge or dot in the rail colour, a selected tool in the armed wash, all read from the
+  palette for the shift the element is shown in
+  (`src/SysMonitor.App/Controls/Instruments/StateBrush.cs:30`). Category colours - device kinds,
+  program types, file types - carried no state and are gone. Game Mode on is armed, since the app
+  is acting on the machine while it is. The four converters that turned hex strings and yes-or-no
+  answers into fixed brushes are deleted; code colour strings are down from 32 files to the two
+  that hold PDF annotation colours, which are document data. Along the way the Dashboard's health
+  word stopped showing "Critical" in green, and the temperature and system-info status words got
+  back the colour a cleanup had dropped.
+
 - **Every page opens on the console's view header.** The hand-built black banner each of the 35
   pages opened with - a red title, a translucent subtitle and a centred logo - is now System-X's
   view header: a faceplate whose stripe carries the module's kicker and serial (`MOD - CPU - 02`,
@@ -243,7 +258,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   says N/A. `FormatHelper` returned "0" for a missing reading when asked for the number
   without its unit - the form a caller with its own unit label uses - and a NaN reading
   came out as "NaN"; the first is now `--`, NaN counts as no reading, and tests cover both.
-  (`src/SysMonitor.App/Converters/Converters.cs:335`,
+  (`src/SysMonitor.App/Converters/Converters.cs:317`,
   `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:439`,
   `src/SysMonitor.Core/Helpers/FormatHelper.cs:111`)
 
@@ -262,8 +277,8 @@ Each entry describes a behaviour change and cites the file it lives in.
   and its button reads TRIM MEMORY. After a failed trim the banner showed a green tick
   and "MEMORY OPTIMIZED" beside the failure; the tick is now a red cross on failure, and
   the badge appears only once a trim has worked.
-  (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175`, `:51`,
-  `src/SysMonitor.App/Views/MemoryPage.xaml:94`, `:116`, `:129`)
+  (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176`, `:52`,
+  `src/SysMonitor.App/Views/MemoryPage.xaml:82`, `:104`, `:117`)
 
 - **The in-app guide describes Game Mode's session stats as they read.** It listed
   "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check

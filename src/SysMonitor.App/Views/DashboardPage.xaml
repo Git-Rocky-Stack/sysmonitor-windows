@@ -232,7 +232,7 @@
                                            Foreground="{ThemeResource SilverBrush}" FontSize="24"/>
                             </StackPanel>
                             <TextBlock Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
-                                       Style="{StaticResource StatusGoodStyle}" FontSize="14"/>
+                                       Style="{StaticResource StatusGoodStyle}" FontSize="14" instruments:StateBrush.Foreground="{x:Bind ViewModel.HealthState, Mode=OneWay}"/>
                         </StackPanel>
 
                         <!-- Quick Actions -->

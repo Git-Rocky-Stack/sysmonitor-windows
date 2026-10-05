@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Helpers;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.Optimizers;
@@ -33,7 +34,7 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
     // Calculated Values
     [ObservableProperty] private double _cachedGB;
     [ObservableProperty] private string _memoryStatus = "Checking...";
-    [ObservableProperty] private string _statusColor = "#4CAF50";
+    [ObservableProperty] private LampState _statusState = LampState.Go;
 
     // State
     [ObservableProperty] private bool _isLoading = true;
@@ -137,22 +138,22 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
         if (usagePercent >= 90)
         {
             MemoryStatus = "Critical - Consider closing applications";
-            StatusColor = "#F44336"; // Red
+            StatusState = LampState.NoGo;
         }
         else if (usagePercent >= 75)
         {
             MemoryStatus = "High Usage - Monitor closely";
-            StatusColor = "#FF9800"; // Orange
+            StatusState = LampState.Hold;
         }
         else if (usagePercent >= 50)
         {
             MemoryStatus = "Normal - System running smoothly";
-            StatusColor = "#8BC34A"; // Light Green
+            StatusState = LampState.Go;
         }
         else
         {
             MemoryStatus = "Excellent - Plenty of memory available";
-            StatusColor = "#4CAF50"; // Green
+            StatusState = LampState.Go;
         }
     }
 

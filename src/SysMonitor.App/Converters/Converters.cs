@@ -102,24 +102,6 @@ public class MBConverter : IValueConverter
     }
 }
 
-public class BoolToSuccessBrushConverter : IValueConverter
-{
-    private static readonly SolidColorBrush SuccessBrush = new(Windows.UI.Color.FromArgb(255, 76, 175, 80)); // #4CAF50
-    private static readonly SolidColorBrush ErrorBrush = new(Windows.UI.Color.FromArgb(255, 244, 67, 54)); // #F44336
-
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool isConnected)
-            return isConnected ? SuccessBrush : ErrorBrush;
-        return ErrorBrush;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
 public class BoolToPluggedInConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
@@ -400,19 +382,6 @@ public class BoolToSuccessGlyphConverter : IValueConverter
     {
         if (value is bool success) return success ? "\uE73E" : "\uE783"; // Checkmark : Error
         return "\uE783";
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
-}
-
-public class BoolToSuccessColorConverter : IValueConverter
-{
-    private static readonly SolidColorBrush SuccessBrush = new(Windows.UI.Color.FromArgb(255, 76, 175, 80));
-    private static readonly SolidColorBrush ErrorBrush = new(Windows.UI.Color.FromArgb(255, 244, 67, 54));
-
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool success) return success ? SuccessBrush : ErrorBrush;
-        return ErrorBrush;
     }
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }

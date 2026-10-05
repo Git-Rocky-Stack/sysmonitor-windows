@@ -85,7 +85,7 @@
                                 HorizontalAlignment="Center">
                             <TextBlock Text="{x:Bind ViewModel.CpuTempStatus, Mode=OneWay}"
                                        FontWeight="SemiBold" FontSize="14"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
+                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.CpuTempState, Mode=OneWay}"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -126,7 +126,7 @@
                                 HorizontalAlignment="Center">
                             <TextBlock Text="{x:Bind ViewModel.GpuTempStatus, Mode=OneWay}"
                                        FontWeight="SemiBold" FontSize="14"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
+                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.GpuTempState, Mode=OneWay}"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -220,7 +220,7 @@
                                         Background="{ThemeResource Carbon700Brush}"
                                         VerticalAlignment="Center">
                                     <TextBlock Text="{x:Bind Status}" FontSize="12" FontWeight="SemiBold"
-                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                               instruments:StateBrush.Foreground="{x:Bind StatusState}"/>
                                 </Border>
                             </Grid>
                         </Border>

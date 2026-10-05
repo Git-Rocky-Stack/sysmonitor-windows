@@ -33,7 +33,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private int _healthScore = 0;
     [ObservableProperty] private string _healthStatus = "Checking...";
-    [ObservableProperty] private string _healthColor = "#4CAF50";
+    [ObservableProperty] private LampState _healthState = LampState.Go;
     [ObservableProperty] private double _cpuUsage = 0;
     [ObservableProperty] private double _memoryUsage = 0;
     [ObservableProperty] private double _memoryUsedGB = 0;
@@ -164,7 +164,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
                 // Health Score
                 HealthScore = info.HealthScore;
-                (HealthStatus, HealthColor) = GetHealthStatus(info.HealthScore);
+                (HealthStatus, HealthState) = GetHealthStatus(info.HealthScore);
 
                 // CPU
                 CpuUsage = info.Cpu.UsagePercent;
@@ -229,15 +229,15 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         }
     }
 
-    private static (string status, string color) GetHealthStatus(int score)
+    private static (string status, LampState state) GetHealthStatus(int score)
     {
         return score switch
         {
-            >= 90 => ("Excellent", "#4CAF50"),
-            >= 75 => ("Good", "#8BC34A"),
-            >= 60 => ("Fair", "#FF9800"),
-            >= 40 => ("Poor", "#FF5722"),
-            _ => ("Critical", "#F44336")
+            >= 90 => ("Excellent", LampState.Go),
+            >= 75 => ("Good", LampState.Go),
+            >= 60 => ("Fair", LampState.Hold),
+            >= 40 => ("Poor", LampState.Warn),
+            _ => ("Critical", LampState.NoGo)
         };
     }
 

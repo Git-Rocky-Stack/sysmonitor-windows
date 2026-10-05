@@ -101,17 +101,7 @@ public class ConsoleRecipeTests
 
     private static readonly string[] CodeColourLiterals =
     [
-        "src/SysMonitor.App/Converters/Converters.cs",
-        "src/SysMonitor.App/ViewModels/BatteryViewModel.cs",
-        "src/SysMonitor.App/ViewModels/CpuViewModel.cs",
-        "src/SysMonitor.App/ViewModels/DashboardViewModel.cs",
-        "src/SysMonitor.App/ViewModels/DiskViewModel.cs",
-        "src/SysMonitor.App/ViewModels/GpuViewModel.cs",
-        "src/SysMonitor.App/ViewModels/MemoryViewModel.cs",
-        "src/SysMonitor.App/ViewModels/NetworkViewModel.cs",
         "src/SysMonitor.App/ViewModels/PdfEditorViewModel.cs",
-        "src/SysMonitor.App/ViewModels/SystemInfoViewModel.cs",
-        "src/SysMonitor.App/ViewModels/TemperatureViewModel.cs",
         "src/SysMonitor.Core/Services/Utilities/IPdfTools.cs",
     ];
 

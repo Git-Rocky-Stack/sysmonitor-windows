@@ -30,7 +30,7 @@ Reset command restores exactly these values (`SettingsViewModel.cs:133-159`).
 The memory threshold raises an alert and nothing else: crossing it trims nothing.
 Working sets are trimmed by the TRIM MEMORY button on the Dashboard
 (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:292`) and on the Memory page
-(`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175`), and by Game Mode, whose memory
+(`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176`), and by Game Mode, whose memory
 step is on unless a caller turns it off
 (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111`,
 `src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:31`). That includes Game Mode
@@ -48,7 +48,7 @@ has said so since v3.0.0: it reads "Trimmed N from background apps"
 (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:306`). Up to and including v3.0.1
 the Memory page's button read OPTIMIZE MEMORY and reported the drop in used memory as
 memory freed; it now reads TRIM MEMORY and reports the same count in the same words
-(`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:178`).
+(`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:179`).
 
 The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
 of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY

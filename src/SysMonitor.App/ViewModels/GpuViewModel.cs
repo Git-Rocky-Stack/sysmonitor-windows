@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitors;
 using System.Management;
 
@@ -22,15 +23,15 @@ public partial class GpuViewModel : ObservableObject, IDisposable
     // GPU Stats (dynamic - stored in Celsius from sensor)
     [ObservableProperty] private double _gpuTemperature;
     [ObservableProperty] private string _tempStatus = "N/A";
-    [ObservableProperty] private string _tempColor = "#808080";
+    [ObservableProperty] private LampState _tempState = LampState.Off;
 
     // Additional temps with status
     [ObservableProperty] private double _gpuHotSpot;
     [ObservableProperty] private string _hotSpotStatus = "N/A";
-    [ObservableProperty] private string _hotSpotColor = "#808080";
+    [ObservableProperty] private LampState _hotSpotState = LampState.Off;
     [ObservableProperty] private double _gpuMemoryTemp;
     [ObservableProperty] private string _memTempStatus = "N/A";
-    [ObservableProperty] private string _memTempColor = "#808080";
+    [ObservableProperty] private LampState _memTempState = LampState.Off;
     [ObservableProperty] private bool _hasHotSpot;
     [ObservableProperty] private bool _hasMemoryTemp;
 
@@ -149,7 +150,7 @@ public partial class GpuViewModel : ObservableObject, IDisposable
 
                 // Main GPU temp
                 GpuTemperature = gpuTemp;
-                (TempStatus, TempColor) = GetTempStatus(gpuTemp);
+                (TempStatus, TempState) = GetTempStatus(gpuTemp);
 
                 // Look for hot spot and memory temps
                 var hotSpot = allTemps.FirstOrDefault(t =>
@@ -163,14 +164,14 @@ public partial class GpuViewModel : ObservableObject, IDisposable
                 if (hotSpot.Key != null && hotSpot.Value > 0)
                 {
                     GpuHotSpot = hotSpot.Value;
-                    (HotSpotStatus, HotSpotColor) = GetTempStatus(hotSpot.Value);
+                    (HotSpotStatus, HotSpotState) = GetTempStatus(hotSpot.Value);
                     HasHotSpot = true;
                 }
 
                 if (memTemp.Key != null && memTemp.Value > 0)
                 {
                     GpuMemoryTemp = memTemp.Value;
-                    (MemTempStatus, MemTempColor) = GetTempStatus(memTemp.Value);
+                    (MemTempStatus, MemTempState) = GetTempStatus(memTemp.Value);
                     HasMemoryTemp = true;
                 }
 
@@ -190,16 +191,16 @@ public partial class GpuViewModel : ObservableObject, IDisposable
         }
     }
 
-    private static (string status, string color) GetTempStatus(double temp)
+    private static (string status, LampState state) GetTempStatus(double temp)
     {
         return temp switch
         {
-            0 => ("N/A", "#808080"),
-            <= 50 => ("Cool", "#2196F3"),
-            <= 70 => ("Normal", "#4CAF50"),
-            <= 85 => ("Warm", "#FF9800"),
-            <= 95 => ("Hot", "#FF5722"),
-            _ => ("Critical", "#F44336")
+            0 => ("N/A", LampState.Off),
+            <= 50 => ("Cool", LampState.Exec),
+            <= 70 => ("Normal", LampState.Go),
+            <= 85 => ("Warm", LampState.Hold),
+            <= 95 => ("Hot", LampState.Warn),
+            _ => ("Critical", LampState.NoGo)
         };
     }
 

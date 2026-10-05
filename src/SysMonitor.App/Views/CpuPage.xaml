@@ -98,11 +98,8 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="{x:Bind CoreName, Mode=OneWay}"
                                                Style="{StaticResource StatLabelStyle}"/>
-                                    <Ellipse Grid.Column="1" Width="8" Height="8" VerticalAlignment="Center">
-                                        <Ellipse.Fill>
-                                            <SolidColorBrush Color="{x:Bind StatusColor, Mode=OneWay}"/>
-                                        </Ellipse.Fill>
-                                    </Ellipse>
+                                    <Ellipse Grid.Column="1" Width="8" Height="8" VerticalAlignment="Center"
+                                             instruments:StateBrush.Fill="{x:Bind StatusState, Mode=OneWay}"/>
                                 </Grid>
 
                                 <!-- Usage Value -->
@@ -112,10 +109,8 @@
                                 </TextBlock>
 
                                 <!-- Status Text -->
-                                <TextBlock Grid.Row="2" FontSize="11" Margin="0,0,0,8">
-                                    <TextBlock.Foreground>
-                                        <SolidColorBrush Color="{x:Bind StatusColor, Mode=OneWay}"/>
-                                    </TextBlock.Foreground>
+                                <TextBlock Grid.Row="2" FontSize="11" Margin="0,0,0,8"
+                                           instruments:StateBrush.Foreground="{x:Bind StatusState, Mode=OneWay}">
                                     <Run Text="{x:Bind Status, Mode=OneWay}"/>
                                 </TextBlock>
 
@@ -253,17 +248,11 @@
                         <StackPanel VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="TEMPERATURE" Style="{StaticResource StatLabelStyle}"/>
-                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
-                                    <Ellipse.Fill>
-                                        <SolidColorBrush Color="{x:Bind ViewModel.TemperatureColor, Mode=OneWay}"/>
-                                    </Ellipse.Fill>
-                                </Ellipse>
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                                         instruments:StateBrush.Fill="{x:Bind ViewModel.TemperatureState, Mode=OneWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock>
-                                    <TextBlock.Foreground>
-                                        <SolidColorBrush Color="{x:Bind ViewModel.TemperatureColor, Mode=OneWay}"/>
-                                    </TextBlock.Foreground>
+                                <TextBlock instruments:StateBrush.Foreground="{x:Bind ViewModel.TemperatureState, Mode=OneWay}">
                                     <Run Text="{x:Bind ViewModel.Temperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                                     <Run Text="°F"/>
                                 </TextBlock>

@@ -38,17 +38,12 @@
                     <!-- Memory Info -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
                         <TextBlock Text="Physical Memory (RAM)" Style="{StaticResource MenuItemTextStyle}" FontSize="16"/>
-                        <!-- Status with Color Indicator -->
+                        <!-- Status with State Indicator -->
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                            <Ellipse Width="10" Height="10" VerticalAlignment="Center">
-                                <Ellipse.Fill>
-                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
-                            <TextBlock FontSize="13">
-                                <TextBlock.Foreground>
-                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
-                                </TextBlock.Foreground>
+                            <Ellipse Width="10" Height="10" VerticalAlignment="Center"
+                                     instruments:StateBrush.Fill="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
+                            <TextBlock FontSize="13"
+                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}">
                                 <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
                             </TextBlock>
                         </StackPanel>
@@ -67,11 +62,8 @@
                     <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                             <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
-                            <Ellipse Width="8" Height="8" VerticalAlignment="Center">
-                                <Ellipse.Fill>
-                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
+                            <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                                     instruments:StateBrush.Fill="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock Text="{x:Bind ViewModel.UsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"
@@ -80,14 +72,10 @@
                                        Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
                         </StackPanel>
                         <!-- Status Badge -->
-                        <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right">
-                            <Border.Background>
-                                <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}" Opacity="0.2"/>
-                            </Border.Background>
-                            <TextBlock FontSize="11" FontWeight="SemiBold">
-                                <TextBlock.Foreground>
-                                    <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
-                                </TextBlock.Foreground>
+                        <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right"
+                                instruments:StateBrush.Wash="{x:Bind ViewModel.StatusState, Mode=OneWay}">
+                            <TextBlock FontSize="11" FontWeight="SemiBold"
+                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}">
                                 <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
                             </TextBlock>
                         </Border>
@@ -115,7 +103,7 @@
                                       Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                         <FontIcon Glyph="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessGlyphConverter}}"
                                   FontSize="20"
-                                  Foreground="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessColorConverter}}"
+                                  instruments:StateBrush.Foreground="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"
                                   Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>

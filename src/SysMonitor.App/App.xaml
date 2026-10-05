@@ -33,7 +33,6 @@
             <converters:PercentConverter x:Key="PercentConverter"/>
             <converters:GBConverter x:Key="GBConverter"/>
             <converters:MBConverter x:Key="MBConverter"/>
-            <converters:BoolToSuccessBrushConverter x:Key="BoolToSuccessBrushConverter"/>
             <converters:BoolToPluggedInConverter x:Key="BoolToPluggedInConverter"/>
             <converters:BoolToChargingConverter x:Key="BoolToChargingConverter"/>
             <converters:InvertBoolToVisibilityConverter x:Key="InvertBoolToVisibilityConverter"/>
@@ -56,7 +55,6 @@
             <converters:IntEqualsSixToVisibilityConverter x:Key="IntEqualsSixToVisibilityConverter"/>
             <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter"/>
             <converters:BoolToSuccessGlyphConverter x:Key="BoolToSuccessGlyphConverter"/>
-            <converters:BoolToSuccessColorConverter x:Key="BoolToSuccessColorConverter"/>
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
             <converters:BoolToLockGlyphConverter x:Key="BoolToLockGlyphConverter"/>
             <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
