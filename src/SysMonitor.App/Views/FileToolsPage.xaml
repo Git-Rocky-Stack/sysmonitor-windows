@@ -92,11 +92,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20">
-                        <FontIcon.Foreground>
-                            <SolidColorBrush Color="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay}"/>
-                        </FontIcon.Foreground>
-                    </FontIcon>
+                    <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20"
+                              instruments:StateBrush.Foreground="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}"/>
                     <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
                                Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
                                TextWrapping="Wrap"/>

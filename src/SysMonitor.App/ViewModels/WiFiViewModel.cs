@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 
@@ -21,7 +22,7 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _macAddress = "";
     [ObservableProperty] private bool _isAdapterEnabled;
     [ObservableProperty] private string _adapterStatus = "Unknown";
-    [ObservableProperty] private string _adapterStatusColor = "#808080";
+    [ObservableProperty] private LampState _adapterStatusState = LampState.Off;
 
     // Current Connection
     [ObservableProperty] private string _connectedNetwork = "Not Connected";
@@ -32,7 +33,7 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _connectionSecurity = "";
     [ObservableProperty] private string _connectionSpeed = "";
     [ObservableProperty] private bool _isConnected;
-    [ObservableProperty] private string _connectionStatusColor = "#808080";
+    [ObservableProperty] private LampState _connectionStatusState = LampState.Off;
 
     // Stats
     [ObservableProperty] private int _networksFound;
@@ -66,7 +67,7 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
         {
             AdapterName = "WiFi Not Available";
             AdapterStatus = "Not Found";
-            AdapterStatusColor = "#F44336";
+            AdapterStatusState = LampState.NoGo;
             return;
         }
 
@@ -88,13 +89,13 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
                 MacAddress = adapter.MacAddress;
                 IsAdapterEnabled = adapter.IsEnabled;
                 AdapterStatus = adapter.Status;
-                AdapterStatusColor = adapter.IsEnabled ? "#4CAF50" : "#F44336";
+                AdapterStatusState = adapter.IsEnabled ? LampState.Go : LampState.NoGo;
             }
             else
             {
                 AdapterName = "WiFi Adapter";
                 AdapterStatus = "Unknown";
-                AdapterStatusColor = "#808080";
+                AdapterStatusState = LampState.Off;
             }
         });
     }
@@ -115,13 +116,13 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
                 ConnectionChannel = $"Channel {connection.Channel}";
                 ConnectionSecurity = connection.Security;
                 ConnectionSpeed = $"{connection.LinkSpeed} Mbps";
-                ConnectionStatusColor = GetSignalColor(connection.SignalStrength);
+                ConnectionStatusState = WiFiNetworkDisplay.GetSignalState(connection.SignalStrength);
             }
             else
             {
                 IsConnected = false;
                 ConnectedNetwork = "Not Connected";
-                ConnectionStatusColor = "#808080";
+                ConnectionStatusState = LampState.Off;
             }
         });
     }
@@ -204,18 +205,6 @@ public partial class WiFiViewModel : ObservableObject, IDisposable
         await LoadCurrentConnectionAsync();
     }
 
-    private static string GetSignalColor(int signal)
-    {
-        return signal switch
-        {
-            >= 80 => "#4CAF50",
-            >= 60 => "#8BC34A",
-            >= 40 => "#FF9800",
-            >= 20 => "#FF5722",
-            _ => "#F44336"
-        };
-    }
-
     public void Dispose()
     {
         if (_isDisposed) return;
@@ -231,7 +220,7 @@ public partial class WiFiNetworkDisplay : ObservableObject
     public string Bssid { get; }
     public int SignalStrength { get; }
     public string SignalText { get; }
-    public string SignalColor { get; }
+    public LampState SignalState { get; }
     public string SignalIcon { get; }
     public int Channel { get; }
     public string Band { get; }
@@ -242,7 +231,7 @@ public partial class WiFiNetworkDisplay : ObservableObject
     /// <summary>False when the platform would not say whether the network is encrypted.</summary>
     public bool IsSecurityKnown { get; }
     public string SecurityIcon { get; }
-    public string SecurityColor { get; }
+    public LampState SecurityState { get; }
     public string NetworkType { get; }
 
     public WiFiNetworkDisplay(WiFiNetworkInfo info)
@@ -251,7 +240,7 @@ public partial class WiFiNetworkDisplay : ObservableObject
         Bssid = info.Bssid;
         SignalStrength = info.SignalStrength;
         SignalText = $"{info.SignalStrength}%";
-        SignalColor = GetSignalColor(info.SignalStrength);
+        SignalState = GetSignalState(info.SignalStrength);
         SignalIcon = GetSignalIcon(info.SignalStrength);
         Channel = info.Channel;
         Band = info.Band;
@@ -268,22 +257,23 @@ public partial class WiFiNetworkDisplay : ObservableObject
             WiFiSecurityState.Open => "\uE785",      // open padlock
             _ => "\uE9CE",                           // question mark
         };
-        SecurityColor = state switch
+        SecurityState = state switch
         {
-            WiFiSecurityState.Secured => "#4CAF50",
-            WiFiSecurityState.Open => "#FF9800",
-            _ => "#9E9E9E",
+            WiFiSecurityState.Secured => LampState.Go,
+            WiFiSecurityState.Open => LampState.Hold,
+            _ => LampState.Off,
         };
         NetworkType = info.NetworkType;
     }
 
-    private static string GetSignalColor(int signal) => signal switch
+    /// <summary>The lamp for a signal strength in percent; the view model's connection lamp uses it too.</summary>
+    internal static LampState GetSignalState(int signal) => signal switch
     {
-        >= 80 => "#4CAF50",
-        >= 60 => "#8BC34A",
-        >= 40 => "#FF9800",
-        >= 20 => "#FF5722",
-        _ => "#F44336"
+        >= 80 => LampState.Go,
+        >= 60 => LampState.Go,
+        >= 40 => LampState.Hold,
+        >= 20 => LampState.Warn,
+        _ => LampState.NoGo
     };
 
     private static string GetSignalIcon(int signal) => signal switch

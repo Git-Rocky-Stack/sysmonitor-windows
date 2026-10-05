@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Management;
 using System.Net.NetworkInformation;
+using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Utilities;
 
@@ -42,7 +43,7 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
                         continue;
 
                     var deviceType = DetermineDeviceType(name, deviceId);
-                    var (quality, signalColor) = GetSignalQuality(-60); // Default signal strength
+                    var (quality, signalState) = GetSignalQuality(-60); // Default signal strength
                     var isConnected = status == "OK";
 
                     devices.Add(new BluetoothDeviceInfo
@@ -51,11 +52,10 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
                         Address = ExtractAddress(deviceId),
                         DeviceType = deviceType.type,
                         DeviceIcon = deviceType.icon,
-                        DeviceTypeColor = deviceType.color,
                         SignalStrength = -60, // WMI doesn't provide RSSI directly
                         SignalQuality = quality,
-                        SignalColor = signalColor,
-                        StatusColor = isConnected ? "#4CAF50" : "#808080",
+                        SignalState = signalState,
+                        StatusState = isConnected ? LampState.Go : LampState.Off,
                         IsConnected = isConnected,
                         IsPaired = true, // If visible in WMI, it's paired
                         LastSeen = DateTime.Now
@@ -124,40 +124,40 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
         }
     }
 
-    private static (string type, string icon, string color) DetermineDeviceType(string name, string deviceId)
+    private static (string type, string icon) DetermineDeviceType(string name, string deviceId)
     {
         var nameLower = name.ToLowerInvariant();
 
         if (nameLower.Contains("headphone") || nameLower.Contains("headset") || nameLower.Contains("earphone") ||
             nameLower.Contains("airpod") || nameLower.Contains("earbud"))
-            return ("Headphones", "\uE7F6", "#9C27B0");
+            return ("Headphones", "\uE7F6");
 
         if (nameLower.Contains("speaker") || nameLower.Contains("audio"))
-            return ("Speaker", "\uE7F5", "#E91E63");
+            return ("Speaker", "\uE7F5");
 
         if (nameLower.Contains("keyboard"))
-            return ("Keyboard", "\uE92E", "#2196F3");
+            return ("Keyboard", "\uE92E");
 
         if (nameLower.Contains("mouse"))
-            return ("Mouse", "\uE962", "#00BCD4");
+            return ("Mouse", "\uE962");
 
         if (nameLower.Contains("gamepad") || nameLower.Contains("controller") || nameLower.Contains("xbox"))
-            return ("Controller", "\uE7FC", "#4CAF50");
+            return ("Controller", "\uE7FC");
 
         if (nameLower.Contains("phone") || nameLower.Contains("iphone") || nameLower.Contains("samsung") ||
             nameLower.Contains("pixel") || nameLower.Contains("galaxy"))
-            return ("Phone", "\uE8EA", "#FF9800");
+            return ("Phone", "\uE8EA");
 
         if (nameLower.Contains("watch") || nameLower.Contains("band") || nameLower.Contains("fitbit"))
-            return ("Wearable", "\uE916", "#673AB7");
+            return ("Wearable", "\uE916");
 
         if (nameLower.Contains("printer"))
-            return ("Printer", "\uE749", "#607D8B");
+            return ("Printer", "\uE749");
 
         if (nameLower.Contains("laptop") || nameLower.Contains("computer") || nameLower.Contains("pc"))
-            return ("Computer", "\uE7F8", "#3F51B5");
+            return ("Computer", "\uE7F8");
 
-        return ("Device", "\uE702", "#808080");
+        return ("Device", "\uE702");
     }
 
     private static string CleanDeviceName(string name)
@@ -186,15 +186,15 @@ public class BluetoothAnalyzer : IBluetoothAnalyzer
         return "";
     }
 
-    private static (string quality, string color) GetSignalQuality(int rssi)
+    private static (string quality, LampState state) GetSignalQuality(int rssi)
     {
         return rssi switch
         {
-            >= -50 => ("Excellent", "#4CAF50"),
-            >= -60 => ("Good", "#8BC34A"),
-            >= -70 => ("Fair", "#FF9800"),
-            >= -80 => ("Weak", "#FF5722"),
-            _ => ("Very Weak", "#F44336")
+            >= -50 => ("Excellent", LampState.Go),
+            >= -60 => ("Good", LampState.Go),
+            >= -70 => ("Fair", LampState.Hold),
+            >= -80 => ("Weak", LampState.Warn),
+            _ => ("Very Weak", LampState.NoGo)
         };
     }
 }

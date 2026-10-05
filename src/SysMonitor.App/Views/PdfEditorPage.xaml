@@ -86,60 +86,60 @@
                             Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="2">
                         <Button Click="SelectTool_Click" Tag="Select" ToolTipService.ToolTip="Select (V)"
-                                Padding="8" Background="{x:Bind ViewModel.IsSelectToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsSelectToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8B3;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Pen" ToolTipService.ToolTip="Pen Tool (P)"
-                                Padding="8" Background="{x:Bind ViewModel.IsPenToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsPenToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xED63;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Text" ToolTipService.ToolTip="Text Box (T)"
-                                Padding="8" Background="{x:Bind ViewModel.IsTextToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsTextToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8D2;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Highlight" ToolTipService.ToolTip="Highlight (H)"
-                                Padding="8" Background="{x:Bind ViewModel.IsHighlightToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsHighlightToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE7E6;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Rectangle" ToolTipService.ToolTip="Rectangle (R)"
-                                Padding="8" Background="{x:Bind ViewModel.IsRectangleToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsRectangleToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE739;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Ellipse" ToolTipService.ToolTip="Ellipse (E)"
-                                Padding="8" Background="{x:Bind ViewModel.IsEllipseToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsEllipseToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xEA3A;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Line" ToolTipService.ToolTip="Line (L)"
-                                Padding="8" Background="{x:Bind ViewModel.IsLineToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsLineToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE762;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Arrow" ToolTipService.ToolTip="Arrow (A)"
-                                Padding="8" Background="{x:Bind ViewModel.IsArrowToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsArrowToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE759;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="StickyNote" ToolTipService.ToolTip="Sticky Note (N)"
-                                Padding="8" Background="{x:Bind ViewModel.IsStickyNoteToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsStickyNoteToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE70B;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Signature" ToolTipService.ToolTip="Signature (S)"
-                                Padding="8" Background="{x:Bind ViewModel.IsSignatureToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsSignatureToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8FA;" FontSize="14"/>
                         </Button>
                         <Button Click="InsertImage_Click" Tag="Image" ToolTipService.ToolTip="Insert Image (I)"
-                                Padding="8" Background="{x:Bind ViewModel.IsImageToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsImageToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xEB9F;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Redaction"
                                 ToolTipService.ToolTip="Redact (X) — on save, the page becomes an image and whatever is under the box is gone from the file"
-                                Padding="8" Background="{x:Bind ViewModel.IsRedactionToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsRedactionToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE738;" FontSize="14"/>
                         </Button>
                         <Button Click="StampTool_Click" ToolTipService.ToolTip="Add Stamp"
-                                Padding="8" Background="{x:Bind ViewModel.IsStampToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsStampToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE7C3;" FontSize="14"/>
                         </Button>
                         <Button Click="WatermarkTool_Click" ToolTipService.ToolTip="Add Watermark"
-                                Padding="8" Background="{x:Bind ViewModel.IsWatermarkToolActive, Mode=OneWay, Converter={StaticResource BoolToAccentBrushConverter}}">
+                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsWatermarkToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
                         </Button>
                     </StackPanel>
@@ -586,7 +586,7 @@
         </Grid>
 
         <!-- Status Toast -->
-        <Border Background="{x:Bind ViewModel.StatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
+        <Border instruments:StateBrush.Background="{x:Bind ViewModel.StatusState, Mode=OneWay}"
                 CornerRadius="8" Padding="16,10" Margin="0,0,0,20"
                 Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="2">

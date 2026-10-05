@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using Windows.Devices.WiFi;
 using Windows.Networking.Connectivity;
+using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Utilities;
 
@@ -165,7 +166,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             var connectionInfo = GetConnectionInfoFromCmd() ?? GetConnectionInfoFromPowerShell();
             if (connectionInfo != null && connectionInfo.IsConnected && connectionInfo.Channel > 0)
             {
-                var (quality, color) = GetSignalQuality(connectionInfo.SignalStrength);
+                var (quality, signalState) = GetSignalQuality(connectionInfo.SignalStrength);
                 var band = connectionInfo.Band;
                 if (string.IsNullOrEmpty(band) || band == "Unknown")
                 {
@@ -179,7 +180,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     SignalStrength = connectionInfo.SignalStrength,
                     SignalBars = GetSignalBars(connectionInfo.SignalStrength),
                     SignalQuality = quality,
-                    SignalColor = color,
+                    SignalState = signalState,
                     Channel = connectionInfo.Channel,
                     Band = band,
                     Security = connectionInfo.Security,
@@ -318,7 +319,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 var security = GetSecurityString(network.SecuritySettings.NetworkAuthenticationType);
                 var networkType = network.PhyKind.ToString();
 
-                var (quality, color) = GetSignalQuality(signalPercent);
+                var (quality, signalState) = GetSignalQuality(signalPercent);
 
                 networks.Add(new WiFiNetworkInfo
                 {
@@ -327,7 +328,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     SignalStrength = signalPercent,
                     SignalBars = signalBars,
                     SignalQuality = quality,
-                    SignalColor = color,
+                    SignalState = signalState,
                     Channel = actualChannel,
                     Band = band,
                     Security = security,
@@ -490,7 +491,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                 var connectionInfo = ParseConnectionInfo(output);
                 if (connectionInfo != null && connectionInfo.IsConnected)
                 {
-                    var (quality, color) = GetSignalQuality(connectionInfo.SignalStrength);
+                    var (quality, signalState) = GetSignalQuality(connectionInfo.SignalStrength);
 
                     // Use parsed band if available, otherwise determine from channel
                     var band = connectionInfo.Band;
@@ -506,7 +507,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                         SignalStrength = connectionInfo.SignalStrength,
                         SignalBars = GetSignalBars(connectionInfo.SignalStrength),
                         SignalQuality = quality,
-                        SignalColor = color,
+                        SignalState = signalState,
                         Channel = connectionInfo.Channel,
                         Band = band,
                         Security = connectionInfo.Security,
@@ -535,7 +536,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             {
                 var ssid = GetConnectedSsidFromProfile() ?? wirelessAdapter.Name;
                 var speed = (int)(wirelessAdapter.Speed / 1_000_000);
-                var (quality, color) = GetSignalQuality(75); // Estimated
+                var (quality, signalState) = GetSignalQuality(75); // Estimated
 
                 return new WiFiNetworkInfo
                 {
@@ -544,7 +545,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
                     SignalStrength = 75, // Estimated
                     SignalBars = 4,
                     SignalQuality = quality,
-                    SignalColor = color,
+                    SignalState = signalState,
                     Channel = 0,
                     Band = "Unknown",
                     // Not read from the adapter on this path, so it is not claimed.
@@ -1280,7 +1281,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
     private static WiFiNetworkInfo CreateNetworkInfo(string? ssid, string bssid, int signalPercent,
         int channel, string band, string authentication, string networkType, string radioType, bool isConnected)
     {
-        var (quality, color) = GetSignalQuality(signalPercent);
+        var (quality, signalState) = GetSignalQuality(signalPercent);
         var bars = GetSignalBars(signalPercent);
 
         // Ensure band is determined
@@ -1301,7 +1302,7 @@ public class WiFiAnalyzer : IWiFiAnalyzer
             SignalStrength = signalPercent,
             SignalBars = bars,
             SignalQuality = quality,
-            SignalColor = color,
+            SignalState = signalState,
             Channel = channel,
             Band = finalBand,
             Security = authentication,
@@ -1516,15 +1517,15 @@ public class WiFiAnalyzer : IWiFiAnalyzer
         return "";
     }
 
-    private static (string quality, string color) GetSignalQuality(int percent)
+    private static (string quality, LampState state) GetSignalQuality(int percent)
     {
         return percent switch
         {
-            >= 80 => ("Excellent", "#4CAF50"),
-            >= 60 => ("Good", "#8BC34A"),
-            >= 40 => ("Fair", "#FF9800"),
-            >= 20 => ("Weak", "#FF5722"),
-            _ => ("Very Weak", "#F44336")
+            >= 80 => ("Excellent", LampState.Go),
+            >= 60 => ("Good", LampState.Go),
+            >= 40 => ("Fair", LampState.Hold),
+            >= 20 => ("Weak", LampState.Warn),
+            _ => ("Very Weak", LampState.NoGo)
         };
     }
 

@@ -191,7 +191,7 @@
                                                 <TextBlock Text="{x:Bind ProblemDescription}" FontSize="12" Foreground="{ThemeResource StateHoldBrush}" Margin="0,2,0,0"/>
                                             </StackPanel>
 
-                                            <Border Grid.Column="2" Background="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}"
+                                            <Border Grid.Column="2" instruments:StateBrush.Background="{x:Bind StatusState}"
                                                     CornerRadius="4" Padding="8,4" VerticalAlignment="Center">
                                                 <TextBlock Text="{x:Bind Status}" FontSize="11" Foreground="{ThemeResource ArmedFgBrush}"/>
                                             </Border>
@@ -237,7 +237,7 @@
                                                 <!-- Icon -->
                                                 <Border Style="{StaticResource IconContainerStyle}" Width="44" Height="44" VerticalAlignment="Center">
                                                     <FontIcon Glyph="{x:Bind DeviceClassIcon}" FontSize="20"
-                                                              Foreground="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}"/>
+                                                              instruments:StateBrush.Foreground="{x:Bind StatusState}"/>
                                                 </Border>
 
                                                 <!-- Device Info -->
@@ -273,7 +273,7 @@
                                                 </StackPanel>
 
                                                 <!-- Signed Status -->
-                                                <Border Grid.Column="4" Background="{x:Bind SignedColor, Converter={StaticResource StringToBrushConverter}}"
+                                                <Border Grid.Column="4" instruments:StateBrush.Background="{x:Bind SignedState}"
                                                         CornerRadius="4" Padding="10,6" VerticalAlignment="Center" MinWidth="70">
                                                     <TextBlock Text="{x:Bind SignedText}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource ArmedFgBrush}" HorizontalAlignment="Center"/>
                                                 </Border>

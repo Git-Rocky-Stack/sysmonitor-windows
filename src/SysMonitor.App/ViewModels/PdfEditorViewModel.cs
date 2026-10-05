@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media.Imaging;
 using SysMonitor.App.Helpers;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
@@ -86,7 +87,7 @@ public partial class PdfEditorViewModel : ObservableObject
     [ObservableProperty] private string _loadingStatus = "";
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private bool _hasStatusMessage;
-    [ObservableProperty] private string _statusColor = "#4CAF50";
+    [ObservableProperty] private LampState _statusState = LampState.Go;
 
     /// <summary>Width of a page thumbnail in the strip, in pixels.</summary>
     private const double ThumbnailWidth = 150;
@@ -1164,7 +1165,7 @@ public partial class PdfEditorViewModel : ObservableObject
     private void ShowStatus(string message, bool isSuccess)
     {
         StatusMessage = message;
-        StatusColor = isSuccess ? "#4CAF50" : "#F44336";
+        StatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasStatusMessage = true;
         _ = ClearStatusAfterDelayAsync();
     }

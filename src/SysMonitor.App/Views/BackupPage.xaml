@@ -596,7 +596,7 @@
                     <Border Style="{StaticResource CardStyle}" Padding="32" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="500">
                         <StackPanel Spacing="24" HorizontalAlignment="Center">
                             <FontIcon Glyph="{x:Bind ViewModel.ResultSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessGlyphConverter}}"
-                                      FontSize="64" Foreground="{x:Bind ViewModel.ResultSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessColorConverter}}"/>
+                                      FontSize="64" instruments:StateBrush.Foreground="{x:Bind ViewModel.ResultSuccess, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"/>
 
                             <StackPanel Spacing="8" HorizontalAlignment="Center">
                                 <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
@@ -615,7 +615,7 @@
         </Grid>
 
         <!-- Status Toast -->
-        <Border Background="{x:Bind ViewModel.StatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
+        <Border instruments:StateBrush.Background="{x:Bind ViewModel.StatusState, Mode=OneWay}"
                 CornerRadius="8" Padding="16,10" Margin="0,0,0,20"
                 Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="1">

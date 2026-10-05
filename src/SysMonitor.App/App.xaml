@@ -41,9 +41,7 @@
             <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
             <converters:ScanButtonIconConverter x:Key="ScanButtonIconConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
-            <converters:StringToBrushConverter x:Key="StringToBrushConverter"/>
             <converters:GreaterThanOneConverter x:Key="GreaterThanOneConverter"/>
-            <converters:BoolToAccentBrushConverter x:Key="BoolToAccentBrushConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
             <converters:CelsiusToFahrenheitConverter x:Key="CelsiusToFahrenheitConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
@@ -64,6 +62,9 @@
             <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
             <converters:DoubleToStringConverter x:Key="DoubleToStringConverter"/>
             <converters:BoolToMonitoringTextConverter x:Key="BoolToMonitoringTextConverter"/>
+            <!-- A yes or no as a lamp state for StateBrush: good or failed, and selected or not. -->
+            <converters:BoolToLampStateConverter x:Key="BoolToGoNoGoConverter" WhenTrue="Go" WhenFalse="NoGo"/>
+            <converters:BoolToLampStateConverter x:Key="BoolToArmedConverter" WhenTrue="Armed" WhenFalse="Off"/>
             <converters:GameModeIconConverter x:Key="GameModeIconConverter"/>
             <converters:GameModeTextConverter x:Key="GameModeTextConverter"/>
         </ResourceDictionary>

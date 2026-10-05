@@ -80,11 +80,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20">
-                        <FontIcon.Foreground>
-                            <SolidColorBrush Color="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay}"/>
-                        </FontIcon.Foreground>
-                    </FontIcon>
+                    <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20"
+                              instruments:StateBrush.Foreground="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}"/>
                     <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
                                Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
                                TextWrapping="Wrap"/>
@@ -176,12 +173,10 @@
                                               VerticalAlignment="Center"/>
 
                                     <!-- File Type Icon -->
-                                    <Border Grid.Column="1" Width="44" Height="44" CornerRadius="8">
-                                        <Border.Background>
-                                            <SolidColorBrush Color="{x:Bind FileTypeColor}"/>
-                                        </Border.Background>
+                                    <Border Grid.Column="1" Width="44" Height="44" CornerRadius="8"
+                                            Background="{ThemeResource ChipFaceBrush}">
                                         <FontIcon Glyph="{x:Bind FileIcon}" FontSize="20"
-                                                  Foreground="{ThemeResource PlatinumBrush}"/>
+                                                  Foreground="{ThemeResource SilverBrush}"/>
                                     </Border>
 
                                     <!-- File Info -->
@@ -194,15 +189,10 @@
                                     </StackPanel>
 
                                     <!-- File Type Badge -->
-                                    <Border Grid.Column="3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center">
-                                        <Border.Background>
-                                            <SolidColorBrush Color="{x:Bind FileTypeColor}" Opacity="0.2"/>
-                                        </Border.Background>
-                                        <TextBlock Text="{x:Bind FileType}" FontSize="11" FontWeight="SemiBold">
-                                            <TextBlock.Foreground>
-                                                <SolidColorBrush Color="{x:Bind FileTypeColor}"/>
-                                            </TextBlock.Foreground>
-                                        </TextBlock>
+                                    <Border Grid.Column="3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center"
+                                            Background="{ThemeResource ChipFaceBrush}">
+                                        <TextBlock Text="{x:Bind FileType}" FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="{ThemeResource SilverBrush}"/>
                                     </Border>
 
                                     <!-- Size -->

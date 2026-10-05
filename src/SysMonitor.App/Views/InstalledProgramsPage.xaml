@@ -139,7 +139,7 @@
                                 <Border Grid.Column="2" CornerRadius="4" Padding="8,4" Margin="8,0"
                                         VerticalAlignment="Center" Background="{ThemeResource Carbon700Brush}">
                                     <TextBlock Text="{Binding TypeDisplay}" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{Binding TypeColor, Converter={StaticResource StringToBrushConverter}}"/>
+                                               Foreground="{ThemeResource SilverBrush}"/>
                                 </Border>
 
                                 <!-- Size -->

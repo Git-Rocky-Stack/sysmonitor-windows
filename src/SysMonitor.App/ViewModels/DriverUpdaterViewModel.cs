@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using Windows.Storage.Pickers;
@@ -183,9 +184,9 @@ public partial class DriverDisplayItem : ObservableObject
     public string DeviceClassIcon { get; }
     public bool IsSigned { get; }
     public string SignedText { get; }
-    public string SignedColor { get; }
+    public LampState SignedState { get; }
     public string Status { get; }
-    public string StatusColor { get; }
+    public LampState StatusState { get; }
     public bool HasProblem { get; }
     public string ProblemDescription { get; }
     public int DaysSinceUpdate { get; }
@@ -208,9 +209,9 @@ public partial class DriverDisplayItem : ObservableObject
         DeviceClassIcon = info.DeviceClassIcon;
         IsSigned = info.IsSigned;
         SignedText = info.IsSigned ? "Signed" : "Unsigned";
-        SignedColor = info.IsSigned ? "#4CAF50" : "#FF9800";
+        SignedState = info.IsSigned ? LampState.Go : LampState.Hold;
         Status = info.Status;
-        StatusColor = info.StatusColor;
+        StatusState = info.StatusState;
         HasProblem = info.HasProblem;
         ProblemDescription = info.ProblemDescription;
         DaysSinceUpdate = info.DaysSinceUpdate;

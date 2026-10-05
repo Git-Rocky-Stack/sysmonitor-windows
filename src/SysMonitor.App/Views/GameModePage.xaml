@@ -41,21 +41,13 @@
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Grid Width="60" Height="60">
                                     <!-- Outer glow -->
-                                    <Ellipse Fill="Transparent" StrokeThickness="3" Opacity="0.3">
-                                        <Ellipse.Stroke>
-                                            <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
-                                        </Ellipse.Stroke>
-                                    </Ellipse>
+                                    <Ellipse Fill="Transparent" StrokeThickness="3" Opacity="0.3"
+                                             instruments:StateBrush.Stroke="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
                                     <!-- Inner circle with icon -->
-                                    <Border CornerRadius="30" Margin="8">
-                                        <Border.Background>
-                                            <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}" Opacity="0.2"/>
-                                        </Border.Background>
-                                        <FontIcon Glyph="&#xE7FC;" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <FontIcon.Foreground>
-                                                <SolidColorBrush Color="{x:Bind ViewModel.StatusColor, Mode=OneWay}"/>
-                                            </FontIcon.Foreground>
-                                        </FontIcon>
+                                    <Border CornerRadius="30" Margin="8"
+                                            instruments:StateBrush.Wash="{x:Bind ViewModel.StatusState, Mode=OneWay}">
+                                        <FontIcon Glyph="&#xE7FC;" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
                                     </Border>
                                 </Grid>
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Backup;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
@@ -103,7 +104,7 @@ public partial class BackupViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private bool _hasStatusMessage;
-    [ObservableProperty] private string _statusColor = "#4CAF50";
+    [ObservableProperty] private LampState _statusState = LampState.Go;
 
     public BackupViewModel(IBackupService backupService,
         ILogger<BackupViewModel>? logger = null)
@@ -759,7 +760,7 @@ public partial class BackupViewModel : ObservableObject, IDisposable
     private void ShowStatus(string message, bool isSuccess)
     {
         StatusMessage = message;
-        StatusColor = isSuccess ? "#4CAF50" : "#F44336";
+        StatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasStatusMessage = true;
         _ = ClearStatusAfterDelayAsync();
     }

@@ -21,7 +21,7 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isGameModeEnabled;
     [ObservableProperty] private bool _isActivating;
     [ObservableProperty] private string _statusMessage = "Game Mode is OFF";
-    [ObservableProperty] private string _statusColor = "#FFFFFF";
+    [ObservableProperty] private LampState _statusState = LampState.Off;
     [ObservableProperty] private int _lastBackgroundAppsAffected;
 
     /// <summary>
@@ -95,7 +95,7 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             StatusMessage = $"Game Mode could not read its settings: {ex.Message}";
-            StatusColor = "#F44336";
+            StatusState = LampState.NoGo;
         }
     }
 
@@ -197,12 +197,14 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
         if (IsGameModeEnabled)
         {
             StatusMessage = "Game Mode is ON";
-            StatusColor = "#4CAF50";  // Green
+            // Armed: the app is acting on the machine - priorities lowered, apps asked to close - for as long as
+            // it is on, which is what System-X reserves the armed state for.
+            StatusState = LampState.Armed;
         }
         else
         {
             StatusMessage = "Game Mode is OFF";
-            StatusColor = "#FFFFFF";  // White
+            StatusState = LampState.Off;
         }
     }
 
@@ -261,7 +263,7 @@ public partial class GameModeViewModel : ObservableObject, IDisposable
                 else
                 {
                     StatusMessage = $"Failed: {result.ErrorMessage}";
-                    StatusColor = "#F44336";  // Red
+                    StatusState = LampState.NoGo;
                     await Task.Delay(3000);
                     UpdateStatusDisplay();
                 }

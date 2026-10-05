@@ -76,18 +76,6 @@ public class InstalledProgram
     };
 
     /// <summary>
-    /// Type color for UI
-    /// </summary>
-    public string TypeColor => Type switch
-    {
-        ProgramType.Win32 => "#4CAF50",
-        ProgramType.StoreApp => "#2196F3",
-        ProgramType.SystemApp => "#FF9800",
-        ProgramType.Framework => "#9C27B0",
-        _ => "#808080"
-    };
-
-    /// <summary>
     /// Whether this program can be uninstalled
     /// </summary>
     public bool CanUninstall => !string.IsNullOrEmpty(UninstallString) ||

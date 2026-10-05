@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 
@@ -55,7 +56,7 @@ public partial class NetworkMapperViewModel : ObservableObject, IDisposable
     // Action Status
     [ObservableProperty] private string _actionStatus = "";
     [ObservableProperty] private bool _hasActionStatus;
-    [ObservableProperty] private string _actionStatusColor = "#4CAF50";
+    [ObservableProperty] private LampState _actionStatusState = LampState.Go;
 
     public NetworkMapperViewModel(INetworkMapper networkMapper,
         ILogger<NetworkMapperViewModel>? logger = null)
@@ -300,7 +301,7 @@ public partial class NetworkMapperViewModel : ObservableObject, IDisposable
     private void ShowAction(string message, bool isSuccess)
     {
         ActionStatus = message;
-        ActionStatusColor = isSuccess ? "#4CAF50" : "#F44336";
+        ActionStatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasActionStatus = true;
         _ = ClearActionAfterDelayAsync();
     }
@@ -328,10 +329,9 @@ public partial class NetworkDeviceDisplay : ObservableObject
     public string Manufacturer { get; }
     public string DeviceType { get; }
     public string DeviceIcon { get; }
-    public string DeviceTypeColor { get; }
     public bool IsOnline { get; }
     public string StatusText { get; }
-    public string StatusColor { get; }
+    public LampState StatusState { get; }
     public int ResponseTime { get; }
     public string ResponseTimeText { get; }
     public DateTime LastSeen { get; }
@@ -344,10 +344,9 @@ public partial class NetworkDeviceDisplay : ObservableObject
         Manufacturer = string.IsNullOrEmpty(info.Manufacturer) ? "Unknown" : info.Manufacturer;
         DeviceType = info.DeviceType;
         DeviceIcon = GetDeviceIcon(info.DeviceType);
-        DeviceTypeColor = GetDeviceTypeColor(info.DeviceType);
         IsOnline = info.IsOnline;
         StatusText = info.IsOnline ? "Online" : "Offline";
-        StatusColor = info.IsOnline ? "#4CAF50" : "#808080";
+        StatusState = info.IsOnline ? LampState.Go : LampState.Off;
         ResponseTime = info.ResponseTimeMs;
         ResponseTimeText = info.ResponseTimeMs > 0 ? $"{info.ResponseTimeMs} ms" : "N/A";
         LastSeen = info.LastSeen;
@@ -365,19 +364,6 @@ public partial class NetworkDeviceDisplay : ObservableObject
         "TV" or "Media" => "\uE7F4",
         _ => "\uE839"
     };
-
-    private static string GetDeviceTypeColor(string type) => type switch
-    {
-        "Router" or "Gateway" => "#FF9800",
-        "Computer" => "#2196F3",
-        "Server" => "#9C27B0",
-        "Printer" => "#607D8B",
-        "Phone" => "#4CAF50",
-        "IoT" or "Smart Device" => "#00BCD4",
-        "Camera" => "#E91E63",
-        "TV" or "Media" => "#673AB7",
-        _ => "#808080"
-    };
 }
 
 public class PortDisplay
@@ -386,7 +372,7 @@ public class PortDisplay
     public string Service { get; }
     public string Protocol { get; }
     public string Status { get; }
-    public string StatusColor { get; }
+    public LampState StatusState { get; }
 
     public PortDisplay(PortInfo info)
     {
@@ -394,6 +380,6 @@ public class PortDisplay
         Service = info.ServiceName;
         Protocol = info.Protocol;
         Status = info.IsOpen ? "Open" : "Closed";
-        StatusColor = info.IsOpen ? "#4CAF50" : "#F44336";
+        StatusState = info.IsOpen ? LampState.Go : LampState.NoGo;
     }
 }

@@ -89,7 +89,7 @@
 
                         <Border Grid.Column="4" CornerRadius="4" Padding="8,4" VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
-                                Background="{Binding IsEnabled, Converter={StaticResource BoolToSuccessBrushConverter}}">
+                                instruments:StateBrush.Background="{Binding IsEnabled, Converter={StaticResource BoolToGoNoGoConverter}}">
                             <TextBlock Text="{Binding IsEnabled}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold" FontSize="11"/>
                         </Border>
                     </Grid>

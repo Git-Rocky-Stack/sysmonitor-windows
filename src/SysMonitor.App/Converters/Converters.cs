@@ -231,38 +231,6 @@ public class InverseBoolConverter : IValueConverter
     }
 }
 
-public class StringToBrushConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is string colorString && !string.IsNullOrEmpty(colorString))
-        {
-            try
-            {
-                // Parse hex color string like "#4CAF50" or "#F44336"
-                colorString = colorString.TrimStart('#');
-                if (colorString.Length == 6)
-                {
-                    var r = System.Convert.ToByte(colorString.Substring(0, 2), 16);
-                    var g = System.Convert.ToByte(colorString.Substring(2, 2), 16);
-                    var b = System.Convert.ToByte(colorString.Substring(4, 2), 16);
-                    return new SolidColorBrush(Windows.UI.Color.FromArgb(255, r, g, b));
-                }
-            }
-            catch
-            {
-                // Best effort: a colour that will not parse falls through to the default below.
-            }
-        }
-        return new SolidColorBrush(Windows.UI.Color.FromArgb(255, 76, 175, 80)); // Default green
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
 public class GreaterThanOneConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
@@ -272,24 +240,6 @@ public class GreaterThanOneConverter : IValueConverter
         if (value is double doubleValue)
             return doubleValue > 1;
         return false;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class BoolToAccentBrushConverter : IValueConverter
-{
-    private static readonly SolidColorBrush AccentBrush = new(Windows.UI.Color.FromArgb(48, 244, 67, 54)); // #30F44336
-    private static readonly SolidColorBrush TransparentBrush = new(Colors.Transparent);
-
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool isActive && isActive)
-            return AccentBrush;
-        return TransparentBrush;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
