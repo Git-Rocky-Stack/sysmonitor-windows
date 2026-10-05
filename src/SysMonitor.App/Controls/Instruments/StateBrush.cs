@@ -23,8 +23,8 @@ namespace SysMonitor.App.Controls.Instruments;
 /// </para>
 /// <para>
 /// The brush comes from <see cref="ConsolePalette"/> for the shift the element is shown in, and is looked up
-/// again when that shift changes - the element's theme, or Windows' High Contrast - so a state follows the shift
-/// as a {ThemeResource} would.
+/// again when that shift may have changed - when the element loads and when its theme changes - so a state
+/// follows the shift as a {ThemeResource} would.
 /// </para>
 /// </summary>
 public static class StateBrush
@@ -170,31 +170,16 @@ public static class StateBrush
     }
 
     /// <summary>
-    /// Paints the element again when the shift it is shown in changes: its own theme, which ActualThemeChanged
-    /// reports, or High Contrast, which it does not. The High Contrast handler is held only while the element is in
-    /// the tree, so an element that has left the page is not kept alive by a static event.
+    /// Paints the element again when the shift it is shown in may have changed: when it loads, which is when it
+    /// first has the theme of the page it is on, and when that theme changes. Windows' High Contrast is picked up
+    /// at the same moments (ConsolePalette says why it cannot be listened for).
     /// </summary>
     private sealed class ShiftWatcher
     {
-        private readonly WeakReference<FrameworkElement> _element;
-
         public ShiftWatcher(FrameworkElement element)
         {
-            _element = new WeakReference<FrameworkElement>(element);
             element.ActualThemeChanged += (sender, _) => Paint(sender);
-            element.Loaded += (sender, _) =>
-            {
-                ConsolePalette.HighContrastChanged -= OnHighContrastChanged;
-                ConsolePalette.HighContrastChanged += OnHighContrastChanged;
-                Paint((FrameworkElement)sender);
-            };
-            element.Unloaded += (_, _) => ConsolePalette.HighContrastChanged -= OnHighContrastChanged;
-        }
-
-        private void OnHighContrastChanged(object? sender, EventArgs args)
-        {
-            if (_element.TryGetTarget(out var element))
-                Paint(element);
+            element.Loaded += (sender, _) => Paint((FrameworkElement)sender);
         }
     }
 }

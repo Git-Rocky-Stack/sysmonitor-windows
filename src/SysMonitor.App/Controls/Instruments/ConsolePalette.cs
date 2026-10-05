@@ -1,4 +1,3 @@
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI.ViewManagement;
@@ -12,27 +11,19 @@ namespace SysMonitor.App.Controls.Instruments;
 /// on a Day Shift page. So this asks the palette's own theme dictionary for the shift the element is shown in -
 /// Night Ops, Day Shift, or High Contrast whenever Windows has it on, as XAML's lookup does.
 /// <para>
-/// High Contrast does not change an element's <c>ActualTheme</c>, so <see cref="HighContrastChanged"/> says when it
-/// is turned on or off, raised on the UI thread for whoever needs to look again.
+/// Whether High Contrast is on is asked of Windows at each lookup. Its change event is not: subscribing to
+/// <c>AccessibilitySettings.HighContrastChanged</c> throws "element not found" in a desktop app, which has no
+/// CoreWindow for it to report to - measured, it took the first page with a coloured status down with it. So an
+/// element picks up a change of High Contrast when it is next painted: when it loads, when its theme changes, or
+/// when its state does.
 /// </para>
 /// </summary>
 internal static class ConsolePalette
 {
     private const string TokensSource = "Styles/Console/Tokens.xaml";
 
-    private static readonly AccessibilitySettings Accessibility = new();
-    private static readonly DispatcherQueue? Dispatcher = DispatcherQueue.GetForCurrentThread();
+    private static AccessibilitySettings? _accessibility;
     private static ResourceDictionary? _tokens;
-
-    static ConsolePalette()
-    {
-        // Windows raises this on a thread of its own; elements can only be touched from theirs.
-        Accessibility.HighContrastChanged += (_, _) =>
-            Dispatcher?.TryEnqueue(() => HighContrastChanged?.Invoke(null, EventArgs.Empty));
-    }
-
-    /// <summary>Raised on the UI thread when Windows turns High Contrast on or off.</summary>
-    public static event EventHandler? HighContrastChanged;
 
     /// <summary>The palette's brush of this key for the shift <paramref name="element"/> is shown in.</summary>
     public static Brush? BrushFor(FrameworkElement element, string key)
@@ -47,7 +38,20 @@ internal static class ConsolePalette
 
     /// <summary>The palette's theme dictionary that answers for an element in this theme.</summary>
     private static string ShiftOf(ElementTheme theme) =>
-        Accessibility.HighContrast ? "HighContrast" : theme == ElementTheme.Light ? "Light" : "Default";
+        HighContrast() ? "HighContrast" : theme == ElementTheme.Light ? "Light" : "Default";
+
+    /// <summary>Whether Windows has High Contrast on; a Windows that will not say is taken as not.</summary>
+    private static bool HighContrast()
+    {
+        try
+        {
+            return (_accessibility ??= new AccessibilitySettings()).HighContrast;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 
     private static ResourceDictionary? Find(ResourceDictionary dictionary)
     {
