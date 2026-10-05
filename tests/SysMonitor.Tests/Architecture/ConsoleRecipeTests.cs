@@ -193,33 +193,7 @@ public class ConsoleRecipeTests
         "src/SysMonitor.App/Views/WiFiPage.xaml",
     ];
 
-    private static readonly string[] ChromeBezels =
-    [
-        "src/SysMonitor.App/Views/BluetoothPage.xaml",
-        "src/SysMonitor.App/Views/BrowserPrivacyPage.xaml",
-        "src/SysMonitor.App/Views/CleanerPage.xaml",
-        "src/SysMonitor.App/Views/DashboardPage.xaml",
-        "src/SysMonitor.App/Views/DonationPage.xaml",
-        "src/SysMonitor.App/Views/DriverUpdaterPage.xaml",
-        "src/SysMonitor.App/Views/DriveWiperPage.xaml",
-        "src/SysMonitor.App/Views/DuplicateFinderPage.xaml",
-        "src/SysMonitor.App/Views/FileToolsPage.xaml",
-        "src/SysMonitor.App/Views/GameModePage.xaml",
-        "src/SysMonitor.App/Views/HealthCheckPage.xaml",
-        "src/SysMonitor.App/Views/HistoryPage.xaml",
-        "src/SysMonitor.App/Views/ImageToolsPage.xaml",
-        "src/SysMonitor.App/Views/InstalledProgramsPage.xaml",
-        "src/SysMonitor.App/Views/LargeFilesPage.xaml",
-        "src/SysMonitor.App/Views/MemoryPage.xaml",
-        "src/SysMonitor.App/Views/NetworkMapperPage.xaml",
-        "src/SysMonitor.App/Views/PerformancePage.xaml",
-        "src/SysMonitor.App/Views/ProcessesPage.xaml",
-        "src/SysMonitor.App/Views/RegistryCleanerPage.xaml",
-        "src/SysMonitor.App/Views/ScheduledCleaningPage.xaml",
-        "src/SysMonitor.App/Views/SettingsPage.xaml",
-        "src/SysMonitor.App/Views/StartupPage.xaml",
-        "src/SysMonitor.App/Views/WiFiPage.xaml",
-    ];
+    private static readonly string[] ChromeBezels = [];
 
     private static readonly string[] FontFamilyLiterals =
     [

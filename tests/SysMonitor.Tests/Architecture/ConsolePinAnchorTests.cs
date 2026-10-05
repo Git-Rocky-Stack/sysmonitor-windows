@@ -260,16 +260,12 @@ public class ConsolePinAnchorTests
         if (!PinnedStylesheet.Line(number).Contains('{'))
             return false;
 
-        for (var i = number - 1; i >= 1; i--)
-        {
-            var above = PinnedStylesheet.Line(i).Trim();
-            if (above.Length == 0)
-                return false;
+        // Only the line directly above decides it: a selector list is unbroken, and a blank line ends one.
+        if (number <= 1)
+            return false;
 
-            return above.EndsWith(',');
-        }
-
-        return false;
+        var above = PinnedStylesheet.Line(number - 1).Trim();
+        return above.Length > 0 && above.EndsWith(',');
     }
 
     /// <summary>Everything the stylesheet writes for a custom property, for the one hop a token may alias through.</summary>

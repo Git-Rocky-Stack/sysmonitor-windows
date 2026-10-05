@@ -40,33 +40,6 @@
         <GradientStop Color="#C93437" Offset="1.0"/>
     </LinearGradientBrush>
 
-    <!-- Primary Button Gradient (90° vertical) -->
-    <LinearGradientBrush x:Key="PrimaryButtonGradientBrush" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#AA2024" Offset="0.0"/>
-        <GradientStop Color="#C93437" Offset="1.0"/>
-    </LinearGradientBrush>
-
-    <!-- Chrome Bezel Layer 1 - Outer Chrome -->
-    <LinearGradientBrush x:Key="ChromeBezelLayer1Brush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#E8E8E8" Offset="0.0"/>
-        <GradientStop Color="#A0A0A0" Offset="0.5"/>
-        <GradientStop Color="#606060" Offset="1.0"/>
-    </LinearGradientBrush>
-
-    <!-- Chrome Bezel Layer 2 - Inner Highlight -->
-    <LinearGradientBrush x:Key="ChromeBezelLayer2Brush" StartPoint="1,1" EndPoint="0,0">
-        <GradientStop Color="#FFFFFF" Offset="0.0"/>
-        <GradientStop Color="#C8C8C8" Offset="0.5"/>
-        <GradientStop Color="#888888" Offset="1.0"/>
-    </LinearGradientBrush>
-
-    <!-- Chrome Bezel Layer 3 - Dark Edge -->
-    <LinearGradientBrush x:Key="ChromeBezelLayer3Brush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#505050" Offset="0.0"/>
-        <GradientStop Color="#383838" Offset="0.5"/>
-        <GradientStop Color="#282828" Offset="1.0"/>
-    </LinearGradientBrush>
-
     <!-- Status Brushes -->
     <SolidColorBrush x:Key="SuccessBrush" Color="#4CAF50"/>
     <SolidColorBrush x:Key="WarningBrush" Color="#FF9800"/>

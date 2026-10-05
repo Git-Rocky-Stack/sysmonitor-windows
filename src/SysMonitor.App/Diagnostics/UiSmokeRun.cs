@@ -307,9 +307,12 @@ internal sealed class UiSmokeRun
                 Problem($"The specimen's content is not a panel, so the caps could not be measured in the {shift} shift");
 
             if (specimen.Content is Panel leverHost)
-            await CheckSwitchAsync(leverHost, theme, shift);
+            {
+                await CheckSwitchAsync(leverHost, theme, shift);
+                await CheckFieldsAsync(leverHost, theme, shift);
+            }
 
-        await CheckDialogsAsync(specimen, theme, shift);
+            await CheckDialogsAsync(specimen, theme, shift);
 
             // It is taller than the window: one picture per window's height of it.
             var shots = new List<string>();
@@ -794,25 +797,124 @@ internal sealed class UiSmokeRun
     }
 
     /// <summary>
-    /// Whether a thumb can still be dragged. This is the one thing about the lever the rest of the run cannot
-    /// press: a drag is a pointer gesture, and there is no pointer here.
-    /// <para>
-    /// What can be reproduced is the sequence ToggleSwitch's own code performs while a finger is down, because
-    /// that sequence is the hazard. It moves to the Dragging state, then writes KnobTranslateTransform.X on
-    /// every move. The travel used to be a RepositionThemeAnimation, which moves the knob element and leaves the
-    /// transform alone; it is now an animation OF that transform, and an animation that holds its final value
-    /// takes precedence over a write to the property it holds. So if the On state's storyboard is still running
-    /// when the drag begins, every write the drag makes is discarded and the thumb sticks at 20 under the
-    /// finger. Moving to Dragging is what stops it - and that it does stop it is the thing worth measuring,
-    /// because nothing in the template says so.
-    /// </para>
-    /// <para>
-    /// This is not a drag. It does not prove a pointer reaches the Thumb, that the gesture recogniser fires, or
-    /// that the distance is clamped to the travel - the geometry test is the nearest thing there is to that
-    /// (ConsoleSwitchTests). It proves the switch is still writable where WinUI writes it, which is what the
-    /// change to the travel could have taken away.
-    /// </para>
+    /// What a field actually draws. The dictionary can be read without running anything (ConsoleFieldTests), but
+    /// not whether WinUI applied the implicit styles, whether NumberBox's own text box took the field it was
+    /// pointed at, or whether focus arms one. So a text box, a password box and a number box are built here, in
+    /// this shift, and asked what face and edge they came out with - and the text box is focused and asked again.
     /// </summary>
+    private async Task CheckFieldsAsync(Panel host, ElementTheme theme, string shift)
+    {
+        Progress($"{shift} specimen: the form fields");
+
+        // InstrumentTemplateTests lets these templates bind presenters to Header and Description because none of
+        // the three has a Content of its own for WinUI to hand a presenter a second time. Asked of the framework.
+        foreach (var type in new[] { typeof(TextBox), typeof(PasswordBox), typeof(NumberBox) })
+        {
+            if (type.IsSubclassOf(typeof(ContentControl)))
+                Problem($"{type.Name} is a ContentControl after all, so the exemption in InstrumentTemplateTests " +
+                        "reopens the crash it was written for");
+        }
+
+        var text = new TextBox { Header = "SPECIMEN", PlaceholderText = "specimen", Opacity = 0, IsHitTestVisible = false };
+        var password = new PasswordBox { Header = "SPECIMEN", Opacity = 0, IsHitTestVisible = false };
+        var number = new NumberBox { Header = "SPECIMEN", Value = 1, Opacity = 0, IsHitTestVisible = false };
+        var fields = new Control[] { text, password, number };
+
+        foreach (var field in fields)
+            host.Children.Add(field);
+
+        try
+        {
+            await SettledAsync();
+
+            var problems = 0;
+            void Face(string what, Brush? drawn, string token)
+            {
+                var wanted = Describe(PaletteBrush(theme, token));
+                if (wanted is null)
+                {
+                    problems++;
+                    Problem($"The {shift} palette does not write {token}, so {what} cannot be checked");
+                }
+                else if (Describe(drawn) != wanted)
+                {
+                    problems++;
+                    Problem($"In the {shift} shift {what} came out {Describe(drawn)}, where the palette's {token} " +
+                            $"is {wanted}: the field did not reach it");
+                }
+            }
+
+            // NumberBox draws its well through InputBox, so the well to measure is that text box's.
+            var input = Named<TextBox>(number, "InputBox");
+            var wells = new (string What, Control Owner)[]
+            {
+                ("a text box nobody styled", text),
+                ("a password box nobody styled", password),
+                ("a number box's own text box", input ?? (Control)number),
+            };
+
+            foreach (var (what, owner) in wells)
+            {
+                var well = Named<Border>(owner, "BorderElement");
+                if (well is null || Named<Border>(owner, "FocusOutline") is null)
+                {
+                    problems++;
+                    Problem($"In the {shift} shift {what} has no console well to measure, so it came out as WinUI's " +
+                            "text box or not at all");
+                    continue;
+                }
+
+                Face($"{what}'s face", well.Background, "FieldFaceBrush");
+                Face($"{what}'s edge", well.BorderBrush, "FieldEdgeBrush");
+            }
+
+            // Focus is the window's to give, and a window the run does not have the foreground in may refuse it.
+            // A refusal is noted rather than failed: it says nothing about the field.
+            var outline = Named<Border>(text, "FocusOutline");
+            var edge = Named<Border>(text, "BorderElement");
+            if (outline is not null && edge is not null)
+            {
+                if (outline.Opacity > 0.01)
+                {
+                    problems++;
+                    Problem($"In the {shift} shift an unfocused text box shows its armed outline");
+                }
+
+                text.IsHitTestVisible = true;
+                if (text.Focus(FocusState.Programmatic))
+                {
+                    await RenderedAsync();
+                    await RenderedAsync();
+
+                    if (outline.Opacity < 0.99)
+                    {
+                        problems++;
+                        Problem($"Focused, the text box in the {shift} shift left its armed outline at {outline.Opacity:0.##}");
+                    }
+
+                    Face("a focused text box's edge", edge.BorderBrush, "ArmedEdgeBrush");
+                }
+                else
+                {
+                    Note($"The text box in the {shift} shift could not be given focus, so its armed outline was not measured");
+                }
+            }
+
+            if (problems == 0)
+                Checked($"The fields in the {shift} shift: a text box, a password box and a number box each drew " +
+                        "the palette's well, and the text box armed its edge and outline when focused");
+        }
+        catch (Exception ex)
+        {
+            Problem($"The fields could not be measured in the {shift} shift: {ex.Message}");
+        }
+        finally
+        {
+            foreach (var field in fields)
+                host.Children.Remove(field);
+        }
+    }
+
     /// <summary>
     /// What a drag leaves behind. A drag is a pointer gesture and there is no pointer here, but the part of it
     /// that outlives the gesture can be reproduced: ToggleSwitch moves to the Dragging state and then writes
@@ -821,7 +923,7 @@ internal sealed class UiSmokeRun
     /// Which is the whole hazard. A state that does not say where the thumb rests inherits whatever the last
     /// drag wrote, so a lever that was dragged and then switched off leaves its thumb standing wherever the
     /// finger let go - on a switch that reads OFF. That is not hypothetical: it is what this found the first
-    /// time it ran, and why the Off state now sets the transform instead of assuming it (Controls.xaml:319).
+    /// time it ran, and why the Off state now sets the transform instead of assuming it (Controls.xaml, the Off state).
     /// </para>
     /// <para>
     /// The thumb is measured where it is drawn against the track rather than by reading the transform back. A

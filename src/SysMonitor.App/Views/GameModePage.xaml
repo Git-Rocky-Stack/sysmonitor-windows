@@ -86,28 +86,16 @@
 
                         <!-- Toggle Button -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <Border CornerRadius="26" Padding="2">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Color="#707070" Offset="0.0"/>
-                                        <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                        <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                        <GradientStop Color="#505050" Offset="1.0"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                                <Button Command="{x:Bind ViewModel.ToggleGameModeCommand}"
-                                        IsEnabled="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
-                                        Style="{StaticResource RedButtonStyle}"
-                                        Width="200" Height="50">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeIconConverter}}"
-                                                  FontSize="16"/>
-                                        <TextBlock Text="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeTextConverter}}"
-                                                   FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                </Button>
-                            </Border>
+                            <Button Command="{x:Bind ViewModel.ToggleGameModeCommand}"
+                                    IsEnabled="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                    Style="{StaticResource ChromeCapButtonStyle}"
+                                    Width="200">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeIconConverter}}"
+                                              FontSize="14"/>
+                                    <TextBlock Text="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeTextConverter}}"/>
+                                </StackPanel>
+                            </Button>
                             <ProgressRing IsActive="{x:Bind ViewModel.IsActivating, Mode=OneWay}"
                                           Width="24" Height="24" Margin="0,8,0,0"
                                           Foreground="{StaticResource PrimaryBrush}"
@@ -177,12 +165,11 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Content="Apply"
+                                <Button Grid.Column="0" Content="APPLY"
                                         Command="{x:Bind ViewModel.ApplyProfileCommand}"
                                         CommandParameter="{x:Bind ViewModel.SelectedProfile, Mode=OneWay}"
-                                        HorizontalAlignment="Stretch"
-                                        Style="{StaticResource AccentButtonStyle}"/>
-                                <Button Grid.Column="1" Content="Clear"
+                                        HorizontalAlignment="Stretch"/>
+                                <Button Grid.Column="1" Content="CLEAR"
                                         Command="{x:Bind ViewModel.DeactivateProfileCommand}"
                                         IsEnabled="{x:Bind ViewModel.HasActiveProfile, Mode=OneWay}"
                                         HorizontalAlignment="Stretch"/>
@@ -203,21 +190,9 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <Border CornerRadius="18" Padding="2" Margin="0,0,0,6">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Color="#707070" Offset="0.0"/>
-                                        <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                        <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                        <GradientStop Color="#505050" Offset="1.0"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                                <Button Command="{x:Bind ViewModel.ToggleOverlayCommand}"
-                                        Content="{x:Bind ViewModel.OverlayButtonText, Mode=OneWay}"
-                                        Style="{StaticResource RedButtonStyle}"
-                                        HorizontalAlignment="Stretch" Height="42" CornerRadius="16"/>
-                            </Border>
+                            <Button Command="{x:Bind ViewModel.ToggleOverlayCommand}"
+                                    Content="{x:Bind ViewModel.OverlayButtonText, Mode=OneWay}"
+                                    HorizontalAlignment="Stretch" Margin="0,0,0,6"/>
 
                             <StackPanel Spacing="4" Margin="0,4,0,0">
                                 <TextBlock Text="Drag overlay to reposition"

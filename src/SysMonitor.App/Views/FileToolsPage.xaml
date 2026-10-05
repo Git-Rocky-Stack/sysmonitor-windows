@@ -48,22 +48,21 @@
 
                     <!-- Selection Buttons -->
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                        <Button Command="{x:Bind ViewModel.SelectFileCommand}" Style="{StaticResource OutlineButtonStyle}"
+                        <Button Command="{x:Bind ViewModel.SelectFileCommand}"
                                 Width="180">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8A5;" FontSize="16"/>
+                                <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
                                 <TextBlock Text="SELECT FILE"/>
                             </StackPanel>
                         </Button>
-                        <Button Command="{x:Bind ViewModel.SelectFolderCommand}" Style="{StaticResource OutlineButtonStyle}"
+                        <Button Command="{x:Bind ViewModel.SelectFolderCommand}"
                                 Width="180">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8B7;" FontSize="16"/>
+                                <FontIcon Glyph="&#xE8B7;" FontSize="14"/>
                                 <TextBlock Text="SELECT FOLDER"/>
                             </StackPanel>
                         </Button>
                         <Button Content="CLEAR" Command="{x:Bind ViewModel.ClearSelectionCommand}"
-                                Style="{StaticResource OutlineButtonStyle}"
                                 Visibility="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     </StackPanel>
 
@@ -169,30 +168,18 @@
                                               Width="120"/>
                                 </StackPanel>
 
-                                <!-- COMPRESS with chrome bezel -->
-                                <Border CornerRadius="26" Padding="2" HorizontalAlignment="Stretch">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#707070" Offset="0.0"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                            <GradientStop Color="#505050" Offset="1.0"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                    <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
-                                            Style="{StaticResource RedButtonStyle}" HorizontalAlignment="Stretch"
-                                            IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
-                                        <Button.ContentTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <FontIcon Glyph="&#xE81E;" FontSize="14"/>
-                                                    <TextBlock Text="COMPRESS"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </Button.ContentTemplate>
-                                    </Button>
-                                </Border>
+                                <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
+                                        Style="{StaticResource ChromeCapButtonStyle}" HorizontalAlignment="Stretch"
+                                        IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE81E;" FontSize="14"/>
+                                                <TextBlock Text="COMPRESS"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
                             </StackPanel>
                         </Border>
 
@@ -219,7 +206,7 @@
                                            FontSize="12"/>
 
                                 <Button Content="EXTRACT" Command="{x:Bind ViewModel.DecompressCommand}"
-                                        Style="{StaticResource OutlineButtonStyle}" HorizontalAlignment="Stretch"
+                                        HorizontalAlignment="Stretch"
                                         IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
                                     <Button.ContentTemplate>
                                         <DataTemplate>
@@ -301,7 +288,7 @@
                     </Grid>
 
                     <Button Content="OPEN OUTPUT FOLDER" Command="{x:Bind ViewModel.OpenOutputFolderCommand}"
-                            Style="{StaticResource OutlineButtonStyle}" HorizontalAlignment="Center">
+                            HorizontalAlignment="Center">
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Spacing="8">

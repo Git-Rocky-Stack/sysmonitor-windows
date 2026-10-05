@@ -50,22 +50,21 @@
 
                     <!-- Selection Buttons -->
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                        <Button Command="{x:Bind ViewModel.SelectSingleImageCommand}" Style="{StaticResource OutlineButtonStyle}"
+                        <Button Command="{x:Bind ViewModel.SelectSingleImageCommand}"
                                 Width="180">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8B9;" FontSize="16"/>
+                                <FontIcon Glyph="&#xE8B9;" FontSize="14"/>
                                 <TextBlock Text="SELECT IMAGE"/>
                             </StackPanel>
                         </Button>
-                        <Button Command="{x:Bind ViewModel.SelectImagesCommand}" Style="{StaticResource OutlineButtonStyle}"
+                        <Button Command="{x:Bind ViewModel.SelectImagesCommand}"
                                 Width="180">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8F1;" FontSize="16"/>
+                                <FontIcon Glyph="&#xE8F1;" FontSize="14"/>
                                 <TextBlock Text="SELECT MULTIPLE"/>
                             </StackPanel>
                         </Button>
                         <Button Content="CLEAR" Command="{x:Bind ViewModel.ClearSelectionCommand}"
-                                Style="{StaticResource OutlineButtonStyle}"
                                 Visibility="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     </StackPanel>
 
@@ -209,30 +208,18 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- COMPRESS with chrome bezel -->
-                        <Border CornerRadius="26" Padding="2" HorizontalAlignment="Stretch">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
-                                    Style="{StaticResource RedButtonStyle}" HorizontalAlignment="Stretch"
-                                    IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
-                                <Button.ContentTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE81E;" FontSize="14"/>
-                                            <TextBlock Text="COMPRESS"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Button.ContentTemplate>
-                            </Button>
-                        </Border>
+                        <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
+                                Style="{StaticResource ChromeCapButtonStyle}" HorizontalAlignment="Stretch"
+                                IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE81E;" FontSize="14"/>
+                                        <TextBlock Text="COMPRESS"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
                     </StackPanel>
                 </Border>
 
@@ -261,7 +248,7 @@
                         </StackPanel>
 
                         <Button Content="CONVERT" Command="{x:Bind ViewModel.ConvertCommand}"
-                                Style="{StaticResource OutlineButtonStyle}" HorizontalAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
                                 IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
@@ -319,7 +306,7 @@
                         </Grid>
 
                         <Button Content="RESIZE" Command="{x:Bind ViewModel.ResizeCommand}"
-                                Style="{StaticResource OutlineButtonStyle}" HorizontalAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
                                 IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
@@ -416,7 +403,7 @@
                     </Grid>
 
                     <Button Content="OPEN OUTPUT FOLDER" Command="{x:Bind ViewModel.OpenOutputFolderCommand}"
-                            Style="{StaticResource OutlineButtonStyle}" HorizontalAlignment="Center">
+                            HorizontalAlignment="Center">
                         <Button.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Spacing="8">

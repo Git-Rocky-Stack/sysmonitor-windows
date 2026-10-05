@@ -142,49 +142,14 @@
 
                     <!-- Action Buttons -->
                     <StackPanel Grid.Column="2" Spacing="8">
-                        <Border CornerRadius="26" Padding="2">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Content="RUN HEALTH CHECK" Command="{x:Bind ViewModel.RunHealthCheckCommand}"
-                                    Style="{StaticResource RedButtonStyle}"
-                                    IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
-                        </Border>
-                        <Border CornerRadius="26" Padding="2">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Content="QUICK FIX ALL" Command="{x:Bind ViewModel.QuickFixCommand}"
-                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
-                                    IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
-                        </Border>
-                        <Border CornerRadius="26" Padding="2">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Content="Create Restore Point" Command="{x:Bind ViewModel.CreateRestorePointCommand}"
-                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
-                                    IsEnabled="{x:Bind ViewModel.CanCreateRestorePoint, Mode=OneWay}"
-                                    HorizontalAlignment="Stretch"/>
-                        </Border>
+                        <Button Content="RUN HEALTH CHECK" Command="{x:Bind ViewModel.RunHealthCheckCommand}"
+                                Style="{StaticResource ChromeCapButtonStyle}"
+                                IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                        <Button Content="QUICK FIX ALL" Command="{x:Bind ViewModel.QuickFixCommand}"
+                                IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
+                        <Button Content="CREATE RESTORE POINT" Command="{x:Bind ViewModel.CreateRestorePointCommand}"
+                                IsEnabled="{x:Bind ViewModel.CanCreateRestorePoint, Mode=OneWay}"
+                                HorizontalAlignment="Stretch"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -203,32 +168,8 @@
                     <TextBlock Text="DETECTED ISSUES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                    <Border CornerRadius="26" Padding="2">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#707070" Offset="0.0"/>
-                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                <GradientStop Color="#505050" Offset="1.0"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <Button Content="Select Fixable" Command="{x:Bind ViewModel.SelectAllFixableCommand}"
-                                Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
-                    </Border>
-                    <Border CornerRadius="26" Padding="2">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#707070" Offset="0.0"/>
-                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                <GradientStop Color="#505050" Offset="1.0"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <Button Content="Deselect All" Command="{x:Bind ViewModel.DeselectAllCommand}"
-                                Style="{StaticResource OutlinedButtonStyle}" Background="#000000"/>
-                    </Border>
+                    <Button Content="SELECT FIXABLE" Command="{x:Bind ViewModel.SelectAllFixableCommand}"/>
+                    <Button Content="DESELECT ALL" Command="{x:Bind ViewModel.DeselectAllCommand}"/>
                 </StackPanel>
             </Grid>
 

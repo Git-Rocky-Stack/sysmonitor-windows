@@ -37,28 +37,16 @@
 
                 <!-- Right: Action Buttons -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <!-- SCAN with chrome bezel -->
-                    <Border CornerRadius="26" Padding="2">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#707070" Offset="0.0"/>
-                                <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                <GradientStop Color="#505050" Offset="1.0"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <Button Command="{x:Bind ViewModel.ScanNetworksCommand}" IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}"
-                                Style="{StaticResource RedButtonStyle}" Background="#000000">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE72C;" FontSize="14"/>
-                                <TextBlock Text="SCAN"/>
-                            </StackPanel>
-                        </Button>
-                    </Border>
+                    <!-- SCAN -->
+                    <Button Command="{x:Bind ViewModel.ScanNetworksCommand}" IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}"
+                            Style="{StaticResource ChromeCapButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE72C;" FontSize="14"/>
+                            <TextBlock Text="SCAN"/>
+                        </StackPanel>
+                    </Button>
                     <Button Command="{x:Bind ViewModel.StopScanCommand}"
-                            Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                            Style="{StaticResource OutlinedButtonStyle}">
+                            Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE71A;" FontSize="14"/>
                             <TextBlock Text="STOP"/>

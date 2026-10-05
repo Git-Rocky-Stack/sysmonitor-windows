@@ -91,26 +91,15 @@
                             You can choose your own amount.
                         </TextBlock>
 
-                        <!-- Donate Button with chrome bezel -->
-                        <Border CornerRadius="26" Padding="2" HorizontalAlignment="Left">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Command="{x:Bind ViewModel.DonateCommand}"
-                                    Style="{StaticResource RedButtonStyle}"
-                                    Padding="24,12">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <FontIcon Glyph="&#xE719;" FontSize="16"/>
-                                    <TextBlock Text="DONATE WITH PAYPAL" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Button>
-                        </Border>
+                        <!-- Donate Button -->
+                        <Button Command="{x:Bind ViewModel.DonateCommand}"
+                                Style="{StaticResource ChromeCapButtonStyle}"
+                                HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE719;" FontSize="14"/>
+                                <TextBlock Text="DONATE WITH PAYPAL"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
 
                     <!-- QR Code Section -->

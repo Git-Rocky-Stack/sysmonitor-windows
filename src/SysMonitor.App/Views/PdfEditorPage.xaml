@@ -49,28 +49,25 @@
                 <!-- File Group -->
                 <StackPanel Grid.Column="0" Spacing="4">
                     <StackPanel Orientation="Horizontal" Spacing="2">
-                        <Button Click="OpenPdf_Click" ToolTipService.ToolTip="Open PDF (Ctrl+O)"
-                                Style="{StaticResource OutlinedButtonStyle}" Padding="10,8">
+                        <Button Click="OpenPdf_Click" ToolTipService.ToolTip="Open PDF (Ctrl+O)">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
-                                <TextBlock Text="Open" VerticalAlignment="Center" FontSize="12"/>
+                                <TextBlock Text="OPEN" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Click="SavePdf_Click" ToolTipService.ToolTip="Save PDF (Ctrl+S)"
-                                Style="{StaticResource RedButtonStyle}" Padding="10,8"
                                 IsEnabled="{x:Bind ViewModel.IsModified, Mode=OneWay}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE74E;" FontSize="14"/>
-                                <TextBlock Text="Save" VerticalAlignment="Center" FontSize="12"/>
+                                <TextBlock Text="SAVE" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Click="ExportAnnotationReport_Click"
                                 ToolTipService.ToolTip="Export a Word report of the pages and their annotations"
-                                Style="{StaticResource OutlinedButtonStyle}" Padding="10,8"
                                 IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
-                                <TextBlock Text="Report" VerticalAlignment="Center" FontSize="12"/>
+                                <TextBlock Text="REPORT" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <!-- Print/Compress/Search -->
@@ -350,10 +347,10 @@
                                HorizontalAlignment="Center" FontSize="18"/>
                     <TextBlock Text="Open a PDF file to start editing"
                                Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                    <Button Click="OpenPdf_Click" Style="{StaticResource RedButtonStyle}" Padding="24,12">
+                    <Button Click="OpenPdf_Click" Style="{StaticResource ChromeCapButtonStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE8E5;" FontSize="16"/>
-                            <TextBlock Text="OPEN PDF" FontSize="14"/>
+                            <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
+                            <TextBlock Text="OPEN PDF"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

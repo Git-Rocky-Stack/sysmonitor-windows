@@ -194,6 +194,12 @@ GROUPS = [
   ("SwitchThumbLip", rgba(255, 255, 255, .16), rgba(255, 255, 255, .16), TR),
   ("SwitchThumbArmedLip", rgba(255, 255, 255, .28), rgba(255, 255, 255, .28), TR),
  ]),
+ ("A form field's edge, the light catching its lower lip, its words and its placeholder (:2286-2302). The same in\nboth shifts: the stylesheet says a field is a recessed dark well in both, so its words stay Night Ops white on\nDay Shift too.", [
+  ("FieldEdge", rgba(0, 0, 0, .75), rgba(0, 0, 0, .75), WT),
+  ("FieldLip", rgba(255, 255, 255, .03), rgba(255, 255, 255, .03), TR),
+  ("FieldForeground", hexc('f5f5f5'), hexc('f5f5f5'), WT),
+  ("FieldPlaceholder", hexc('6a6a6a'), hexc('6a6a6a'), GT),
+ ]),
  ("A lamp's cap edge, the light along its top and the shade along its bottom, and the word an unlit lamp shows,\nwhich stays Night Ops graphite because a lamp is dark in both shifts (:1692-1697, :1265); a VU meter's unlit\nsegment (:1915).", [
   ("LampEdge", rgba(255, 255, 255, .06), rgba(255, 255, 255, .06), WT),
   ("LampLip", rgba(255, 255, 255, .06), rgba(255, 255, 255, .06), TR),
@@ -302,6 +308,9 @@ def composed(theme):
         + lin(c, 'SwitchShadeTopBrush', [(0, recess), (1, fade(recess))])
         + lin(c, 'SwitchThumbBrush', [(0, hexc('2a2a2a')), (1, hexc('161616'))])
         + lin(c, 'SwitchThumbArmedBrush', [(0, hexc('c8333a')), (1, 'ArmedDeep')]))
+    add("A form field (:2286): its recessed face, and the inset shade its top edge casts into it, which WinUI has no\ninset shadow for (inset 0 2px 4px, :2293). Dark in both shifts.",
+        lin(c, 'FieldFaceBrush', [(0, hexc('070707')), (1, hexc('0a0a0a'))])
+        + lin(c, 'FieldShadeTopBrush', [(0, recess), (1, fade(recess))]))
     return out
 
 COMPOSED_HC = {  # key -> system colour (or Transparent) for the High Contrast theme
@@ -320,6 +329,8 @@ COMPOSED_HC = {  # key -> system colour (or Transparent) for the High Contrast t
     # the text colour that sits on each. The inset shade is decoration and goes.
     'SwitchTrackBrush': W, 'SwitchTrackArmedBrush': HL, 'SwitchShadeTopBrush': TR,
     'SwitchThumbBrush': WT, 'SwitchThumbArmedBrush': HLT,
+    # A field is the window colour with its edge in the text colour, as WinUI's own High Contrast text box is.
+    'FieldFaceBrush': W, 'FieldShadeTopBrush': TR,
 }
 
 # Solid pairs that are not palette tokens but recipe colours that change with the shift.
@@ -354,6 +365,14 @@ def locked_block(theme):
         out.append(f'{I}<SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="{{ThemeResource {GT}}}"/>')
     else:
         out.append(f'{I}<SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="{lit(colours(theme)["SilverBright"])}"/>')
+
+    # The same word inside a form field, which is a dark well in both shifts. The chassis' locked word is dark on
+    # Day Shift and would vanish into the well, so the field keeps its own white there - dimming is still the whole
+    # treatment in the working shifts - and greys with GrayText in High Contrast like every other locked word.
+    if theme == 'hc':
+        out.append(f'{I}<SolidColorBrush x:Key="ConsoleDisabledFieldForegroundBrush" Color="{{ThemeResource {GT}}}"/>')
+    else:
+        out.append(f'{I}<SolidColorBrush x:Key="ConsoleDisabledFieldForegroundBrush" Color="{lit(colours(theme)["FieldForeground"])}"/>')
 
     return out
 

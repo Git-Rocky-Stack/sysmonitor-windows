@@ -62,12 +62,11 @@
 
                                 <!-- New Backup -->
                                 <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="16">
-                                    <Button Click="NewBackup_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                            Style="{StaticResource OutlinedButtonStyle}" Padding="16">
+                                    <Button Click="NewBackup_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="16">
                                         <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                            <FontIcon Glyph="&#xE710;" FontSize="36" Foreground="{StaticResource PrimaryBrush}"/>
-                                            <TextBlock Text="New Backup" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                            <TextBlock Text="Create a new backup of your files" FontSize="11" Foreground="#888"
+                                            <FontIcon Glyph="&#xE710;" FontSize="36"/>
+                                            <TextBlock Text="NEW BACKUP" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="Create a new backup of your files" FontSize="11" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"
                                                        TextWrapping="Wrap" TextAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
@@ -75,12 +74,11 @@
 
                                 <!-- Create Restore Point -->
                                 <Border Grid.Column="1" Style="{StaticResource CardStyle}" Padding="16">
-                                    <Button Click="CreateRestorePoint_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                            Style="{StaticResource OutlinedButtonStyle}" Padding="16">
+                                    <Button Click="CreateRestorePoint_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="16">
                                         <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                            <FontIcon Glyph="&#xE81C;" FontSize="36" Foreground="#4CAF50"/>
-                                            <TextBlock Text="Restore Point" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                            <TextBlock Text="Create a system restore point" FontSize="11" Foreground="#888"
+                                            <FontIcon Glyph="&#xE81C;" FontSize="36"/>
+                                            <TextBlock Text="RESTORE POINT" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="Create a system restore point" FontSize="11" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"
                                                        TextWrapping="Wrap" TextAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
@@ -88,12 +86,11 @@
 
                                 <!-- Quick Backup Documents -->
                                 <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="16">
-                                    <Button Click="QuickBackupDocs_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                            Style="{StaticResource OutlinedButtonStyle}" Padding="16">
+                                    <Button Click="QuickBackupDocs_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="16">
                                         <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                            <FontIcon Glyph="&#xE8B7;" FontSize="36" Foreground="#2196F3"/>
-                                            <TextBlock Text="Quick Backup" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                            <TextBlock Text="One-click Documents backup" FontSize="11" Foreground="#888"
+                                            <FontIcon Glyph="&#xE8B7;" FontSize="36"/>
+                                            <TextBlock Text="QUICK BACKUP" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="One-click Documents backup" FontSize="11" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"
                                                        TextWrapping="Wrap" TextAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
@@ -291,49 +288,47 @@
                         </Grid.RowDefinitions>
 
                         <Button Grid.Row="0" Grid.Column="0" Click="SelectBackupType_Click" Tag="Full"
-                                Style="{StaticResource OutlinedButtonStyle}" Padding="20" Margin="0,0,0,16"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left">
+                                Margin="0,0,0,16"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="20">
                             <StackPanel Orientation="Horizontal" Spacing="16">
-                                <FontIcon Glyph="&#xE8F1;" FontSize="32" Foreground="{StaticResource PrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE8F1;" FontSize="32"/>
                                 <StackPanel>
-                                    <TextBlock Text="Full Backup" FontWeight="SemiBold" FontSize="16"/>
-                                    <TextBlock Text="Complete backup of all selected files" FontSize="12" Foreground="#888"/>
+                                    <TextBlock Text="FULL BACKUP"/>
+                                    <TextBlock Text="Complete backup of all selected files" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Button>
 
                         <Button Grid.Row="0" Grid.Column="1" Click="SelectBackupType_Click" Tag="Incremental"
-                                Style="{StaticResource OutlinedButtonStyle}" Padding="20" Margin="0,0,0,16"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left">
+                                Margin="0,0,0,16"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="20">
                             <StackPanel Orientation="Horizontal" Spacing="16">
-                                <FontIcon Glyph="&#xE8B2;" FontSize="32" Foreground="#4CAF50"/>
+                                <FontIcon Glyph="&#xE8B2;" FontSize="32"/>
                                 <StackPanel>
-                                    <TextBlock Text="Incremental Backup" FontWeight="SemiBold" FontSize="16"/>
-                                    <TextBlock Text="Only backup files changed since last backup" FontSize="12" Foreground="#888"/>
+                                    <TextBlock Text="INCREMENTAL BACKUP"/>
+                                    <TextBlock Text="Only backup files changed since last backup" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Button>
 
                         <Button Grid.Row="1" Grid.Column="0" Click="SelectBackupType_Click" Tag="SystemImage"
-                                Style="{StaticResource OutlinedButtonStyle}" Padding="20"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left">
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="20">
                             <StackPanel Orientation="Horizontal" Spacing="16">
-                                <FontIcon Glyph="&#xE770;" FontSize="32" Foreground="#2196F3"/>
+                                <FontIcon Glyph="&#xE770;" FontSize="32"/>
                                 <StackPanel>
-                                    <TextBlock Text="System Image" FontWeight="SemiBold" FontSize="16"/>
-                                    <TextBlock Text="Complete system backup for disaster recovery" FontSize="12" Foreground="#888"/>
+                                    <TextBlock Text="SYSTEM IMAGE"/>
+                                    <TextBlock Text="Complete system backup for disaster recovery" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Button>
 
                         <Button Grid.Row="1" Grid.Column="1" Click="SelectBackupType_Click" Tag="Mirror"
-                                Style="{StaticResource OutlinedButtonStyle}" Padding="20"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left">
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="20">
                             <StackPanel Orientation="Horizontal" Spacing="16">
-                                <FontIcon Glyph="&#xE8AB;" FontSize="32" Foreground="#FF9800"/>
+                                <FontIcon Glyph="&#xE8AB;" FontSize="32"/>
                                 <StackPanel>
-                                    <TextBlock Text="Mirror Backup" FontWeight="SemiBold" FontSize="16"/>
-                                    <TextBlock Text="Exact mirror of selected folders" FontSize="12" Foreground="#888"/>
+                                    <TextBlock Text="MIRROR BACKUP"/>
+                                    <TextBlock Text="Exact mirror of selected folders" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Button>
@@ -341,7 +336,7 @@
 
                     <!-- Navigation -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,24,0,0">
-                        <Button Click="CancelWizard_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Cancel" Padding="24,10"/>
+                        <Button Click="CancelWizard_Click" Content="CANCEL"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -351,34 +346,34 @@
 
                     <!-- Quick Add Buttons -->
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Click="AddQuickSource_Click" Tag="Documents" Style="{StaticResource OutlinedButtonStyle}" Padding="12,8">
+                        <Button Click="AddQuickSource_Click" Tag="Documents">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
-                                <TextBlock Text="Documents"/>
+                                <TextBlock Text="DOCUMENTS"/>
                             </StackPanel>
                         </Button>
-                        <Button Click="AddQuickSource_Click" Tag="Pictures" Style="{StaticResource OutlinedButtonStyle}" Padding="12,8">
+                        <Button Click="AddQuickSource_Click" Tag="Pictures">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xEB9F;" FontSize="14"/>
-                                <TextBlock Text="Pictures"/>
+                                <TextBlock Text="PICTURES"/>
                             </StackPanel>
                         </Button>
-                        <Button Click="AddQuickSource_Click" Tag="Videos" Style="{StaticResource OutlinedButtonStyle}" Padding="12,8">
+                        <Button Click="AddQuickSource_Click" Tag="Videos">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE8B2;" FontSize="14"/>
-                                <TextBlock Text="Videos"/>
+                                <TextBlock Text="VIDEOS"/>
                             </StackPanel>
                         </Button>
-                        <Button Click="AddQuickSource_Click" Tag="Desktop" Style="{StaticResource OutlinedButtonStyle}" Padding="12,8">
+                        <Button Click="AddQuickSource_Click" Tag="Desktop">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE8FC;" FontSize="14"/>
-                                <TextBlock Text="Desktop"/>
+                                <TextBlock Text="DESKTOP"/>
                             </StackPanel>
                         </Button>
-                        <Button Click="AddQuickSource_Click" Tag="Downloads" Style="{StaticResource OutlinedButtonStyle}" Padding="12,8">
+                        <Button Click="AddQuickSource_Click" Tag="Downloads">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE896;" FontSize="14"/>
-                                <TextBlock Text="Downloads"/>
+                                <TextBlock Text="DOWNLOADS"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -392,16 +387,16 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
-                                <Button Click="AddSourceFolder_Click" Style="{StaticResource RedButtonStyle}" Padding="12,8">
+                                <Button Click="AddSourceFolder_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE8F4;" FontSize="14"/>
-                                        <TextBlock Text="Add Folder"/>
+                                        <TextBlock Text="ADD FOLDER"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Click="AddSourceFiles_Click" Style="{StaticResource OutlinedButtonStyle}" Padding="12,8">
+                                <Button Click="AddSourceFiles_Click">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon Glyph="&#xE8E5;" FontSize="14"/>
-                                        <TextBlock Text="Add Files"/>
+                                        <TextBlock Text="ADD FILES"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -440,9 +435,9 @@
 
                     <!-- Navigation -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,24,0,0">
-                        <Button Click="CancelWizard_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Cancel" Padding="24,10"/>
-                        <Button Click="PreviousStep_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Back" Padding="24,10"/>
-                        <Button Click="NextStep_Click" Style="{StaticResource RedButtonStyle}" Content="Next" Padding="24,10"/>
+                        <Button Click="CancelWizard_Click" Content="CANCEL"/>
+                        <Button Click="PreviousStep_Click" Content="BACK"/>
+                        <Button Click="NextStep_Click" Content="NEXT"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -460,7 +455,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Click="SelectDrive_Click" Tag="{Binding}" HorizontalAlignment="Stretch"
-                                        Style="{StaticResource OutlinedButtonStyle}" Padding="16" HorizontalContentAlignment="Stretch">
+                                        HorizontalContentAlignment="Stretch" Padding="16">
                                     <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -472,28 +467,28 @@
 
                                         <StackPanel Grid.Column="1" Spacing="4">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="14"/>
-                                                <TextBlock Text="{Binding Path}" FontSize="12" Foreground="#888"/>
+                                                <TextBlock Text="{Binding Label}"/>
+                                                <TextBlock Text="{Binding Path}" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                             </StackPanel>
                                             <ProgressBar Value="{Binding UsedPercent}" Maximum="100" Height="4" CornerRadius="2"/>
-                                            <TextBlock FontSize="11" Foreground="#888">
+                                            <TextBlock FontSize="11" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}">
                                                 <Run Text="{Binding FormattedFree}"/>
                                                 <Run Text=" available"/>
                                             </TextBlock>
                                         </StackPanel>
 
-                                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="14" Foreground="#666"/>
+                                        <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="14"/>
                                     </Grid>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <Button Click="BrowseDestination_Click" Style="{StaticResource OutlinedButtonStyle}"
-                            HorizontalAlignment="Stretch" Padding="16">
+                    <Button Click="BrowseDestination_Click"
+                            HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xED25;" FontSize="16"/>
-                            <TextBlock Text="Browse for folder..."/>
+                            <FontIcon Glyph="&#xED25;" FontSize="14"/>
+                            <TextBlock Text="BROWSE FOR FOLDER..."/>
                         </StackPanel>
                     </Button>
 
@@ -509,9 +504,9 @@
 
                     <!-- Navigation -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,24,0,0">
-                        <Button Click="CancelWizard_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Cancel" Padding="24,10"/>
-                        <Button Click="PreviousStep_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Back" Padding="24,10"/>
-                        <Button Click="NextStep_Click" Style="{StaticResource RedButtonStyle}" Content="Next" Padding="24,10"/>
+                        <Button Click="CancelWizard_Click" Content="CANCEL"/>
+                        <Button Click="PreviousStep_Click" Content="BACK"/>
+                        <Button Click="NextStep_Click" Content="NEXT"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -575,12 +570,12 @@
 
                         <!-- Navigation -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,24,0,16">
-                            <Button Click="CancelWizard_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Cancel" Padding="24,10"/>
-                            <Button Click="PreviousStep_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Back" Padding="24,10"/>
-                            <Button Click="StartBackup_Click" Style="{StaticResource RedButtonStyle}" Padding="24,10">
+                            <Button Click="CancelWizard_Click" Content="CANCEL"/>
+                            <Button Click="PreviousStep_Click" Content="BACK"/>
+                            <Button Click="StartBackup_Click" Style="{StaticResource ChromeCapButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE768;" FontSize="14"/>
-                                    <TextBlock Text="Start Backup"/>
+                                    <TextBlock Text="START BACKUP"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -609,7 +604,7 @@
 
                             <TextBlock Text="{x:Bind ViewModel.ProgressEta, Mode=OneWay}" FontSize="12" Foreground="#4CAF50" HorizontalAlignment="Center"/>
 
-                            <Button Click="CancelBackup_Click" Style="{StaticResource OutlinedButtonStyle}" Content="Cancel Backup" Padding="24,10" HorizontalAlignment="Center"/>
+                            <Button Click="CancelBackup_Click" Content="CANCEL BACKUP" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -628,8 +623,8 @@
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                <Button Click="CancelWizard_Click" Style="{StaticResource RedButtonStyle}" Content="Done" Padding="32,10"/>
-                                <Button Click="NewBackup_Click" Style="{StaticResource OutlinedButtonStyle}" Content="New Backup" Padding="24,10"/>
+                                <Button Click="CancelWizard_Click" Content="DONE"/>
+                                <Button Click="NewBackup_Click" Content="NEW BACKUP"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
