@@ -1,4 +1,4 @@
-# Handoff - Phase 2F-3 (fields) and the button migration are done; the rest of "match System-X" is mapped
+# Handoff - fields, buttons and the pages' colours, headers and spinners are on the console; code colours are next
 
 **Date:** 2026-10-05
 **Branch:** `claude/peaceful-mendel-xkext6`, draft PR against `main`
@@ -15,7 +15,11 @@
 2. **The direction changed mid-session.** The 2026-09-29 handoff left the 41 red buttons as ~10 product calls
    for Rocky. He answered: buttons and everything else should match the System-X app. So the calls were made
    by System-X's own rule (section 2.2), and the table is there to be overridden button by button.
-3. **"Everything else" is bigger than one session**, and section 3 lists what is left, counted.
+3. **The first CI run crashed the smoke run on the first number box**, and why matters beyond the fix: WinUI
+   declares a few resources with `x:Name`, which nothing outside its dictionary can find, and the vendored key
+   list counted them as provided. `scripts/list-winui-keys.py` now leaves them out, so ResourceKeyTests fails on
+   that class of mistake (section 2.4).
+4. **"Everything else" is bigger than one session**, and section 3 lists what is left, counted.
 
 ---
 
@@ -91,25 +95,46 @@ reposition animation; two comments named a `ConsoleSwitch` class that does not e
 summary and broken indentation in `UiSmokeRun.cs`, a CS0162 warning in `ConsolePinAnchorTests.cs`, and 22
 CHANGELOG anchors re-pointed through a line diff after the pages moved.
 
+### 2.4 The pages: styles, colours, headers, spinners
+
+- **Styles.xaml is a bridge.** Every name a page still asks for maps onto the console: `CardStyle` is the
+  plate, `PageHeaderStyle` the view title, `SectionHeaderStyle` a placard beside the plate's armed light pipe,
+  labels and values the kicker and telemetry faces, progress bars a well with an LED. Twenty unused styles and
+  all of `Colors.xaml` are deleted.
+- **1,016 legacy brush references** moved to `{ThemeResource}` tokens by role (words: Platinum, Silver, Silver
+  Mute, ArmedLit, the State colours; surfaces: the carbon ramp; status fills: the rails).
+- **All 35 pages open on `ViewHeader`**, numbered by the rail: Dashboard `MOD - DASH - 01` to User's Guide
+  `34`, PDF Editor `25B`. The per-page logo is gone; System-X's header has none. Scan/stop caps that lived in a
+  banner are its Actions.
+- **Hardcoded colours** are tokens by role; words on a status fill are `ArmedFgBrush` (HighlightText on the
+  Highlight the rails become in High Contrast). The colour ratchet is down from 39 files to 3, each kept as data:
+  PDF Editor's ink swatches, PayPal's blue, and the FPS overlay.
+- **No ProgressRing remains.** Loading and scanning regions are `BusyWell`s carrying their status line; rings
+  beside an action are a small armed `EXEC` lamp. The ratchet is empty.
+- **MainWindow**: the title bar stays black on Void and asks for the dark theme; the rail's three backgrounds
+  moved into FluentOverrides, written per shift.
+- **The resource check now knows `x:Name` from `x:Key`** (`scripts/list-winui-keys.py:75`); nine names left the
+  list, and NumberBox restates WinUI's two spin button styles where its buttons can reach them.
+
 ---
 
 ## 3. What is left to match System-X, counted
 
 | Surface | Left | Where it is tracked |
 |---|---|---|
-| CheckBox 26, RadioButton 14, Slider 12, ComboBox 14 | recoloured by FluentOverrides, not re-templated | 2F-4 |
-| Instruments (`Lamp`, `Plate`, `Faceplate`, `Display`, `ViewHeader`, `BusyPanel`...) | used by no page | the 2026-09-29 handoff, 4.2 |
-| Colour literals in XAML | 39 files | `ConsoleRecipeTests.XamlColourLiterals` |
-| ProgressRings | 18 pages | `ConsoleRecipeTests.ProgressRings` |
+| Colour strings in code: view models and converters choosing Material hex per status | 32 files, about 240 strings; pages bind them as fills and words | `ConsoleRecipeTests.CodeColourLiterals` |
 | Font names in XAML | 7 files | `ConsoleRecipeTests.FontFamilyLiterals` |
-| Colour strings in code | 32 files | `ConsoleRecipeTests.CodeColourLiterals` |
+| Cards are bordered plates, not the `Plate`/`Faceplate` instruments (no lip, no shadow, no state rail) | every page, through `CardStyle` | Styles.xaml header |
 | Card-like and icon buttons with local overrides | Backup tiles and history icons, Driver Updater quick actions, Installed Programs row icons, Registry Cleaner's folder icon | not tracked |
-| Words from converters in mixed case | Performance's Pause/Resume (`Converters.cs:522`, also feeds a status line) | not tracked |
+| Status badges and dots as filled Borders rather than `Chip`/`LedDot`/`Lamp` | most status pages | not tracked |
+| CheckBox, RadioButton, Slider, ComboBox | System-X gives them only the armed accent, which FluentOverrides applies: nothing more to transcribe | - |
+| Words from converters in mixed case | Performance's Pause/Resume (`Converters.cs:522`) | not tracked |
+| Excellent and Good thresholds share one green | Performance and User's Guide legends | not tracked |
 | `saturate(.5)` on locked controls; NumberBox spinners as caps | not drawn | Controls.xaml comments |
 
-The biggest visible step after this is the pages themselves: cards, headers and status colours are still the
-first-generation look around the new caps and fields. That is the instruments (`Faceplate`, `Plate`,
-`ViewHeader`, `Lamp`) reaching the pages, and it is where most of the colour-literal ratchet will shrink.
+The next step with the most reach is the code colours: a status should carry a word and a `LampState`
+(`src/SysMonitor.Core/Models/LampState.cs`), and the page draw it as a lamp, chip or state colour. That turns
+the remaining fixed-colour fills into shift-aware ones and lets the badges become instruments.
 
 ---
 

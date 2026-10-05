@@ -90,7 +90,7 @@
                         <Border Grid.Column="4" CornerRadius="4" Padding="8,4" VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
                                 Background="{Binding IsEnabled, Converter={StaticResource BoolToSuccessBrushConverter}}">
-                            <TextBlock Text="{Binding IsEnabled}" Foreground="White" FontWeight="SemiBold" FontSize="11"/>
+                            <TextBlock Text="{Binding IsEnabled}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold" FontSize="11"/>
                         </Border>
                     </Grid>
                 </DataTemplate>

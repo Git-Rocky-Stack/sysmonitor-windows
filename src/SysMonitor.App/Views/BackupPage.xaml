@@ -3,6 +3,7 @@
     x:Class="SysMonitor.App.Views.BackupPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}"
     Loaded="Page_Loaded">
 
@@ -12,26 +13,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="{x:Bind ViewModel.WizardTitle, Mode=OneWay}" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="{x:Bind ViewModel.WizardSubtitle, Mode=OneWay}" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
-                </StackPanel>
-
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Uniform"/>
-            </Grid>
-        </Border>
+        <!-- View Header -->
+        <instruments:ViewHeader Grid.Row="0" Module="BACKUP" Index="15" Title="{x:Bind ViewModel.WizardTitle, Mode=OneWay}"
+                                Description="{x:Bind ViewModel.WizardSubtitle, Mode=OneWay}"/>
 
         <!-- Main Content -->
         <Grid Grid.Row="1" Margin="0,16,0,0">
@@ -132,19 +116,19 @@
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
                                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <TextBlock Text="{Binding FormattedDate}" FontSize="11" Foreground="#888"/>
-                                                        <TextBlock Text="|" FontSize="11" Foreground="#666"/>
-                                                        <TextBlock Text="{Binding FormattedSize}" FontSize="11" Foreground="#888"/>
-                                                        <TextBlock Text="|" FontSize="11" Foreground="#666"/>
-                                                        <TextBlock FontSize="11" Foreground="#888">
+                                                        <TextBlock Text="{Binding FormattedDate}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                        <TextBlock Text="|" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                        <TextBlock Text="{Binding FormattedSize}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                        <TextBlock Text="|" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                        <TextBlock FontSize="11" Foreground="{ThemeResource SilverMuteBrush}">
                                                             <Run Text="{Binding FileCount}"/>
                                                             <Run Text=" files"/>
                                                         </TextBlock>
                                                     </StackPanel>
                                                 </StackPanel>
 
-                                                <Border Grid.Column="2" CornerRadius="4" Padding="8,4" Background="#202020" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding TypeDisplay}" FontSize="10" Foreground="#AAA"/>
+                                                <Border Grid.Column="2" CornerRadius="4" Padding="8,4" Background="{ThemeResource Carbon700Brush}" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding TypeDisplay}" FontSize="10" Foreground="{ThemeResource SilverBrush}"/>
                                                 </Border>
 
                                                 <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
@@ -155,7 +139,7 @@
                                                         <FontIcon Glyph="&#xE73E;" FontSize="14"/>
                                                     </Button>
                                                     <Button Click="DeleteBackup_Click" Tag="{Binding}" ToolTipService.ToolTip="Delete" AutomationProperties.Name="Delete backup" Padding="8">
-                                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#F44336"/>
+                                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="{ThemeResource StateNoGoBrush}"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
@@ -167,9 +151,9 @@
                             <Border Style="{StaticResource CardStyle}" Padding="24"
                                     Visibility="{x:Bind ViewModel.HasBackups, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
                                 <StackPanel HorizontalAlignment="Center" Spacing="8">
-                                    <FontIcon Glyph="&#xE8B7;" FontSize="32" Foreground="#666"/>
-                                    <TextBlock Text="No backups yet" FontSize="14" Foreground="#888" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Create your first backup to protect your files" FontSize="12" Foreground="#666" HorizontalAlignment="Center"/>
+                                    <FontIcon Glyph="&#xE8B7;" FontSize="32" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                    <TextBlock Text="No backups yet" FontSize="14" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Create your first backup to protect your files" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -193,9 +177,9 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <FontIcon Grid.Column="0" Glyph="&#xE81C;" FontSize="14" Foreground="#4CAF50"/>
+                                                <FontIcon Grid.Column="0" Glyph="&#xE81C;" FontSize="14" Foreground="{ThemeResource StateGoBrush}"/>
                                                 <TextBlock Grid.Column="1" Text="{Binding Description}" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding CreationTime}" FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding CreationTime}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" VerticalAlignment="Center"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -205,33 +189,33 @@
                             <Border Style="{StaticResource CardStyle}" Padding="16"
                                     Visibility="{x:Bind ViewModel.HasRestorePoints, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
                                 <TextBlock Text="No restore points found. Click 'Restore Point' to create one."
-                                           FontSize="12" Foreground="#888" HorizontalAlignment="Center"/>
+                                           FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
 
                 <!-- Right Sidebar - Status -->
-                <Border Grid.Column="1" Background="#141414" CornerRadius="8" Padding="16">
+                <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16">
                     <StackPanel Spacing="16">
-                        <TextBlock Text="BACKUP STATUS" FontWeight="SemiBold" Foreground="#888"/>
+                        <TextBlock Text="BACKUP STATUS" FontWeight="SemiBold" Foreground="{ThemeResource SilverMuteBrush}"/>
 
                         <!-- Last Backup Info -->
-                        <Border Background="#1A1A1A" CornerRadius="6" Padding="12">
+                        <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="6" Padding="12">
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Last Backup" FontSize="11" Foreground="#888"/>
+                                <TextBlock Text="Last Backup" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 <TextBlock Text="Documents_Backup" FontWeight="SemiBold"/>
-                                <TextBlock Text="2 hours ago" FontSize="12" Foreground="#4CAF50"/>
+                                <TextBlock Text="2 hours ago" FontSize="12" Foreground="{ThemeResource StateGoBrush}"/>
                             </StackPanel>
                         </Border>
 
                         <!-- Storage Overview -->
                         <StackPanel Spacing="8">
-                            <TextBlock Text="AVAILABLE DRIVES" FontWeight="SemiBold" Foreground="#888"/>
+                            <TextBlock Text="AVAILABLE DRIVES" FontWeight="SemiBold" Foreground="{ThemeResource SilverMuteBrush}"/>
                             <ItemsControl ItemsSource="{x:Bind ViewModel.AvailableDrives, Mode=OneWay}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="#1A1A1A" CornerRadius="6" Padding="12" Margin="0,4">
+                                        <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="6" Padding="12" Margin="0,4">
                                             <StackPanel Spacing="6">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
@@ -241,14 +225,14 @@
                                                     <FontIcon Grid.Column="0" Glyph="{Binding Icon}" FontSize="18" Margin="0,0,8,0"/>
                                                     <StackPanel Grid.Column="1">
                                                         <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="12"/>
-                                                        <TextBlock Text="{Binding Path}" FontSize="10" Foreground="#888"/>
+                                                        <TextBlock Text="{Binding Path}" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                     </StackPanel>
                                                 </Grid>
                                                 <ProgressBar Value="{Binding UsedPercent}" Maximum="100" Height="4" CornerRadius="2"/>
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <TextBlock Text="{Binding FormattedFree}" FontSize="10" Foreground="#4CAF50"/>
-                                                    <TextBlock Text="free of" FontSize="10" Foreground="#666"/>
-                                                    <TextBlock Text="{Binding FormattedTotal}" FontSize="10" Foreground="#888"/>
+                                                    <TextBlock Text="{Binding FormattedFree}" FontSize="10" Foreground="{ThemeResource StateGoBrush}"/>
+                                                    <TextBlock Text="free of" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="{Binding FormattedTotal}" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>
@@ -258,12 +242,12 @@
                         </StackPanel>
 
                         <!-- Tips -->
-                        <Border Background="#1A1A1A" CornerRadius="6" Padding="12">
+                        <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="6" Padding="12">
                             <StackPanel Spacing="6">
-                                <TextBlock Text="BACKUP TIPS" FontSize="11" FontWeight="SemiBold" Foreground="#888"/>
-                                <TextBlock Text="&#x2022; Use USB drives for portable backups" FontSize="10" Foreground="#666" TextWrapping="Wrap"/>
-                                <TextBlock Text="&#x2022; Create restore points before updates" FontSize="10" Foreground="#666" TextWrapping="Wrap"/>
-                                <TextBlock Text="&#x2022; Schedule weekly backups for safety" FontSize="10" Foreground="#666" TextWrapping="Wrap"/>
+                                <TextBlock Text="BACKUP TIPS" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                <TextBlock Text="&#x2022; Use USB drives for portable backups" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                <TextBlock Text="&#x2022; Create restore points before updates" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                <TextBlock Text="&#x2022; Schedule weekly backups for safety" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -275,7 +259,7 @@
 
                 <!-- Step 1: Select Backup Type -->
                 <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsOneToVisibilityConverter}}">
-                    <TextBlock Text="What type of backup do you want to create?" FontSize="14" Foreground="#AAA"/>
+                    <TextBlock Text="What type of backup do you want to create?" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
 
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
@@ -342,7 +326,7 @@
 
                 <!-- Step 2: Select Source -->
                 <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsTwoToVisibilityConverter}}">
-                    <TextBlock Text="Select files and folders to backup:" FontSize="14" Foreground="#AAA"/>
+                    <TextBlock Text="Select files and folders to backup:" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
 
                     <!-- Quick Add Buttons -->
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -411,11 +395,11 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <FontIcon Grid.Column="0" Glyph="&#xE8B7;" FontSize="14" Foreground="#888"/>
+                                            <FontIcon Grid.Column="0" Glyph="&#xE8B7;" FontSize="14" Foreground="{ThemeResource SilverMuteBrush}"/>
                                             <TextBlock Grid.Column="1" Text="{x:Bind}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                             <Button Grid.Column="2" Click="RemoveSource_Click" Tag="{x:Bind}" Padding="4"
                                                     Background="Transparent" ToolTipService.ToolTip="Remove">
-                                                <FontIcon Glyph="&#xE711;" FontSize="12" Foreground="#F44336"/>
+                                                <FontIcon Glyph="&#xE711;" FontSize="12" Foreground="{ThemeResource StateNoGoBrush}"/>
                                             </Button>
                                         </Grid>
                                     </DataTemplate>
@@ -425,10 +409,10 @@
                     </Border>
 
                     <!-- Estimated Size -->
-                    <Border Background="#1A1A1A" CornerRadius="6" Padding="12">
+                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="6" Padding="12">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE946;" FontSize="16" Foreground="#888"/>
-                            <TextBlock Text="Estimated backup size:" Foreground="#888"/>
+                            <FontIcon Glyph="&#xE946;" FontSize="16" Foreground="{ThemeResource SilverMuteBrush}"/>
+                            <TextBlock Text="Estimated backup size:" Foreground="{ThemeResource SilverMuteBrush}"/>
                             <TextBlock Text="{x:Bind ViewModel.FormattedEstimatedSize, Mode=OneWay}" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
@@ -443,7 +427,7 @@
 
                 <!-- Step 3: Select Destination -->
                 <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsThreeToVisibilityConverter}}">
-                    <TextBlock Text="Choose where to save your backup:" FontSize="14" Foreground="#AAA"/>
+                    <TextBlock Text="Choose where to save your backup:" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
 
                     <!-- Available Drives -->
                     <ItemsControl ItemsSource="{x:Bind ViewModel.AvailableDrives, Mode=OneWay}">
@@ -493,11 +477,11 @@
                     </Button>
 
                     <!-- Selected Destination -->
-                    <Border Background="#1A1A1A" CornerRadius="6" Padding="12"
+                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="6" Padding="12"
                             Visibility="{x:Bind ViewModel.DestinationPath, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="#4CAF50"/>
-                            <TextBlock Text="Selected:" Foreground="#888"/>
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"/>
+                            <TextBlock Text="Selected:" Foreground="{ThemeResource SilverMuteBrush}"/>
                             <TextBlock Text="{x:Bind ViewModel.DestinationPath, Mode=OneWay}" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
@@ -513,7 +497,7 @@
                 <!-- Step 4: Options -->
                 <ScrollViewer Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsFourToVisibilityConverter}}">
                     <StackPanel Spacing="16">
-                        <TextBlock Text="Configure backup options:" FontSize="14" Foreground="#AAA"/>
+                        <TextBlock Text="Configure backup options:" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
 
                         <!-- Backup Name -->
                         <Border Style="{StaticResource CardStyle}" Padding="16">
@@ -586,23 +570,21 @@
                 <Grid Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsFiveToVisibilityConverter}}">
                     <Border Style="{StaticResource CardStyle}" Padding="32" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="500">
                         <StackPanel Spacing="24" HorizontalAlignment="Center">
-                            <ProgressRing IsActive="True" Width="64" Height="64" Foreground="{ThemeResource ArmedLitBrush}"/>
-
-                            <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.ProgressStatus, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.CurrentFile, Mode=OneWay}" FontSize="12" Foreground="#888"
+                            <StackPanel Spacing="8" HorizontalAlignment="Stretch">
+                                <instruments:BusyWell Title="{x:Bind ViewModel.ProgressStatus, Mode=OneWay}"/>
+                                <TextBlock Text="{x:Bind ViewModel.CurrentFile, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"
                                            HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="400"/>
                             </StackPanel>
 
                             <StackPanel Spacing="4">
                                 <ProgressBar Value="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" Maximum="100" Height="8" CornerRadius="4"/>
                                 <Grid>
-                                    <TextBlock Text="{x:Bind ViewModel.ProcessedInfo, Mode=OneWay}" FontSize="11" Foreground="#888"/>
-                                    <TextBlock Text="{x:Bind ViewModel.ProgressSpeed, Mode=OneWay}" FontSize="11" Foreground="#888" HorizontalAlignment="Right"/>
+                                    <TextBlock Text="{x:Bind ViewModel.ProcessedInfo, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.ProgressSpeed, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Right"/>
                                 </Grid>
                             </StackPanel>
 
-                            <TextBlock Text="{x:Bind ViewModel.ProgressEta, Mode=OneWay}" FontSize="12" Foreground="#4CAF50" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{x:Bind ViewModel.ProgressEta, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Center"/>
 
                             <Button Click="CancelBackup_Click" Content="CANCEL BACKUP" HorizontalAlignment="Center"/>
                         </StackPanel>
@@ -618,7 +600,7 @@
 
                             <StackPanel Spacing="8" HorizontalAlignment="Center">
                                 <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ResultDetails, Mode=OneWay}" FontSize="12" Foreground="#888"
+                                <TextBlock Text="{x:Bind ViewModel.ResultDetails, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"
                                            HorizontalAlignment="Center" TextAlignment="Center"/>
                             </StackPanel>
 
@@ -637,11 +619,11 @@
                 CornerRadius="8" Padding="16,10" Margin="0,0,0,20"
                 Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="1">
-            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold" FontSize="13"/>
         </Border>
 
         <!-- Loading Overlay -->
-        <Border Background="#CC000000" Grid.RowSpan="2"
+        <Border Background="{ThemeResource ScrimBrush}" Grid.RowSpan="2"
                 Visibility="{x:Bind ViewModel.IsBackupRunning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
         </Border>
     </Grid>

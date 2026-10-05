@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:SysMonitor.Core.Models"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -17,26 +18,9 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Page Header Banner -->
-            <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="GAME MODE" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                        <TextBlock Text="Optimize Your System for Gaming" Style="{StaticResource PageSubtitleStyle}"
-                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
-                    </StackPanel>
-
-                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Uniform"/>
-                </Grid>
-            </Border>
+            <!-- View Header -->
+            <instruments:ViewHeader Grid.Row="0" Module="GAME" Index="11" Title="GAME MODE"
+                                    Description="Optimize Your System for Gaming"/>
 
             <!-- Main Toggle Section -->
             <StackPanel Grid.Row="1" Spacing="12">
@@ -96,9 +80,7 @@
                                     <TextBlock Text="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeTextConverter}}"/>
                                 </StackPanel>
                             </Button>
-                            <ProgressRing IsActive="{x:Bind ViewModel.IsActivating, Mode=OneWay}"
-                                          Width="24" Height="24" Margin="0,8,0,0"
-                                          Foreground="{ThemeResource ArmedLitBrush}"
+                            <instruments:Lamp State="Armed" Code="EXEC" Size="Small" Margin="0,8,0,0" HorizontalAlignment="Center"
                                           Visibility="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                         </StackPanel>
                     </Grid>
@@ -127,7 +109,7 @@
                                     <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="{ThemeResource ArmedLitBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="AUTO MODE" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
+                                    <TextBlock Text="AUTO MODE" Style="{StaticResource CardTitleStyle}"/>
                                     <TextBlock Text="Auto-detect games" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                                 </StackPanel>
                             </StackPanel>
@@ -149,7 +131,7 @@
                                     <FontIcon Glyph="&#xE9D5;" FontSize="18" Foreground="{ThemeResource StateHoldBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="PROFILES" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
+                                    <TextBlock Text="PROFILES" Style="{StaticResource CardTitleStyle}"/>
                                     <TextBlock Text="Optimization presets" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                                 </StackPanel>
                             </StackPanel>
@@ -185,7 +167,7 @@
                                     <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{ThemeResource StateGoBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="GAME OVERLAY" Style="{StaticResource CardTitleStyle}" FontWeight="Bold"/>
+                                    <TextBlock Text="GAME OVERLAY" Style="{StaticResource CardTitleStyle}"/>
                                     <TextBlock Text="Temperatures, load and power on top of your game" Style="{StaticResource CardSubtitleStyle}" FontSize="11" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </StackPanel>
@@ -241,7 +223,7 @@
                                     <FontIcon Glyph="&#xE9CA;" FontSize="22" Foreground="{ThemeResource StateGoBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="FAN SPEEDS" Style="{StaticResource CardTitleStyle}" FontWeight="Bold" FontSize="16"/>
+                                    <TextBlock Text="FAN SPEEDS" Style="{StaticResource CardTitleStyle}" FontSize="16"/>
                                     <TextBlock Text="Real-time cooling status" Style="{StaticResource CardSubtitleStyle}"/>
                                 </StackPanel>
                             </StackPanel>
@@ -257,11 +239,11 @@
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="8">
                                     <Grid Width="80" Height="80">
                                         <!-- Outer ring -->
-                                        <Ellipse Stroke="#40FFFFFF" StrokeThickness="3"/>
+                                        <Ellipse Stroke="{ThemeResource HairlineStrongBrush}" StrokeThickness="3"/>
                                         <!-- Progress ring background -->
                                         <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
                                         <!-- Progress ring -->
-                                        <Ellipse x:Name="CpuFanRing" Stroke="#FF00FF00" StrokeThickness="6" Margin="4"
+                                        <Ellipse x:Name="CpuFanRing" Stroke="{ThemeResource RailGoBrush}" StrokeThickness="6" Margin="4"
                                                  StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
                                             <Ellipse.RenderTransform>
                                                 <RotateTransform Angle="0"/>
@@ -283,9 +265,9 @@
                                 <!-- System Fan -->
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="8">
                                     <Grid Width="80" Height="80">
-                                        <Ellipse Stroke="#40FFFFFF" StrokeThickness="3"/>
+                                        <Ellipse Stroke="{ThemeResource HairlineStrongBrush}" StrokeThickness="3"/>
                                         <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
-                                        <Ellipse x:Name="SysFanRing" Stroke="#FF00BFFF" StrokeThickness="6" Margin="4"
+                                        <Ellipse x:Name="SysFanRing" Stroke="{ThemeResource RailExecBrush}" StrokeThickness="6" Margin="4"
                                                  StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
                                             <Ellipse.RenderTransform>
                                                 <RotateTransform Angle="0"/>
@@ -306,7 +288,7 @@
 
                             <!-- Info Panel with clickable link -->
                             <StackPanel Grid.Row="2" Spacing="8" Margin="0,12,0,0">
-                                <Border Background="#20FFFFFF" CornerRadius="6" Padding="12,8">
+                                <Border Background="{ThemeResource Carbon700Brush}" CornerRadius="6" Padding="12,8">
                                     <StackPanel Spacing="4">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
@@ -340,7 +322,7 @@
                                     <FontIcon Glyph="&#xEA91;" FontSize="22" Foreground="{ThemeResource StateHoldBrush}"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="POWER DRAW" Style="{StaticResource CardTitleStyle}" FontWeight="Bold" FontSize="16"/>
+                                    <TextBlock Text="POWER DRAW" Style="{StaticResource CardTitleStyle}" FontSize="16"/>
                                     <TextBlock Text="Real-time wattage" Style="{StaticResource CardSubtitleStyle}"/>
                                 </StackPanel>
                             </StackPanel>
@@ -359,7 +341,7 @@
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock x:Name="CpuPowerText" Text="--W"
                                                        FontSize="24" FontWeight="Bold" FontFamily="Consolas"
-                                                       Foreground="#FFFFA500" HorizontalAlignment="Center"/>
+                                                       Foreground="{ThemeResource StateHoldBrush}" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
                                     <TextBlock Text="CPU" FontSize="11" FontWeight="SemiBold"
@@ -372,7 +354,7 @@
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock x:Name="GpuPowerText" Text="--W"
                                                        FontSize="24" FontWeight="Bold" FontFamily="Consolas"
-                                                       Foreground="#FF00BFFF" HorizontalAlignment="Center"/>
+                                                       Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
                                     <TextBlock Text="GPU" FontSize="11" FontWeight="SemiBold"
@@ -381,17 +363,11 @@
 
                                 <!-- Total Power -->
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Center" Spacing="4">
-                                    <Border CornerRadius="8" Padding="12,8">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#30FF6600" Offset="0"/>
-                                                <GradientStop Color="#20FF0000" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
+                                    <Border CornerRadius="8" Padding="12,8" Background="{ThemeResource WarnSoftBrush}">
                                         <StackPanel HorizontalAlignment="Center">
                                             <TextBlock x:Name="TotalPowerText" Text="--W"
                                                        FontSize="24" FontWeight="Bold" FontFamily="Consolas"
-                                                       Foreground="#FFFF6600" HorizontalAlignment="Center"/>
+                                                       Foreground="{ThemeResource StateWarnBrush}" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
                                     <TextBlock Text="TOTAL" FontSize="11" FontWeight="SemiBold"

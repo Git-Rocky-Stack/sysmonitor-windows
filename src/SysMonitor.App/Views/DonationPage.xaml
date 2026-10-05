@@ -3,34 +3,14 @@
     x:Class="SysMonitor.App.Views.DonationPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="16" Padding="0,0,0,24">
 
-            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Left: Header text -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="DONATE" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Left"/>
-                        <TextBlock Text="Support STX.1 System Monitor" Style="{StaticResource PageSubtitleStyle}"
-                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                    </StackPanel>
-
-                    <!-- Center: STX.1 Home Logo -->
-                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Stretch="Uniform"/>
-                </Grid>
-            </Border>
+            <instruments:ViewHeader Module="DONATE" Index="33" Title="DONATE"
+                                    Description="Support STX.1 System Monitor"/>
 
             <!-- Help Support Section Header -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -106,6 +86,7 @@
                     <StackPanel Grid.Column="1" Spacing="12" HorizontalAlignment="Center">
                         <TextBlock Text="Or scan QR code" Foreground="{ThemeResource SilverBrush}"
                                    FontSize="12" HorizontalAlignment="Center"/>
+                        <!-- White is paper: a QR code needs a white quiet zone around it to scan -->
                         <Border Background="White" CornerRadius="8" Padding="12">
                             <Image Source="ms-appx:///Assets/DonateQR.png"
                                    Width="150" Height="150"

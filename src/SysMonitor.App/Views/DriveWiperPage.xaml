@@ -3,6 +3,7 @@
     x:Class="SysMonitor.App.Views.DriveWiperPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     x:Name="ContentArea"
     Background="{ThemeResource Carbon950Brush}">
 
@@ -14,26 +15,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="DRIVE WIPER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Securely Delete Files Beyond Recovery" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
-                </StackPanel>
-
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Uniform"/>
-            </Grid>
-        </Border>
+        <!-- View Header -->
+        <instruments:ViewHeader Grid.Row="0" Module="WIPE" Index="13" Title="DRIVE WIPER"
+                                Description="Securely Delete Files Beyond Recovery"/>
 
         <!-- Controls Section -->
         <StackPanel Grid.Row="1" Spacing="12">

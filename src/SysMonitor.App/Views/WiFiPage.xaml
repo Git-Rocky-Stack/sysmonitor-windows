@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
@@ -13,30 +14,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left: Header text -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="WIFI ANALYZER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Scan &amp; Analyze WiFi Networks" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                </StackPanel>
-
-                <!-- Center: STX.1 Home Logo -->
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Stretch="Uniform"/>
-
-                <!-- Right: Action Buttons -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+        <instruments:ViewHeader Grid.Row="0" Module="WIFI" Index="28" Title="WIFI ANALYZER"
+                                Description="Scan &amp; Analyze WiFi Networks">
+            <instruments:ViewHeader.Actions>
+                <StackPanel Orientation="Horizontal" Spacing="8">
                     <!-- SCAN -->
                     <Button Command="{x:Bind ViewModel.ScanNetworksCommand}" IsEnabled="{x:Bind ViewModel.IsAvailable, Mode=OneWay}"
                             Style="{StaticResource ChromeCapButtonStyle}">
@@ -53,8 +34,8 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
-            </Grid>
-        </Border>
+            </instruments:ViewHeader.Actions>
+        </instruments:ViewHeader>
 
         <!-- Main Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -93,7 +74,7 @@
 
                                 <Border Grid.Column="2" Background="{x:Bind ViewModel.AdapterStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
                                         CornerRadius="4" Padding="12,6" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.AdapterStatus, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                                    <TextBlock Text="{x:Bind ViewModel.AdapterStatus, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource ArmedFgBrush}"/>
                                 </Border>
                             </Grid>
                         </Border>
@@ -148,51 +129,46 @@
                         <Border Style="{StaticResource CardStyle}">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="Networks" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.NetworksFound, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="#00BCD4" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.NetworksFound, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
                         <Border Grid.Column="1" Style="{StaticResource CardStyle}">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="Secure" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.SecureNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="#4CAF50" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.SecureNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
                         <Border Grid.Column="2" Style="{StaticResource CardStyle}">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="Open" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.OpenNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="#FF9800" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.OpenNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateHoldBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
                         <Border Grid.Column="3" Style="{StaticResource CardStyle}">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="2.4 GHz" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.Networks24GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="#9C27B0" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.Networks24GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
                         <Border Grid.Column="4" Style="{StaticResource CardStyle}">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="5 GHz" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.Networks5GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="#2196F3" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.Networks5GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
                     </Grid>
                 </StackPanel>
 
                 <!-- Scan Status -->
-                <Border Style="{StaticResource CardStyle}" Padding="12" Background="#1A1A1A"
-                        Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <ProgressRing IsActive="True" Width="20" Height="20"/>
-                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{ThemeResource SilverBrush}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
+                <instruments:BusyWell Title="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                 <!-- Permission Warning Banner -->
-                <Border Background="#331A1A" BorderBrush="#FF5722" BorderThickness="1" CornerRadius="8" Padding="16"
+                <Border Background="{ThemeResource WarnSoftBrush}" BorderBrush="{ThemeResource RailWarnBrush}" BorderThickness="1" CornerRadius="8" Padding="16"
                         Visibility="{x:Bind ViewModel.HasPermissionError, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -200,17 +176,17 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <FontIcon Glyph="&#xE7BA;" FontSize="32" Foreground="#FF5722" VerticalAlignment="Top" Margin="0,0,16,0"/>
+                        <FontIcon Glyph="&#xE7BA;" FontSize="32" Foreground="{ThemeResource StateWarnBrush}" VerticalAlignment="Top" Margin="0,0,16,0"/>
 
                         <StackPanel Grid.Column="1" Spacing="8">
-                            <TextBlock Text="WINDOWS PERMISSIONS REQUIRED" FontSize="14" FontWeight="Bold" Foreground="#FF5722"/>
+                            <TextBlock Text="WINDOWS PERMISSIONS REQUIRED" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource StateWarnBrush}"/>
                             <TextBlock Text="Windows 11 requires additional permissions to scan WiFi networks:"
                                        Foreground="{ThemeResource SilverBrush}" TextWrapping="Wrap"/>
 
                             <!-- Location Permission -->
                             <StackPanel Orientation="Horizontal" Spacing="8"
                                         Visibility="{x:Bind ViewModel.RequiresLocationPermission, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <FontIcon Glyph="&#xE81D;" FontSize="16" Foreground="#FF9800"/>
+                                <FontIcon Glyph="&#xE81D;" FontSize="16" Foreground="{ThemeResource StateHoldBrush}"/>
                                 <TextBlock Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap">
                                     <Run FontWeight="SemiBold">Location Services:</Run>
                                     <Run Text=" Settings > Privacy &amp; security > Location > Turn ON"/>
@@ -220,7 +196,7 @@
                             <!-- Admin Permission -->
                             <StackPanel Orientation="Horizontal" Spacing="8"
                                         Visibility="{x:Bind ViewModel.RequiresAdminElevation, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <FontIcon Glyph="&#xE7EF;" FontSize="16" Foreground="#FF9800"/>
+                                <FontIcon Glyph="&#xE7EF;" FontSize="16" Foreground="{ThemeResource StateHoldBrush}"/>
                                 <TextBlock Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap">
                                     <Run FontWeight="SemiBold">Administrator:</Run>
                                     <Run Text=" Right-click app > Run as administrator"/>
@@ -252,7 +228,7 @@
                                 </ListView.ItemContainerStyle>
                                 <ListView.ItemTemplate>
                                     <DataTemplate x:DataType="vm:WiFiNetworkDisplay">
-                                        <Border Background="#141414" CornerRadius="6" Padding="16">
+                                        <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="6" Padding="16">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -282,13 +258,13 @@
                                                 <!-- Channel -->
                                                 <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="60">
                                                     <TextBlock Text="Channel" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                                    <TextBlock Text="{x:Bind Channel}" FontSize="16" FontWeight="Bold" Foreground="#9C27B0" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{x:Bind Channel}" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                                                 </StackPanel>
 
                                                 <!-- Frequency -->
                                                 <StackPanel Grid.Column="3" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="80">
                                                     <TextBlock Text="Frequency" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                                    <TextBlock Text="{x:Bind Frequency}" FontSize="12" FontWeight="SemiBold" Foreground="#2196F3" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{x:Bind Frequency}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                                                 </StackPanel>
 
                                                 <!-- Signal Strength -->
@@ -308,7 +284,7 @@
                             <!-- Empty State -->
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                         Visibility="{x:Bind ViewModel.NetworksFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
-                                <FontIcon Glyph="&#xE701;" FontSize="48" Foreground="#404040"/>
+                                <FontIcon Glyph="&#xE701;" FontSize="48" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 <TextBlock Text="No WiFi networks found" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
                                 <TextBlock Text="Click 'SCAN' to search for available networks" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
                             </StackPanel>

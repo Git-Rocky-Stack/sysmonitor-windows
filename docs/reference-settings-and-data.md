@@ -18,13 +18,13 @@ Reset command restores exactly these values (`SettingsViewModel.cs:133-159`).
 |---|---|---|---|
 | Run at Startup | On or off | Off (`:23`) | Launches the app when you sign in |
 | Minimize to Tray | On or off | On (`:24`) | Closing the window keeps the app running in the notification area |
-| Show Notifications | On or off | On (`:25`) | Enables alert toasts (`src/SysMonitor.App/Views/SettingsPage.xaml:98`) |
+| Show Notifications | On or off | On (`:25`) | Enables alert toasts (`src/SysMonitor.App/Views/SettingsPage.xaml:78`) |
 
 ## Monitoring
 
 | Setting | Type | Default | Effect |
 |---|---|---|---|
-| Refresh Interval | 1 to 10 seconds | 2 seconds | Saved, but no page reads it yet: each page refreshes on a fixed timer of its own (`:28`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:122`) |
+| Refresh Interval | 1 to 10 seconds | 2 seconds | Saved, but no page reads it yet: each page refreshes on a fixed timer of its own (`:28`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:102`) |
 | Memory Threshold | Percent | 80 (`:29`) | The usage level that raises a memory alert |
 
 The memory threshold raises an alert and nothing else: crossing it trims nothing.

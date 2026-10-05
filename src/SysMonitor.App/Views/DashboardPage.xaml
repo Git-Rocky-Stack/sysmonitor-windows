@@ -260,7 +260,7 @@
                     <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16,12"
                             Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" Spacing="12">
-                            <ProgressRing IsActive="{x:Bind ViewModel.IsOptimizing, Mode=OneWay}" Width="20" Height="20"
+                            <instruments:Lamp State="Armed" Code="EXEC" Size="Small" VerticalAlignment="Center"
                                           Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"
                                       Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>

@@ -94,24 +94,9 @@ public class ConsoleRecipeTests
 
     private static readonly string[] XamlColourLiterals =
     [
-        "src/SysMonitor.App/Views/BackupPage.xaml",
-        "src/SysMonitor.App/Views/BluetoothPage.xaml",
-        "src/SysMonitor.App/Views/BrowserPrivacyPage.xaml",
         "src/SysMonitor.App/Views/DonationPage.xaml",
-        "src/SysMonitor.App/Views/DriverUpdaterPage.xaml",
-        "src/SysMonitor.App/Views/DriveWiperPage.xaml",
         "src/SysMonitor.App/Views/FpsOverlayWindow.xaml",
-        "src/SysMonitor.App/Views/GameModePage.xaml",
-        "src/SysMonitor.App/Views/HealthCheckPage.xaml",
-        "src/SysMonitor.App/Views/HistoryPage.xaml",
-        "src/SysMonitor.App/Views/NetworkMapperPage.xaml",
         "src/SysMonitor.App/Views/PdfEditorPage.xaml",
-        "src/SysMonitor.App/Views/PdfToolsPage.xaml",
-        "src/SysMonitor.App/Views/PerformancePage.xaml",
-        "src/SysMonitor.App/Views/ScheduledCleaningPage.xaml",
-        "src/SysMonitor.App/Views/SettingsPage.xaml",
-        "src/SysMonitor.App/Views/UserGuidePage.xaml",
-        "src/SysMonitor.App/Views/WiFiPage.xaml",
     ];
 
     private static readonly string[] CodeColourLiterals =
@@ -150,27 +135,7 @@ public class ConsoleRecipeTests
         "src/SysMonitor.Core/Services/Utilities/WiFiAnalyzer.cs",
     ];
 
-    private static readonly string[] ProgressRings =
-    [
-        "src/SysMonitor.App/Views/BackupPage.xaml",
-        "src/SysMonitor.App/Views/BluetoothPage.xaml",
-        "src/SysMonitor.App/Views/DashboardPage.xaml",
-        "src/SysMonitor.App/Views/DiskPage.xaml",
-        "src/SysMonitor.App/Views/DriverUpdaterPage.xaml",
-        "src/SysMonitor.App/Views/FileToolsPage.xaml",
-        "src/SysMonitor.App/Views/GameModePage.xaml",
-        "src/SysMonitor.App/Views/GpuPage.xaml",
-        "src/SysMonitor.App/Views/HistoryPage.xaml",
-        "src/SysMonitor.App/Views/ImageToolsPage.xaml",
-        "src/SysMonitor.App/Views/MemoryPage.xaml",
-        "src/SysMonitor.App/Views/NetworkMapperPage.xaml",
-        "src/SysMonitor.App/Views/PdfEditorPage.xaml",
-        "src/SysMonitor.App/Views/PdfToolsPage.xaml",
-        "src/SysMonitor.App/Views/ScheduledCleaningPage.xaml",
-        "src/SysMonitor.App/Views/SystemInfoPage.xaml",
-        "src/SysMonitor.App/Views/TemperaturePage.xaml",
-        "src/SysMonitor.App/Views/WiFiPage.xaml",
-    ];
+    private static readonly string[] ProgressRings = [];
 
     private static readonly string[] ChromeBezels = [];
 

@@ -14,14 +14,8 @@
                                     Description="Hardware and software specifications"/>
 
             <!-- Loading State -->
-            <Border Style="{StaticResource CardStyle}" Padding="32"
-                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" Spacing="16">
-                    <ProgressRing IsActive="True" Width="48" Height="48"/>
-                    <TextBlock Text="Gathering system information..." Style="{StaticResource CardSubtitleStyle}"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
+            <instruments:BusyWell Title="Gathering system information..."
+                                  Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- Health Score Card -->
             <Border Style="{StaticResource CardStyle}" Padding="24">

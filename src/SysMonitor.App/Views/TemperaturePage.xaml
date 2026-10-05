@@ -15,14 +15,8 @@
                                     Description="Real-time thermal monitoring"/>
 
             <!-- Loading State -->
-            <Border Style="{StaticResource CardStyle}" Padding="32"
-                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" Spacing="16">
-                    <ProgressRing IsActive="True" Width="48" Height="48"/>
-                    <TextBlock Text="Initializing temperature sensors..." Style="{StaticResource CardSubtitleStyle}"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
+            <instruments:BusyWell Title="Initializing temperature sensors..."
+                                  Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- No Sensors Found -->
             <Border Style="{StaticResource CardStyle}" Padding="32"

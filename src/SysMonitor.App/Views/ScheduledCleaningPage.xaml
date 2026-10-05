@@ -3,6 +3,7 @@
     x:Class="SysMonitor.App.Views.ScheduledCleaningPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}"
     Loaded="Page_Loaded">
 
@@ -13,26 +14,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="SCHEDULED CLEAN" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Automate System Maintenance Tasks" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left"/>
-                </StackPanel>
-
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Uniform"/>
-            </Grid>
-        </Border>
+        <!-- View Header -->
+        <instruments:ViewHeader Grid.Row="0" Module="SCHED" Index="14" Title="SCHEDULED CLEAN"
+                                Description="Automate System Maintenance Tasks"/>
 
         <!-- Settings Content -->
         <ScrollViewer Grid.Row="1">
@@ -203,13 +187,10 @@
         </Border>
 
         <!-- Loading Overlay -->
-        <Grid Grid.RowSpan="3" Background="#80000000"
+        <Grid Grid.RowSpan="3" Background="{ThemeResource ScrimBrush}"
               Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <ProgressRing IsActive="True" Width="48" Height="48"/>
-                <TextBlock Text="Loading settings..." Margin="0,16,0,0"
-                           Foreground="{ThemeResource PlatinumBrush}"/>
-            </StackPanel>
+            <instruments:BusyWell Title="Loading settings..." MinWidth="360"
+                                  VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Grid>
     </Grid>
 </Page>

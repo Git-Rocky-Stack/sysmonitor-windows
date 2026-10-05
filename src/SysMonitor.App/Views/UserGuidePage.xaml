@@ -3,34 +3,14 @@
     x:Class="SysMonitor.App.Views.UserGuidePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="16" Padding="0,0,0,24">
 
-            <!-- Page Header Banner -->
-            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Left: Header text -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="USER'S GUIDE" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Left"/>
-                        <TextBlock Text="Complete Reference &amp; Documentation" Style="{StaticResource PageSubtitleStyle}"
-                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                    </StackPanel>
-
-                    <!-- Center: STX.1 Home Logo -->
-                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Stretch="Uniform"/>
-                </Grid>
-            </Border>
+            <instruments:ViewHeader Module="GUIDE" Index="34" Title="USER'S GUIDE"
+                                    Description="Complete Reference &amp; Documentation"/>
 
             <!-- ==================== GETTING STARTED ==================== -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -64,7 +44,7 @@
                         <Border Grid.Row="0" Grid.Column="0" Background="{ThemeResource ArmedBrush}"
                                 CornerRadius="12" Width="24" Height="24">
                             <TextBlock TextWrapping="Wrap" Text="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       FontWeight="Bold" Foreground="White" FontSize="12"/>
+                                       FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}" FontSize="12"/>
                         </Border>
                         <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
                                    Foreground="{ThemeResource PlatinumBrush}">
@@ -76,7 +56,7 @@
                         <Border Grid.Row="1" Grid.Column="0" Background="{ThemeResource RailGoBrush}"
                                 CornerRadius="12" Width="24" Height="24">
                             <TextBlock TextWrapping="Wrap" Text="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       FontWeight="Bold" Foreground="White" FontSize="12"/>
+                                       FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}" FontSize="12"/>
                         </Border>
                         <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
                                    Foreground="{ThemeResource PlatinumBrush}">
@@ -88,7 +68,7 @@
                         <Border Grid.Row="2" Grid.Column="0" Background="{ThemeResource RailExecBrush}"
                                 CornerRadius="12" Width="24" Height="24">
                             <TextBlock TextWrapping="Wrap" Text="3" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       FontWeight="Bold" Foreground="White" FontSize="12"/>
+                                       FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}" FontSize="12"/>
                         </Border>
                         <TextBlock Grid.Row="2" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
                                    Foreground="{ThemeResource PlatinumBrush}">
@@ -175,7 +155,7 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}" Width="40" Height="40">
-                            <FontIcon Glyph="&#xE74D;" FontSize="18" Foreground="White"/>
+                            <FontIcon Glyph="&#xE74D;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Cleanup &amp; Optimization" FontSize="16" FontWeight="Bold"
@@ -229,7 +209,7 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}" Width="40" Height="40">
-                            <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="White"/>
+                            <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Game Mode" FontSize="16" FontWeight="Bold"
@@ -356,7 +336,7 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailExecBrush}" Width="40" Height="40">
-                            <FontIcon Glyph="&#xE8B7;" FontSize="18" Foreground="White"/>
+                            <FontIcon Glyph="&#xE8B7;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Utilities &amp; Tools" FontSize="16" FontWeight="Bold"
@@ -410,7 +390,7 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailHoldBrush}" Width="40" Height="40">
-                            <FontIcon Glyph="&#xE7E8;" FontSize="18" Foreground="White"/>
+                            <FontIcon Glyph="&#xE7E8;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="System Tray &amp; Alerts" FontSize="16" FontWeight="Bold"
@@ -469,7 +449,7 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailHoldBrush}" Width="40" Height="40">
-                            <FontIcon Glyph="&#xE81C;" FontSize="18" Foreground="White"/>
+                            <FontIcon Glyph="&#xE81C;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Historical Data &amp; Graphs" FontSize="16" FontWeight="Bold"
@@ -528,7 +508,7 @@
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailHoldBrush}" Width="40" Height="40">
-                            <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="White"/>
+                            <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Performance Monitoring" FontSize="16" FontWeight="Bold"
@@ -586,23 +566,23 @@
                             <TextBlock Text="Performance Thresholds" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <Border Background="#4CAF50" Width="12" Height="12" CornerRadius="3"/>
+                                    <Border Background="{ThemeResource RailGoBrush}" Width="12" Height="12" CornerRadius="3"/>
                                     <TextBlock Text="Excellent (&lt;16ms)" Foreground="{ThemeResource SilverBrush}" FontSize="11"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <Border Background="#8BC34A" Width="12" Height="12" CornerRadius="3"/>
+                                    <Border Background="{ThemeResource RailGoBrush}" Width="12" Height="12" CornerRadius="3"/>
                                     <TextBlock Text="Good (&lt;50ms)" Foreground="{ThemeResource SilverBrush}" FontSize="11"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <Border Background="#FF9800" Width="12" Height="12" CornerRadius="3"/>
+                                    <Border Background="{ThemeResource RailHoldBrush}" Width="12" Height="12" CornerRadius="3"/>
                                     <TextBlock Text="Fair (&lt;100ms)" Foreground="{ThemeResource SilverBrush}" FontSize="11"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <Border Background="#FF5722" Width="12" Height="12" CornerRadius="3"/>
+                                    <Border Background="{ThemeResource RailWarnBrush}" Width="12" Height="12" CornerRadius="3"/>
                                     <TextBlock Text="Poor (&lt;200ms)" Foreground="{ThemeResource SilverBrush}" FontSize="11"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <Border Background="#F44336" Width="12" Height="12" CornerRadius="3"/>
+                                    <Border Background="{ThemeResource RailNoGoBrush}" Width="12" Height="12" CornerRadius="3"/>
                                     <TextBlock Text="Critical (&gt;200ms)" Foreground="{ThemeResource SilverBrush}" FontSize="11"/>
                                 </StackPanel>
                             </StackPanel>
@@ -718,7 +698,7 @@
                         <TextBlock Text="Changes since v3.0.1" FontSize="16" FontWeight="Bold"
                                    Foreground="{ThemeResource PlatinumBrush}"/>
                         <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="4" Padding="8,2">
-                            <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
                         </Border>
                     </StackPanel>
 

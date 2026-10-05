@@ -14,14 +14,8 @@
                                     Description="Graphics card performance analytics"/>
 
             <!-- Loading State -->
-            <Border Style="{StaticResource CardStyle}" Padding="32"
-                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" Spacing="16">
-                    <ProgressRing IsActive="True" Width="48" Height="48"/>
-                    <TextBlock Text="Detecting graphics hardware..." Style="{StaticResource CardSubtitleStyle}"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
+            <instruments:BusyWell Title="Detecting graphics hardware..."
+                                  Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- GPU Info Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}"

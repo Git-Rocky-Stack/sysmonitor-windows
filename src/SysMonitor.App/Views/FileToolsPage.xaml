@@ -203,14 +203,8 @@
                     </Grid>
 
                     <!-- Processing Indicator -->
-                    <Border Grid.Row="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
-                            Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center">
-                            <ProgressRing IsActive="True" Width="24" Height="24"/>
-                            <TextBlock Text="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
-                                       VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </Border>
+                    <instruments:BusyWell Grid.Row="1" Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
+                                          Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 </Grid>
             </Border>
 

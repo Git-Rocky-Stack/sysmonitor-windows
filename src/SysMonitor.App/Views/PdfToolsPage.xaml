@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     x:Name="ContentArea"
     Background="{ThemeResource Carbon950Brush}">
 
@@ -14,29 +15,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left: Header text -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="PDF TOOLS" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Merge, Split, Extract, Sign &amp; Convert Files to PDF" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                </StackPanel>
-
-                <!-- Center: STX.1 Home Logo -->
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Stretch="Uniform"/>
-            </Grid>
-        </Border>
+        <instruments:ViewHeader Grid.Row="0" Module="PDF" Index="25" Title="PDF TOOLS"
+                                Description="Merge, Split, Extract, Sign &amp; Convert Files to PDF"/>
 
         <!-- Main Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -332,6 +312,7 @@
                                         </StackPanel>
                                     </Button>
                                 </Grid>
+                                <!-- White is paper: the signature is drawn on a white sheet, as it will sit on the PDF page -->
                                 <Border Background="White" CornerRadius="8" Height="150" BorderBrush="{ThemeResource HairlineStrongBrush}" BorderThickness="1">
                                     <Canvas x:Name="SignatureCanvas"
                                             Background="White"
@@ -350,6 +331,7 @@
                                          Text="{x:Bind ViewModel.TypedSignatureName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          PlaceholderText="Type your full name..."
                                          TextChanged="TypedSignatureInput_TextChanged"/>
+                                <!-- White is paper: the typed signature is previewed in black ink on a white sheet -->
                                 <Border Background="White" CornerRadius="8" Height="80" BorderBrush="{ThemeResource HairlineStrongBrush}" BorderThickness="1" Padding="16,8">
                                     <TextBlock x:Name="TypedSignaturePreview"
                                                Text="{x:Bind ViewModel.TypedSignatureName, Mode=OneWay}"
@@ -471,20 +453,20 @@
                                 <StackPanel Spacing="8">
                                     <TextBlock Text="Supported file formats:" Style="{StaticResource CardTitleStyle}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Background="#30F44336" CornerRadius="4" Padding="8,4">
+                                        <Border Background="{ThemeResource NoGoSoftBrush}" CornerRadius="4" Padding="8,4">
                                             <TextBlock Text="Office" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource ArmedLitBrush}"/>
                                         </Border>
                                         <TextBlock Text="DOC, DOCX, XLS, XLSX, PPT, PPTX (requires MS Office)" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Background="#304CAF50" CornerRadius="4" Padding="8,4">
-                                            <TextBlock Text="Images" FontSize="11" FontWeight="SemiBold" Foreground="#4CAF50"/>
+                                        <Border Background="{ThemeResource GoSoftBrush}" CornerRadius="4" Padding="8,4">
+                                            <TextBlock Text="Images" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource StateGoBrush}"/>
                                         </Border>
                                         <TextBlock Text="JPG, PNG, BMP, GIF, TIFF, WebP" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Border Background="#302196F3" CornerRadius="4" Padding="8,4">
-                                            <TextBlock Text="Text" FontSize="11" FontWeight="SemiBold" Foreground="#2196F3"/>
+                                        <Border Background="{ThemeResource ScopeSoftBrush}" CornerRadius="4" Padding="8,4">
+                                            <TextBlock Text="Text" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}"/>
                                         </Border>
                                         <TextBlock Text="TXT, CSV, XML, JSON, MD, HTML" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -506,7 +488,7 @@
                                 </Border>
                                 <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}" Margin="0,0,16,0"
                                         Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}">
-                                    <FontIcon Glyph="&#xE8FB;" FontSize="20" Foreground="#4CAF50"/>
+                                    <FontIcon Glyph="&#xE8FB;" FontSize="20" Foreground="{ThemeResource StateGoBrush}"/>
                                 </Border>
 
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -544,12 +526,8 @@
                 </StackPanel>
 
                 <!-- Processing Status -->
-                <Border Style="{StaticResource CardStyle}" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay}">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <ProgressRing IsActive="True" Width="20" Height="20" Foreground="{ThemeResource ArmedLitBrush}"/>
-                        <TextBlock Text="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
+                <instruments:BusyWell Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay}"/>
 
                 <!-- Result -->
                 <Border Style="{StaticResource CardStyle}" Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay}">
@@ -561,11 +539,11 @@
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}" Margin="0,0,16,0">
-                            <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="#4CAF50"/>
+                            <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="{ThemeResource StateGoBrush}"/>
                         </Border>
 
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Operation Complete" Style="{StaticResource CardTitleStyle}" Foreground="#4CAF50"/>
+                            <TextBlock Text="Operation Complete" Style="{StaticResource CardTitleStyle}" Foreground="{ThemeResource StateGoBrush}"/>
                             <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.ResultPath, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" TextTrimming="CharacterEllipsis" Opacity="0.6"/>
                         </StackPanel>
@@ -583,7 +561,7 @@
                 <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
                         CornerRadius="8" Padding="16"
                         Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay}" Opacity="0.9">
-                    <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
+                    <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold"/>
                 </Border>
 
             </StackPanel>

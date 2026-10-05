@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App.Views"
     xmlns:vm="using:SysMonitor.App.ViewModels"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
@@ -13,40 +14,18 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left: Header text -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="NETWORK MAPPER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Discover Devices On Your Local Network" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                </StackPanel>
-
-                <!-- Center: STX.1 Home Logo -->
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Stretch="Uniform"/>
-
-                <!-- Right: Action Buttons -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Command="{x:Bind ViewModel.ScanNetworkCommand}"
-                            Style="{StaticResource ChromeCapButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource ScanButtonIconConverter}}" FontSize="14"/>
-                            <TextBlock Text="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToScanButtonConverter}}"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+        <instruments:ViewHeader Grid.Row="0" Module="MAP" Index="29" Title="NETWORK MAPPER"
+                                Description="Discover Devices On Your Local Network">
+            <instruments:ViewHeader.Actions>
+                <Button Command="{x:Bind ViewModel.ScanNetworkCommand}"
+                        Style="{StaticResource ChromeCapButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource ScanButtonIconConverter}}" FontSize="14"/>
+                        <TextBlock Text="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToScanButtonConverter}}"/>
+                    </StackPanel>
+                </Button>
+            </instruments:ViewHeader.Actions>
+        </instruments:ViewHeader>
 
         <!-- Main Content -->
         <Grid Grid.Row="1">
@@ -137,22 +116,22 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Bind ViewModel.DevicesFound, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#00BCD4" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.DevicesFound, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="Devices" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Bind ViewModel.ActiveDevices, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#4CAF50" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ActiveDevices, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="Active" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Bind ViewModel.RoutersFound, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#FF9800" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.RoutersFound, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource StateHoldBrush}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="Routers" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="3" HorizontalAlignment="Center">
-                                        <TextBlock Text="{x:Bind ViewModel.ComputersFound, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="#2196F3" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ComputersFound, Mode=OneWay}" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="Computers" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </Grid>
@@ -161,13 +140,10 @@
                     </StackPanel>
 
                     <!-- Scan Progress -->
-                    <Border Style="{StaticResource CardStyle}" Padding="12" Background="#1A1A1A"
+                    <Border Style="{StaticResource CardStyle}" Padding="12" Background="{ThemeResource Carbon750Brush}"
                             Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel Spacing="8">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <ProgressRing IsActive="True" Width="20" Height="20"/>
-                                <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}" Foreground="{ThemeResource SilverBrush}" VerticalAlignment="Center"/>
-                            </StackPanel>
+                            <instruments:BusyWell Title="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"/>
                             <ProgressBar Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}" Maximum="100"/>
                             <TextBlock Text="{x:Bind ViewModel.CurrentTarget, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                         </StackPanel>
@@ -193,7 +169,7 @@
                                     </ListView.ItemContainerStyle>
                                     <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="vm:NetworkDeviceDisplay">
-                                            <Border Background="#141414" CornerRadius="6" Padding="16">
+                                            <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="6" Padding="16">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
@@ -210,19 +186,19 @@
                                                     <!-- Device Info -->
                                                     <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
                                                         <TextBlock Text="{x:Bind Hostname}" Style="{StaticResource CardTitleStyle}"/>
-                                                        <TextBlock Text="{x:Bind IpAddress}" FontSize="12" Foreground="#00BCD4" Margin="0,2,0,0"/>
+                                                        <TextBlock Text="{x:Bind IpAddress}" FontSize="12" Foreground="{ThemeResource StateExecBrush}" Margin="0,2,0,0"/>
                                                         <TextBlock Text="{x:Bind MacAddress}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,2,0,0"/>
                                                     </StackPanel>
 
                                                     <!-- Response Time -->
                                                     <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
                                                         <TextBlock Text="Latency" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                                        <TextBlock Text="{x:Bind ResponseTimeText}" FontSize="14" FontWeight="SemiBold" Foreground="#4CAF50" HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="{x:Bind ResponseTimeText}" FontSize="14" FontWeight="SemiBold" Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Center"/>
                                                     </StackPanel>
 
                                                     <!-- Status -->
                                                     <Border Grid.Column="3" Background="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}" CornerRadius="4" Padding="10,6" VerticalAlignment="Center">
-                                                        <TextBlock Text="{x:Bind StatusText}" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
+                                                        <TextBlock Text="{x:Bind StatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource ArmedFgBrush}"/>
                                                     </Border>
                                                 </Grid>
                                             </Border>
@@ -233,7 +209,7 @@
                                 <!-- Empty State -->
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                             Visibility="{x:Bind ViewModel.DevicesFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
-                                    <FontIcon Glyph="&#xE968;" FontSize="48" Foreground="#404040"/>
+                                    <FontIcon Glyph="&#xE968;" FontSize="48" Foreground="{ThemeResource SilverMuteBrush}"/>
                                     <TextBlock Text="No devices discovered" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
                                     <TextBlock Text="Click 'SCAN' to discover devices" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
                                 </StackPanel>
@@ -244,13 +220,13 @@
                     <!-- Action Status -->
                     <Border Background="{x:Bind ViewModel.ActionStatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}" CornerRadius="8" Padding="16"
                             Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="0.9">
-                        <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="White" FontWeight="SemiBold"/>
+                        <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold"/>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
 
             <!-- Right Panel - Device Details -->
-            <Border Grid.Column="1" Background="#0A0A0A" CornerRadius="8,0,0,8">
+            <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8,0,0,8">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Padding="20" Spacing="16">
                         <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -261,14 +237,14 @@
                         <!-- No Selection -->
                         <StackPanel Visibility="{x:Bind ViewModel.HasSelectedDevice, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
                                     HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,40,0,0">
-                            <FontIcon Glyph="&#xE946;" FontSize="48" Foreground="#404040"/>
+                            <FontIcon Glyph="&#xE946;" FontSize="48" Foreground="{ThemeResource SilverMuteBrush}"/>
                             <TextBlock Text="Select a device to view details" FontSize="13" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0" TextAlignment="Center"/>
                         </StackPanel>
 
                         <!-- Device Selected -->
                         <StackPanel Visibility="{x:Bind ViewModel.HasSelectedDevice, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Spacing="16">
                             <!-- Basic Info -->
-                            <Border Background="#141414" CornerRadius="8" Padding="16">
+                            <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16">
                                 <StackPanel Spacing="12">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -276,11 +252,11 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel>
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedDevice.Hostname, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                                            <TextBlock Text="{x:Bind ViewModel.SelectedDevice.Hostname, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
                                             <TextBlock Text="{x:Bind ViewModel.SelectedDevice.DeviceType, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
                                         </StackPanel>
                                         <Border Grid.Column="1" Background="{x:Bind ViewModel.SelectedDevice.StatusColor, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}" CornerRadius="4" Padding="8,4">
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedDevice.StatusText, Mode=OneWay}" FontSize="11" Foreground="White"/>
+                                            <TextBlock Text="{x:Bind ViewModel.SelectedDevice.StatusText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource ArmedFgBrush}"/>
                                         </Border>
                                     </Grid>
 
@@ -291,7 +267,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="IP Address" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.IpAddress, Mode=OneWay}" FontSize="12" Foreground="#00BCD4"/>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.IpAddress, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource StateExecBrush}"/>
                                         </Grid>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -299,7 +275,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="MAC Address" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.MacAddress, Mode=OneWay}" FontSize="12" Foreground="White"/>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.MacAddress, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
                                         </Grid>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -307,7 +283,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="Manufacturer" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.Manufacturer, Mode=OneWay}" FontSize="12" Foreground="White"/>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.Manufacturer, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
                                         </Grid>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -315,7 +291,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="Latency" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.ResponseTimeText, Mode=OneWay}" FontSize="12" Foreground="#4CAF50"/>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.SelectedDevice.ResponseTimeText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource StateGoBrush}"/>
                                         </Grid>
                                     </StackPanel>
                                 </StackPanel>
@@ -339,16 +315,11 @@
                             </StackPanel>
 
                             <!-- Port Scan Progress -->
-                            <Border Background="#141414" CornerRadius="8" Padding="16"
-                                    Visibility="{x:Bind ViewModel.IsPortScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <ProgressRing IsActive="True" Width="16" Height="16"/>
-                                    <TextBlock Text="{x:Bind ViewModel.PortScanStatus, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
-                                </StackPanel>
-                            </Border>
+                            <instruments:BusyWell Title="{x:Bind ViewModel.PortScanStatus, Mode=OneWay}"
+                                                  Visibility="{x:Bind ViewModel.IsPortScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                             <!-- Open Ports -->
-                            <Border Background="#141414" CornerRadius="8" Padding="16">
+                            <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16">
                                 <StackPanel Spacing="8">
                                     <TextBlock Text="OPEN PORTS" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource SilverBrush}"/>
                                     <ListView ItemsSource="{x:Bind ViewModel.OpenPorts, Mode=OneWay}" SelectionMode="None" MaxHeight="200">
@@ -360,10 +331,10 @@
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{x:Bind Port}" FontSize="13" FontWeight="SemiBold" Foreground="#00BCD4"/>
+                                                    <TextBlock Text="{x:Bind Port}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}"/>
                                                     <TextBlock Grid.Column="1" Text="{x:Bind Service}" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                                                     <Border Grid.Column="2" Background="{x:Bind StatusColor, Converter={StaticResource StringToBrushConverter}}" CornerRadius="3" Padding="6,2">
-                                                        <TextBlock Text="{x:Bind Status}" FontSize="10" Foreground="White"/>
+                                                        <TextBlock Text="{x:Bind Status}" FontSize="10" Foreground="{ThemeResource ArmedFgBrush}"/>
                                                     </Border>
                                                 </Grid>
                                             </DataTemplate>

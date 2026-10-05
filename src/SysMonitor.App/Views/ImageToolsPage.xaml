@@ -306,11 +306,7 @@
             <Border Style="{StaticResource CardStyle}" Padding="20"
                     Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel Spacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center">
-                        <ProgressRing IsActive="True" Width="24" Height="24"/>
-                        <TextBlock Text="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
-                                   VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
-                    </StackPanel>
+                    <instruments:BusyWell Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"/>
                     <ProgressBar Value="{x:Bind ViewModel.ProcessingProgress, Mode=OneWay}"
                                  Maximum="100" Height="4"/>
                 </StackPanel>

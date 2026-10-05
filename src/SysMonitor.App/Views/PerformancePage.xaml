@@ -4,34 +4,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewmodels="using:SysMonitor.App.ViewModels"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Left: Header text -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="PERFORMANCE" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                        <TextBlock Text="Real-time application performance metrics" Style="{StaticResource PageSubtitleStyle}"
-                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                    </StackPanel>
-
-                    <!-- Center: STX.1 Home Logo -->
-                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Stretch="Uniform"/>
-                </Grid>
-            </Border>
+            <instruments:ViewHeader Module="PERF" Index="30" Title="PERFORMANCE"
+                                    Description="Real-time application performance metrics"/>
 
             <!-- Monitoring Controls Section -->
             <StackPanel Spacing="12">
@@ -158,7 +138,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0" Background="#1A1A1A" Padding="16,12">
+                    <Border Grid.Row="0" Background="{ThemeResource Carbon750Brush}" Padding="16,12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -195,7 +175,7 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="viewmodels:PerformanceMetric">
-                                <Border Padding="16,12" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
+                                <Border Padding="16,12" BorderBrush="{ThemeResource Carbon700Brush}" BorderThickness="0,0,0,1">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="2*"/>
@@ -228,10 +208,10 @@
                                         <TextBlock Grid.Column="6" Text="{x:Bind P99MsFormatted}"
                                                    Foreground="{ThemeResource SilverBrush}" FontSize="13"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                        <Border Grid.Column="7" Background="#4CAF50"
+                                        <Border Grid.Column="7" Background="{ThemeResource RailGoBrush}"
                                                 CornerRadius="4" Padding="8,4" HorizontalAlignment="Center">
                                             <TextBlock Text="{x:Bind Status}" FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="{ThemeResource PlatinumBrush}"/>
+                                                       Foreground="{ThemeResource ArmedFgBrush}"/>
                                         </Border>
                                     </Grid>
                                 </Border>
@@ -247,23 +227,23 @@
                     <TextBlock Text="PERFORMANCE THRESHOLDS" Style="{StaticResource StatLabelStyle}"/>
                     <StackPanel Orientation="Horizontal" Spacing="24">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Background="#4CAF50" Width="16" Height="16" CornerRadius="4"/>
+                            <Border Background="{ThemeResource RailGoBrush}" Width="16" Height="16" CornerRadius="4"/>
                             <TextBlock Text="Excellent (&lt;16ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Background="#8BC34A" Width="16" Height="16" CornerRadius="4"/>
+                            <Border Background="{ThemeResource RailGoBrush}" Width="16" Height="16" CornerRadius="4"/>
                             <TextBlock Text="Good (&lt;50ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Background="#FF9800" Width="16" Height="16" CornerRadius="4"/>
+                            <Border Background="{ThemeResource RailHoldBrush}" Width="16" Height="16" CornerRadius="4"/>
                             <TextBlock Text="Fair (&lt;100ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Background="#FF5722" Width="16" Height="16" CornerRadius="4"/>
+                            <Border Background="{ThemeResource RailWarnBrush}" Width="16" Height="16" CornerRadius="4"/>
                             <TextBlock Text="Poor (&lt;200ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Border Background="#F44336" Width="16" Height="16" CornerRadius="4"/>
+                            <Border Background="{ThemeResource RailNoGoBrush}" Width="16" Height="16" CornerRadius="4"/>
                             <TextBlock Text="Critical (&gt;200ms)" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                         </StackPanel>
                     </StackPanel>
@@ -271,7 +251,7 @@
             </Border>
 
             <!-- Info Section -->
-            <Border Style="{StaticResource CardStyle}" Padding="16" Background="#1A1A1A">
+            <Border Style="{StaticResource CardStyle}" Padding="16" Background="{ThemeResource Carbon750Brush}">
                 <StackPanel Spacing="8">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE946;" FontSize="16" Foreground="{ThemeResource StateExecBrush}"/>

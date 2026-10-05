@@ -110,9 +110,8 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Status Icon / Progress -->
-                    <Grid Grid.Column="0" Width="32" Height="32">
-                        <ProgressRing IsActive="{x:Bind ViewModel.IsOptimizing, Mode=OneWay}"
-                                      Width="24" Height="24"
+                    <Grid Grid.Column="0" MinWidth="32" MinHeight="32">
+                        <instruments:Lamp State="Armed" Code="EXEC" Size="Small" VerticalAlignment="Center"
                                       Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                         <FontIcon Glyph="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessGlyphConverter}}"
                                   FontSize="20"

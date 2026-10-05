@@ -648,7 +648,7 @@ Detailed system specifications:
 
 - **Run at Startup** - Launch app when Windows starts
 - **Minimize to Tray** - Keep running in system tray
-- **Show Notifications** - Enable/disable alerts (`src/SysMonitor.App/Views/SettingsPage.xaml:98`)
+- **Show Notifications** - Enable/disable alerts (`src/SysMonitor.App/Views/SettingsPage.xaml:78`)
 
 ### Monitoring
 
