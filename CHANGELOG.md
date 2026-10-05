@@ -17,16 +17,18 @@ Each entry describes a behaviour change and cites the file it lives in.
   by WinUI. They are now cut from the chassis, to System-X's own measurements: 34 high, 14
   either side of the word, the word itself Archivo at 11.5 tracked .08em on the 4px control
   radius, over the palette's cap face with a key light across the top - going in under the
-  finger and fading to Graphite when they are disabled, which is the user's own GrayText in
-  High Contrast (`src/SysMonitor.App/Styles/Console/Controls.xaml:64`,
+  finger and dimming to .42 when they are disabled, which is what System-X dims a locked
+  control to, except in High Contrast, where the palette leaves the dimming at 1 and greys
+  the word with the user's own GrayText instead
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:65`,
   `src/SysMonitor.App/App.xaml:24`). Two caps carry more weight and differ only in their
   face: the armed cap for a command that cannot simply be undone
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:158`) and the chrome cap for a page's
-  single call to action (`:165`). The palette had written all three faces and Fonts.xaml
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:165`) and the chrome cap for a page's
+  single call to action (`:172`). The palette had written all three faces and Fonts.xaml
   the cap face since the tokens were generated; until this dictionary existed nothing read
   any of them. The smoke run builds each cap in the live tree, in both shifts, and checks
   the face it came out with against the palette
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:597`), and each measurement is pinned to
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:600`), and each measurement is pinned to
   the rule it was read from, so a cap cannot be quietly resized
   (`tests/SysMonitor.Tests/Architecture/ConsoleCapTests.cs:131`).
 
@@ -35,8 +37,8 @@ Each entry describes a behaviour change and cites the file it lives in.
   radius, the thumb 16 square on the 3px inset radius, and the shade the top edge casts into the
   recess drawn as a gradient, since WinUI has no inset shadow. Turned on it arms - the track, its
   rim and the thumb all going over to armed red together, the thumb travelling 20
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:186`). Locked, the thumb and the words go to
-  Graphite, which is the user's own GrayText in High Contrast, as a locked cap does. The palette
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:193`). Locked, it dims to .42, which is what
+  a locked cap does, because System-X writes that rule once and points the switch at it. The palette
   gains the eight colours the lever needs, written for all three shifts by the generator
   (`scripts/generate-tokens.py:192`, `:299`).
 

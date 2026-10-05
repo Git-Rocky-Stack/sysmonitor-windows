@@ -26,6 +26,9 @@ namespace SysMonitor.Tests.Architecture;
 public class ConsoleSwitchTests
 {
     private const string Controls = "src/SysMonitor.App/Styles/Console/Controls.xaml";
+    private const string Views = "src/SysMonitor.App/Views";
+
+    private const string SwitchType = "ToggleSwitch";
     private const string Tokens = "src/SysMonitor.App/Styles/Console/Tokens.xaml";
 
     private static readonly XNamespace Presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
@@ -183,9 +186,92 @@ public class ConsoleSwitchTests
         }
     }
 
+
+    /// <summary>
+    /// Armed, the lever glows twice: <c>0 0 12px var(--armed-glow)</c> outside the track and
+    /// <c>0 0 10px</c> outside the thumb (:2352, :2359). Neither is a property WinUI has, so both are cast by
+    /// composition from ConsoleSwitch's code onto a host in the template - and the thumb's host rides inside
+    /// SwitchKnob, or the glow stays behind while the thumb travels.
+    /// </summary>
+    [Fact]
+    public void TheArmedLeverHasAHostForEachOfItsTwoGlows()
+    {
+        Named("PART_TrackGlowHost").Should().NotBeNull();
+
+        var thumbHost = Named("PART_ThumbGlowHost");
+        thumbHost.Ancestors().Select(a => a.Attribute(Xaml + "Name")?.Value)
+            .Should().Contain("SwitchKnob",
+                "the thumb's glow travels with the thumb, so its host sits inside the part that moves");
+
+        Named("PART_ArmedGlow").Attribute("Background")?.Value.Should().Be("{ThemeResource ArmedGlowBrush}",
+            "the glow's colour is the palette's, carried into the template the way a lamp's is, so a shift " +
+            "changes it without the control knowing what shift it is in");
+    }
+
+    /// <summary>
+    /// <c>transition: transform 160ms var(--ease-snap)</c> (:2347), and ease-snap is
+    /// <c>cubic-bezier(.32, .72, 0, 1)</c> (:710). WinUI's RepositionThemeAnimation is Windows' own reposition
+    /// timing instead, which is not that curve and not that duration; it also moves the knob element rather than
+    /// the transform, so leaving one in beside a transform animation moves the thumb twice.
+    /// </summary>
+    [Fact]
+    public void TheThumbTravelsOnTheSnapEasingForTheDurationTheStylesheetGives()
+    {
+        var transitions = Template().Descendants(Presentation + "VisualTransition").ToList();
+        transitions.Should().NotBeEmpty("the lever's travel is drawn by its transitions");
+
+        transitions.SelectMany(t => t.Descendants(Presentation + "RepositionThemeAnimation")).Should().BeEmpty(
+            "Windows' reposition timing is not the 160ms snap, and it moves the knob as well as the transform");
+
+        var moves = transitions
+            .SelectMany(transition => transition.Descendants()
+                .Where(a => a.Attribute(Presentation + "Storyboard.TargetName")?.Value == "KnobTranslateTransform"
+                         || a.Attribute("Storyboard.TargetName")?.Value == "KnobTranslateTransform")
+                .Select(a => (Transition: transition.Attribute(Xaml + "Name")?.Value ?? "?", Animation: a)))
+            .ToList();
+
+        moves.Should().HaveCountGreaterThan(0, "a transition that never moves the knob never shows it travelling");
+
+        foreach (var (name, animation) in moves)
+        {
+            var frames = animation.Descendants()
+                .Where(frame => frame.Attribute("KeyTime") is not null)
+                .ToList();
+
+            frames.Should().NotBeEmpty($"{name} moves the knob with no key frame to move it over");
+
+            foreach (var frame in frames)
+            {
+                frame.Attribute("KeyTime")!.Value.Should().Be("0:0:0.16",
+                    $"{name} travels for 160ms, which is what .switch transitions its transform over");
+                frame.Attribute("KeySpline")?.Value.Should().Be("0.32,0.72 0,1",
+                    $"{name} travels on ease-snap, cubic-bezier(.32, .72, 0, 1)");
+            }
+        }
+    }
+
+    /// <summary>
+    /// The hosts are inert on their own - a Border with no background draws nothing. Something has to cast the
+    /// shadows onto them, and the only thing that runs per switch is the attached property the style sets. A
+    /// template with the hosts and a style without the setter is a lever with the glows quietly missing, which
+    /// is what it was before.
+    /// </summary>
+    [Fact]
+    public void TheStyleTurnsOnTheGlowsItsTemplateHasHostsFor()
+    {
+        var setters = SwitchStyles()[0].Elements(Presentation + "Setter")
+            .ToDictionary(
+                setter => setter.Attribute("Property")?.Value ?? string.Empty,
+                setter => setter.Attribute("Value")?.Value ?? string.Empty);
+
+        setters.Should().ContainKey("instruments:ConsoleLever.HasGlows",
+            "the template's glow hosts are cast onto from ConsoleLever, and nothing else turns it on");
+        setters["instruments:ConsoleLever.HasGlows"].Should().Be("True");
+    }
+
     private static List<XElement> SwitchStyles() =>
         XDocument.Load(PathOf(Controls)).Descendants(Presentation + "Style")
-            .Where(style => style.Attribute("TargetType")?.Value == "ToggleSwitch")
+            .Where(style => style.Attribute("TargetType")?.Value == SwitchType)
             .ToList();
 
     private static XElement Template()
@@ -194,7 +280,7 @@ public class ConsoleSwitchTests
         styles.Should().NotBeEmpty("there is no switch style to read, so every test here would be vacuous");
         // The switch's own template, not the transparent one its drag Thumb carries.
         return styles[0].Descendants(Presentation + "ControlTemplate")
-            .Single(template => template.Attribute("TargetType")?.Value == "ToggleSwitch");
+            .Single(template => template.Attribute("TargetType")?.Value == SwitchType);
     }
 
     /// <summary>The one element in the template with this name.</summary>

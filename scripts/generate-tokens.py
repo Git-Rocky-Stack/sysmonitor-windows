@@ -331,6 +331,32 @@ def note(text):
     lines = textwrap.wrap(text.replace('\n', ' '), width=118 - len(I) - 5 - 4)
     return f'{I}<!-- ' + ('\n' + I + '     ').join(lines) + ' -->'
 
+# The locked treatment, per shift. CSS dims a disabled control to .42 and desaturates it, and writes that rule
+# once for every button and then again for the switch, under a comment saying a locked control reads the same way
+# everywhere rather than inventing a second idiom (:2016-2023, :2367-2369).
+#
+# High Contrast does not dim. The user chose those colours for their contrast and 42% of them is not the contrast
+# they chose, so that shift carries the greying in the system's own GrayText and leaves the opacity at 1. That is
+# why this is a resource per shift rather than a number in a template.
+LOCKED = [
+    ('ConsoleDisabledOpacity', '0.42', '0.42', '1'),
+]
+
+def locked_block(theme):
+    out = [note("A locked control: dimmed to .42 in both working shifts, and in High Contrast not dimmed at all -\nthat shift greys the word with the user's own GrayText instead (:2016-2023, :2367-2369).")]
+    for name, night, day, hc in LOCKED:
+        value = hc if theme == 'hc' else (night if theme == 'night' else day)
+        out.append(f'{I}<x:Double x:Key="{name}">{value}</x:Double>')
+
+    # The word on a locked control. Unchanged in the working shifts, where the dimming above is the whole
+    # treatment; GrayText in High Contrast, where it is the whole treatment instead.
+    if theme == 'hc':
+        out.append(f'{I}<SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="{{ThemeResource {GT}}}"/>')
+    else:
+        out.append(f'{I}<SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="{lit(colours(theme)["SilverBright"])}"/>')
+
+    return out
+
 def theme_block(theme):
     out = []
     groups = GROUPS + [("Chrome cap text: black on the polished face, platinum on Day Shift's black gloss (:2125, Day :2135).", EXTRA)]
@@ -372,6 +398,8 @@ def theme_block(theme):
                 out.append('')
         assert keys == list(COMPOSED_HC), (keys, list(COMPOSED_HC))
         if out[-1] == '': out.pop()
+    out.append('')
+    out.extend(locked_block(theme))
     return out
 
 HEADER = '''<?xml version="1.0" encoding="utf-8"?>

@@ -725,6 +725,14 @@ internal sealed class UiSmokeRun
                 Problem($"The switch in the {shift} shift shows its armed track while it is off");
             }
 
+            var (trackGlow, thumbGlow) = ConsoleLever.GlowLayers(lever);
+            if (trackGlow != 0 || thumbGlow != 0)
+            {
+                problems++;
+                Problem($"The switch in the {shift} shift glows while it is off, at {trackGlow} round the track " +
+                        $"and {thumbGlow} round the thumb; only an armed lever is lit");
+            }
+
             lever.IsOn = true;
             await SettledAsync();
 
@@ -745,6 +753,20 @@ internal sealed class UiSmokeRun
                         $"{armedTrack.Opacity:0.##} and its armed thumb at {thumbOn.Opacity:0.##}, so it does not " +
                         "read as armed");
             }
+
+            // The two glows CSS gives an armed lever, 0 0 12px round the track and 0 0 10px round the thumb.
+            // Composition casts them from ConsoleLever, so the template alone cannot show whether they are
+            // there: the hosts are empty Borders either way, with or without a shadow on them. One each, the
+            // way a lamp's shadows are counted - this run is not in High Contrast, where they would both go.
+            (trackGlow, thumbGlow) = ConsoleLever.GlowLayers(lever);
+            if (trackGlow != 1 || thumbGlow != 1)
+            {
+                problems++;
+                Problem($"Turned on, the switch in the {shift} shift cast {trackGlow} glow(s) round its track " +
+                        $"and {thumbGlow} round its thumb, not the one each an armed lever carries");
+            }
+
+            problems += await CheckSwitchDragAsync(lever, knob, track, shift);
 
             lever.IsOn = false;
             await SettledAsync();
@@ -769,6 +791,87 @@ internal sealed class UiSmokeRun
         }
 
         static double Travel(Grid knob) => (knob.RenderTransform as TranslateTransform)?.X ?? double.NaN;
+    }
+
+    /// <summary>
+    /// Whether a thumb can still be dragged. This is the one thing about the lever the rest of the run cannot
+    /// press: a drag is a pointer gesture, and there is no pointer here.
+    /// <para>
+    /// What can be reproduced is the sequence ToggleSwitch's own code performs while a finger is down, because
+    /// that sequence is the hazard. It moves to the Dragging state, then writes KnobTranslateTransform.X on
+    /// every move. The travel used to be a RepositionThemeAnimation, which moves the knob element and leaves the
+    /// transform alone; it is now an animation OF that transform, and an animation that holds its final value
+    /// takes precedence over a write to the property it holds. So if the On state's storyboard is still running
+    /// when the drag begins, every write the drag makes is discarded and the thumb sticks at 20 under the
+    /// finger. Moving to Dragging is what stops it - and that it does stop it is the thing worth measuring,
+    /// because nothing in the template says so.
+    /// </para>
+    /// <para>
+    /// This is not a drag. It does not prove a pointer reaches the Thumb, that the gesture recogniser fires, or
+    /// that the distance is clamped to the travel - the geometry test is the nearest thing there is to that
+    /// (ConsoleSwitchTests). It proves the switch is still writable where WinUI writes it, which is what the
+    /// change to the travel could have taken away.
+    /// </para>
+    /// </summary>
+    /// <summary>
+    /// What a drag leaves behind. A drag is a pointer gesture and there is no pointer here, but the part of it
+    /// that outlives the gesture can be reproduced: ToggleSwitch moves to the Dragging state and then writes
+    /// KnobTranslateTransform.X on every move, and that written value stays on the transform afterwards.
+    /// <para>
+    /// Which is the whole hazard. A state that does not say where the thumb rests inherits whatever the last
+    /// drag wrote, so a lever that was dragged and then switched off leaves its thumb standing wherever the
+    /// finger let go - on a switch that reads OFF. That is not hypothetical: it is what this found the first
+    /// time it ran, and why the Off state now sets the transform instead of assuming it (Controls.xaml:319).
+    /// </para>
+    /// <para>
+    /// The thumb is measured where it is drawn against the track rather than by reading the transform back. A
+    /// write to a property returns that value when it is read whether or not it is what gets drawn, so reading
+    /// it back would pass no matter what the template did.
+    /// </para>
+    /// <para>
+    /// This is still not a drag: no pointer reaches the Thumb, the gesture recogniser never runs, and nothing
+    /// here clamps the distance to the travel - the geometry test is the nearest thing to that
+    /// (ConsoleSwitchTests). It covers what a drag leaves on the transform, which is the part that persists.
+    /// </para>
+    /// </summary>
+    private async Task<int> CheckSwitchDragAsync(ToggleSwitch lever, Grid knob, Border track, string shift)
+    {
+        if (knob.RenderTransform is not TranslateTransform transform)
+        {
+            Problem($"The switch in the {shift} shift has no translate transform on its knob, so nothing could " +
+                    "move it and a drag has nothing to write to");
+            return 1;
+        }
+
+        double Drawn() => knob.TransformToVisual(track).TransformPoint(new Windows.Foundation.Point(0, 0)).X;
+
+        var armed = Drawn();
+
+        // A finger goes down on an armed lever and drags the thumb most of the way back.
+        VisualStateManager.GoToState(lever, "Dragging", false);
+        transform.X = 7;
+        await RenderedAsync();
+
+        // It is let go on the off side: the switch turns off, and the thumb has to come back to the left.
+        lever.IsOn = false;
+        await SettledAsync();
+
+        var rested = Drawn();
+        var travelled = armed - rested;
+
+        if (Math.Abs(travelled - 20) > 1)
+        {
+            Problem($"After a drag, the switch in the {shift} shift turned off with its thumb {travelled:0.#} " +
+                    $"back from where armed drew it, not the 20 it travels: armed {armed:0.#}, off " +
+                    $"{rested:0.#}. The drag wrote 7 onto the transform and the off state left it there, so a " +
+                    "lever that reads OFF is drawn part-way on");
+            return 1;
+        }
+
+        // Left as the rest of the run expects to find it: on, and about to be turned off again.
+        lever.IsOn = true;
+        await SettledAsync();
+        return 0;
     }
 
     /// <summary>A frame, time for a 160ms state to finish, and another frame.</summary>

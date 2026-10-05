@@ -537,6 +537,11 @@
                 <GradientStop Offset="0" Color="#C8333A"/>
                 <GradientStop Offset="1" Color="#7F171A"/>
             </LinearGradientBrush>
+
+            <!-- A locked control: dimmed to .42 in both working shifts, and in High Contrast not dimmed at all -
+                 that shift greys the word with the user's own GrayText instead (:2016-2023, :2367-2369). -->
+            <x:Double x:Key="ConsoleDisabledOpacity">0.42</x:Double>
+            <SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="#D1D1D1"/>
         </ResourceDictionary>
 
         <!-- ============================================================ DAY SHIFT -->
@@ -1050,6 +1055,11 @@
                 <GradientStop Offset="0" Color="#C8333A"/>
                 <GradientStop Offset="1" Color="#7F171A"/>
             </LinearGradientBrush>
+
+            <!-- A locked control: dimmed to .42 in both working shifts, and in High Contrast not dimmed at all -
+                 that shift greys the word with the user's own GrayText instead (:2016-2023, :2367-2369). -->
+            <x:Double x:Key="ConsoleDisabledOpacity">0.42</x:Double>
+            <SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="#2E2E2C"/>
         </ResourceDictionary>
 
         <!-- ============================================================ HIGH CONTRAST -->
@@ -1389,6 +1399,11 @@
             <SolidColorBrush x:Key="SwitchShadeTopBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="SwitchThumbBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
             <SolidColorBrush x:Key="SwitchThumbArmedBrush" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+
+            <!-- A locked control: dimmed to .42 in both working shifts, and in High Contrast not dimmed at all -
+                 that shift greys the word with the user's own GrayText instead (:2016-2023, :2367-2369). -->
+            <x:Double x:Key="ConsoleDisabledOpacity">1</x:Double>
+            <SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="{ThemeResource SystemColorGrayTextColor}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

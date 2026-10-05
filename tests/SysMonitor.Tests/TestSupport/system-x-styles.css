@@ -1,0 +1,2660 @@
+/* system-x-app@eaba14bd8b04113e0dd8a24ab18d0a3f16479459 src/styles.css - the revision this console is transcribed from.
+   Vendored verbatim so the anchors in the console sources can be checked without the System-X
+   working tree, which has moved on. Written by:
+       git -C <system-x-app> show eaba14b:src/styles.css
+   Lines below start at 1, so a `:NNNN` anchor is this file NNNN lines past this header. */
+@import "tailwindcss";
+
+/* ==========================================================================
+   SYSTEM-X - COMMAND CONSOLE (Carbon Pro chassis)
+   --------------------------------------------------------------------------
+   Design language mirrored from Team-X:
+     ..\Team-X-Website\DESIGN.md   (v3 / Command Console, re-based 2026-06-28)
+     ..\Team-X\apps\desktop\src\renderer\src\styles\globals.css (app recipes)
+
+   Four-layer raised-hardware depth:
+     0 chassis   - page canvas, flat
+     1 faceplate - brushed aluminum section panels (stripe + hex bolts)
+     2 well      - recessed, ALWAYS dark in both shifts (displays)
+     3 control   - raised caps, lamps, cards, buttons
+
+   Dual-shift: html[data-theme="night"] (default) / html[data-theme="day"].
+   Displays (wells, LCDs, lamps, VU windows) stay void-black in BOTH shifts.
+   Red means LIVE, not error. Steady = live. 1Hz blink = unacknowledged.
+   NO-GO = settled fault (steady, dedicated tone).
+   ========================================================================== */
+
+/* ==========================================================================
+   FONTS - self-hosted woff2 subsets. Four faces, four jobs, zero overlap.
+   Archivo (display/placards) - Public Sans (body/UI)
+   Departure Mono (telemetry) - Iosevka (code/streams)
+   ========================================================================== */
+
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("./assets/fonts/archivo-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("./assets/fonts/archivo-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("./assets/fonts/archivo-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("./assets/fonts/archivo-italic-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./assets/fonts/public-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./assets/fonts/public-sans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./assets/fonts/public-sans-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./assets/fonts/public-sans-italic-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Departure Mono v1.500 - SIL OFL 1.1, vendored from the Team-X app. */
+@font-face {
+  font-family: "Departure Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./assets/fonts/departure-mono.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Iosevka";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/iosevka-latin.woff2") format("woff2");
+}
+
+/* ==========================================================================
+   THEME TOKENS
+   Values copied from Team-X DESIGN.md section 7. Never invent inline values.
+   ========================================================================== */
+
+@theme {
+  /* ---- Carbon ramp (Night Ops surfaces) ---------------------------------- */
+  --color-void: #000000;
+  --color-carbon-950: #050505;
+  --color-carbon-900: #0d0d0d;
+  --color-carbon-850: #101010;
+  --color-carbon-800: #141414;
+  --color-carbon-750: #1a1a1a;
+  --color-carbon-700: #262626;
+  --color-anthracite: #3a3a3a;
+
+  /* ---- Silver text ramp --------------------------------------------------
+     ALIASED, not literal, and that is load-bearing. These four are the
+     Tailwind-utility spelling of the ramp the CSS below reaches for as
+     `var(--platinum)` and friends -- but as hexes only the CSS spelling
+     followed html[data-theme="day"], because only the :root contract vars are
+     re-skinned. `.field-label` darkened for Day Shift and `text-silver-mute`
+     did not, so the utility kept painting #888888 onto the near-white rail at
+     2.11:1. That one divergence was 342 of the 345 below-AA silver-mute pairs
+     measured in Day Shift.
+     Pointing them at the contract vars makes both spellings the same colour in
+     both shifts. The displays-stay-dark group re-declares all four, because a
+     custom property is substituted where it is DECLARED: an alias resolved on
+     :root inherits as the already-substituted Day value, so a well would
+     otherwise get dark-on-dark text — see the block at src/styles.css:1255. */
+  --color-platinum: var(--platinum);
+  --color-silver-bright: var(--silver-bright);
+  --color-silver: var(--silver);
+  --color-silver-mute: var(--silver-mute);
+
+  /* ---- ARMED RED - the identity. Steady = LIVE, never "error". ----------- */
+  --color-armed: #aa2024;
+  --color-armed-lit: #e8343a;
+  --color-armed-deep: #7f171a;
+  --color-chrome: #e6e6e6;
+
+  /* ---- LED semantics ----------------------------------------------------- */
+  --color-led-go: #41e25e;
+  --color-led-hold: #ffb000;
+  --color-led-warn: #ff4438;
+  --color-led-nogo: #c8453e;
+  --color-led-scope: #58c4bc;
+  --color-led-orange: #ff7a1a;
+
+  /* ======================================================================
+     LEGACY NAME BRIDGE
+     The existing pages address colors by the pre-restyle names. Repointing
+     them here re-skins every page through the cascade instead of by hand.
+     Shift-dependent entries alias the app-native contract vars declared on
+     :root below, so they follow html[data-theme].
+     ====================================================================== */
+  --color-black: var(--carbon-950);
+  --color-charcoal: var(--carbon-900);
+  --color-charcoal-light: var(--carbon-800);
+  --color-charcoal-lighter: var(--carbon-700);
+  --color-carbon: var(--carbon-950);
+  --color-carbon-deep: #000000;
+  --color-carbon-plate: var(--carbon-850);
+  --color-graphite: var(--carbon-900);
+  --color-graphite-light: var(--carbon-800);
+
+  --color-steel: var(--silver-mute);
+  /* `text-grey-dark` pointed at --anthracite, and --anthracite is a SURFACE:
+     it is declared with the carbon ramp at src/styles.css:552, not with the
+     text ramp. #3A3A3A on a #2C2C2C plate is 1.22:1, and it was carrying real
+     copy -- the File Shredder empty state and the Hosts Editor domain list.
+     There is no darker TEXT step to point it at: --silver-mute is already at
+     the AA floor for the lightest chassis surface, so "a more muted muted" has
+     nowhere to go in this palette and the legacy name collapses onto it. That
+     is the honest answer rather than inventing a step that cannot pass.
+     Checked before repointing: --color-grey-dark is only ever used as text (4
+     call sites, all `text-grey-dark`), never as a background or a border, so
+     nothing that wanted the surface loses it. */
+  --color-grey-dark: var(--silver-mute);
+  --color-grey: var(--silver-mute);
+  --color-grey-light: var(--silver);
+  --color-grey-lighter: var(--silver-bright);
+  --color-white: var(--platinum);
+  --color-white-muted: var(--silver-bright);
+
+  --color-red: var(--armed);
+  --color-red-dark: var(--armed-deep);
+  --color-red-light: var(--armed-lit);
+  --color-red-bright: var(--armed-lit);
+
+  --color-background: var(--carbon-950);
+  --color-foreground: var(--platinum);
+  --color-primary: var(--armed);
+  --color-primary-foreground: #fff3f0;
+  --color-primary-hover: var(--armed-lit);
+  --color-secondary: var(--carbon-800);
+  --color-secondary-foreground: var(--platinum);
+  --color-muted: var(--carbon-800);
+  --color-muted-foreground: var(--silver);
+  --color-accent: var(--armed-deep);
+  --color-accent-foreground: #fff3f0;
+  --color-card: var(--carbon-900);
+  --color-card-foreground: var(--platinum);
+  --color-card-hover: var(--carbon-800);
+  --color-border: var(--carbon-700);
+  --color-border-hover: var(--anthracite);
+  --color-ring: var(--armed-lit);
+
+  --color-success: var(--color-led-go);
+  --color-warning: var(--color-led-hold);
+  --color-error: var(--color-led-warn);
+  --color-info: var(--color-led-scope);
+  --color-status-good: var(--color-led-go);
+  --color-status-moderate: var(--color-led-hold);
+  --color-status-bad: var(--color-led-nogo);
+
+  /* ======================================================================
+     TAILWIND PALETTE OVERRIDE -> LED VOCABULARY
+     The console has five status colors, not a rainbow. Every stock Tailwind
+     hue the pages reach for is folded onto the LED it actually means:
+       green / emerald  -> GO
+       yellow / amber   -> HOLD
+       red              -> WARN / NO-GO
+       blue / cyan      -> SCOPE (informational)
+       orange           -> the VU orange zone
+     ====================================================================== */
+  --color-green-100: #c6f7d2;
+  --color-green-200: #a0f0b5;
+  --color-green-300: #6bea88;
+  --color-green-400: #41e25e;
+  --color-green-500: #41e25e;
+  --color-green-600: #2fbf48;
+  --color-green-700: #1f9b37;
+  --color-emerald-100: #c6f7d2;
+  --color-emerald-200: #a0f0b5;
+  --color-emerald-300: #6bea88;
+  --color-emerald-400: #41e25e;
+  --color-emerald-500: #41e25e;
+  --color-emerald-600: #2fbf48;
+  --color-emerald-700: #1f9b37;
+  --color-lime-400: #41e25e;
+  --color-lime-500: #41e25e;
+  --color-teal-400: #41e25e;
+  --color-teal-500: #41e25e;
+
+  --color-yellow-100: #ffe8b8;
+  --color-yellow-200: #ffdd99;
+  --color-yellow-300: #ffc94d;
+  --color-yellow-400: #ffb000;
+  --color-yellow-500: #ffb000;
+  --color-yellow-600: #d99500;
+  --color-yellow-700: #b37b00;
+  --color-amber-100: #ffe8b8;
+  --color-amber-200: #ffdd99;
+  --color-amber-300: #ffc94d;
+  --color-amber-400: #ffb000;
+  --color-amber-500: #ffb000;
+  --color-amber-600: #d99500;
+  --color-amber-700: #b37b00;
+
+  --color-orange-400: #ff7a1a;
+  --color-orange-500: #ff7a1a;
+  --color-orange-600: #e06400;
+
+  --color-red-100: #ffdedb;
+  --color-red-200: #ffc9c5;
+  --color-red-300: #ff8c84;
+  --color-red-400: #ff6459;
+  --color-red-500: #ff4438;
+  --color-red-600: #c8453e;
+  --color-red-700: #aa2024;
+  --color-rose-400: #ff6459;
+  --color-rose-500: #ff4438;
+
+  --color-cyan-100: #d6f2f0;
+  --color-cyan-200: #b4e8e4;
+  --color-cyan-300: #86d8d2;
+  --color-cyan-400: #58c4bc;
+  --color-cyan-500: #58c4bc;
+  --color-cyan-600: #3f9d96;
+  --color-sky-400: #58c4bc;
+  --color-sky-500: #58c4bc;
+  --color-blue-100: #d6f2f0;
+  --color-blue-200: #b4e8e4;
+  --color-blue-300: #86d8d2;
+  --color-blue-400: #58c4bc;
+  --color-blue-500: #58c4bc;
+  --color-blue-600: #3f9d96;
+  --color-indigo-400: #58c4bc;
+  --color-indigo-500: #58c4bc;
+  --color-violet-400: #58c4bc;
+  --color-violet-500: #58c4bc;
+  --color-purple-300: #86d8d2;
+  --color-purple-400: #58c4bc;
+  --color-purple-500: #58c4bc;
+  --color-fuchsia-400: #58c4bc;
+  --color-pink-400: #ff6459;
+
+  /* Neutral stock ramps fold onto the carbon/silver ramps so a stray
+     `bg-zinc-800` cannot open a hole in the chassis. */
+  --color-slate-950: var(--carbon-950);
+  --color-slate-900: var(--carbon-900);
+  --color-slate-800: var(--carbon-800);
+  --color-slate-700: var(--carbon-700);
+  --color-slate-600: var(--anthracite);
+  --color-slate-500: var(--silver-mute);
+  --color-slate-400: var(--silver);
+  --color-slate-300: var(--silver-bright);
+  --color-slate-200: var(--platinum);
+  --color-gray-950: var(--carbon-950);
+  --color-gray-900: var(--carbon-900);
+  --color-gray-800: var(--carbon-800);
+  --color-gray-700: var(--carbon-700);
+  --color-gray-600: var(--anthracite);
+  --color-gray-500: var(--silver-mute);
+  --color-gray-400: var(--silver);
+  --color-gray-300: var(--silver-bright);
+  --color-gray-200: var(--platinum);
+  --color-zinc-950: var(--carbon-950);
+  --color-zinc-900: var(--carbon-900);
+  --color-zinc-800: var(--carbon-800);
+  --color-zinc-700: var(--carbon-700);
+  --color-zinc-600: var(--anthracite);
+  --color-zinc-500: var(--silver-mute);
+  --color-zinc-400: var(--silver);
+  --color-zinc-300: var(--silver-bright);
+  --color-neutral-950: var(--carbon-950);
+  --color-neutral-900: var(--carbon-900);
+  --color-neutral-800: var(--carbon-800);
+  --color-neutral-700: var(--carbon-700);
+  --color-neutral-400: var(--silver);
+
+  /* ---- Type: four families, four jobs (DESIGN.md section 6) -------------- */
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo", "Public Sans", sans-serif;
+  --font-data: "Departure Mono", ui-monospace, "Cascadia Mono", Consolas,
+    monospace;
+  --font-mono: "Iosevka", "Departure Mono", ui-monospace, Consolas, monospace;
+  --font-stream: "Iosevka", "Departure Mono", ui-monospace, monospace;
+
+  /* ---- Radius: machined. Never a uniform radius across surface types. ----
+     Every stock step is folded onto one of the three machined values so
+     `rounded-2xl` on a legacy panel lands on the 2px plate radius. */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
+  --radius-4xl: 2px;
+
+  /* ---- Elevation --------------------------------------------------------- */
+  --shadow-carbon: 0 1px 0 rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.7),
+    0 12px 28px rgba(0, 0, 0, 0.55), 0 40px 80px rgba(0, 0, 0, 0.4);
+  --shadow-red: 0 0 0 1px var(--armed-edge), 0 0 24px var(--armed-glow);
+
+  /* ---- Motion: mechanical envelopes (DESIGN.md section 10) --------------- */
+  --animate-fade-in: fade-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-fade-out: fade-out 0.16s cubic-bezier(0.4, 0, 1, 1);
+  --animate-slide-in: slide-in 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-slide-up: slide-up 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-pulse-red: on-air-pulse 2s ease-in-out infinite;
+  --animate-scan: scan 2.4s ease-in-out infinite;
+  --animate-strike: led-strike 320ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  --animate-blink-1hz: blink-1hz 1000ms step-end infinite;
+  --animate-vu-tip: vu-tip 220ms steps(2, jump-none) infinite;
+  --animate-forge-sweep: cap-glint 2.8s ease-in-out infinite;
+  --animate-grid-drift: grid-drift 18s linear infinite;
+  --animate-shimmer-carbon: well-sweep 1.6s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes slide-in {
+    from {
+      transform: translateX(-8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slide-up {
+    from {
+      transform: translateY(12px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* The strike: 80ms attack with overshoot bloom, settles at sustain. */
+  @keyframes led-strike {
+    0% {
+      opacity: 0.35;
+      filter: brightness(0.6);
+    }
+    25% {
+      opacity: 1;
+      filter: brightness(1.55);
+    }
+    100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+  }
+
+  /* 1Hz step blink. Unacknowledged warnings only - never decorative. */
+  @keyframes blink-1hz {
+    0%,
+    49.9% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0.18;
+    }
+  }
+
+  @keyframes on-air-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 6px 1px currentColor;
+    }
+    50% {
+      opacity: 0.55;
+      box-shadow: 0 0 2px 0 currentColor;
+    }
+  }
+
+  /* Flickering tip on the boundary VU segment. */
+  @keyframes vu-tip {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes scan {
+    0% {
+      transform: translateY(-120%);
+    }
+    100% {
+      transform: translateY(220%);
+    }
+  }
+
+  /* Hover-only specular glint across a machined cap. */
+  @keyframes cap-glint {
+    0% {
+      transform: translateX(-140%) skewX(-18deg);
+      opacity: 0;
+    }
+    18% {
+      opacity: 0.5;
+    }
+    60% {
+      opacity: 0.12;
+    }
+    100% {
+      transform: translateX(240%) skewX(-18deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes grid-drift {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 96px 96px;
+    }
+  }
+
+  @keyframes well-sweep {
+    0% {
+      transform: translateX(-140%);
+    }
+    100% {
+      transform: translateX(140%);
+    }
+  }
+}
+
+/* ==========================================================================
+   APP-NATIVE CONTRACT
+   The recipe variables the four-layer CSS below reads. Declared on :root so
+   html[data-theme="day"] can re-skin the chassis without touching geometry.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --void: #000000;
+  --carbon-950: #050505;
+  --carbon-900: #0d0d0d;
+  --carbon-850: #101010;
+  --carbon-800: #141414;
+  --carbon-750: #1a1a1a;
+  --carbon-700: #262626;
+  --anthracite: #3a3a3a;
+
+  /* text
+     --silver-mute is set by the LIGHTEST ground it lands on, not by taste.
+     That ground is the stripe grain highlight: --stripe-1 (#2A2A2A) under
+     --stripe-grain-a (white at 3.5%) composites to #313131, and .serial prints
+     on it 218 times per sweep. At #888888 that pair was 3.65:1 -- the single
+     largest block of below-AA text in the app, 285 pairs in Night Shift alone,
+     because this one token carries .serial, .field-label, .placard and
+     .nav-cap. #9C9C9C clears it at 4.74:1 and clears every darker console
+     surface by more. Going lighter would close the step down from --silver
+     (#B3B3B3) to nothing; going darker fails the grain. Displays are not
+     affected either way: they pin their own value below. */
+  --platinum: #f5f5f5;
+  --silver-bright: #d1d1d1;
+  --silver: #b3b3b3;
+  --silver-mute: #9c9c9c;
+  /* The dimmest legible text step, and the only thing it ever paints is a lamp
+     that is not lit (src/styles.css:1693 and src/styles.css:1823) -- nothing in
+     the app uses --graphite as a surface. It was #5A5A5A, which is 2.69:1 on
+     the lamp's own ground (#131313, the top stop of its gradient), so STBY was
+     the one lamp state an operator could not read. #808080 is 4.70:1 there.
+     It stays visibly the dimmest thing in the lamp family: no hue, no glow,
+     and two steps below --silver-mute. An unlit lamp should look unlit; it
+     should not be illegible, and those are not the same requirement. */
+  --graphite: #808080;
+
+  /* armed red - --armed / --armed-deep are constant across shifts.
+     --armed-lit deepens on Day for AA on the silver chassis.
+     --armed-display is the CONSTANT bright form for armed text on void
+     displays, which stay dark in both shifts. */
+  --armed: #aa2024;
+  --armed-lit: #e8343a;
+  --armed-display: #e8343a;
+  --armed-deep: #7f171a;
+  --armed-edge: rgba(232, 52, 58, 0.35);
+  --armed-glow: rgba(232, 52, 58, 0.22);
+  --armed-soft: rgba(170, 32, 36, 0.12);
+  --armed-fg: #fff3f0;
+
+  /* chrome - the polished bits, used sparingly */
+  --chrome: #e6e6e6;
+  --chrome-edge: rgba(230, 230, 230, 0.28);
+  --chrome-soft: rgba(230, 230, 230, 0.1);
+
+  /* LED semantics - identical both shifts */
+  --led-go: #41e25e;
+  --led-hold: #ffb000;
+  --led-warn: #ff4438;
+  --led-nogo: #c8453e;
+  --led-scope: #58c4bc;
+  --led-orange: #ff7a1a;
+  --go-soft: rgba(65, 226, 94, 0.1);
+  --hold-soft: rgba(255, 176, 0, 0.1);
+  --warn-soft: rgba(255, 68, 56, 0.12);
+  --nogo-soft: rgba(200, 69, 62, 0.12);
+  --scope-soft: rgba(88, 196, 188, 0.1);
+  --go-edge: rgba(65, 226, 94, 0.35);
+  --hold-edge: rgba(255, 176, 0, 0.35);
+  --warn-edge: rgba(255, 68, 56, 0.4);
+  --nogo-edge: rgba(200, 69, 62, 0.4);
+  --scope-edge: rgba(88, 196, 188, 0.32);
+
+  /* STATE AS TEXT, one token per LED state.
+     Read this as: "the GO colour, safe to print on whatever ground the element
+     is standing on." Out on the chassis it follows the shift, because the
+     literal LED hexes are tuned for a black ground and #41E25E on Day Shift's
+     silver is 1.27:1. Inside a well or a display the group below pins it back
+     to the literal LED, because that surface is void-black in both shifts.
+     One token covers both because the element cannot always know which ground
+     it is standing on: BackupUtility's status card paints the SAME state
+     colour on a .well icon tile and on a 22px reading out on the faceplate
+     (src/pages/BackupUtility.tsx:141).
+     These started as `html[data-theme="day"] .chip.go { color: #135724 }` and
+     four siblings. A descendant selector is the one form the
+     displays-stay-dark group cannot undo -- a token can be re-declared on a
+     well, a rule on <html> cannot -- so the moment .display began painting its
+     own void black, a `go` chip inside one was still handed Day's #135724 on
+     black, at 1.10:1. Same shape as --silver-mute, same fix. */
+  --state-go: var(--led-go);
+  --state-hold: var(--led-hold);
+  --state-warn: var(--led-warn);
+  --state-nogo: var(--led-nogo);
+  --state-exec: var(--led-scope);
+
+  /* displays-stay-dark group - defined once, never overridden by a shift */
+  --display-bg-top: #040404;
+  --display-bg-bottom: #070707;
+  --display-border: rgba(0, 0, 0, 0.8);
+  --display-fg: #b3b3b3;
+  --display-fg-mute: #8a8a86;
+  --phosphor: #41e25e;
+  --phosphor-dim: #2e5237;
+  --scrim: rgba(0, 0, 0, 0.72);
+
+  /* hairlines */
+  --hairline: rgba(255, 255, 255, 0.08);
+  --hairline-strong: rgba(255, 255, 255, 0.16);
+
+  /* faceplate / control / stripe gradient stops (shift-dependent) */
+  --plate-1: #1c1c1c;
+  --plate-2: #151515;
+  --plate-3: #101010;
+  --plate-4: #0c0c0c;
+  --plate-key: rgba(255, 255, 255, 0.04);
+  --plate-edge: rgba(255, 255, 255, 0.06);
+  --plate-lip: rgba(255, 255, 255, 0.1);
+  --plate-under: rgba(0, 0, 0, 0.7);
+
+  --cap-1: #1f1f1f;
+  --cap-2: #171717;
+  --cap-3: #121212;
+  --cap-key: rgba(255, 255, 255, 0.06);
+  --cap-edge: rgba(255, 255, 255, 0.04);
+
+  --stripe-1: #2a2a2a;
+  --stripe-2: #1f1f1f;
+  --stripe-3: #181818;
+  --stripe-grain-a: rgba(255, 255, 255, 0.035);
+  --stripe-grain-b: rgba(255, 255, 255, 0.012);
+  --stripe-grain-c: rgba(0, 0, 0, 0.06);
+
+  --edge-light: rgba(230, 230, 230, 0.18);
+  --edge-light-mid: rgba(230, 230, 230, 0.32);
+
+  --hex-1: #a4a4a4;
+  --hex-2: #7c7c7c;
+  --hex-3: #525252;
+  --hex-4: #323232;
+  --hex-5: #181818;
+  --hex-6: #0a0a0a;
+
+  /* selection + focus */
+  --selection-bg: rgba(170, 32, 36, 0.35);
+  --focus: #e6e6e6;
+
+  /* spacing (base-4, Fibonacci-flavored) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 20px;
+  --sp-5: 32px;
+  --sp-6: 52px;
+  --sp-7: 84px;
+
+  /* machined radii */
+  --r-card: 2px;
+  --r-control: 4px;
+  --r-inset: 3px;
+  --r-overlay: 8px;
+  --r-pill: 9999px;
+
+  /* mechanical eases */
+  --ease-snap: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-led: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --ease-vu: cubic-bezier(0.2, 0.85, 0.15, 1);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* scrollbar */
+  --scrollbar-thumb: rgba(170, 32, 36, 0.58);
+  --scrollbar-thumb-hover: rgba(232, 52, 58, 0.82);
+}
+
+/* ==========================================================================
+   DAY SHIFT - silver anodized. A designed second skin, never an auto-invert.
+   Geometry, depth structure, spacing, type, armed red, and LED meanings are
+   identical to Night. Only the chassis material changes.
+   Displays (wells, LCDs, lamps, VU windows) are NOT re-skinned: see the
+   displays-stay-dark block further down.
+   ========================================================================== */
+
+html[data-theme="day"] {
+  color-scheme: light;
+
+  --carbon-950: #c8c8c4;
+  --carbon-900: #d2d2ce;
+  --carbon-850: #cecec9;
+  --carbon-800: #d8d8d4;
+  --carbon-750: #dededa;
+  --carbon-700: #b0b0ac;
+  --anthracite: #96968f;
+
+  --platinum: #1a1a1a;
+  --silver-bright: #2e2e2c;
+  --silver: #44443f;
+  --silver-mute: #4f4f4b;
+  --graphite: #96968f;
+
+  /* State text on the silver chassis, measured against --carbon-950 (#C8C8C4),
+     the darkest Day surface and therefore the worst-case ground. Anything that
+     clears there clears on the lighter plate and chip tints above it too.
+
+       go    #135724  5.18:1
+       hold  #6F4700  4.86:1
+       warn  #9E120A  4.92:1
+       nogo  #9E120A  4.92:1
+       exec  #1D5854  4.86:1
+
+     exec was #256F69 and is the one value here that did not clear -- 3.52:1 on
+     that ground, and measured at 4.25:1 and 4.38:1 on the two surfaces it
+     actually lands on. It came across unchanged from the descendant-selector
+     rules these tokens replaced, and the ratio had never been computed. It is
+     darkened along its own hue so the teal still reads as the scope colour.
+
+     warn and nogo deliberately land on the same red: that is why a warn RAIL
+     blinks and a nogo rail does not (src/styles.css:1195) and why the word is
+     always printed beside the colour. --state-armed does not exist because
+     armed reads --armed-lit, which the block below already re-skins. */
+  --state-go: #135724;
+  --state-hold: #6f4700;
+  --state-warn: #9e120a;
+  --state-nogo: #9e120a;
+  --state-exec: #1d5854;
+
+  /* Armed text deepens for AA on the silver chassis (4.52:1 on #C8C8C4).
+     --armed-display is intentionally NOT overridden. */
+  --armed-lit: #a31e23;
+  --armed-edge: rgba(163, 30, 35, 0.45);
+  --armed-glow: rgba(163, 30, 35, 0.2);
+
+  --hairline: rgba(0, 0, 0, 0.1);
+  --hairline-strong: rgba(0, 0, 0, 0.2);
+  --chrome-edge: rgba(0, 0, 0, 0.3);
+  --focus: #2a2a2a;
+
+  --plate-1: #f5f5f3;
+  --plate-2: #eaeae7;
+  --plate-3: #e0e0dc;
+  --plate-4: #d8d8d4;
+  --plate-key: rgba(255, 255, 255, 0.55);
+  --plate-edge: rgba(0, 0, 0, 0.12);
+  --plate-lip: rgba(255, 255, 255, 0.92);
+  --plate-under: rgba(0, 0, 0, 0.16);
+
+  --cap-1: #f7f7f5;
+  --cap-2: #ebebe8;
+  --cap-3: #dededa;
+  --cap-key: rgba(255, 255, 255, 0.75);
+  --cap-edge: rgba(0, 0, 0, 0.1);
+
+  --stripe-1: #f0f0ed;
+  --stripe-2: #e0e0dc;
+  --stripe-3: #d5d5d1;
+  --stripe-grain-a: rgba(0, 0, 0, 0.035);
+  --stripe-grain-b: rgba(0, 0, 0, 0.012);
+  --stripe-grain-c: rgba(255, 255, 255, 0.45);
+
+  --edge-light: rgba(255, 255, 255, 0.6);
+  --edge-light-mid: rgba(255, 255, 255, 0.95);
+
+  --hex-1: #ffffff;
+  --hex-2: #d8d8d4;
+  --hex-3: #aaaaa4;
+  --hex-4: #868680;
+  --hex-5: #5c5c58;
+  --hex-6: #44443f;
+
+  --scrollbar-thumb: rgba(170, 32, 36, 0.5);
+  --scrollbar-thumb-hover: rgba(163, 30, 35, 0.8);
+
+  /* LED-family text on the silver chassis.
+     The literal LED hexes are tuned for a black ground: #FFB000 amber sits at
+     3.02:1 on #C8C8C4, which fails AA outright. Day Shift therefore darkens
+     the ramp steps that get used as TEXT and BORDERS out on the chassis. Every
+     value below clears 4.5:1 against --carbon-950 (#C8C8C4), the worst-case
+     ground, and so also clears it on the lighter card and faceplate surfaces.
+     Dots, wells, lamps, and VU segments are unaffected: the display group
+     further down pins the literal LEDs back inside every dark surface, exactly
+     as it does for the silver text ramp. */
+  --color-green-100: #1c8a44;
+  --color-green-200: #167036;
+  --color-green-300: #0f5c2c;
+  --color-green-400: #0f5c2c;
+  --color-green-500: #0f5c2c;
+  --color-green-600: #0b4522;
+  --color-green-700: #0b4522;
+  --color-emerald-100: #1c8a44;
+  --color-emerald-200: #167036;
+  --color-emerald-300: #0f5c2c;
+  --color-emerald-400: #0f5c2c;
+  --color-emerald-500: #0f5c2c;
+  --color-emerald-600: #0b4522;
+  --color-emerald-700: #0b4522;
+  --color-lime-400: #0f5c2c;
+  --color-lime-500: #0f5c2c;
+  --color-teal-400: #0f5c2c;
+  --color-teal-500: #0f5c2c;
+
+  --color-yellow-100: #7a5000;
+  --color-yellow-200: #6f4700;
+  --color-yellow-300: #6f4700;
+  --color-yellow-400: #6f4700;
+  --color-yellow-500: #6f4700;
+  --color-yellow-600: #5a3900;
+  --color-yellow-700: #5a3900;
+  --color-amber-100: #7a5000;
+  --color-amber-200: #6f4700;
+  --color-amber-300: #6f4700;
+  --color-amber-400: #6f4700;
+  --color-amber-500: #6f4700;
+  --color-amber-600: #5a3900;
+  --color-amber-700: #5a3900;
+
+  --color-orange-400: #7a3600;
+  --color-orange-500: #7a3600;
+  --color-orange-600: #632c00;
+
+  --color-red-100: #b81810;
+  --color-red-200: #a3140c;
+  --color-red-300: #a3140c;
+  --color-red-400: #a3140c;
+  --color-red-500: #a3140c;
+  --color-red-600: #870f09;
+  --color-red-700: #870f09;
+  --color-rose-400: #a3140c;
+  --color-rose-500: #a3140c;
+  --color-pink-400: #a3140c;
+
+  --color-cyan-100: #1f605b;
+  --color-cyan-200: #1a524e;
+  --color-cyan-300: #1a524e;
+  --color-cyan-400: #1a524e;
+  --color-cyan-500: #1a524e;
+  --color-cyan-600: #133d3a;
+  --color-sky-400: #1a524e;
+  --color-sky-500: #1a524e;
+  --color-blue-100: #1f605b;
+  --color-blue-200: #1a524e;
+  --color-blue-300: #1a524e;
+  --color-blue-400: #1a524e;
+  --color-blue-500: #1a524e;
+  --color-blue-600: #133d3a;
+  --color-indigo-400: #1a524e;
+  --color-indigo-500: #1a524e;
+  --color-violet-400: #1a524e;
+  --color-violet-500: #1a524e;
+  --color-purple-300: #1a524e;
+  --color-purple-400: #1a524e;
+  --color-purple-500: #1a524e;
+  --color-fuchsia-400: #1a524e;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--carbon-700);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--carbon-950);
+    color: var(--platinum);
+    font-family: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Heading levels are Public Sans 600 (DESIGN.md section 5). Archivo caps are
+     reserved for display sizes, view titles, placards, and lamp codes: use
+     `.view-title` or `.font-display-tech` to opt into them. Forcing caps on
+     every heading would shout, and hierarchy comes from weight, size, AND
+     color rather than size alone. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--platinum);
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: "Iosevka", "Departure Mono", ui-monospace, monospace;
+  }
+
+  ::selection {
+    background: var(--selection-bg);
+    color: var(--platinum);
+  }
+
+  /* Scrollbars: armed thumb on the chassis. */
+  * {
+    scrollbar-color: var(--scrollbar-thumb) var(--carbon-950);
+    scrollbar-width: thin;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--carbon-950);
+  }
+  ::-webkit-scrollbar-thumb {
+    min-height: 48px;
+    border: 2px solid var(--carbon-950);
+    border-radius: var(--r-pill);
+    background-color: var(--scrollbar-thumb);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+  ::-webkit-scrollbar-corner {
+    background: var(--carbon-950);
+  }
+
+  /* Focus: the armed-red glow ring is the default. The machined-cap family
+     takes a neutral outline instead (an outline sits outside the cap's
+     box-shadow stack and contrasts every cap fill, red ones included). */
+  :focus-visible {
+    outline: 2px solid var(--armed-lit);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--armed-glow);
+  }
+  .btn:focus-visible,
+  .btn-armed:focus-visible,
+  .btn-chrome:focus-visible,
+  .btn-ghost:focus-visible,
+  .lamp:focus-visible,
+  .nav-cap:focus-visible,
+  .chip:focus-visible,
+  .switch:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  select,
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--armed);
+  }
+  select option,
+  select optgroup {
+    background-color: var(--carbon-850);
+    color: var(--platinum);
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(1);
+    opacity: 0.72;
+  }
+  html[data-theme="day"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: none;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+/* ==========================================================================
+   LAYER 1 - RAISED FACEPLATE (brushed black aluminum)
+   Depth is layered shadow + edge light + bevel, never a flat drop shadow.
+   ========================================================================== */
+
+@layer components {
+  .faceplate {
+    position: relative;
+    border-radius: var(--r-card);
+    background:
+      radial-gradient(
+        ellipse 80% 60% at 30% -10%,
+        var(--plate-key) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        180deg,
+        var(--plate-1) 0%,
+        var(--plate-2) 35%,
+        var(--plate-3) 70%,
+        var(--plate-4) 100%
+      );
+    border: 1px solid var(--plate-edge);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      inset 1px 0 0 rgba(255, 255, 255, 0.025),
+      inset -1px 0 0 rgba(0, 0, 0, 0.4),
+      0 1px 0 rgba(0, 0, 0, 0.9),
+      0 2px 4px rgba(0, 0, 0, 0.7),
+      0 12px 28px rgba(0, 0, 0, 0.55),
+      0 40px 80px rgba(0, 0, 0, 0.4);
+  }
+
+  html[data-theme="day"] .faceplate {
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      inset 1px 0 0 rgba(255, 255, 255, 0.5),
+      inset -1px 0 0 rgba(0, 0, 0, 0.08),
+      0 1px 0 rgba(0, 0, 0, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.16),
+      0 12px 28px rgba(0, 0, 0, 0.14),
+      0 40px 80px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Edge-light strip along the top lip, inset to clear the corner bolts. */
+  .faceplate::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    z-index: 6;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--edge-light) 20%,
+      var(--edge-light-mid) 50%,
+      var(--edge-light) 80%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Top-right key light. */
+  .faceplate::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 140px;
+    height: 60px;
+    border-radius: var(--r-card);
+    background: radial-gradient(
+      ellipse at 80% 0%,
+      var(--plate-key) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  /* Standard faceplate body gutter. 24px horizontal clears the corner bolts
+     (16px inset 7px, so they occupy the first 23px), and the deeper bottom
+     pad keeps the last line of copy off the lower pair. */
+  .faceplate-body {
+    padding: 16px 24px 24px;
+  }
+
+  /* ------------------------------------------------------------------------
+     LAYER 1b - RACK MODULE PLATE
+     A list row is a module seated in the rack, not a panel floating above the
+     chassis: the same brushed material as .faceplate, with the deep drop
+     shadow removed because it is mounted flush.
+
+     The state rail is the reason this recipe exists. Six pages each invented
+     their own way to make a card carry a status -- 'bg-yellow-500/10
+     border-yellow-500/30' and five near-variants of it -- and a 10% wash over
+     carbon is close to invisible: the weakest available signal, paid for in
+     the contrast of every word printed on top of it. A real module reports its
+     condition on a light pipe down its mounting edge. That reads down a list
+     of forty at a glance, and it leaves the plate's own surface at a known
+     luminance, so body copy keeps the ratio it was designed with.
+     ------------------------------------------------------------------------ */
+  .plate {
+    position: relative;
+    border-radius: var(--r-card);
+    background: linear-gradient(180deg, var(--plate-1) 0%, var(--plate-3) 100%);
+    border: 1px solid var(--plate-edge);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  /* The light pipe. Transparent until a state class sets --rail, so a plain
+     .plate is a neutral module and costs nothing extra to render. */
+  .plate::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: var(--r-card) 0 0 var(--r-card);
+    background: var(--rail, transparent);
+    pointer-events: none;
+  }
+
+  /* Each rail resolves through the Tailwind palette override rather than the
+     literal LED hex, which is what makes it survive Day Shift: the override
+     re-skins those same tokens to the darkened ramp that clears contrast on a
+     silver ground. Wiring the rails to --led-go and friends instead would look
+     right at night and put bright #41E25E on a near-white plate by day. */
+  .plate.go {
+    --rail: var(--color-green-500);
+    border-color: var(--go-edge);
+  }
+  .plate.hold {
+    --rail: var(--color-yellow-500);
+    border-color: var(--hold-edge);
+  }
+  .plate.warn {
+    --rail: var(--color-red-500);
+    border-color: var(--warn-edge);
+  }
+  .plate.nogo {
+    --rail: var(--color-red-600);
+    border-color: var(--nogo-edge);
+  }
+  /* WARN blinks, NO-GO holds. Section 4's rule -- steady means live, a 1Hz
+     blink means unacknowledged -- is the only thing that separates these two
+     states, and on a rail it is the only thing that CAN: they are one step
+     apart on the red ramp, and Day Shift collapses even that step, painting
+     .chip.warn and .chip.nogo the same #9e120a. A steady warn rail is not a
+     dimmer nogo, it is an indistinguishable one, and a module that cannot
+     report the difference between "nobody has looked at this yet" and "this
+     failed and we know" is lying by omission.
+     The blink rides the pseudo-element, not the plate, for two reasons: the
+     surface stays at the luminance the body copy was contrast-checked against,
+     and the words on it never dim. That also keeps it off .chip -- severity
+     RANKS wear a warn chip (see the note above SEVERITY_CHIP in
+     src/pages/SecurityScanner.tsx), and a rank must never blink like an alarm. */
+  .plate.warn::before {
+    animation: blink-1hz 1000ms step-end infinite;
+  }
+  .plate.exec {
+    --rail: var(--color-cyan-500);
+    border-color: var(--scope-edge);
+  }
+  /* Armed is the one state that also fills the surface, and only because it is
+     the one state the operator chose: these are the rows staged for a
+     destructive run, and section 4's rule that steady red means LIVE rather
+     than error is exactly what a staged shred is. */
+  .plate.armed {
+    --rail: var(--armed-lit);
+    border-color: var(--armed-edge);
+    background:
+      linear-gradient(180deg, var(--armed-soft) 0%, var(--armed-soft) 100%),
+      linear-gradient(180deg, var(--plate-1) 0%, var(--plate-3) 100%);
+  }
+
+  /* A plate the operator can press. Hover lifts the module on its shadow only:
+     touching the border would overwrite the state rail's matching edge, and
+     the row would lose its status for as long as the pointer sat on it. The
+     :not(:focus-visible) guard is there for the same reason in the other
+     direction -- this rule outranks the global focus ring, so without it a
+     hovered row would drop its keyboard outline. */
+  /* The scrolling view floor is keyboard focusable so a read-only page can be
+     scrolled without a pointer — System Info has no focusable child at all, so
+     before this its content was unreachable by keyboard. The global focus ring
+     is a glow drawn OUTSIDE the box, and outside a full-height floor is off
+     screen, so this one is inset. */
+  .view-floor:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+    box-shadow: none;
+  }
+
+  .plate-hit {
+    cursor: pointer;
+    transition:
+      box-shadow 160ms ease-out,
+      transform 160ms ease-out;
+  }
+  .plate-hit:hover:not(:focus-visible) {
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      0 2px 8px rgba(0, 0, 0, 0.55);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plate-hit {
+      transition: none;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     LAYER 2 - RECESSED WELL. Always dark, both shifts.
+     The local variable re-declarations are what enforce the
+     displays-stay-dark rule: any silver-ramp text nested inside a well
+     resolves through these Night values even in Day Shift.
+     ------------------------------------------------------------------------ */
+  .well,
+  .lcd,
+  .lamp,
+  .annunciator,
+  .stream,
+  .display {
+    --platinum: #f5f5f5;
+    --silver-bright: #d1d1d1;
+    --silver: #b3b3b3;
+    --silver-mute: #9c9c9c;
+    --graphite: #808080;
+    --armed-lit: #e8343a;
+    /* THE UTILITY SPELLING OF THE SAME RAMP, and it has to be spelled out.
+       A custom property is substituted where it is DECLARED, so an @theme
+       alias like `--color-grey: var(--silver-mute)` is already resolved to
+       Day's #4F4F4B by the time a child of this rule inherits it -- pinning
+       --silver-mute above does not reach `text-grey`. Every alias that
+       resolves through a re-skinned TEXT var therefore has to be re-declared
+       here, and re-declared as var(), so it picks up the pinned value on THIS
+       element rather than a copy of it.
+       That is not a style preference, it is 15 measured Day-Shift pairs:
+       `text-grey` at 2.41:1 and `text-white` at 1.14:1 inside a .well, which
+       is Day's near-black text on a display's actual black.
+       The list is generated, not curated -- scripts/check-palette-coverage.cjs
+       fails the build if @theme gains a text-ramp alias that is missing here,
+       because this exact hole has now been found twice. */
+    --color-platinum: var(--platinum);
+    --color-silver-bright: var(--silver-bright);
+    --color-silver: var(--silver);
+    --color-silver-mute: var(--silver-mute);
+    --color-charcoal-light: var(--carbon-800);
+    --color-charcoal-lighter: var(--carbon-700);
+    --color-graphite-light: var(--carbon-800);
+    --color-steel: var(--silver-mute);
+    --color-grey-dark: var(--silver-mute);
+    --color-grey: var(--silver-mute);
+    --color-grey-light: var(--silver);
+    --color-grey-lighter: var(--silver-bright);
+    --color-white: var(--platinum);
+    --color-white-muted: var(--silver-bright);
+    --color-red-light: var(--armed-lit);
+    --color-red-bright: var(--armed-lit);
+    --color-foreground: var(--platinum);
+    --color-primary-hover: var(--armed-lit);
+    --color-secondary: var(--carbon-800);
+    --color-secondary-foreground: var(--platinum);
+    --color-muted: var(--carbon-800);
+    --color-muted-foreground: var(--silver);
+    --color-card-foreground: var(--platinum);
+    --color-card-hover: var(--carbon-800);
+    --color-border: var(--carbon-700);
+    --color-ring: var(--armed-lit);
+    --color-slate-800: var(--carbon-800);
+    --color-slate-700: var(--carbon-700);
+    --color-slate-500: var(--silver-mute);
+    --color-slate-400: var(--silver);
+    --color-slate-300: var(--silver-bright);
+    --color-slate-200: var(--platinum);
+    --color-gray-800: var(--carbon-800);
+    --color-gray-700: var(--carbon-700);
+    --color-gray-500: var(--silver-mute);
+    --color-gray-400: var(--silver);
+    --color-gray-300: var(--silver-bright);
+    --color-gray-200: var(--platinum);
+    --color-zinc-800: var(--carbon-800);
+    --color-zinc-700: var(--carbon-700);
+    --color-zinc-500: var(--silver-mute);
+    --color-zinc-400: var(--silver);
+    --color-zinc-300: var(--silver-bright);
+    --color-neutral-800: var(--carbon-800);
+    --color-neutral-700: var(--carbon-700);
+    --color-neutral-400: var(--silver);
+    /* State text back to the literal LEDs, for the same reason the ramp below
+       goes back: this surface is void-black in both shifts. */
+    --state-go: var(--led-go);
+    --state-hold: var(--led-hold);
+    --state-warn: var(--led-warn);
+    --state-nogo: var(--led-nogo);
+    --state-exec: var(--led-scope);
+    /* LED ramp restored to its literal values: these surfaces are void-black
+       in both shifts, so the Day Shift darkening above must not reach them. */
+    --color-green-300: #6bea88;
+    --color-green-400: #41e25e;
+    --color-green-500: #41e25e;
+    --color-emerald-200: #a0f0b5;
+    --color-emerald-300: #6bea88;
+    --color-emerald-400: #41e25e;
+    --color-emerald-500: #41e25e;
+    --color-yellow-300: #ffc94d;
+    --color-yellow-400: #ffb000;
+    --color-yellow-500: #ffb000;
+    --color-amber-200: #ffdd99;
+    --color-amber-300: #ffc94d;
+    --color-amber-400: #ffb000;
+    --color-amber-500: #ffb000;
+    --color-orange-400: #ff7a1a;
+    --color-orange-500: #ff7a1a;
+    --color-red-300: #ff8c84;
+    --color-red-400: #ff6459;
+    --color-red-500: #ff4438;
+    --color-red-600: #c8453e;
+    --color-cyan-300: #86d8d2;
+    --color-cyan-400: #58c4bc;
+    --color-cyan-500: #58c4bc;
+    --color-blue-300: #86d8d2;
+    --color-blue-400: #58c4bc;
+    --color-blue-500: #58c4bc;
+    --color-purple-300: #86d8d2;
+    --color-purple-400: #58c4bc;
+    --color-purple-500: #58c4bc;
+    --color-rose-400: #ff6459;
+    --color-rose-500: #ff4438;
+    --color-pink-400: #ff6459;
+    --color-lime-400: #41e25e;
+    --color-lime-500: #41e25e;
+    --color-teal-400: #41e25e;
+    --color-teal-500: #41e25e;
+    --color-sky-400: #58c4bc;
+    --color-sky-500: #58c4bc;
+    --color-indigo-400: #58c4bc;
+    --color-indigo-500: #58c4bc;
+    --color-violet-400: #58c4bc;
+    --color-violet-500: #58c4bc;
+    --color-fuchsia-400: #58c4bc;
+    --hairline: rgba(255, 255, 255, 0.08);
+    --hairline-strong: rgba(255, 255, 255, 0.16);
+    --carbon-700: #262626;
+    --carbon-750: #1a1a1a;
+    --carbon-800: #141414;
+
+    /* CONTROL CHROME, and it belongs here for the same reason the text ramp
+       does. A .chip and a .btn build their surface out of --cap-* and
+       --plate-*, and those are re-skinned by Day Shift like every other
+       chassis material. Left out of this rule they stayed silver INSIDE a
+       display -- so a chip nested in a well wore Day chrome (#DEDEDA) under
+       text this rule had already pinned to the Night ramp (#B3B3B3), at
+       1.55:1, and a .btn the same at 1.13:1. 13 measured pairs.
+       The answer the displays-stay-dark rule implies is the one taken here: a
+       control on a black display looks like a Night control in both shifts.
+       Pinning the text without the surface it prints on was never a coherent
+       half-measure, it was just the half that had been noticed. */
+    --plate-1: #1c1c1c;
+    --plate-2: #151515;
+    --plate-3: #101010;
+    --plate-4: #0c0c0c;
+    --plate-key: rgba(255, 255, 255, 0.04);
+    --plate-edge: rgba(255, 255, 255, 0.06);
+    --plate-lip: rgba(255, 255, 255, 0.1);
+    --plate-under: rgba(0, 0, 0, 0.7);
+    --cap-1: #1f1f1f;
+    --cap-2: #171717;
+    --cap-3: #121212;
+    --cap-key: rgba(255, 255, 255, 0.06);
+    --cap-edge: rgba(255, 255, 255, 0.04);
+    color-scheme: dark;
+  }
+
+  /* .display is the only member of the group above that painted NO ground of
+     its own. .well, .lcd, .annunciator and .stream all lay down a void-black
+     surface; .display declared the dark-display token set and left the surface
+     to whatever the call site happened to put there. On the Night chassis that
+     was invisible -- black over black -- so it survived every review.
+     Day Shift is where it costs. A call site that painted nothing, or painted
+     a TRANSLUCENT tint (bg-black/25, bg-[var(--go-soft)]), let the silver
+     chassis show through while the text above it stayed pinned to the Night
+     ramp by the block above. That is #9C9C9C on #C8C8C4 at 1.64:1: a class
+     whose entire job is "this box is a dark display" was the thing making its
+     own text unreadable. Measured: 10 .field-label nodes, 18 --display-fg
+     nodes, 8 --display-fg-mute nodes and 17 literal-LED nodes in Day Shift.
+     A caller that paints its own OPAQUE surface still wins -- Tailwind's
+     bg-gradient-* utilities sit in @layer utilities, after this one -- so the
+     modules that already dress their own faceplate are untouched. */
+  .display {
+    background: linear-gradient(
+      180deg,
+      var(--display-bg-top) 0%,
+      var(--display-bg-bottom) 100%
+    );
+  }
+
+  /* Semantic tints, layered OVER that ground rather than instead of it.
+     `bg-[var(--go-soft)]` could not do this: a Tailwind background-color
+     utility replaces the surface, and a 10% green over the Day chassis is a
+     pale green chassis, not a tinted display. Named for the state, like
+     .plate.go and .chip.go, because it is the same vocabulary. */
+  .display.go {
+    background:
+      linear-gradient(var(--go-soft), var(--go-soft)),
+      linear-gradient(180deg, var(--display-bg-top) 0%, var(--display-bg-bottom) 100%);
+  }
+  .display.nogo {
+    background:
+      linear-gradient(var(--nogo-soft), var(--nogo-soft)),
+      linear-gradient(180deg, var(--display-bg-top) 0%, var(--display-bg-bottom) 100%);
+  }
+
+  .well {
+    position: relative;
+    border-radius: var(--r-card);
+    background: linear-gradient(180deg, #080808 0%, #0a0a0a 100%);
+    border: 1px solid rgba(0, 0, 0, 0.7);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.8),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+      inset 1px 0 2px rgba(0, 0, 0, 0.5),
+      inset -1px 0 2px rgba(0, 0, 0, 0.5);
+    color: var(--display-fg);
+  }
+
+  /* ------------------------------------------------------------------------
+     LAYER 3 - RAISED CONTROL
+     ------------------------------------------------------------------------ */
+  .control {
+    position: relative;
+    border-radius: var(--r-control);
+    background:
+      radial-gradient(
+        ellipse 80% 50% at 50% 0%,
+        var(--cap-key) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        180deg,
+        var(--cap-1) 0%,
+        var(--cap-2) 60%,
+        var(--cap-3) 100%
+      );
+    border: 1px solid var(--cap-edge);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      0 1px 2px rgba(0, 0, 0, 0.8),
+      0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  html[data-theme="day"] .control {
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      0 1px 2px rgba(0, 0, 0, 0.18),
+      0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  /* ------------------------------------------------------------------------
+     BRUSHED-ALUMINUM STRIPE HEADER
+     36px, top of every faceplate. Grain is DIRECTIONAL machine brushing,
+     never fractal noise. 44px padding clears the 20px corner bolts.
+     ------------------------------------------------------------------------ */
+  .stripe {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 36px;
+    padding: 0 30px;
+    z-index: 5;
+    border-radius: var(--r-card) var(--r-card) 0 0;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--stripe-grain-a) 0 1px,
+        var(--stripe-grain-b) 1px 2px,
+        var(--stripe-grain-c) 2px 3px
+      ),
+      linear-gradient(
+        180deg,
+        var(--stripe-1) 0%,
+        var(--stripe-2) 55%,
+        var(--stripe-3) 100%
+      );
+    border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  html[data-theme="day"] .stripe {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .stripe .kicker {
+    font-family: "Departure Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--silver);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .stripe .serial {
+    font-family: "Departure Mono", ui-monospace, monospace;
+    font-size: 10px;
+    color: var(--silver-mute);
+    white-space: nowrap;
+  }
+
+  /* ------------------------------------------------------------------------
+     HEX SOCKET CAP BOLTS - 3-layer machined, 20px, 4 per faceplate.
+     ------------------------------------------------------------------------ */
+  .hex {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    z-index: 7;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        circle at 50% 50%,
+        transparent 62%,
+        rgba(255, 255, 255, 0.04) 68%,
+        transparent 75%
+      ),
+      radial-gradient(
+        circle at 28% 22%,
+        var(--hex-1) 0%,
+        var(--hex-2) 12%,
+        var(--hex-3) 30%,
+        var(--hex-4) 55%,
+        var(--hex-5) 80%,
+        var(--hex-6) 100%
+      );
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.95))
+      drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
+  }
+
+  html[data-theme="day"] .hex {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28))
+      drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+
+  .hex::after {
+    content: "";
+    position: absolute;
+    inset: 30%;
+    background: radial-gradient(
+      circle at 72% 78%,
+      #242424 0%,
+      #0e0e0e 40%,
+      #000 100%
+    );
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  }
+
+  html[data-theme="day"] .hex::after {
+    background: radial-gradient(
+      circle at 72% 78%,
+      #8a8a84 0%,
+      #5c5c58 40%,
+      #3a3a36 100%
+    );
+  }
+
+  .hex.tl {
+    top: 10px;
+    left: 7px;
+  }
+  .hex.tr {
+    top: 10px;
+    right: 7px;
+  }
+  .hex.bl {
+    bottom: 7px;
+    left: 7px;
+  }
+  .hex.br {
+    bottom: 7px;
+    right: 7px;
+  }
+
+  /* ------------------------------------------------------------------------
+     PLACARDS AND SILKSCREEN LABELS
+     ------------------------------------------------------------------------ */
+  .placard {
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    font-stretch: 118%;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--silver-mute);
+    line-height: 1;
+  }
+
+  .kicker {
+    font-family: "Departure Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--silver);
+    white-space: nowrap;
+  }
+
+  .serial {
+    font-family: "Departure Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--silver-mute);
+    white-space: nowrap;
+  }
+
+  .view-title {
+    font-family: "Archivo", sans-serif;
+    font-weight: 800;
+    font-stretch: 118%;
+    font-size: 21px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--platinum);
+    line-height: 1.2;
+  }
+
+  /* ==========================================================================
+     INSTRUMENTS
+     ========================================================================== */
+
+  /* ---- LAMP TILE: raised cap + Archivo stencil word. Always dark-capped. -- */
+  .lamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 26px;
+    min-width: 46px;
+    padding: 0 9px;
+    border-radius: var(--r-control);
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    font-stretch: 110%;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: linear-gradient(180deg, #131313 0%, #0a0a0a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--graphite);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      0 1px 2px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 0 5px var(--lamp-glow, transparent);
+    transition:
+      color 160ms var(--ease-led),
+      box-shadow 160ms var(--ease-led);
+  }
+
+  .lamp.sm {
+    height: 19px;
+    min-width: 36px;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+
+  .lamp.lit {
+    animation: led-strike 320ms var(--ease-led);
+  }
+
+  .lamp.go {
+    --lamp-glow: rgba(65, 226, 94, 0.55);
+    color: var(--led-go);
+    border-color: var(--go-edge);
+    background: linear-gradient(180deg, #0f1a12 0%, #070b08 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      inset 0 0 12px var(--go-soft),
+      0 0 10px var(--go-soft);
+  }
+
+  .lamp.hold {
+    --lamp-glow: rgba(255, 176, 0, 0.55);
+    color: var(--led-hold);
+    border-color: var(--hold-edge);
+    background: linear-gradient(180deg, #1a1508 0%, #0b0905 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      inset 0 0 12px var(--hold-soft),
+      0 0 10px var(--hold-soft);
+  }
+
+  /* Unacknowledged warning. Blinks at 1Hz until acknowledged - never steady. */
+  .lamp.warn {
+    --lamp-glow: rgba(255, 68, 56, 0.5);
+    color: var(--led-warn);
+    border-color: var(--warn-edge);
+    background: linear-gradient(180deg, #1c0c0a 0%, #0c0605 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      inset 0 0 12px var(--warn-soft),
+      0 0 10px var(--warn-soft);
+    animation: blink-1hz 1000ms step-end infinite;
+  }
+
+  /* Settled fault. Ignites once, then holds steady. */
+  .lamp.nogo {
+    --lamp-glow: rgba(200, 69, 62, 0.5);
+    color: var(--led-nogo);
+    border-color: var(--nogo-edge);
+    background: linear-gradient(180deg, #1a0b0a 0%, #0b0605 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      inset 0 0 12px var(--nogo-soft),
+      0 0 10px var(--nogo-soft);
+  }
+
+  .lamp.exec {
+    --lamp-glow: rgba(88, 196, 188, 0.55);
+    color: var(--led-scope);
+    border-color: var(--scope-edge);
+    background: linear-gradient(180deg, #08191a 0%, #050b0b 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      inset 0 0 12px var(--scope-soft),
+      0 0 10px var(--scope-soft);
+  }
+
+  /* Steady armed red: LIVE. Not an error. */
+  .lamp.armed {
+    --lamp-glow: rgba(232, 52, 58, 0.5);
+    color: var(--armed-display);
+    border-color: var(--armed-edge);
+    background: linear-gradient(180deg, #1c0a0b 0%, #0c0505 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      inset 0 0 12px var(--armed-soft),
+      0 0 10px var(--armed-glow);
+  }
+
+  /* ---- LED DOT ----------------------------------------------------------- */
+  .led-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: currentColor;
+    box-shadow:
+      0 0 6px 1px currentColor,
+      inset 0 0 2px rgba(255, 255, 255, 0.6);
+  }
+  .led-dot.go {
+    color: var(--led-go);
+  }
+  .led-dot.hold {
+    color: var(--led-hold);
+  }
+  .led-dot.warn {
+    color: var(--led-warn);
+    animation: blink-1hz 1000ms step-end infinite;
+  }
+  .led-dot.nogo {
+    color: var(--led-nogo);
+  }
+  .led-dot.exec {
+    color: var(--led-scope);
+  }
+  .led-dot.armed {
+    color: var(--armed-display);
+  }
+  .led-dot.off {
+    color: var(--graphite);
+    box-shadow: none;
+  }
+  .led-dot.pulse {
+    animation: on-air-pulse 2s ease-in-out infinite;
+  }
+
+  /* ---- LCD WELL: void-black window + Departure Mono phosphor ------------- */
+  .lcd {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: var(--r-card);
+    background: linear-gradient(
+      180deg,
+      var(--display-bg-top) 0%,
+      var(--display-bg-bottom) 100%
+    );
+    border: 1px solid var(--display-border);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.9),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+    font-family: "Departure Mono", ui-monospace, monospace;
+    overflow: hidden;
+  }
+
+  /* Cover-glass sheen. */
+  .lcd::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      168deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 38%
+    );
+  }
+
+  .lcd .lcd-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--display-fg-mute);
+    line-height: 1;
+  }
+
+  .lcd .lcd-value {
+    font-size: 18px;
+    line-height: 1.1;
+    color: var(--phosphor);
+    text-shadow: 0 0 8px currentColor;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lcd.amber .lcd-value {
+    color: var(--led-hold);
+  }
+  .lcd.red .lcd-value {
+    color: var(--armed-display);
+  }
+  .lcd.scope .lcd-value {
+    color: var(--led-scope);
+  }
+  .lcd.nogo .lcd-value {
+    color: var(--led-nogo);
+  }
+
+  /* ---- VU METER: segment cascade, green -> amber -> orange -> red -------- */
+  .vu {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    height: 10px;
+    padding: 2px;
+    border-radius: var(--r-card);
+    background: linear-gradient(
+      180deg,
+      var(--display-bg-top) 0%,
+      var(--display-bg-bottom) 100%
+    );
+    border: 1px solid var(--display-border);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
+    overflow: hidden;
+  }
+
+  .vu-seg {
+    flex: 1;
+    border-radius: 1px;
+    background: #131313;
+    transition: background-color 300ms var(--ease-vu);
+  }
+  .vu-seg.on {
+    background: var(--led-go);
+    box-shadow: 0 0 5px var(--led-go);
+  }
+  .vu-seg.on.hold {
+    background: var(--led-hold);
+    box-shadow: 0 0 5px var(--led-hold);
+  }
+  .vu-seg.on.orange {
+    background: var(--led-orange);
+    box-shadow: 0 0 5px var(--led-orange);
+  }
+  .vu-seg.on.red {
+    background: var(--led-warn);
+    box-shadow: 0 0 5px var(--led-warn);
+  }
+  /* Flickering tip on the boundary segment. */
+  .vu-seg.tip {
+    animation: vu-tip 220ms steps(2, jump-none) infinite alternate;
+  }
+
+  .vu.tall {
+    height: 100%;
+    width: 10px;
+    flex-direction: column-reverse;
+  }
+
+  /* ---- ANNUNCIATOR RAIL: dark strip in both shifts ----------------------- */
+  .annunciator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: linear-gradient(180deg, #0e0e0e 0%, #090909 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.85);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 -2px 6px rgba(0, 0, 0, 0.7);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .annunciator::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ---- PHOSPHOR STREAM WELL (Iosevka) ------------------------------------ */
+  .stream {
+    border-radius: var(--r-card);
+    background: linear-gradient(
+      180deg,
+      var(--display-bg-top) 0%,
+      var(--display-bg-bottom) 100%
+    );
+    border: 1px solid var(--display-border);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9);
+    font-family: "Iosevka", "Departure Mono", ui-monospace, monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--display-fg);
+  }
+
+  /* ==========================================================================
+     MACHINED CAPS (buttons)
+     Press: 1px cap travel, 80ms. Hover: brightness lift + specular glint.
+     ========================================================================== */
+
+  .btn,
+  .btn-armed,
+  .btn-chrome,
+  .btn-ghost {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: var(--r-control);
+    font-family: "Archivo", sans-serif;
+    font-weight: 700;
+    font-stretch: 112%;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      transform 80ms var(--ease-snap),
+      filter 120ms var(--ease-snap),
+      box-shadow 120ms var(--ease-snap);
+  }
+
+  .btn:disabled,
+  .btn-armed:disabled,
+  .btn-chrome:disabled,
+  .btn-ghost:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+    filter: saturate(0.5);
+  }
+
+  .btn:not(:disabled):hover,
+  .btn-armed:not(:disabled):hover,
+  .btn-chrome:not(:disabled):hover {
+    filter: brightness(1.14);
+  }
+
+  .btn:not(:disabled):active,
+  .btn-armed:not(:disabled):active,
+  .btn-chrome:not(:disabled):active,
+  .btn-ghost:not(:disabled):active {
+    transform: translateY(1px);
+  }
+
+  /* Hover-only specular glint. Suppressed under reduced motion. */
+  .btn::after,
+  .btn-armed::after,
+  .btn-chrome::after {
+    content: "";
+    position: absolute;
+    inset: -60% auto -60% -40%;
+    width: 34%;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.28),
+      transparent
+    );
+    transform: translateX(-140%) skewX(-18deg);
+    opacity: 0;
+    transition:
+      transform 520ms var(--ease-out),
+      opacity 520ms var(--ease-out);
+  }
+  .btn:not(:disabled):hover::after,
+  .btn-armed:not(:disabled):hover::after,
+  .btn-chrome:not(:disabled):hover::after {
+    transform: translateX(320%) skewX(-18deg);
+    opacity: 1;
+  }
+
+  /* Ghost-neutral cap: the default action. */
+  .btn {
+    background:
+      radial-gradient(
+        ellipse 80% 50% at 50% 0%,
+        var(--cap-key) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        180deg,
+        var(--cap-1) 0%,
+        var(--cap-2) 60%,
+        var(--cap-3) 100%
+      );
+    border: 1px solid var(--cap-edge);
+    color: var(--silver-bright);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      0 1px 2px rgba(0, 0, 0, 0.8),
+      0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  html[data-theme="day"] .btn {
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      inset 0 -1px 0 var(--plate-under),
+      0 1px 2px rgba(0, 0, 0, 0.18),
+      0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Armed cap: consequential commands only. Foreground is constant across
+     shifts - the doubled class outranks a stray `text-white` utility. */
+  .btn-armed {
+    background: linear-gradient(
+      180deg,
+      #c8333a 0%,
+      var(--armed) 55%,
+      var(--armed-deep) 100%
+    );
+    border: 1px solid var(--armed-deep);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+      0 1px 2px rgba(0, 0, 0, 0.8),
+      0 4px 10px rgba(0, 0, 0, 0.5),
+      0 0 18px var(--armed-glow);
+  }
+  .btn-armed.btn-armed {
+    color: var(--armed-fg);
+    --platinum: #fff3f0;
+    --silver-bright: #fff3f0;
+    --silver: rgba(255, 243, 240, 0.85);
+  }
+
+  /* Chrome cap: the single polished CTA. Inverts to black gloss on Day. */
+  .btn-chrome {
+    background: linear-gradient(180deg, #fbfbfb 0%, #e6e6e6 55%, #c4c4c4 100%);
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+      0 1px 2px rgba(0, 0, 0, 0.8),
+      0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+  .btn-chrome.btn-chrome {
+    color: #0a0a0a;
+    --platinum: #0a0a0a;
+    --silver-bright: #1a1a1a;
+    --silver: #2e2e2c;
+  }
+  html[data-theme="day"] .btn-chrome {
+    background: linear-gradient(180deg, #303030 0%, #1a1a1a 55%, #0a0a0a 100%);
+    border: 1px solid rgba(0, 0, 0, 0.6);
+  }
+  html[data-theme="day"] .btn-chrome.btn-chrome {
+    color: #f5f5f5;
+    --platinum: #f5f5f5;
+    --silver-bright: #d1d1d1;
+    --silver: #b3b3b3;
+  }
+
+  /* Flat ghost: tertiary actions, no cap. */
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--silver);
+  }
+  .btn-ghost:not(:disabled):hover {
+    background: var(--armed-soft);
+    border-color: var(--armed-edge);
+    color: var(--armed-lit);
+  }
+
+  .btn.sm,
+  .btn-armed.sm,
+  .btn-chrome.sm,
+  .btn-ghost.sm {
+    min-height: 26px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  .btn.lg,
+  .btn-armed.lg,
+  .btn-chrome.lg,
+  .btn-ghost.lg {
+    min-height: 44px;
+    padding: 0 22px;
+    font-size: 13px;
+  }
+
+  /* ==========================================================================
+     CHIPS, SWITCHES, FORM WELLS
+     ========================================================================== */
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 9px;
+    border-radius: var(--r-control);
+    font-family: "Departure Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: linear-gradient(180deg, var(--cap-1) 0%, var(--cap-3) 100%);
+    border: 1px solid var(--cap-edge);
+    color: var(--silver);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+  /* Colour comes from a token, never from an html[data-theme] descendant
+     selector -- see the --state-* note on :root. A token follows the shift out
+     on the chassis AND goes back to the literal LED inside a display; a
+     descendant selector only does the first. */
+  .chip.go {
+    color: var(--state-go);
+    border-color: var(--go-edge);
+    background: var(--go-soft);
+  }
+  .chip.hold {
+    color: var(--state-hold);
+    border-color: var(--hold-edge);
+    background: var(--hold-soft);
+  }
+  .chip.warn {
+    color: var(--state-warn);
+    border-color: var(--warn-edge);
+    background: var(--warn-soft);
+  }
+  .chip.nogo {
+    color: var(--state-nogo);
+    border-color: var(--nogo-edge);
+    background: var(--nogo-soft);
+  }
+  .chip.exec {
+    color: var(--state-exec);
+    border-color: var(--scope-edge);
+    background: var(--scope-soft);
+  }
+  .chip.armed {
+    color: var(--armed-lit);
+    border-color: var(--armed-edge);
+    background: var(--armed-soft);
+  }
+
+  /* --------------------------------------------------------------------------
+     ANNUNCIATOR BANNER
+     A condition the module is reporting inline: a fault, a caution, a note.
+
+     Tone comes from the LED vocabulary, never from a raw hue. That matters
+     here more than anywhere else: these were hand-rolled `bg-red/10` strips,
+     and a red-tinted error box contradicts section 4 outright, where steady
+     red means LIVE rather than error. The banner carries a lamp, so the state
+     is a stencil WORD first and a colour second, and a settled fault reads
+     NO-GO rather than borrowing the armed ramp.
+     -------------------------------------------------------------------------- */
+  .banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--r-plate);
+    border: 1px solid var(--cap-edge);
+    background: var(--cap-1);
+  }
+
+  .banner > .lamp {
+    flex: none;
+    margin-top: 1px;
+  }
+
+  .banner-msg {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--silver);
+  }
+
+  .banner.nogo {
+    border-color: var(--nogo-edge);
+    background: var(--nogo-soft);
+  }
+  .banner.warn {
+    border-color: var(--warn-edge);
+    background: var(--warn-soft);
+  }
+  .banner.hold {
+    border-color: var(--hold-edge);
+    background: var(--hold-soft);
+  }
+  .banner.exec {
+    border-color: var(--scope-edge);
+    background: var(--scope-soft);
+  }
+  .banner.go {
+    border-color: var(--go-edge);
+    background: var(--go-soft);
+  }
+
+  /* Console plate form: inputs are recessed dark wells in BOTH shifts. */
+  .field {
+    width: 100%;
+    padding: 8px 11px;
+    border-radius: var(--r-control);
+    background: linear-gradient(180deg, #070707 0%, #0a0a0a 100%);
+    border: 1px solid rgba(0, 0, 0, 0.75);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.85),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+    color: #f5f5f5;
+    font-family: "Public Sans", sans-serif;
+    font-size: 13px;
+    transition: border-color 160ms var(--ease-out);
+  }
+  .field::placeholder {
+    color: #6a6a6a;
+  }
+  .field:focus {
+    border-color: var(--armed-edge);
+    outline: 2px solid var(--armed-display);
+    outline-offset: 1px;
+  }
+  .field.invalid {
+    border-color: var(--led-warn);
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 5px;
+    font-family: "Departure Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--silver-mute);
+  }
+
+  /* Bat-lever switch: recessed track + machined cap thumb, armed when on. */
+  .switch {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    flex: none;
+    border-radius: var(--r-control);
+    background: linear-gradient(180deg, #070707 0%, #0c0c0c 100%);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
+    cursor: pointer;
+    transition: background-color 160ms var(--ease-snap);
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--r-inset);
+    background: linear-gradient(180deg, #2a2a2a 0%, #161616 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 1px 2px rgba(0, 0, 0, 0.9);
+    transition: transform 160ms var(--ease-snap);
+  }
+  .switch[data-on="true"] {
+    background: linear-gradient(180deg, #3b0d0f 0%, #240809 100%);
+    border-color: var(--armed-deep);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.85),
+      0 0 12px var(--armed-glow);
+  }
+  .switch[data-on="true"]::after {
+    transform: translateX(20px);
+    background: linear-gradient(180deg, #c8333a 0%, var(--armed-deep) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 0 10px var(--armed-glow);
+  }
+  /* Same treatment the buttons use, so a locked control reads the same way
+     everywhere on the console rather than inventing a second idiom. */
+  .switch:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+    filter: saturate(0.5);
+  }
+
+  /* ==========================================================================
+     CHASSIS AND SHELL
+     The frame the panels sit in: page canvas, command bar, nav rail, and the
+     two loading sweeps. Everything inside a view is composed from the console
+     primitives above instead.
+
+     This was the LEGACY BRIDGE - the pre-restyle recipe classes re-cut on the
+     four-layer system, which is how the restyle reached every page through the
+     cascade rather than by hand. The bridge is gone: `carbon-panel`,
+     `carbon-card`, `carbon-hero`, `btn-forge`, `btn-steel`, `metal-chip`,
+     `tech-label`, `red-edge`, `bg-gradient-card`, `bg-gradient-dark` and the
+     red glow utilities all reached zero call sites and were deleted. What
+     survives here is the shell, which was never part of the bridge.
+     ========================================================================== */
+
+  /* The chassis. Flat carbon, no decorative gradient wash. */
+  .bg-carbon-shell {
+    background: var(--carbon-950);
+  }
+
+  .carbon-main {
+    position: relative;
+    isolation: isolate;
+    background: var(--carbon-950);
+  }
+
+  /* Faint machined datum grid on the view floor: structure, not decoration. */
+  .carbon-main::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+    background:
+      linear-gradient(90deg, var(--hairline) 1px, transparent 1px),
+      linear-gradient(180deg, var(--hairline) 1px, transparent 1px);
+    background-size: 96px 96px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      black,
+      transparent 78%
+    );
+    mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      black,
+      transparent 78%
+    );
+  }
+
+  /* Command bar: sticky console header, brushed grain. */
+  .carbon-titlebar {
+    position: relative;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--stripe-grain-a) 0 1px,
+        var(--stripe-grain-b) 1px 2px,
+        var(--stripe-grain-c) 2px 3px
+      ),
+      linear-gradient(
+        180deg,
+        var(--stripe-1) 0%,
+        var(--stripe-2) 55%,
+        var(--stripe-3) 100%
+      );
+    border-bottom: 1px solid rgba(0, 0, 0, 0.85);
+    box-shadow:
+      inset 0 1px 0 var(--plate-lip),
+      0 1px 0 var(--armed-edge),
+      0 2px 8px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Nav rail: a faceplate turned on its side. */
+  .carbon-sidebar {
+    position: relative;
+    background: linear-gradient(
+      90deg,
+      var(--plate-2) 0%,
+      var(--plate-3) 60%,
+      var(--plate-4) 100%
+    );
+    border-right: 1px solid rgba(0, 0, 0, 0.8);
+    box-shadow:
+      inset -1px 0 0 rgba(0, 0, 0, 0.6),
+      inset 1px 0 0 var(--plate-lip),
+      8px 0 24px rgba(0, 0, 0, 0.45);
+  }
+  html[data-theme="day"] .carbon-sidebar {
+    box-shadow:
+      inset -1px 0 0 rgba(0, 0, 0, 0.14),
+      inset 1px 0 0 var(--plate-lip),
+      8px 0 24px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Brand nameplate. Black anodized in BOTH shifts: the artwork is drawn for a
+     dark ground, and a badged nameplate on a silver chassis is what real gear
+     does anyway. Follows the same displays-stay-dark logic as the wells. */
+  .carbon-sidebar-brand {
+    position: relative;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.03) 0 1px,
+        rgba(255, 255, 255, 0.01) 1px 2px,
+        rgba(0, 0, 0, 0.06) 2px 3px
+      ),
+      linear-gradient(180deg, #1a1a1a 0%, #101010 60%, #0a0a0a 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.85);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Nav item: raised cap when active, flat when not. */
+  .nav-cap {
+    position: relative;
+    border-radius: var(--r-control);
+    border: 1px solid transparent;
+    color: var(--silver-mute);
+    transition:
+      color 120ms var(--ease-out),
+      background-color 120ms var(--ease-out),
+      border-color 120ms var(--ease-out);
+  }
+  .nav-cap:hover {
+    color: var(--silver-bright);
+    background: var(--hairline);
+  }
+  .nav-cap[aria-current="page"] {
+    color: var(--platinum);
+    border-color: var(--armed-edge);
+    background:
+      linear-gradient(90deg, var(--armed-soft) 0%, transparent 70%),
+      linear-gradient(180deg, var(--cap-1) 0%, var(--cap-3) 100%);
+    box-shadow:
+      inset 3px 0 0 var(--armed),
+      inset 0 1px 0 var(--plate-lip),
+      0 1px 2px rgba(0, 0, 0, 0.7);
+  }
+
+  .steel-divider {
+    border-color: var(--hairline);
+  }
+
+  /* A slow phosphor sweep across a dark well. Loading, not decoration. */
+  .scanline {
+    position: relative;
+    overflow: hidden;
+  }
+  .scanline::after {
+    content: "";
+    position: absolute;
+    inset: -40% 0 auto 0;
+    height: 30%;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      var(--armed-glow),
+      transparent
+    );
+    animation: scan 2.4s ease-in-out infinite;
+  }
+
+  .shimmer-carbon {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--r-card);
+    background: linear-gradient(180deg, #080808 0%, #0c0c0c 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  .shimmer-carbon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(179, 179, 179, 0.1),
+      transparent
+    );
+    transform: translateX(-140%);
+    animation: well-sweep 1.6s ease-in-out infinite;
+  }
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+@layer utilities {
+  .font-display-tech {
+    font-family: "Archivo", "Public Sans", sans-serif;
+    font-stretch: 118%;
+    letter-spacing: 0.05em;
+  }
+
+  .font-telemetry {
+    font-family: "Departure Mono", ui-monospace, "Cascadia Mono", Consolas,
+      monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .font-stream {
+    font-family: "Iosevka", "Departure Mono", ui-monospace, monospace;
+  }
+
+  .text-silver {
+    color: var(--silver);
+  }
+  .text-platinum {
+    color: var(--platinum);
+  }
+  .text-armed {
+    color: var(--armed-lit);
+  }
+
+  /* ON AIR bar: hero-only armed bar with a pulsing white LED. */
+  .on-air {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 26px;
+    padding: 0 12px;
+    border-radius: var(--r-control);
+    background: linear-gradient(180deg, #c8333a 0%, var(--armed) 100%);
+    border: 1px solid var(--armed-deep);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 0 18px var(--armed-glow);
+    font-family: "Archivo", sans-serif;
+    font-weight: 800;
+    font-stretch: 118%;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #fff3f0;
+  }
+
+  .app-region-drag {
+    -webkit-app-region: drag;
+  }
+  .app-region-no-drag {
+    -webkit-app-region: no-drag;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   All animation suppressed; states stay legible by color and stencil word.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* A blinking warn lamp must stay LIT, not freeze dark. The plate's warn rail
+     is on the same rule for the same reason: the blink keyframe spends half its
+     cycle at 0.18, so freezing it mid-keyframe would leave an unacknowledged
+     module reporting almost nothing. Held on, it degrades to exactly what a
+     steady rail was before -- readable, just no longer distinguishable from
+     NO-GO by colour alone, which is why the chip beside it carries the word. */
+  .lamp.warn,
+  .led-dot.warn,
+  .led-dot.pulse,
+  .plate.warn::before {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .btn::after,
+  .btn-armed::after,
+  .btn-chrome::after,
+  .scanline::after,
+  .shimmer-carbon::after {
+    display: none !important;
+  }
+}

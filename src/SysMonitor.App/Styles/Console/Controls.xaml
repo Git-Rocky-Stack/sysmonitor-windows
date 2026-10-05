@@ -57,7 +57,8 @@
 -->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments">
 
     <!-- ============================================================ CAP (.btn, :2062) -->
 
@@ -108,11 +109,17 @@
                                 </VisualState>
 
                                 <!-- Unlit: the word goes to Graphite, which is GrayText in High Contrast. -->
+                                <!-- Locked: opacity .42 (:2016-2023). The key light and the lip go with it - a
+                                     cap nobody can press is not catching the light - and the word takes the
+                                     shift's own locked colour, which is the user's GrayText in High Contrast.
+                                     That shift leaves ConsoleDisabledOpacity at 1: dimming a control against a
+                                     ground the user chose for its contrast is the one thing it must not do. -->
                                 <VisualState x:Name="Disabled">
                                     <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
                                         <Setter Target="KeyLight.Opacity" Value="0"/>
                                         <Setter Target="Lip.Opacity" Value="0"/>
-                                        <Setter Target="Word.Foreground" Value="{ThemeResource GraphiteBrush}"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
@@ -184,6 +191,7 @@
          spline of the right duration is the one change here that could break dragging, and a drag is not something
          the smoke run can press. -->
     <Style TargetType="ToggleSwitch">
+        <Setter Property="instruments:ConsoleLever.HasGlows" Value="True"/>
         <Setter Property="Foreground" Value="{ThemeResource SilverBrush}"/>
         <Setter Property="FontFamily" Value="{StaticResource ConsoleBodyFontFamily}"/>
         <Setter Property="FontSize" Value="13"/>
@@ -197,7 +205,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleSwitch">
-                    <Grid>
+                    <Grid x:Name="Root">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
@@ -216,19 +224,25 @@
 
                                 <VisualState x:Name="Pressed"/>
 
-                                <!-- Locked: the thumb and the words go to Graphite, which is GrayText in High
-                                     Contrast. CSS dims the whole lever to .42 opacity and desaturates it (:2365);
-                                     recolouring is the treatment the caps use, and it is the one that survives
-                                     High Contrast, where dimming a control against its own ground is the thing
-                                     that must not happen. -->
+                                <!-- Locked: opacity .42 (:2365-2369), which is the caps' treatment, which is
+                                     what the stylesheet asks for in as many words - the same rule is written
+                                     for the buttons at :2016 and pointed at from here "so a locked control
+                                     reads the same way everywhere on the console rather than inventing a second
+                                     idiom". It dims through one resource the palette writes per shift, and High
+                                     Contrast writes 1 for it: dimming a control against a ground the user chose
+                                     for its contrast is the one thing that shift must not do, so it greys the
+                                     words with the user's own GrayText instead.
+
+                                     `filter: saturate(.5)` is not drawn. WinUI has no filter, and the only
+                                     route to it is a desaturated twin of every armed face the lever can show,
+                                     generated beside the original. Dimming carries the meaning on its own;
+                                     desaturating a red that is already dimmed to .42 is the smaller half. -->
                                 <VisualState x:Name="Disabled">
                                     <VisualState.Setters>
-                                        <Setter Target="OuterBorder.BorderBrush" Value="{ThemeResource GraphiteBrush}"/>
-                                        <Setter Target="SwitchKnobOff.Background" Value="{ThemeResource GraphiteBrush}"/>
-                                        <Setter Target="SwitchKnobOn.Background" Value="{ThemeResource GraphiteBrush}"/>
-                                        <Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource GraphiteBrush}"/>
-                                        <Setter Target="OnContentPresenter.Foreground" Value="{ThemeResource GraphiteBrush}"/>
-                                        <Setter Target="OffContentPresenter.Foreground" Value="{ThemeResource GraphiteBrush}"/>
+                                        <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                        <Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
+                                        <Setter Target="OnContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
+                                        <Setter Target="OffContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
@@ -237,7 +251,9 @@
                                 <VisualStateGroup.Transitions>
                                     <VisualTransition x:Name="DraggingToOnTransition" From="Dragging" To="On" GeneratedDuration="0">
                                         <Storyboard>
-                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobCurrentToOnOffset}"/>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="KnobTranslateTransform" Storyboard.TargetProperty="X">
+                                                <SplineDoubleKeyFrame KeyTime="0:0:0.16" Value="20" KeySpline="0.32,0.72 0,1"/>
+                                            </DoubleAnimationUsingKeyFrames>
                                             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
                                                 <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
                                             </DoubleAnimationUsingKeyFrames>
@@ -272,7 +288,9 @@
 
                                     <VisualTransition x:Name="DraggingToOffTransition" From="Dragging" To="Off" GeneratedDuration="0">
                                         <Storyboard>
-                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobCurrentToOffOffset}"/>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="KnobTranslateTransform" Storyboard.TargetProperty="X">
+                                                <SplineDoubleKeyFrame KeyTime="0:0:0.16" Value="0" KeySpline="0.32,0.72 0,1"/>
+                                            </DoubleAnimationUsingKeyFrames>
                                             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
                                                 <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="0"/>
                                             </DoubleAnimationUsingKeyFrames>
@@ -290,13 +308,17 @@
 
                                     <VisualTransition x:Name="OnToOffTransition" From="On" To="Off" GeneratedDuration="0">
                                         <Storyboard>
-                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobOnToOffOffset}"/>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="KnobTranslateTransform" Storyboard.TargetProperty="X">
+                                                <SplineDoubleKeyFrame KeyTime="0:0:0.16" Value="0" KeySpline="0.32,0.72 0,1"/>
+                                            </DoubleAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </VisualTransition>
 
                                     <VisualTransition x:Name="OffToOnTransition" From="Off" To="On" GeneratedDuration="0">
                                         <Storyboard>
-                                            <RepositionThemeAnimation TargetName="SwitchKnob" FromHorizontalOffset="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.KnobOffToOnOffset}"/>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="KnobTranslateTransform" Storyboard.TargetProperty="X">
+                                                <SplineDoubleKeyFrame KeyTime="0:0:0.16" Value="20" KeySpline="0.32,0.72 0,1"/>
+                                            </DoubleAnimationUsingKeyFrames>
                                             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="SwitchKnobBounds" Storyboard.TargetProperty="Opacity">
                                                 <LinearDoubleKeyFrame KeyTime="0:0:0.16" Value="1"/>
                                             </DoubleAnimationUsingKeyFrames>
@@ -314,7 +336,16 @@
                                 </VisualStateGroup.Transitions>
 
                                 <VisualState x:Name="Dragging"/>
-                                <VisualState x:Name="Off"/>
+
+                                <!-- Off puts the thumb back at the left, and has to say so rather than leave it
+                                     to the transform's own value: a drag writes that value, so a lever that was
+                                     dragged and then turned off would leave its thumb wherever the finger let
+                                     go of it. The travel there is the transition's; this is where it rests. -->
+                                <VisualState x:Name="Off">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="KnobTranslateTransform" Storyboard.TargetProperty="X" To="0" Duration="0"/>
+                                    </Storyboard>
+                                </VisualState>
 
                                 <!-- On: the thumb sits 20 over, which is translateX(20px) and also exactly
                                      SwitchKnobBounds less SwitchKnob, the distance WinUI works out for a drag. -->
@@ -403,6 +434,15 @@
                                               VerticalAlignment="Center"
                                               AutomationProperties.AccessibilityView="Raw"/>
 
+                            <!-- The palette's armed glow, carried into the template so ConsoleSwitch can read
+                                 it without knowing which shift it is in. Drawn by nothing; it is a colour. -->
+                            <Border x:Name="PART_ArmedGlow" Visibility="Collapsed"
+                                    Background="{ThemeResource ArmedGlowBrush}"/>
+
+                            <!-- Armed, the track glows 0 0 12px outside itself (:2352). Composition casts it
+                                 from ConsoleSwitch onto this host, which sits under the track. -->
+                            <Border x:Name="PART_TrackGlowHost" Width="42" Height="22" IsHitTestVisible="False"/>
+
                             <!-- The recess: the track, its edge, and the shade the top edge casts into it. -->
                             <Border x:Name="OuterBorder" Width="42" Height="22"
                                     Background="{ThemeResource SwitchTrackBrush}"
@@ -429,6 +469,11 @@
                                         IsHitTestVisible="False"/>
 
                                 <Grid x:Name="SwitchKnob" Width="20" Height="20" HorizontalAlignment="Left">
+                                    <!-- The thumb's own glow, 0 0 10px (:2359). Inside SwitchKnob, so it
+                                         travels with the thumb instead of staying at the left of the track. -->
+                                    <Border x:Name="PART_ThumbGlowHost" Width="16" Height="16"
+                                            IsHitTestVisible="False"/>
+
                                     <Border x:Name="SwitchKnobOff" Width="16" Height="16"
                                             Background="{ThemeResource SwitchThumbBrush}"
                                             CornerRadius="{StaticResource InsetCornerRadius}">

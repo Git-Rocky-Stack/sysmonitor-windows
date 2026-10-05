@@ -244,7 +244,7 @@
     <!-- A dark cap lit in its state's colour: the face and its edge, an inner ring of the state's soft light, the
          light along the top and the shade along the bottom, and the stencil word in Archivo at width 110, tracked
          .1em. It sits on a small shadow, and lit it glows outside in its soft colour and round its word in its
-         LED's (:1697-1789). Warn blinks the whole lamp at 1 Hz, down to 18% (:458-467); WarnSteady is the same
+         LED's (:1697-1789). Warn blinks the whole lamp at 1 Hz, down to 18% (:456-465); WarnSteady is the same
          lamp held lit, for when animation effects are off. Striking brings it up from 35% in 80 ms, once. -->
     <Style TargetType="instruments:Lamp">
         <Setter Property="IsTabStop" Value="False"/>
@@ -378,7 +378,7 @@
 
     <!-- A 7-across LED in its state's colour; unlit, it is graphite. Lit, it has a halo drawn behind it
          (LedDot.cs). Warn blinks at 1 Hz; Pulsing breathes to 55% and back over 2 seconds, the ON AIR light
-         (:469-478). -->
+         (:467-477). -->
     <Style TargetType="instruments:LedDot">
         <Setter Property="Width" Value="7"/>
         <Setter Property="Height" Value="7"/>
@@ -708,7 +708,7 @@
 
     <!-- A module seated flush in the rack: the brushed face top to bottom in a 1px edge, the lip along its top and
          the underside along its bottom. The rail runs down the mounting edge inside the border in the state's rail
-         colour, and the border takes the state's edge. Warn blinks the rail alone at 1 Hz, down to 18% (:1188,
+         colour, and the border takes the state's edge. Warn blinks the rail alone at 1 Hz, down to 18% (:1182-1194,
          :456-465); WarnSteady holds it lit. Armed lays the armed soft red over the brushing (:1206). It sits on a
          small shadow (:1144), which a hovered pressable plate trades for a deeper one - System-X lifts it on its
          shadow and never its border, which matches the rail (:1241). Composition draws both behind the face
