@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
+using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Utilities;
 
@@ -173,7 +174,7 @@ public class NetworkMapper : INetworkMapper
             var hostname = await GetHostnameAsync(ipAddress);
             var manufacturer = GetManufacturer(mac);
             var deviceType = DetermineDeviceType(hostname, manufacturer, mac);
-            var (status, color) = GetResponseStatus(reply.RoundtripTime);
+            var (status, responseState) = GetResponseStatus(reply.RoundtripTime);
 
             return new NetworkDeviceInfo
             {
@@ -186,7 +187,7 @@ public class NetworkMapper : INetworkMapper
                 IsOnline = true,
                 ResponseTimeMs = (int)reply.RoundtripTime,
                 ResponseStatus = status,
-                ResponseColor = color,
+                ResponseState = responseState,
                 LastSeen = DateTime.Now
             };
         }
@@ -367,15 +368,15 @@ public class NetworkMapper : INetworkMapper
         return ("Computer", "\uE7F8");
     }
 
-    private static (string status, string color) GetResponseStatus(long ms)
+    private static (string status, LampState state) GetResponseStatus(long ms)
     {
         return ms switch
         {
-            < 10 => ("Excellent", "#4CAF50"),
-            < 50 => ("Good", "#8BC34A"),
-            < 100 => ("Fair", "#FF9800"),
-            < 200 => ("Slow", "#FF5722"),
-            _ => ("Very Slow", "#F44336")
+            < 10 => ("Excellent", LampState.Go),
+            < 50 => ("Good", LampState.Go),
+            < 100 => ("Fair", LampState.Hold),
+            < 200 => ("Slow", LampState.Warn),
+            _ => ("Very Slow", LampState.NoGo)
         };
     }
 

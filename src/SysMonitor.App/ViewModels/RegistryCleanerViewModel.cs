@@ -279,18 +279,6 @@ public partial class RegistryCleanerViewModel : ObservableObject, IDisposable
         };
     }
 
-    public string GetRiskColor(CleanerRiskLevel risk)
-    {
-        return risk switch
-        {
-            CleanerRiskLevel.Safe => "#4CAF50",
-            CleanerRiskLevel.Low => "#8BC34A",
-            CleanerRiskLevel.Medium => "#FF9800",
-            CleanerRiskLevel.High => "#F44336",
-            _ => "#808080"
-        };
-    }
-
     /// <summary>
     /// Stops whatever this page started. The page calls it on the way out; without it a scan or a wipe kept
     /// running against a page the user had already left, holding the page and its bindings alive with it.

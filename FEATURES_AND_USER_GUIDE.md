@@ -259,7 +259,7 @@ Control programs that launch at startup:
 1. View startup programs list
 2. Select a program to see details
 3. Click **Disable** to prevent auto-start
-4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:81`)
+4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:62`)
 
 ### Scheduled Cleaning
 
@@ -648,7 +648,7 @@ Detailed system specifications:
 
 - **Run at Startup** - Launch app when Windows starts
 - **Minimize to Tray** - Keep running in system tray
-- **Show Notifications** - Enable/disable alerts (`src/SysMonitor.App/Views/SettingsPage.xaml:98`)
+- **Show Notifications** - Enable/disable alerts (`src/SysMonitor.App/Views/SettingsPage.xaml:78`)
 
 ### Monitoring
 

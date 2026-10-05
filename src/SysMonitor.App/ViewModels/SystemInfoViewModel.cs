@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services;
 using Serilog;
 
@@ -48,7 +49,7 @@ public partial class SystemInfoViewModel : ObservableObject, IDisposable
     // Health Score
     [ObservableProperty] private int _healthScore;
     [ObservableProperty] private string _healthStatus = "";
-    [ObservableProperty] private string _healthColor = "#4CAF50";
+    [ObservableProperty] private LampState _healthState = LampState.Go;
 
     // State
     [ObservableProperty] private bool _isLoading = true;
@@ -149,7 +150,7 @@ public partial class SystemInfoViewModel : ObservableObject, IDisposable
 
                 // Health Score
                 HealthScore = systemInfo.HealthScore;
-                (HealthStatus, HealthColor) = GetHealthStatus(systemInfo.HealthScore);
+                (HealthStatus, HealthState) = GetHealthStatus(systemInfo.HealthScore);
 
                 IsLoading = false;
             });
@@ -180,15 +181,15 @@ public partial class SystemInfoViewModel : ObservableObject, IDisposable
         return $"{gb:F1} GB";
     }
 
-    private static (string status, string color) GetHealthStatus(int score)
+    private static (string status, LampState state) GetHealthStatus(int score)
     {
         return score switch
         {
-            >= 90 => ("Excellent", "#4CAF50"),
-            >= 75 => ("Good", "#8BC34A"),
-            >= 60 => ("Fair", "#FF9800"),
-            >= 40 => ("Poor", "#FF5722"),
-            _ => ("Critical", "#F44336")
+            >= 90 => ("Excellent", LampState.Go),
+            >= 75 => ("Good", LampState.Go),
+            >= 60 => ("Fair", LampState.Hold),
+            >= 40 => ("Poor", LampState.Warn),
+            _ => ("Critical", LampState.NoGo)
         };
     }
 

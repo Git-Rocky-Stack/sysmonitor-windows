@@ -70,8 +70,8 @@ opens the note now.
 ## Features
 
 Thirty-four entries in the navigation menu, grouped the way the app groups them
-(`src/SysMonitor.App/MainWindow.xaml:73-252`). Settings
-(`MainWindow.xaml:238`), Donate (`:243`) and the built-in User's Guide (`:248`)
+(`src/SysMonitor.App/MainWindow.xaml:57-236`). Settings
+(`MainWindow.xaml:222`), Donate (`:227`) and the built-in User's Guide (`:232`)
 sit below the groups listed here.
 
 ### Monitoring

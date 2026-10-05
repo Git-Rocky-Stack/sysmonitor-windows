@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
@@ -49,7 +50,7 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
     // Action Status
     [ObservableProperty] private string _actionStatus = "";
     [ObservableProperty] private bool _hasActionStatus;
-    [ObservableProperty] private string _actionStatusColor = "#4CAF50";
+    [ObservableProperty] private LampState _actionStatusState = LampState.Go;
 
     public DuplicateFinderViewModel(IDuplicateFinder duplicateFinder,
         ILogger<DuplicateFinderViewModel>? logger = null)
@@ -260,7 +261,7 @@ public partial class DuplicateFinderViewModel : ObservableObject, IDisposable
     private void ShowAction(string message, bool isSuccess)
     {
         ActionStatus = message;
-        ActionStatusColor = isSuccess ? "#4CAF50" : "#F44336";
+        ActionStatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasActionStatus = true;
 
         // Good news fades after a few seconds. A report of anything left undone - files Windows could not
@@ -349,7 +350,7 @@ public partial class DuplicateFileDisplay : ObservableObject
     public DateTime LastModified { get; }
     public bool IsOriginal { get; }
     public string StatusText { get; }
-    public string StatusColor { get; }
+    public LampState StatusState { get; }
 
     [ObservableProperty] private bool _isSelected;
 
@@ -361,6 +362,6 @@ public partial class DuplicateFileDisplay : ObservableObject
         LastModified = info.LastModified;
         IsOriginal = info.IsOriginal;
         StatusText = info.IsOriginal ? "ORIGINAL" : "DUPLICATE";
-        StatusColor = info.IsOriginal ? "#4CAF50" : "#FF9800";
+        StatusState = info.IsOriginal ? LampState.Go : LampState.Hold;
     }
 }

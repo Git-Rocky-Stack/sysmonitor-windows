@@ -663,8 +663,7 @@ public sealed partial class PdfEditorPage : Page
 
         var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right };
 
-        // The page's own Resources do not look in App.xaml, where the Fluent styles are merged; asking the page threw.
-        var saveButton = new Button { Content = "Save", Style = (Style)Application.Current.Resources["AccentButtonStyle"] };
+        var saveButton = new Button { Content = "SAVE" };
         saveButton.Click += async (s, args) =>
         {
             var title = titleBox.Text;
@@ -680,7 +679,7 @@ public sealed partial class PdfEditorPage : Page
             CloseStickyNoteInput();
         };
 
-        var cancelButton = new Button { Content = "Cancel" };
+        var cancelButton = new Button { Content = "CANCEL" };
         cancelButton.Click += (s, args) => CloseStickyNoteInput();
 
         buttonPanel.Children.Add(cancelButton);

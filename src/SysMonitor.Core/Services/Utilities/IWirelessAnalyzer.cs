@@ -1,3 +1,5 @@
+using SysMonitor.Core.Models;
+
 namespace SysMonitor.Core.Services.Utilities;
 
 /// <summary>
@@ -44,11 +46,10 @@ public record BluetoothDeviceInfo
     public string Address { get; init; } = "";
     public string DeviceType { get; init; } = "Unknown";
     public string DeviceIcon { get; init; } = "\uE702";
-    public string DeviceTypeColor { get; init; } = "#808080";
     public int SignalStrength { get; init; } // RSSI in dBm
     public string SignalQuality { get; init; } = "Unknown";
-    public string SignalColor { get; init; } = "#808080";
-    public string StatusColor { get; init; } = "#4CAF50";
+    public LampState SignalState { get; init; } = LampState.Off;
+    public LampState StatusState { get; init; } = LampState.Go;
     public bool IsConnected { get; init; }
     public bool IsPaired { get; init; }
     public DateTime LastSeen { get; init; }
@@ -71,7 +72,7 @@ public record WiFiNetworkInfo
     public int SignalStrength { get; init; } // Percentage 0-100
     public int SignalBars { get; init; } // 1-5 bars
     public string SignalQuality { get; init; } = "Unknown";
-    public string SignalColor { get; init; } = "#808080";
+    public LampState SignalState { get; init; } = LampState.Off;
     public int Channel { get; init; }
     public string Band { get; init; } = ""; // 2.4 GHz or 5 GHz
     public string Security { get; init; } = "";

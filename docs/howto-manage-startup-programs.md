@@ -36,7 +36,7 @@ now agree with each other.
    `Explorer\StartupApproved`, which is how Windows itself records that an entry is
    switched off.
 
-4. To undo, select the entry and click **Enable** (`src/SysMonitor.App/Views/StartupPage.xaml:81`).
+4. To undo, select the entry and click **Enable** (`src/SysMonitor.App/Views/StartupPage.xaml:62`).
 
 ## Verification
 

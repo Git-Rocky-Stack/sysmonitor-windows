@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using SysMonitor.Core.Models;
 using System.Diagnostics;
 using System.Management;
 using System.Text;
@@ -118,7 +119,7 @@ public class DriverUpdater : IDriverUpdater
                             InfName = infName,
                             IsSigned = isSigned,
                             Status = "OK",
-                            StatusColor = "#4CAF50",
+                            StatusState = LampState.Go,
                             HasProblem = false,
                             DaysSinceUpdate = daysSinceUpdate,
                             IsOutdated = isOutdated,
@@ -143,7 +144,7 @@ public class DriverUpdater : IDriverUpdater
                         {
                             HasProblem = true,
                             Status = problem.Status,
-                            StatusColor = problem.StatusColor,
+                            StatusState = problem.StatusState,
                             ProblemDescription = problem.ProblemDescription
                         };
                     }
@@ -189,7 +190,7 @@ public class DriverUpdater : IDriverUpdater
                     var manufacturer = obj["Manufacturer"]?.ToString() ?? "";
                     var deviceId = obj["DeviceID"]?.ToString() ?? "";
 
-                    var (status, statusColor, description) = GetErrorDescription(errorCode);
+                    var (status, statusState, description) = GetErrorDescription(errorCode);
 
                     problems.Add(new DriverInfo
                     {
@@ -200,7 +201,7 @@ public class DriverUpdater : IDriverUpdater
                         DeviceClassIcon = GetDeviceClassIcon(deviceClass),
                         HasProblem = true,
                         Status = status,
-                        StatusColor = statusColor,
+                        StatusState = statusState,
                         ProblemDescription = description,
                         IsCritical = CriticalClasses.Contains(deviceClass)
                     });
@@ -219,44 +220,44 @@ public class DriverUpdater : IDriverUpdater
         return problems;
     }
 
-    private static (string status, string color, string description) GetErrorDescription(int errorCode)
+    private static (string status, LampState state, string description) GetErrorDescription(int errorCode)
     {
         return errorCode switch
         {
-            1 => ("Not Configured", "#FF9800", "Device is not configured correctly"),
-            3 => ("Driver Corrupt", "#F44336", "Driver for this device might be corrupted"),
-            10 => ("Cannot Start", "#F44336", "Device cannot start"),
-            12 => ("Resource Conflict", "#FF9800", "Cannot find enough free resources"),
-            14 => ("Restart Required", "#2196F3", "Device requires computer restart"),
-            18 => ("Reinstall Drivers", "#FF9800", "Reinstall drivers for this device"),
-            21 => ("Will Be Removed", "#FF9800", "Windows is removing this device"),
-            22 => ("Disabled", "#808080", "Device is disabled"),
-            24 => ("Not Present", "#808080", "Device is not present or not working"),
-            28 => ("No Driver", "#F44336", "Drivers for this device are not installed"),
-            29 => ("Disabled (BIOS)", "#808080", "Device is disabled in BIOS"),
-            31 => ("Not Working", "#F44336", "Device is not working properly"),
-            32 => ("Driver Blocked", "#F44336", "Driver for this device was blocked"),
-            33 => ("IRQ Conflict", "#FF9800", "Cannot determine required resources"),
-            34 => ("Need Manual Config", "#FF9800", "Device requires manual configuration"),
-            35 => ("BIOS Memory Error", "#FF9800", "System BIOS doesn't have enough info"),
-            36 => ("IRQ Conflict", "#FF9800", "Device requesting PCI interrupt"),
-            37 => ("Cannot Initialize", "#F44336", "Cannot initialize device driver"),
-            38 => ("Driver Load Failed", "#F44336", "Cannot load device driver"),
-            39 => ("Driver Corrupt", "#F44336", "Driver corrupted or missing"),
-            40 => ("Registry Error", "#F44336", "Registry entry is invalid"),
-            41 => ("Driver Loaded", "#FF9800", "Driver loaded but device not found"),
-            42 => ("Duplicate Device", "#FF9800", "Duplicate device detected"),
-            43 => ("Driver Failed", "#F44336", "Driver reported device failure"),
-            44 => ("Stopped", "#FF9800", "Device stopped by application or user"),
-            45 => ("Disconnected", "#808080", "Device is not connected"),
-            46 => ("Access Denied", "#F44336", "Windows cannot access device"),
-            47 => ("Safe Removal", "#2196F3", "Device prepared for safe removal"),
-            48 => ("Display Driver", "#FF9800", "Display driver blocked (known issues)"),
-            49 => ("Registry Too Large", "#FF9800", "System hive too large"),
-            50 => ("Cannot Apply", "#FF9800", "Cannot apply all settings"),
-            51 => ("Unknown Problem", "#F44336", "Device has unknown problem"),
-            52 => ("Unsigned Driver", "#FF9800", "Driver not digitally signed"),
-            _ => ("Error", "#F44336", $"Unknown error code: {errorCode}")
+            1 => ("Not Configured", LampState.Hold, "Device is not configured correctly"),
+            3 => ("Driver Corrupt", LampState.NoGo, "Driver for this device might be corrupted"),
+            10 => ("Cannot Start", LampState.NoGo, "Device cannot start"),
+            12 => ("Resource Conflict", LampState.Hold, "Cannot find enough free resources"),
+            14 => ("Restart Required", LampState.Exec, "Device requires computer restart"),
+            18 => ("Reinstall Drivers", LampState.Hold, "Reinstall drivers for this device"),
+            21 => ("Will Be Removed", LampState.Hold, "Windows is removing this device"),
+            22 => ("Disabled", LampState.Off, "Device is disabled"),
+            24 => ("Not Present", LampState.Off, "Device is not present or not working"),
+            28 => ("No Driver", LampState.NoGo, "Drivers for this device are not installed"),
+            29 => ("Disabled (BIOS)", LampState.Off, "Device is disabled in BIOS"),
+            31 => ("Not Working", LampState.NoGo, "Device is not working properly"),
+            32 => ("Driver Blocked", LampState.NoGo, "Driver for this device was blocked"),
+            33 => ("IRQ Conflict", LampState.Hold, "Cannot determine required resources"),
+            34 => ("Need Manual Config", LampState.Hold, "Device requires manual configuration"),
+            35 => ("BIOS Memory Error", LampState.Hold, "System BIOS doesn't have enough info"),
+            36 => ("IRQ Conflict", LampState.Hold, "Device requesting PCI interrupt"),
+            37 => ("Cannot Initialize", LampState.NoGo, "Cannot initialize device driver"),
+            38 => ("Driver Load Failed", LampState.NoGo, "Cannot load device driver"),
+            39 => ("Driver Corrupt", LampState.NoGo, "Driver corrupted or missing"),
+            40 => ("Registry Error", LampState.NoGo, "Registry entry is invalid"),
+            41 => ("Driver Loaded", LampState.Hold, "Driver loaded but device not found"),
+            42 => ("Duplicate Device", LampState.Hold, "Duplicate device detected"),
+            43 => ("Driver Failed", LampState.NoGo, "Driver reported device failure"),
+            44 => ("Stopped", LampState.Hold, "Device stopped by application or user"),
+            45 => ("Disconnected", LampState.Off, "Device is not connected"),
+            46 => ("Access Denied", LampState.NoGo, "Windows cannot access device"),
+            47 => ("Safe Removal", LampState.Exec, "Device prepared for safe removal"),
+            48 => ("Display Driver", LampState.Hold, "Display driver blocked (known issues)"),
+            49 => ("Registry Too Large", LampState.Hold, "System hive too large"),
+            50 => ("Cannot Apply", LampState.Hold, "Cannot apply all settings"),
+            51 => ("Unknown Problem", LampState.NoGo, "Device has unknown problem"),
+            52 => ("Unsigned Driver", LampState.Hold, "Driver not digitally signed"),
+            _ => ("Error", LampState.NoGo, $"Unknown error code: {errorCode}")
         };
     }
 

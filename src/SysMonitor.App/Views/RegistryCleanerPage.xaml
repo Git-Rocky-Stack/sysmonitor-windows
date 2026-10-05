@@ -3,7 +3,8 @@
     x:Class="SysMonitor.App.Views.RegistryCleanerPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{StaticResource BackgroundBrush}">
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
+    Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
         <Grid.RowDefinitions>
@@ -13,29 +14,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left: Header text -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="REGISTRY CLEANER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Find &amp; Fix Invalid Registry Entries" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                </StackPanel>
-
-                <!-- Center: STX.1 Home Logo -->
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Stretch="Uniform"/>
-            </Grid>
-        </Border>
+        <!-- View Header -->
+        <instruments:ViewHeader Grid.Row="0" Module="REG" Index="07" Title="REGISTRY CLEANER"
+                                Description="Find &amp; Fix Invalid Registry Entries"/>
 
         <!-- Cleaning Controls Section -->
         <StackPanel Grid.Row="1" Spacing="12">
@@ -45,7 +26,7 @@
             </StackPanel>
 
             <!-- Status Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -54,7 +35,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                        <FontIcon Glyph="&#xEA99;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <FontIcon Glyph="&#xEA99;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                     </Border>
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -62,59 +43,24 @@
                                    Style="{StaticResource CardTitleStyle}"/>
                         <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
                             <Run Text="Issues: "/>
-                            <Run Text="{x:Bind ViewModel.TotalIssues, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
+                            <Run Text="{x:Bind ViewModel.TotalIssues, Mode=OneWay}" Foreground="{ThemeResource StateHoldBrush}"/>
                             <Run Text=" | Selected: "/>
-                            <Run Text="{x:Bind ViewModel.SelectedIssues, Mode=OneWay}" Foreground="{StaticResource CyanAccentBrush}"/>
+                            <Run Text="{x:Bind ViewModel.SelectedIssues, Mode=OneWay}" Foreground="{ThemeResource StateExecBrush}"/>
                         </TextBlock>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                        <!-- SCAN with chrome bezel -->
-                        <Border CornerRadius="26" Padding="2">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Content="SCAN" Command="{x:Bind ViewModel.ScanCommand}"
-                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
-                                    IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
-                        </Border>
-                        <!-- FIX SELECTED with chrome bezel -->
-                        <Border CornerRadius="26" Padding="2">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Content="FIX SELECTED" Command="{x:Bind ViewModel.CleanCommand}"
-                                    Style="{StaticResource RedButtonStyle}"
-                                    IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
-                        </Border>
-                        <!-- RESTORE BACKUP with chrome bezel -->
-                        <Border CornerRadius="26" Padding="2">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#707070" Offset="0.0"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                    <GradientStop Color="#505050" Offset="1.0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Button Content="RESTORE BACKUP" Click="RestoreBackup_Click"
-                                    Style="{StaticResource OutlinedButtonStyle}" Background="#000000"
-                                    ToolTipService.ToolTip="Undo the last registry cleaning by importing its backup"
-                                    IsEnabled="{x:Bind ViewModel.HasBackup, Mode=OneWay}"/>
-                        </Border>
+                        <!-- SCAN -->
+                        <Button Content="SCAN" Command="{x:Bind ViewModel.ScanCommand}"
+                                IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                        <!-- FIX SELECTED -->
+                        <Button Content="FIX SELECTED" Command="{x:Bind ViewModel.CleanCommand}"
+                                Style="{StaticResource ArmedCapButtonStyle}"
+                                IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
+                        <!-- RESTORE BACKUP -->
+                        <Button Content="RESTORE BACKUP" Click="RestoreBackup_Click"
+                                ToolTipService.ToolTip="Undo the last registry cleaning by importing its backup"
+                                IsEnabled="{x:Bind ViewModel.HasBackup, Mode=OneWay}"/>
                         <Button Command="{x:Bind ViewModel.OpenBackupFolderCommand}" Padding="10" VerticalAlignment="Center"
                                 ToolTipService.ToolTip="Open the registry backups folder"
                                 AutomationProperties.Name="Open registry backups folder">
@@ -122,10 +68,10 @@
                         </Button>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Info Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="12" Background="#1A1A1A">
+            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -133,13 +79,13 @@
                     </Grid.ColumnDefinitions>
 
                     <FontIcon Grid.Column="0" Glyph="&#xE946;" FontSize="16"
-                              Foreground="{StaticResource CyanAccentBrush}" Margin="0,0,12,0"/>
-                    <TextBlock Grid.Column="1" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
+                              Foreground="{ThemeResource StateExecBrush}" Margin="0,0,12,0"/>
+                    <TextBlock Grid.Column="1" TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="12">
                         <Run Text="Registry cleaning removes invalid entries left behind by uninstalled programs. "/>
-                        <Run Text="Every key that will change is backed up first; if the backup fails, nothing is changed. Use RESTORE BACKUP to undo the last cleaning." Foreground="{StaticResource SuccessBrush}"/>
+                        <Run Text="Every key that will change is backed up first; if the backup fails, nothing is changed. Use RESTORE BACKUP to undo the last cleaning." Foreground="{ThemeResource StateGoBrush}"/>
                     </TextBlock>
                 </Grid>
-            </Border>
+            </instruments:Plate>
         </StackPanel>
 
         <!-- Scan Results Section -->
@@ -165,8 +111,7 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource CardStyle}" Padding="12"
-                            Opacity="{Binding IsProtected, Converter={StaticResource BoolToOpacityConverter}}">
+                    <instruments:Plate Padding="12" Opacity="{Binding IsProtected, Converter={StaticResource BoolToOpacityConverter}}" VerticalContentAlignment="Stretch">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -182,7 +127,7 @@
                             <Border Grid.Column="1" Style="{StaticResource IconContainerStyle}"
                                     Width="40" Height="40" Margin="8,0,12,0">
                                 <!-- Show lock icon if protected, registry icon otherwise -->
-                                <FontIcon FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"
+                                <FontIcon FontSize="16" Foreground="{ThemeResource PlatinumBrush}"
                                           Glyph="{Binding IsProtected, Converter={StaticResource BoolToLockGlyphConverter}}"/>
                             </Border>
 
@@ -190,38 +135,38 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Text="{Binding IssueType}" Style="{StaticResource CardTitleStyle}"/>
                                     <!-- Protected badge -->
-                                    <Border CornerRadius="4" Padding="6,2" Background="#442222"
+                                    <Border CornerRadius="4" Padding="6,2" Background="{ThemeResource NoGoSoftBrush}"
                                             Visibility="{Binding IsProtected, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <TextBlock Text="PROTECTED" FontSize="9" FontWeight="Bold" Foreground="#FF6666"/>
+                                        <TextBlock Text="PROTECTED" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource StateNoGoBrush}"/>
                                     </Border>
                                 </StackPanel>
                                 <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"
                                            TextTrimming="CharacterEllipsis" MaxWidth="400"/>
                                 <TextBlock Text="{Binding Key}" Style="{StaticResource CardSubtitleStyle}"
-                                           Foreground="{StaticResource TextTertiaryBrush}" FontSize="10"
+                                           Foreground="{ThemeResource SilverMuteBrush}" FontSize="10"
                                            TextTrimming="CharacterEllipsis" MaxWidth="400"/>
                                 <!-- Protection reason -->
-                                <TextBlock Text="{Binding ProtectionReason}" FontSize="10" Foreground="#FF9966"
+                                <TextBlock Text="{Binding ProtectionReason}" FontSize="10" Foreground="{ThemeResource StateWarnBrush}"
                                            Visibility="{Binding IsProtected, Converter={StaticResource BoolToVisibilityConverter}}"
                                            Margin="0,2,0,0"/>
                             </StackPanel>
 
                             <!-- Risk Level Badge -->
                             <Border Grid.Column="3" VerticalAlignment="Center" CornerRadius="8" Padding="8,4"
-                                    Background="#2A2A2A" Margin="8,0,0,0">
+                                    Background="{ThemeResource Carbon700Brush}" Margin="8,0,0,0">
                                 <TextBlock FontSize="11" FontWeight="SemiBold">
                                     <Run Text="{Binding RiskLevel}"/>
                                 </TextBlock>
                             </Border>
                         </Grid>
-                    </Border>
+                    </instruments:Plate>
                 </DataTemplate>
             </ListView.ItemTemplate>
             </ListView>
         </Grid>
 
         <ProgressBar Grid.Row="3" IsIndeterminate="True"
-                     Foreground="{StaticResource PrimaryBrush}"
+                     Foreground="{ThemeResource ArmedBrush}"
                      Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
     </Grid>
 </Page>

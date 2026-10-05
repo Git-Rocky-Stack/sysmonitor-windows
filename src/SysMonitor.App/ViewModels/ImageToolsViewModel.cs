@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
@@ -52,7 +53,7 @@ public partial class ImageToolsViewModel : ObservableObject
     [ObservableProperty] private int _processingProgress;
     [ObservableProperty] private string _actionStatus = "";
     [ObservableProperty] private bool _hasActionStatus;
-    [ObservableProperty] private string _actionStatusColor = "#4CAF50";
+    [ObservableProperty] private LampState _actionStatusState = LampState.Go;
 
     // Last Result
     [ObservableProperty] private bool _hasResult;
@@ -457,7 +458,7 @@ public partial class ImageToolsViewModel : ObservableObject
     private void ShowAction(string message, bool isSuccess)
     {
         ActionStatus = message;
-        ActionStatusColor = isSuccess ? "#4CAF50" : "#F44336";
+        ActionStatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasActionStatus = true;
         _ = ClearActionAfterDelayAsync();
     }

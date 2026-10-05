@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitors;
 using System.Collections.ObjectModel;
 
@@ -21,8 +22,8 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
     [ObservableProperty] private double _gpuTemperature;
     [ObservableProperty] private string _cpuTempStatus = "Normal";
     [ObservableProperty] private string _gpuTempStatus = "Normal";
-    [ObservableProperty] private string _cpuTempColor = "#4CAF50";
-    [ObservableProperty] private string _gpuTempColor = "#4CAF50";
+    [ObservableProperty] private LampState _cpuTempState = LampState.Go;
+    [ObservableProperty] private LampState _gpuTempState = LampState.Go;
 
     // State
     [ObservableProperty] private bool _isLoading = true;
@@ -90,21 +91,21 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
                 GpuTemperature = gpuTemp;
 
                 // CPU Status
-                (CpuTempStatus, CpuTempColor) = GetTempStatus(cpuTemp);
-                (GpuTempStatus, GpuTempColor) = GetTempStatus(gpuTemp);
+                (CpuTempStatus, CpuTempState) = GetTempStatus(cpuTemp);
+                (GpuTempStatus, GpuTempState) = GetTempStatus(gpuTemp);
 
                 // All sensors
                 Temperatures.Clear();
                 foreach (var temp in allTemps.OrderBy(t => t.Key))
                 {
-                    var (status, color) = GetTempStatus(temp.Value);
+                    var (status, state) = GetTempStatus(temp.Value);
                     var category = GetCategory(temp.Key);
                     Temperatures.Add(new TemperatureDisplayInfo
                     {
                         Name = temp.Key,
                         Temperature = temp.Value,
                         Status = status,
-                        StatusColor = color,
+                        StatusState = state,
                         Icon = GetIcon(category),
                         Category = category
                     });
@@ -133,16 +134,16 @@ public partial class TemperatureViewModel : ObservableObject, IDisposable
 
     private static double CelsiusToFahrenheit(double celsius) => (celsius * 1.8) + 32;
 
-    private static (string status, string color) GetTempStatus(double tempCelsius)
+    private static (string status, LampState state) GetTempStatus(double tempCelsius)
     {
         return tempCelsius switch
         {
-            0 => ("N/A", "#808080"),
-            <= 45 => ("Cool", "#2196F3"),      // Blue - Cool (<113°F)
-            <= 65 => ("Normal", "#4CAF50"),    // Green - Normal (<149°F)
-            <= 80 => ("Warm", "#FF9800"),      // Orange - Warm (<176°F)
-            <= 90 => ("Hot", "#FF5722"),       // Deep Orange - Hot (<194°F)
-            _ => ("Critical", "#F44336")        // Red - Critical (194°F+)
+            0 => ("N/A", LampState.Off),
+            <= 45 => ("Cool", LampState.Exec),      // Cool (<113°F)
+            <= 65 => ("Normal", LampState.Go),      // Normal (<149°F)
+            <= 80 => ("Warm", LampState.Hold),      // Warm (<176°F)
+            <= 90 => ("Hot", LampState.Warn),       // Hot (<194°F)
+            _ => ("Critical", LampState.NoGo)       // Critical (194°F+)
         };
     }
 
@@ -184,7 +185,7 @@ public class TemperatureDisplayInfo
     public string Name { get; set; } = string.Empty;
     public double Temperature { get; set; }
     public string Status { get; set; } = string.Empty;
-    public string StatusColor { get; set; } = string.Empty;
+    public LampState StatusState { get; set; } = LampState.Off;
     public string Icon { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
 

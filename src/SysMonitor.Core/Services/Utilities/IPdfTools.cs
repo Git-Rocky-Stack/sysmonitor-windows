@@ -1,4 +1,6 @@
-﻿namespace SysMonitor.Core.Services.Utilities;
+﻿using SysMonitor.Core.Models;
+
+namespace SysMonitor.Core.Services.Utilities;
 
 /// <summary>
 /// Service for PDF operations - merge, split, extract, sign, convert
@@ -91,7 +93,7 @@ public record NetworkDeviceInfo
     public bool IsOnline { get; init; }
     public int ResponseTimeMs { get; init; }
     public string ResponseStatus { get; init; } = "";
-    public string ResponseColor { get; init; } = "#808080";
+    public LampState ResponseState { get; init; } = LampState.Off;
     public DateTime LastSeen { get; init; }
     public List<PortInfo> OpenPorts { get; init; } = [];
 }

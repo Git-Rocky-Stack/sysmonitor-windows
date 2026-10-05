@@ -1,681 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    The first generation's style names, kept because the pages ask for them by name, and now answered by the Command
+    Console. Nothing here draws a look of its own: each style is a console text style from Typography.xaml or a
+    recipe on the palette's tokens, so a page that still says PageHeaderStyle gets the view title. The look lives in
+    the console and is changed there; this file only maps old names onto it, and every name in it has a page asking
+    for it. The card styles are gone: every card is now the Plate instrument, which draws the lip, shade and shadow
+    a styled Border could not.
+
+    Colours are asked for with {ThemeResource}, never written here, so every style follows the shift it is shown in.
+    A page moving onto the console's own names (ViewTitleTextStyle, a Plate, a Faceplate) can drop the old one; the
+    mapping is the bridge, not the destination.
+
+    Sources are System-X's stylesheet at system-x-app@eaba14b.
+
+      PageHeaderStyle    .view-title (:1659), as ViewTitleTextStyle sets it.
+      SectionHeaderStyle .placard (:1631), as PlacardTextStyle sets it. Its accent bar is the plate's light pipe -
+                         3 wide, armed - since a placard carries no bar of its own (:1149).
+      StatLabelStyle     .kicker (:1642); StatValueStyle and LargeStatValueStyle the telemetry face (:2569).
+      CardTitleStyle     a heading (:926-935), never Archivo caps; CardSubtitleStyle a description.
+      progress bars      a dark well's track (:1451) with the LED that names the meter's job lit along it.
+-->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Dark Card Style (Info cards) - matches Android app panels -->
-    <Style x:Key="CardStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Padding" Value="16"/>
-    </Style>
+    <!-- ============================================================ ICON SEATS -->
 
-    <!-- Elevated Card Style -->
-    <Style x:Key="ElevatedCardStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource ElevatedSurfaceBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Padding" Value="16"/>
-    </Style>
-
-    <!-- Red Card Style (Menu/Action items) - matches Android menu cards -->
-    <Style x:Key="RedCardStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource RedCardGradientBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource PrimaryLightBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Padding" Value="16"/>
-    </Style>
-
-    <!-- Stat Card Style -->
-    <Style x:Key="StatCardStyle" TargetType="Border" BasedOn="{StaticResource CardStyle}">
-        <Setter Property="MinWidth" Value="200"/>
-        <Setter Property="MinHeight" Value="100"/>
-    </Style>
-
-    <!-- Header Banner Style -->
-    <Style x:Key="HeaderBannerStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource HeaderGradientBrush}"/>
-        <Setter Property="Padding" Value="24"/>
-        <Setter Property="Margin" Value="-24,-24,-24,24"/>
-    </Style>
-
-    <!-- Icon Container Style (Dark rounded square - for info items) -->
+    <!-- An icon's seat: the chip's flatter cap face (:2176) on the control radius. -->
     <Style x:Key="IconContainerStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource IconContainerBrush}"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Background" Value="{ThemeResource ChipFaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource CapEdgeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CapCornerRadius}"/>
         <Setter Property="Width" Value="48"/>
         <Setter Property="Height" Value="48"/>
         <Setter Property="Padding" Value="10"/>
     </Style>
 
-    <!-- Icon Container Red Style (for menu cards - circular like Android) -->
-    <Style x:Key="IconContainerRedStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource IconContainerBrush}"/>
-        <Setter Property="CornerRadius" Value="24"/>
-        <Setter Property="Width" Value="48"/>
-        <Setter Property="Height" Value="48"/>
-        <Setter Property="Padding" Value="10"/>
-    </Style>
+    <Style x:Key="IconContainerRedStyle" TargetType="Border" BasedOn="{StaticResource IconContainerStyle}"/>
 
-    <!-- Menu Card Icon Style (dark circle with icon like Android menu items) -->
-    <Style x:Key="MenuCardIconStyle" TargetType="Border">
-        <Setter Property="Background" Value="#2A2A2A"/>
-        <Setter Property="CornerRadius" Value="24"/>
-        <Setter Property="Width" Value="48"/>
-        <Setter Property="Height" Value="48"/>
+    <Style x:Key="MenuCardIconStyle" TargetType="Border" BasedOn="{StaticResource IconContainerStyle}">
         <Setter Property="Padding" Value="12"/>
     </Style>
 
-    <!-- Large Icon Container (for dashboard/hero sections) -->
-    <Style x:Key="LargeIconContainerStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource IconContainerBrush}"/>
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Width" Value="64"/>
-        <Setter Property="Height" Value="64"/>
-        <Setter Property="Padding" Value="14"/>
-    </Style>
+    <!-- ============================================================ TITLES AND PLACARDS -->
 
-    <!-- Page Header Style -->
-    <Style x:Key="PageHeaderStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="28"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    <Style x:Key="PageHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource ViewTitleTextStyle}">
         <Setter Property="Margin" Value="0,0,0,8"/>
-        <Setter Property="CharacterSpacing" Value="50"/>
     </Style>
 
-    <!-- Page Subtitle Style -->
-    <Style x:Key="PageSubtitleStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+    <Style x:Key="PageSubtitleStyle" TargetType="TextBlock" BasedOn="{StaticResource DescriptionTextStyle}">
         <Setter Property="Margin" Value="0,0,0,24"/>
     </Style>
 
-    <!-- Section Header Style (with red accent bar) -->
-    <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+    <Style x:Key="SectionHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource PlacardTextStyle}">
         <Setter Property="Margin" Value="12,0,0,12"/>
-        <Setter Property="CharacterSpacing" Value="100"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <!-- Section Header with Accent Bar -->
     <Style x:Key="SectionHeaderWithAccentStyle" TargetType="StackPanel">
         <Setter Property="Orientation" Value="Horizontal"/>
         <Setter Property="Margin" Value="0,16,0,12"/>
     </Style>
 
-    <!-- Accent Bar -->
     <Style x:Key="AccentBarStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="Width" Value="4"/>
-        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="Background" Value="{ThemeResource ArmedBrush}"/>
+        <Setter Property="Width" Value="3"/>
         <Setter Property="Margin" Value="0,0,8,0"/>
     </Style>
 
-    <!-- Stat Value Style -->
-    <Style x:Key="StatValueStyle" TargetType="TextBlock">
+    <!-- ============================================================ TEXT -->
+
+    <Style x:Key="CardTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource Heading2TextStyle}"/>
+
+    <Style x:Key="CardSubtitleStyle" TargetType="TextBlock" BasedOn="{StaticResource DescriptionTextStyle}"/>
+
+    <Style x:Key="MenuItemTextStyle" TargetType="TextBlock" BasedOn="{StaticResource Heading2TextStyle}"/>
+
+    <Style x:Key="MenuItemSubtitleStyle" TargetType="TextBlock" BasedOn="{StaticResource DescriptionTextStyle}"/>
+
+    <Style x:Key="StatLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource KickerTextStyle}"/>
+
+    <Style x:Key="StatValueStyle" TargetType="TextBlock" BasedOn="{StaticResource TelemetryTextStyle}">
         <Setter Property="FontSize" Value="36"/>
-        <Setter Property="FontWeight" Value="Light"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource PlatinumBrush}"/>
     </Style>
 
-    <!-- Large Stat Value Style (for hero numbers) -->
-    <Style x:Key="LargeStatValueStyle" TargetType="TextBlock">
+    <Style x:Key="LargeStatValueStyle" TargetType="TextBlock" BasedOn="{StaticResource ReadoutTextStyle}">
         <Setter Property="FontSize" Value="64"/>
-        <Setter Property="FontWeight" Value="Light"/>
-        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+        <Setter Property="LineHeight" Value="64"/>
+        <Setter Property="Foreground" Value="{ThemeResource StateGoBrush}"/>
     </Style>
 
-    <!-- Stat Label Style -->
-    <Style x:Key="StatLabelStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        <Setter Property="CharacterSpacing" Value="50"/>
-    </Style>
-
-    <!-- Card Title Style -->
-    <Style x:Key="CardTitleStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="16"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-    </Style>
-
-    <!-- Card Subtitle Style -->
-    <Style x:Key="CardSubtitleStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-    </Style>
-
-    <!-- Menu Item Text Style -->
-    <Style x:Key="MenuItemTextStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="18"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-    </Style>
-
-    <!-- Menu Item Subtitle Style -->
-    <Style x:Key="MenuItemSubtitleStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Foreground" Value="#CCFFFFFF"/>
-    </Style>
-
-    <!-- ==================== STANDARDIZED ACTION BUTTON STYLES ==================== -->
-    <!-- All action buttons follow consistent design language:
-         - Active/Rest State: Red background (#AA2024), white text, chrome bezel wrapper
-         - Disabled/Processing: Black background, red border, red text, chrome bezel wrapper
-         - Hover: Maintains visibility with subtle highlight, NO washout -->
-
-    <!-- Primary Action Button Style (RED with WHITE text) - Use for primary actions -->
-    <!-- Wrap with ChromeBezelWrapper in XAML for chrome effect -->
-    <Style x:Key="RedButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="#AA2024"/>
-        <Setter Property="Foreground" Value="#FFFFFF"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="CornerRadius" Value="24"/>
-        <Setter Property="Padding" Value="24,12"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="RootBorder"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{TemplateBinding CornerRadius}"
-                            Padding="{TemplateBinding Padding}">
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Normal"/>
-                                <VisualState x:Name="PointerOver">
-                                    <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="Background">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#C93437"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                                <VisualState x:Name="Pressed">
-                                    <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="Background">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#8A1A1D"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                                <VisualState x:Name="Disabled">
-                                    <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="Background">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#000000"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="BorderBrush">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#AA2024"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="BorderThickness">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="1"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#AA2024"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
-                        <ContentPresenter x:Name="ContentPresenter"
-                                          Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          Foreground="{TemplateBinding Foreground}"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- Secondary/Outlined Button Style (BLACK with RED text/border) - Use for secondary actions -->
-    <!-- Wrap with ChromeBezelWrapper in XAML for chrome effect -->
-    <Style x:Key="OutlinedButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="#000000"/>
-        <Setter Property="Foreground" Value="#AA2024"/>
-        <Setter Property="BorderBrush" Value="#AA2024"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="24"/>
-        <Setter Property="Padding" Value="24,12"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="RootBorder"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{TemplateBinding CornerRadius}"
-                            Padding="{TemplateBinding Padding}">
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Normal"/>
-                                <VisualState x:Name="PointerOver">
-                                    <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="Background">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#1A1A1A"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="BorderBrush">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#C93437"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#C93437"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                                <VisualState x:Name="Pressed">
-                                    <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="Background">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#252525"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="BorderBrush">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#8A1A1D"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                                <VisualState x:Name="Disabled">
-                                    <Storyboard>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="BorderBrush">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#4D4D4D"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="#4D4D4D"/>
-                                        </ObjectAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
-                        <ContentPresenter x:Name="ContentPresenter"
-                                          Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          Foreground="{TemplateBinding Foreground}"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- Compact Outlined Button Style - For smaller action buttons in lists/toolbars -->
-    <Style x:Key="OutlineButtonStyle" TargetType="Button" BasedOn="{StaticResource OutlinedButtonStyle}">
-        <Setter Property="Padding" Value="16,8"/>
-        <Setter Property="FontSize" Value="12"/>
-    </Style>
-
-    <!-- Export Button Style - Same as RedButtonStyle but wider padding -->
-    <Style x:Key="ExportButtonStyle" TargetType="Button" BasedOn="{StaticResource RedButtonStyle}">
-        <Setter Property="Padding" Value="32,12"/>
-        <Setter Property="MinWidth" Value="100"/>
-    </Style>
-
-    <!-- Status Text Styles -->
     <Style x:Key="StatusGoodStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleBodySemiBoldFontFamily}"/>
+        <Setter Property="Foreground" Value="{ThemeResource StateGoBrush}"/>
     </Style>
 
-    <Style x:Key="StatusWarningStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-    </Style>
+    <!-- ============================================================ METERS -->
 
-    <Style x:Key="StatusErrorStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-    </Style>
-
-    <!-- ==================== PREMIUM PROGRESS BAR STYLES ==================== -->
-    <!-- Executive-inspired progress bars with enhanced visual depth and consistency -->
-
-    <!-- Premium Red Progress Bar - Primary metric indicator -->
     <Style x:Key="RedProgressBarStyle" TargetType="ProgressBar">
         <Setter Property="Height" Value="8"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#1A1A1A" Offset="0"/>
-                    <GradientStop Color="#0D0D0D" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Foreground">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#AA2024" Offset="0"/>
-                    <GradientStop Color="#D4383C" Offset="0.5"/>
-                    <GradientStop Color="#AA2024" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="CornerRadius" Value="{StaticResource PlateCornerRadius}"/>
+        <Setter Property="Background" Value="{ThemeResource WellFaceBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource ArmedBrush}"/>
     </Style>
 
-    <!-- Premium Green Progress Bar - Success/positive metrics -->
-    <Style x:Key="GreenProgressBarStyle" TargetType="ProgressBar">
-        <Setter Property="Height" Value="8"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#1A1A1A" Offset="0"/>
-                    <GradientStop Color="#0D0D0D" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Foreground">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#2E7D32" Offset="0"/>
-                    <GradientStop Color="#4CAF50" Offset="0.5"/>
-                    <GradientStop Color="#2E7D32" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
+    <Style x:Key="GreenProgressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource RedProgressBarStyle}">
+        <Setter Property="Foreground" Value="{ThemeResource LedGoBrush}"/>
     </Style>
 
-    <!-- Premium Cyan Progress Bar - Info/neutral metrics -->
-    <Style x:Key="CyanProgressBarStyle" TargetType="ProgressBar">
-        <Setter Property="Height" Value="8"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#1A1A1A" Offset="0"/>
-                    <GradientStop Color="#0D0D0D" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Foreground">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#0097A7" Offset="0"/>
-                    <GradientStop Color="#00BCD4" Offset="0.5"/>
-                    <GradientStop Color="#0097A7" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
+    <Style x:Key="CyanProgressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource RedProgressBarStyle}">
+        <Setter Property="Foreground" Value="{ThemeResource LedScopeBrush}"/>
     </Style>
 
-    <!-- Premium Warning Progress Bar - Warning/caution metrics -->
-    <Style x:Key="WarningProgressBarStyle" TargetType="ProgressBar">
-        <Setter Property="Height" Value="8"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#1A1A1A" Offset="0"/>
-                    <GradientStop Color="#0D0D0D" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Foreground">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#E65100" Offset="0"/>
-                    <GradientStop Color="#FF9800" Offset="0.5"/>
-                    <GradientStop Color="#E65100" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- Thin Progress Bar Style - For subtle/secondary indicators -->
-    <Style x:Key="ThinProgressBarStyle" TargetType="ProgressBar">
-        <Setter Property="Height" Value="4"/>
-        <Setter Property="CornerRadius" Value="2"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#1A1A1A" Offset="0"/>
-                    <GradientStop Color="#0D0D0D" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Foreground">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#AA2024" Offset="0"/>
-                    <GradientStop Color="#D4383C" Offset="0.5"/>
-                    <GradientStop Color="#AA2024" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- Premium Large Progress Bar - For hero/main metric displays -->
-    <Style x:Key="PremiumProgressBarStyle" TargetType="ProgressBar">
+    <Style x:Key="PremiumProgressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource RedProgressBarStyle}">
         <Setter Property="Height" Value="12"/>
-        <Setter Property="CornerRadius" Value="6"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#252525" Offset="0"/>
-                    <GradientStop Color="#1A1A1A" Offset="0.5"/>
-                    <GradientStop Color="#0D0D0D" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Foreground">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#8A1A1D" Offset="0"/>
-                    <GradientStop Color="#AA2024" Offset="0.3"/>
-                    <GradientStop Color="#D4383C" Offset="0.5"/>
-                    <GradientStop Color="#AA2024" Offset="0.7"/>
-                    <GradientStop Color="#8A1A1D" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- ==================== PREMIUM CIRCULAR GAUGE STYLES ==================== -->
-    <!-- Executive-style circular gauge components for consistent visualization -->
-
-    <!-- Circular Gauge Track Style - Outer ring background -->
-    <Style x:Key="GaugeTrackStyle" TargetType="Ellipse">
-        <Setter Property="Stroke">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#2A2A2A" Offset="0"/>
-                    <GradientStop Color="#1A1A1A" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="StrokeThickness" Value="6"/>
-        <Setter Property="Fill" Value="Transparent"/>
-    </Style>
-
-    <!-- Circular Gauge Progress Style - Primary red arc -->
-    <Style x:Key="GaugeProgressRedStyle" TargetType="Ellipse">
-        <Setter Property="Stroke" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="StrokeThickness" Value="6"/>
-        <Setter Property="Fill" Value="Transparent"/>
-        <Setter Property="StrokeDashCap" Value="Round"/>
-    </Style>
-
-    <!-- Circular Gauge Progress Style - Green arc -->
-    <Style x:Key="GaugeProgressGreenStyle" TargetType="Ellipse">
-        <Setter Property="Stroke" Value="{StaticResource SuccessBrush}"/>
-        <Setter Property="StrokeThickness" Value="6"/>
-        <Setter Property="Fill" Value="Transparent"/>
-        <Setter Property="StrokeDashCap" Value="Round"/>
-    </Style>
-
-    <!-- Circular Gauge Progress Style - Cyan arc -->
-    <Style x:Key="GaugeProgressCyanStyle" TargetType="Ellipse">
-        <Setter Property="Stroke" Value="{StaticResource CyanAccentBrush}"/>
-        <Setter Property="StrokeThickness" Value="6"/>
-        <Setter Property="Fill" Value="Transparent"/>
-        <Setter Property="StrokeDashCap" Value="Round"/>
-    </Style>
-
-    <!-- Premium Stat Card with Chrome Accent -->
-    <Style x:Key="PremiumStatCardStyle" TargetType="Border">
-        <Setter Property="CornerRadius" Value="16"/>
-        <Setter Property="Padding" Value="20"/>
-        <Setter Property="MinWidth" Value="200"/>
-        <Setter Property="MinHeight" Value="120"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#1F1F1F" Offset="0"/>
-                    <GradientStop Color="#141414" Offset="0.5"/>
-                    <GradientStop Color="#0F0F0F" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="BorderBrush">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#3A3A3A" Offset="0"/>
-                    <GradientStop Color="#252525" Offset="0.5"/>
-                    <GradientStop Color="#1A1A1A" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="BorderThickness" Value="1"/>
-    </Style>
-
-    <!-- Premium Hero Stat Card - For main dashboard metrics -->
-    <Style x:Key="HeroStatCardStyle" TargetType="Border">
-        <Setter Property="CornerRadius" Value="20"/>
-        <Setter Property="Padding" Value="24"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#1F1F1F" Offset="0"/>
-                    <GradientStop Color="#181818" Offset="0.3"/>
-                    <GradientStop Color="#121212" Offset="0.7"/>
-                    <GradientStop Color="#0A0A0A" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="BorderBrush">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#404040" Offset="0"/>
-                    <GradientStop Color="#2A2A2A" Offset="0.5"/>
-                    <GradientStop Color="#1A1A1A" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="BorderThickness" Value="1"/>
-    </Style>
-
-    <!-- Red Accent Line - For section headers -->
-    <Style x:Key="RedAccentLineStyle" TargetType="Border">
-        <Setter Property="Height" Value="3"/>
-        <Setter Property="CornerRadius" Value="1.5"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#AA2024" Offset="0"/>
-                    <GradientStop Color="#D4383C" Offset="0.5"/>
-                    <GradientStop Color="#AA2024" Offset="1"/>
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- ==================== CHROME BEZEL BUTTON STYLES ==================== -->
-    <!-- Primary Chrome Bezel Button (matches Android app's premium button style) -->
-    <!-- WinUI 3 implementation using nested borders for the 4-layer chrome effect -->
-
-    <!-- Chrome Bezel Primary Button - Outer bezel wrapper -->
-    <Style x:Key="ChromeBezelButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource ChromeBezelLayer1Brush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="CornerRadius" Value="14"/>
-        <Setter Property="Padding" Value="3"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="FontSize" Value="14"/>
-    </Style>
-
-    <!-- Secondary Chrome Bezel Button (outline style with red border) -->
-    <Style x:Key="ChromeBezelSecondaryButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource ChromeBezelLayer1Brush}"/>
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="CornerRadius" Value="14"/>
-        <Setter Property="Padding" Value="3"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="FontSize" Value="14"/>
-    </Style>
-
-    <!-- Input Field Style (matching Android) -->
-    <Style x:Key="InputFieldStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="12,10"/>
-    </Style>
-
-    <!-- Search TextBox Style (for search fields with icon placeholder) -->
-    <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="12,10"/>
-        <Setter Property="PlaceholderForeground" Value="{StaticResource TextTertiaryBrush}"/>
-    </Style>
-
-    <!-- Badge Styles -->
-    <Style x:Key="BadgeStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Padding" Value="8,4"/>
-    </Style>
-
-    <Style x:Key="BadgeSuccessStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Padding" Value="8,4"/>
-    </Style>
-
-    <Style x:Key="BadgeWarningStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Padding" Value="8,4"/>
-    </Style>
-
-    <Style x:Key="BadgeErrorStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Padding" Value="8,4"/>
-    </Style>
-
-    <Style x:Key="BadgeTextStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="11"/>
-        <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-    </Style>
-
-    <!-- Divider Styles -->
-    <Style x:Key="HorizontalDividerStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
-        <Setter Property="Height" Value="1"/>
-        <Setter Property="Margin" Value="0,16"/>
-    </Style>
-
-    <Style x:Key="VerticalDividerStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
-        <Setter Property="Width" Value="1"/>
-        <Setter Property="Margin" Value="16,0"/>
     </Style>
 </ResourceDictionary>

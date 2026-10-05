@@ -1,3 +1,5 @@
+using SysMonitor.Core.Models;
+
 namespace SysMonitor.Core.Services.Utilities;
 
 /// <summary>
@@ -51,7 +53,7 @@ public record DriverInfo
     public string InfName { get; init; } = "";
     public bool IsSigned { get; init; }
     public string Status { get; init; } = "OK";
-    public string StatusColor { get; init; } = "#4CAF50";
+    public LampState StatusState { get; init; } = LampState.Go;
     public bool HasProblem { get; init; }
     public string ProblemDescription { get; init; } = "";
     public int DaysSinceUpdate { get; init; }

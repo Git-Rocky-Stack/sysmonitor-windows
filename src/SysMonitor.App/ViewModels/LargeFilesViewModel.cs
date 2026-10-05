@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitoring;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
@@ -42,7 +43,7 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
     // Action Status
     [ObservableProperty] private string _actionStatus = "";
     [ObservableProperty] private bool _hasActionStatus;
-    [ObservableProperty] private string _actionStatusColor = "#4CAF50";
+    [ObservableProperty] private LampState _actionStatusState = LampState.Go;
 
     // Quick Filters
     [ObservableProperty] private string _selectedFilter = "All";
@@ -241,7 +242,7 @@ public partial class LargeFilesViewModel : ObservableObject, IDisposable
     private void ShowAction(string message, bool isSuccess)
     {
         ActionStatus = message;
-        ActionStatusColor = isSuccess ? "#4CAF50" : "#F44336";
+        ActionStatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasActionStatus = true;
 
         // Good news fades after a few seconds. A report of anything left undone - files Windows could not
@@ -293,7 +294,6 @@ public partial class LargeFileDisplay : ObservableObject
     public DateTime LastModified { get; }
     public string Extension { get; }
     public string FileType { get; }
-    public string FileTypeColor { get; }
     public string FileIcon { get; }
 
     [ObservableProperty] private bool _isSelected;
@@ -308,22 +308,8 @@ public partial class LargeFileDisplay : ObservableObject
         LastModified = info.LastModified;
         Extension = info.Extension;
         FileType = info.FileType;
-        FileTypeColor = GetTypeColor(info.FileType);
         FileIcon = GetFileIcon(info.FileType);
     }
-
-    private static string GetTypeColor(string type) => type switch
-    {
-        "Video" => "#E91E63",
-        "Image" => "#9C27B0",
-        "Audio" => "#3F51B5",
-        "Archive" => "#FF9800",
-        "Document" => "#2196F3",
-        "Executable" => "#F44336",
-        "Disk Image" => "#795548",
-        "Game Data" => "#4CAF50",
-        _ => "#607D8B"
-    };
 
     private static string GetFileIcon(string type) => type switch
     {

@@ -187,9 +187,13 @@ public class ConsoleCapTests
             "Styles.xaml holds the look the caps replace; merged after them it would win");
     }
 
-    /// <summary>Every <c>Style TargetType="Button"</c> in the console's controls dictionary.</summary>
+    /// <summary>
+    /// Every <c>Style TargetType="Button"</c> the console's controls dictionary hands out - its own entries, not a
+    /// style inside another control's template. The field's clear button is one of those: a part of the field,
+    /// drawn as WinUI draws it, that no button on a page can ask for.
+    /// </summary>
     private static IEnumerable<XElement> ButtonStyles() =>
-        XDocument.Load(PathOf(Controls)).Descendants(Presentation + "Style")
+        XDocument.Load(PathOf(Controls)).Root!.Elements(Presentation + "Style")
             .Where(style => style.Attribute("TargetType")?.Value == "Button");
 
     /// <summary>A style's value for a property, written as an attribute or as an element.</summary>

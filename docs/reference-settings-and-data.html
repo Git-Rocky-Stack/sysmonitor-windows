@@ -104,7 +104,7 @@
     <td>Show Notifications</td>
     <td>On or off</td>
     <td>On (<code>:25</code>)</td>
-    <td>Enables alert toasts (<code>src/SysMonitor.App/Views/SettingsPage.xaml:98</code>)</td>
+    <td>Enables alert toasts (<code>src/SysMonitor.App/Views/SettingsPage.xaml:78</code>)</td>
     </tr>
     </tbody>
     </table></div>
@@ -123,7 +123,7 @@
     <td>Refresh Interval</td>
     <td>1 to 10 seconds</td>
     <td>2 seconds</td>
-    <td>Saved, but no page reads it yet: each page refreshes on a fixed timer of its own (<code>:28</code>, range at <code>src/SysMonitor.App/Views/SettingsPage.xaml:122</code>)</td>
+    <td>Saved, but no page reads it yet: each page refreshes on a fixed timer of its own (<code>:28</code>, range at <code>src/SysMonitor.App/Views/SettingsPage.xaml:102</code>)</td>
     </tr>
     <tr>
     <td>Memory Threshold</td>
@@ -136,7 +136,7 @@
     <p>The memory threshold raises an alert and nothing else: crossing it trims nothing.
     Working sets are trimmed by the TRIM MEMORY button on the Dashboard
     (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:292</code>) and on the Memory page
-    (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175</code>), and by Game Mode, whose memory
+    (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176</code>), and by Game Mode, whose memory
     step is on unless a caller turns it off
     (<code>src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111</code>,
     <code>src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:31</code>). That includes Game Mode
@@ -152,10 +152,10 @@
     (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:306</code>). Up to and including v3.0.1
     the Memory page's button read OPTIMIZE MEMORY and reported the drop in used memory as
     memory freed; it now reads TRIM MEMORY and reports the same count in the same words
-    (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:178</code>).</p>
+    (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:179</code>).</p>
     <p>The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
     of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY
-    (<code>src/SysMonitor.App/Views/DashboardPage.xaml:286</code>), with a tooltip explaining the
+    (<code>src/SysMonitor.App/Views/DashboardPage.xaml:242</code>), with a tooltip explaining the
     standby list. If your copy says BOOST RAM you are on v3.0.0 or earlier; the button does
     the same thing either way.</p>
     <h2>Temperature alerts</h2>

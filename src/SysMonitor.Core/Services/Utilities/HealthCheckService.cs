@@ -30,7 +30,7 @@ public class HealthCheckReport
     public TimeSpan ScanDuration { get; set; }
     public int HealthScore { get; set; }
     public string HealthStatus { get; set; } = string.Empty;
-    public string HealthColor { get; set; } = "#4CAF50";
+    public LampState HealthState { get; set; } = LampState.Go;
 
     // Junk Files
     public long TotalJunkBytes { get; set; }
@@ -256,7 +256,7 @@ public class HealthCheckService : IHealthCheckService
 
             // Calculate Health Score
             report.HealthScore = CalculateHealthScore(report);
-            (report.HealthStatus, report.HealthColor) = GetHealthStatusAndColor(report.HealthScore);
+            (report.HealthStatus, report.HealthState) = GetHealthStatusAndState(report.HealthScore);
         }
         catch (OperationCanceledException)
         {
@@ -512,13 +512,13 @@ public class HealthCheckService : IHealthCheckService
         }
     }
 
-    private static (string status, string color) GetHealthStatusAndColor(int score) => score switch
+    private static (string status, LampState state) GetHealthStatusAndState(int score) => score switch
     {
-        >= 90 => ("Excellent", "#4CAF50"),
-        >= 75 => ("Good", "#8BC34A"),
-        >= 60 => ("Fair", "#FF9800"),
-        >= 40 => ("Poor", "#FF5722"),
-        _ => ("Critical", "#F44336")
+        >= 90 => ("Excellent", LampState.Go),
+        >= 75 => ("Good", LampState.Go),
+        >= 60 => ("Fair", LampState.Hold),
+        >= 40 => ("Poor", LampState.Warn),
+        _ => ("Critical", LampState.NoGo)
     };
 
     private static string FormatSize(long bytes)

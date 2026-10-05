@@ -72,15 +72,24 @@ def keys_in(theme_xaml):
               for theme in owner}
     defined = set()
     used = set()
+    # A resource declared with x:Name instead of x:Key (NumberBox's spin button styles are) is found by the
+    # file's own references and by nothing outside it: asked for from the app, it throws "Cannot find a Resource
+    # with the Name/Key". So it is neither defined for the app nor supplied by the framework.
+    named = set()
     for element in root.iter():
         key = element.get(XAML + "Key")
         if key and id(element) not in themes:
             defined.add(key)
+        if element.tag.endswith(("}ResourceDictionary", "ResourceDictionary.ThemeDictionaries", ".Resources")):
+            for resource in element:
+                name = resource.get(XAML + "Name")
+                if name and not resource.get(XAML + "Key"):
+                    named.add(name)
         for value in element.attrib.values():
             used.update(REFERENCE.findall(value))
         if element.tag.endswith("}StaticResource") and element.get("ResourceKey"):
             used.add(element.get("ResourceKey"))
-    return defined, used - defined
+    return defined, used - defined - named
 
 
 def main():

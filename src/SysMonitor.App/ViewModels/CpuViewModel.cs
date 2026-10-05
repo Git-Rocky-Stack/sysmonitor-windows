@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Monitoring;
 using System.Collections.ObjectModel;
@@ -41,7 +42,7 @@ public partial class CpuViewModel : ObservableObject, IDisposable
     [ObservableProperty] private double _temperature;
     [ObservableProperty] private bool _hasTemperature;
     [ObservableProperty] private string _temperatureStatus = "N/A";
-    [ObservableProperty] private string _temperatureColor = "#4CAF50";
+    [ObservableProperty] private LampState _temperatureState = LampState.Go;
 
     // Per-Core Usage
     [ObservableProperty] private ObservableCollection<CoreUsageInfo> _coreUsages = new();
@@ -127,7 +128,7 @@ public partial class CpuViewModel : ObservableObject, IDisposable
                 // Temperature
                 Temperature = temperature;
                 HasTemperature = temperature > 0;
-                (TemperatureStatus, TemperatureColor) = GetTemperatureStatus(temperature);
+                (TemperatureStatus, TemperatureState) = GetTemperatureStatus(temperature);
 
                 // Update per-core usages
                 UpdateCoreUsages(cpuInfo.CoreUsages);
@@ -179,16 +180,16 @@ public partial class CpuViewModel : ObservableObject, IDisposable
         };
     }
 
-    private static (string status, string color) GetTemperatureStatus(double temp)
+    private static (string status, LampState state) GetTemperatureStatus(double temp)
     {
         return temp switch
         {
-            0 => ("N/A", "#808080"),
-            <= 45 => ("Cool", "#4CAF50"),      // Green
-            <= 65 => ("Normal", "#8BC34A"),    // Light green
-            <= 80 => ("Warm", "#FF9800"),      // Orange
-            <= 90 => ("Hot", "#FF5722"),       // Red-orange
-            _ => ("Critical", "#F44336")        // Red
+            0 => ("N/A", LampState.Off),
+            <= 45 => ("Cool", LampState.Go),
+            <= 65 => ("Normal", LampState.Go),
+            <= 80 => ("Warm", LampState.Hold),
+            <= 90 => ("Hot", LampState.Warn),
+            _ => ("Critical", LampState.NoGo)
         };
     }
 
@@ -209,20 +210,20 @@ public partial class CoreUsageInfo : ObservableObject
     [ObservableProperty] private int _coreIndex;
     [ObservableProperty] private double _usage;
     [ObservableProperty] private string _status = "Idle";
-    [ObservableProperty] private string _statusColor = "#4CAF50";
+    [ObservableProperty] private LampState _statusState = LampState.Go;
 
     public string CoreName => $"Core {CoreIndex}";
 
     partial void OnUsageChanged(double value)
     {
         // Update status based on usage level
-        (Status, StatusColor) = value switch
+        (Status, StatusState) = value switch
         {
-            < 20 => ("Idle", "#4CAF50"),       // Green
-            < 50 => ("Light", "#8BC34A"),      // Light green
-            < 75 => ("Moderate", "#FF9800"),   // Orange
-            < 90 => ("Heavy", "#FF5722"),      // Red-orange
-            _ => ("Max", "#F44336")            // Red
+            < 20 => ("Idle", LampState.Go),
+            < 50 => ("Light", LampState.Go),
+            < 75 => ("Moderate", LampState.Hold),
+            < 90 => ("Heavy", LampState.Warn),
+            _ => ("Max", LampState.NoGo)
         };
     }
 }

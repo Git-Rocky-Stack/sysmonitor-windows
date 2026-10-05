@@ -3,34 +3,15 @@
     x:Class="SysMonitor.App.Views.DashboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{StaticResource BackgroundBrush}">
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
+    Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Left: Header text -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="SYSTEM MONITOR" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Left"/>
-                        <TextBlock Text="Strategic. Excellence. Engineered." Style="{StaticResource PageSubtitleStyle}"
-                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                    </StackPanel>
-
-                    <!-- Center: STX.1 Home Logo -->
-                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Stretch="Uniform"/>
-                </Grid>
-            </Border>
+            <!-- View Header -->
+            <instruments:ViewHeader Module="DASH" Index="01" Title="SYSTEM MONITOR"
+                                    Description="Strategic. Excellence. Engineered."/>
 
             <!-- Quick Access Section Header -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -51,7 +32,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- Network Monitor Card -->
-                <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="0" Grid.Row="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -60,16 +41,16 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE774;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE774;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="NETWORK" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Grid.Row="1" Spacing="2">
-                            <TextBlock Foreground="{StaticResource SuccessBrush}" FontSize="12">
+                            <TextBlock Foreground="{ThemeResource StateGoBrush}" FontSize="12">
                                 <Run Text="↓"/>
                                 <Run Text="{x:Bind ViewModel.DownloadSpeed, Mode=OneWay}"/>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource CyanAccentBrush}" FontSize="12">
+                            <TextBlock Foreground="{ThemeResource StateExecBrush}" FontSize="12">
                                 <Run Text="↑"/>
                                 <Run Text="{x:Bind ViewModel.UploadSpeed, Mode=OneWay}"/>
                             </TextBlock>
@@ -77,10 +58,10 @@
                         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Temperature Card -->
-                <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="1" Grid.Row="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -89,21 +70,21 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE9CA;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE9CA;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="TEMPERATURE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Grid.Row="1" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}">
+                        <TextBlock Grid.Row="1" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}">
                             <Run Text="{x:Bind ViewModel.CpuTemperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
                             <Run Text="°F" FontSize="14"/>
                         </TextBlock>
                         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.CpuTempStatus, Mode=OneWay}"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- System Info Card -->
-                <Border Grid.Column="2" Grid.Row="0" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="2" Grid.Row="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -112,22 +93,22 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE7F4;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE7F4;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="SYSTEM INFO" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <TextBlock Grid.Row="1" FontSize="14" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}">
+                                   Foreground="{ThemeResource PlatinumBrush}">
                             <Run Text="Uptime:"/>
-                            <Run Text="{x:Bind ViewModel.Uptime, Mode=OneWay}" Foreground="{StaticResource CyanAccentBrush}"/>
+                            <Run Text="{x:Bind ViewModel.Uptime, Mode=OneWay}" Foreground="{ThemeResource StateExecBrush}"/>
                         </TextBlock>
                         <TextBlock Grid.Row="2" Text="Health &amp; Specs"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Disk Analyzer Card -->
-                <Border Grid.Column="0" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="0" Grid.Row="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -136,11 +117,11 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xEDA2;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xEDA2;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="DISK" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Grid.Row="1" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}">
+                        <TextBlock Grid.Row="1" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}">
                             <Run Text="{x:Bind ViewModel.DiskUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
                             <Run Text="%" FontSize="14"/>
                         </TextBlock>
@@ -149,11 +130,10 @@
                             <Run Text="drives detected"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Battery Card (or Cleaner if no battery) -->
-                <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16"
-                        Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <instruments:Plate Grid.Column="1" Grid.Row="1" Padding="16" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -162,22 +142,21 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE83F;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE83F;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="BATTERY" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Grid.Row="1" FontSize="24" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}">
+                        <TextBlock Grid.Row="1" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}">
                             <Run Text="{x:Bind ViewModel.BatteryLevel, Mode=OneWay}"/>
                             <Run Text="%" FontSize="14"/>
                         </TextBlock>
                         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.BatteryStatus, Mode=OneWay}"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Cleaner Card (shown when no battery) -->
-                <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16"
-                        Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                <instruments:Plate Grid.Column="1" Grid.Row="1" Padding="16" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -186,20 +165,20 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE74D;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE74D;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="CLEANER" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Grid.Row="1" FontSize="18" FontWeight="Bold" Foreground="{StaticResource WarningBrush}">
+                        <TextBlock Grid.Row="1" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource StateHoldBrush}">
                             <Run Text="{x:Bind ViewModel.CleanableSpaceMB, Mode=OneWay, Converter={StaticResource MBConverter}}"/>
                         </TextBlock>
                         <TextBlock Grid.Row="2" Text="Cleanable space"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Process Monitor Card -->
-                <Border Grid.Column="2" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="2" Grid.Row="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -208,20 +187,20 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
-                                <FontIcon Glyph="&#xE8A5;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE8A5;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <TextBlock Text="PROCESSES" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <TextBlock Grid.Row="1" FontSize="14" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}">
+                                   Foreground="{ThemeResource PlatinumBrush}">
                             <Run Text="CPU:"/>
-                            <Run Text="{x:Bind ViewModel.CpuUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}" Foreground="{StaticResource PrimaryBrush}"/>
+                            <Run Text="{x:Bind ViewModel.CpuUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}" Foreground="{ThemeResource ArmedLitBrush}"/>
                             <Run Text="%"/>
                         </TextBlock>
                         <TextBlock Grid.Row="2" Text="Monitor &amp; manage apps"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Health Score Section Header -->
@@ -231,7 +210,7 @@
             </StackPanel>
 
             <!-- Health Score Hero Card -->
-            <Border Style="{StaticResource HeroStatCardStyle}">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -248,87 +227,47 @@
                                 <TextBlock Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"
                                            Style="{StaticResource LargeStatValueStyle}"/>
                                 <TextBlock Text="%" VerticalAlignment="Bottom" Margin="0,0,0,12"
-                                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="24"/>
+                                           Foreground="{ThemeResource SilverBrush}" FontSize="24"/>
                             </StackPanel>
                             <TextBlock Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"
-                                       Style="{StaticResource StatusGoodStyle}" FontSize="14"/>
+                                       Style="{StaticResource StatusGoodStyle}" FontSize="14" instruments:StateBrush.Foreground="{x:Bind ViewModel.HealthState, Mode=OneWay}"/>
                         </StackPanel>
 
                         <!-- Quick Actions -->
                         <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Spacing="12">
-                                <!-- QUICK CLEAN with chrome bezel -->
-                                <Border CornerRadius="26" Padding="2">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#707070" Offset="0.0"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                            <GradientStop Color="#505050" Offset="1.0"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                    <Button Content="QUICK CLEAN" Command="{x:Bind ViewModel.QuickCleanCommand}"
-                                            Style="{StaticResource RedButtonStyle}"
-                                            IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
-                                </Border>
-                                <!-- TRIM MEMORY with chrome bezel -->
-                                <Border CornerRadius="26" Padding="2">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#707070" Offset="0.0"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                            <GradientStop Color="#505050" Offset="1.0"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                    <Button Content="TRIM MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
-                                            Style="{StaticResource OutlinedButtonStyle}"
-                                            Background="#000000"
-                                            IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
-                                            ToolTipService.ToolTip="Trim the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM."/>
-                                </Border>
-                                <!-- EXPORT with chrome bezel -->
-                                <Border CornerRadius="26" Padding="2">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#707070" Offset="0.0"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                                            <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                            <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                                            <GradientStop Color="#505050" Offset="1.0"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                    <Button Command="{x:Bind ViewModel.ExportReportCommand}"
-                                            Style="{StaticResource OutlinedButtonStyle}"
-                                            Background="#000000"
-                                            IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
-                                            ToolTipService.ToolTip="Export System Report">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE78C;" FontSize="14"/>
-                                            <TextBlock Text="EXPORT"/>
-                                        </StackPanel>
-                                    </Button>
-                                </Border>
+                                <Button Content="QUICK CLEAN" Command="{x:Bind ViewModel.QuickCleanCommand}"
+                                        Style="{StaticResource ArmedCapButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                                <Button Content="TRIM MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
+                                        IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                        ToolTipService.ToolTip="Trim the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM."/>
+                                <Button Command="{x:Bind ViewModel.ExportReportCommand}"
+                                        IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                        ToolTipService.ToolTip="Export System Report">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE78C;" FontSize="14"/>
+                                        <TextBlock Text="EXPORT"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
 
                     <!-- Action Status Banner -->
-                    <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="16,12"
+                    <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16,12"
                             Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" Spacing="12">
-                            <ProgressRing IsActive="{x:Bind ViewModel.IsOptimizing, Mode=OneWay}" Width="20" Height="20"
+                            <instruments:Lamp State="Armed" Code="EXEC" Size="Small" VerticalAlignment="Center"
                                           Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{StaticResource SuccessBrush}"
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"
                                       Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
                             <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                       Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- System Resources Section Header -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -346,7 +285,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- CPU Card -->
-                <Border Grid.Column="0" Style="{StaticResource PremiumStatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -356,7 +295,7 @@
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource IconContainerRedStyle}">
-                                <FontIcon Glyph="&#xE950;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE950;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="CPU" Style="{StaticResource StatLabelStyle}"/>
@@ -366,16 +305,16 @@
 
                         <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0">
                             <Run Text="{x:Bind ViewModel.CpuUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                            <Run Text="%" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="%" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.CpuUsage, Mode=OneWay}"
                                      Maximum="100" Style="{StaticResource PremiumProgressBarStyle}"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Memory Card -->
-                <Border Grid.Column="1" Style="{StaticResource PremiumStatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -386,7 +325,7 @@
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource IconContainerRedStyle}">
-                                <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="MEMORY" Style="{StaticResource StatLabelStyle}"/>
@@ -396,7 +335,7 @@
 
                         <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0">
                             <Run Text="{x:Bind ViewModel.MemoryUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                            <Run Text="%" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="%" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.MemoryUsage, Mode=OneWay}"
@@ -409,10 +348,10 @@
                             <Run Text="GB"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Disk Card -->
-                <Border Grid.Column="2" Style="{StaticResource PremiumStatCardStyle}">
+                <instruments:Plate Grid.Column="2" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -423,7 +362,7 @@
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource IconContainerRedStyle}">
-                                <FontIcon Glyph="&#xEDA2;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xEDA2;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="DISK (C:)" Style="{StaticResource StatLabelStyle}"/>
@@ -433,7 +372,7 @@
 
                         <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0">
                             <Run Text="{x:Bind ViewModel.DiskUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                            <Run Text="%" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="%" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.DiskUsage, Mode=OneWay}"
@@ -446,11 +385,10 @@
                             <Run Text="GB"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Battery Card -->
-                <Border Grid.Column="3" Style="{StaticResource PremiumStatCardStyle}"
-                        Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <instruments:Plate Grid.Column="3" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -460,7 +398,7 @@
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource IconContainerRedStyle}">
-                                <FontIcon Glyph="&#xE83F;" FontSize="20" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <FontIcon Glyph="&#xE83F;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="BATTERY" Style="{StaticResource StatLabelStyle}"/>
@@ -469,15 +407,15 @@
                         </StackPanel>
 
                         <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{StaticResource SuccessBrush}">
+                                   Foreground="{ThemeResource StateGoBrush}">
                             <Run Text="{x:Bind ViewModel.BatteryLevel, Mode=OneWay}"/>
-                            <Run Text="%" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="%" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
                         </TextBlock>
 
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.BatteryLevel, Mode=OneWay}"
                                      Maximum="100" Style="{StaticResource GreenProgressBarStyle}"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- System Information Section Header -->
@@ -487,7 +425,7 @@
             </StackPanel>
 
             <!-- System Info Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -501,41 +439,41 @@
                     <!-- OS Info -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE770;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE770;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="OPERATING SYSTEM" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.OsName, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                       Foreground="{ThemeResource PlatinumBrush}"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Uptime -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE916;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE916;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="UPTIME" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock Text="{x:Bind ViewModel.Uptime, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                       Foreground="{ThemeResource PlatinumBrush}"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Cleanable Space -->
                     <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE74D;" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <FontIcon Glyph="&#xE74D;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="CLEANABLE SPACE" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Foreground="{StaticResource WarningBrush}">
+                            <TextBlock Foreground="{ThemeResource StateHoldBrush}">
                                 <Run Text="{x:Bind ViewModel.CleanableSpaceMB, Mode=OneWay, Converter={StaticResource MBConverter}}"/>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer with Strategia-X branding -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">
@@ -544,7 +482,7 @@
                        Stretch="Uniform" Opacity="0.7"/>
                 <TextBlock Text="Powered by Strategia-X Technology"
                            HorizontalAlignment="Center"
-                           Foreground="{StaticResource PrimaryBrush}"
+                           Foreground="{ThemeResource ArmedLitBrush}"
                            FontSize="12"/>
             </StackPanel>
 

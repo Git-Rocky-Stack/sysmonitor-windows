@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     WinUI's own resources, restated in the console palette, so the framework's stock controls - check boxes,
-    switches, radio buttons, sliders, progress bars, selection, scroll bars and accent buttons - read as the
-    Command Console before the instruments re-template any of them.
+    switches, radio buttons, sliders, progress bars, selection, scroll bars, accent buttons and the navigation
+    rail - read as the Command Console before the instruments re-template any of them.
 
     Every key here replaces one of WinUI's (ResourceKeyTests), and every colour is one of the palette's
     (ConsoleRecipeTests): these are the palette applied, not new colours. They come in two kinds.
@@ -54,6 +54,12 @@
             <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="#D1E8343A"/>
             <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="#E8343A"/>
             <SolidColorBrush x:Key="ScrollBarPanningThumbBackground" Color="#94AA2024"/>
+
+            <!-- The navigation rail and the page behind it: the chassis, Carbon950 under the page and Carbon900 in
+                 the rail, as System-X's console sits its rail a step off the chassis. -->
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="#050505"/>
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#0D0D0D"/>
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#0D0D0D"/>
         </ResourceDictionary>
 
         <!-- ============================================================ DAY SHIFT -->
@@ -83,6 +89,11 @@
             <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="#CCA31E23"/>
             <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="#A31E23"/>
             <SolidColorBrush x:Key="ScrollBarPanningThumbBackground" Color="#80AA2024"/>
+
+            <!-- Day Shift's chassis under the page and in the rail. -->
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="#C8C8C4"/>
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#D2D2CE"/>
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#D2D2CE"/>
         </ResourceDictionary>
 
         <!-- ============================================================ HIGH CONTRAST -->
@@ -111,6 +122,12 @@
             <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="{ThemeResource SystemColorHighlightColor}"/>
             <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="{ThemeResource SystemColorHighlightColor}"/>
             <SolidColorBrush x:Key="ScrollBarPanningThumbBackground" Color="{ThemeResource SystemColorButtonTextColor}"/>
+
+            <!-- The window colour, which is WinUI's own for the page and the expanded rail; the compact rail takes
+                 it too rather than WinUI's base-low brush, so High Contrast reads one ground. -->
+            <SolidColorBrush x:Key="NavigationViewContentBackground" Color="{ThemeResource SystemColorWindowColor}"/>
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="{ThemeResource SystemColorWindowColor}"/>
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="{ThemeResource SystemColorWindowColor}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

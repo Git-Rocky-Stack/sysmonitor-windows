@@ -7,16 +7,17 @@
     xmlns:views="using:SysMonitor.App.Views"
     Title="SysMonitor - Windows System Monitor &amp; Optimizer">
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Grid Background="{ThemeResource Carbon950Brush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title Bar - AMOLED Pure Black -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="68"
-              Background="#000000">
+        <!-- The title bar is black in both shifts, as the brand mark on it is drawn for black, so it asks for the
+             dark theme and its words resolve as they do on Night Ops. -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="68" RequestedTheme="Dark"
+              Background="{ThemeResource VoidBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -30,196 +31,179 @@
 
             <!-- SYSTEM MONITOR text -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
-                <TextBlock Text="SYSTEM MONITOR" FontSize="14" FontWeight="Bold"
-                           Foreground="{StaticResource TextPrimaryBrush}"
-                           CharacterSpacing="100" VerticalAlignment="Center"/>
+                <TextBlock Text="SYSTEM MONITOR" FontFamily="{StaticResource ConsolePlacardFontFamily}" FontSize="14"
+                           Foreground="{ThemeResource PlatinumBrush}"
+                           CharacterSpacing="80" VerticalAlignment="Center"/>
             </StackPanel>
 
             <!-- Tagline on right -->
             <TextBlock Grid.Column="2" Text="Strategic. Excellence. Engineered."
-                       FontSize="10" Foreground="#AAFFFFFF"
+                       Style="{StaticResource SerialTextStyle}"
                        VerticalAlignment="Center" Margin="0,0,16,0"/>
         </Grid>
 
-        <!-- Chrome Divider -->
-        <Border Grid.Row="1" Height="3">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="#606060" Offset="0.0"/>
-                    <GradientStop Color="#C0C0C0" Offset="0.3"/>
-                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                    <GradientStop Color="#C0C0C0" Offset="0.7"/>
-                    <GradientStop Color="#404040" Offset="1.0"/>
-                </LinearGradientBrush>
-            </Border.Background>
-        </Border>
+        <!-- The seam under the title bar: the faceplate's edge light, bright at the middle and gone at the ends. -->
+        <Border Grid.Row="1" Height="1" Background="{ThemeResource FaceplateEdgeLightBrush}"/>
 
         <!-- Navigation View -->
         <NavigationView x:Name="NavView" Grid.Row="2"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="False"
                         PaneDisplayMode="Left"
-                        Background="{StaticResource BackgroundBrush}"
+                        Background="{ThemeResource Carbon950Brush}"
                         SelectionChanged="NavView_SelectionChanged">
-
-            <NavigationView.Resources>
-                <!-- Customize NavigationView colors for dark theme -->
-                <SolidColorBrush x:Key="NavigationViewContentBackground" Color="#000000"/>
-                <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#121212"/>
-                <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#121212"/>
-            </NavigationView.Resources>
 
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Dashboard" Tag="Dashboard">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE80F;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE80F;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="CPU Monitor" Tag="CpuMonitor">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE950;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE950;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="GPU Monitor" Tag="GpuMonitor">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7F4;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE7F4;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Memory Monitor" Tag="MemoryMonitor">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE964;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE964;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Processes" Tag="Processes">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8A5;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE8A5;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Directory Cleaner" Tag="DirectoryCleaner">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE74D;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Registry Cleaner" Tag="RegistryCleaner">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xEA99;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xEA99;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Startup" Tag="Startup">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7E8;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE7E8;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Installed Programs" Tag="InstalledPrograms">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE74C;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE74C;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItemHeader Content="MAINTENANCE"/>
                 <NavigationViewItem Content="Health Check" Tag="HealthCheck">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8E1;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE8E1;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Game Mode" Tag="GameMode">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7FC;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE7FC;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Browser Privacy" Tag="BrowserPrivacy">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE72E;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE72E;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Drive Wiper" Tag="DriveWiper">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE74D;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Scheduled Cleaning" Tag="ScheduledCleaning">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE823;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE823;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Backup Manager" Tag="Backup">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7B8;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE7B8;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Driver Updater" Tag="DriverUpdater">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE964;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE964;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItem Content="Disk Analyzer" Tag="DiskAnalyzer">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xEDA2;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xEDA2;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Network" Tag="Network">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE774;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE774;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Battery" Tag="Battery">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE83F;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE83F;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Temperature" Tag="Temperature">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE9CA;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE9CA;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="System Info" Tag="SystemInfo">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7F4;" Foreground="{StaticResource PrimaryBrush}"/>
+                        <FontIcon Glyph="&#xE7F4;" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItemHeader Content="UTILITIES"/>
                 <NavigationViewItem Content="Large Files" Tag="LargeFiles">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7B8;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xE7B8;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Duplicate Finder" Tag="DuplicateFinder">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8C8;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xE8C8;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="File Tools" Tag="FileTools">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8B7;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xE8B7;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="PDF Tools" Tag="PdfTools">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xEA90;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xEA90;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Image Tools" Tag="ImageTools">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xEB9F;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xEB9F;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItemHeader Content="WIRELESS"/>
                 <NavigationViewItem Content="Bluetooth" Tag="Bluetooth">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE702;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xE702;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="WiFi Analyzer" Tag="WiFi">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE701;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xE701;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Network Mapper" Tag="NetworkMapper">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE968;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xE968;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
@@ -227,32 +211,32 @@
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Content="Performance" Tag="Performance">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE9D9;" Foreground="{StaticResource WarningBrush}"/>
+                        <FontIcon Glyph="&#xE9D9;" Foreground="{ThemeResource StateHoldBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="History" Tag="History">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE81C;" Foreground="{StaticResource WarningBrush}"/>
+                        <FontIcon Glyph="&#xE81C;" Foreground="{ThemeResource StateHoldBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Settings" Tag="Settings">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE713;" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <FontIcon Glyph="&#xE713;" Foreground="{ThemeResource SilverBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Donate" Tag="Donate">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE719;" Foreground="{StaticResource SuccessBrush}"/>
+                        <FontIcon Glyph="&#xE719;" Foreground="{ThemeResource StateGoBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="User's Guide" Tag="UserGuide">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE736;" Foreground="{StaticResource CyanAccentBrush}"/>
+                        <FontIcon Glyph="&#xE736;" Foreground="{ThemeResource StateExecBrush}"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
 
-            <Frame x:Name="ContentFrame" Padding="24" Background="{StaticResource BackgroundBrush}"
+            <Frame x:Name="ContentFrame" Padding="24" Background="{ThemeResource Carbon950Brush}"
                    FontFamily="{StaticResource ConsoleBodyFontFamily}"/>
         </NavigationView>
     </Grid>

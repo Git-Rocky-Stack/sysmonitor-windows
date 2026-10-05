@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using SysMonitor.Core.Models;
 using Windows.Storage.Streams;
 
 namespace SysMonitor.App.Converters;
@@ -93,24 +94,6 @@ public class MBConverter : IValueConverter
             return $"{mb:F0} MB";
         }
         return "0 MB";
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class BoolToSuccessBrushConverter : IValueConverter
-{
-    private static readonly SolidColorBrush SuccessBrush = new(Windows.UI.Color.FromArgb(255, 76, 175, 80)); // #4CAF50
-    private static readonly SolidColorBrush ErrorBrush = new(Windows.UI.Color.FromArgb(255, 244, 67, 54)); // #F44336
-
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool isConnected)
-            return isConnected ? SuccessBrush : ErrorBrush;
-        return ErrorBrush;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -230,38 +213,6 @@ public class InverseBoolConverter : IValueConverter
     }
 }
 
-public class StringToBrushConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is string colorString && !string.IsNullOrEmpty(colorString))
-        {
-            try
-            {
-                // Parse hex color string like "#4CAF50" or "#F44336"
-                colorString = colorString.TrimStart('#');
-                if (colorString.Length == 6)
-                {
-                    var r = System.Convert.ToByte(colorString.Substring(0, 2), 16);
-                    var g = System.Convert.ToByte(colorString.Substring(2, 2), 16);
-                    var b = System.Convert.ToByte(colorString.Substring(4, 2), 16);
-                    return new SolidColorBrush(Windows.UI.Color.FromArgb(255, r, g, b));
-                }
-            }
-            catch
-            {
-                // Best effort: a colour that will not parse falls through to the default below.
-            }
-        }
-        return new SolidColorBrush(Windows.UI.Color.FromArgb(255, 76, 175, 80)); // Default green
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
 public class GreaterThanOneConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
@@ -271,24 +222,6 @@ public class GreaterThanOneConverter : IValueConverter
         if (value is double doubleValue)
             return doubleValue > 1;
         return false;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class BoolToAccentBrushConverter : IValueConverter
-{
-    private static readonly SolidColorBrush AccentBrush = new(Windows.UI.Color.FromArgb(48, 244, 67, 54)); // #30F44336
-    private static readonly SolidColorBrush TransparentBrush = new(Colors.Transparent);
-
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool isActive && isActive)
-            return AccentBrush;
-        return TransparentBrush;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
@@ -453,19 +386,6 @@ public class BoolToSuccessGlyphConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }
 
-public class BoolToSuccessColorConverter : IValueConverter
-{
-    private static readonly SolidColorBrush SuccessBrush = new(Windows.UI.Color.FromArgb(255, 76, 175, 80));
-    private static readonly SolidColorBrush ErrorBrush = new(Windows.UI.Color.FromArgb(255, 244, 67, 54));
-
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool success) return success ? SuccessBrush : ErrorBrush;
-        return ErrorBrush;
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
-}
-
 public class BoolToOpacityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
@@ -514,17 +434,6 @@ public class DoubleToStringConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }
 
-public class BoolToMonitoringTextConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool isMonitoring)
-            return isMonitoring ? "Pause" : "Resume";
-        return "Pause";
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
-}
-
 public class GameModeIconConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
@@ -545,4 +454,49 @@ public class GameModeTextConverter : IValueConverter
         return "ENABLE GAME MODE";
     }
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+}
+
+/// <summary>
+/// A yes or no as a lamp state, for <c>StateBrush</c> to colour: plugged in or not, connected or not, a tool
+/// selected or not. Which state each answer is belongs to the page, so App.xaml declares one instance per pairing
+/// rather than this deciding that true is good.
+/// </summary>
+public class BoolToLampStateConverter : IValueConverter
+{
+    public LampState WhenTrue { get; set; } = LampState.Go;
+
+    public LampState WhenFalse { get; set; } = LampState.NoGo;
+
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value is true ? WhenTrue : WhenFalse;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotImplementedException();
+}
+
+/// <summary>
+/// A word in capitals, as a chip or a placard shows it. The source string stays as written, so the word the
+/// documentation quotes is the word in the code; only what is drawn is upper case.
+/// </summary>
+public class UpperCaseConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value?.ToString()?.ToUpperInvariant() ?? string.Empty;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotImplementedException();
+}
+
+/// <summary>A yes or no as the word a chip or a cap says for it; App.xaml declares one instance per pair of words.</summary>
+public class BoolToWordConverter : IValueConverter
+{
+    public string WhenTrue { get; set; } = "YES";
+
+    public string WhenFalse { get; set; } = "NO";
+
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value is true ? WhenTrue : WhenFalse;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotImplementedException();
 }

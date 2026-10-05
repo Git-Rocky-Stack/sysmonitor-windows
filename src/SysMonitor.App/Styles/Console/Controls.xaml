@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
     WinUI's stock controls, re-templated as the Command Console's own. FluentOverrides.xaml restates the colours
-    WinUI reads, which is as far as a colour can reach; this is where a control's shape changes. Two so far: the
-    cap that every button takes, and the bat-lever switch at the foot of the file.
+    WinUI reads, which is as far as a colour can reach; this is where a control's shape changes. Three so far: the
+    cap that every button takes, the bat-lever switch, and the recessed field that every text box, password box
+    and number box is typed into, at the foot of the file.
 
     The cap. A button on the console is a machined key cut from the chassis: the palette's cap face, a key light
     across the top, the machined radius, and its word in Archivo at the cap width. The palette has written the
@@ -38,8 +39,9 @@
 
       hover      `filter: brightness(1.14)` and a 520ms specular glint swept across the cap. Here the key light
                  comes up and the edge sharpens. WinUI has no filter, and the glint wants a clip animated per cap.
-      disabled   `opacity: .42` with `saturate(.5)`. Here the word goes to Graphite, which is GrayText in High
-                 Contrast. Dimming the whole cap by opacity is the one thing that shift must not do.
+      disabled   `opacity: .42` with `saturate(.5)`. The dimming is drawn, through the palette's per-shift
+                 ConsoleDisabledOpacity, which High Contrast writes as 1 and greys the word with GrayText instead.
+                 The desaturation is not: WinUI has no filter (the switch's locked state says what it would take).
       pressed    `translateY(1px)` over 80ms on the snap easing. The travel is transcribed; the 80ms is not, as a
                  visual state setter arrives at once.
       the rest   `gap: 8px` between an icon and its word, `text-transform: uppercase` and `white-space: nowrap`
@@ -108,7 +110,6 @@
                                     </VisualState.Setters>
                                 </VisualState>
 
-                                <!-- Unlit: the word goes to Graphite, which is GrayText in High Contrast. -->
                                 <!-- Locked: opacity .42 (:2016-2023). The key light and the lip go with it - a
                                      cap nobody can press is not catching the light - and the word takes the
                                      shift's own locked colour, which is the user's GrayText in High Contrast.
@@ -186,10 +187,10 @@
          so, which is why the list of them is a test (ConsoleSwitchTests). The header and the on and off words stay
          for the same reason: the pages use both.
 
-         The travel is WinUI's reposition animation, not the transcribed 160ms on the snap easing (:2347). The
-         control works the knob's offsets out for itself and hands them to these animations; replacing them with a
-         spline of the right duration is the one change here that could break dragging, and a drag is not something
-         the smoke run can press. -->
+         The travel is the transcribed 160ms on the snap easing (:2347), animating KnobTranslateTransform rather
+         than WinUI's reposition animation, which moved the knob element instead. A drag writes that same transform,
+         so every state that rests the thumb says where it rests (Off, below), and the smoke run reproduces what a
+         drag leaves behind (UiSmokeRun.CheckSwitchDragAsync). -->
     <Style TargetType="ToggleSwitch">
         <Setter Property="instruments:ConsoleLever.HasGlows" Value="True"/>
         <Setter Property="Foreground" Value="{ThemeResource SilverBrush}"/>
@@ -434,13 +435,13 @@
                                               VerticalAlignment="Center"
                                               AutomationProperties.AccessibilityView="Raw"/>
 
-                            <!-- The palette's armed glow, carried into the template so ConsoleSwitch can read
+                            <!-- The palette's armed glow, carried into the template so ConsoleLever can read
                                  it without knowing which shift it is in. Drawn by nothing; it is a colour. -->
                             <Border x:Name="PART_ArmedGlow" Visibility="Collapsed"
                                     Background="{ThemeResource ArmedGlowBrush}"/>
 
                             <!-- Armed, the track glows 0 0 12px outside itself (:2352). Composition casts it
-                                 from ConsoleSwitch onto this host, which sits under the track. -->
+                                 from ConsoleLever onto this host, which sits under the track. -->
                             <Border x:Name="PART_TrackGlowHost" Width="42" Height="22" IsHitTestVisible="False"/>
 
                             <!-- The recess: the track, its edge, and the shade the top edge casts into it. -->
@@ -503,6 +504,606 @@
                                 </Thumb.Template>
                             </Thumb>
                         </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ FIELD (.field, :2286) -->
+
+    <!-- A form field on the console is a recessed dark well cut into the plate, dark in both shifts - the
+         stylesheet says so in as many words above the rule (:2285) - so its face, edge and words are the same on
+         Day Shift as on Night Ops. Three controls are typed into and take it: TextBox, PasswordBox, and NumberBox,
+         whose own text box is pointed at the same style. ComboBox is not one: System-X gives `select` no .field
+         rule, only the armed accent (:999-1003), and FluentOverrides already carries that.
+
+         WinUI's own templates are kept part for part, because each control's code finds its parts by name -
+         ContentElement is where the text is drawn, PlaceholderTextContentPresenter where the hint is, DeleteButton
+         and RevealButton are found and shown by the control, and NumberBox drives InputBox, its spin buttons and
+         their popup. A template that renames one still builds and still draws, and loses what the part did, which
+         is why the list of them is a test (ConsoleFieldTests). The colour states are the console's.
+
+         Transcribed: 8 above and below the words and 11 either side, the 4px control radius, Public Sans 13, the
+         face's gradient and its 1px edge, the shade the top edge casts in (inset 0 2px 4px, drawn as a gradient
+         because WinUI has no inset shadow, as the switch's recess is) and the light along the lower lip (inset 0
+         -1px 0). The placeholder is its own grey (:2300). Focused, the edge goes to armed edge and a 2px armed
+         outline stands 1px off it (:2303): drawn here, not left to the system focus rectangle, because that only
+         shows for the keyboard and a browser shows a text field's on any focus. A header is a field label (:2312):
+         Departure Mono 10, tracked .12em, 5 above its field, in silver mute - FieldLabelTextStyle's values, which a
+         presenter cannot take as a TextBlock style. Words are typed in capitals at the call site, as everywhere.
+
+         The well's own parts - its text, its clear and reveal buttons, NumberBox's inline spinners - ask for the
+         dark theme, as a Well or a Display does. Their text and glyph colours, and the caret, follow the element's
+         theme rather than its Foreground, so on Day Shift they would otherwise come out dark on a dark well.
+
+         Translated or not drawn:
+
+           transition  `border-color 160ms` on the out easing. A visual state setter arrives at once.
+           hover       none: the stylesheet gives a field no hover rule, so PointerOver changes nothing.
+           .invalid    the warn edge (:2308) has no WinUI state to hang on and no page that validates a field. It
+                       arrives with the first page that does.
+           locked      the console's one locked idiom (:2016-2023): the field dims by ConsoleDisabledOpacity, its
+                       label takes the shared locked word, and its own words take the field's twin of it - the
+                       chassis' locked word is dark on Day Shift and would vanish into the well. Both are GrayText
+                       in High Contrast, which does not dim.
+
+         High Contrast needs nothing here: the face is Window, the edge and the words WindowText, the placeholder
+         GrayText, armed edge and display Highlight, and the shade and lip go. -->
+    <Style x:Key="ConsoleFieldTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+        <Setter Property="Foreground" Value="{ThemeResource FieldForegroundBrush}"/>
+        <Setter Property="Background" Value="{ThemeResource FieldFaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource FieldEdgeBrush}"/>
+        <Setter Property="PlaceholderForeground" Value="{ThemeResource FieldPlaceholderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CapCornerRadius}"/>
+        <Setter Property="Padding" Value="11,8"/>
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleBodyFontFamily}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="UseSystemFocusVisuals" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Grid x:Name="Root">
+
+                        <Grid.Resources>
+                            <!-- WinUI's clear button, as it draws it. -->
+                            <Style x:Key="FieldClearButtonStyle" TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid x:Name="ButtonLayoutGrid" Margin="{ThemeResource TextBoxInnerButtonMargin}"
+                                                  BorderBrush="{ThemeResource TextControlButtonBorderBrush}"
+                                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                                  Background="{ThemeResource TextControlButtonBackground}"
+                                                  BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                                                  CornerRadius="{TemplateBinding CornerRadius}">
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualState x:Name="Normal"/>
+                                                        <VisualState x:Name="PointerOver">
+                                                            <VisualState.Setters>
+                                                                <Setter Target="ButtonLayoutGrid.Background" Value="{ThemeResource TextControlButtonBackgroundPointerOver}"/>
+                                                                <Setter Target="ButtonLayoutGrid.BorderBrush" Value="{ThemeResource TextControlButtonBorderBrushPointerOver}"/>
+                                                                <Setter Target="GlyphElement.Foreground" Value="{ThemeResource TextControlButtonForegroundPointerOver}"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <VisualState x:Name="Pressed">
+                                                            <VisualState.Setters>
+                                                                <Setter Target="ButtonLayoutGrid.Background" Value="{ThemeResource TextControlButtonBackgroundPressed}"/>
+                                                                <Setter Target="ButtonLayoutGrid.BorderBrush" Value="{ThemeResource TextControlButtonBorderBrushPressed}"/>
+                                                                <Setter Target="GlyphElement.Foreground" Value="{ThemeResource TextControlButtonForegroundPressed}"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <!-- No Disabled state: WinUI's hid the clear button on a locked field, but the field only
+                                                             shows it while it is focused, and a locked field cannot be. So it is never seen locked,
+                                                             and the field's own locked state dims everything in it. -->
+                                                    </VisualStateGroup>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <TextBlock x:Name="GlyphElement" Foreground="{ThemeResource TextControlButtonForeground}"
+                                                           VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Normal"
+                                                           FontSize="{ThemeResource TextBoxIconFontSize}" Text="&#xE894;"
+                                                           FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                                           AutomationProperties.AccessibilityView="Raw"/>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Grid.Resources>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+
+                                <!-- No hover rule in the stylesheet, so nothing changes under the pointer. -->
+                                <VisualState x:Name="PointerOver"/>
+
+                                <!-- Focused: armed edge, and the 2px armed outline 1px off it (:2303). -->
+                                <VisualState x:Name="Focused">
+                                    <VisualState.Setters>
+                                        <Setter Target="BorderElement.BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+                                        <Setter Target="FocusOutline.Opacity" Value="1"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <!-- Locked: the console's one idiom (:2016-2023), described above. -->
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                        <Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
+                                        <Setter Target="ContentElement.Foreground" Value="{ThemeResource ConsoleDisabledFieldForegroundBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="ButtonStates">
+                                <VisualState x:Name="ButtonVisible">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeleteButton.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="ButtonCollapsed"/>
+                            </VisualStateGroup>
+
+                            <!-- Only NumberBox's own text box is ever sent to these, by NumberBox: room for its
+                                 inline spinners, or the compact popup's indicator. A plain field never leaves
+                                 SpinButtonsCollapsed, where the column is empty and takes no width. -->
+                            <VisualStateGroup x:Name="SpinButtonStates">
+                                <VisualState x:Name="SpinButtonsCollapsed"/>
+                                <VisualState x:Name="SpinButtonsPopup">
+                                    <VisualState.Setters>
+                                        <Setter Target="PopupIndicator.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="SpinButtonsVisible">
+                                    <VisualState.Setters>
+                                        <Setter Target="SpinButtonsColumn.Width" Value="72"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition x:Name="SpinButtonsColumn" Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- The field label (:2312). -->
+                        <ContentPresenter x:Name="HeaderContentPresenter" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                                          Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="10"
+                                          CharacterSpacing="120" FontWeight="Normal"
+                                          Foreground="{ThemeResource SilverMuteBrush}" Margin="0,0,0,5"
+                                          TextWrapping="Wrap" VerticalAlignment="Top"
+                                          Visibility="Collapsed" x:DeferLoadStrategy="Lazy"/>
+
+                        <!-- outline: 2px solid armed display, offset 1px - so it stands 3 outside the edge, and
+                             its corners follow the 4px radius out to 7. Shown only while focused. -->
+                        <Border x:Name="FocusOutline" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="-3"
+                                BorderBrush="{ThemeResource ArmedDisplayBrush}" BorderThickness="2" CornerRadius="7"
+                                Opacity="0" IsHitTestVisible="False"/>
+
+                        <Border x:Name="BorderElement" Grid.Row="1" Grid.Column="0" Grid.RowSpan="1" Grid.ColumnSpan="3"
+                                Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}"
+                                Control.IsTemplateFocusTarget="True"
+                                MinWidth="{TemplateBinding MinWidth}" MinHeight="{TemplateBinding MinHeight}"/>
+
+                        <!-- The recess: the shade the top edge casts in, and the light along the lower lip, both
+                             inside the 1px edge. -->
+                        <Border x:Name="Shade" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Height="4" Margin="1,1,1,0"
+                                VerticalAlignment="Top" CornerRadius="3,3,0,0"
+                                Background="{ThemeResource FieldShadeTopBrush}" IsHitTestVisible="False"/>
+                        <Border x:Name="Lip" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Height="1" Margin="1,0,1,1"
+                                VerticalAlignment="Bottom"
+                                Background="{ThemeResource FieldLipBrush}" IsHitTestVisible="False"/>
+
+                        <ScrollViewer x:Name="ContentElement" Grid.Row="1" Grid.Column="0" RequestedTheme="Dark"
+                                      HorizontalScrollMode="{TemplateBinding ScrollViewer.HorizontalScrollMode}"
+                                      HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                      VerticalScrollMode="{TemplateBinding ScrollViewer.VerticalScrollMode}"
+                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                      IsHorizontalRailEnabled="{TemplateBinding ScrollViewer.IsHorizontalRailEnabled}"
+                                      IsVerticalRailEnabled="{TemplateBinding ScrollViewer.IsVerticalRailEnabled}"
+                                      IsDeferredScrollingEnabled="{TemplateBinding ScrollViewer.IsDeferredScrollingEnabled}"
+                                      Margin="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      IsTabStop="False" AutomationProperties.AccessibilityView="Raw" ZoomMode="Disabled"/>
+
+                        <TextBlock x:Name="PlaceholderTextContentPresenter" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Foreground="{Binding PlaceholderForeground, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue={ThemeResource FieldPlaceholderBrush}}"
+                                   Margin="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}"
+                                   Text="{TemplateBinding PlaceholderText}" TextAlignment="{TemplateBinding TextAlignment}"
+                                   TextWrapping="{TemplateBinding TextWrapping}" IsHitTestVisible="False"/>
+
+                        <Button x:Name="DeleteButton" Grid.Row="1" Grid.Column="1" RequestedTheme="Dark"
+                                Style="{StaticResource FieldClearButtonStyle}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}"
+                                Padding="{ThemeResource HelperButtonThemePadding}" IsTabStop="False" Visibility="Collapsed"
+                                AutomationProperties.AccessibilityView="Raw" FontSize="{TemplateBinding FontSize}"
+                                Width="30" VerticalAlignment="Stretch"/>
+
+                        <!-- NumberBox's compact-mode indicator, shown by SpinButtonsPopup. -->
+                        <TextBlock x:Name="PopupIndicator" Grid.Row="1" Grid.Column="2" RequestedTheme="Dark" Visibility="Collapsed"
+                                   Margin="{StaticResource NumberBoxPopupIndicatorMargin}"
+                                   Foreground="{ThemeResource NumberBoxPopupIndicatorForeground}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="12" Text="&#xEC8F;"
+                                   FontFamily="{ThemeResource SymbolThemeFontFamily}" AutomationProperties.AccessibilityView="Raw"/>
+
+                        <ContentPresenter x:Name="DescriptionPresenter" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                          Content="{TemplateBinding Description}"
+                                          Foreground="{ThemeResource SystemControlDescriptionTextForegroundBrush}"
+                                          AutomationProperties.AccessibilityView="Raw" x:Load="False"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A text box that asks for nothing is a field, for the reason a bare button is a cap. -->
+    <Style TargetType="TextBox" BasedOn="{StaticResource ConsoleFieldTextBoxStyle}"/>
+
+    <!-- The password field: the same well, with WinUI's reveal button in place of the clear button. PasswordBox has
+         no PlaceholderForeground, so the placeholder names the palette's grey itself. -->
+    <Style TargetType="PasswordBox" BasedOn="{StaticResource DefaultPasswordBoxStyle}">
+        <Setter Property="Foreground" Value="{ThemeResource FieldForegroundBrush}"/>
+        <Setter Property="Background" Value="{ThemeResource FieldFaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource FieldEdgeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CapCornerRadius}"/>
+        <Setter Property="Padding" Value="11,8"/>
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleBodyFontFamily}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="UseSystemFocusVisuals" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Grid x:Name="Root">
+
+                        <Grid.Resources>
+                            <!-- WinUI's reveal button, as it draws it. -->
+                            <Style x:Key="FieldRevealButtonStyle" TargetType="ToggleButton">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Grid x:Name="ButtonLayoutGrid" Margin="{ThemeResource TextBoxInnerButtonMargin}"
+                                                  BorderBrush="{ThemeResource TextControlButtonBorderBrush}"
+                                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                                  Background="{ThemeResource TextControlButtonBackground}"
+                                                  CornerRadius="{TemplateBinding CornerRadius}">
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualState x:Name="Normal"/>
+                                                        <VisualState x:Name="Indeterminate"/>
+                                                        <VisualState x:Name="PointerOver">
+                                                            <VisualState.Setters>
+                                                                <Setter Target="ButtonLayoutGrid.Background" Value="{ThemeResource TextControlButtonBackgroundPointerOver}"/>
+                                                                <Setter Target="ButtonLayoutGrid.BorderBrush" Value="{ThemeResource TextControlButtonBorderBrushPointerOver}"/>
+                                                                <Setter Target="GlyphElement.Foreground" Value="{ThemeResource TextControlButtonForegroundPointerOver}"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <VisualState x:Name="Pressed">
+                                                            <VisualState.Setters>
+                                                                <Setter Target="ButtonLayoutGrid.Background" Value="{ThemeResource TextControlButtonBackgroundPressed}"/>
+                                                                <Setter Target="ButtonLayoutGrid.BorderBrush" Value="{ThemeResource TextControlButtonBorderBrushPressed}"/>
+                                                                <Setter Target="GlyphElement.Foreground" Value="{ThemeResource TextControlButtonForegroundPressed}"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <VisualState x:Name="CheckedPressed">
+                                                            <VisualState.Setters>
+                                                                <Setter Target="ButtonLayoutGrid.Background" Value="{ThemeResource TextControlButtonBackgroundPressed}"/>
+                                                                <Setter Target="ButtonLayoutGrid.BorderBrush" Value="{ThemeResource TextControlButtonBorderBrushPressed}"/>
+                                                                <Setter Target="GlyphElement.Foreground" Value="{ThemeResource TextControlButtonForegroundPressed}"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <VisualState x:Name="IndeterminatePressed">
+                                                            <VisualState.Setters>
+                                                                <Setter Target="ButtonLayoutGrid.Background" Value="{ThemeResource TextControlButtonBackgroundPressed}"/>
+                                                                <Setter Target="ButtonLayoutGrid.BorderBrush" Value="{ThemeResource TextControlButtonBorderBrushPressed}"/>
+                                                                <Setter Target="GlyphElement.Foreground" Value="{ThemeResource TextControlButtonForegroundPressed}"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <!-- No Disabled state: WinUI's hid the reveal button on a locked field, but the field only
+                                                             shows it while it is focused, and a locked field cannot be. So it is never seen locked,
+                                                             and the field's own locked state dims everything in it. -->
+                                                    </VisualStateGroup>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <TextBlock x:Name="GlyphElement" Foreground="{ThemeResource TextControlButtonForeground}"
+                                                           VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Normal"
+                                                           FontSize="{ThemeResource PasswordBoxIconFontSize}" Text="&#xF78D;"
+                                                           FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                                           AutomationProperties.AccessibilityView="Raw"/>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Grid.Resources>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver"/>
+
+                                <VisualState x:Name="Focused">
+                                    <VisualState.Setters>
+                                        <Setter Target="BorderElement.BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+                                        <Setter Target="FocusOutline.Opacity" Value="1"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                        <Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
+                                        <Setter Target="ContentElement.Foreground" Value="{ThemeResource ConsoleDisabledFieldForegroundBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="ButtonStates">
+                                <VisualState x:Name="ButtonVisible">
+                                    <VisualState.Setters>
+                                        <Setter Target="RevealButton.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="ButtonCollapsed"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ContentPresenter x:Name="HeaderContentPresenter" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                          Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="10"
+                                          CharacterSpacing="120" FontWeight="Normal"
+                                          Foreground="{ThemeResource SilverMuteBrush}" Margin="0,0,0,5"
+                                          TextWrapping="Wrap" VerticalAlignment="Top"
+                                          Visibility="Collapsed" x:DeferLoadStrategy="Lazy"/>
+
+                        <Border x:Name="FocusOutline" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="-3"
+                                BorderBrush="{ThemeResource ArmedDisplayBrush}" BorderThickness="2" CornerRadius="7"
+                                Opacity="0" IsHitTestVisible="False"/>
+
+                        <Border x:Name="BorderElement" Grid.Row="1" Grid.Column="0" Grid.RowSpan="1" Grid.ColumnSpan="2"
+                                Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}"
+                                MinWidth="{ThemeResource TextControlThemeMinWidth}" MinHeight="{ThemeResource TextControlThemeMinHeight}"/>
+
+                        <Border x:Name="Shade" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Height="4" Margin="1,1,1,0"
+                                VerticalAlignment="Top" CornerRadius="3,3,0,0"
+                                Background="{ThemeResource FieldShadeTopBrush}" IsHitTestVisible="False"/>
+                        <Border x:Name="Lip" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Height="1" Margin="1,0,1,1"
+                                VerticalAlignment="Bottom"
+                                Background="{ThemeResource FieldLipBrush}" IsHitTestVisible="False"/>
+
+                        <ScrollViewer x:Name="ContentElement" Grid.Row="1" Grid.Column="0" RequestedTheme="Dark"
+                                      HorizontalScrollMode="{TemplateBinding ScrollViewer.HorizontalScrollMode}"
+                                      HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                      VerticalScrollMode="{TemplateBinding ScrollViewer.VerticalScrollMode}"
+                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                      IsHorizontalRailEnabled="{TemplateBinding ScrollViewer.IsHorizontalRailEnabled}"
+                                      IsVerticalRailEnabled="{TemplateBinding ScrollViewer.IsVerticalRailEnabled}"
+                                      Margin="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}"
+                                      IsTabStop="False" ZoomMode="Disabled" AutomationProperties.AccessibilityView="Raw"/>
+
+                        <TextBlock x:Name="PlaceholderTextContentPresenter" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Foreground="{ThemeResource FieldPlaceholderBrush}"
+                                   Margin="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}"
+                                   Text="{TemplateBinding PlaceholderText}" IsHitTestVisible="False"/>
+
+                        <ToggleButton x:Name="RevealButton" Grid.Row="1" Grid.Column="1" RequestedTheme="Dark"
+                                      Style="{StaticResource FieldRevealButtonStyle}"
+                                      BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}"
+                                      Padding="{ThemeResource HelperButtonThemePadding}" IsTabStop="False" Visibility="Collapsed"
+                                      FontSize="{TemplateBinding FontSize}" VerticalAlignment="Stretch" Width="30"/>
+
+                        <ContentPresenter x:Name="DescriptionPresenter" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                          Content="{TemplateBinding Description}"
+                                          Foreground="{ThemeResource SystemControlDescriptionTextForegroundBrush}"
+                                          AutomationProperties.AccessibilityView="Raw" x:Load="False"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The number field. NumberBox draws no well of its own: its InputBox is a TextBox, which WinUI points at a
+         style of its own, so the field reaches it only through this template, which points InputBox at
+         ConsoleFieldTextBoxStyle instead. NumberBox hands InputBox its edge, padding, radius, face and words by
+         template binding, so they are set here, on the NumberBox, to the field's values.
+
+         The rest is WinUI's template. Two things are left out of it: the theme dictionaries that re-point the spin
+         buttons at the text box's button colours, because a theme dictionary belongs in a dictionary App.xaml
+         merges itself (ConsoleDictionaryTests), and the popup state's redundant re-setting of InputBox's style.
+         So the inline spinners are WinUI's repeat buttons in the dark theme, small keys on the dark well, and the
+         compact popup's are WinUI's own on the popup's ground. Making them console caps is the spinners' own
+         piece of work, not a field's.
+
+         Locked, InputBox dims itself as every field does, so this dims what InputBox does not cover - the label
+         and the inline spinners - rather than its whole root, which would dim the field twice. -->
+    <Style TargetType="NumberBox">
+        <Setter Property="Foreground" Value="{ThemeResource FieldForegroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource FieldEdgeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CapCornerRadius}"/>
+        <Setter Property="Padding" Value="11,8"/>
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleBodyFontFamily}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="NumberBox">
+                    <Grid Height="{TemplateBinding Height}">
+
+                        <!-- WinUI's own spin button styles are declared by x:Name, which nothing outside its
+                             dictionary can find - asked for from here they throw as the number box lays out. So
+                             they are restated, as WinUI writes them, where the buttons can reach them. -->
+                        <Grid.Resources>
+                            <Style x:Key="FieldSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
+                                <Setter Property="IsTabStop" Value="False"/>
+                                <Setter Property="MinWidth" Value="32"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                                <Setter Property="BorderThickness" Value="{ThemeResource NumberBoxSpinButtonBorderThickness}"/>
+                                <Setter Property="FontSize" Value="12"/>
+                                <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}"/>
+                            </Style>
+                        </Grid.Resources>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="HeaderContentPresenter.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                        <Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
+                                        <Setter Target="UpSpinButton.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                        <Setter Target="DownSpinButton.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="SpinButtonStates">
+                                <VisualState x:Name="SpinButtonsCollapsed"/>
+                                <VisualState x:Name="SpinButtonsVisible">
+                                    <VisualState.Setters>
+                                        <Setter Target="DownSpinButton.Visibility" Value="Visible"/>
+                                        <Setter Target="UpSpinButton.Visibility" Value="Visible"/>
+                                        <Setter Target="InputEater.Visibility" Value="Visible"/>
+                                        <Setter Target="InputBox.MinWidth" Value="{ThemeResource NumberBoxMinWidth}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="SpinButtonsPopup"/>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="UpSpinButtonEnabledStates">
+                                <VisualState x:Name="UpSpinButtonEnabled"/>
+                                <VisualState x:Name="UpSpinButtonDisabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="UpSpinButton.IsEnabled" Value="False"/>
+                                        <Setter Target="PopupUpSpinButton.IsEnabled" Value="False"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="DownSpinButtonEnabledStates">
+                                <VisualState x:Name="DownSpinButtonEnabled"/>
+                                <VisualState x:Name="DownSpinButtonDisabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="DownSpinButton.IsEnabled" Value="False"/>
+                                        <Setter Target="PopupDownSpinButton.IsEnabled" Value="False"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- The field label (:2312), as the text box draws it. -->
+                        <ContentPresenter x:Name="HeaderContentPresenter" Grid.ColumnSpan="3"
+                                          Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          FontFamily="{StaticResource ConsoleTelemetryFontFamily}" FontSize="10"
+                                          CharacterSpacing="120" FontWeight="Normal"
+                                          Foreground="{ThemeResource SilverMuteBrush}" Margin="0,0,0,5"
+                                          TextWrapping="Wrap" VerticalAlignment="Top"
+                                          Visibility="Collapsed" x:DeferLoadStrategy="Lazy"/>
+
+                        <TextBox x:Name="InputBox" Grid.Row="1" Grid.ColumnSpan="3"
+                                 Style="{StaticResource ConsoleFieldTextBoxStyle}"
+                                 InputScope="{TemplateBinding InputScope}" PlaceholderText="{TemplateBinding PlaceholderText}"
+                                 SelectionFlyout="{TemplateBinding SelectionFlyout}"
+                                 SelectionHighlightColor="{TemplateBinding SelectionHighlightColor}"
+                                 TextReadingOrder="{TemplateBinding TextReadingOrder}"
+                                 PreventKeyboardDisplayOnProgrammaticFocus="{TemplateBinding PreventKeyboardDisplayOnProgrammaticFocus}"
+                                 FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}"
+                                 FontFamily="{TemplateBinding FontFamily}"
+                                 BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}"
+                                 Padding="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}"
+                                 TextAlignment="{TemplateBinding TextAlignment}" CornerRadius="{TemplateBinding CornerRadius}"/>
+
+                        <Popup x:Name="UpDownPopup" Grid.Row="1" Grid.Column="1"
+                               VerticalOffset="{ThemeResource NumberBoxPopupVerticalOffset}"
+                               HorizontalOffset="{ThemeResource NumberBoxPopupHorizonalOffset}"
+                               ShouldConstrainToRootBounds="False" HorizontalAlignment="Left">
+                            <Grid x:Name="PopupContentRoot" Padding="6" Background="{ThemeResource NumberBoxPopupBackground}"
+                                  BorderBrush="{ThemeResource NumberBoxPopupBorderBrush}"
+                                  BorderThickness="{ThemeResource NumberBoxPopupBorderThickness}"
+                                  CornerRadius="{ThemeResource OverlayCornerRadius}">
+                                <Grid.Resources>
+                                    <Style x:Key="FieldPopupSpinButtonStyle" TargetType="RepeatButton">
+                                        <Setter Property="AutomationProperties.AccessibilityView" Value="Raw"/>
+                                        <Setter Property="IsTabStop" Value="False"/>
+                                        <Setter Property="Width" Value="36"/>
+                                        <Setter Property="Height" Value="36"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="BorderThickness" Value="{ThemeResource NumberBoxPopupSpinButtonBorderThickness}"/>
+                                        <Setter Property="FontSize" Value="16"/>
+                                        <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}"/>
+                                        <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}"/>
+                                    </Style>
+                                </Grid.Resources>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <RepeatButton x:Name="PopupUpSpinButton" Style="{StaticResource FieldPopupSpinButtonStyle}"
+                                              Margin="0,0,0,4" Content="&#xE70E;"/>
+                                <RepeatButton x:Name="PopupDownSpinButton" Style="{StaticResource FieldPopupSpinButtonStyle}"
+                                              Grid.Row="1" Content="&#xE70D;"/>
+                            </Grid>
+                        </Popup>
+
+                        <Button x:Name="InputEater" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Visibility="Collapsed"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="4,0,0,0" IsTabStop="False"
+                                AutomationProperties.AccessibilityView="Raw">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid Background="Transparent"/>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <RepeatButton x:Name="UpSpinButton" Grid.Row="1" Grid.Column="1" RequestedTheme="Dark" Visibility="Collapsed"
+                                      FontSize="{TemplateBinding FontSize}" Content="&#xE70E;"
+                                      Style="{StaticResource FieldSpinButtonStyle}" Margin="4"
+                                      CornerRadius="{TemplateBinding CornerRadius}"/>
+                        <RepeatButton x:Name="DownSpinButton" Grid.Row="1" Grid.Column="2" RequestedTheme="Dark" Visibility="Collapsed"
+                                      FontSize="{TemplateBinding FontSize}" Content="&#xE70D;"
+                                      Style="{StaticResource FieldSpinButtonStyle}" Margin="0,4,4,4"
+                                      CornerRadius="{TemplateBinding CornerRadius}"/>
+
+                        <ContentPresenter x:Name="DescriptionPresenter" Grid.Row="2" Grid.ColumnSpan="3"
+                                          Content="{TemplateBinding Description}"
+                                          Foreground="{ThemeResource SystemControlDescriptionTextForegroundBrush}"
+                                          AutomationProperties.AccessibilityView="Raw"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

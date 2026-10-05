@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Utilities;
 using System.Collections.ObjectModel;
 
@@ -20,7 +21,7 @@ public partial class BluetoothViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _adapterAddress = "";
     [ObservableProperty] private bool _isAdapterEnabled;
     [ObservableProperty] private string _adapterStatus = "Unknown";
-    [ObservableProperty] private string _adapterStatusColor = "#808080";
+    [ObservableProperty] private LampState _adapterStatusState = LampState.Off;
 
     // Stats
     [ObservableProperty] private int _devicesFound;
@@ -46,7 +47,7 @@ public partial class BluetoothViewModel : ObservableObject, IDisposable
         {
             AdapterName = "Bluetooth Not Available";
             AdapterStatus = "Not Found";
-            AdapterStatusColor = "#F44336";
+            AdapterStatusState = LampState.NoGo;
             return;
         }
 
@@ -66,13 +67,13 @@ public partial class BluetoothViewModel : ObservableObject, IDisposable
                 AdapterAddress = adapter.Address;
                 IsAdapterEnabled = adapter.IsEnabled;
                 AdapterStatus = adapter.Status;
-                AdapterStatusColor = adapter.IsEnabled ? "#4CAF50" : "#F44336";
+                AdapterStatusState = adapter.IsEnabled ? LampState.Go : LampState.NoGo;
             }
             else
             {
                 AdapterName = "Bluetooth Adapter";
                 AdapterStatus = "Unknown";
-                AdapterStatusColor = "#808080";
+                AdapterStatusState = LampState.Off;
             }
         });
     }

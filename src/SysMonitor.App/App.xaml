@@ -12,8 +12,8 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
                 <!-- The console's dictionaries, in the order they lean on each other: the faces and the palette, the
                      Fluent overrides, then the text styles, the stock controls and the instruments that use them.
-                     Controls.xaml comes before Styles.xaml, whose named button styles are the look its caps replace:
-                     merged after them, an implicit style there would take the bare buttons back. Each is merged here
+                     Styles.xaml comes last: it maps the first generation's style names onto all of the above, and
+                     an implicit style in it would beat the console's own, so it holds none. Each is merged here
                      and nowhere else, which is where the palette was measured to follow an element's theme - a well's
                      Dark, a shift switched while the app runs (ConsoleDictionaryTests). Sources are absolute: a
                      relative one, looked up during layout, is "not a valid absolute URI". -->
@@ -23,7 +23,6 @@
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Typography.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Controls.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Console/Instruments.xaml" />
-                <ResourceDictionary Source="ms-appx:///Styles/Colors.xaml" />
                 <ResourceDictionary Source="ms-appx:///Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
@@ -34,7 +33,6 @@
             <converters:PercentConverter x:Key="PercentConverter"/>
             <converters:GBConverter x:Key="GBConverter"/>
             <converters:MBConverter x:Key="MBConverter"/>
-            <converters:BoolToSuccessBrushConverter x:Key="BoolToSuccessBrushConverter"/>
             <converters:BoolToPluggedInConverter x:Key="BoolToPluggedInConverter"/>
             <converters:BoolToChargingConverter x:Key="BoolToChargingConverter"/>
             <converters:InvertBoolToVisibilityConverter x:Key="InvertBoolToVisibilityConverter"/>
@@ -42,9 +40,7 @@
             <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
             <converters:ScanButtonIconConverter x:Key="ScanButtonIconConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
-            <converters:StringToBrushConverter x:Key="StringToBrushConverter"/>
             <converters:GreaterThanOneConverter x:Key="GreaterThanOneConverter"/>
-            <converters:BoolToAccentBrushConverter x:Key="BoolToAccentBrushConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
             <converters:CelsiusToFahrenheitConverter x:Key="CelsiusToFahrenheitConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
@@ -59,12 +55,19 @@
             <converters:IntEqualsSixToVisibilityConverter x:Key="IntEqualsSixToVisibilityConverter"/>
             <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter"/>
             <converters:BoolToSuccessGlyphConverter x:Key="BoolToSuccessGlyphConverter"/>
-            <converters:BoolToSuccessColorConverter x:Key="BoolToSuccessColorConverter"/>
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
             <converters:BoolToLockGlyphConverter x:Key="BoolToLockGlyphConverter"/>
             <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
             <converters:DoubleToStringConverter x:Key="DoubleToStringConverter"/>
-            <converters:BoolToMonitoringTextConverter x:Key="BoolToMonitoringTextConverter"/>
+            <!-- A yes or no as a lamp state for StateBrush: good or failed, and selected or not. -->
+            <converters:BoolToLampStateConverter x:Key="BoolToGoNoGoConverter" WhenTrue="Go" WhenFalse="NoGo"/>
+            <converters:BoolToLampStateConverter x:Key="BoolToArmedConverter" WhenTrue="Armed" WhenFalse="Off"/>
+            <converters:BoolToLampStateConverter x:Key="BoolToGoHoldConverter" WhenTrue="Go" WhenFalse="Hold"/>
+            <!-- A chip's or a cap's word: in capitals, or the word for a yes or no. -->
+            <converters:UpperCaseConverter x:Key="UpperCaseConverter"/>
+            <converters:BoolToWordConverter x:Key="BoolToEnabledWordConverter" WhenTrue="ENABLED" WhenFalse="DISABLED"/>
+            <converters:BoolToWordConverter x:Key="BoolToMonitoringWordConverter" WhenTrue="MONITORING" WhenFalse="PAUSED"/>
+            <converters:BoolToWordConverter x:Key="BoolToMonitoringTextConverter" WhenTrue="PAUSE" WhenFalse="RESUME"/>
             <converters:GameModeIconConverter x:Key="GameModeIconConverter"/>
             <converters:GameModeTextConverter x:Key="GameModeTextConverter"/>
         </ResourceDictionary>

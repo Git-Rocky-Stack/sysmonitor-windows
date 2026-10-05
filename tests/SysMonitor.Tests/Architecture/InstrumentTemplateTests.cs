@@ -29,13 +29,16 @@ public class InstrumentTemplateTests
     /// Content and a Control that is not a ContentControl has none. ToggleSwitch is the case: Header, OnContent
     /// and OffContent are all it has, WinUI's own template binds presenters to exactly those three, and the
     /// substitute this rule prescribes elsewhere - a ContentControl - is not what the control's code looks for
-    /// when it shows and hides HeaderContentPresenter, so it would cost every switch its header.
+    /// when it shows and hides HeaderContentPresenter, so it would cost every switch its header. The three fields
+    /// are the same case: TextBox, PasswordBox and NumberBox have a Header and a Description and no Content, and
+    /// their code finds and shows HeaderContentPresenter and DescriptionPresenter by those names.
     /// <para>
-    /// The exemption is checked, not taken on trust: TheExemptedControlsReallyHaveNoContentOfTheirOwn asks the
-    /// framework itself, so listing a ContentControl here fails rather than quietly reopening the crash.
+    /// The exemption is checked, not taken on trust: the UI smoke run asks the framework itself whether each of
+    /// these is a ContentControl (UiSmokeRun.CheckFieldsAsync and CheckSwitchAsync), so listing one here fails
+    /// the run rather than quietly reopening the crash.
     /// </para>
     /// </summary>
-    private static readonly string[] ControlsWithNoContentOfTheirOwn = ["ToggleSwitch"];
+    private static readonly string[] ControlsWithNoContentOfTheirOwn = ["ToggleSwitch", "TextBox", "PasswordBox", "NumberBox"];
 
     /// <summary>The one thing a template's presenter may show: the control's own Content.</summary>
     private static readonly Regex OwnContent = new(@"^\{TemplateBinding\s+Content\}$", RegexOptions.Compiled);

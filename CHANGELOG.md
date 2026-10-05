@@ -20,15 +20,15 @@ Each entry describes a behaviour change and cites the file it lives in.
   finger and dimming to .42 when they are disabled, which is what System-X dims a locked
   control to, except in High Contrast, where the palette leaves the dimming at 1 and greys
   the word with the user's own GrayText instead
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:65`,
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:67`,
   `src/SysMonitor.App/App.xaml:24`). Two caps carry more weight and differ only in their
   face: the armed cap for a command that cannot simply be undone
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:165`) and the chrome cap for a page's
-  single call to action (`:172`). The palette had written all three faces and Fonts.xaml
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:166`) and the chrome cap for a page's
+  single call to action (`:173`). The palette had written all three faces and Fonts.xaml
   the cap face since the tokens were generated; until this dictionary existed nothing read
   any of them. The smoke run builds each cap in the live tree, in both shifts, and checks
   the face it came out with against the palette
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:600`), and each measurement is pinned to
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:603`), and each measurement is pinned to
   the rule it was read from, so a cap cannot be quietly resized
   (`tests/SysMonitor.Tests/Architecture/ConsoleCapTests.cs:131`).
 
@@ -37,10 +37,10 @@ Each entry describes a behaviour change and cites the file it lives in.
   radius, the thumb 16 square on the 3px inset radius, and the shade the top edge casts into the
   recess drawn as a gradient, since WinUI has no inset shadow. Turned on it arms - the track, its
   rim and the thumb all going over to armed red together, the thumb travelling 20
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:193`). Locked, it dims to .42, which is what
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:194`). Locked, it dims to .42, which is what
   a locked cap does, because System-X writes that rule once and points the switch at it. The palette
   gains the eight colours the lever needs, written for all three shifts by the generator
-  (`scripts/generate-tokens.py:192`, `:299`).
+  (`scripts/generate-tokens.py:192`, `:305`).
 
   WinUI's template parts are kept name for name, because ToggleSwitch's own code drives them: it
   measures two of them to work out how far the knob travels and how far a drag may go, and writes
@@ -50,7 +50,97 @@ Each entry describes a behaviour change and cites the file it lives in.
   words stay for the same reason: the pages use both. The smoke run builds a switch in both
   shifts, turns it on and off again, and checks every face against the palette and the travel
   against the number WinUI works out for itself
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:662`).
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:665`).
+- **A status is a word and a lamp state, all the way down.** Services and view models graded
+  their readings into Material hex colours - a temperature "Hot" in `#FF5722`, a driver problem
+  in `#F44336` - and the pages parsed those strings into brushes that ignored the shift. Every
+  status now carries a `LampState` beside its word, graded exactly where its colour used to change,
+  and the page colours it with `StateBrush`: a word in the state colour System-X darkens for Day
+  Shift, a badge or dot in the rail colour, a selected tool in the armed wash, all read from the
+  palette for the shift the element is shown in
+  (`src/SysMonitor.App/Controls/Instruments/StateBrush.cs:30`). Category colours - device kinds,
+  program types, file types - carried no state and are gone. Game Mode on is armed, since the app
+  is acting on the machine while it is. The four converters that turned hex strings and yes-or-no
+  answers into fixed brushes are deleted; code colour strings are down from 32 files to the two
+  that hold PDF annotation colours, which are document data. Along the way the Dashboard's health
+  word stopped showing "Critical" in green, and the temperature and system-info status words got
+  back the colour a cleanup had dropped.
+
+- **Cards, dots, badges and toasts are the console's instruments.** Every card on every page -
+  199 of them, across 34 pages - was a Border styled as a plate, which could draw the plate's face,
+  edge and radius but not its lip, the shade under it or the shadow it sits on. Each is now the
+  `Plate` instrument, which draws all three, with the padding and size the old style gave it
+  (`src/SysMonitor.App/Controls/Instruments/Plate.cs:24`). The four card styles had nothing left
+  asking for them and are gone. The eighteen status dots are `LedDot`s, lit in the state's LED
+  colour with its glow (`src/SysMonitor.App/Controls/Instruments/LedDot.cs:23`); the nine badges
+  are `Chip`s, their word in capitals as System-X sets a chip
+  (`src/SysMonitor.App/Controls/Instruments/Chip.cs:17`, `src/SysMonitor.App/Converters/Converters.cs:481`);
+  and the four result toasts - Backup, the PDF editor and tools, and the network mapper - are
+  `Banner`s, with the lamp that names the result beside the message
+  (`src/SysMonitor.App/Controls/Instruments/Banner.cs:24`). The startup list's ENABLED and
+  DISABLED chip words come from one converter (`:491`), and so do Performance's: its status line
+  read "Status: Pause" in green while it was monitoring - the button's verb, not the state - and is
+  now a MONITORING or PAUSED chip, lit go or hold, beside a PAUSE or RESUME cap
+  (`src/SysMonitor.App/Views/PerformancePage.xaml:37`).
+
+- **Every page opens on the console's view header.** The hand-built black banner each of the 35
+  pages opened with - a red title, a translucent subtitle and a centred logo - is now System-X's
+  view header: a faceplate whose stripe carries the module's kicker and serial (`MOD - CPU - 02`,
+  numbered by the page's place in the navigation rail) and whose body carries the title as a
+  placard over its line of description. Scan and stop caps that sat in a banner sit at its right.
+  The window's title bar stays black on Void with its words on the placard and serial faces, and
+  the chrome divider under it is the faceplate's edge light.
+
+- **Nothing on a page names a colour of its own.** The hardcoded colours left on the pages -
+  surfaces, greys, status greens, ambers and reds - are palette tokens chosen by role, so every
+  page follows the shift. Words on a status fill are ArmedFg, the warm white System-X writes on
+  a lit face, which High Contrast turns into the highlight text that sits on the highlight. Three
+  files keep colours that are data, not styling: the PDF editor's ink swatches, PayPal's blue on
+  the donate button, and the FPS overlay, which draws over games.
+
+- **Nothing on the console spins.** Every progress ring is gone. A page that is loading or
+  scanning shows the busy sweep down a dark well with its status line in it, and a ring that sat
+  beside an action is a small armed EXEC lamp, the mark System-X gives the machine at work.
+
+- **The pages speak the console's colours.** Every reference a page made to the first
+  generation's brushes - 1,016 of them, on every page - now asks for the console palette with
+  `{ThemeResource}`, so it follows the shift: words are Platinum, Silver and Silver Mute, armed
+  text is ArmedLit, a status word is the state colour System-X darkens on Day Shift so it stays
+  readable on silver, and a status fill is the matching rail. `Styles/Colors.xaml` had nothing
+  left reading it and is gone.
+
+- **The first generation's style names are answered by the console.** A page that still asks for
+  `PageHeaderStyle` gets the view title; `SectionHeaderStyle` a placard with the plate's armed light pipe beside it; stat labels
+  and values the Departure Mono kicker and telemetry faces; titles and subtitles the console's
+  headings and descriptions; progress bars a dark well with an LED lit along it
+  (`src/SysMonitor.App/Styles/Styles.xaml:2`). Twenty styles nothing asked for are deleted.
+
+- **A form field is a recessed well.** Text boxes, password boxes and number boxes were WinUI's,
+  or a legacy style with a pill radius and hardcoded colours. They are now System-X's `.field`:
+  a dark well cut into the plate, dark in both shifts as the stylesheet says, 8 above and below
+  the words and 11 either side on the 4px control radius, Public Sans 13 in Night Ops white with
+  a grey placeholder, and the shade the top edge casts in drawn as a gradient. Focused, the edge
+  goes to armed edge and a 2px armed outline stands 1px off it, drawn by the field itself on any
+  focus, not only the keyboard's. A header is a field label - Departure Mono 10, tracked .12em
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:553`, `:756`, `:942`). NumberBox's own text
+  box is pointed at the same field, so a form reads as one idiom; ComboBox is not a field, since
+  System-X gives `select` only the armed accent. The palette gains the field's colours for all
+  three shifts, and a locked field's words keep their white on Day Shift, where the chassis'
+  locked word would vanish into the well (`scripts/generate-tokens.py:197`, `:311`, `:373`). The
+  pages' legacy `SearchTextBoxStyle`, `InputFieldStyle` and local face overrides are gone, and a
+  test keeps them gone (`tests/SysMonitor.Tests/Architecture/ConsoleFieldTests.cs:337`); the smoke
+  run builds each field in both shifts and measures its well and its focus against the palette
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:805`).
+
+- **Every button is a System-X cap.** The 121 buttons that still asked for the first-generation
+  styles - a 24px pill, hardcoded red or outlined, many wrapped in a hand-copied chrome bezel -
+  now take the console's caps. Armed red is kept for commands that cannot simply be undone, as
+  System-X reserves it: wiping, deleting, ending a task, cleaning, fixing the registry, clearing
+  all data, resetting settings and deleting the scheduled task. Each tool page's one main action -
+  a scan, a health check, a compress, starting a backup - is the chrome cap, and everything else is
+  the plain cap. Words on caps are written in capitals, as System-X sets them. The legacy button
+  styles and the bezel brushes they used are deleted, and the chrome bezel ratchet is empty.
+
 - **A confirmation arms the button that does the thing, not Cancel.** WinUI hands a
   dialog's default button the accent style from a visual state, and that state beats any
   style the dialog sets; with the accent armed red since this release, every confirmation
@@ -63,7 +153,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:92`, `:93`). Because no
   test could have caught this by reading the code, the smoke run now opens a confirmation
   in both shifts and asks both buttons which face they were drawn in
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:659`).
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:662`).
 
 - **Every dialog comes from the one helper.** Nine dialogs across four pages were still
   built by hand, so each missed whatever it was not told: the application's dialog style,
@@ -88,7 +178,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   Windows was set to, blue unless it had been changed. They now take the armed red
   `#AA2024`, as System-X's form controls do, with its warm white on top where WinUI
   wrote black, and the scroll bars wear System-X's armed thumb
-  (`src/SysMonitor.App/Styles/Console/FluentOverrides.xaml:120`, `:33`). High
+  (`src/SysMonitor.App/Styles/Console/FluentOverrides.xaml:137`, `:33`). High
   Contrast is untouched: its entries restate the system colours WinUI gives those
   controls. The smoke run checks that WinUI's own brushes pick the new colours up.
 
@@ -114,6 +204,12 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ### Removed
 
+- **The first-generation button and field styles.** `RedButtonStyle`, `OutlinedButtonStyle`,
+  `OutlineButtonStyle`, `ExportButtonStyle`, `ChromeBezelButtonStyle`,
+  `ChromeBezelSecondaryButtonStyle`, `InputFieldStyle` and `SearchTextBoxStyle`, with the three
+  chrome bezel brushes and the primary button gradient, had no consumer once the pages took the
+  caps and the field, so they are deleted rather than left to be asked for again.
+
 - **A process count nothing showed.** The Dashboard's view model set `ProcessCount` to
   the number of processor cores times ten, commented as a rough estimate, and no page
   bound it. A property holding a made-up number is one binding away from being shown as
@@ -121,6 +217,13 @@ Each entry describes a behaviour change and cites the file it lives in.
   pages moved with the lines they cite.
 
 ### Fixed
+
+- **The resource check knows a name from a key.** WinUI declares a few resources with `x:Name`
+  rather than `x:Key` - NumberBox's spin button styles among them - and nothing outside its own
+  dictionary can find those. The list of keys WinUI provides counted them as provided, so a
+  template that asked for one passed the resource check and crashed the first page that laid out
+  a number box. The list is now written without them (`scripts/list-winui-keys.py:75`), and the
+  number box restates the two styles where its buttons can reach them.
 
 - **The Drive Wiper shows the result of a wipe.** Every wipe wrote its outcome to the
   status line and then, in its `finally` block, described the list over it, so the
@@ -137,7 +240,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   page that never set a `DataContext`, so the binding found nothing and the button did
   nothing. It now reaches the command the way Installed Programs and PDF Tools do, and
   its tooltip says it removes the file from the list rather than wiping it.
-  (`src/SysMonitor.App/Views/DriveWiperPage.xaml:6`, `:197`,
+  (`src/SysMonitor.App/Views/DriveWiperPage.xaml:7`, `:135`,
   `src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:17`)
 
 - **Nothing on the Drive Wiper page changes while a wipe runs.** The wipe works through
@@ -150,7 +253,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   named only the last choice. WIPE NOW also waits for an add to finish - a folder is
   sized before it joins the list, and a wipe started in that gap ran without it.
   (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:25`, `:196`, `:203`,
-  `src/SysMonitor.App/Views/DriveWiperPage.xaml:125`)
+  `src/SysMonitor.App/Views/DriveWiperPage.xaml:74`)
 
 - **A file the wipe could not finish says why.** Each row has an error line, but the
   entry behind it raised no change notification, so the line was read once, while still
@@ -161,8 +264,8 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **Memory sizes carry one unit.** `MBConverter` already appends `MB` or `GB`; the
   Dashboard's Cleanable Space line and the Processes page's Memory column appended
   another, and read "512 MB MB" and "1.2 GB MB".
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:533`,
-  `src/SysMonitor.App/Views/ProcessesPage.xaml:147`)
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:471`,
+  `src/SysMonitor.App/Views/ProcessesPage.xaml:115`)
 
 - **A missing temperature reads as missing.** With no sensor the monitors report 0 C,
   which the Fahrenheit converter turned into 32F on the Dashboard, the Temperature page
@@ -171,7 +274,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   says N/A. `FormatHelper` returned "0" for a missing reading when asked for the number
   without its unit - the form a caller with its own unit label uses - and a NaN reading
   came out as "NaN"; the first is now `--`, NaN counts as no reading, and tests cover both.
-  (`src/SysMonitor.App/Converters/Converters.cs:335`,
+  (`src/SysMonitor.App/Converters/Converters.cs:317`,
   `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:439`,
   `src/SysMonitor.Core/Helpers/FormatHelper.cs:111`)
 
@@ -190,14 +293,14 @@ Each entry describes a behaviour change and cites the file it lives in.
   and its button reads TRIM MEMORY. After a failed trim the banner showed a green tick
   and "MEMORY OPTIMIZED" beside the failure; the tick is now a red cross on failure, and
   the badge appears only once a trim has worked.
-  (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175`, `:51`,
-  `src/SysMonitor.App/Views/MemoryPage.xaml:124`, `:148`, `:161`)
+  (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176`, `:52`,
+  `src/SysMonitor.App/Views/MemoryPage.xaml:80`, `:102`, `:115`)
 
 - **The in-app guide describes Game Mode's session stats as they read.** It listed
   "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check
   knew only the RAM wordings of this claim, which is how both this line and the Memory
   page's message got past it; it now covers "memory" as well as "RAM".
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:947`,
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:927`,
   `tests/SysMonitor.Tests/Architecture/InAppGuideClaimTests.cs:45`)
 
 - **The documentation says what trims memory.** The user guide and the settings
@@ -247,7 +350,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **The PDF editor's sticky note opens instead of closing the app.** Clicking the page with
   the Sticky Note tool built the note's Save button from `AccentButtonStyle`, asked of the
   page's own resources, which do not look in App.xaml where the Fluent styles are merged. The
-  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:669`).
+  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:668`).
   A new check reads every resource the XAML and the code ask for and fails when one cannot be
   reached (`tests/SysMonitor.Tests/Architecture/ResourceKeyTests.cs`).
 
@@ -320,14 +423,14 @@ labels on top of them, and this release finishes that.
   background apps" since 3.0.0, and the optimizer's own wording was corrected then; the
   button label was the last part of that flow still claiming otherwise. It now reads
   `TRIM MEMORY`, with a tooltip saying what happens to the pages.
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:286`)
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:242`)
 
 - **Game Mode stops claiming it frees RAM.** Game Mode's memory step calls the same
   `IMemoryOptimizer.OptimizeMemoryAsync` the Dashboard button does
   (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111`), so it trims working
   sets and frees nothing - but the page said `Frees Up RAM`, subtitled it "Optimizes
   memory for gaming", and labelled the result `RAM Freed`
-  (`src/SysMonitor.App/Views/GameModePage.xaml:476`, `:477`, `:512`). Three more copies
+  (`src/SysMonitor.App/Views/GameModePage.xaml:419`, `:420`, `:454`). Three more copies
   of the claim the Dashboard button had just been corrected for. They now read
   `Trims Memory` and `Trimmed`. The field behind the label was called `MemoryFreedBytes`,
   which is where each of those labels came from; it is now `MemoryTrimmedBytes`
@@ -340,7 +443,7 @@ labels on top of them, and this release finishes that.
   a file count, so that is what the guide now says. The card subtitle "Free space and
   boost performance" headed six tools of which a registry cleaner and a startup manager
   free no space; it now names what the tools under it do.
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:84`, `:183`)
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:64`, `:163`)
 
 - **The Game Mode target list says what happens to the apps on it.** It was captioned
   "These apps will be closed when Game Mode is enabled", above twenty-one named
@@ -348,7 +451,7 @@ labels on top of them, and this release finishes that.
   `LowerPriority` (`src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:26`), which
   moves them down the processor queue, and ticking "Ask them to close instead" asks and
   accepts a refusal. The caption now says which of those happens and that an app which
-  declines keeps running. (`src/SysMonitor.App/Views/GameModePage.xaml:562`)
+  declines keeps running. (`src/SysMonitor.App/Views/GameModePage.xaml:503`)
 
 - **The markdown guide's Quick Actions table matches the buttons.** It listed "Quick
   Clean - Instantly removes temporary files and browser cache", and Quick Clean does not
@@ -371,7 +474,7 @@ labels on top of them, and this release finishes that.
   consults any catalogue (`src/SysMonitor.Core/Services/Utilities/DriverUpdater.cs:99-100`,
   `:277`); and "One-click RAM cleanup". Nothing reads the markdown file at runtime, so no
   shipped build showed these five. The in-app guide was correct on all five
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:216`, `:855`, `:863`, `:867`) but wrong on
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:196`, `:835`, `:843`, `:847`) but wrong on
   three others, which are the three Changed entries above; this entry said the in-app
   guide "was already correct" without qualification, and that was not true of the file as
   a whole.
@@ -613,7 +716,7 @@ which is what makes this a major version.
 - **A License card was added to the in-app User's Guide**
   (`src/SysMonitor.App/Views/UserGuidePage.xaml`), stating what the MIT grant permits and
   requires, and listing the third-party licences bundled with the app. The Settings page
-  says the same (`src/SysMonitor.App/Views/SettingsPage.xaml:374`).
+  says the same (`src/SysMonitor.App/Views/SettingsPage.xaml:343`).
 - **`THIRD-PARTY-NOTICES.md` added.** The build is self-contained, so it redistributes its
   dependencies, and none were attributed. LibreHardwareMonitor is MPL-2.0 and carries a
   source-availability obligation that was not being met; Serilog is Apache-2.0.

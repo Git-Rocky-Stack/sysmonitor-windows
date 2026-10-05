@@ -31,6 +31,10 @@ public class ConsoleLockedStateTests
     private const string Tokens = "src/SysMonitor.App/Styles/Console/Tokens.xaml";
     private const string Opacity = "{ThemeResource ConsoleDisabledOpacity}";
     private const string Foreground = "{ThemeResource ConsoleDisabledForegroundBrush}";
+    private const string FieldForeground = "{ThemeResource ConsoleDisabledFieldForegroundBrush}";
+
+    /// <summary>Where a field draws its own words: the one part allowed the field's twin of the locked word.</summary>
+    private const string FieldText = "ContentElement.Foreground";
 
     private static readonly XNamespace Presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
     private static readonly XNamespace Xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
@@ -54,19 +58,27 @@ public class ConsoleLockedStateTests
     /// The word on a locked control is the one thing High Contrast still has to change, because it is not
     /// dimming there. A template that names Graphite directly gets Night Ops' grey in a shift the user set to
     /// something else.
+    /// <para>
+    /// One place takes a twin of it: the words typed into a field. A field is a dark well in both shifts
+    /// (styles.css :2285), and the shared locked word is the chassis' - dark on Day Shift, where it would vanish
+    /// into the well. The twin keeps the field's own white in the working shifts and is GrayText in High Contrast,
+    /// so it is the same idiom on a different ground, and it is allowed only on the part a field draws its text
+    /// in. A label above the field is on the chassis, and takes the shared word like everything else.
+    /// </para>
     /// </summary>
     [Fact]
     public void ALockedControlTakesItsWordFromTheSharedLockedForeground()
     {
         var wrong = DisabledStates()
             .SelectMany(state => Setters(state).Select(setter => (Owner: Owner(state), setter.Target, setter.Value)))
-            .Where(setter => setter.Target.EndsWith(".Foreground", StringComparison.Ordinal) && setter.Value != Foreground)
+            .Where(setter => setter.Target.EndsWith(".Foreground", StringComparison.Ordinal))
+            .Where(setter => setter.Value != Foreground && !(setter.Target == FieldText && setter.Value == FieldForeground))
             .Select(setter => $"{setter.Owner} sets {setter.Target} to {setter.Value}")
             .ToList();
 
         wrong.Should().BeEmpty(
             $"a locked word is {Foreground}, which is the shift's own grey - and in High Contrast the user's, " +
-            "which is the only greying that shift gets");
+            $"which is the only greying that shift gets; only a field's own text ({FieldText}) takes {FieldForeground}");
     }
 
     /// <summary>
@@ -90,6 +102,13 @@ public class ConsoleLockedStateTests
 
             written.Should().Contain("ConsoleDisabledOpacity", $"the {shift} shift has to say how far a locked control dims");
             written.Should().Contain("ConsoleDisabledForegroundBrush", $"the {shift} shift has to say what a locked word is");
+            written.Should().Contain("ConsoleDisabledFieldForegroundBrush", $"the {shift} shift has to say what a locked field's words are");
+        }
+
+        foreach (var key in new[] { "ConsoleDisabledForegroundBrush", "ConsoleDisabledFieldForegroundBrush" })
+        {
+            BrushColour(themes["HighContrast"], key).Should().Be("{ThemeResource SystemColorGrayTextColor}",
+                $"{key} is the only greying High Contrast gets, so it is the user's own GrayText");
         }
 
         Dimming(themes["HighContrast"]).Should().Be("1",
@@ -98,6 +117,9 @@ public class ConsoleLockedStateTests
         Dimming(themes["Default"]).Should().Be("0.42", "opacity: .42 is what the stylesheet dims a locked control to");
         Dimming(themes["Light"]).Should().Be("0.42");
     }
+
+    private static string? BrushColour(XElement theme, string key) =>
+        theme.Elements().FirstOrDefault(r => r.Attribute(Xaml + "Key")?.Value == key)?.Attribute("Color")?.Value;
 
     private static string? Dimming(XElement theme) =>
         theme.Elements().FirstOrDefault(r => r.Attribute(Xaml + "Key")?.Value == "ConsoleDisabledOpacity")?.Value.Trim();

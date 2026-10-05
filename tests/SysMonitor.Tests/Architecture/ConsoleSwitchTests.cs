@@ -190,7 +190,7 @@ public class ConsoleSwitchTests
     /// <summary>
     /// Armed, the lever glows twice: <c>0 0 12px var(--armed-glow)</c> outside the track and
     /// <c>0 0 10px</c> outside the thumb (:2352, :2359). Neither is a property WinUI has, so both are cast by
-    /// composition from ConsoleSwitch's code onto a host in the template - and the thumb's host rides inside
+    /// composition from ConsoleLever's code onto a host in the template - and the thumb's host rides inside
     /// SwitchKnob, or the glow stays behind while the thumb travels.
     /// </summary>
     [Fact]
