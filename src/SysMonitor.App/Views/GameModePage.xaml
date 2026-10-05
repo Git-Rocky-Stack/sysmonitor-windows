@@ -29,7 +29,7 @@
                     <TextBlock Text="GAME MODE CONTROL" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <Grid Padding="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -76,7 +76,7 @@
                                           Visibility="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                         </StackPanel>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </StackPanel>
 
             <!-- Advanced Features Grid (4 Cards) -->
@@ -94,7 +94,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Auto Game Mode Card -->
-                    <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="16">
+                    <instruments:Plate Grid.Column="0" Padding="16" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
@@ -113,10 +113,10 @@
                             <TextBlock Text="{x:Bind ViewModel.DetectedGamesText, Mode=OneWay}"
                                        FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
 
                     <!-- Performance Profiles Card -->
-                    <Border Grid.Column="1" Style="{StaticResource CardStyle}" Padding="16">
+                    <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
@@ -149,10 +149,10 @@
                                         HorizontalAlignment="Stretch"/>
                             </Grid>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
 
                     <!-- In-game overlay card -->
-                    <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="20">
+                    <instruments:Plate Grid.Column="2" Padding="20" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="10">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
@@ -182,7 +182,7 @@
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
 
                 </Grid>
             </StackPanel>
@@ -201,7 +201,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Fan Speed Widget -->
-                    <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="20">
+                    <instruments:Plate Grid.Column="0" Padding="20" VerticalContentAlignment="Stretch">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -298,10 +298,10 @@
                                                  FontSize="11"/>
                             </StackPanel>
                         </Grid>
-                    </Border>
+                    </instruments:Plate>
 
                     <!-- System Power Widget -->
-                    <Border Grid.Column="1" Style="{StaticResource CardStyle}" Padding="20">
+                    <instruments:Plate Grid.Column="1" Padding="20" VerticalContentAlignment="Stretch">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -367,7 +367,7 @@
                                 </StackPanel>
                             </Grid>
                         </Grid>
-                    </Border>
+                    </instruments:Plate>
                 </Grid>
             </StackPanel>
 
@@ -385,7 +385,7 @@
                         <TextBlock Text="WHEN ENABLED" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                     </StackPanel>
 
-                    <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
@@ -421,7 +421,7 @@
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
                 </StackPanel>
 
                 <!-- Last Session Info -->
@@ -431,8 +431,7 @@
                         <TextBlock Text="LAST SESSION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                     </StackPanel>
 
-                    <Border Style="{StaticResource CardStyle}" Padding="16"
-                            Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="16">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -477,10 +476,9 @@
                                 </ItemsControl>
                             </StackPanel>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
 
-                    <Border Style="{StaticResource CardStyle}" Padding="16"
-                            Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                    <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
                             <FontIcon Glyph="&#xE946;" FontSize="32" Foreground="{ThemeResource SilverBrush}"
                                       HorizontalAlignment="Center"/>
@@ -489,7 +487,7 @@
                             <TextBlock Text="Enable Game Mode to see results" FontSize="12"
                                        Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
                 </StackPanel>
             </Grid>
 
@@ -500,7 +498,7 @@
                     <TextBlock Text="TARGET APPLICATIONS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <StackPanel Spacing="8">
                         <TextBlock Text="The apps Game Mode acts on. Their priority is lowered; tick &quot;Ask them to close instead&quot; above and they are asked to close, and anything that declines keeps running:"
                                    TextWrapping="Wrap"
@@ -520,7 +518,7 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
             </StackPanel>
         </Grid>
     </ScrollViewer>

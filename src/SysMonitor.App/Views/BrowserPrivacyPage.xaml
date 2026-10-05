@@ -25,7 +25,7 @@
                 <TextBlock Text="PRIVACY CONTROLS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -59,10 +59,10 @@
                                 IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Risk Filter -->
-            <Border Style="{StaticResource CardStyle}" Padding="12">
+            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" Spacing="24">
                     <TextBlock Text="Show:" VerticalAlignment="Center" Foreground="{ThemeResource SilverBrush}"/>
                     <CheckBox Content="Safe (Cache)" IsChecked="{x:Bind ViewModel.ShowSafeItems, Mode=TwoWay}"/>
@@ -73,7 +73,7 @@
                     <Button Content="SELECT SAFE ONLY" Command="{x:Bind ViewModel.SelectSafeItemsCommand}"
                             Margin="24,0,0,0"/>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
         </StackPanel>
 
         <!-- Browser Data List -->
@@ -120,7 +120,7 @@
                                 <ItemsControl ItemsSource="{Binding Items}" Margin="24,8,0,8">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Style="{StaticResource CardStyle}" Padding="12" Margin="0,4,0,4">
+                                            <instruments:Plate Padding="12" Margin="0,4,0,4" VerticalContentAlignment="Stretch">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
@@ -146,7 +146,7 @@
                                                                Foreground="{ThemeResource StateHoldBrush}"
                                                                VerticalAlignment="Center" HorizontalAlignment="Right"/>
                                                 </Grid>
-                                            </Border>
+                                            </instruments:Plate>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>

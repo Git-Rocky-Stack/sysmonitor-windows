@@ -52,7 +52,7 @@ memory freed; it now reads TRIM MEMORY and reports the same count in the same wo
 
 The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
 of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY
-(`src/SysMonitor.App/Views/DashboardPage.xaml:267`), with a tooltip explaining the
+(`src/SysMonitor.App/Views/DashboardPage.xaml:242`), with a tooltip explaining the
 standby list. If your copy says BOOST RAM you are on v3.0.0 or earlier; the button does
 the same thing either way.
 

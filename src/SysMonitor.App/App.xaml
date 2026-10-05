@@ -59,10 +59,15 @@
             <converters:BoolToLockGlyphConverter x:Key="BoolToLockGlyphConverter"/>
             <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
             <converters:DoubleToStringConverter x:Key="DoubleToStringConverter"/>
-            <converters:BoolToMonitoringTextConverter x:Key="BoolToMonitoringTextConverter"/>
             <!-- A yes or no as a lamp state for StateBrush: good or failed, and selected or not. -->
             <converters:BoolToLampStateConverter x:Key="BoolToGoNoGoConverter" WhenTrue="Go" WhenFalse="NoGo"/>
             <converters:BoolToLampStateConverter x:Key="BoolToArmedConverter" WhenTrue="Armed" WhenFalse="Off"/>
+            <converters:BoolToLampStateConverter x:Key="BoolToGoHoldConverter" WhenTrue="Go" WhenFalse="Hold"/>
+            <!-- A chip's or a cap's word: in capitals, or the word for a yes or no. -->
+            <converters:UpperCaseConverter x:Key="UpperCaseConverter"/>
+            <converters:BoolToWordConverter x:Key="BoolToEnabledWordConverter" WhenTrue="ENABLED" WhenFalse="DISABLED"/>
+            <converters:BoolToWordConverter x:Key="BoolToMonitoringWordConverter" WhenTrue="MONITORING" WhenFalse="PAUSED"/>
+            <converters:BoolToWordConverter x:Key="BoolToMonitoringTextConverter" WhenTrue="PAUSE" WhenFalse="RESUME"/>
             <converters:GameModeIconConverter x:Key="GameModeIconConverter"/>
             <converters:GameModeTextConverter x:Key="GameModeTextConverter"/>
         </ResourceDictionary>

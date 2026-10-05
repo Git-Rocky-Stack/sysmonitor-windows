@@ -26,8 +26,7 @@
             </StackPanel>
 
             <!-- Total Storage Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="24"
-                    Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -60,8 +59,7 @@
                         <!-- Status Badge -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                                <Ellipse Width="10" Height="10" VerticalAlignment="Center"
-                                         instruments:StateBrush.Fill="{x:Bind ViewModel.TotalStorageState, Mode=OneWay}"/>
+                                <instruments:LedDot State="{x:Bind ViewModel.TotalStorageState, Mode=OneWay}" VerticalAlignment="Center"/>
                                 <TextBlock FontSize="13" FontWeight="SemiBold"
                                            instruments:StateBrush.Foreground="{x:Bind ViewModel.TotalStorageState, Mode=OneWay}">
                                     <Run Text="{x:Bind ViewModel.TotalStorageStatus, Mode=OneWay}"/>
@@ -117,7 +115,7 @@
                         </StackPanel>
                     </Grid>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Drives Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0"
@@ -133,7 +131,7 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="viewmodels:DiskDisplayInfo">
-                        <Border Style="{StaticResource CardStyle}" Padding="20">
+                        <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
                             <Grid RowSpacing="16">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -181,8 +179,7 @@
                                         <Border CornerRadius="8" Padding="10,4"
                                                 instruments:StateBrush.Wash="{x:Bind UsageState}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <Ellipse Width="8" Height="8" VerticalAlignment="Center"
-                                                         instruments:StateBrush.Fill="{x:Bind UsageState}"/>
+                                                <instruments:LedDot State="{x:Bind UsageState}" VerticalAlignment="Center"/>
                                                 <TextBlock Text="{x:Bind UsageStatus}" FontWeight="SemiBold" FontSize="11"
                                                            instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
                                             </StackPanel>
@@ -262,7 +259,7 @@
                                     </Border>
                                 </Grid>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
@@ -274,8 +271,7 @@
                 <TextBlock Text="STORAGE TIPS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}" Padding="20"
-                    Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE8C8;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
@@ -293,7 +289,7 @@
                                    Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

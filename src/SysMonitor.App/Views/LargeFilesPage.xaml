@@ -15,7 +15,7 @@
                                     Description="Find and manage space-hogging files"/>
 
             <!-- Scan Controls -->
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -69,7 +69,7 @@
                                    Style="{StaticResource CardSubtitleStyle}"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Action Feedback -->
             <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
@@ -101,34 +101,34 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel HorizontalAlignment="Center" Spacing="8">
                         <TextBlock Text="FILES FOUND" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                         <TextBlock Text="{x:Bind ViewModel.FilesFound, Mode=OneWay}"
                                    Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateExecBrush}"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel HorizontalAlignment="Center" Spacing="8">
                         <TextBlock Text="TOTAL SIZE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                         <TextBlock Text="{x:Bind ViewModel.TotalSize, Mode=OneWay}"
                                    Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
-                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel HorizontalAlignment="Center" Spacing="8">
                         <TextBlock Text="STATUS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                         <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"
                                    Style="{StaticResource CardSubtitleStyle}" FontSize="14"
                                    HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Action Buttons -->
-            <Border Style="{StaticResource CardStyle}" Padding="16">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                     <Button Content="SELECT ALL" Command="{x:Bind ViewModel.SelectAllCommand}"/>
                     <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"/>
@@ -144,7 +144,7 @@
                         </Button.ContentTemplate>
                     </Button>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- File List -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -152,7 +152,7 @@
                 <TextBlock Text="LARGE FILES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}" Padding="0" MinHeight="200">
+            <instruments:Plate Padding="0" MinHeight="200" VerticalContentAlignment="Stretch">
                 <ListView ItemsSource="{x:Bind ViewModel.LargeFiles, Mode=OneWay}"
                           SelectionMode="None" Background="Transparent">
                     <ListView.ItemTemplate>
@@ -205,7 +205,7 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

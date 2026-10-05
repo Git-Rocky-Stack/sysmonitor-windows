@@ -19,8 +19,7 @@
                                   Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- No Sensors Found -->
-            <Border Style="{StaticResource CardStyle}" Padding="32"
-                    Visibility="{x:Bind ViewModel.NoSensorsFound, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <instruments:Plate Padding="32" Visibility="{x:Bind ViewModel.NoSensorsFound, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                 <StackPanel HorizontalAlignment="Center" Spacing="16">
                     <FontIcon Glyph="&#xE783;" FontSize="48" Foreground="{ThemeResource SilverBrush}"/>
                     <TextBlock Text="No Temperature Sensors Found" Style="{StaticResource PageSubtitleStyle}"
@@ -32,7 +31,7 @@
                                HorizontalAlignment="Center" Foreground="{ThemeResource StateExecBrush}"
                                FontSize="12"/>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Primary Temperatures Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}"
@@ -50,7 +49,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- CPU Temperature Card -->
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -88,10 +87,10 @@
                                        instruments:StateBrush.Foreground="{x:Bind ViewModel.CpuTempState, Mode=OneWay}"/>
                         </Border>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- GPU Temperature Card -->
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -129,12 +128,11 @@
                                        instruments:StateBrush.Foreground="{x:Bind ViewModel.GpuTempState, Mode=OneWay}"/>
                         </Border>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Temperature Legend -->
-            <Border Style="{StaticResource CardStyle}" Padding="16"
-                    Visibility="{x:Bind ViewModel.HasTemperatures, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasTemperatures, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                 <Grid ColumnSpacing="24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -165,7 +163,7 @@
                         <TextBlock Text="Critical 194°F+" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- All Sensors Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0"
@@ -188,7 +186,7 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="viewmodels:TemperatureDisplayInfo">
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -223,7 +221,7 @@
                                                instruments:StateBrush.Foreground="{x:Bind StatusState}"/>
                                 </Border>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
@@ -235,8 +233,7 @@
                 <TextBlock Text="THERMAL TIPS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}" Padding="20"
-                    Visibility="{x:Bind ViewModel.HasTemperatures, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.HasTemperatures, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE9CA;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
@@ -254,7 +251,7 @@
                                    Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

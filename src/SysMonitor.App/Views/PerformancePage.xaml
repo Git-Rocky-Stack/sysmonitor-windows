@@ -21,7 +21,7 @@
                 </StackPanel>
 
                 <!-- Controls Card -->
-                <Border Style="{StaticResource CardStyle}">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -34,11 +34,12 @@
                         </Border>
 
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource CardTitleStyle}">
-                                <Run Text="Status: "/>
-                                <Run Text="{x:Bind ViewModel.IsMonitoring, Mode=OneWay, Converter={StaticResource BoolToMonitoringTextConverter}}"
-                                     Foreground="{ThemeResource StateGoBrush}"/>
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Status" Style="{StaticResource CardTitleStyle}" VerticalAlignment="Center"/>
+                                <instruments:Chip State="{x:Bind ViewModel.IsMonitoring, Mode=OneWay, Converter={StaticResource BoolToGoHoldConverter}}"
+                                                  Content="{x:Bind ViewModel.IsMonitoring, Mode=OneWay, Converter={StaticResource BoolToMonitoringWordConverter}}"
+                                                  VerticalAlignment="Center"/>
+                            </StackPanel>
                             <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
                                 <Run Text="Tracked Operations: "/>
                                 <Run Text="{x:Bind ViewModel.Metrics.Count, Mode=OneWay}" Foreground="{ThemeResource StateHoldBrush}"/>
@@ -56,7 +57,7 @@
                             <Button Content="EXPORT CSV" Command="{x:Bind ViewModel.ExportMetricsCommand}"/>
                         </StackPanel>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </StackPanel>
 
             <!-- System Overview Section -->
@@ -74,7 +75,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Memory Usage Card -->
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
@@ -88,10 +89,10 @@
                         </TextBlock>
                         <TextBlock Text="Working Set" Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
                 <!-- GC Pressure Card -->
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
@@ -104,10 +105,10 @@
                         </TextBlock>
                         <TextBlock Text="Collection Score" Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Metrics Count Card -->
-                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Style="{StaticResource MenuCardIconStyle}">
@@ -120,7 +121,7 @@
                         </TextBlock>
                         <TextBlock Text="Operations Monitored" Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Performance Metrics Section -->
@@ -130,7 +131,7 @@
             </StackPanel>
 
             <!-- Metrics List -->
-            <Border Style="{StaticResource CardStyle}" Padding="0">
+            <instruments:Plate Padding="0" VerticalContentAlignment="Stretch">
                 <!-- Header Row -->
                 <Grid>
                     <Grid.RowDefinitions>
@@ -219,10 +220,10 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Legend Section -->
-            <Border Style="{StaticResource CardStyle}" Padding="16">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="12">
                     <TextBlock Text="PERFORMANCE THRESHOLDS" Style="{StaticResource StatLabelStyle}"/>
                     <StackPanel Orientation="Horizontal" Spacing="24">
@@ -248,10 +249,10 @@
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Info Section -->
-            <Border Style="{StaticResource CardStyle}" Padding="16" Background="{ThemeResource Carbon750Brush}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="8">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE946;" FontSize="16" Foreground="{ThemeResource StateExecBrush}"/>
@@ -262,7 +263,7 @@
                         Metrics include execution count, average/min/max times, and P95/P99 percentiles. Export to CSV for detailed analysis.
                     </TextBlock>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
         </StackPanel>
     </ScrollViewer>

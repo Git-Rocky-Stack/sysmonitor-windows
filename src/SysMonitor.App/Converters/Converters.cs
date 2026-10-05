@@ -434,17 +434,6 @@ public class DoubleToStringConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
 }
 
-public class BoolToMonitoringTextConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is bool isMonitoring)
-            return isMonitoring ? "Pause" : "Resume";
-        return "Pause";
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
-}
-
 public class GameModeIconConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
@@ -477,6 +466,33 @@ public class BoolToLampStateConverter : IValueConverter
     public LampState WhenTrue { get; set; } = LampState.Go;
 
     public LampState WhenFalse { get; set; } = LampState.NoGo;
+
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value is true ? WhenTrue : WhenFalse;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotImplementedException();
+}
+
+/// <summary>
+/// A word in capitals, as a chip or a placard shows it. The source string stays as written, so the word the
+/// documentation quotes is the word in the code; only what is drawn is upper case.
+/// </summary>
+public class UpperCaseConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value?.ToString()?.ToUpperInvariant() ?? string.Empty;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotImplementedException();
+}
+
+/// <summary>A yes or no as the word a chip or a cap says for it; App.xaml declares one instance per pair of words.</summary>
+public class BoolToWordConverter : IValueConverter
+{
+    public string WhenTrue { get; set; } = "YES";
+
+    public string WhenFalse { get; set; } = "NO";
 
     public object Convert(object value, Type targetType, object parameter, string language) =>
         value is true ? WhenTrue : WhenFalse;

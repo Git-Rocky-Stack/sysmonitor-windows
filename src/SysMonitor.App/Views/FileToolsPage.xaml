@@ -20,7 +20,7 @@
                 <TextBlock Text="SELECT FILE OR FOLDER" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -81,7 +81,7 @@
                         </Grid>
                     </Border>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Action Feedback -->
             <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
@@ -106,7 +106,7 @@
                 <TextBlock Text="COMPRESSION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -203,11 +203,10 @@
                     <instruments:BusyWell Grid.Row="1" Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
                                           Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Result Section -->
-            <Border Style="{StaticResource CardStyle}" Padding="24"
-                    Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE73E;" FontSize="28" Foreground="{ThemeResource StateGoBrush}"/>
@@ -271,7 +270,7 @@
                         </Button.ContentTemplate>
                     </Button>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Tips Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -279,7 +278,7 @@
                 <TextBlock Text="COMPRESSION TIPS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}" Padding="20">
+            <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <FontIcon Glyph="&#xE8B7;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
@@ -297,7 +296,7 @@
                                    Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

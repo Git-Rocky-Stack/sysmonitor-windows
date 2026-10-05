@@ -45,7 +45,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!-- New Backup -->
-                                <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="16">
+                                <instruments:Plate Grid.Column="0" Padding="16" VerticalContentAlignment="Stretch">
                                     <Button Click="NewBackup_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="16">
                                         <StackPanel Spacing="12" HorizontalAlignment="Center">
                                             <FontIcon Glyph="&#xE710;" FontSize="36"/>
@@ -54,10 +54,10 @@
                                                        TextWrapping="Wrap" TextAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
-                                </Border>
+                                </instruments:Plate>
 
                                 <!-- Create Restore Point -->
-                                <Border Grid.Column="1" Style="{StaticResource CardStyle}" Padding="16">
+                                <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
                                     <Button Click="CreateRestorePoint_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="16">
                                         <StackPanel Spacing="12" HorizontalAlignment="Center">
                                             <FontIcon Glyph="&#xE81C;" FontSize="36"/>
@@ -66,10 +66,10 @@
                                                        TextWrapping="Wrap" TextAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
-                                </Border>
+                                </instruments:Plate>
 
                                 <!-- Quick Backup Documents -->
-                                <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="16">
+                                <instruments:Plate Grid.Column="2" Padding="16" VerticalContentAlignment="Stretch">
                                     <Button Click="QuickBackupDocs_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="16">
                                         <StackPanel Spacing="12" HorizontalAlignment="Center">
                                             <FontIcon Glyph="&#xE8B7;" FontSize="36"/>
@@ -78,7 +78,7 @@
                                                        TextWrapping="Wrap" TextAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
-                                </Border>
+                                </instruments:Plate>
                             </Grid>
                         </StackPanel>
 
@@ -89,8 +89,7 @@
                                 <TextBlock Text="BACKUP HISTORY" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                             </StackPanel>
 
-                            <Border Style="{StaticResource CardStyle}" Padding="0"
-                                    Visibility="{x:Bind ViewModel.HasBackups, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <instruments:Plate Padding="0" Visibility="{x:Bind ViewModel.HasBackups, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                                 <ListView ItemsSource="{x:Bind ViewModel.BackupHistory, Mode=OneWay}"
                                           SelectionMode="None" Background="Transparent">
                                     <ListView.ItemContainerStyle>
@@ -146,16 +145,15 @@
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
                                 </ListView>
-                            </Border>
+                            </instruments:Plate>
 
-                            <Border Style="{StaticResource CardStyle}" Padding="24"
-                                    Visibility="{x:Bind ViewModel.HasBackups, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                            <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasBackups, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                                 <StackPanel HorizontalAlignment="Center" Spacing="8">
                                     <FontIcon Glyph="&#xE8B7;" FontSize="32" Foreground="{ThemeResource SilverMuteBrush}"/>
                                     <TextBlock Text="No backups yet" FontSize="14" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                                     <TextBlock Text="Create your first backup to protect your files" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
-                            </Border>
+                            </instruments:Plate>
                         </StackPanel>
 
                         <!-- Restore Points -->
@@ -165,8 +163,7 @@
                                 <TextBlock Text="SYSTEM RESTORE POINTS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                             </StackPanel>
 
-                            <Border Style="{StaticResource CardStyle}" Padding="12"
-                                    Visibility="{x:Bind ViewModel.HasRestorePoints, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <instruments:Plate Padding="12" Visibility="{x:Bind ViewModel.HasRestorePoints, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.RestorePoints, Mode=OneWay}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -184,13 +181,12 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                            </Border>
+                            </instruments:Plate>
 
-                            <Border Style="{StaticResource CardStyle}" Padding="16"
-                                    Visibility="{x:Bind ViewModel.HasRestorePoints, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                            <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasRestorePoints, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                                 <TextBlock Text="No restore points found. Click 'Restore Point' to create one."
                                            FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                            </Border>
+                            </instruments:Plate>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -363,7 +359,7 @@
                     </StackPanel>
 
                     <!-- Selected Sources List -->
-                    <Border Style="{StaticResource CardStyle}" Padding="12" MinHeight="200">
+                    <instruments:Plate Padding="12" MinHeight="200" VerticalContentAlignment="Stretch">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -406,7 +402,7 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Grid>
-                    </Border>
+                    </instruments:Plate>
 
                     <!-- Estimated Size -->
                     <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="6" Padding="12">
@@ -500,15 +496,15 @@
                         <TextBlock Text="Configure backup options:" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
 
                         <!-- Backup Name -->
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Backup Name" FontWeight="SemiBold"/>
                                 <TextBox Text="{x:Bind ViewModel.BackupName, Mode=TwoWay}" PlaceholderText="Enter a name for this backup"/>
                             </StackPanel>
-                        </Border>
+                        </instruments:Plate>
 
                         <!-- Compression -->
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Compression" FontWeight="SemiBold"/>
                                 <ComboBox x:Name="CompressionPicker" SelectedIndex="1" HorizontalAlignment="Stretch">
@@ -517,10 +513,10 @@
                                     <ComboBoxItem Content="Maximum - Smallest size, slower" Tag="Maximum"/>
                                 </ComboBox>
                             </StackPanel>
-                        </Border>
+                        </instruments:Plate>
 
                         <!-- Encryption -->
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <StackPanel Spacing="8">
                                 <ToggleSwitch Header="Encrypt Backup" IsOn="{x:Bind ViewModel.EnableEncryption, Mode=TwoWay}"/>
                                 <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.EnableEncryption, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -528,20 +524,20 @@
                                     <PasswordBox Header="Confirm Password" Password="{x:Bind ViewModel.ConfirmPassword, Mode=TwoWay}" PlaceholderText="Confirm password"/>
                                 </StackPanel>
                             </StackPanel>
-                        </Border>
+                        </instruments:Plate>
 
                         <!-- Additional Options -->
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <StackPanel Spacing="12">
                                 <TextBlock Text="Additional Options" FontWeight="SemiBold"/>
                                 <ToggleSwitch Header="Verify backup after completion" IsOn="{x:Bind ViewModel.VerifyAfterBackup, Mode=TwoWay}"/>
                                 <ToggleSwitch Header="Include hidden files" IsOn="{x:Bind ViewModel.IncludeHiddenFiles, Mode=TwoWay}"/>
                                 <ToggleSwitch Header="Use Volume Shadow Copy (backup files in use)" IsOn="{x:Bind ViewModel.UseVss, Mode=TwoWay}"/>
                             </StackPanel>
-                        </Border>
+                        </instruments:Plate>
 
                         <!-- Retention -->
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Retention Policy" FontWeight="SemiBold"/>
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -550,7 +546,7 @@
                                     <TextBlock Text="backups" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </StackPanel>
-                        </Border>
+                        </instruments:Plate>
 
                         <!-- Navigation -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,24,0,16">
@@ -568,7 +564,7 @@
 
                 <!-- Step 5: Progress -->
                 <Grid Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsFiveToVisibilityConverter}}">
-                    <Border Style="{StaticResource CardStyle}" Padding="32" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="500">
+                    <instruments:Plate Padding="32" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="500" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="24" HorizontalAlignment="Center">
                             <StackPanel Spacing="8" HorizontalAlignment="Stretch">
                                 <instruments:BusyWell Title="{x:Bind ViewModel.ProgressStatus, Mode=OneWay}"/>
@@ -588,12 +584,12 @@
 
                             <Button Click="CancelBackup_Click" Content="CANCEL BACKUP" HorizontalAlignment="Center"/>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
                 </Grid>
 
                 <!-- Step 6: Complete -->
                 <Grid Visibility="{x:Bind ViewModel.CurrentStep, Mode=OneWay, Converter={StaticResource IntEqualsSixToVisibilityConverter}}">
-                    <Border Style="{StaticResource CardStyle}" Padding="32" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="500">
+                    <instruments:Plate Padding="32" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="500" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="24" HorizontalAlignment="Center">
                             <FontIcon Glyph="{x:Bind ViewModel.ResultSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessGlyphConverter}}"
                                       FontSize="64" instruments:StateBrush.Foreground="{x:Bind ViewModel.ResultSuccess, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"/>
@@ -609,18 +605,13 @@
                                 <Button Click="NewBackup_Click" Content="NEW BACKUP"/>
                             </StackPanel>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
                 </Grid>
             </Grid>
         </Grid>
 
         <!-- Status Toast -->
-        <Border instruments:StateBrush.Background="{x:Bind ViewModel.StatusState, Mode=OneWay}"
-                CornerRadius="8" Padding="16,10" Margin="0,0,0,20"
-                Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="1">
-            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold" FontSize="13"/>
-        </Border>
+        <instruments:Banner State="{x:Bind ViewModel.StatusState, Mode=OneWay}" Content="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Grid.Row="1" Margin="0,0,0,20" Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
 
         <!-- Loading Overlay -->
         <Border Background="{ThemeResource ScrimBrush}" Grid.RowSpan="2"

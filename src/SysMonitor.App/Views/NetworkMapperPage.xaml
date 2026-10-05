@@ -45,7 +45,7 @@
                             <TextBlock Text="LOCAL NETWORK INFO" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                         </StackPanel>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <Grid ColumnSpacing="24">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -74,7 +74,7 @@
                                     <TextBlock Text="{x:Bind ViewModel.Hostname, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
                                 </StackPanel>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </StackPanel>
 
                     <!-- Scan Settings & Stats Section -->
@@ -91,7 +91,7 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- Scan Settings -->
-                            <Border Style="{StaticResource CardStyle}">
+                            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                                 <StackPanel>
                                     <TextBlock Text="Scan Subnet" Style="{StaticResource CardSubtitleStyle}"/>
                                     <Grid Margin="0,8,0,0">
@@ -103,10 +103,10 @@
                                         <TextBlock Grid.Column="1" Text=".x" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{ThemeResource SilverBrush}"/>
                                     </Grid>
                                 </StackPanel>
-                            </Border>
+                            </instruments:Plate>
 
                             <!-- Stats -->
-                            <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                            <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -135,19 +135,18 @@
                                         <TextBlock Text="Computers" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </Grid>
-                            </Border>
+                            </instruments:Plate>
                         </Grid>
                     </StackPanel>
 
                     <!-- Scan Progress -->
-                    <Border Style="{StaticResource CardStyle}" Padding="12" Background="{ThemeResource Carbon750Brush}"
-                            Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <instruments:Plate Padding="12" Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="8">
                             <instruments:BusyWell Title="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"/>
                             <ProgressBar Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}" Maximum="100"/>
                             <TextBlock Text="{x:Bind ViewModel.CurrentTarget, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                         </StackPanel>
-                    </Border>
+                    </instruments:Plate>
 
                     <!-- Devices List Section -->
                     <StackPanel Spacing="8">
@@ -156,7 +155,7 @@
                             <TextBlock Text="DISCOVERED DEVICES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                         </StackPanel>
 
-                        <Border Style="{StaticResource CardStyle}" Padding="0" MinHeight="300">
+                        <instruments:Plate Padding="0" MinHeight="300" VerticalContentAlignment="Stretch">
                             <Grid>
                                 <ListView ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
                                           SelectedItem="{x:Bind ViewModel.SelectedDevice, Mode=TwoWay}"
@@ -197,9 +196,7 @@
                                                     </StackPanel>
 
                                                     <!-- Status -->
-                                                    <Border Grid.Column="3" instruments:StateBrush.Background="{x:Bind StatusState}" CornerRadius="4" Padding="10,6" VerticalAlignment="Center">
-                                                        <TextBlock Text="{x:Bind StatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource ArmedFgBrush}"/>
-                                                    </Border>
+                                                    <instruments:Chip State="{x:Bind StatusState}" Content="{x:Bind StatusText, Converter={StaticResource UpperCaseConverter}}" Grid.Column="3" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -214,14 +211,11 @@
                                     <TextBlock Text="Click 'SCAN' to discover devices" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </StackPanel>
 
                     <!-- Action Status -->
-                    <Border instruments:StateBrush.Background="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}" CornerRadius="8" Padding="16"
-                            Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Opacity="0.9">
-                        <TextBlock Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold"/>
-                    </Border>
+                    <instruments:Banner State="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}" Content="{x:Bind ViewModel.ActionStatus, Mode=OneWay}" Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 </StackPanel>
             </ScrollViewer>
 
@@ -255,9 +249,7 @@
                                             <TextBlock Text="{x:Bind ViewModel.SelectedDevice.Hostname, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
                                             <TextBlock Text="{x:Bind ViewModel.SelectedDevice.DeviceType, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
                                         </StackPanel>
-                                        <Border Grid.Column="1" instruments:StateBrush.Background="{x:Bind ViewModel.SelectedDevice.StatusState, Mode=OneWay}" CornerRadius="4" Padding="8,4">
-                                            <TextBlock Text="{x:Bind ViewModel.SelectedDevice.StatusText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource ArmedFgBrush}"/>
-                                        </Border>
+                                        <instruments:Chip State="{x:Bind ViewModel.SelectedDevice.StatusState, Mode=OneWay}" Content="{x:Bind ViewModel.SelectedDevice.StatusText, Mode=OneWay, Converter={StaticResource UpperCaseConverter}}" Grid.Column="1"/>
                                     </Grid>
 
                                     <StackPanel Spacing="8">
@@ -333,9 +325,7 @@
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="{x:Bind Port}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}"/>
                                                     <TextBlock Grid.Column="1" Text="{x:Bind Service}" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
-                                                    <Border Grid.Column="2" instruments:StateBrush.Background="{x:Bind StatusState}" CornerRadius="3" Padding="6,2">
-                                                        <TextBlock Text="{x:Bind Status}" FontSize="10" Foreground="{ThemeResource ArmedFgBrush}"/>
-                                                    </Border>
+                                                    <instruments:Chip State="{x:Bind StatusState}" Content="{x:Bind Status, Converter={StaticResource UpperCaseConverter}}" Grid.Column="2"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </ListView.ItemTemplate>

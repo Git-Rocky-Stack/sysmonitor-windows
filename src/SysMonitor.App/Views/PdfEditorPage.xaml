@@ -586,11 +586,6 @@
         </Grid>
 
         <!-- Status Toast -->
-        <Border instruments:StateBrush.Background="{x:Bind ViewModel.StatusState, Mode=OneWay}"
-                CornerRadius="8" Padding="16,10" Margin="0,0,0,20"
-                Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="2">
-            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold" FontSize="13"/>
-        </Border>
+        <instruments:Banner State="{x:Bind ViewModel.StatusState, Mode=OneWay}" Content="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Grid.Row="2" Margin="0,0,0,20" Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
     </Grid>
 </Page>

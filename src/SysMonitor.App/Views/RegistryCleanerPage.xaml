@@ -26,7 +26,7 @@
             </StackPanel>
 
             <!-- Status Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -68,10 +68,10 @@
                         </Button>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Info Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="12" Background="{ThemeResource Carbon750Brush}">
+            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -85,7 +85,7 @@
                         <Run Text="Every key that will change is backed up first; if the backup fails, nothing is changed. Use RESTORE BACKUP to undo the last cleaning." Foreground="{ThemeResource StateGoBrush}"/>
                     </TextBlock>
                 </Grid>
-            </Border>
+            </instruments:Plate>
         </StackPanel>
 
         <!-- Scan Results Section -->
@@ -111,8 +111,7 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource CardStyle}" Padding="12"
-                            Opacity="{Binding IsProtected, Converter={StaticResource BoolToOpacityConverter}}">
+                    <instruments:Plate Padding="12" Opacity="{Binding IsProtected, Converter={StaticResource BoolToOpacityConverter}}" VerticalContentAlignment="Stretch">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -160,7 +159,7 @@
                                 </TextBlock>
                             </Border>
                         </Grid>
-                    </Border>
+                    </instruments:Plate>
                 </DataTemplate>
             </ListView.ItemTemplate>
             </ListView>

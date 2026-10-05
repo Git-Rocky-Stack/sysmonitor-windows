@@ -20,7 +20,7 @@
                     <TextBlock Text="TIME RANGE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -45,7 +45,7 @@
                             <Button Content="REFRESH" Command="{x:Bind ViewModel.RefreshDataCommand}"/>
                         </StackPanel>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Status Message -->
                 <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
@@ -65,9 +65,9 @@
                     <TextBlock Text="CPU USAGE (%)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}" MinHeight="200">
+                <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
                     <Grid x:Name="CpuChartContainer" Height="180"/>
-                </Border>
+                </instruments:Plate>
             </StackPanel>
 
             <StackPanel Spacing="12">
@@ -76,9 +76,9 @@
                     <TextBlock Text="MEMORY USAGE (%)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}" MinHeight="200">
+                <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
                     <Grid x:Name="MemoryChartContainer" Height="180"/>
-                </Border>
+                </instruments:Plate>
             </StackPanel>
 
             <StackPanel Spacing="12">
@@ -87,9 +87,9 @@
                     <TextBlock Text="TEMPERATURE (°F)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}" MinHeight="200">
+                <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
                     <Grid x:Name="TemperatureChartContainer" Height="180"/>
-                </Border>
+                </instruments:Plate>
             </StackPanel>
 
         </StackPanel>

@@ -1,4 +1,4 @@
-# Handoff - fields, buttons, page colours, headers, spinners and code colours are on the console; instruments are next
+# Handoff - fields, buttons, page colours, headers, spinners, code colours and instruments are on the console
 
 **Date:** 2026-10-05
 **Branch:** `claude/peaceful-mendel-xkext6`, draft PR against `main`
@@ -97,8 +97,8 @@ CHANGELOG anchors re-pointed through a line diff after the pages moved.
 
 ### 2.4 The pages: styles, colours, headers, spinners
 
-- **Styles.xaml is a bridge.** Every name a page still asks for maps onto the console: `CardStyle` is the
-  plate, `PageHeaderStyle` the view title, `SectionHeaderStyle` a placard beside the plate's armed light pipe,
+- **Styles.xaml is a bridge.** Every name a page still asks for maps onto the console: `PageHeaderStyle` the
+  view title, `SectionHeaderStyle` a placard beside the plate's armed light pipe,
   labels and values the kicker and telemetry faces, progress bars a well with an LED. Twenty unused styles and
   all of `Colors.xaml` are deleted.
 - **1,016 legacy brush references** moved to `{ThemeResource}` tokens by role (words: Platinum, Silver, Silver
@@ -127,6 +127,20 @@ the smoke run's `CheckStateBrushAsync`. Mappings that follow the old colour over
 code 45 "Disconnected" is Off and 51 "Unknown Problem" NoGo; a disk at 50-75% reads "Normal" on a Hold lamp; an
 unplugged battery is NoGo.
 
+### 2.6 Instruments
+
+- **Cards are `Plate`s.** All 199 `CardStyle`/`StatCardStyle`/`PremiumStatCardStyle`/`HeroStatCardStyle` Borders
+  on 34 pages are `instruments:Plate`, which draws the lip, the shade and the `0 1px 2px` shadow a Border could
+  not. Each keeps the old style's padding (16, 20 premium, 24 hero) and stat minimums, and stretches its content
+  vertically as the Border did; Background, BorderBrush, BorderThickness and CornerRadius overrides were dropped,
+  since the plate draws its own. The four styles are deleted. Plates carry no `State` yet: a card whose whole
+  subject has a condition could light its rail.
+- **Dots are `LedDot`s** (18), **badges are `Chip`s** (9, words through `UpperCaseConverter`, or
+  `BoolToWordConverter` for a yes or no), and **result toasts are `Banner`s** (Backup, PDF Editor, PDF Tools,
+  Network Mapper).
+- **Performance** said "Status: Pause" in green while monitoring. It is now a MONITORING/PAUSED chip (Go/Hold) beside
+  a PAUSE/RESUME cap; `BoolToMonitoringTextConverter` is a `BoolToWordConverter` instance.
+
 ---
 
 ## 3. What is left to match System-X, counted
@@ -135,17 +149,16 @@ unplugged battery is NoGo.
 |---|---|---|
 | Colour strings in code | 2 files, both PDF annotation colours (document data, kept on purpose) | `ConsoleRecipeTests.CodeColourLiterals` |
 | Font names in XAML | 7 files | `ConsoleRecipeTests.FontFamilyLiterals` |
-| Cards are bordered plates, not the `Plate`/`Faceplate` instruments (no lip, no shadow, no state rail) | every page, through `CardStyle` | Styles.xaml header |
+| Major sections as `Faceplate`s (bolts, stripe, deep shadow) rather than `Plate`s; plates lit by `State` | every page that groups plates under a heading | not tracked |
 | Card-like and icon buttons with local overrides | Backup tiles and history icons, Driver Updater quick actions, Installed Programs row icons, Registry Cleaner's folder icon | not tracked |
-| Status badges and dots as filled Borders rather than `Chip`/`LedDot`/`Lamp` | most status pages | not tracked |
 | CheckBox, RadioButton, Slider, ComboBox | System-X gives them only the armed accent, which FluentOverrides applies: nothing more to transcribe | - |
-| Words from converters in mixed case | Performance's Pause/Resume (`Converters.cs:441`) | not tracked |
 | Excellent and Good thresholds share one green | Performance and User's Guide legends | not tracked |
 | `saturate(.5)` on locked controls; NumberBox spinners as caps | not drawn | Controls.xaml comments |
 
-Statuses now carry a `LampState` and pages colour them with `StateBrush` (section 2.5). The next step with
-the most reach is the instruments: the status badges and dots are still filled Borders, where System-X draws
-chips, LED dots and lamps, and the cards are bordered plates rather than the `Plate`/`Faceplate` instruments.
+Cards, dots, badges and toasts are instruments (section 2.6). The next step with the most reach is the
+faceplates: System-X groups a view's plates under faceplates with bolts and a stripe, where the pages still set a
+section header over loose plates. After that, the seven files that still name a font family, and the card-like
+buttons on Backup and Driver Updater.
 
 ---
 

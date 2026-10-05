@@ -28,7 +28,7 @@
                     <TextBlock Text="SCHEDULE STATUS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -57,7 +57,7 @@
                         <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}"
                                       OnContent="Enabled" OffContent="Disabled"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Schedule Settings -->
                 <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -65,7 +65,7 @@
                     <TextBlock Text="SCHEDULE SETTINGS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <StackPanel Spacing="16">
                         <!-- Schedule Type -->
                         <Grid>
@@ -126,7 +126,7 @@
                                       Width="80"/>
                         </Grid>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
                 <!-- What to Clean -->
                 <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -134,7 +134,7 @@
                     <TextBlock Text="WHAT TO CLEAN" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <StackPanel Spacing="12">
                         <CheckBox Content="Temporary Files" IsChecked="{x:Bind ViewModel.CleanTempFiles, Mode=TwoWay}"/>
                         <CheckBox Content="Browser Cache" IsChecked="{x:Bind ViewModel.CleanBrowserCache, Mode=TwoWay}"/>
@@ -146,7 +146,7 @@
                         </CheckBox>
                         <CheckBox Content="Thumbnail Cache" IsChecked="{x:Bind ViewModel.CleanThumbnailCache, Mode=TwoWay}"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Options -->
                 <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -154,7 +154,7 @@
                     <TextBlock Text="OPTIONS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                 </StackPanel>
 
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                     <StackPanel Spacing="12">
                         <CheckBox Content="Show notification when cleaning completes"
                                   IsChecked="{x:Bind ViewModel.ShowNotification, Mode=TwoWay}"/>
@@ -165,13 +165,13 @@
                         <CheckBox Content="Run missed schedule as soon as possible"
                                   IsChecked="{x:Bind ViewModel.RunMissedSchedule, Mode=TwoWay}"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
             </StackPanel>
         </ScrollViewer>
 
         <!-- Bottom Action Bar -->
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="16">
+        <instruments:Plate Grid.Row="2" Padding="16" VerticalContentAlignment="Stretch">
             <Grid>
                 <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
                            Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
@@ -184,7 +184,7 @@
                             IsEnabled="{x:Bind ViewModel.IsSaving, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                 </StackPanel>
             </Grid>
-        </Border>
+        </instruments:Plate>
 
         <!-- Loading Overlay -->
         <Grid Grid.RowSpan="3" Background="{ThemeResource ScrimBrush}"

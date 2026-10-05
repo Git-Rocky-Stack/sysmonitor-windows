@@ -15,7 +15,7 @@
                                     Description="Find and remove duplicate files"/>
 
             <!-- Scan Controls -->
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -49,7 +49,7 @@
                                    Style="{StaticResource CardSubtitleStyle}"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Action Feedback -->
             <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
@@ -81,33 +81,33 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel HorizontalAlignment="Center" Spacing="8">
                         <TextBlock Text="DUPLICATE GROUPS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                         <TextBlock Text="{x:Bind ViewModel.GroupsFound, Mode=OneWay}"
                                    Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateExecBrush}"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel HorizontalAlignment="Center" Spacing="8">
                         <TextBlock Text="TOTAL DUPLICATES" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                         <TextBlock Text="{x:Bind ViewModel.TotalDuplicates, Mode=OneWay}"
                                    Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateHoldBrush}"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
 
-                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <StackPanel HorizontalAlignment="Center" Spacing="8">
                         <TextBlock Text="WASTED SPACE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
                         <TextBlock Text="{x:Bind ViewModel.WastedSpace, Mode=OneWay}"
                                    Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource ArmedLitBrush}"/>
                     </StackPanel>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Action Buttons -->
-            <Border Style="{StaticResource CardStyle}" Padding="16">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                     <Button Content="SELECT ALL DUPLICATES" Command="{x:Bind ViewModel.SelectAllDuplicatesCommand}"/>
                     <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"/>
@@ -119,7 +119,7 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Duplicate Groups List -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -127,7 +127,7 @@
                 <TextBlock Text="DUPLICATE FILES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}" Padding="16" MinHeight="200">
+            <instruments:Plate Padding="16" MinHeight="200" VerticalContentAlignment="Stretch">
                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.DuplicateGroups, Mode=OneWay}">
                     <ItemsRepeater.Layout>
                         <StackLayout Orientation="Vertical" Spacing="16"/>
@@ -208,7 +208,7 @@
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

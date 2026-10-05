@@ -18,7 +18,7 @@
                                 Description="Control Programs That Run at Boot"/>
 
         <!-- Action Bar -->
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+        <instruments:Plate Grid.Row="1" Padding="16" VerticalContentAlignment="Stretch">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -43,7 +43,7 @@
                             Style="{StaticResource ArmedCapButtonStyle}"/>
                 </StackPanel>
             </Grid>
-        </Border>
+        </instruments:Plate>
 
         <!-- Startup Items List -->
         <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.StartupItems, Mode=OneWay}"
@@ -87,11 +87,7 @@
                         <TextBlock Grid.Column="3" Text="{Binding Impact}" VerticalAlignment="Center"
                                    Foreground="{ThemeResource StateHoldBrush}"/>
 
-                        <Border Grid.Column="4" CornerRadius="4" Padding="8,4" VerticalAlignment="Center"
-                                HorizontalAlignment="Center"
-                                instruments:StateBrush.Background="{Binding IsEnabled, Converter={StaticResource BoolToGoNoGoConverter}}">
-                            <TextBlock Text="{Binding IsEnabled}" Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold" FontSize="11"/>
-                        </Border>
+                        <instruments:Chip State="{Binding IsEnabled, Converter={StaticResource BoolToGoNoGoConverter}}" Content="{Binding IsEnabled, Converter={StaticResource BoolToEnabledWordConverter}}" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

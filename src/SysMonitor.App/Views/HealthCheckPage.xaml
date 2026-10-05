@@ -25,7 +25,7 @@
                 <TextBlock Text="SYSTEM HEALTH" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -102,7 +102,7 @@
                                 HorizontalAlignment="Stretch"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
         </StackPanel>
 
         <!-- Issues List -->
@@ -132,7 +132,7 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}" Padding="12">
+                        <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -169,7 +169,7 @@
                                                Foreground="{ThemeResource StateHoldBrush}"/>
                                 </StackPanel>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

@@ -32,7 +32,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- Network Monitor Card -->
-                <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="0" Grid.Row="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -58,10 +58,10 @@
                         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Temperature Card -->
-                <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="1" Grid.Row="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -81,10 +81,10 @@
                         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.CpuTempStatus, Mode=OneWay}"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- System Info Card -->
-                <Border Grid.Column="2" Grid.Row="0" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="2" Grid.Row="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -105,10 +105,10 @@
                         <TextBlock Grid.Row="2" Text="Health &amp; Specs"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Disk Analyzer Card -->
-                <Border Grid.Column="0" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="0" Grid.Row="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -130,11 +130,10 @@
                             <Run Text="drives detected"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Battery Card (or Cleaner if no battery) -->
-                <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16"
-                        Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <instruments:Plate Grid.Column="1" Grid.Row="1" Padding="16" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -154,11 +153,10 @@
                         <TextBlock Grid.Row="2" Text="{x:Bind ViewModel.BatteryStatus, Mode=OneWay}"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Cleaner Card (shown when no battery) -->
-                <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16"
-                        Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                <instruments:Plate Grid.Column="1" Grid.Row="1" Padding="16" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -177,10 +175,10 @@
                         <TextBlock Grid.Row="2" Text="Cleanable space"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Process Monitor Card -->
-                <Border Grid.Column="2" Grid.Row="1" Style="{StaticResource StatCardStyle}" Padding="16">
+                <instruments:Plate Grid.Column="2" Grid.Row="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -202,7 +200,7 @@
                         <TextBlock Grid.Row="2" Text="Monitor &amp; manage apps"
                                    Style="{StaticResource MenuItemSubtitleStyle}" FontSize="11"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Health Score Section Header -->
@@ -212,7 +210,7 @@
             </StackPanel>
 
             <!-- Health Score Hero Card -->
-            <Border Style="{StaticResource HeroStatCardStyle}">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -269,7 +267,7 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- System Resources Section Header -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -287,7 +285,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- CPU Card -->
-                <Border Grid.Column="0" Style="{StaticResource PremiumStatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -313,10 +311,10 @@
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.CpuUsage, Mode=OneWay}"
                                      Maximum="100" Style="{StaticResource PremiumProgressBarStyle}"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Memory Card -->
-                <Border Grid.Column="1" Style="{StaticResource PremiumStatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -350,10 +348,10 @@
                             <Run Text="GB"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Disk Card -->
-                <Border Grid.Column="2" Style="{StaticResource PremiumStatCardStyle}">
+                <instruments:Plate Grid.Column="2" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -387,11 +385,10 @@
                             <Run Text="GB"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Battery Card -->
-                <Border Grid.Column="3" Style="{StaticResource PremiumStatCardStyle}"
-                        Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <instruments:Plate Grid.Column="3" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Padding="20" MinWidth="200" MinHeight="120" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -418,7 +415,7 @@
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.BatteryLevel, Mode=OneWay}"
                                      Maximum="100" Style="{StaticResource GreenProgressBarStyle}"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- System Information Section Header -->
@@ -428,7 +425,7 @@
             </StackPanel>
 
             <!-- System Info Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -476,7 +473,7 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer with Strategia-X branding -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

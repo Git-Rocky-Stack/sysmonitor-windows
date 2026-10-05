@@ -21,7 +21,7 @@
             </StackPanel>
 
             <!-- Main Connection Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -43,8 +43,7 @@
                                    Style="{StaticResource MenuItemTextStyle}" FontSize="16"
                                    TextWrapping="Wrap" MaxWidth="400"/>
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                            <Ellipse Width="10" Height="10" VerticalAlignment="Center"
-                                     instruments:StateBrush.Fill="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}"/>
+                            <instruments:LedDot State="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}" VerticalAlignment="Center"/>
                             <TextBlock FontSize="13"
                                        instruments:StateBrush.Foreground="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}">
                                 <Run Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"/>
@@ -65,7 +64,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Speed Stats Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -80,7 +79,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Download Speed Card -->
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -107,8 +106,7 @@
                         <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8"
                                 instruments:StateBrush.Wash="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <Ellipse Width="6" Height="6" VerticalAlignment="Center"
-                                         instruments:StateBrush.Fill="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}"/>
+                                <instruments:LedDot State="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}" VerticalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.DownloadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold"
                                            instruments:StateBrush.Foreground="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}"/>
                             </StackPanel>
@@ -119,10 +117,10 @@
                             <Run Text="{x:Bind ViewModel.TotalReceivedDisplay, Mode=OneWay}"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Upload Speed Card -->
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -149,8 +147,7 @@
                         <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8"
                                 instruments:StateBrush.Wash="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <Ellipse Width="6" Height="6" VerticalAlignment="Center"
-                                         instruments:StateBrush.Fill="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}"/>
+                                <instruments:LedDot State="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}" VerticalAlignment="Center"/>
                                 <TextBlock Text="{x:Bind ViewModel.UploadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold"
                                            instruments:StateBrush.Foreground="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}"/>
                             </StackPanel>
@@ -161,7 +158,7 @@
                             <Run Text="{x:Bind ViewModel.TotalSentDisplay, Mode=OneWay}"/>
                         </TextBlock>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Network Details Section -->
@@ -171,7 +168,7 @@
             </StackPanel>
 
             <!-- Network Info Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16" ColumnSpacing="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -231,7 +228,7 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Network Adapters Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
@@ -246,7 +243,7 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="models:NetworkAdapter">
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -283,7 +280,7 @@
                                                Foreground="{ThemeResource SilverBrush}"/>
                                 </Border>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>

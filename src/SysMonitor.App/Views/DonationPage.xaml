@@ -19,7 +19,7 @@
             </StackPanel>
 
             <!-- Main Content Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="20">
                     <!-- Introduction Text -->
                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
@@ -38,7 +38,7 @@
                         Every bit helps - and we truly appreciate it.
                     </TextBlock>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Donate Section Header -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -47,7 +47,7 @@
             </StackPanel>
 
             <!-- Donation Options Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid ColumnSpacing="32">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -96,7 +96,7 @@
                                    FontSize="11" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Thank You Section Header -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -105,7 +105,7 @@
             </StackPanel>
 
             <!-- Thank You Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="16">
                         <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
@@ -128,7 +128,7 @@
                         Thank you for being part of the STX.1 community!
                     </TextBlock>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer with Strategia-X branding -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

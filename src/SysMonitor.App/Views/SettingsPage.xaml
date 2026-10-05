@@ -18,7 +18,7 @@
                 <TextBlock Text="APPEARANCE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Style="{StaticResource IconContainerRedStyle}">
@@ -32,7 +32,7 @@
                         </ComboBox>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Behavior Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -40,7 +40,7 @@
                 <TextBlock Text="BEHAVIOR" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="20">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -78,7 +78,7 @@
                                       IsOn="{x:Bind ViewModel.ShowNotifications, Mode=TwoWay}"/>
                     </Grid>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Monitoring Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -86,7 +86,7 @@
                 <TextBlock Text="MONITORING" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="20">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -129,7 +129,7 @@
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Alert Thresholds Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -138,7 +138,7 @@
             </StackPanel>
 
             <!-- Temperature Alerts Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -216,10 +216,10 @@
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Battery Alerts Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -263,7 +263,7 @@
                         </Grid>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Data & Privacy Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -271,7 +271,7 @@
                 <TextBlock Text="DATA &amp; PRIVACY" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -304,7 +304,7 @@
                         </TextBlock>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- About Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -312,7 +312,7 @@
                 <TextBlock Text="ABOUT" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="16">
                         <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
@@ -348,7 +348,7 @@
                         <Run Text="for the full terms and the licences of the third-party components it includes."/>
                     </TextBlock>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
 
             <!-- Actions -->
             <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">

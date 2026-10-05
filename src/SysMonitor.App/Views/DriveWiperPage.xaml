@@ -26,7 +26,7 @@
                 <TextBlock Text="SECURE DELETION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -56,10 +56,10 @@
                                 IsEnabled="{x:Bind ViewModel.HasFiles, Mode=OneWay}"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Wipe Method Selection -->
-            <Border Style="{StaticResource CardStyle}" Padding="12">
+            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -74,7 +74,7 @@
                               IsEnabled="{x:Bind ViewModel.IsWiping, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
                               HorizontalAlignment="Stretch"/>
                 </Grid>
-            </Border>
+            </instruments:Plate>
         </StackPanel>
 
         <!-- Files List -->
@@ -103,7 +103,7 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}" Padding="12">
+                        <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -137,7 +137,7 @@
                                     <FontIcon Glyph="&#xE711;" FontSize="12"/>
                                 </Button>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
@@ -155,7 +155,7 @@
 
         <!-- Progress Section -->
         <Grid Grid.Row="3" Visibility="{x:Bind ViewModel.IsWiping, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-            <Border Style="{StaticResource CardStyle}" Padding="12">
+            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                 <StackPanel Spacing="8">
                     <Grid>
                         <TextBlock Text="{x:Bind ViewModel.CurrentFile, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}"/>
@@ -168,7 +168,7 @@
                     <ProgressBar Value="{x:Bind ViewModel.Progress, Mode=OneWay}" Maximum="100"
                                  Foreground="{ThemeResource ArmedBrush}"/>
                 </StackPanel>
-            </Border>
+            </instruments:Plate>
         </Grid>
     </Grid>
 </Page>

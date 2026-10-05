@@ -26,7 +26,7 @@
             </StackPanel>
 
             <!-- Status Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -55,7 +55,7 @@
                                 IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
         </StackPanel>
 
         <!-- Scan Results Section -->
@@ -81,7 +81,7 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource CardStyle}" Padding="12">
+                    <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -114,7 +114,7 @@
                                        Text="{Binding FormattedSize}"
                                        Foreground="{ThemeResource StateHoldBrush}" FontWeight="SemiBold"/>
                         </Grid>
-                    </Border>
+                    </instruments:Plate>
                 </DataTemplate>
             </ListView.ItemTemplate>
             </ListView>

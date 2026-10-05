@@ -28,7 +28,7 @@
             </StackPanel>
 
             <!-- Status and Refresh Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -58,11 +58,11 @@
                             Command="{x:Bind ViewModel.LoadProgramsCommand}"
                             IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
                 </Grid>
-            </Border>
+            </instruments:Plate>
         </StackPanel>
 
         <!-- Filters Section -->
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+        <instruments:Plate Grid.Row="2" Padding="16" VerticalContentAlignment="Stretch">
             <Grid RowSpacing="12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -81,7 +81,7 @@
                     <CheckBox Content="Frameworks" IsChecked="{x:Bind ViewModel.ShowFrameworks, Mode=TwoWay}"/>
                 </StackPanel>
             </Grid>
-        </Border>
+        </instruments:Plate>
 
         <!-- Programs List -->
         <Grid Grid.Row="3" RowSpacing="8">
@@ -106,7 +106,7 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}" Padding="12">
+                        <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -164,7 +164,7 @@
                                     </Button>
                                 </StackPanel>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

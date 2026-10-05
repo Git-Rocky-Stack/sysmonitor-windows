@@ -20,7 +20,7 @@
             </StackPanel>
 
             <!-- Main Memory Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -40,8 +40,7 @@
                         <TextBlock Text="Physical Memory (RAM)" Style="{StaticResource MenuItemTextStyle}" FontSize="16"/>
                         <!-- Status with State Indicator -->
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                            <Ellipse Width="10" Height="10" VerticalAlignment="Center"
-                                     instruments:StateBrush.Fill="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
+                            <instruments:LedDot State="{x:Bind ViewModel.StatusState, Mode=OneWay}" VerticalAlignment="Center"/>
                             <TextBlock FontSize="13"
                                        instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}">
                                 <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
@@ -62,8 +61,7 @@
                     <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                             <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
-                            <Ellipse Width="8" Height="8" VerticalAlignment="Center"
-                                     instruments:StateBrush.Fill="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
+                            <instruments:LedDot State="{x:Bind ViewModel.StatusState, Mode=OneWay}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock Text="{x:Bind ViewModel.UsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"
@@ -85,7 +83,7 @@
                                 ToolTipService.ToolTip="Trim the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM."/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Action Feedback Banner -->
             <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
@@ -136,7 +134,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Used Memory Card -->
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -163,10 +161,10 @@
                         <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.UsagePercent, Mode=OneWay}"
                                      Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Available Memory Card -->
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -194,10 +192,10 @@
                                      Maximum="{x:Bind ViewModel.TotalGB, Mode=OneWay}"
                                      Style="{StaticResource GreenProgressBarStyle}"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Total Memory Card -->
-                <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -224,7 +222,7 @@
                         <ProgressBar Grid.Row="2" Value="100" Maximum="100"
                                      Style="{StaticResource CyanProgressBarStyle}"/>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Virtual Memory Section -->
@@ -234,7 +232,7 @@
             </StackPanel>
 
             <!-- Page File Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16" ColumnSpacing="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -293,7 +291,7 @@
                                  Value="{x:Bind ViewModel.PageFileUsagePercent, Mode=OneWay}"
                                  Maximum="100" Style="{StaticResource CyanProgressBarStyle}"/>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

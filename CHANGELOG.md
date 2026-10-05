@@ -66,6 +66,23 @@ Each entry describes a behaviour change and cites the file it lives in.
   word stopped showing "Critical" in green, and the temperature and system-info status words got
   back the colour a cleanup had dropped.
 
+- **Cards, dots, badges and toasts are the console's instruments.** Every card on every page -
+  199 of them, across 34 pages - was a Border styled as a plate, which could draw the plate's face,
+  edge and radius but not its lip, the shade under it or the shadow it sits on. Each is now the
+  `Plate` instrument, which draws all three, with the padding and size the old style gave it
+  (`src/SysMonitor.App/Controls/Instruments/Plate.cs:24`). The four card styles had nothing left
+  asking for them and are gone. The eighteen status dots are `LedDot`s, lit in the state's LED
+  colour with its glow (`src/SysMonitor.App/Controls/Instruments/LedDot.cs:23`); the nine badges
+  are `Chip`s, their word in capitals as System-X sets a chip
+  (`src/SysMonitor.App/Controls/Instruments/Chip.cs:17`, `src/SysMonitor.App/Converters/Converters.cs:481`);
+  and the four result toasts - Backup, the PDF editor and tools, and the network mapper - are
+  `Banner`s, with the lamp that names the result beside the message
+  (`src/SysMonitor.App/Controls/Instruments/Banner.cs:24`). The startup list's ENABLED and
+  DISABLED chip words come from one converter (`:491`), and so do Performance's: its status line
+  read "Status: Pause" in green while it was monitoring - the button's verb, not the state - and is
+  now a MONITORING or PAUSED chip, lit go or hold, beside a PAUSE or RESUME cap
+  (`src/SysMonitor.App/Views/PerformancePage.xaml:37`).
+
 - **Every page opens on the console's view header.** The hand-built black banner each of the 35
   pages opened with - a red title, a translucent subtitle and a centred logo - is now System-X's
   view header: a faceplate whose stripe carries the module's kicker and serial (`MOD - CPU - 02`,
@@ -93,11 +110,10 @@ Each entry describes a behaviour change and cites the file it lives in.
   left reading it and is gone.
 
 - **The first generation's style names are answered by the console.** A page that still asks for
-  `CardStyle` gets System-X's plate - its face, edge and 2px radius; `PageHeaderStyle` the view
-  title; `SectionHeaderStyle` a placard with the plate's armed light pipe beside it; stat labels
+  `PageHeaderStyle` gets the view title; `SectionHeaderStyle` a placard with the plate's armed light pipe beside it; stat labels
   and values the Departure Mono kicker and telemetry faces; titles and subtitles the console's
   headings and descriptions; progress bars a dark well with an LED lit along it
-  (`src/SysMonitor.App/Styles/Styles.xaml:31`). Twenty styles nothing asked for are deleted.
+  (`src/SysMonitor.App/Styles/Styles.xaml:2`). Twenty styles nothing asked for are deleted.
 
 - **A form field is a recessed well.** Text boxes, password boxes and number boxes were WinUI's,
   or a legacy style with a pill radius and hardcoded colours. They are now System-X's `.field`:
@@ -248,7 +264,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **Memory sizes carry one unit.** `MBConverter` already appends `MB` or `GB`; the
   Dashboard's Cleanable Space line and the Processes page's Memory column appended
   another, and read "512 MB MB" and "1.2 GB MB".
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:474`,
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:471`,
   `src/SysMonitor.App/Views/ProcessesPage.xaml:115`)
 
 - **A missing temperature reads as missing.** With no sensor the monitors report 0 C,
@@ -278,7 +294,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   and "MEMORY OPTIMIZED" beside the failure; the tick is now a red cross on failure, and
   the badge appears only once a trim has worked.
   (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176`, `:52`,
-  `src/SysMonitor.App/Views/MemoryPage.xaml:82`, `:104`, `:117`)
+  `src/SysMonitor.App/Views/MemoryPage.xaml:80`, `:102`, `:115`)
 
 - **The in-app guide describes Game Mode's session stats as they read.** It listed
   "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check
@@ -407,14 +423,14 @@ labels on top of them, and this release finishes that.
   background apps" since 3.0.0, and the optimizer's own wording was corrected then; the
   button label was the last part of that flow still claiming otherwise. It now reads
   `TRIM MEMORY`, with a tooltip saying what happens to the pages.
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:244`)
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:242`)
 
 - **Game Mode stops claiming it frees RAM.** Game Mode's memory step calls the same
   `IMemoryOptimizer.OptimizeMemoryAsync` the Dashboard button does
   (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111`), so it trims working
   sets and frees nothing - but the page said `Frees Up RAM`, subtitled it "Optimizes
   memory for gaming", and labelled the result `RAM Freed`
-  (`src/SysMonitor.App/Views/GameModePage.xaml:427`, `:428`, `:463`). Three more copies
+  (`src/SysMonitor.App/Views/GameModePage.xaml:419`, `:420`, `:454`). Three more copies
   of the claim the Dashboard button had just been corrected for. They now read
   `Trims Memory` and `Trimmed`. The field behind the label was called `MemoryFreedBytes`,
   which is where each of those labels came from; it is now `MemoryTrimmedBytes`
@@ -435,7 +451,7 @@ labels on top of them, and this release finishes that.
   `LowerPriority` (`src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:26`), which
   moves them down the processor queue, and ticking "Ask them to close instead" asks and
   accepts a refusal. The caption now says which of those happens and that an app which
-  declines keeps running. (`src/SysMonitor.App/Views/GameModePage.xaml:513`)
+  declines keeps running. (`src/SysMonitor.App/Views/GameModePage.xaml:503`)
 
 - **The markdown guide's Quick Actions table matches the buttons.** It listed "Quick
   Clean - Instantly removes temporary files and browser cache", and Quick Clean does not

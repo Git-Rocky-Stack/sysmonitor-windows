@@ -21,7 +21,7 @@
             </StackPanel>
 
             <!-- Total CPU Usage Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -65,7 +65,7 @@
                         </Border>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Per-Core Usage Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -81,7 +81,7 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="vm:CoreUsageInfo">
-                        <Border Style="{StaticResource StatCardStyle}" Padding="16">
+                        <instruments:Plate Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -98,8 +98,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="{x:Bind CoreName, Mode=OneWay}"
                                                Style="{StaticResource StatLabelStyle}"/>
-                                    <Ellipse Grid.Column="1" Width="8" Height="8" VerticalAlignment="Center"
-                                             instruments:StateBrush.Fill="{x:Bind StatusState, Mode=OneWay}"/>
+                                    <instruments:LedDot State="{x:Bind StatusState, Mode=OneWay}" Grid.Column="1" VerticalAlignment="Center"/>
                                 </Grid>
 
                                 <!-- Usage Value -->
@@ -118,7 +117,7 @@
                                 <ProgressBar Grid.Row="3" Value="{x:Bind Usage, Mode=OneWay}"
                                              Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
                             </Grid>
-                        </Border>
+                        </instruments:Plate>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
@@ -130,7 +129,7 @@
             </StackPanel>
 
             <!-- Specs Card -->
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16" ColumnSpacing="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -248,8 +247,7 @@
                         <StackPanel VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="TEMPERATURE" Style="{StaticResource StatLabelStyle}"/>
-                                <Ellipse Width="8" Height="8" VerticalAlignment="Center"
-                                         instruments:StateBrush.Fill="{x:Bind ViewModel.TemperatureState, Mode=OneWay}"/>
+                                <instruments:LedDot State="{x:Bind ViewModel.TemperatureState, Mode=OneWay}" VerticalAlignment="Center"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock instruments:StateBrush.Foreground="{x:Bind ViewModel.TemperatureState, Mode=OneWay}">
@@ -266,7 +264,7 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

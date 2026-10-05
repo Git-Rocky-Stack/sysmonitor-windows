@@ -18,7 +18,7 @@
                                   Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- Health Score Card -->
-            <Border Style="{StaticResource CardStyle}" Padding="24">
+            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -51,7 +51,7 @@
                         </TextBlock>
                     </Border>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Operating System Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -59,7 +59,7 @@
                 <TextBlock Text="OPERATING SYSTEM" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16" ColumnSpacing="32">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -161,7 +161,7 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Processor Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
@@ -169,7 +169,7 @@
                 <TextBlock Text="PROCESSOR" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardStyle}">
+            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                 <Grid RowSpacing="16" ColumnSpacing="32">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -247,7 +247,7 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </instruments:Plate>
 
             <!-- Memory & Storage Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
@@ -262,7 +262,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Memory Card -->
-                <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -304,10 +304,10 @@
                             </StackPanel>
                         </Grid>
                     </Grid>
-                </Border>
+                </instruments:Plate>
 
                 <!-- Storage Card -->
-                <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                     <Grid RowSpacing="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -351,7 +351,7 @@
                             </StackPanel>
                         </Grid>
                     </Grid>
-                </Border>
+                </instruments:Plate>
             </Grid>
 
             <!-- Footer -->
