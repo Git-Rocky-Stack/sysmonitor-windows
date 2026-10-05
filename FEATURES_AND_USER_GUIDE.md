@@ -259,7 +259,7 @@ Control programs that launch at startup:
 1. View startup programs list
 2. Select a program to see details
 3. Click **Disable** to prevent auto-start
-4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:81`)
+4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:62`)
 
 ### Scheduled Cleaning
 

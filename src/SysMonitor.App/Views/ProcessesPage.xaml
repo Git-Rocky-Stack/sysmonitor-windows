@@ -3,6 +3,7 @@
     x:Class="SysMonitor.App.Views.ProcessesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <Grid RowSpacing="16">
@@ -12,29 +13,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-        <Border Grid.Row="0" Background="#000000" Padding="24" Margin="-24,-24,-24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left: Header text -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="PROCESS MANAGER" Style="{StaticResource PageHeaderStyle}"
-                               Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Real-time App Analytics" Style="{StaticResource PageSubtitleStyle}"
-                               Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                </StackPanel>
-
-                <!-- Center: STX.1 Home Logo -->
-                <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                       Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                       Stretch="Uniform"/>
-            </Grid>
-        </Border>
+        <!-- View Header -->
+        <instruments:ViewHeader Grid.Row="0" Module="PROC" Index="05" Title="PROCESS MANAGER"
+                                Description="Real-time App Analytics"/>
 
         <!-- Process Controls Section -->
         <StackPanel Grid.Row="1" Spacing="12">
@@ -101,11 +82,11 @@
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="NAME" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="1" Text="CPU %" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="2" Text="MEMORY" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="3" Text="PID" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="4" Text="STATUS" Style="{StaticResource StatLabelStyle}" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="0" Text="NAME" Style="{StaticResource StatLabelStyle}"/>
+                        <TextBlock Grid.Column="1" Text="CPU %" Style="{StaticResource StatLabelStyle}"/>
+                        <TextBlock Grid.Column="2" Text="MEMORY" Style="{StaticResource StatLabelStyle}"/>
+                        <TextBlock Grid.Column="3" Text="PID" Style="{StaticResource StatLabelStyle}"/>
+                        <TextBlock Grid.Column="4" Text="STATUS" Style="{StaticResource StatLabelStyle}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.HeaderTemplate>

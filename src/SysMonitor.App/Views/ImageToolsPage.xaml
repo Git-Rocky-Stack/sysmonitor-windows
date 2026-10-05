@@ -5,34 +5,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:utilities="using:SysMonitor.Core.Services.Utilities"
     xmlns:vm="using:SysMonitor.App.ViewModels"
+    xmlns:instruments="using:SysMonitor.App.Controls.Instruments"
     Background="{ThemeResource Carbon950Brush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="0,0,0,24" Spacing="16">
 
-            <!-- Page Header Banner - AMOLED pure black with left header, centered logo -->
-            <Border Background="#000000" Padding="24" Margin="-24,-24,-24,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Left: Header text -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="IMAGE TOOLS" Style="{StaticResource PageHeaderStyle}"
-                                   Foreground="{ThemeResource ArmedLitBrush}" HorizontalAlignment="Left"/>
-                        <TextBlock Text="Compress, convert, and resize images" Style="{StaticResource PageSubtitleStyle}"
-                                   Foreground="#AAFFFFFF" HorizontalAlignment="Left" Margin="0"/>
-                    </StackPanel>
-
-                    <!-- Center: STX.1 Home Logo -->
-                    <Image Grid.Column="1" Source="ms-appx:///Assets/Home_Logo.png"
-                           Height="80" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Stretch="Uniform"/>
-                </Grid>
-            </Border>
+            <!-- Page Header Banner -->
+            <instruments:ViewHeader Module="IMAGE" Index="26" Title="IMAGE TOOLS"
+                                    Description="Compress, convert, and resize images"/>
 
             <!-- Image Selection Section -->
             <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
@@ -267,7 +248,7 @@
                     <StackPanel Spacing="16">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Border Width="48" Height="48" CornerRadius="8"
-                                    Background="#9C27B0">
+                                    Background="{ThemeResource RailExecBrush}">
                                 <FontIcon Glyph="&#xE799;" FontSize="24"
                                           Foreground="{ThemeResource PlatinumBrush}"/>
                             </Border>

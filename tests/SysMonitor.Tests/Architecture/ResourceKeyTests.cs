@@ -45,9 +45,6 @@ public class ResourceKeyTests
     private static readonly Dictionary<string, string> DeliberateOverrides = new(StringComparer.Ordinal)
     {
         ["ContentControlThemeFontFamily"] = "Fonts.xaml: the framework's own controls set their text in Public Sans",
-        ["NavigationViewContentBackground"] = "MainWindow.xaml: the page area behind the navigation rail",
-        ["NavigationViewDefaultPaneBackground"] = "MainWindow.xaml: the navigation rail's pane",
-        ["NavigationViewExpandedPaneBackground"] = "MainWindow.xaml: the navigation rail's pane, expanded",
     };
 
     private static readonly Regex CodeLookup = new(

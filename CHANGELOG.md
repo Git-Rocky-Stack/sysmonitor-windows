@@ -128,7 +128,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   Windows was set to, blue unless it had been changed. They now take the armed red
   `#AA2024`, as System-X's form controls do, with its warm white on top where WinUI
   wrote black, and the scroll bars wear System-X's armed thumb
-  (`src/SysMonitor.App/Styles/Console/FluentOverrides.xaml:120`, `:33`). High
+  (`src/SysMonitor.App/Styles/Console/FluentOverrides.xaml:137`, `:33`). High
   Contrast is untouched: its entries restate the system colours WinUI gives those
   controls. The smoke run checks that WinUI's own brushes pick the new colours up.
 
@@ -214,8 +214,8 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **Memory sizes carry one unit.** `MBConverter` already appends `MB` or `GB`; the
   Dashboard's Cleanable Space line and the Processes page's Memory column appended
   another, and read "512 MB MB" and "1.2 GB MB".
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:493`,
-  `src/SysMonitor.App/Views/ProcessesPage.xaml:134`)
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:474`,
+  `src/SysMonitor.App/Views/ProcessesPage.xaml:115`)
 
 - **A missing temperature reads as missing.** With no sensor the monitors report 0 C,
   which the Fahrenheit converter turned into 32F on the Dashboard, the Temperature page
@@ -244,7 +244,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   and "MEMORY OPTIMIZED" beside the failure; the tick is now a red cross on failure, and
   the badge appears only once a trim has worked.
   (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:175`, `:51`,
-  `src/SysMonitor.App/Views/MemoryPage.xaml:113`, `:136`, `:149`)
+  `src/SysMonitor.App/Views/MemoryPage.xaml:94`, `:117`, `:130`)
 
 - **The in-app guide describes Game Mode's session stats as they read.** It listed
   "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check
@@ -373,7 +373,7 @@ labels on top of them, and this release finishes that.
   background apps" since 3.0.0, and the optimizer's own wording was corrected then; the
   button label was the last part of that flow still claiming otherwise. It now reads
   `TRIM MEMORY`, with a tooltip saying what happens to the pages.
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:263`)
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:244`)
 
 - **Game Mode stops claiming it frees RAM.** Game Mode's memory step calls the same
   `IMemoryOptimizer.OptimizeMemoryAsync` the Dashboard button does
