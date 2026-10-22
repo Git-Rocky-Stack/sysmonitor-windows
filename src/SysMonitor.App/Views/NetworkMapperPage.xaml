@@ -44,13 +44,17 @@
                             <StackPanel Spacing="8">
 
                                 <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                                    <Grid ColumnSpacing="24">
+                                    <!-- Two by two: beside the device details column, four across broke every label
+                                         and address into fragments. -->
+                                    <Grid ColumnSpacing="24" RowSpacing="12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
                                         <StackPanel>
                                             <TextBlock Text="Local IP" Style="{StaticResource CardSubtitleStyle}"/>
@@ -62,12 +66,12 @@
                                             <TextBlock Text="{x:Bind ViewModel.Gateway, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" Margin="0,4,0,0"/>
                                         </StackPanel>
 
-                                        <StackPanel Grid.Column="2">
+                                        <StackPanel Grid.Row="1">
                                             <TextBlock Text="MAC Address" Style="{StaticResource CardSubtitleStyle}"/>
                                             <TextBlock Text="{x:Bind ViewModel.MacAddress, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" Margin="0,4,0,0"/>
                                         </StackPanel>
 
-                                        <StackPanel Grid.Column="3">
+                                        <StackPanel Grid.Row="1" Grid.Column="1">
                                             <TextBlock Text="Hostname" Style="{StaticResource CardSubtitleStyle}"/>
                                             <TextBlock Text="{x:Bind ViewModel.Hostname, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
@@ -82,11 +86,12 @@
                         <instruments:Faceplate Kicker="MAP - SCAN SETTINGS &amp; STATISTICS - 29B" Serial="{instruments:SerialFor Module=MAP-SCAN-SETTINGS-STATISTICS}">
                             <StackPanel Spacing="8">
 
-                                <Grid ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="2*"/>
-                                    </Grid.ColumnDefinitions>
+                                <!-- Settings above statistics, each the column's full width (see 29A). -->
+                                <Grid RowSpacing="12">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
                                     <!-- Scan Settings -->
                                     <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
@@ -104,7 +109,7 @@
                                     </instruments:Plate>
 
                                     <!-- Stats -->
-                                    <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
+                                    <instruments:Plate Grid.Row="1" Padding="16" VerticalContentAlignment="Stretch">
                                         <Grid ColumnSpacing="16">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -220,9 +225,11 @@
             </ScrollViewer>
 
             <!-- Right Panel - Device Details -->
-            <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8,0,0,8">
+            <!-- The details sit on the chassis beside the list, as a faceplate of their own; a carbon panel round
+                 the faceplate drew a second frame outside the first. -->
+            <Border Grid.Column="1" Margin="16,0,0,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Padding="20" Spacing="16">
+                    <StackPanel Spacing="16">
                         <instruments:Faceplate Kicker="MAP - DEVICE DETAILS - 29D" Serial="{instruments:SerialFor Module=MAP-DEVICE-DETAILS}">
                             <StackPanel Spacing="16">
 

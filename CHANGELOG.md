@@ -11,6 +11,98 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
+The Command Console look is complete, and an end-to-end audit of the app's safety, lifetime,
+accessibility and release path is resolved. This is planned as 3.1.0; RELEASE_CHECKLIST.md is
+the cut. The entries for the redesign's earlier phases follow the first five sections.
+
+### Fixed - nothing is destroyed that cannot be proven broken
+
+- **The registry scan no longer flags working entries.** An uninstall string names
+  `MsiExec.exe` and a Run value names a program by bare name; `File.Exists` looked for those
+  in the app's own folder, so every MSI-installed program was "orphaned" and the fix deleted
+  its Uninstall key. An entry is now broken only when a fully qualified path on a mounted
+  drive is gone; a type library's resource index (`ieframe.dll\1`) is not part of its file,
+  and only the broken version of a type library is deleted
+  (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs`, `RegistryCleaner.IsProvablyMissing`).
+- **Health Check's QUICK FIX backs the registry up first** and leaves it untouched when the
+  backup fails, fixes only what is selected, and reports the cleaners' errors
+  (`src/SysMonitor.Core/Services/Utilities/HealthCheckService.cs`).
+- **Cleans never walk through a junction.** The scheduled clean runs elevated, and a junction
+  planted in `Windows\Temp` could have steered it into System32. Temp and browser-cache cleans
+  remove only folders they emptied, where they deleted every subfolder outright
+  (`src/SysMonitor.Core/Services/Utilities/FileScanning.cs`, `FileScanning.RemoveEmptyFolders`).
+- **The Recycle Bin is never pre-selected**, so QUICK CLEAN leaves it; what emptying it freed
+  is read back from the bin (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs`).
+- **Backups keep every source and every good backup.** Two sources with one folder name no
+  longer overwrite each other, a drive root is `Drive-D` rather than an absolute path that
+  sent the copy back onto the source, exclusions match whole folders, an unreadable folder no
+  longer fails the backup, `.git` and `Program Files` are copied, a failed encryption deletes
+  the unencrypted copy, retention runs only after a complete backup and never removes the full
+  backup later ones depend on, and restore points are listed (the old parse always threw)
+  (`src/SysMonitor.Core/Services/Backup/BackupService.cs`).
+- **Results say what happened.** A created restore point is confirmed by a new sequence number
+  (Windows answers success without making one within 24 hours of the last); a free-space wipe
+  that stops short fails, and fills in files under FAT32's 4 GiB limit; a PDF merge with an
+  unreadable part is refused; unpacking an archive never overwrites the file beside it;
+  Browser Privacy counts what it deleted, deletes SQLite journals with their database, finds
+  Firefox's cache, and calls `places.sqlite` history and bookmarks, at high risk
+  (`src/SysMonitor.Core/Services/Utilities/SystemRestoreService.cs`,
+  `src/SysMonitor.Core/Services/Utilities/DriveWiper.cs`,
+  `src/SysMonitor.Core/Services/Utilities/PdfTools.cs`,
+  `src/SysMonitor.Core/Services/Utilities/FileConverter.cs`,
+  `src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs`).
+- **Startup manages 32-bit machine-wide entries** (`WOW6432Node\...\Run`, approved under
+  `StartupApproved\Run32` as Task Manager does) (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs`).
+
+### Fixed - every armed action asks first
+
+- Browser Privacy's CLEAN deleted saved passwords on the first press under a comment that
+  read "In a real app, we'd show a confirmation dialog here". It, END TASK, QUICK CLEAN,
+  CLEAN SELECTED, Startup DELETE, DELETE TASK, Settings CLEAR and RESET TO DEFAULTS,
+  Uninstall, QUICK FIX, FIX SELECTED and the PDF Editor's DELETE PAGE and CLEAR ALL now ask,
+  saying what will happen and naming what cannot be recovered
+  (`src/SysMonitor.App/ViewModels/Confirmation.cs`). `ArmedActionConfirmationTests` keeps it
+  so. END TASK refuses the processes Windows cannot run without and says whether the process
+  ended (`src/SysMonitor.Core/Services/Monitors/ProcessMonitor.cs`).
+
+### Fixed - lifetime
+
+- **One copy of the app.** A second launch shows the running copy's window and exits, where
+  it started a second tray icon, a second history recorder and every alert twice
+  (`src/SysMonitor.App/App.xaml.cs`).
+- **Alerts fire from any page**, and with the window in the tray; the Dashboard was the only
+  caller (`src/SysMonitor.App/Services/TrayIconService.cs`).
+- **Shutdown closes everything.** Disposing the history service twice threw and ended the
+  host's dispose loop before the hardware monitor was closed
+  (`src/SysMonitor.Core/Services/History/HistoryService.cs`).
+- **Pages stop when left**, even during their first refresh, and the watch-only pages stop
+  while the window is hidden in the tray (`src/SysMonitor.App/MainWindow.xaml.cs`).
+- **Navigation** keeps the rail on the page showing, footer items and the PDF Editor
+  included, and no longer opens a page twice from the tray.
+- Performance's EXPORT CSV reports a refused write instead of closing the app; Settings'
+  status is coloured by outcome and clears; status lines keep failures on screen.
+
+### Changed - the look is complete
+
+- **Every major section is a bolted `Faceplate`** (106 across 35 pages), its stripe carrying
+  the section's code - `CPU - CORE USAGE - 02B` - and a stamped serial. A section shown only
+  with data is gated as a whole (`tests/SysMonitor.Tests/Architecture/FaceplateKickerTests.cs`).
+- **Tiles and icon buttons are caps**: `TileCapButtonStyle`, `IconCapButtonStyle` and
+  `ArmedIconCapButtonStyle` (`src/SysMonitor.App/Styles/Console/Controls.xaml`); hand-painted
+  insets are `Well`s; no XAML names a font family by hand; dialog buttons read in capitals.
+- **Accessibility**: every unlabelled slider, combo box, number box, switch, result checkbox and
+  icon cap has an accessible name; faceplate kickers are headings; meaningful text is at least
+  11; the window has a minimum size; the PDF Editor's advertised shortcuts work.
+- Excellent and Good share Go's lamp, so the thresholds legend names them on one swatch.
+
+### Release
+
+- Setup refuses Windows older than 10 version 2004 (`installer/SysMonitorSetup.iss`); the
+  manifest drops its placeholder PhoneIdentity and is tested against Windows 11 24H2; the
+  User's Guide shows the build's stamped date; the UI smoke run fails on a binding failure or
+  an unhandled exception.
+
+
 ### Changed
 
 - **A button is a machined cap.** Buttons that asked for no style of their own were drawn
@@ -37,7 +129,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   radius, the thumb 16 square on the 3px inset radius, and the shade the top edge casts into the
   recess drawn as a gradient, since WinUI has no inset shadow. Turned on it arms - the track, its
   rim and the thumb all going over to armed red together, the thumb travelling 20
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:224`). Locked, it dims to .42, which is what
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:226`). Locked, it dims to .42, which is what
   a locked cap does, because System-X writes that rule once and points the switch at it. The palette
   gains the eight colours the lever needs, written for all three shifts by the generator
   (`scripts/generate-tokens.py:192`, `:305`).
@@ -122,7 +214,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   a grey placeholder, and the shade the top edge casts in drawn as a gradient. Focused, the edge
   goes to armed edge and a 2px armed outline stands 1px off it, drawn by the field itself on any
   focus, not only the keyboard's. A header is a field label - Departure Mono 10, tracked .12em
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:583`, `:786`, `:972`). NumberBox's own text
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:585`, `:788`, `:974`). NumberBox's own text
   box is pointed at the same field, so a form reads as one idiom; ComboBox is not a field, since
   System-X gives `select` only the armed accent. The palette gains the field's colours for all
   three shifts, and a locked field's words keep their white on Day Shift, where the chassis'

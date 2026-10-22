@@ -44,9 +44,9 @@
 
                                         <!-- New Backup -->
                                         <Button Grid.Column="0" Click="NewBackup_Click" Style="{StaticResource TileCapButtonStyle}">
-                                            <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                                <FontIcon Glyph="&#xE710;" FontSize="36"/>
-                                                <TextBlock Text="NEW BACKUP" HorizontalAlignment="Center"/>
+                                            <StackPanel Spacing="12">
+                                                <FontIcon Glyph="&#xE710;" FontSize="36" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="NEW BACKUP" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                                                 <TextBlock Text="Create a new backup of your files" FontSize="11" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"
                                                            TextWrapping="Wrap" TextAlignment="Center"/>
                                             </StackPanel>
@@ -54,9 +54,9 @@
 
                                         <!-- Create Restore Point -->
                                         <Button Grid.Column="1" Click="CreateRestorePoint_Click" Style="{StaticResource TileCapButtonStyle}">
-                                            <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                                <FontIcon Glyph="&#xE81C;" FontSize="36"/>
-                                                <TextBlock Text="RESTORE POINT" HorizontalAlignment="Center"/>
+                                            <StackPanel Spacing="12">
+                                                <FontIcon Glyph="&#xE81C;" FontSize="36" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="RESTORE POINT" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                                                 <TextBlock Text="Create a system restore point" FontSize="11" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"
                                                            TextWrapping="Wrap" TextAlignment="Center"/>
                                             </StackPanel>
@@ -64,9 +64,9 @@
 
                                         <!-- Quick Backup Documents -->
                                         <Button Grid.Column="2" Click="QuickBackupDocs_Click" Style="{StaticResource TileCapButtonStyle}">
-                                            <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                                <FontIcon Glyph="&#xE8B7;" FontSize="36"/>
-                                                <TextBlock Text="QUICK BACKUP" HorizontalAlignment="Center"/>
+                                            <StackPanel Spacing="12">
+                                                <FontIcon Glyph="&#xE8B7;" FontSize="36" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="QUICK BACKUP" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                                                 <TextBlock Text="One-click Documents backup" FontSize="11" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"
                                                            TextWrapping="Wrap" TextAlignment="Center"/>
                                             </StackPanel>
@@ -140,10 +140,11 @@
                                     </instruments:Plate>
 
                                     <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasBackups, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                        <StackPanel Spacing="8">
                                             <FontIcon Glyph="&#xE8B7;" FontSize="32" Foreground="{ThemeResource SilverMuteBrush}"/>
                                             <TextBlock Text="No backups yet" FontSize="14" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                            <TextBlock Text="Create your first backup to protect your files" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="Create your first backup to protect your files" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"
+                                                       HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                                         </StackPanel>
                                     </instruments:Plate>
                                 </StackPanel>
@@ -186,9 +187,8 @@
                 </ScrollViewer>
 
                 <!-- Right Sidebar - Status -->
-                <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16">
+                <instruments:Faceplate Grid.Column="1" VerticalAlignment="Top" Kicker="BACKUP - STATUS - 15D" Serial="{instruments:SerialFor Module=BACKUP-STATUS}">
                     <StackPanel Spacing="16">
-                        <TextBlock Text="BACKUP STATUS" FontWeight="SemiBold" Foreground="{ThemeResource SilverMuteBrush}"/>
 
                         <!-- Last Backup Info -->
                         <instruments:Well Padding="12">
@@ -241,7 +241,7 @@
                             </StackPanel>
                         </instruments:Well>
                     </StackPanel>
-                </Border>
+                </instruments:Faceplate>
             </Grid>
 
             <!-- Wizard Views -->

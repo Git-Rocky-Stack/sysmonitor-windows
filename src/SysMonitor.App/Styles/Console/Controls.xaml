@@ -180,7 +180,9 @@
          It is the cap's face, states and travel, only stretched to its column and padded to hold the stack; the
          tile is the key itself, never a button seated inside a plate, which drew a second bezel round the first. -->
     <Style x:Key="TileCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
-        <Setter Property="Padding" Value="16"/>
+        <Setter Property="Padding" Value="12"/>
+        <!-- The stack inside spans the tile, so its words wrap at the tile's edge rather than being cut there. -->
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="MinHeight" Value="112"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Stretch"/>
