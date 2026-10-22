@@ -76,12 +76,17 @@ public class InAppGuideClaimTests
     [Fact]
     public void TheQuickCleanTipDescribesWhatQuickCleanActuallyDoes()
     {
-        StillClaimed("One click deletes temporary files and tells you how many it removed.");
+        StillClaimed("Asks once, then deletes temporary files and tells you how many it removed. The Recycle Bin is left alone.");
 
         // "deletes temporary files": the command runs the temp-file cleaner, not some general optimiser. The
         // window allows for the confirmation it asks first.
         ShouldMatch(Dashboard, @"QuickCleanAsync[\s\S]{0,1000}?_tempFileCleaner\.CleanAsync",
             "the tip promises deletion, so the command has to be the one that deletes");
+
+        // "The Recycle Bin is left alone": the scan never pre-selects it, and CleanAsync cleans only what is selected.
+        ShouldMatch("src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs",
+            @"Category = CleanerCategory.RecycleBin,[\s\S]{0,600}?IsSelected = false",
+            "the tip promises the Recycle Bin is left, so the scan must not select it for a one-click clean");
 
         // "tells you how many it removed": the count is the only result the user is shown.
         ShouldMatch(Dashboard, @"QuickCleanAsync[\s\S]{0,1000}?ShowActionStatus\(\$""Cleaned \{cleaned\.FilesDeleted\}",

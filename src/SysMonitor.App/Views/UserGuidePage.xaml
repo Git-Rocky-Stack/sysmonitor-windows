@@ -59,7 +59,7 @@
                                 <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
                                            Foreground="{ThemeResource PlatinumBrush}">
                                     <Run FontWeight="SemiBold">Quick Clean</Run>
-                                    <Run> - One click deletes temporary files and tells you how many it removed.</Run>
+                                    <Run> - Asks once, then deletes temporary files and tells you how many it removed. The Recycle Bin is left alone.</Run>
                                 </TextBlock>
 
                                 <!-- Tip 3 -->
@@ -692,9 +692,7 @@
                                 <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{ThemeResource StateExecBrush}"/>
                                 <TextBlock Text="Changes since v3.0.1" FontSize="16" FontWeight="Bold"
                                            Foreground="{ThemeResource PlatinumBrush}"/>
-                                <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="4" Padding="8,2">
-                                    <TextBlock Text="LATEST" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
-                                </Border>
+                                <instruments:Chip State="Hold" Content="LATEST" VerticalAlignment="Center"/>
                             </StackPanel>
 
                             <TextBlock TextWrapping="Wrap" FontSize="12" Margin="16,0,0,0"
@@ -704,59 +702,70 @@
                             </TextBlock>
 
                             <StackPanel Spacing="8">
+                                <TextBlock Text="A new look: the Command Console" FontWeight="SemiBold" Foreground="{ThemeResource StateHoldBrush}"/>
+                                <StackPanel Spacing="4" Margin="16,0,0,0">
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> Every page opens on a view header, and every section is a faceplate whose stripe names it - CPU - CORE USAGE - 02B - so you can point to a section exactly</Run>
+                                    </TextBlock>
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> Buttons are machined caps; a red cap does something that cannot simply be undone. Day Shift is the light theme, Night Ops the dark, and High Contrast keeps your own colours</Run>
+                                    </TextBlock>
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> Every control has a name a screen reader can read, and section names are headings</Run>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Spacing="8">
                                 <TextBlock Text="Nothing is destroyed without asking" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}"/>
                                 <StackPanel Spacing="4" Margin="16,0,0,0">
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many items are involved and how much they hold. The button that does it is drawn in armed red and Cancel plain, and neither is the default, so Enter changes nothing and Escape cancels</Run>
+                                        <Run> Every red cap asks first and says what it will do; Browser Privacy names saved passwords and bookmarks before it deletes them. Neither button is the default, so Enter changes nothing and Escape cancels</Run>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> Large Files and Duplicate Finder never delete a file permanently. A file Windows cannot recycle, on a network or removable drive or larger than the Recycle Bin is set to hold, is left where it is, and the result says so</Run>
+                                        <Run> END TASK will not end a process Windows cannot run without</Run>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> The Drive Wiper's X removes a file from the list, and nothing on the page can change while a wipe runs</Run>
-                                    </TextBlock>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Spacing="8">
-                                <TextBlock Text="What the app reports is what happened" FontWeight="SemiBold" Foreground="{ThemeResource StateGoBrush}"/>
-                                <StackPanel Spacing="4" Margin="16,0,0,0">
-                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
-                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> The Drive Wiper shows the result of a wipe, including overwrites it could not read back</Run>
-                                    </TextBlock>
-                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
-                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> A missing temperature reads -- instead of 32F, sizes carry one unit, and the game overlay labels its Fahrenheit readings F</Run>
-                                    </TextBlock>
-                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
-                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> The Memory page reports what a trim did, in the Dashboard's words, and shows success only when the trim worked</Run>
-                                    </TextBlock>
-                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
-                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> Every CPU reading covers its reader's own interval, so two views reading at once no longer shorten each other's measurement</Run>
+                                        <Run> Large Files and Duplicate Finder send files to the Recycle Bin, never delete them outright</Run>
                                     </TextBlock>
                                 </StackPanel>
                             </StackPanel>
-
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Settings, fixes and a new look" FontWeight="SemiBold" Foreground="{ThemeResource StateHoldBrush}"/>
+                                <TextBlock Text="Tools touch only what they can prove" FontWeight="SemiBold" Foreground="{ThemeResource StateGoBrush}"/>
                                 <StackPanel Spacing="4" Margin="16,0,0,0">
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> The Microsoft Store build honours the Settings page: notifications, alert thresholds and minimize-to-tray used to be saved there and then ignored. The page says so when a save fails</Run>
+                                        <Run> The Registry Cleaner no longer lists working programs as broken; Quick Fix backs the registry up first</Run>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> Clicking a PDF page with the Sticky Note tool opens the note instead of closing the app</Run>
+                                        <Run> Cleaning never follows a shortcut folder out of the folder being cleaned, and never empties the Recycle Bin unless you tick it</Run>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
-                                        <Run> Text is set in Public Sans, and check boxes, switches, sliders, progress bars and scroll bars use System-X's armed red in place of the Windows accent colour: the first parts of a new look that matches System-X. High Contrast keeps your own colours</Run>
+                                        <Run> Backups keep every folder you add, even two with the same name, and never leave an unencrypted copy behind</Run>
+                                    </TextBlock>
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> A restore point, a free-space wipe or a PDF merge is reported as done only when it was</Run>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="One app, always watching" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}"/>
+                                <StackPanel Spacing="4" Margin="16,0,0,0">
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> Starting the app again brings back the window that is already open</Run>
+                                    </TextBlock>
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> Alerts fire whichever page is open, and with the window in the tray</Run>
                                     </TextBlock>
                                 </StackPanel>
                             </StackPanel>

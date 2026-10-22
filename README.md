@@ -11,7 +11,7 @@ A Windows system monitoring and optimization desktop application, built with Win
 and .NET 8. **Free and open source under the MIT License** - use it, read it, change
 it, ship it.
 
-![STX.1 System Monitor dashboard](App%20Screenshots/v%202.2.0.0%20%28Microsoft%20store%29/1.png)
+![STX.1 System Monitor - CPU Monitor in the Command Console look, Day Shift](App%20Screenshots/Command%20Console/cpu-monitor-day-shift.png)
 
 ---
 
@@ -25,47 +25,49 @@ feature was removed rather than reworded. See [CHANGELOG.md](CHANGELOG.md).
 
 ## What's new
 
-Changes since v3.0.1. Each one is described in full, with the file it lives in, in
-[CHANGELOG.md](CHANGELOG.md) under Unreleased.
+Changes since v3.0.1, planned as 3.1.0. Each one is described in full, with the file it
+lives in, in [CHANGELOG.md](CHANGELOG.md) under Unreleased.
 
-**A new look is on its way.** STX.1 is being restyled to match System-X, its sister app,
-so the two read as one family. The type comes first: text is now set in Public Sans,
-and the faces the rest of the look uses (Archivo, Departure Mono and Iosevka) ship with
-the app under the SIL Open Font License. The accent follows: check boxes, switches,
-radio buttons, sliders, progress bars, selections and scroll bars use System-X's armed
-red instead of whatever accent colour Windows is set to. High Contrast keeps your own
+**The Command Console look.** STX.1 now looks like System-X, its sister app, so the two read
+as one family. Every page opens on a bolted view header, and every section of a page is a
+brushed faceplate whose stripe names it - `CPU - CORE USAGE - 02B` - so a section can be
+pointed at in a support thread. Buttons are machined caps; the one that does something that
+cannot simply be undone is armed red. Readings sit in dark wells, conditions light lamps,
+and text is set in Public Sans, Archivo, Departure Mono and Iosevka, which ship with the
+app. Day Shift is the light theme and Night Ops the dark; High Contrast keeps your own
 colours.
 
-**Nothing is destroyed without asking.**
-- Drive Wiper's WIPE NOW and Large Files' DELETE SELECTED ask first, naming how many
-  items are involved and how much they hold. The button that does it is drawn in armed
-  red and Cancel plain, and neither is the default, so Enter changes nothing and Escape
-  cancels.
-- Large Files and Duplicate Finder never delete a file permanently. A file Windows
-  cannot recycle, on a network or removable drive or larger than the Recycle Bin is set
-  to hold, is left where it is, and the result says so. A file is only reported as moved
-  once it has been found in the Recycle Bin.
-- The Drive Wiper's X removes a file from the list, and nothing on the page can change
-  while a wipe runs.
+![Driver Updater in the Command Console look, Day Shift](App%20Screenshots/Command%20Console/driver-updater-day-shift.png)
 
-**What the app reports is what happened.**
-- The Drive Wiper shows the result of a wipe, including overwrites it could not read
-  back. Before, the result was replaced before it reached the screen.
-- A missing temperature reads `--` instead of a measured-looking 32F, sizes carry one
-  unit, and the game overlay labels its Fahrenheit readings F.
-- The Memory page reports what a trim did, in the Dashboard's words, and shows success
-  only when the trim worked.
-- Every CPU reading covers its reader's own interval, so two views reading at once no
-  longer shorten each other's measurement or report 0%.
+**Nothing is destroyed without asking.** Every armed cap asks first and says what it will
+do - Browser Privacy names saved passwords and Firefox bookmarks as unrecoverable before it
+deletes them, END TASK names the process, Directory Cleaner says when the Recycle Bin is
+included. No button is the default, so Enter changes nothing and Escape cancels. END TASK
+refuses the processes Windows cannot run without.
 
-**Settings are honoured everywhere.** The Microsoft Store (packaged) build saved the
-Settings page to a place the rest of the app never read, so turning notifications off,
-changing an alert threshold or turning minimize-to-tray off had no effect there. Both
-builds now keep every setting in one file, and the Settings page says so when a save
-fails.
+**Tools only touch what they can prove.**
+- The Registry Cleaner no longer flags working programs. It used to call every
+  MSI-installed program orphaned, because their uninstall command names `MsiExec.exe`
+  by bare name, and fixing that deleted the program's Uninstall entry.
+- Health Check's QUICK FIX backs up the registry first, and fixes only what is selected.
+- Cleans never follow a junction or symbolic link out of the folder being cleaned. They
+  remove only the folders they emptied, and never empty the Recycle Bin unless you tick it.
+- Backups keep every source, even two folders with the same name. They survive an
+  unreadable folder, copy `.git` and `Program Files`, never leave an unencrypted copy when
+  encryption fails, and retention never deletes the full backup later ones depend on.
 
-**Fixed:** clicking the PDF editor's page with the Sticky Note tool closed the app. It
-opens the note now.
+**What the app reports is what happened.** A restore point is reported only once Windows
+has actually made one. A free-space wipe that stopped short fails. A PDF merge refuses a
+file it cannot read rather than leaving it out. Unpacking never overwrites the file beside
+it. Freed space counts what was actually deleted.
+
+**One app, always watching.** A second launch brings back the running copy instead of
+starting another. Temperature, memory and battery alerts fire whichever page is open, and
+with the window in the tray. The monitoring pages stop sampling while the window is hidden.
+
+**Accessible.** Every control has a name a screen reader can read, section kickers are
+headings, text that carries meaning is at least 11 points, the window has a minimum size,
+and the PDF Editor's shortcuts work.
 
 ## Features
 
@@ -126,7 +128,8 @@ sit below the groups listed here.
 Listed because previous versions implied otherwise:
 
 - **No app-wide keyboard shortcuts.** The app registers no `KeyboardAccelerator`. The
-  only key handling is Delete, Escape and Enter inside the PDF editor.
+  only shortcuts are the PDF Editor's: Ctrl+O, S, P, Z and Y, a letter per annotation
+  tool, Delete and Escape.
 - **No PDF text extraction or search.** The PDF editor searches annotations, not page
   text, and its report export contains annotations rather than document text.
 - **No 7z or tar archives.** Compression is ZIP (file or folder) and GZip (`.gz`, a
@@ -222,13 +225,13 @@ SysMonitor.sln
 +-- src/SysMonitor.App/          # WinUI 3 front end (WinExe)
 |   +-- Views/                   # 35 XAML pages + the FPS overlay window
 |   +-- ViewModels/              # CommunityToolkit.Mvvm view models
-|   +-- Controls/Instruments/    # Console controls, starting with the dialog helper
+|   +-- Controls/Instruments/    # The console's instruments: faceplate, plate, well, lamp, chip, banner, dialog
 |   +-- Services/                # Tray icon and the FPS overlay
-|   +-- Helpers/                 # Dispatcher and PDF page rendering helpers
+|   +-- Helpers/                 # Dispatcher, PDF page rendering, the window's minimum size
 |   +-- Converters/              # Value converters
 |   +-- Diagnostics/             # The UI smoke run (--ui-smoke)
 |   +-- Assets/Fonts/            # The console typefaces and their licences
-|   \-- Styles/                  # Colors and styles; Console/ holds the faces, palette, text, controls and instruments
+|   \-- Styles/                  # Console/ holds the faces, palette (generated), text, controls and instruments
 |
 +-- src/SysMonitor.Core/         # Core library
 |   +-- Models/

@@ -1,25 +1,22 @@
-# Handoff - fields, buttons, page colours, headers, spinners, code colours and instruments are on the console
+# Handoff - the console look is complete, the audit is resolved, and the release is ready to cut
 
-**Date:** 2026-10-05
-**Branch:** `claude/peaceful-mendel-xkext6`, draft PR against `main`
-**Previous handoff:** the 2026-09-29 one (2F-2 closed, buttons waiting on a decision) is in git history at `3a659e0`.
+**Date:** 2026-10-22
+**Branch:** `claude/serene-albattani-lababk`, draft PR #98 against `main`
+**Previous handoff:** the 2026-10-05 one (fields, buttons, headers, lamp states, instruments) is in git history at `b9df9ce`.
 
 ---
 
 ## 0. Read this first
 
-1. **This session ran on Linux, so nothing WinUI was built or run here.** The Architecture suite (175 tests),
-   the token generator's `--check` and a Roslyn syntax parse of every changed C# file ran locally and pass.
-   The build, the full suite and the UI smoke run in both shifts are Windows CI's to answer
-   (`.github/workflows/windows-ci.yml`). Treat a red CI run on this branch as the first thing to read.
-2. **The direction changed mid-session.** The 2026-09-29 handoff left the 41 red buttons as ~10 product calls
-   for Rocky. He answered: buttons and everything else should match the System-X app. So the calls were made
-   by System-X's own rule (section 2.2), and the table is there to be overridden button by button.
-3. **The first CI run crashed the smoke run on the first number box**, and why matters beyond the fix: WinUI
-   declares a few resources with `x:Name`, which nothing outside its dictionary can find, and the vendored key
-   list counted them as provided. `scripts/list-winui-keys.py` now leaves them out, so ResourceKeyTests fails on
-   that class of mistake (section 2.4).
-4. **"Everything else" is bigger than one session**, and section 3 lists what is left, counted.
+1. **Linux session; Windows CI is the judge.** The Architecture suite (183 tests), the service tests that run
+   on Linux, `scripts/generate-tokens.py --check` and `docs/build-docs.py --check` ran here. The WinUI build,
+   the full suite (junction, registry and WMI tests included) and the UI smoke run in both themes are Windows
+   CI's; every pushed commit up to `5fda861` came back green or was superseded by one that did.
+2. **The version is still 3.0.1 on purpose.** The work is under CHANGELOG's Unreleased, planned as 3.1.0.
+   `docs/index.html` lists the SHA-256 of the published 3.0.1 files; a 3.1.0 page needs the checksums of files
+   that do not exist until the release is built. [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) is the cut.
+3. **Four audits were run** (architecture and lifetime, Core service safety, UI/UX and accessibility, QA and
+   release) and their confirmed findings are fixed, below. What was left, and why, is in section 3.
 
 ---
 
@@ -31,134 +28,75 @@ Tokens.xaml matches its generator.
 
 $ dotnet test tests/SysMonitor.Tests -p:EnableWindowsTargeting=true -p:Platform=x64 \
       --filter "FullyQualifiedName~SysMonitor.Tests.Architecture"
-Passed!  - Failed: 0, Passed: 175
+Passed!  - Failed: 0, Passed: 183
 ```
-
-The rest of the suite needs Windows (COM, `ping.exe`) and crashes the test host on Linux; CI runs it.
 
 ---
 
 ## 2. What was done
 
-### 2.1 Phase 2F-3: the field (`.field`, styles.css :2286)
+### 2.1 The look is complete (`559cfd0`, `5fda861`)
 
-- **TextBox, PasswordBox and NumberBox are recessed wells**, dark in both shifts
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:585`, `:788`, `:974`). WinUI's templates are kept part for
-  part; the colour states are the console's. Focused: armed edge and a 2px armed outline 1px off it, drawn by
-  the template on any focus. Header: the field label's values, pinned to `FieldLabelTextStyle` by a test.
-- **NumberBox** is re-templated only to point `InputBox` at `ConsoleFieldTextBoxStyle`; the field's template
-  carries NumberBox's spin-button states, so one template serves both. WinUI's theme dictionaries that
-  re-point the spinners were dropped (a theme dictionary belongs in a dictionary App.xaml merges itself), so
-  the inline spinners are WinUI's repeat buttons in the dark theme.
-- **ComboBox is deliberately not a field**: System-X gives `select` no `.field` rule, only the armed accent.
-- **Palette**: `FieldEdge`, `FieldLip`, `FieldForeground`, `FieldPlaceholder`, `FieldFaceBrush`,
-  `FieldShadeTopBrush`, and `ConsoleDisabledFieldForegroundBrush` - a locked field's words. The shared locked
-  word is `#2E2E2C` on Day Shift and would vanish into the well, so the field keeps its white there and is
-  GrayText in High Contrast (`scripts/generate-tokens.py:197`, `:311`, `:373`).
-- **Pages**: `SearchTextBoxStyle` (3), `Style="{StaticResource DefaultTextBoxStyle}"` (2) and ProcessesPage's
-  local brushes are gone; `InputFieldStyle` and `SearchTextBoxStyle` are deleted.
-- **Tests**: `tests/SysMonitor.Tests/Architecture/ConsoleFieldTests.cs` (parts, states, metrics, faces, focus,
-  label, the dark parts, NumberBox's single dimming, no page restyling a field). The locked rule admits the
-  field's twin only on `ContentElement.Foreground`; the presenter rule's exemption gains the three fields;
-  the cap rule reads only the dictionary's own styles, not the clear button inside the field.
-- **Smoke run**: `UiSmokeRun.CheckFieldsAsync` (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:806`) builds the
-  three in each shift, measures each well against the palette, focuses the text box and measures the armed
-  edge and outline. A refused focus is a note, not a failure. **Not yet run** - CI is its first run.
+- **Every major section is a `Faceplate`**, 106 across the pages plus Backup's status sidebar (15D). The stripe's
+  kicker is `<MODULE> - <SECTION> - <INDEX><LETTER>`, the module and index from the page's `ViewHeader`, letters in
+  document order, serial from `SerialFor`. `FaceplateKickerTests` holds it. Gated sections carry their gate on the
+  faceplate; footers stay on the chassis; a narrow stripe cuts its serial, not its kicker.
+- **Caps for tiles and icons**: `TileCapButtonStyle` (stack spans the tile, words wrap), `IconCapButtonStyle`,
+  `ArmedIconCapButtonStyle` (`src/SysMonitor.App/Styles/Console/Controls.xaml`). 28 hand-painted insets are `Well`s.
+- No XAML names a font family; the signature face is `SignatureInkFontFamily`, shared with the PDF renderer.
+- `SectionHeaderStyle` / `SectionHeaderWithAccentStyle` are deleted; `AccentBarStyle` remains for sub-headings
+  inside a panel (PDF Editor).
+- Network Mapper's columns are restacked; the PDF Editor is module 35 (its 25B collided with PDF Tools' 25B).
 
-### 2.2 The button migration
+### 2.2 Data safety (`6051e09`, `792cf18`)
 
-All 121 buttons on 28 pages that used `OutlinedButtonStyle`, `OutlineButtonStyle`, `RedButtonStyle` or
-`AccentButtonStyle`, and every hand-copied chrome bezel (55 on 24 pages), now take the caps. Local faces,
-radii, padding and heights that fought the cap were stripped; literal words were put in capitals. The legacy
-button styles, the bezel brushes and the primary button gradient are deleted, and the bezel ratchet is empty.
+Registry scan (bare names, unmounted drives, type-library versions), Quick Fix backup-first, temp/browser cleans
+that never follow junctions and remove only emptied folders, Recycle Bin opt-in, backups (source folders, whole-
+folder matching, unreadable folders, `.git`, encryption leftovers, retention), restore points (listed, confirmed),
+free-space wipe (FAT32, shortfall), PDF merge, unpack without overwrite, Browser Privacy (freed bytes, SQLite
+sidecars, Firefox cache and profile, bookmarks at high risk), 32-bit startup entries, used-space. Each is in
+CHANGELOG with its file; tests are in `tests/SysMonitor.Tests/Services/` (`HealthQuickFixTests`,
+`FileToolsOutputTests`, `BackupServiceUncompressedTests`, `RegistryComScanTests`, `FileScanningTests`).
 
-**Armed** (cannot simply be undone): WIPE NOW, both DELETE SELECTED, END TASK, Startup DELETE, both CLEAN
-SELECTED, QUICK CLEAN, FIX SELECTED, Scheduled Cleaning DELETE TASK, Settings CLEAR (all data) and RESET TO
-DEFAULTS.
+### 2.3 Confirmation (`7e085e8`)
 
-**Chrome** (the page's one call to action): SCAN on Bluetooth, Driver Updater, Wi-Fi and Network Mapper; the
-scans on Duplicate Finder and Large Files; RUN HEALTH CHECK; TRIM MEMORY on the Memory page; COMPRESS on File
-Tools and Image Tools; DONATE WITH PAYPAL; START BACKUP; the Performance monitoring toggle; the Game Mode
-toggle; the PDF editor's empty-state OPEN PDF.
+A view model asks through `Confirmation` (`src/SysMonitor.App/ViewModels/Confirmation.cs`); its page wires it to
+`ConsoleDialog.ConfirmAsync`; an unwired one answers no. `ArmedActionConfirmationTests` checks both ends. Dialog
+buttons read in capitals. END TASK refuses Windows' own processes and reports the outcome.
 
-**Plain**: everything else, including Next/Back/Done, REFRESH, SAVE SETTINGS, SCAN PORTS, the PDF operations.
+### 2.4 Lifetime and navigation (`82cf47a`, `957d310`)
 
-**Backup's tiles** - the three quick-action tiles, four backup types and the drive picker - are card-like
-buttons. They keep the cap face with their own padding, icon sizes, and their descriptions as Public Sans
-prose in silver mute. They are really pressable plates (`.plate-hit`, :1231), which `Plate` already draws but
-is not a Button; moving them onto it means re-wiring their Click handlers.
+Single instance (`App.HandedToRunningCopyAsync`), alerts from `TrayIconService`, `HistoryService.Dispose` idempotent,
+refresh loops not started after dispose, the rail following the frame, watch-only pages parked while hidden, the
+window's minimum size (`Helpers/WindowMinimumSize.cs`), status lines that keep failures.
 
-### 2.3 Cleanups found on the way
+### 2.5 Accessibility and polish (`957d310`)
 
-Stale comments in `Controls.xaml` (the cap's disabled note still said Graphite; the switch said it used the
-reposition animation; two comments named a `ConsoleSwitch` class that does not exist), a stale duplicate
-summary and broken indentation in `UiSmokeRun.cs`, a CS0162 warning in `ConsolePinAnchorTests.cs`, and 22
-CHANGELOG anchors re-pointed through a line diff after the pages moved.
+Accessible names on every unlabelled input, result checkbox and icon cap; kickers as headings; text >= 11;
+empty states on Large Files and Duplicate Finder; Startup's actions wait for a selection; PDF Editor shortcuts.
 
-### 2.4 The pages: styles, colours, headers, spinners
+### 2.6 Release and docs (`cec4a1f`, this commit)
 
-- **Styles.xaml is a bridge.** Every name a page still asks for maps onto the console: `PageHeaderStyle` the
-  view title, `SectionHeaderStyle` a placard beside the plate's armed light pipe,
-  labels and values the kicker and telemetry faces, progress bars a well with an LED. Twenty unused styles and
-  all of `Colors.xaml` are deleted.
-- **1,016 legacy brush references** moved to `{ThemeResource}` tokens by role (words: Platinum, Silver, Silver
-  Mute, ArmedLit, the State colours; surfaces: the carbon ramp; status fills: the rails).
-- **All 35 pages open on `ViewHeader`**, numbered by the rail: Dashboard `MOD - DASH - 01` to User's Guide
-  `34`, PDF Editor `25B`. The per-page logo is gone; System-X's header has none. Scan/stop caps that lived in a
-  banner are its Actions.
-- **Hardcoded colours** are tokens by role; words on a status fill are `ArmedFgBrush` (HighlightText on the
-  Highlight the rails become in High Contrast). The colour ratchet is down from 39 files to 3, each kept as data:
-  PDF Editor's ink swatches, PayPal's blue, and the FPS overlay.
-- **No ProgressRing remains.** Loading and scanning regions are `BusyWell`s carrying their status line; rings
-  beside an action are a small armed `EXEC` lamp. The ratchet is empty.
-- **MainWindow**: the title bar stays black on Void and asks for the dark theme; the rail's three backgrounds
-  moved into FluentOverrides, written per shift.
-- **The resource check now knows `x:Name` from `x:Key`** (`scripts/list-winui-keys.py:75`); nine names left the
-  list, and NumberBox restates WinUI's two spin button styles where its buttons can reach them.
-
-### 2.5 Code colours are lamp states
-
-Services and view models carry a `LampState` beside each status word instead of a Material hex string;
-pages colour by state with `StateBrush` (`src/SysMonitor.App/Controls/Instruments/StateBrush.cs:30`), which reads
-the palette through `ConsolePalette` for the element's own shift, High Contrast included. Words take the State
-colours, fills the rails, washes the soft tints. Category colours are removed; Game Mode on is armed. The four
-hex/bool brush converters are replaced by one `BoolToLampStateConverter`. Guarded by `ConsoleStateBrushTests` and
-the smoke run's `CheckStateBrushAsync`. Mappings that follow the old colour over the word, worth a look: driver
-code 45 "Disconnected" is Off and 51 "Unknown Problem" NoGo; a disk at 50-75% reads "Normal" on a Hold lamp; an
-unplugged battery is NoGo.
-
-### 2.6 Instruments
-
-- **Cards are `Plate`s.** All 199 `CardStyle`/`StatCardStyle`/`PremiumStatCardStyle`/`HeroStatCardStyle` Borders
-  on 34 pages are `instruments:Plate`, which draws the lip, the shade and the `0 1px 2px` shadow a Border could
-  not. Each keeps the old style's padding (16, 20 premium, 24 hero) and stat minimums, and stretches its content
-  vertically as the Border did; Background, BorderBrush, BorderThickness and CornerRadius overrides were dropped,
-  since the plate draws its own. The four styles are deleted. Plates carry no `State` yet: a card whose whole
-  subject has a condition could light its rail.
-- **Dots are `LedDot`s** (18), **badges are `Chip`s** (9, words through `UpperCaseConverter`, or
-  `BoolToWordConverter` for a yes or no), and **result toasts are `Banner`s** (Backup, PDF Editor, PDF Tools,
-  Network Mapper).
-- **Performance** said "Status: Pause" in green while monitoring. It is now a MONITORING/PAUSED chip (Go/Hold) beside
-  a PAUSE/RESUME cap; `BoolToMonitoringTextConverter` is a `BoolToWordConverter` instance.
+Setup's `MinVersion`, manifest PhoneIdentity removed and `MaxVersionTested` 26100, build date stamped in the
+assembly, smoke run failing on binding failures and unhandled exceptions (the last run had none), unused installer
+readmes removed. Docs: README, FEATURES_AND_USER_GUIDE, docs/*.md, the in-app guide's "Changes since v3.0.1",
+PRIVACY_POLICY (network activity, browser profiles, Wi-Fi, where data lives), and two new files:
+[UAT_TEST_PLAN.md](UAT_TEST_PLAN.md) and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
 
 ---
 
-## 3. What is left to match System-X, counted
+## 3. Left, and why
 
-| Surface | Left | Where it is tracked |
+| Item | Why it is not done | Where it is tracked |
 |---|---|---|
-| Colour strings in code | 2 files, both PDF annotation colours (document data, kept on purpose) | `ConsoleRecipeTests.CodeColourLiterals` |
-| Font names in XAML | 7 files | `ConsoleRecipeTests.FontFamilyLiterals` |
-| Major sections as `Faceplate`s (bolts, stripe, deep shadow) rather than `Plate`s; plates lit by `State` | every page that groups plates under a heading | not tracked |
-| Card-like and icon buttons with local overrides | Backup tiles and history icons, Driver Updater quick actions, Installed Programs row icons, Registry Cleaner's folder icon | not tracked |
-| CheckBox, RadioButton, Slider, ComboBox | System-X gives them only the armed accent, which FluentOverrides applies: nothing more to transcribe | - |
-| Excellent and Good thresholds share one green | Performance and User's Guide legends | not tracked |
-| `saturate(.5)` on locked controls; NumberBox spinners as caps | not drawn | Controls.xaml comments |
-
-Cards, dots, badges and toasts are instruments (section 2.6). The next step with the most reach is the
-faceplates: System-X groups a view's plates under faceplates with bolts and a stripe, where the pages still set a
-section header over loose plates. After that, the seven files that still name a font family, and the card-like
-buttons on Backup and Driver Updater.
+| Cut 3.1.0 | Needs the built files' checksums for `docs/index.html` | RELEASE_CHECKLIST.md 2-4 |
+| Store screenshots in the new look | Need real hardware; CI's VM has no sensors | RELEASE_CHECKLIST.md 5 |
+| One product name (STX-1 ULTIMATE / STX.1 / STX1) and one publisher | A brand decision | RELEASE_CHECKLIST.md 5 |
+| Stray non-app files (`App Bundle/*.aab`, `v.2.0.1 Exec/`, ...) | Owner's files; confirm before removing | RELEASE_CHECKLIST.md, housekeeping |
+| x86 / ARM64 and the MSIX build in CI | CI builds x64 unpackaged only | not tracked |
+| `saturate(.5)` on locked controls; NumberBox spinners as caps | Template work with no user-visible defect | Controls.xaml comments |
+| ElevatedRegistryHelper's result file in a user-writable folder | Plausible, not verified: needs a pipe instead of a file | audit note, not tracked |
+| Game Mode restores priorities by process ID | Plausible: an ID can be reused before restore | audit note, not tracked |
 
 ---
 
@@ -168,6 +106,7 @@ buttons on Backup and Driver Updater.
 dotnet build SysMonitor.sln -c Debug -p:Platform=x64
 dotnet test
 python scripts/generate-tokens.py --check
+python docs/build-docs.py --check
 dotnet run --project src/SysMonitor.App -- --ui-smoke <folder>
 ```
 

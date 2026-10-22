@@ -1,93 +1,102 @@
 # Privacy Policy
 
-**STX-1 ULTIMATE System Monitor**
+**STX-1 ULTIMATE System Monitor** (also published as STX.1 System Monitor)
 **Effective Date:** January 3, 2026
-**Last Updated:** January 3, 2026
+**Last Updated:** October 22, 2026
 
 ## Overview
 
-STX-1 ULTIMATE System Monitor ("the App") is developed by Rocky Stack.
-This Privacy Policy explains how we handle information when you use our Windows desktop application.
+STX-1 ULTIMATE System Monitor ("the App") is developed by Rocky Stack and published in the
+Microsoft Store by Strategia-X. This policy explains what the App reads, what it keeps, and
+what - if anything - leaves your computer. It describes the code as it is; where a statement
+can be checked, it says where.
 
-## Data Collection
+## In short
 
-### What We Collect
+- **Nothing about you or your computer is sent to the developer or to anyone else.** The App
+  has no account, no analytics, no telemetry, no advertising and no crash reporting.
+- **It needs no internet connection.** The only network activity is on your own network, and
+  only when you start it (see "Network activity" below).
+- **Everything it keeps stays in folders on your computer**, which you can delete.
 
-**The App does NOT collect, transmit, or share any personal data.** All data processed by the App remains entirely on your local device.
+## What the App reads, on your computer
 
-The App monitors and displays the following system information locally:
-- CPU usage, temperature, and specifications
-- GPU usage, temperature, and specifications
-- Memory (RAM) usage statistics
-- Disk usage and storage information
-- Network adapter information and usage statistics
-- Battery status (on applicable devices)
-- Running processes and startup programs
-- System hardware specifications
+To show and maintain your system, the App reads locally:
 
-### Local Data Storage
+- Processor, graphics, memory, disk, battery and temperature readings, through Windows and
+  the LibreHardwareMonitor library
+- Network adapters and their throughput
+- Running processes, startup entries, installed programs and device drivers
+- The registry keys the Registry Cleaner and Startup pages inspect
+- Files and folders you point it at (Large Files, Duplicate Finder, File Tools, PDF Tools,
+  Image Tools, Backup, Drive Wiper), and the temporary and cache folders Directory Cleaner
+  scans
+- **Browser profiles**, when you open Browser Privacy: the folders where Chrome, Edge,
+  Firefox, Brave, Opera and Vivaldi keep their cache, cookies, history, form data and saved
+  passwords. The App reads their sizes to show them. It deletes only what you select, after
+  you confirm; it never reads the contents of your passwords, history or cookies
+- **Nearby Wi-Fi networks** (names, signal, channel and security, through Windows' `netsh`),
+  when you open the WiFi Analyzer. On Windows 11 this can require location permission, which
+  Windows asks for; the App does not read or store your location
+- **Nearby Bluetooth devices** (names and signal), when you open Bluetooth
 
-The App stores the following data locally on your device:
-- **Historical metrics database** (SQLite) - Stored in `%LocalAppData%\SysMonitor\`
-- **Application settings and preferences** - Stored locally
-- **Log files** - Stored in `%LocalAppData%\SysMonitor\Logs\`
+None of this is sent anywhere.
 
-This data never leaves your device and is not transmitted to any external servers.
+## Network activity
 
-## Data Sharing
+The App makes no connection to the internet of its own. On your local network, and only
+when you press SCAN on the Network Mapper, it:
 
-**We do not share any data with third parties.** The App:
-- Does NOT transmit data to external servers
-- Does NOT include analytics or telemetry
-- Does NOT include advertising
-- Does NOT require an internet connection to function
-- Does NOT access cloud services
+- pings the addresses on the subnet you choose, to find which devices answer, and
+- tries a short list of common ports on a device you select, to show which services it offers
 
-## Third-Party Services
+To pick the adapter that carries your traffic, the Network page asks Windows which interface
+it would route a public address through; this is a question to Windows, and sends no packet.
 
-The App does not integrate with any third-party services that collect user data.
+The **Donate** page opens PayPal's donation page in your web browser when you press it, and
+the Driver Updater can open Windows Update; what those sites and apps do is governed by their
+own policies.
 
-## Data Security
+## What the App keeps, and where
 
-All data remains on your local device under your control. The App:
-- Stores data only in standard Windows application data directories
-- Does not require network permissions for core functionality
-- Allows you to delete all stored data by uninstalling the App or manually removing the `%LocalAppData%\SysMonitor\` folder
+| What | Where |
+|---|---|
+| Settings | `%LocalAppData%\SysMonitor\settings.json` (for the Microsoft Store build, Windows keeps this folder inside the App's own package data) |
+| History of readings for the History page, kept 30 days | A SQLite database under `%LocalAppData%\SysMonitor\` |
+| Logs, for troubleshooting | `%LocalAppData%\SysMonitor\Logs\` |
+| Registry backups taken before the Registry Cleaner changes anything | `%LocalAppData%\SysMonitor\RegistryBackups\` |
+| Reports you export | Dashboard EXPORT: your Documents folder. Performance EXPORT CSV: your Desktop. Driver Updater: where you choose. The App names the file it wrote |
+| Backups you make | The destination you choose. Encrypted backups use AES-256 with a key derived from your password, which the App does not store |
 
-## System Permissions
+Logs record what the App did and any errors, with file paths where an operation failed. They
+do not record passwords, browser data or file contents.
 
-The App requests the following permissions to function:
-- **Administrator access** (optional) - Required for complete hardware temperature monitoring and certain optimization features
-- **File system access** - Required for disk analysis, file cleaning, and large file finder features
-- **Process management** - Required for viewing and managing running processes
+## Your control
 
-## Children's Privacy
+- Settings' CLEAR resets every setting.
+- Deleting `%LocalAppData%\SysMonitor\` removes everything the App keeps; uninstalling
+  removes the App.
+- Exports and backups are ordinary files you can delete.
 
-The App does not knowingly collect any information from children under 13 years of age, as it does not collect any personal information from any users.
+## Permissions
 
-## Changes to This Policy
+The App runs as an ordinary user. A few actions ask Windows for administrator permission when
+you start them: changing machine-wide registry keys or startup entries, creating a restore
+point, and some hardware sensors. The Microsoft Store build declares the "full trust"
+capability because it is a desktop application that reads hardware and manages files.
 
-We may update this Privacy Policy from time to time. Any changes will be posted to this repository with an updated "Last Updated" date.
+## Children's privacy
 
-## Your Rights
+The App collects no personal information from anyone, including children under 13.
 
-Since no personal data is collected or transmitted, there is no personal data to access, modify, or delete from our systems. All data created by the App is stored locally on your device and can be deleted by:
-1. Uninstalling the application
-2. Manually deleting the `%LocalAppData%\SysMonitor\` folder
+## Changes to this policy
+
+Changes are published in this repository with a new "Last Updated" date.
 
 ## Contact
 
-If you have questions about this Privacy Policy, please contact us through:
-- **GitHub Issues:** [https://github.com/Git-Rocky-Stack/sysmonitor-windows/issues](https://github.com/Git-Rocky-Stack/sysmonitor-windows/issues)
-
-## Summary
-
-- **Data Collected:** None transmitted externally; local system metrics only
-- **Data Shared:** None
-- **Data Sold:** None
-- **Tracking:** None
-- **Analytics:** None
+GitHub Issues: [https://github.com/Git-Rocky-Stack/sysmonitor-windows/issues](https://github.com/Git-Rocky-Stack/sysmonitor-windows/issues)
 
 ---
 
-*This privacy policy applies to STX-1 ULTIMATE System Monitor for Windows.*
+*This privacy policy applies to STX-1 ULTIMATE System Monitor (STX.1 System Monitor) for Windows.*
