@@ -43,7 +43,7 @@ The rest of the suite needs Windows (COM, `ping.exe`) and crashes the test host 
 ### 2.1 Phase 2F-3: the field (`.field`, styles.css :2286)
 
 - **TextBox, PasswordBox and NumberBox are recessed wells**, dark in both shifts
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:553`, `:756`, `:942`). WinUI's templates are kept part for
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:583`, `:786`, `:972`). WinUI's templates are kept part for
   part; the colour states are the console's. Focused: armed edge and a 2px armed outline 1px off it, drawn by
   the template on any focus. Header: the field label's values, pinned to `FieldLabelTextStyle` by a test.
 - **NumberBox** is re-templated only to point `InputBox` at `ConsoleFieldTextBoxStyle`; the field's template

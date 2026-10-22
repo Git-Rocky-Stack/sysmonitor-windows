@@ -23,149 +23,149 @@
             <StackPanel Spacing="16" Padding="0,0,16,0">
 
                 <!-- Enable/Disable Card -->
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="SCHEDULE STATUS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="SCHED - SCHEDULE STATUS - 14A" Serial="{instruments:SerialFor Module=SCHED-SCHEDULE-STATUS}">
+                    <StackPanel Spacing="16">
 
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                            <FontIcon Glyph="&#xE823;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
+                                <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
+                                    <FontIcon Glyph="&#xE823;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
 
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Automatic Scheduled Cleaning" Style="{StaticResource CardTitleStyle}"/>
-                            <StackPanel Orientation="Horizontal" Spacing="24" Margin="0,4,0,0">
-                                <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                    <Run Text="Next run: "/>
-                                    <Run Text="{x:Bind ViewModel.NextRunTime, Mode=OneWay}" Foreground="{ThemeResource StateGoBrush}"/>
-                                </TextBlock>
-                                <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                    <Run Text="Last run: "/>
-                                    <Run Text="{x:Bind ViewModel.LastRunTime, Mode=OneWay}"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Automatic Scheduled Cleaning" Style="{StaticResource CardTitleStyle}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="24" Margin="0,4,0,0">
+                                        <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                            <Run Text="Next run: "/>
+                                            <Run Text="{x:Bind ViewModel.NextRunTime, Mode=OneWay}" Foreground="{ThemeResource StateGoBrush}"/>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                            <Run Text="Last run: "/>
+                                            <Run Text="{x:Bind ViewModel.LastRunTime, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
 
-                        <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}"
-                                      OnContent="Enabled" OffContent="Disabled"/>
-                    </Grid>
-                </instruments:Plate>
+                                <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}"
+                                              OnContent="Enabled" OffContent="Disabled"/>
+                            </Grid>
+                        </instruments:Plate>
+                    </StackPanel>
+                </instruments:Faceplate>
 
                 <!-- Schedule Settings -->
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="SCHEDULE SETTINGS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
-
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                <instruments:Faceplate Kicker="SCHED - SCHEDULE SETTINGS - 14B" Serial="{instruments:SerialFor Module=SCHED-SCHEDULE-SETTINGS}">
                     <StackPanel Spacing="16">
-                        <!-- Schedule Type -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Schedule Type:" VerticalAlignment="Center"
-                                       Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.ScheduleOptions}"
-                                      SelectedValue="{x:Bind ViewModel.SelectedSchedule, Mode=TwoWay}"
-                                      SelectedValuePath="Schedule" DisplayMemberPath="Name"
-                                      HorizontalAlignment="Stretch"/>
-                        </Grid>
 
-                        <!-- Day of Week (for Weekly) -->
-                        <Grid Visibility="{x:Bind ViewModel.SelectedSchedule, Mode=OneWay, Converter={StaticResource ScheduleToVisibilityConverter}, ConverterParameter=Weekly}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Day of Week:" VerticalAlignment="Center"
-                                       Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfWeek}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedDayOfWeek, Mode=TwoWay}"
-                                      HorizontalAlignment="Stretch"/>
-                        </Grid>
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="16">
+                                <!-- Schedule Type -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Schedule Type:" VerticalAlignment="Center"
+                                               Foreground="{ThemeResource SilverBrush}"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.ScheduleOptions}"
+                                              SelectedValue="{x:Bind ViewModel.SelectedSchedule, Mode=TwoWay}"
+                                              SelectedValuePath="Schedule" DisplayMemberPath="Name"
+                                              HorizontalAlignment="Stretch"/>
+                                </Grid>
 
-                        <!-- Day of Month (for Monthly) -->
-                        <Grid Visibility="{x:Bind ViewModel.SelectedSchedule, Mode=OneWay, Converter={StaticResource ScheduleToVisibilityConverter}, ConverterParameter=Monthly}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Day of Month:" VerticalAlignment="Center"
-                                       Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfMonth}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedDayOfMonth, Mode=TwoWay}"
-                                      HorizontalAlignment="Stretch"/>
-                        </Grid>
+                                <!-- Day of Week (for Weekly) -->
+                                <Grid Visibility="{x:Bind ViewModel.SelectedSchedule, Mode=OneWay, Converter={StaticResource ScheduleToVisibilityConverter}, ConverterParameter=Weekly}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Day of Week:" VerticalAlignment="Center"
+                                               Foreground="{ThemeResource SilverBrush}"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfWeek}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedDayOfWeek, Mode=TwoWay}"
+                                              HorizontalAlignment="Stretch"/>
+                                </Grid>
 
-                        <!-- Time -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Time:" VerticalAlignment="Center"
-                                       Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.Hours}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedHour, Mode=TwoWay}"
-                                      Width="80"/>
-                            <TextBlock Grid.Column="2" Text=":" VerticalAlignment="Center" Margin="8,0"/>
-                            <ComboBox Grid.Column="3" ItemsSource="{x:Bind ViewModel.Minutes}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedMinute, Mode=TwoWay}"
-                                      Width="80"/>
-                        </Grid>
+                                <!-- Day of Month (for Monthly) -->
+                                <Grid Visibility="{x:Bind ViewModel.SelectedSchedule, Mode=OneWay, Converter={StaticResource ScheduleToVisibilityConverter}, ConverterParameter=Monthly}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Day of Month:" VerticalAlignment="Center"
+                                               Foreground="{ThemeResource SilverBrush}"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfMonth}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedDayOfMonth, Mode=TwoWay}"
+                                              HorizontalAlignment="Stretch"/>
+                                </Grid>
+
+                                <!-- Time -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Time:" VerticalAlignment="Center"
+                                               Foreground="{ThemeResource SilverBrush}"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.Hours}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedHour, Mode=TwoWay}"
+                                              Width="80"/>
+                                    <TextBlock Grid.Column="2" Text=":" VerticalAlignment="Center" Margin="8,0"/>
+                                    <ComboBox Grid.Column="3" ItemsSource="{x:Bind ViewModel.Minutes}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedMinute, Mode=TwoWay}"
+                                              Width="80"/>
+                                </Grid>
+                            </StackPanel>
+                        </instruments:Plate>
                     </StackPanel>
-                </instruments:Plate>
+                </instruments:Faceplate>
 
                 <!-- What to Clean -->
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="WHAT TO CLEAN" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="SCHED - WHAT TO CLEAN - 14C" Serial="{instruments:SerialFor Module=SCHED-WHAT-TO-CLEAN}">
+                    <StackPanel Spacing="16">
 
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                    <StackPanel Spacing="12">
-                        <CheckBox Content="Temporary Files" IsChecked="{x:Bind ViewModel.CleanTempFiles, Mode=TwoWay}"/>
-                        <CheckBox Content="Browser Cache" IsChecked="{x:Bind ViewModel.CleanBrowserCache, Mode=TwoWay}"/>
-                        <CheckBox Content="Recycle Bin" IsChecked="{x:Bind ViewModel.CleanRecycleBin, Mode=TwoWay}"/>
-                        <CheckBox Content="Windows Update Cache" IsChecked="{x:Bind ViewModel.CleanWindowsUpdateCache, Mode=TwoWay}">
-                            <ToolTipService.ToolTip>
-                                <ToolTip Content="May require administrator privileges"/>
-                            </ToolTipService.ToolTip>
-                        </CheckBox>
-                        <CheckBox Content="Thumbnail Cache" IsChecked="{x:Bind ViewModel.CleanThumbnailCache, Mode=TwoWay}"/>
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="12">
+                                <CheckBox Content="Temporary Files" IsChecked="{x:Bind ViewModel.CleanTempFiles, Mode=TwoWay}"/>
+                                <CheckBox Content="Browser Cache" IsChecked="{x:Bind ViewModel.CleanBrowserCache, Mode=TwoWay}"/>
+                                <CheckBox Content="Recycle Bin" IsChecked="{x:Bind ViewModel.CleanRecycleBin, Mode=TwoWay}"/>
+                                <CheckBox Content="Windows Update Cache" IsChecked="{x:Bind ViewModel.CleanWindowsUpdateCache, Mode=TwoWay}">
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="May require administrator privileges"/>
+                                    </ToolTipService.ToolTip>
+                                </CheckBox>
+                                <CheckBox Content="Thumbnail Cache" IsChecked="{x:Bind ViewModel.CleanThumbnailCache, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </instruments:Plate>
                     </StackPanel>
-                </instruments:Plate>
+                </instruments:Faceplate>
 
                 <!-- Options -->
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="OPTIONS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="SCHED - OPTIONS - 14D" Serial="{instruments:SerialFor Module=SCHED-OPTIONS}">
+                    <StackPanel Spacing="16">
 
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                    <StackPanel Spacing="12">
-                        <CheckBox Content="Show notification when cleaning completes"
-                                  IsChecked="{x:Bind ViewModel.ShowNotification, Mode=TwoWay}"/>
-                        <CheckBox Content="Only run when system is idle"
-                                  IsChecked="{x:Bind ViewModel.OnlyWhenIdle, Mode=TwoWay}"/>
-                        <CheckBox Content="Wake computer to run scheduled task"
-                                  IsChecked="{x:Bind ViewModel.WakeToRun, Mode=TwoWay}"/>
-                        <CheckBox Content="Run missed schedule as soon as possible"
-                                  IsChecked="{x:Bind ViewModel.RunMissedSchedule, Mode=TwoWay}"/>
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="12">
+                                <CheckBox Content="Show notification when cleaning completes"
+                                          IsChecked="{x:Bind ViewModel.ShowNotification, Mode=TwoWay}"/>
+                                <CheckBox Content="Only run when system is idle"
+                                          IsChecked="{x:Bind ViewModel.OnlyWhenIdle, Mode=TwoWay}"/>
+                                <CheckBox Content="Wake computer to run scheduled task"
+                                          IsChecked="{x:Bind ViewModel.WakeToRun, Mode=TwoWay}"/>
+                                <CheckBox Content="Run missed schedule as soon as possible"
+                                          IsChecked="{x:Bind ViewModel.RunMissedSchedule, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </instruments:Plate>
                     </StackPanel>
-                </instruments:Plate>
+                </instruments:Faceplate>
 
             </StackPanel>
         </ScrollViewer>

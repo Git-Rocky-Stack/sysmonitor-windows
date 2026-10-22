@@ -68,7 +68,7 @@
                                 <TextBlock x:Name="FpsText" Grid.Column="1"
                                            Text="---"
                                            FontSize="32" FontWeight="Black"
-                                           FontFamily="Consolas"
+                                           FontFamily="{StaticResource ConsoleTelemetryFontFamily}"
                                            HorizontalAlignment="Center">
                                     <TextBlock.Foreground>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -146,7 +146,7 @@
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock x:Name="CpuTempText" Text="--"
                                                FontSize="10" FontWeight="SemiBold"
-                                               Foreground="#FFFFA500" FontFamily="Consolas"/>
+                                               Foreground="#FFFFA500" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"/>
                                     <TextBlock Text="F" FontSize="8" Foreground="#80FFA500"
                                                VerticalAlignment="Top" Margin="1,1,0,0"/>
                                 </StackPanel>
@@ -188,7 +188,7 @@
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock x:Name="GpuTempText" Text="--"
                                                FontSize="10" FontWeight="SemiBold"
-                                               Foreground="#FF00BFFF" FontFamily="Consolas"/>
+                                               Foreground="#FF00BFFF" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"/>
                                     <TextBlock Text="F" FontSize="8" Foreground="#8000BFFF"
                                                VerticalAlignment="Top" Margin="1,1,0,0"/>
                                 </StackPanel>
@@ -230,7 +230,7 @@
                                 <TextBlock x:Name="RamText" Grid.Column="2"
                                            Text="--/-- GB"
                                            FontSize="9" FontWeight="SemiBold"
-                                           Foreground="#FFDA70D6" FontFamily="Consolas"
+                                           Foreground="#FFDA70D6" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"
                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
                             </Grid>
 
@@ -270,7 +270,7 @@
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock x:Name="PowerText" Text="--"
                                                FontSize="10" FontWeight="SemiBold"
-                                               Foreground="#FF00FFFF" FontFamily="Consolas"/>
+                                               Foreground="#FF00FFFF" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"/>
                                     <TextBlock Text="W" FontSize="8" Foreground="#8000FFFF"
                                                VerticalAlignment="Top" Margin="1,1,0,0"/>
                                 </StackPanel>
@@ -306,7 +306,7 @@
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBlock x:Name="FanText" Text="----"
                                                FontSize="10" FontWeight="SemiBold"
-                                               Foreground="#FF98FB98" FontFamily="Consolas"/>
+                                               Foreground="#FF98FB98" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"/>
                                     <TextBlock Text="RPM" FontSize="6" Foreground="#8098FB98"
                                                VerticalAlignment="Bottom" Margin="2,0,0,1"/>
                                 </StackPanel>

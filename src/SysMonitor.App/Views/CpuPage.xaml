@@ -15,256 +15,256 @@
                                     Description="Real-time processor analytics"/>
 
             <!-- Overall CPU Usage Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="PROCESSOR USAGE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="CPU - PROCESSOR USAGE - 02A" Serial="{instruments:SerialFor Module=CPU-PROCESSOR-USAGE}">
+                <StackPanel Spacing="16">
 
-            <!-- Total CPU Usage Card -->
-            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Total CPU Usage Card -->
+                    <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- CPU Icon and Name -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <Border Style="{StaticResource IconContainerRedStyle}" Width="64" Height="64" CornerRadius="12">
-                            <FontIcon Glyph="&#xE950;" FontSize="32" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                    </StackPanel>
+                            <!-- CPU Icon and Name -->
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <Border Style="{StaticResource IconContainerRedStyle}" Width="64" Height="64" CornerRadius="12">
+                                    <FontIcon Glyph="&#xE950;" FontSize="32" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                            </StackPanel>
 
-                    <!-- CPU Info -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
-                        <TextBlock Text="{x:Bind ViewModel.CpuName, Mode=OneWay}"
-                                   Style="{StaticResource MenuItemTextStyle}" FontSize="16"
-                                   TextWrapping="Wrap" MaxWidth="400"/>
-                        <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
-                            <Run Text="{x:Bind ViewModel.PhysicalCores, Mode=OneWay}"/>
-                            <Run Text="Cores |"/>
-                            <Run Text="{x:Bind ViewModel.LogicalProcessors, Mode=OneWay}"/>
-                            <Run Text="Threads |"/>
-                            <Run Text="{x:Bind ViewModel.Architecture, Mode=OneWay}"/>
-                        </TextBlock>
-                    </StackPanel>
+                            <!-- CPU Info -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
+                                <TextBlock Text="{x:Bind ViewModel.CpuName, Mode=OneWay}"
+                                           Style="{StaticResource MenuItemTextStyle}" FontSize="16"
+                                           TextWrapping="Wrap" MaxWidth="400"/>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
+                                    <Run Text="{x:Bind ViewModel.PhysicalCores, Mode=OneWay}"/>
+                                    <Run Text="Cores |"/>
+                                    <Run Text="{x:Bind ViewModel.LogicalProcessors, Mode=OneWay}"/>
+                                    <Run Text="Threads |"/>
+                                    <Run Text="{x:Bind ViewModel.Architecture, Mode=OneWay}"/>
+                                </TextBlock>
+                            </StackPanel>
 
-                    <!-- Usage Display -->
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                        <TextBlock Text="TOTAL USAGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Right"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock Text="{x:Bind ViewModel.TotalUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}"
-                                       Style="{StaticResource LargeStatValueStyle}" FontSize="48"/>
-                            <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,12"
-                                       Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
-                        </StackPanel>
-                        <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="12" Padding="12,4" HorizontalAlignment="Right">
-                            <TextBlock Text="{x:Bind ViewModel.TotalUsageStatus, Mode=OneWay}"
-                                       Foreground="{ThemeResource StateExecBrush}" FontSize="12" FontWeight="SemiBold"/>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
+                            <!-- Usage Display -->
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <TextBlock Text="TOTAL USAGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Right"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock Text="{x:Bind ViewModel.TotalUsage, Mode=OneWay, Converter={StaticResource PercentConverter}}"
+                                               Style="{StaticResource LargeStatValueStyle}" FontSize="48"/>
+                                    <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,12"
+                                               Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
+                                </StackPanel>
+                                <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="12" Padding="12,4" HorizontalAlignment="Right">
+                                    <TextBlock Text="{x:Bind ViewModel.TotalUsageStatus, Mode=OneWay}"
+                                               Foreground="{ThemeResource StateExecBrush}" FontSize="12" FontWeight="SemiBold"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Per-Core Usage Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="CORE USAGE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="CPU - CORE USAGE - 02B" Serial="{instruments:SerialFor Module=CPU-CORE-USAGE}">
+                <StackPanel Spacing="16">
 
-            <!-- Core Usage Grid -->
-            <ItemsRepeater ItemsSource="{x:Bind ViewModel.CoreUsages, Mode=OneWay}">
-                <ItemsRepeater.Layout>
-                    <UniformGridLayout Orientation="Horizontal" MinItemWidth="200" MinItemHeight="160"
-                                       MinColumnSpacing="16" MinRowSpacing="16"/>
-                </ItemsRepeater.Layout>
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="vm:CoreUsageInfo">
-                        <instruments:Plate Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                    <!-- Core Usage Grid -->
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.CoreUsages, Mode=OneWay}">
+                        <ItemsRepeater.Layout>
+                            <UniformGridLayout Orientation="Horizontal" MinItemWidth="200" MinItemHeight="160"
+                                               MinColumnSpacing="16" MinRowSpacing="16"/>
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CoreUsageInfo">
+                                <instruments:Plate Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                <!-- Core Name with Status Indicator -->
-                                <Grid Grid.Row="0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{x:Bind CoreName, Mode=OneWay}"
-                                               Style="{StaticResource StatLabelStyle}"/>
-                                    <instruments:LedDot State="{x:Bind StatusState, Mode=OneWay}" Grid.Column="1" VerticalAlignment="Center"/>
-                                </Grid>
+                                        <!-- Core Name with Status Indicator -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{x:Bind CoreName, Mode=OneWay}"
+                                                       Style="{StaticResource StatLabelStyle}"/>
+                                            <instruments:LedDot State="{x:Bind StatusState, Mode=OneWay}" Grid.Column="1" VerticalAlignment="Center"/>
+                                        </Grid>
 
-                                <!-- Usage Value -->
-                                <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,8,0,4">
-                                    <Run Text="{x:Bind Usage, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                                    <Run Text="%" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
-                                </TextBlock>
+                                        <!-- Usage Value -->
+                                        <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,8,0,4">
+                                            <Run Text="{x:Bind Usage, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                            <Run Text="%" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
+                                        </TextBlock>
 
-                                <!-- Status Text -->
-                                <TextBlock Grid.Row="2" FontSize="11" Margin="0,0,0,8"
-                                           instruments:StateBrush.Foreground="{x:Bind StatusState, Mode=OneWay}">
-                                    <Run Text="{x:Bind Status, Mode=OneWay}"/>
-                                </TextBlock>
+                                        <!-- Status Text -->
+                                        <TextBlock Grid.Row="2" FontSize="11" Margin="0,0,0,8"
+                                                   instruments:StateBrush.Foreground="{x:Bind StatusState, Mode=OneWay}">
+                                            <Run Text="{x:Bind Status, Mode=OneWay}"/>
+                                        </TextBlock>
 
-                                <!-- Progress Bar -->
-                                <ProgressBar Grid.Row="3" Value="{x:Bind Usage, Mode=OneWay}"
-                                             Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
-                            </Grid>
-                        </instruments:Plate>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                                        <!-- Progress Bar -->
+                                        <ProgressBar Grid.Row="3" Value="{x:Bind Usage, Mode=OneWay}"
+                                                     Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
+                                    </Grid>
+                                </instruments:Plate>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Processor Specifications Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="SPECIFICATIONS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="CPU - SPECIFICATIONS - 02C" Serial="{instruments:SerialFor Module=CPU-SPECIFICATIONS}">
+                <StackPanel Spacing="16">
 
-            <!-- Specs Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="16" ColumnSpacing="24">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Specs Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <Grid RowSpacing="16" ColumnSpacing="24">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Manufacturer -->
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE821;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="MANUFACTURER" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.Manufacturer, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Architecture -->
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE99A;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="ARCHITECTURE" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.Architecture, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Max Clock Speed -->
-                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xEC49;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="MAX CLOCK SPEED" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.MaxClockDisplay, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Physical Cores -->
-                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE950;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="PHYSICAL CORES" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.PhysicalCores, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Logical Processors -->
-                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE8A5;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="LOGICAL PROCESSORS" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.LogicalProcessors, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Current Clock Speed -->
-                    <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xEC49;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="CURRENT CLOCK" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.CurrentClockDisplay, Mode=OneWay}"
-                                       Foreground="{ThemeResource StateExecBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- L2 Cache -->
-                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="L2 CACHE" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.CacheL2, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- L3 Cache -->
-                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="L3 CACHE" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.CacheL3, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Temperature (if available) -->
-                    <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Spacing="12"
-                                Visibility="{x:Bind ViewModel.HasTemperature, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE9CA;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="TEMPERATURE" Style="{StaticResource StatLabelStyle}"/>
-                                <instruments:LedDot State="{x:Bind ViewModel.TemperatureState, Mode=OneWay}" VerticalAlignment="Center"/>
+                            <!-- Manufacturer -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE821;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="MANUFACTURER" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.Manufacturer, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock instruments:StateBrush.Foreground="{x:Bind ViewModel.TemperatureState, Mode=OneWay}">
-                                    <Run Text="{x:Bind ViewModel.Temperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
-                                    <Run Text="°F"/>
-                                </TextBlock>
-                                <TextBlock FontSize="11" VerticalAlignment="Center"
-                                           Foreground="{ThemeResource SilverBrush}">
-                                    <Run Text="("/>
-                                    <Run Text="{x:Bind ViewModel.TemperatureStatus, Mode=OneWay}"/>
-                                    <Run Text=")"/>
-                                </TextBlock>
+
+                            <!-- Architecture -->
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE99A;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="ARCHITECTURE" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.Architecture, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
+
+                            <!-- Max Clock Speed -->
+                            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xEC49;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="MAX CLOCK SPEED" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.MaxClockDisplay, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Physical Cores -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE950;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="PHYSICAL CORES" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.PhysicalCores, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Logical Processors -->
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE8A5;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="LOGICAL PROCESSORS" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.LogicalProcessors, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Current Clock Speed -->
+                            <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xEC49;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="CURRENT CLOCK" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.CurrentClockDisplay, Mode=OneWay}"
+                                               Foreground="{ThemeResource StateExecBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- L2 Cache -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="L2 CACHE" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.CacheL2, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- L3 Cache -->
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="L3 CACHE" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.CacheL3, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Temperature (if available) -->
+                            <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Spacing="12"
+                                        Visibility="{x:Bind ViewModel.HasTemperature, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE9CA;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="TEMPERATURE" Style="{StaticResource StatLabelStyle}"/>
+                                        <instruments:LedDot State="{x:Bind ViewModel.TemperatureState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock instruments:StateBrush.Foreground="{x:Bind ViewModel.TemperatureState, Mode=OneWay}">
+                                            <Run Text="{x:Bind ViewModel.Temperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
+                                            <Run Text="°F"/>
+                                        </TextBlock>
+                                        <TextBlock FontSize="11" VerticalAlignment="Center"
+                                                   Foreground="{ThemeResource SilverBrush}">
+                                            <Run Text="("/>
+                                            <Run Text="{x:Bind ViewModel.TemperatureStatus, Mode=OneWay}"/>
+                                            <Run Text=")"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

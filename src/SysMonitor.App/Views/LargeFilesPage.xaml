@@ -72,7 +72,7 @@
             </instruments:Plate>
 
             <!-- Action Feedback -->
-            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
+            <instruments:Well Padding="16"
                     Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
@@ -86,126 +86,126 @@
                                Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
                                TextWrapping="Wrap"/>
                 </Grid>
-            </Border>
+            </instruments:Well>
 
             <!-- Stats Summary -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="SCAN RESULTS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="LARGE - SCAN RESULTS - 22A" Serial="{instruments:SerialFor Module=LARGE-SCAN-RESULTS}">
+                <StackPanel Spacing="16">
 
-            <Grid ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <StackPanel HorizontalAlignment="Center" Spacing="8">
-                        <TextBlock Text="FILES FOUND" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{x:Bind ViewModel.FilesFound, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateExecBrush}"/>
-                    </StackPanel>
-                </instruments:Plate>
+                        <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="FILES FOUND" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.FilesFound, Mode=OneWay}"
+                                           Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateExecBrush}"/>
+                            </StackPanel>
+                        </instruments:Plate>
 
-                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <StackPanel HorizontalAlignment="Center" Spacing="8">
-                        <TextBlock Text="TOTAL SIZE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{x:Bind ViewModel.TotalSize, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource ArmedLitBrush}"/>
-                    </StackPanel>
-                </instruments:Plate>
+                        <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="TOTAL SIZE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalSize, Mode=OneWay}"
+                                           Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource ArmedLitBrush}"/>
+                            </StackPanel>
+                        </instruments:Plate>
 
-                <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <StackPanel HorizontalAlignment="Center" Spacing="8">
-                        <TextBlock Text="STATUS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"
-                                   Style="{StaticResource CardSubtitleStyle}" FontSize="14"
-                                   HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                    </StackPanel>
-                </instruments:Plate>
-            </Grid>
+                        <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="STATUS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"
+                                           Style="{StaticResource CardSubtitleStyle}" FontSize="14"
+                                           HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </instruments:Plate>
+                    </Grid>
 
-            <!-- Action Buttons -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                    <Button Content="SELECT ALL" Command="{x:Bind ViewModel.SelectAllCommand}"/>
-                    <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"/>
-                    <Button Content="DELETE SELECTED" Command="{x:Bind ViewModel.DeleteSelectedCommand}"
-                            Style="{StaticResource ArmedCapButtonStyle}">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                                    <TextBlock Text="DELETE SELECTED"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
+                    <!-- Action Buttons -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                            <Button Content="SELECT ALL" Command="{x:Bind ViewModel.SelectAllCommand}"/>
+                            <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"/>
+                            <Button Content="DELETE SELECTED" Command="{x:Bind ViewModel.DeleteSelectedCommand}"
+                                    Style="{StaticResource ArmedCapButtonStyle}">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                            <TextBlock Text="DELETE SELECTED"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- File List -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="LARGE FILES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="LARGE - LARGE FILES - 22B" Serial="{instruments:SerialFor Module=LARGE-LARGE-FILES}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="0" MinHeight="200" VerticalContentAlignment="Stretch">
-                <ListView ItemsSource="{x:Bind ViewModel.LargeFiles, Mode=OneWay}"
-                          SelectionMode="None" Background="Transparent">
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:LargeFileDisplay">
-                            <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8"
-                                    Padding="16" Margin="0,4">
-                                <Grid ColumnSpacing="16">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+                    <instruments:Plate Padding="0" MinHeight="200" VerticalContentAlignment="Stretch">
+                        <ListView ItemsSource="{x:Bind ViewModel.LargeFiles, Mode=OneWay}"
+                                  SelectionMode="None" Background="Transparent">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LargeFileDisplay">
+                                    <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8"
+                                            Padding="16" Margin="0,4">
+                                        <Grid ColumnSpacing="16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    <!-- Selection Checkbox -->
-                                    <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
-                                              VerticalAlignment="Center"/>
+                                            <!-- Selection Checkbox -->
+                                            <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                      VerticalAlignment="Center"/>
 
-                                    <!-- File Type Icon -->
-                                    <Border Grid.Column="1" Width="44" Height="44" CornerRadius="8"
-                                            Background="{ThemeResource ChipFaceBrush}">
-                                        <FontIcon Glyph="{x:Bind FileIcon}" FontSize="20"
-                                                  Foreground="{ThemeResource SilverBrush}"/>
+                                            <!-- File Type Icon -->
+                                            <Border Grid.Column="1" Width="44" Height="44" CornerRadius="8"
+                                                    Background="{ThemeResource ChipFaceBrush}">
+                                                <FontIcon Glyph="{x:Bind FileIcon}" FontSize="20"
+                                                          Foreground="{ThemeResource SilverBrush}"/>
+                                            </Border>
+
+                                            <!-- File Info -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource PlatinumBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{x:Bind Directory}" Style="{StaticResource CardSubtitleStyle}"
+                                                           FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+
+                                            <!-- File Type Badge -->
+                                            <Border Grid.Column="3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center"
+                                                    Background="{ThemeResource ChipFaceBrush}">
+                                                <TextBlock Text="{x:Bind FileType}" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource SilverBrush}"/>
+                                            </Border>
+
+                                            <!-- Size -->
+                                            <TextBlock Grid.Column="4" Text="{x:Bind FormattedSize}"
+                                                       FontWeight="Bold" FontSize="16"
+                                                       Foreground="{ThemeResource StateExecBrush}"
+                                                       VerticalAlignment="Center" MinWidth="80" TextAlignment="Right"/>
+                                        </Grid>
                                     </Border>
-
-                                    <!-- File Info -->
-                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
-                                                   Foreground="{ThemeResource PlatinumBrush}"
-                                                   TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{x:Bind Directory}" Style="{StaticResource CardSubtitleStyle}"
-                                                   FontSize="11" TextTrimming="CharacterEllipsis"/>
-                                    </StackPanel>
-
-                                    <!-- File Type Badge -->
-                                    <Border Grid.Column="3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center"
-                                            Background="{ThemeResource ChipFaceBrush}">
-                                        <TextBlock Text="{x:Bind FileType}" FontSize="11" FontWeight="SemiBold"
-                                                   Foreground="{ThemeResource SilverBrush}"/>
-                                    </Border>
-
-                                    <!-- Size -->
-                                    <TextBlock Grid.Column="4" Text="{x:Bind FormattedSize}"
-                                               FontWeight="Bold" FontSize="16"
-                                               Foreground="{ThemeResource StateExecBrush}"
-                                               VerticalAlignment="Center" MinWidth="80" TextAlignment="Right"/>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </instruments:Plate>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

@@ -14,8 +14,8 @@
     Sources are System-X's stylesheet at system-x-app@eaba14b.
 
       PageHeaderStyle    .view-title (:1659), as ViewTitleTextStyle sets it.
-      SectionHeaderStyle .placard (:1631), as PlacardTextStyle sets it. Its accent bar is the plate's light pipe -
-                         3 wide, armed - since a placard carries no bar of its own (:1149).
+      AccentBarStyle     the plate's light pipe - 3 wide, armed (:1149) - beside a sub-heading inside a panel. A
+                         page's major sections are Faceplates, whose stripe carries the section's kicker.
       StatLabelStyle     .kicker (:1642); StatValueStyle and LargeStatValueStyle the telemetry face (:2569).
       CardTitleStyle     a heading (:926-935), never Archivo caps; CardSubtitleStyle a description.
       progress bars      a dark well's track (:1451) with the LED that names the meter's job lit along it.
@@ -51,16 +51,6 @@
 
     <Style x:Key="PageSubtitleStyle" TargetType="TextBlock" BasedOn="{StaticResource DescriptionTextStyle}">
         <Setter Property="Margin" Value="0,0,0,24"/>
-    </Style>
-
-    <Style x:Key="SectionHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource PlacardTextStyle}">
-        <Setter Property="Margin" Value="12,0,0,12"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-
-    <Style x:Key="SectionHeaderWithAccentStyle" TargetType="StackPanel">
-        <Setter Property="Orientation" Value="Horizontal"/>
-        <Setter Property="Margin" Value="0,16,0,12"/>
     </Style>
 
     <Style x:Key="AccentBarStyle" TargetType="Border">

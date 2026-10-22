@@ -20,160 +20,158 @@
 
         <!-- Health Score Card -->
         <StackPanel Grid.Row="1" Spacing="12">
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="SYSTEM HEALTH" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="HEALTH - SYSTEM HEALTH - 10A" Serial="{instruments:SerialFor Module=HEALTH-SYSTEM-HEALTH}">
+                <StackPanel Spacing="12">
 
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Premium Health Score Gauge -->
-                    <Grid Grid.Column="0" Width="120" Height="120" Margin="0,0,24,0">
-                        <!-- Outer glow ring -->
-                        <Ellipse StrokeThickness="8" Opacity="0.15" Stroke="{ThemeResource ArmedBrush}"/>
-                        <!-- Track ring (background) -->
-                        <Ellipse StrokeThickness="6" Margin="8" Stroke="{ThemeResource Carbon700Brush}"/>
-                        <!-- Progress ring (foreground) -->
-                        <Ellipse StrokeThickness="6" StrokeDashCap="Round" Margin="8"
-                                 StrokeDashArray="4 1" Stroke="{ThemeResource ArmedBrush}"/>
-                        <!-- Inner content -->
-                        <Border CornerRadius="50" Margin="20" Background="{ThemeResource Carbon750Brush}">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.HealthGrade, Mode=OneWay}"
-                                           FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"
-                                           Foreground="{ThemeResource ArmedLitBrush}"/>
-                                <TextBlock FontSize="12" Foreground="{ThemeResource SilverBrush}"
-                                           HorizontalAlignment="Center">
-                                    <Run Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"/>
-                                    <Run Text="/100"/>
+                            <!-- Premium Health Score Gauge -->
+                            <Grid Grid.Column="0" Width="120" Height="120" Margin="0,0,24,0">
+                                <!-- Outer glow ring -->
+                                <Ellipse StrokeThickness="8" Opacity="0.15" Stroke="{ThemeResource ArmedBrush}"/>
+                                <!-- Track ring (background) -->
+                                <Ellipse StrokeThickness="6" Margin="8" Stroke="{ThemeResource Carbon700Brush}"/>
+                                <!-- Progress ring (foreground) -->
+                                <Ellipse StrokeThickness="6" StrokeDashCap="Round" Margin="8"
+                                         StrokeDashArray="4 1" Stroke="{ThemeResource ArmedBrush}"/>
+                                <!-- Inner content -->
+                                <Border CornerRadius="50" Margin="20" Background="{ThemeResource Carbon750Brush}">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.HealthGrade, Mode=OneWay}"
+                                                   FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"
+                                                   Foreground="{ThemeResource ArmedLitBrush}"/>
+                                        <TextBlock FontSize="12" Foreground="{ThemeResource SilverBrush}"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="{x:Bind ViewModel.HealthScore, Mode=OneWay}"/>
+                                            <Run Text="/100"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Status Info -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">
+                                <TextBlock Text="{x:Bind ViewModel.HealthDescription, Mode=OneWay}"
+                                           Style="{StaticResource CardTitleStyle}" TextWrapping="Wrap"/>
+                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <FontIcon Glyph="&#xE783;" FontSize="14" Foreground="{ThemeResource StateNoGoBrush}"/>
+                                        <TextBlock Foreground="{ThemeResource StateNoGoBrush}">
+                                            <Run Text="{x:Bind ViewModel.CriticalCount, Mode=OneWay}"/>
+                                            <Run Text=" Critical"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource StateHoldBrush}"/>
+                                        <TextBlock Foreground="{ThemeResource StateHoldBrush}">
+                                            <Run Text="{x:Bind ViewModel.WarningCount, Mode=OneWay}"/>
+                                            <Run Text=" Warnings"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <FontIcon Glyph="&#xE946;" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
+                                        <TextBlock Foreground="{ThemeResource SilverBrush}">
+                                            <Run Text="{x:Bind ViewModel.InfoCount, Mode=OneWay}"/>
+                                            <Run Text=" Info"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                    <Run Text="Potential savings: "/>
+                                    <Run Text="{x:Bind ViewModel.FormattedSpaceSavings, Mode=OneWay}" Foreground="{ThemeResource StateGoBrush}"/>
                                 </TextBlock>
                             </StackPanel>
-                        </Border>
-                    </Grid>
 
-                    <!-- Status Info -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">
-                        <TextBlock Text="{x:Bind ViewModel.HealthDescription, Mode=OneWay}"
-                                   Style="{StaticResource CardTitleStyle}" TextWrapping="Wrap"/>
-                        <StackPanel Orientation="Horizontal" Spacing="16">
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <FontIcon Glyph="&#xE783;" FontSize="14" Foreground="{ThemeResource StateNoGoBrush}"/>
-                                <TextBlock Foreground="{ThemeResource StateNoGoBrush}">
-                                    <Run Text="{x:Bind ViewModel.CriticalCount, Mode=OneWay}"/>
-                                    <Run Text=" Critical"/>
-                                </TextBlock>
+                            <!-- Action Buttons -->
+                            <StackPanel Grid.Column="2" Spacing="8">
+                                <Button Content="RUN HEALTH CHECK" Command="{x:Bind ViewModel.RunHealthCheckCommand}"
+                                        Style="{StaticResource ChromeCapButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
+                                <Button Content="QUICK FIX ALL" Command="{x:Bind ViewModel.QuickFixCommand}"
+                                        IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
+                                <Button Content="CREATE RESTORE POINT" Command="{x:Bind ViewModel.CreateRestorePointCommand}"
+                                        IsEnabled="{x:Bind ViewModel.CanCreateRestorePoint, Mode=OneWay}"
+                                        HorizontalAlignment="Stretch"/>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource StateHoldBrush}"/>
-                                <TextBlock Foreground="{ThemeResource StateHoldBrush}">
-                                    <Run Text="{x:Bind ViewModel.WarningCount, Mode=OneWay}"/>
-                                    <Run Text=" Warnings"/>
-                                </TextBlock>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <FontIcon Glyph="&#xE946;" FontSize="14" Foreground="{ThemeResource SilverBrush}"/>
-                                <TextBlock Foreground="{ThemeResource SilverBrush}">
-                                    <Run Text="{x:Bind ViewModel.InfoCount, Mode=OneWay}"/>
-                                    <Run Text=" Info"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel>
-                        <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                            <Run Text="Potential savings: "/>
-                            <Run Text="{x:Bind ViewModel.FormattedSpaceSavings, Mode=OneWay}" Foreground="{ThemeResource StateGoBrush}"/>
-                        </TextBlock>
-                    </StackPanel>
-
-                    <!-- Action Buttons -->
-                    <StackPanel Grid.Column="2" Spacing="8">
-                        <Button Content="RUN HEALTH CHECK" Command="{x:Bind ViewModel.RunHealthCheckCommand}"
-                                Style="{StaticResource ChromeCapButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"/>
-                        <Button Content="QUICK FIX ALL" Command="{x:Bind ViewModel.QuickFixCommand}"
-                                IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}"/>
-                        <Button Content="CREATE RESTORE POINT" Command="{x:Bind ViewModel.CreateRestorePointCommand}"
-                                IsEnabled="{x:Bind ViewModel.CanCreateRestorePoint, Mode=OneWay}"
-                                HorizontalAlignment="Stretch"/>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
         </StackPanel>
 
         <!-- Issues List -->
-        <Grid Grid.Row="2" RowSpacing="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <instruments:Faceplate Grid.Row="2" Kicker="HEALTH - DETECTED ISSUES - 10B" Serial="{instruments:SerialFor Module=HEALTH-DETECTED-ISSUES}">
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="DETECTED ISSUES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                    <Button Content="SELECT FIXABLE" Command="{x:Bind ViewModel.SelectAllFixableCommand}"/>
-                    <Button Content="DESELECT ALL" Command="{x:Bind ViewModel.DeselectAllCommand}"/>
-                </StackPanel>
-            </Grid>
+                <Grid Grid.Row="0">
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                        <Button Content="SELECT FIXABLE" Command="{x:Bind ViewModel.SelectAllFixableCommand}"/>
+                        <Button Content="DESELECT ALL" Command="{x:Bind ViewModel.DeselectAllCommand}"/>
+                    </StackPanel>
+                </Grid>
 
-            <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.Issues, Mode=OneWay}" Background="Transparent">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Margin" Value="0,4,0,4"/>
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.Issues, Mode=OneWay}" Background="Transparent">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Margin" Value="0,4,0,4"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                                <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                          IsEnabled="{Binding CanAutoFix}" VerticalAlignment="Center"/>
+                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              IsEnabled="{Binding CanAutoFix}" VerticalAlignment="Center"/>
 
-                                <Border Grid.Column="1" Style="{StaticResource IconContainerStyle}"
-                                        Width="40" Height="40" Margin="8,0,12,0">
-                                    <FontIcon Glyph="{Binding SeverityIcon}" FontSize="18"
-                                              Foreground="{ThemeResource PlatinumBrush}"/>
-                                </Border>
-
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Title}" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"
-                                               TextWrapping="Wrap" MaxWidth="400"/>
-                                    <TextBlock Text="{Binding FixAction}" Foreground="{ThemeResource SilverBrush}"
-                                               FontSize="11" FontStyle="Italic" Margin="0,4,0,0"
-                                               Visibility="{Binding CanAutoFix, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                    <Border CornerRadius="4" Padding="8,4" Background="{ThemeResource Carbon750Brush}">
-                                        <TextBlock Text="{Binding Category}" FontSize="11"
-                                                   Foreground="{ThemeResource SilverBrush}"/>
+                                    <Border Grid.Column="1" Style="{StaticResource IconContainerStyle}"
+                                            Width="40" Height="40" Margin="8,0,12,0">
+                                        <FontIcon Glyph="{Binding SeverityIcon}" FontSize="18"
+                                                  Foreground="{ThemeResource PlatinumBrush}"/>
                                     </Border>
-                                    <TextBlock Text="{Binding Severity}" FontSize="12" FontWeight="SemiBold"
-                                               HorizontalAlignment="Center" Margin="0,4,0,0"
-                                               Foreground="{ThemeResource StateHoldBrush}"/>
-                                </StackPanel>
-                            </Grid>
-                        </instruments:Plate>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
+
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" Style="{StaticResource CardTitleStyle}"/>
+                                        <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"
+                                                   TextWrapping="Wrap" MaxWidth="400"/>
+                                        <TextBlock Text="{Binding FixAction}" Foreground="{ThemeResource SilverBrush}"
+                                                   FontSize="11" FontStyle="Italic" Margin="0,4,0,0"
+                                                   Visibility="{Binding CanAutoFix, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <Border CornerRadius="4" Padding="8,4" Background="{ThemeResource Carbon750Brush}">
+                                            <TextBlock Text="{Binding Category}" FontSize="11"
+                                                       Foreground="{ThemeResource SilverBrush}"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding Severity}" FontSize="12" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" Margin="0,4,0,0"
+                                                   Foreground="{ThemeResource StateHoldBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </instruments:Plate>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </instruments:Faceplate>
 
         <!-- Status Bar -->
         <Grid Grid.Row="3">

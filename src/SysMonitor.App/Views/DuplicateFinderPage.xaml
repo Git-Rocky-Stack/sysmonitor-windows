@@ -52,7 +52,7 @@
             </instruments:Plate>
 
             <!-- Action Feedback -->
-            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
+            <instruments:Well Padding="16"
                     Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
@@ -66,149 +66,149 @@
                                Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
                                TextWrapping="Wrap"/>
                 </Grid>
-            </Border>
+            </instruments:Well>
 
             <!-- Stats Summary -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="DUPLICATE ANALYSIS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="DUPES - DUPLICATE ANALYSIS - 23A" Serial="{instruments:SerialFor Module=DUPES-DUPLICATE-ANALYSIS}">
+                <StackPanel Spacing="16">
 
-            <Grid ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <StackPanel HorizontalAlignment="Center" Spacing="8">
-                        <TextBlock Text="DUPLICATE GROUPS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{x:Bind ViewModel.GroupsFound, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateExecBrush}"/>
-                    </StackPanel>
-                </instruments:Plate>
+                        <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="DUPLICATE GROUPS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.GroupsFound, Mode=OneWay}"
+                                           Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateExecBrush}"/>
+                            </StackPanel>
+                        </instruments:Plate>
 
-                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <StackPanel HorizontalAlignment="Center" Spacing="8">
-                        <TextBlock Text="TOTAL DUPLICATES" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{x:Bind ViewModel.TotalDuplicates, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateHoldBrush}"/>
-                    </StackPanel>
-                </instruments:Plate>
+                        <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="TOTAL DUPLICATES" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalDuplicates, Mode=OneWay}"
+                                           Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource StateHoldBrush}"/>
+                            </StackPanel>
+                        </instruments:Plate>
 
-                <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <StackPanel HorizontalAlignment="Center" Spacing="8">
-                        <TextBlock Text="WASTED SPACE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{x:Bind ViewModel.WastedSpace, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource ArmedLitBrush}"/>
-                    </StackPanel>
-                </instruments:Plate>
-            </Grid>
+                        <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="WASTED SPACE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ViewModel.WastedSpace, Mode=OneWay}"
+                                           Style="{StaticResource StatValueStyle}" Foreground="{ThemeResource ArmedLitBrush}"/>
+                            </StackPanel>
+                        </instruments:Plate>
+                    </Grid>
 
-            <!-- Action Buttons -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                    <Button Content="SELECT ALL DUPLICATES" Command="{x:Bind ViewModel.SelectAllDuplicatesCommand}"/>
-                    <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"/>
-                    <Button Command="{x:Bind ViewModel.DeleteSelectedDuplicatesCommand}"
-                            Style="{StaticResource ArmedCapButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                            <TextBlock Text="DELETE SELECTED"/>
+                    <!-- Action Buttons -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                            <Button Content="SELECT ALL DUPLICATES" Command="{x:Bind ViewModel.SelectAllDuplicatesCommand}"/>
+                            <Button Content="SELECT NONE" Command="{x:Bind ViewModel.SelectNoneCommand}"/>
+                            <Button Command="{x:Bind ViewModel.DeleteSelectedDuplicatesCommand}"
+                                    Style="{StaticResource ArmedCapButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                    <TextBlock Text="DELETE SELECTED"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                    </Button>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Duplicate Groups List -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="DUPLICATE FILES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="DUPES - DUPLICATE FILES - 23B" Serial="{instruments:SerialFor Module=DUPES-DUPLICATE-FILES}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="16" MinHeight="200" VerticalContentAlignment="Stretch">
-                <ItemsRepeater ItemsSource="{x:Bind ViewModel.DuplicateGroups, Mode=OneWay}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Vertical" Spacing="16"/>
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="vm:DuplicateGroupDisplay">
-                            <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="12" Padding="16">
-                                <StackPanel Spacing="12">
-                                    <!-- Group Header -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                    <instruments:Plate Padding="16" MinHeight="200" VerticalContentAlignment="Stretch">
+                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.DuplicateGroups, Mode=OneWay}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Orientation="Vertical" Spacing="16"/>
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="vm:DuplicateGroupDisplay">
+                                    <instruments:Well Padding="16">
+                                        <StackPanel Spacing="12">
+                                            <!-- Group Header -->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                                            <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="8"
-                                                    Padding="8,4">
-                                                <TextBlock FontSize="11" FontWeight="Bold"
-                                                           Foreground="{ThemeResource PlatinumBrush}">
-                                                    <Run Text="{x:Bind DuplicateCount}"/>
-                                                    <Run Text="DUPLICATES"/>
+                                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                                    <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="8"
+                                                            Padding="8,4">
+                                                        <TextBlock FontSize="11" FontWeight="Bold"
+                                                                   Foreground="{ThemeResource PlatinumBrush}">
+                                                            <Run Text="{x:Bind DuplicateCount}"/>
+                                                            <Run Text="DUPLICATES"/>
+                                                        </TextBlock>
+                                                    </Border>
+                                                    <TextBlock Text="{x:Bind FormattedSize}" VerticalAlignment="Center"
+                                                               Foreground="{ThemeResource SilverBrush}"/>
+                                                </StackPanel>
+
+                                                <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                                           Foreground="{ThemeResource ArmedLitBrush}" FontWeight="Bold">
+                                                    <Run Text="Wasted:"/>
+                                                    <Run Text="{x:Bind WastedSpace}"/>
                                                 </TextBlock>
-                                            </Border>
-                                            <TextBlock Text="{x:Bind FormattedSize}" VerticalAlignment="Center"
-                                                       Foreground="{ThemeResource SilverBrush}"/>
-                                        </StackPanel>
+                                            </Grid>
 
-                                        <TextBlock Grid.Column="1" VerticalAlignment="Center"
-                                                   Foreground="{ThemeResource ArmedLitBrush}" FontWeight="Bold">
-                                            <Run Text="Wasted:"/>
-                                            <Run Text="{x:Bind WastedSpace}"/>
-                                        </TextBlock>
-                                    </Grid>
+                                            <!-- Files in Group -->
+                                            <ItemsRepeater ItemsSource="{x:Bind Files}">
+                                                <ItemsRepeater.Layout>
+                                                    <StackLayout Orientation="Vertical" Spacing="8"/>
+                                                </ItemsRepeater.Layout>
+                                                <ItemsRepeater.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:DuplicateFileDisplay">
+                                                        <Border Background="{ThemeResource Carbon700Brush}"
+                                                                CornerRadius="8" Padding="12">
+                                                            <Grid ColumnSpacing="12">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
 
-                                    <!-- Files in Group -->
-                                    <ItemsRepeater ItemsSource="{x:Bind Files}">
-                                        <ItemsRepeater.Layout>
-                                            <StackLayout Orientation="Vertical" Spacing="8"/>
-                                        </ItemsRepeater.Layout>
-                                        <ItemsRepeater.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:DuplicateFileDisplay">
-                                                <Border Background="{ThemeResource Carbon700Brush}"
-                                                        CornerRadius="8" Padding="12">
-                                                    <Grid ColumnSpacing="12">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                        </Grid.ColumnDefinitions>
+                                                                <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                                          IsEnabled="{x:Bind IsOriginal, Converter={StaticResource InvertBoolConverter}}"
+                                                                          VerticalAlignment="Center"/>
 
-                                                        <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
-                                                                  IsEnabled="{x:Bind IsOriginal, Converter={StaticResource InvertBoolConverter}}"
-                                                                  VerticalAlignment="Center"/>
+                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
+                                                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                                                    <TextBlock Text="{x:Bind Directory}" FontSize="11"
+                                                                               Foreground="{ThemeResource SilverBrush}"
+                                                                               TextTrimming="CharacterEllipsis"/>
+                                                                </StackPanel>
 
-                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
-                                                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                                                            <TextBlock Text="{x:Bind Directory}" FontSize="11"
-                                                                       Foreground="{ThemeResource SilverBrush}"
-                                                                       TextTrimming="CharacterEllipsis"/>
-                                                        </StackPanel>
-
-                                                        <Border Grid.Column="2" CornerRadius="6" Padding="10,4"
-                                                                VerticalAlignment="Center"
-                                                                instruments:StateBrush.Wash="{x:Bind StatusState}">
-                                                            <TextBlock Text="{x:Bind StatusText}" FontSize="10" FontWeight="Bold"
-                                                                       instruments:StateBrush.Foreground="{x:Bind StatusState}"/>
+                                                                <Border Grid.Column="2" CornerRadius="6" Padding="10,4"
+                                                                        VerticalAlignment="Center"
+                                                                        instruments:StateBrush.Wash="{x:Bind StatusState}">
+                                                                    <TextBlock Text="{x:Bind StatusText}" FontSize="10" FontWeight="Bold"
+                                                                               instruments:StateBrush.Foreground="{x:Bind StatusState}"/>
+                                                                </Border>
+                                                            </Grid>
                                                         </Border>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsRepeater.ItemTemplate>
-                                    </ItemsRepeater>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </instruments:Plate>
+                                                    </DataTemplate>
+                                                </ItemsRepeater.ItemTemplate>
+                                            </ItemsRepeater>
+                                        </StackPanel>
+                                    </instruments:Well>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

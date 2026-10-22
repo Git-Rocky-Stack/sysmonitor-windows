@@ -15,43 +15,43 @@
 
             <!-- Time Range Selector -->
             <StackPanel Spacing="12">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="TIME RANGE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="HIST - TIME RANGE - 31A" Serial="{instruments:SerialFor Module=HIST-TIME-RANGE}">
+                    <StackPanel Spacing="12">
 
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                            <FontIcon Glyph="&#xE823;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
+                                <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
+                                    <FontIcon Glyph="&#xE823;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
 
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
-                            <RadioButtons SelectedIndex="{x:Bind ViewModel.SelectedTimeRangeIndex, Mode=TwoWay}">
-                                <RadioButton Content="1 Hour"/>
-                                <RadioButton Content="24 Hours"/>
-                                <RadioButton Content="7 Days"/>
-                                <RadioButton Content="30 Days"/>
-                            </RadioButtons>
-                        </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                                    <RadioButtons SelectedIndex="{x:Bind ViewModel.SelectedTimeRangeIndex, Mode=TwoWay}">
+                                        <RadioButton Content="1 Hour"/>
+                                        <RadioButton Content="24 Hours"/>
+                                        <RadioButton Content="7 Days"/>
+                                        <RadioButton Content="30 Days"/>
+                                    </RadioButtons>
+                                </StackPanel>
 
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                            <Button Content="REFRESH" Command="{x:Bind ViewModel.RefreshDataCommand}"/>
-                        </StackPanel>
-                    </Grid>
-                </instruments:Plate>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Content="REFRESH" Command="{x:Bind ViewModel.RefreshDataCommand}"/>
+                                </StackPanel>
+                            </Grid>
+                        </instruments:Plate>
 
-                <!-- Status Message -->
-                <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                           Style="{StaticResource CardSubtitleStyle}"
-                           HorizontalAlignment="Center"
-                           Visibility="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
+                        <!-- Status Message -->
+                        <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                                   Style="{StaticResource CardSubtitleStyle}"
+                                   HorizontalAlignment="Center"
+                                   Visibility="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
+                    </StackPanel>
+                </instruments:Faceplate>
             </StackPanel>
 
             <!-- Loading Indicator -->
@@ -60,36 +60,36 @@
 
             <!-- Placeholder for charts - LiveCharts requires code-behind integration -->
             <StackPanel Spacing="12">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="CPU USAGE (%)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="HIST - CPU USAGE (%) - 31B" Serial="{instruments:SerialFor Module=HIST-CPU-USAGE}">
+                    <StackPanel Spacing="12">
 
-                <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
-                    <Grid x:Name="CpuChartContainer" Height="180"/>
-                </instruments:Plate>
+                        <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
+                            <Grid x:Name="CpuChartContainer" Height="180"/>
+                        </instruments:Plate>
+                    </StackPanel>
+                </instruments:Faceplate>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="MEMORY USAGE (%)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="HIST - MEMORY USAGE (%) - 31C" Serial="{instruments:SerialFor Module=HIST-MEMORY-USAGE}">
+                    <StackPanel Spacing="12">
 
-                <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
-                    <Grid x:Name="MemoryChartContainer" Height="180"/>
-                </instruments:Plate>
+                        <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
+                            <Grid x:Name="MemoryChartContainer" Height="180"/>
+                        </instruments:Plate>
+                    </StackPanel>
+                </instruments:Faceplate>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="TEMPERATURE (°F)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="HIST - TEMPERATURE (°F) - 31D" Serial="{instruments:SerialFor Module=HIST-TEMPERATURE-F}">
+                    <StackPanel Spacing="12">
 
-                <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
-                    <Grid x:Name="TemperatureChartContainer" Height="180"/>
-                </instruments:Plate>
+                        <instruments:Plate MinHeight="200" Padding="16" VerticalContentAlignment="Stretch">
+                            <Grid x:Name="TemperatureChartContainer" Height="180"/>
+                        </instruments:Plate>
+                    </StackPanel>
+                </instruments:Faceplate>
             </StackPanel>
 
         </StackPanel>

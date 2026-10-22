@@ -13,361 +13,361 @@
                                     Description="Configure Application Preferences"/>
 
             <!-- Appearance Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="APPEARANCE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
-
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+            <instruments:Faceplate Kicker="SET - APPEARANCE - 32A" Serial="{instruments:SerialFor Module=SET-APPEARANCE}">
                 <StackPanel Spacing="16">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerRedStyle}">
-                            <FontIcon Glyph="&#xE790;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <ComboBox Header="Theme" SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}"
-                                  Width="200" Background="{ThemeResource Carbon800Brush}">
-                            <ComboBoxItem Content="System Default"/>
-                            <ComboBoxItem Content="Light"/>
-                            <ComboBoxItem Content="Dark (Strategia-X)"/>
-                        </ComboBox>
-                    </StackPanel>
+
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerRedStyle}">
+                                    <FontIcon Glyph="&#xE790;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <ComboBox Header="Theme" SelectedIndex="{x:Bind ViewModel.SelectedThemeIndex, Mode=TwoWay}"
+                                          Width="200" Background="{ThemeResource Carbon800Brush}">
+                                    <ComboBoxItem Content="System Default"/>
+                                    <ComboBoxItem Content="Light"/>
+                                    <ComboBoxItem Content="Dark (Strategia-X)"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Behavior Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="BEHAVIOR" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="SET - BEHAVIOR - 32B" Serial="{instruments:SerialFor Module=SET-BEHAVIOR}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE7E8;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <ToggleSwitch Grid.Column="1" Header="Run at Windows startup"
-                                      IsOn="{x:Bind ViewModel.RunAtStartup, Mode=TwoWay}"/>
-                    </Grid>
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE7E8;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <ToggleSwitch Grid.Column="1" Header="Run at Windows startup"
+                                              IsOn="{x:Bind ViewModel.RunAtStartup, Mode=TwoWay}"/>
+                            </Grid>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE921;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <ToggleSwitch Grid.Column="1" Header="Minimize to system tray"
-                                      IsOn="{x:Bind ViewModel.MinimizeToTray, Mode=TwoWay}"/>
-                    </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE921;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <ToggleSwitch Grid.Column="1" Header="Minimize to system tray"
+                                              IsOn="{x:Bind ViewModel.MinimizeToTray, Mode=TwoWay}"/>
+                            </Grid>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE7E7;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <ToggleSwitch Grid.Column="1" Header="Show notifications"
-                                      IsOn="{x:Bind ViewModel.ShowNotifications, Mode=TwoWay}"/>
-                    </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE7E7;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <ToggleSwitch Grid.Column="1" Header="Show notifications"
+                                              IsOn="{x:Bind ViewModel.ShowNotifications, Mode=TwoWay}"/>
+                            </Grid>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Monitoring Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="MONITORING" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="SET - MONITORING - 32C" Serial="{instruments:SerialFor Module=SET-MONITORING}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE916;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="Refresh Interval" Foreground="{ThemeResource PlatinumBrush}" FontWeight="SemiBold"/>
-                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                                <Slider Minimum="1" Maximum="10" Width="250"
-                                        Value="{x:Bind ViewModel.RefreshInterval, Mode=TwoWay}"/>
-                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource SilverBrush}"
-                                           Text="{x:Bind ViewModel.RefreshInterval, Mode=OneWay}"/>
-                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource SilverBrush}" Text=" seconds"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE916;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Refresh Interval" Foreground="{ThemeResource PlatinumBrush}" FontWeight="SemiBold"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                                        <Slider Minimum="1" Maximum="10" Width="250"
+                                                Value="{x:Bind ViewModel.RefreshInterval, Mode=TwoWay}"/>
+                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource SilverBrush}"
+                                                   Text="{x:Bind ViewModel.RefreshInterval, Mode=OneWay}"/>
+                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource SilverBrush}" Text=" seconds"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="Warn me when memory usage goes above"
-                                       Style="{StaticResource BodyTextBlockStyle}"/>
-                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                                <Slider Minimum="50" Maximum="95" Width="250"
-                                        Value="{x:Bind ViewModel.MemoryThreshold, Mode=TwoWay}"/>
-                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
-                                           Text="{x:Bind ViewModel.MemoryThreshold, Mode=OneWay}"/>
-                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="%"/>
-                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Warn me when memory usage goes above"
+                                               Style="{StaticResource BodyTextBlockStyle}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                                        <Slider Minimum="50" Maximum="95" Width="250"
+                                                Value="{x:Bind ViewModel.MemoryThreshold, Mode=TwoWay}"/>
+                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
+                                                   Text="{x:Bind ViewModel.MemoryThreshold, Mode=OneWay}"/>
+                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="%"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
-                    </Grid>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Alert Thresholds Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="ALERT THRESHOLDS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
-
-            <!-- Temperature Alerts Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+            <instruments:Faceplate Kicker="SET - ALERT THRESHOLDS - 32D" Serial="{instruments:SerialFor Module=SET-ALERT-THRESHOLDS}">
                 <StackPanel Spacing="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerRedStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE9CA;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <ToggleSwitch Grid.Column="1" Header="Enable temperature alerts"
-                                      IsOn="{x:Bind ViewModel.EnableTempAlerts, Mode=TwoWay}"/>
-                    </Grid>
 
-                    <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.EnableTempAlerts, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <!-- CPU Temperature -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="CPU Temperature" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
-                            <Grid ColumnSpacing="24">
+                    <!-- Temperature Alerts Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Warning" Foreground="{ThemeResource StateHoldBrush}" FontSize="12"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Slider Minimum="50" Maximum="85" Width="150"
-                                                Value="{x:Bind ViewModel.CpuTempWarning, Mode=TwoWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
-                                                   Text="{x:Bind ViewModel.CpuTempWarningF, Mode=OneWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="°F"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Critical" Foreground="{ThemeResource StateNoGoBrush}" FontSize="12"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Slider Minimum="70" Maximum="100" Width="150"
-                                                Value="{x:Bind ViewModel.CpuTempCritical, Mode=TwoWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}"
-                                                   Text="{x:Bind ViewModel.CpuTempCriticalF, Mode=OneWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}" Text="°F"/>
-                                    </StackPanel>
-                                </StackPanel>
+                                <Border Style="{StaticResource IconContainerRedStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE9CA;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <ToggleSwitch Grid.Column="1" Header="Enable temperature alerts"
+                                              IsOn="{x:Bind ViewModel.EnableTempAlerts, Mode=TwoWay}"/>
                             </Grid>
-                        </StackPanel>
 
-                        <!-- GPU Temperature -->
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="GPU Temperature" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
-                            <Grid ColumnSpacing="24">
+                            <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.EnableTempAlerts, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <!-- CPU Temperature -->
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="CPU Temperature" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    <Grid ColumnSpacing="24">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Warning" Foreground="{ThemeResource StateHoldBrush}" FontSize="12"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Slider Minimum="50" Maximum="85" Width="150"
+                                                        Value="{x:Bind ViewModel.CpuTempWarning, Mode=TwoWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
+                                                           Text="{x:Bind ViewModel.CpuTempWarningF, Mode=OneWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="°F"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Critical" Foreground="{ThemeResource StateNoGoBrush}" FontSize="12"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Slider Minimum="70" Maximum="100" Width="150"
+                                                        Value="{x:Bind ViewModel.CpuTempCritical, Mode=TwoWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}"
+                                                           Text="{x:Bind ViewModel.CpuTempCriticalF, Mode=OneWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}" Text="°F"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+
+                                <!-- GPU Temperature -->
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="GPU Temperature" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    <Grid ColumnSpacing="24">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Warning" Foreground="{ThemeResource StateHoldBrush}" FontSize="12"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Slider Minimum="60" Maximum="90" Width="150"
+                                                        Value="{x:Bind ViewModel.GpuTempWarning, Mode=TwoWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
+                                                           Text="{x:Bind ViewModel.GpuTempWarningF, Mode=OneWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="°F"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Critical" Foreground="{ThemeResource StateNoGoBrush}" FontSize="12"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Slider Minimum="80" Maximum="105" Width="150"
+                                                        Value="{x:Bind ViewModel.GpuTempCritical, Mode=TwoWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}"
+                                                           Text="{x:Bind ViewModel.GpuTempCriticalF, Mode=OneWay}"/>
+                                                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}" Text="°F"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </instruments:Plate>
+
+                    <!-- Battery Alerts Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Warning" Foreground="{ThemeResource StateHoldBrush}" FontSize="12"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Slider Minimum="60" Maximum="90" Width="150"
-                                                Value="{x:Bind ViewModel.GpuTempWarning, Mode=TwoWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
-                                                   Text="{x:Bind ViewModel.GpuTempWarningF, Mode=OneWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="°F"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Critical" Foreground="{ThemeResource StateNoGoBrush}" FontSize="12"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Slider Minimum="80" Maximum="105" Width="150"
-                                                Value="{x:Bind ViewModel.GpuTempCritical, Mode=TwoWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}"
-                                                   Text="{x:Bind ViewModel.GpuTempCriticalF, Mode=OneWay}"/>
-                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}" Text="°F"/>
-                                    </StackPanel>
-                                </StackPanel>
+                                <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE83F;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <ToggleSwitch Grid.Column="1" Header="Enable battery alerts"
+                                              IsOn="{x:Bind ViewModel.EnableBatteryAlerts, Mode=TwoWay}"/>
                             </Grid>
+
+                            <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.EnableBatteryAlerts, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="Battery Level Warnings" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                <Grid ColumnSpacing="24">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Low Warning" Foreground="{ThemeResource StateHoldBrush}" FontSize="12"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Slider Minimum="10" Maximum="40" Width="150"
+                                                    Value="{x:Bind ViewModel.BatteryLowWarning, Mode=TwoWay}"/>
+                                            <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
+                                                       Text="{x:Bind ViewModel.BatteryLowWarning, Mode=OneWay}"/>
+                                            <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="%"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Critical Warning" Foreground="{ThemeResource StateNoGoBrush}" FontSize="12"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Slider Minimum="5" Maximum="20" Width="150"
+                                                    Value="{x:Bind ViewModel.BatteryCriticalWarning, Mode=TwoWay}"/>
+                                            <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}"
+                                                       Text="{x:Bind ViewModel.BatteryCriticalWarning, Mode=OneWay}"/>
+                                            <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}" Text="%"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
-
-            <!-- Battery Alerts Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE83F;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <ToggleSwitch Grid.Column="1" Header="Enable battery alerts"
-                                      IsOn="{x:Bind ViewModel.EnableBatteryAlerts, Mode=TwoWay}"/>
-                    </Grid>
-
-                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.EnableBatteryAlerts, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <TextBlock Text="Battery Level Warnings" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
-                        <Grid ColumnSpacing="24">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Low Warning" Foreground="{ThemeResource StateHoldBrush}" FontSize="12"/>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Slider Minimum="10" Maximum="40" Width="150"
-                                            Value="{x:Bind ViewModel.BatteryLowWarning, Mode=TwoWay}"/>
-                                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}"
-                                               Text="{x:Bind ViewModel.BatteryLowWarning, Mode=OneWay}"/>
-                                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateHoldBrush}" Text="%"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="Critical Warning" Foreground="{ThemeResource StateNoGoBrush}" FontSize="12"/>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Slider Minimum="5" Maximum="20" Width="150"
-                                            Value="{x:Bind ViewModel.BatteryCriticalWarning, Mode=TwoWay}"/>
-                                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}"
-                                               Text="{x:Bind ViewModel.BatteryCriticalWarning, Mode=OneWay}"/>
-                                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource StateNoGoBrush}" Text="%"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Data & Privacy Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="DATA &amp; PRIVACY" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
-
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+            <instruments:Faceplate Kicker="SET - DATA &amp; PRIVACY - 32E" Serial="{instruments:SerialFor Module=SET-DATA-PRIVACY}">
                 <StackPanel Spacing="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
-                            <FontIcon Glyph="&#xE74D;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Clear All Data" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
-                            <TextBlock Text="Reset settings and clear stored preferences"
-                                       Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
+
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource IconContainerStyle}" Margin="0,0,12,0">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Clear All Data" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    <TextBlock Text="Reset settings and clear stored preferences"
+                                               Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
+                                </StackPanel>
+                                <!-- CLEAR -->
+                                <Button Grid.Column="2" Content="CLEAR"
+                                        Command="{x:Bind ViewModel.ClearAllDataCommand}"
+                                        Style="{StaticResource ArmedCapButtonStyle}"/>
+                            </Grid>
+
+                            <Border Height="1" Background="{ThemeResource Carbon800Brush}"/>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Privacy Notice" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="12">
+                                    SysMonitor runs entirely on your device. No data is collected, transmitted,
+                                    or shared with third parties. All monitoring data is processed locally and
+                                    settings are stored on your machine only.
+                                </TextBlock>
+                            </StackPanel>
                         </StackPanel>
-                        <!-- CLEAR -->
-                        <Button Grid.Column="2" Content="CLEAR"
-                                Command="{x:Bind ViewModel.ClearAllDataCommand}"
-                                Style="{StaticResource ArmedCapButtonStyle}"/>
-                    </Grid>
-
-                    <Border Height="1" Background="{ThemeResource Carbon800Brush}"/>
-
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Privacy Notice" FontWeight="SemiBold" Foreground="{ThemeResource PlatinumBrush}"/>
-                        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="12">
-                            SysMonitor runs entirely on your device. No data is collected, transmitted,
-                            or shared with third parties. All monitoring data is processed locally and
-                            settings are stored on your machine only.
-                        </TextBlock>
-                    </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- About Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="ABOUT" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="SET - ABOUT - 32F" Serial="{instruments:SerialFor Module=SET-ABOUT}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="16">
-                        <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
-                            <FontIcon Glyph="&#xE7F4;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <!-- Strategia-X branding like Android -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                <TextBlock Text="\\strateg\a-" FontSize="10" FontWeight="Light"
-                                           Foreground="{ThemeResource SilverBrush}" FontFamily="Consolas"/>
-                                <TextBlock Text="x" FontSize="10" FontWeight="Light"
-                                           Foreground="{ThemeResource ArmedLitBrush}" FontFamily="Consolas"/>
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
+                                    <FontIcon Glyph="&#xE7F4;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <!-- Strategia-X branding like Android -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="\\strateg\a-" FontSize="10" FontWeight="Light"
+                                                   Foreground="{ThemeResource SilverBrush}" FontFamily="{StaticResource ConsoleCodeFontFamily}"/>
+                                        <TextBlock Text="x" FontSize="10" FontWeight="Light"
+                                                   Foreground="{ThemeResource ArmedLitBrush}" FontFamily="{StaticResource ConsoleCodeFontFamily}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="STX" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
+                                        <TextBlock Text="." FontSize="14" FontWeight="Bold" Foreground="{ThemeResource ArmedLitBrush}"/>
+                                        <TextBlock Text="1" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
+                                        <TextBlock Text=" SYSTEM MONITOR" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Version " Foreground="{ThemeResource SilverBrush}"/>
+                                        <TextBlock Text="{x:Bind ViewModel.Version, Mode=OneWay}" Foreground="{ThemeResource SilverBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                <TextBlock Text="STX" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
-                                <TextBlock Text="." FontSize="14" FontWeight="Bold" Foreground="{ThemeResource ArmedLitBrush}"/>
-                                <TextBlock Text="1" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
-                                <TextBlock Text=" SYSTEM MONITOR" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Version " Foreground="{ThemeResource SilverBrush}"/>
-                                <TextBlock Text="{x:Bind ViewModel.Version, Mode=OneWay}" Foreground="{ThemeResource SilverBrush}"/>
-                            </StackPanel>
+                            <TextBlock Text="Strategic. Excellence. Engineered." Foreground="{ThemeResource ArmedLitBrush}"
+                                       FontSize="12" Margin="0,8,0,0"/>
+                            <TextBlock Text="© 2024-2026 Rocky Stack. Free and open source under the MIT License."
+                                       Foreground="{ThemeResource SilverBrush}" FontSize="11"/>
+                            <TextBlock Foreground="{ThemeResource SilverBrush}" FontSize="11" TextWrapping="Wrap">
+                                <Run Text="You are free to use, copy, modify and redistribute this software. See the"/>
+                                <Run Text="User's Guide" FontWeight="SemiBold"/>
+                                <Run Text="for the full terms and the licences of the third-party components it includes."/>
+                            </TextBlock>
                         </StackPanel>
+                    </instruments:Plate>
+
+                    <!-- Actions -->
+                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                        <!-- SAVE SETTINGS -->
+                        <Button Content="SAVE SETTINGS" Command="{x:Bind ViewModel.SaveSettingsCommand}"/>
+                        <!-- RESET TO DEFAULTS -->
+                        <Button Content="RESET TO DEFAULTS" Command="{x:Bind ViewModel.ResetSettingsCommand}"
+                                Style="{StaticResource ArmedCapButtonStyle}"/>
                     </StackPanel>
-                    <TextBlock Text="Strategic. Excellence. Engineered." Foreground="{ThemeResource ArmedLitBrush}"
-                               FontSize="12" Margin="0,8,0,0"/>
-                    <TextBlock Text="© 2024-2026 Rocky Stack. Free and open source under the MIT License."
-                               Foreground="{ThemeResource SilverBrush}" FontSize="11"/>
-                    <TextBlock Foreground="{ThemeResource SilverBrush}" FontSize="11" TextWrapping="Wrap">
-                        <Run Text="You are free to use, copy, modify and redistribute this software. See the"/>
-                        <Run Text="User's Guide" FontWeight="SemiBold"/>
-                        <Run Text="for the full terms and the licences of the third-party components it includes."/>
-                    </TextBlock>
-                </StackPanel>
-            </instruments:Plate>
 
-            <!-- Actions -->
-            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                <!-- SAVE SETTINGS -->
-                <Button Content="SAVE SETTINGS" Command="{x:Bind ViewModel.SaveSettingsCommand}"/>
-                <!-- RESET TO DEFAULTS -->
-                <Button Content="RESET TO DEFAULTS" Command="{x:Bind ViewModel.ResetSettingsCommand}"
-                        Style="{StaticResource ArmedCapButtonStyle}"/>
-            </StackPanel>
-
-            <!-- Status Message -->
-            <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16,12"
-                    Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"/>
-                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                               Foreground="{ThemeResource StateGoBrush}" VerticalAlignment="Center"/>
+                    <!-- Status Message -->
+                    <instruments:Well Padding="16,12"
+                            Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"/>
+                            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                                       Foreground="{ThemeResource StateGoBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </instruments:Well>
                 </StackPanel>
-            </Border>
+            </instruments:Faceplate>
 
         </StackPanel>
     </ScrollViewer>

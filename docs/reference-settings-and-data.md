@@ -18,14 +18,14 @@ Reset command restores exactly these values (`SettingsViewModel.cs:133-159`).
 |---|---|---|---|
 | Run at Startup | On or off | Off (`:23`) | Launches the app when you sign in |
 | Minimize to Tray | On or off | On (`:24`) | Closing the window keeps the app running in the notification area |
-| Show Notifications | On or off | On (`:25`) | Enables alert toasts (`src/SysMonitor.App/Views/SettingsPage.xaml:78`) |
+| Show Notifications | On or off | On (`:25`) | Enables alert toasts (`src/SysMonitor.App/Views/SettingsPage.xaml:76`) |
 
 ## Monitoring
 
 | Setting | Type | Default | Effect |
 |---|---|---|---|
-| Refresh Interval | 1 to 10 seconds | 2 seconds | Saved, but no page reads it yet: each page refreshes on a fixed timer of its own (`:28`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:102`) |
-| Memory Threshold | Percent | 80 (`:29`) | The usage level that raises a memory alert |
+| Refresh Interval | 1 to 10 seconds | 2 seconds | Saved, but no page reads it yet: each page refreshes on a fixed timer of its own (`:26`, range at `src/SysMonitor.App/Views/SettingsPage.xaml:100`) |
+| Memory Threshold | Percent | 80 (`:27`) | The usage level that raises a memory alert |
 
 The memory threshold raises an alert and nothing else: crossing it trims nothing.
 Working sets are trimmed by the TRIM MEMORY button on the Dashboard
@@ -52,7 +52,7 @@ memory freed; it now reads TRIM MEMORY and reports the same count in the same wo
 
 The button was labelled BOOST RAM up to and including v3.0.0, which was the last piece
 of that flow still claiming otherwise. From v3.0.1 it reads TRIM MEMORY
-(`src/SysMonitor.App/Views/DashboardPage.xaml:242`), with a tooltip explaining the
+(`src/SysMonitor.App/Views/DashboardPage.xaml:240`), with a tooltip explaining the
 standby list. If your copy says BOOST RAM you are on v3.0.0 or earlier; the button does
 the same thing either way.
 
@@ -60,11 +60,11 @@ the same thing either way.
 
 | Setting | Default | Notes |
 |---|---|---|
-| Enable temperature alerts | On (`:32`) | |
-| CPU warning | 75 degrees C (`:33`) | |
-| CPU critical | 90 degrees C (`:34`) | |
-| GPU warning | 80 degrees C (`:35`) | |
-| GPU critical | 95 degrees C (`:36`) | |
+| Enable temperature alerts | On (`:30`) | |
+| CPU warning | 75 degrees C (`:31`) | |
+| CPU critical | 90 degrees C (`:32`) | |
+| GPU warning | 80 degrees C (`:33`) | |
+| GPU critical | 95 degrees C (`:34`) | |
 
 Temperature readings need hardware sensor access. Run the app as administrator if the
 values read as unavailable.
@@ -73,9 +73,9 @@ values read as unavailable.
 
 | Setting | Default | Notes |
 |---|---|---|
-| Enable battery alerts | On (`:50`) | |
-| Low battery warning | 20 percent (`:51`) | |
-| Critical battery warning | 10 percent (`:52`) | |
+| Enable battery alerts | On (`:48`) | |
+| Low battery warning | 20 percent (`:49`) | |
+| Critical battery warning | 10 percent (`:50`) | |
 
 A machine with no battery is handled as a machine with no battery. Before v3.0.0 the
 alert service dereferenced a null reading, so every battery alert check threw and was

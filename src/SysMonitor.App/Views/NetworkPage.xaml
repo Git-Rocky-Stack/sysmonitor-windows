@@ -15,275 +15,275 @@
                                     Description="Real-time connectivity analytics"/>
 
             <!-- Connection Status Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="CONNECTION STATUS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="NET - CONNECTION STATUS - 18A" Serial="{instruments:SerialFor Module=NET-CONNECTION-STATUS}">
+                <StackPanel Spacing="16">
 
-            <!-- Main Connection Card -->
-            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Main Connection Card -->
+                    <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Network Icon -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <Border Width="64" Height="64" CornerRadius="12"
-                                instruments:StateBrush.Background="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}">
-                            <FontIcon Glyph="&#xE774;" FontSize="32" Foreground="{ThemeResource ArmedFgBrush}"/>
-                        </Border>
-                    </StackPanel>
+                            <!-- Network Icon -->
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <Border Width="64" Height="64" CornerRadius="12"
+                                        instruments:StateBrush.Background="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}">
+                                    <FontIcon Glyph="&#xE774;" FontSize="32" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                </Border>
+                            </StackPanel>
 
-                    <!-- Connection Info -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
-                        <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}"
-                                   Style="{StaticResource MenuItemTextStyle}" FontSize="16"
-                                   TextWrapping="Wrap" MaxWidth="400"/>
-                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                            <instruments:LedDot State="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}" VerticalAlignment="Center"/>
-                            <TextBlock FontSize="13"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}">
-                                <Run Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"/>
-                            </TextBlock>
-                            <TextBlock Text="|" Style="{StaticResource CardSubtitleStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
-                                       Style="{StaticResource CardSubtitleStyle}"/>
-                        </StackPanel>
-                    </StackPanel>
+                            <!-- Connection Info -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
+                                <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}"
+                                           Style="{StaticResource MenuItemTextStyle}" FontSize="16"
+                                           TextWrapping="Wrap" MaxWidth="400"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                    <instruments:LedDot State="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                    <TextBlock FontSize="13"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}">
+                                        <Run Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="|" Style="{StaticResource CardSubtitleStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
+                                               Style="{StaticResource CardSubtitleStyle}"/>
+                                </StackPanel>
+                            </StackPanel>
 
-                    <!-- Status Badge -->
-                    <Border Grid.Column="2" CornerRadius="8" Padding="16,8" VerticalAlignment="Center"
-                            instruments:StateBrush.Background="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Ellipse Width="8" Height="8" Fill="{ThemeResource ArmedFgBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"
-                                       Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </instruments:Plate>
+                            <!-- Status Badge -->
+                            <Border Grid.Column="2" CornerRadius="8" Padding="16,8" VerticalAlignment="Center"
+                                    instruments:StateBrush.Background="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="8" Height="8" Fill="{ThemeResource ArmedFgBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}"
+                                               Foreground="{ThemeResource ArmedFgBrush}" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Speed Stats Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="NETWORK SPEED" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="NET - NETWORK SPEED - 18B" Serial="{instruments:SerialFor Module=NET-NETWORK-SPEED}">
+                <StackPanel Spacing="16">
 
-            <Grid ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <!-- Download Speed Card -->
-                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}">
-                                <FontIcon Glyph="&#xE896;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="DOWNLOAD" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock Text="Incoming Data" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.DownloadSpeedDisplay, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Margin="0,16,0,4"
-                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}"/>
-
-                        <!-- Speed Status Badge -->
-                        <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8"
-                                instruments:StateBrush.Wash="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <instruments:LedDot State="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.DownloadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}"/>
-                            </StackPanel>
-                        </Border>
-
-                        <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}">
-                            <Run Text="Total:"/>
-                            <Run Text="{x:Bind ViewModel.TotalReceivedDisplay, Mode=OneWay}"/>
-                        </TextBlock>
-                    </Grid>
-                </instruments:Plate>
-
-                <!-- Upload Speed Card -->
-                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailExecBrush}">
-                                <FontIcon Glyph="&#xE898;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="UPLOAD" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock Text="Outgoing Data" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UploadSpeedDisplay, Mode=OneWay}"
-                                   Style="{StaticResource StatValueStyle}" Margin="0,16,0,4"
-                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}"/>
-
-                        <!-- Speed Status Badge -->
-                        <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8"
-                                instruments:StateBrush.Wash="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <instruments:LedDot State="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.UploadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}"/>
-                            </StackPanel>
-                        </Border>
-
-                        <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}">
-                            <Run Text="Total:"/>
-                            <Run Text="{x:Bind ViewModel.TotalSentDisplay, Mode=OneWay}"/>
-                        </TextBlock>
-                    </Grid>
-                </instruments:Plate>
-            </Grid>
-
-            <!-- Network Details Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="NETWORK DETAILS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
-
-            <!-- Network Info Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="16" ColumnSpacing="24">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- IP Address -->
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE968;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="IP ADDRESS" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.IpAddress, Mode=OneWay}"
-                                       Foreground="{ThemeResource StateExecBrush}" FontFamily="Consolas"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- MAC Address -->
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="MAC ADDRESS" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.MacAddress, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}" FontFamily="Consolas" FontSize="12"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Connection Type -->
-                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE774;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="CONNECTION TYPE" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Adapter Name -->
-                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="ADAPTER" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}"
-                                       Foreground="{ThemeResource PlatinumBrush}" TextTrimming="CharacterEllipsis"
-                                       MaxWidth="200"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
-
-            <!-- Network Adapters Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="NETWORK ADAPTERS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
-
-            <!-- Adapters List -->
-            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Adapters, Mode=OneWay}">
-                <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Vertical" Spacing="8"/>
-                </ItemsRepeater.Layout>
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="models:NetworkAdapter">
-                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <!-- Download Speed Card -->
+                        <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
                             <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                <!-- Adapter Icon -->
-                                <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}">
-                                    <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                                </Border>
-
-                                <!-- Adapter Info -->
-                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                                    <TextBlock Text="{x:Bind Name}" Style="{StaticResource MenuItemTextStyle}"/>
-                                    <TextBlock Text="{x:Bind Description}" Style="{StaticResource CardSubtitleStyle}"
-                                               TextTrimming="CharacterEllipsis"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
-                                        <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                            <Run Text="Type:"/>
-                                            <Run Text="{x:Bind Type}" Foreground="{ThemeResource PlatinumBrush}"/>
-                                        </TextBlock>
-                                        <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                            <Run Text="IP:"/>
-                                            <Run Text="{x:Bind IpAddress}" Foreground="{ThemeResource StateExecBrush}"/>
-                                        </TextBlock>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}">
+                                        <FontIcon Glyph="&#xE896;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="DOWNLOAD" Style="{StaticResource StatLabelStyle}"/>
+                                        <TextBlock Text="Incoming Data" Style="{StaticResource CardSubtitleStyle}"/>
                                     </StackPanel>
                                 </StackPanel>
 
-                                <!-- Status Badge -->
-                                <Border Grid.Column="2" CornerRadius="4" Padding="8,4"
-                                        Background="{ThemeResource Carbon700Brush}" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind Status}" FontSize="12"
-                                               Foreground="{ThemeResource SilverBrush}"/>
+                                <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.DownloadSpeedDisplay, Mode=OneWay}"
+                                           Style="{StaticResource StatValueStyle}" Margin="0,16,0,4"
+                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}"/>
+
+                                <!-- Speed Status Badge -->
+                                <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                        instruments:StateBrush.Wash="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <instruments:LedDot State="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.DownloadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.DownloadSpeedState, Mode=OneWay}"/>
+                                    </StackPanel>
                                 </Border>
+
+                                <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}">
+                                    <Run Text="Total:"/>
+                                    <Run Text="{x:Bind ViewModel.TotalReceivedDisplay, Mode=OneWay}"/>
+                                </TextBlock>
                             </Grid>
                         </instruments:Plate>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+
+                        <!-- Upload Speed Card -->
+                        <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailExecBrush}">
+                                        <FontIcon Glyph="&#xE898;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="UPLOAD" Style="{StaticResource StatLabelStyle}"/>
+                                        <TextBlock Text="Outgoing Data" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.UploadSpeedDisplay, Mode=OneWay}"
+                                           Style="{StaticResource StatValueStyle}" Margin="0,16,0,4"
+                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}"/>
+
+                                <!-- Speed Status Badge -->
+                                <Border Grid.Row="2" CornerRadius="8" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                        instruments:StateBrush.Wash="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <instruments:LedDot State="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.UploadSpeedStatus, Mode=OneWay}" FontSize="11" FontWeight="SemiBold"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.UploadSpeedState, Mode=OneWay}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Grid.Row="3" Style="{StaticResource CardSubtitleStyle}">
+                                    <Run Text="Total:"/>
+                                    <Run Text="{x:Bind ViewModel.TotalSentDisplay, Mode=OneWay}"/>
+                                </TextBlock>
+                            </Grid>
+                        </instruments:Plate>
+                    </Grid>
+                </StackPanel>
+            </instruments:Faceplate>
+
+            <!-- Network Details Section -->
+            <instruments:Faceplate Kicker="NET - NETWORK DETAILS - 18C" Serial="{instruments:SerialFor Module=NET-NETWORK-DETAILS}">
+                <StackPanel Spacing="16">
+
+                    <!-- Network Info Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <Grid RowSpacing="16" ColumnSpacing="24">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- IP Address -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE968;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="IP ADDRESS" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.IpAddress, Mode=OneWay}"
+                                               Foreground="{ThemeResource StateExecBrush}" FontFamily="{StaticResource ConsoleCodeFontFamily}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- MAC Address -->
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="MAC ADDRESS" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.MacAddress, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}" FontFamily="{StaticResource ConsoleCodeFontFamily}" FontSize="12"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Connection Type -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE774;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="CONNECTION TYPE" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.ConnectionType, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Adapter Name -->
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE964;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="ADAPTER" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}"
+                                               Foreground="{ThemeResource PlatinumBrush}" TextTrimming="CharacterEllipsis"
+                                               MaxWidth="200"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
+
+            <!-- Network Adapters Section -->
+            <instruments:Faceplate Kicker="NET - NETWORK ADAPTERS - 18D" Serial="{instruments:SerialFor Module=NET-NETWORK-ADAPTERS}">
+                <StackPanel Spacing="16">
+
+                    <!-- Adapters List -->
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.Adapters, Mode=OneWay}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Orientation="Vertical" Spacing="8"/>
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="models:NetworkAdapter">
+                                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Adapter Icon -->
+                                        <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}">
+                                            <FontIcon Glyph="&#xE839;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                        </Border>
+
+                                        <!-- Adapter Info -->
+                                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                            <TextBlock Text="{x:Bind Name}" Style="{StaticResource MenuItemTextStyle}"/>
+                                            <TextBlock Text="{x:Bind Description}" Style="{StaticResource CardSubtitleStyle}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
+                                                <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                                    <Run Text="Type:"/>
+                                                    <Run Text="{x:Bind Type}" Foreground="{ThemeResource PlatinumBrush}"/>
+                                                </TextBlock>
+                                                <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                                    <Run Text="IP:"/>
+                                                    <Run Text="{x:Bind IpAddress}" Foreground="{ThemeResource StateExecBrush}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Status Badge -->
+                                        <Border Grid.Column="2" CornerRadius="4" Padding="8,4"
+                                                Background="{ThemeResource Carbon700Brush}" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Status}" FontSize="12"
+                                                       Foreground="{ThemeResource SilverBrush}"/>
+                                        </Border>
+                                    </Grid>
+                                </instruments:Plate>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

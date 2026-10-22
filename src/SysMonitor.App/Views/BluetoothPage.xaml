@@ -42,71 +42,71 @@
 
                 <!-- Adapter Info Section -->
                 <StackPanel Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="ADAPTER INFO" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="BT - ADAPTER INFO - 27A" Serial="{instruments:SerialFor Module=BT-ADAPTER-INFO}">
+                        <StackPanel Spacing="8">
 
-                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                            <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                                <FontIcon Glyph="&#xE702;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
+                                    <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
+                                        <FontIcon Glyph="&#xE702;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
 
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"/>
-                                <TextBlock Text="{x:Bind ViewModel.AdapterAddress, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0"/>
-                            </StackPanel>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"/>
+                                        <TextBlock Text="{x:Bind ViewModel.AdapterAddress, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0"/>
+                                    </StackPanel>
 
-                            <instruments:Chip State="{x:Bind ViewModel.AdapterStatusState, Mode=OneWay}" Content="{x:Bind ViewModel.AdapterStatus, Mode=OneWay, Converter={StaticResource UpperCaseConverter}}" Grid.Column="2" VerticalAlignment="Center"/>
-                        </Grid>
-                    </instruments:Plate>
+                                    <instruments:Chip State="{x:Bind ViewModel.AdapterStatusState, Mode=OneWay}" Content="{x:Bind ViewModel.AdapterStatus, Mode=OneWay, Converter={StaticResource UpperCaseConverter}}" Grid.Column="2" VerticalAlignment="Center"/>
+                                </Grid>
+                            </instruments:Plate>
+                        </StackPanel>
+                    </instruments:Faceplate>
                 </StackPanel>
 
                 <!-- Stats Section -->
                 <StackPanel Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="STATISTICS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="BT - STATISTICS - 27B" Serial="{instruments:SerialFor Module=BT-STATISTICS}">
+                        <StackPanel Spacing="8">
 
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Devices Found -->
-                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="Devices Found" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.DevicesFound, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" Margin="0,8,0,0" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
+                                <!-- Devices Found -->
+                                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Devices Found" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.DevicesFound, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
 
-                        <!-- Connected -->
-                        <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="Connected" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ConnectedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}" Margin="0,8,0,0" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
+                                <!-- Connected -->
+                                <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Connected" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ConnectedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
 
-                        <!-- Paired -->
-                        <instruments:Plate Grid.Column="2" Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="Paired" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.PairedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" Margin="0,8,0,0" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
-                    </Grid>
+                                <!-- Paired -->
+                                <instruments:Plate Grid.Column="2" Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Paired" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.PairedDevices, Mode=OneWay}" FontSize="32" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
+                            </Grid>
+                        </StackPanel>
+                    </instruments:Faceplate>
                 </StackPanel>
 
                 <!-- Scan Status -->
@@ -115,76 +115,76 @@
 
                 <!-- Devices List Section -->
                 <StackPanel Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="DISCOVERED DEVICES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="BT - DISCOVERED DEVICES - 27C" Serial="{instruments:SerialFor Module=BT-DISCOVERED-DEVICES}">
+                        <StackPanel Spacing="8">
 
-                    <instruments:Plate Padding="0" MinHeight="300" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <ListView ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
-                                      Background="Transparent" SelectionMode="None">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="Padding" Value="12"/>
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="utils:BluetoothDeviceInfo">
-                                        <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="6" Padding="16">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                            <instruments:Plate Padding="0" MinHeight="300" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <ListView ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
+                                              Background="Transparent" SelectionMode="None">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                <Setter Property="Padding" Value="12"/>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate x:DataType="utils:BluetoothDeviceInfo">
+                                                <instruments:Well Padding="16">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
 
-                                                <!-- Icon -->
-                                                <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48" VerticalAlignment="Center">
-                                                    <FontIcon Glyph="{x:Bind DeviceIcon}" Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
-                                                </Border>
+                                                        <!-- Icon -->
+                                                        <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48" VerticalAlignment="Center">
+                                                            <FontIcon Glyph="{x:Bind DeviceIcon}" Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
+                                                        </Border>
 
-                                                <!-- Device Info -->
-                                                <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{x:Bind Name}" Style="{StaticResource CardTitleStyle}"/>
-                                                    <TextBlock Text="{x:Bind DeviceType}" Style="{StaticResource CardSubtitleStyle}" Margin="0,2,0,0"/>
-                                                    <TextBlock Text="{x:Bind Address}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,2,0,0"/>
-                                                </StackPanel>
+                                                        <!-- Device Info -->
+                                                        <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{x:Bind Name}" Style="{StaticResource CardTitleStyle}"/>
+                                                            <TextBlock Text="{x:Bind DeviceType}" Style="{StaticResource CardSubtitleStyle}" Margin="0,2,0,0"/>
+                                                            <TextBlock Text="{x:Bind Address}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,2,0,0"/>
+                                                        </StackPanel>
 
-                                                <!-- Signal -->
-                                                <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                    <TextBlock Text="Signal" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                                    <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,2,0,0"
-                                                               instruments:StateBrush.Foreground="{x:Bind SignalState}">
-                                                        <Run Text="{x:Bind SignalStrength}"/><Run Text="%"/>
-                                                    </TextBlock>
-                                                </StackPanel>
+                                                        <!-- Signal -->
+                                                        <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                            <TextBlock Text="Signal" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                                                            <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,2,0,0"
+                                                                       instruments:StateBrush.Foreground="{x:Bind SignalState}">
+                                                                <Run Text="{x:Bind SignalStrength}"/><Run Text="%"/>
+                                                            </TextBlock>
+                                                        </StackPanel>
 
-                                                <!-- Status -->
-                                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                    <instruments:Chip State="{x:Bind StatusState}" Content="CONNECTED" Visibility="{x:Bind IsConnected, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                                    <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="4" Padding="8,4"
-                                                            Visibility="{x:Bind IsPaired, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="Paired" FontSize="11" Foreground="{ThemeResource ArmedFgBrush}"/>
-                                                    </Border>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                                                        <!-- Status -->
+                                                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                            <instruments:Chip State="{x:Bind StatusState}" Content="CONNECTED" Visibility="{x:Bind IsConnected, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                            <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="4" Padding="8,4"
+                                                                    Visibility="{x:Bind IsPaired, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <TextBlock Text="Paired" FontSize="11" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </instruments:Well>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
 
-                            <!-- Empty State -->
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                                        Visibility="{x:Bind ViewModel.DevicesFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
-                                <FontIcon Glyph="&#xE702;" FontSize="48" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                <TextBlock Text="No Bluetooth devices found" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
-                                <TextBlock Text="Click 'SCAN' to search for nearby devices" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </instruments:Plate>
+                                    <!-- Empty State -->
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                Visibility="{x:Bind ViewModel.DevicesFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
+                                        <FontIcon Glyph="&#xE702;" FontSize="48" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                        <TextBlock Text="No Bluetooth devices found" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
+                                        <TextBlock Text="Click 'SCAN' to search for nearby devices" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </instruments:Plate>
+                        </StackPanel>
+                    </instruments:Faceplate>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

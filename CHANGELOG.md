@@ -37,7 +37,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   radius, the thumb 16 square on the 3px inset radius, and the shade the top edge casts into the
   recess drawn as a gradient, since WinUI has no inset shadow. Turned on it arms - the track, its
   rim and the thumb all going over to armed red together, the thumb travelling 20
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:194`). Locked, it dims to .42, which is what
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:224`). Locked, it dims to .42, which is what
   a locked cap does, because System-X writes that rule once and points the switch at it. The palette
   gains the eight colours the lever needs, written for all three shifts by the generator
   (`scripts/generate-tokens.py:192`, `:305`).
@@ -81,7 +81,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   DISABLED chip words come from one converter (`:491`), and so do Performance's: its status line
   read "Status: Pause" in green while it was monitoring - the button's verb, not the state - and is
   now a MONITORING or PAUSED chip, lit go or hold, beside a PAUSE or RESUME cap
-  (`src/SysMonitor.App/Views/PerformancePage.xaml:37`).
+  (`src/SysMonitor.App/Views/PerformancePage.xaml:35`).
 
 - **Every page opens on the console's view header.** The hand-built black banner each of the 35
   pages opened with - a red title, a translucent subtitle and a centred logo - is now System-X's
@@ -122,7 +122,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   a grey placeholder, and the shade the top edge casts in drawn as a gradient. Focused, the edge
   goes to armed edge and a 2px armed outline stands 1px off it, drawn by the field itself on any
   focus, not only the keyboard's. A header is a field label - Departure Mono 10, tracked .12em
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:553`, `:756`, `:942`). NumberBox's own text
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:583`, `:786`, `:972`). NumberBox's own text
   box is pointed at the same field, so a form reads as one idiom; ComboBox is not a field, since
   System-X gives `select` only the armed accent. The palette gains the field's colours for all
   three shifts, and a locked field's words keep their white on Day Shift, where the chassis'
@@ -240,7 +240,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   page that never set a `DataContext`, so the binding found nothing and the button did
   nothing. It now reaches the command the way Installed Programs and PDF Tools do, and
   its tooltip says it removes the file from the list rather than wiping it.
-  (`src/SysMonitor.App/Views/DriveWiperPage.xaml:7`, `:135`,
+  (`src/SysMonitor.App/Views/DriveWiperPage.xaml:7`, `:132`,
   `src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:17`)
 
 - **Nothing on the Drive Wiper page changes while a wipe runs.** The wipe works through
@@ -253,7 +253,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   named only the last choice. WIPE NOW also waits for an add to finish - a folder is
   sized before it joins the list, and a wipe started in that gap ran without it.
   (`src/SysMonitor.App/ViewModels/DriveWiperViewModel.cs:25`, `:196`, `:203`,
-  `src/SysMonitor.App/Views/DriveWiperPage.xaml:74`)
+  `src/SysMonitor.App/Views/DriveWiperPage.xaml:72`)
 
 - **A file the wipe could not finish says why.** Each row has an error line, but the
   entry behind it raised no change notification, so the line was read once, while still
@@ -264,8 +264,8 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **Memory sizes carry one unit.** `MBConverter` already appends `MB` or `GB`; the
   Dashboard's Cleanable Space line and the Processes page's Memory column appended
   another, and read "512 MB MB" and "1.2 GB MB".
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:471`,
-  `src/SysMonitor.App/Views/ProcessesPage.xaml:115`)
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:469`,
+  `src/SysMonitor.App/Views/ProcessesPage.xaml:111`)
 
 - **A missing temperature reads as missing.** With no sensor the monitors report 0 C,
   which the Fahrenheit converter turned into 32F on the Dashboard, the Temperature page
@@ -294,13 +294,13 @@ Each entry describes a behaviour change and cites the file it lives in.
   and "MEMORY OPTIMIZED" beside the failure; the tick is now a red cross on failure, and
   the badge appears only once a trim has worked.
   (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176`, `:52`,
-  `src/SysMonitor.App/Views/MemoryPage.xaml:80`, `:102`, `:115`)
+  `src/SysMonitor.App/Views/MemoryPage.xaml:78`, `:100`, `:113`)
 
 - **The in-app guide describes Game Mode's session stats as they read.** It listed
   "memory freed" for a figure the Game Mode page labels Trimmed. The in-app claim check
   knew only the RAM wordings of this claim, which is how both this line and the Memory
   page's message got past it; it now covers "memory" as well as "RAM".
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:927`,
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:922`,
   `tests/SysMonitor.Tests/Architecture/InAppGuideClaimTests.cs:45`)
 
 - **The documentation says what trims memory.** The user guide and the settings
@@ -423,14 +423,14 @@ labels on top of them, and this release finishes that.
   background apps" since 3.0.0, and the optimizer's own wording was corrected then; the
   button label was the last part of that flow still claiming otherwise. It now reads
   `TRIM MEMORY`, with a tooltip saying what happens to the pages.
-  (`src/SysMonitor.App/Views/DashboardPage.xaml:242`)
+  (`src/SysMonitor.App/Views/DashboardPage.xaml:240`)
 
 - **Game Mode stops claiming it frees RAM.** Game Mode's memory step calls the same
   `IMemoryOptimizer.OptimizeMemoryAsync` the Dashboard button does
   (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111`), so it trims working
   sets and frees nothing - but the page said `Frees Up RAM`, subtitled it "Optimizes
   memory for gaming", and labelled the result `RAM Freed`
-  (`src/SysMonitor.App/Views/GameModePage.xaml:419`, `:420`, `:454`). Three more copies
+  (`src/SysMonitor.App/Views/GameModePage.xaml:417`, `:418`, `:452`). Three more copies
   of the claim the Dashboard button had just been corrected for. They now read
   `Trims Memory` and `Trimmed`. The field behind the label was called `MemoryFreedBytes`,
   which is where each of those labels came from; it is now `MemoryTrimmedBytes`
@@ -443,7 +443,7 @@ labels on top of them, and this release finishes that.
   a file count, so that is what the guide now says. The card subtitle "Free space and
   boost performance" headed six tools of which a registry cleaner and a startup manager
   free no space; it now names what the tools under it do.
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:64`, `:163`)
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:62`, `:161`)
 
 - **The Game Mode target list says what happens to the apps on it.** It was captioned
   "These apps will be closed when Game Mode is enabled", above twenty-one named
@@ -451,7 +451,7 @@ labels on top of them, and this release finishes that.
   `LowerPriority` (`src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:26`), which
   moves them down the processor queue, and ticking "Ask them to close instead" asks and
   accepts a refusal. The caption now says which of those happens and that an app which
-  declines keeps running. (`src/SysMonitor.App/Views/GameModePage.xaml:503`)
+  declines keeps running. (`src/SysMonitor.App/Views/GameModePage.xaml:501`)
 
 - **The markdown guide's Quick Actions table matches the buttons.** It listed "Quick
   Clean - Instantly removes temporary files and browser cache", and Quick Clean does not
@@ -474,7 +474,7 @@ labels on top of them, and this release finishes that.
   consults any catalogue (`src/SysMonitor.Core/Services/Utilities/DriverUpdater.cs:99-100`,
   `:277`); and "One-click RAM cleanup". Nothing reads the markdown file at runtime, so no
   shipped build showed these five. The in-app guide was correct on all five
-  (`src/SysMonitor.App/Views/UserGuidePage.xaml:196`, `:835`, `:843`, `:847`) but wrong on
+  (`src/SysMonitor.App/Views/UserGuidePage.xaml:194`, `:830`, `:838`, `:842`) but wrong on
   three others, which are the three Changed entries above; this entry said the in-app
   guide "was already correct" without qualification, and that was not true of the file as
   a whole.
@@ -716,7 +716,7 @@ which is what makes this a major version.
 - **A License card was added to the in-app User's Guide**
   (`src/SysMonitor.App/Views/UserGuidePage.xaml`), stating what the MIT grant permits and
   requires, and listing the third-party licences bundled with the app. The Settings page
-  says the same (`src/SysMonitor.App/Views/SettingsPage.xaml:343`).
+  says the same (`src/SysMonitor.App/Views/SettingsPage.xaml:341`).
 - **`THIRD-PARTY-NOTICES.md` added.** The build is self-contained, so it redistributes its
   dependencies, and none were attributed. LibreHardwareMonitor is MPL-2.0 and carries a
   source-availability obligation that was not being met; Serilog is Apache-2.0.

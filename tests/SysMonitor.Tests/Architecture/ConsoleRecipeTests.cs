@@ -109,16 +109,7 @@ public class ConsoleRecipeTests
 
     private static readonly string[] ChromeBezels = [];
 
-    private static readonly string[] FontFamilyLiterals =
-    [
-        "src/SysMonitor.App/Views/FpsOverlayWindow.xaml",
-        "src/SysMonitor.App/Views/GameModePage.xaml",
-        "src/SysMonitor.App/Views/NetworkPage.xaml",
-        "src/SysMonitor.App/Views/PdfToolsPage.xaml",
-        "src/SysMonitor.App/Views/SettingsPage.xaml",
-        "src/SysMonitor.App/Views/SystemInfoPage.xaml",
-        "src/SysMonitor.App/Views/UserGuidePage.xaml",
-    ];
+    private static readonly string[] FontFamilyLiterals = [];
 
     private static readonly string[] HandBuiltDialogs = [];
 }

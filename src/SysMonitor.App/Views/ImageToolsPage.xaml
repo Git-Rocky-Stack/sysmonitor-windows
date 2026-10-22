@@ -16,403 +16,403 @@
                                     Description="Compress, convert, and resize images"/>
 
             <!-- Image Selection Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="SELECT IMAGES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="IMAGE - SELECT IMAGES - 26A" Serial="{instruments:SerialFor Module=IMAGE-SELECT-IMAGES}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="16">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Selection Buttons -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                        <Button Command="{x:Bind ViewModel.SelectSingleImageCommand}"
-                                Width="180">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8B9;" FontSize="14"/>
-                                <TextBlock Text="SELECT IMAGE"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Command="{x:Bind ViewModel.SelectImagesCommand}"
-                                Width="180">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8F1;" FontSize="14"/>
-                                <TextBlock Text="SELECT MULTIPLE"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Content="CLEAR" Command="{x:Bind ViewModel.ClearSelectionCommand}"
-                                Visibility="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    </StackPanel>
-
-                    <!-- Selected Images Summary -->
-                    <Border Grid.Row="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
-                            Visibility="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid ColumnSpacing="16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Border Grid.Column="0" Width="48" Height="48" CornerRadius="8"
-                                    Background="{ThemeResource RailExecBrush}">
-                                <FontIcon Glyph="&#xEB9F;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock FontWeight="SemiBold" FontSize="16"
-                                           Foreground="{ThemeResource PlatinumBrush}">
-                                    <Run Text="{x:Bind ViewModel.SelectedImagesCount, Mode=OneWay}"/>
-                                    <Run Text=" image(s) selected"/>
-                                </TextBlock>
-                                <TextBlock Text="Supported: JPG, PNG, BMP, GIF"
-                                           Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                <TextBlock Text="TOTAL SIZE" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Right"/>
-                                <TextBlock Text="{x:Bind ViewModel.TotalSelectedSize, Mode=OneWay}"
-                                           Foreground="{ThemeResource StateExecBrush}"
-                                           FontWeight="Bold" FontSize="18"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- Image Info (single image) -->
-                    <Border Grid.Row="2" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
-                            Visibility="{x:Bind ViewModel.HasImageInfo, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid ColumnSpacing="24">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                <TextBlock Text="DIMENSIONS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ImageDimensions, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                <TextBlock Text="FORMAT" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ImageFormatName, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource StateExecBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                                <TextBlock Text="COLOR DEPTH" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ImageColorDepth, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="3" HorizontalAlignment="Center">
-                                <TextBlock Text="RESOLUTION" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ImageResolution, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </instruments:Plate>
-
-            <!-- Action Feedback -->
-            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
-                    Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20"
-                              instruments:StateBrush.Foreground="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}"/>
-                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
-                               Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
-                               TextWrapping="Wrap"/>
-                </Grid>
-            </Border>
-
-            <!-- Operations Grid -->
-            <Grid ColumnSpacing="16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Compress Card -->
-                <instruments:Plate Grid.Column="0" Padding="20" VerticalContentAlignment="Stretch">
-                    <StackPanel Spacing="16">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Width="48" Height="48" CornerRadius="8"
-                                    Background="{ThemeResource RailGoBrush}">
-                                <FontIcon Glyph="&#xE81E;" FontSize="24"
-                                          Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="COMPRESS" FontWeight="Bold" FontSize="16"
-                                           Foreground="{ThemeResource PlatinumBrush}"/>
-                                <TextBlock Text="Reduce file size"
-                                           Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Quality:" Foreground="{ThemeResource SilverBrush}"/>
-                            <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Slider Grid.Column="0" Minimum="10" Maximum="100"
-                                        Value="{x:Bind ViewModel.CompressionQuality, Mode=TwoWay}"/>
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center"
-                                           Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold">
-                                    <Run Text="{x:Bind ViewModel.CompressionQuality, Mode=OneWay}"/>
-                                    <Run Text="%"/>
-                                </TextBlock>
-                            </Grid>
-                        </StackPanel>
-
-                        <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
-                                Style="{StaticResource ChromeCapButtonStyle}" HorizontalAlignment="Stretch"
-                                IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
-                            <Button.ContentTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="&#xE81E;" FontSize="14"/>
-                                        <TextBlock Text="COMPRESS"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Button.ContentTemplate>
-                        </Button>
-                    </StackPanel>
-                </instruments:Plate>
-
-                <!-- Convert Card -->
-                <instruments:Plate Grid.Column="1" Padding="20" VerticalContentAlignment="Stretch">
-                    <StackPanel Spacing="16">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Width="48" Height="48" CornerRadius="8"
-                                    Background="{ThemeResource RailExecBrush}">
-                                <FontIcon Glyph="&#xE8AB;" FontSize="24"
-                                          Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="CONVERT" FontWeight="Bold" FontSize="16"
-                                           Foreground="{ThemeResource PlatinumBrush}"/>
-                                <TextBlock Text="Change image format"
-                                           Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Target Format:" Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox ItemsSource="{x:Bind ViewModel.ImageFormats}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}"
-                                      HorizontalAlignment="Stretch"/>
-                        </StackPanel>
-
-                        <Button Content="CONVERT" Command="{x:Bind ViewModel.ConvertCommand}"
-                                HorizontalAlignment="Stretch"
-                                IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
-                            <Button.ContentTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="&#xE8AB;" FontSize="14"/>
-                                        <TextBlock Text="CONVERT"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Button.ContentTemplate>
-                        </Button>
-                    </StackPanel>
-                </instruments:Plate>
-
-                <!-- Resize Card -->
-                <instruments:Plate Grid.Column="2" Padding="20" VerticalContentAlignment="Stretch">
-                    <StackPanel Spacing="16">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Width="48" Height="48" CornerRadius="8"
-                                    Background="{ThemeResource RailExecBrush}">
-                                <FontIcon Glyph="&#xE799;" FontSize="24"
-                                          Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="RESIZE" FontWeight="Bold" FontSize="16"
-                                           Foreground="{ThemeResource PlatinumBrush}"/>
-                                <TextBlock Text="Change dimensions"
-                                           Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <Grid ColumnSpacing="8" RowSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
+                        <Grid RowSpacing="16">
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <NumberBox Grid.Column="0" Grid.Row="0" Header="Width"
-                                       Value="{x:Bind ViewModel.ResizeWidth, Mode=TwoWay}"
-                                       Minimum="1" Maximum="10000" SpinButtonPlacementMode="Compact"/>
-                            <TextBlock Grid.Column="1" Grid.Row="0" Text="x" VerticalAlignment="Bottom"
-                                       Margin="0,0,0,8" Foreground="{ThemeResource SilverBrush}"/>
-                            <NumberBox Grid.Column="2" Grid.Row="0" Header="Height"
-                                       Value="{x:Bind ViewModel.ResizeHeight, Mode=TwoWay}"
-                                       Minimum="1" Maximum="10000" SpinButtonPlacementMode="Compact"/>
-
-                            <CheckBox Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
-                                      Content="Maintain aspect ratio"
-                                      IsChecked="{x:Bind ViewModel.MaintainAspectRatio, Mode=TwoWay}"
-                                      Foreground="{ThemeResource SilverBrush}"/>
-                        </Grid>
-
-                        <Button Content="RESIZE" Command="{x:Bind ViewModel.ResizeCommand}"
-                                HorizontalAlignment="Stretch"
-                                IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
-                            <Button.ContentTemplate>
-                                <DataTemplate>
+                            <!-- Selection Buttons -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                                <Button Command="{x:Bind ViewModel.SelectSingleImageCommand}"
+                                        Width="180">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="&#xE799;" FontSize="14"/>
-                                        <TextBlock Text="RESIZE"/>
+                                        <FontIcon Glyph="&#xE8B9;" FontSize="14"/>
+                                        <TextBlock Text="SELECT IMAGE"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </Button.ContentTemplate>
-                        </Button>
-                    </StackPanel>
-                </instruments:Plate>
-            </Grid>
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.SelectImagesCommand}"
+                                        Width="180">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE8F1;" FontSize="14"/>
+                                        <TextBlock Text="SELECT MULTIPLE"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Content="CLEAR" Command="{x:Bind ViewModel.ClearSelectionCommand}"
+                                        Visibility="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </StackPanel>
 
-            <!-- Processing Indicator -->
-            <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="12">
-                    <instruments:BusyWell Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"/>
-                    <ProgressBar Value="{x:Bind ViewModel.ProcessingProgress, Mode=OneWay}"
-                                 Maximum="100" Height="4"/>
-                </StackPanel>
-            </instruments:Plate>
+                            <!-- Selected Images Summary -->
+                            <Border Grid.Row="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
+                                    Visibility="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-            <!-- Result Section -->
-            <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="16">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE73E;" FontSize="28" Foreground="{ThemeResource StateGoBrush}"/>
-                        <TextBlock Text="OPERATION COMPLETE" FontWeight="Bold" FontSize="18"
-                                   VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
-                    </StackPanel>
+                                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="8"
+                                            Background="{ThemeResource RailExecBrush}">
+                                        <FontIcon Glyph="&#xEB9F;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
 
-                    <Grid ColumnSpacing="24">
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock FontWeight="SemiBold" FontSize="16"
+                                                   Foreground="{ThemeResource PlatinumBrush}">
+                                            <Run Text="{x:Bind ViewModel.SelectedImagesCount, Mode=OneWay}"/>
+                                            <Run Text=" image(s) selected"/>
+                                        </TextBlock>
+                                        <TextBlock Text="Supported: JPG, PNG, BMP, GIF"
+                                                   Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <TextBlock Text="TOTAL SIZE" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{x:Bind ViewModel.TotalSelectedSize, Mode=OneWay}"
+                                                   Foreground="{ThemeResource StateExecBrush}"
+                                                   FontWeight="Bold" FontSize="18"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Image Info (single image) -->
+                            <Border Grid.Row="2" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
+                                    Visibility="{x:Bind ViewModel.HasImageInfo, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid ColumnSpacing="24">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                        <TextBlock Text="DIMENSIONS" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ImageDimensions, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                        <TextBlock Text="FORMAT" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ImageFormatName, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="14" Foreground="{ThemeResource StateExecBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                        <TextBlock Text="COLOR DEPTH" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ImageColorDepth, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                        <TextBlock Text="RESOLUTION" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ImageResolution, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="14" Foreground="{ThemeResource PlatinumBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </instruments:Plate>
+
+                    <!-- Action Feedback -->
+                    <instruments:Well Padding="16"
+                            Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20"
+                                      instruments:StateBrush.Foreground="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
+                                       Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
+                                       TextWrapping="Wrap"/>
+                        </Grid>
+                    </instruments:Well>
+
+                    <!-- Operations Grid -->
+                    <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="FILES PROCESSED" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.FilesProcessed, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="20"
-                                           Foreground="{ThemeResource StateExecBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
+                        <!-- Compress Card -->
+                        <instruments:Plate Grid.Column="0" Padding="20" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="16">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border Width="48" Height="48" CornerRadius="8"
+                                            Background="{ThemeResource RailGoBrush}">
+                                        <FontIcon Glyph="&#xE81E;" FontSize="24"
+                                                  Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="COMPRESS" FontWeight="Bold" FontSize="16"
+                                                   Foreground="{ThemeResource PlatinumBrush}"/>
+                                        <TextBlock Text="Reduce file size"
+                                                   Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
 
-                        <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="ORIGINAL SIZE" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ResultOriginalSize, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="20"
-                                           Foreground="{ThemeResource SilverBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Quality:" Foreground="{ThemeResource SilverBrush}"/>
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Grid.Column="0" Minimum="10" Maximum="100"
+                                                Value="{x:Bind ViewModel.CompressionQuality, Mode=TwoWay}"/>
+                                        <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                                   Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold">
+                                            <Run Text="{x:Bind ViewModel.CompressionQuality, Mode=OneWay}"/>
+                                            <Run Text="%"/>
+                                        </TextBlock>
+                                    </Grid>
+                                </StackPanel>
 
-                        <Border Grid.Column="2" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="NEW SIZE" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ResultNewSize, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="20"
-                                           Foreground="{ThemeResource StateGoBrush}"
-                                           HorizontalAlignment="Center"/>
+                                <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
+                                        Style="{StaticResource ChromeCapButtonStyle}" HorizontalAlignment="Stretch"
+                                        IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE81E;" FontSize="14"/>
+                                                <TextBlock Text="COMPRESS"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
                             </StackPanel>
-                        </Border>
+                        </instruments:Plate>
 
-                        <Border Grid.Column="3" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="SPACE SAVED" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ResultSaved, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="20"
-                                           Foreground="{ThemeResource StateExecBrush}"
-                                           HorizontalAlignment="Center"/>
+                        <!-- Convert Card -->
+                        <instruments:Plate Grid.Column="1" Padding="20" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="16">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border Width="48" Height="48" CornerRadius="8"
+                                            Background="{ThemeResource RailExecBrush}">
+                                        <FontIcon Glyph="&#xE8AB;" FontSize="24"
+                                                  Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="CONVERT" FontWeight="Bold" FontSize="16"
+                                                   Foreground="{ThemeResource PlatinumBrush}"/>
+                                        <TextBlock Text="Change image format"
+                                                   Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Target Format:" Foreground="{ThemeResource SilverBrush}"/>
+                                    <ComboBox ItemsSource="{x:Bind ViewModel.ImageFormats}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <Button Content="CONVERT" Command="{x:Bind ViewModel.ConvertCommand}"
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE8AB;" FontSize="14"/>
+                                                <TextBlock Text="CONVERT"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
                             </StackPanel>
-                        </Border>
+                        </instruments:Plate>
+
+                        <!-- Resize Card -->
+                        <instruments:Plate Grid.Column="2" Padding="20" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="16">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border Width="48" Height="48" CornerRadius="8"
+                                            Background="{ThemeResource RailExecBrush}">
+                                        <FontIcon Glyph="&#xE799;" FontSize="24"
+                                                  Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="RESIZE" FontWeight="Bold" FontSize="16"
+                                                   Foreground="{ThemeResource PlatinumBrush}"/>
+                                        <TextBlock Text="Change dimensions"
+                                                   Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Grid ColumnSpacing="8" RowSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <NumberBox Grid.Column="0" Grid.Row="0" Header="Width"
+                                               Value="{x:Bind ViewModel.ResizeWidth, Mode=TwoWay}"
+                                               Minimum="1" Maximum="10000" SpinButtonPlacementMode="Compact"/>
+                                    <TextBlock Grid.Column="1" Grid.Row="0" Text="x" VerticalAlignment="Bottom"
+                                               Margin="0,0,0,8" Foreground="{ThemeResource SilverBrush}"/>
+                                    <NumberBox Grid.Column="2" Grid.Row="0" Header="Height"
+                                               Value="{x:Bind ViewModel.ResizeHeight, Mode=TwoWay}"
+                                               Minimum="1" Maximum="10000" SpinButtonPlacementMode="Compact"/>
+
+                                    <CheckBox Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
+                                              Content="Maintain aspect ratio"
+                                              IsChecked="{x:Bind ViewModel.MaintainAspectRatio, Mode=TwoWay}"
+                                              Foreground="{ThemeResource SilverBrush}"/>
+                                </Grid>
+
+                                <Button Content="RESIZE" Command="{x:Bind ViewModel.ResizeCommand}"
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="{x:Bind ViewModel.HasSelectedImages, Mode=OneWay}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE799;" FontSize="14"/>
+                                                <TextBlock Text="RESIZE"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </StackPanel>
+                        </instruments:Plate>
                     </Grid>
 
-                    <Button Content="OPEN OUTPUT FOLDER" Command="{x:Bind ViewModel.OpenOutputFolderCommand}"
-                            HorizontalAlignment="Center">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE838;" FontSize="14"/>
-                                    <TextBlock Text="OPEN OUTPUT FOLDER"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
+                    <!-- Processing Indicator -->
+                    <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="12">
+                            <instruments:BusyWell Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"/>
+                            <ProgressBar Value="{x:Bind ViewModel.ProcessingProgress, Mode=OneWay}"
+                                         Maximum="100" Height="4"/>
+                        </StackPanel>
+                    </instruments:Plate>
+
+                    <!-- Result Section -->
+                    <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE73E;" FontSize="28" Foreground="{ThemeResource StateGoBrush}"/>
+                                <TextBlock Text="OPERATION COMPLETE" FontWeight="Bold" FontSize="18"
+                                           VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
+                            </StackPanel>
+
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="8" Padding="16">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="FILES PROCESSED" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.FilesProcessed, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="20"
+                                                   Foreground="{ThemeResource StateExecBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="8" Padding="16">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="ORIGINAL SIZE" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ResultOriginalSize, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="20"
+                                                   Foreground="{ThemeResource SilverBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="2" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="8" Padding="16">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="NEW SIZE" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ResultNewSize, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="20"
+                                                   Foreground="{ThemeResource StateGoBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="3" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="8" Padding="16">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="SPACE SAVED" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ResultSaved, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="20"
+                                                   Foreground="{ThemeResource StateExecBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Button Content="OPEN OUTPUT FOLDER" Command="{x:Bind ViewModel.OpenOutputFolderCommand}"
+                                    HorizontalAlignment="Center">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE838;" FontSize="14"/>
+                                            <TextBlock Text="OPEN OUTPUT FOLDER"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Tips Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="IMAGE TIPS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="IMAGE - IMAGE TIPS - 26B" Serial="{instruments:SerialFor Module=IMAGE-IMAGE-TIPS}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xEB9F;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="JPEG is best for photos - offers good compression with minimal quality loss"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE81E;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="PNG preserves transparency and is ideal for graphics and logos"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE799;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="Lower quality settings result in smaller files but may introduce artifacts"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
+                    <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xEB9F;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="JPEG is best for photos - offers good compression with minimal quality loss"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE81E;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="PNG preserves transparency and is ideal for graphics and logos"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE799;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="Lower quality settings result in smaller files but may introduce artifacts"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

@@ -43,121 +43,121 @@
 
                 <!-- Adapter & Connection Section -->
                 <StackPanel Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="CONNECTION STATUS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="WIFI - CONNECTION STATUS - 28A" Serial="{instruments:SerialFor Module=WIFI-CONNECTION-STATUS}">
+                        <StackPanel Spacing="8">
 
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Adapter Info -->
-                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                                    <FontIcon Glyph="&#xE701;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                                </Border>
-
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{x:Bind ViewModel.MacAddress, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-
-                                <instruments:Chip State="{x:Bind ViewModel.AdapterStatusState, Mode=OneWay}" Content="{x:Bind ViewModel.AdapterStatus, Mode=OneWay, Converter={StaticResource UpperCaseConverter}}" Grid.Column="2" VerticalAlignment="Center"/>
-                            </Grid>
-                        </instruments:Plate>
-
-                        <!-- Current Connection -->
-                        <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
-                            <Grid>
+                            <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Connected To" Style="{StaticResource CardSubtitleStyle}"/>
-                                    <TextBlock Text="{x:Bind ViewModel.ConnectedNetwork, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0"
-                                                Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <TextBlock Text="{x:Bind ViewModel.ConnectionChannel, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                        <TextBlock Text="{x:Bind ViewModel.ConnectionSpeed, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
+                                <!-- Adapter Info -->
+                                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                            Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <TextBlock FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
-                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}">
-                                        <Run Text="{x:Bind ViewModel.ConnectionSignal, Mode=OneWay}"/><Run Text="%"/>
-                                    </TextBlock>
-                                    <TextBlock Text="Signal" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                </StackPanel>
+                                        <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
+                                            <FontIcon Glyph="&#xE701;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind ViewModel.AdapterName, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{x:Bind ViewModel.MacAddress, Mode=OneWay}" Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0"/>
+                                        </StackPanel>
+
+                                        <instruments:Chip State="{x:Bind ViewModel.AdapterStatusState, Mode=OneWay}" Content="{x:Bind ViewModel.AdapterStatus, Mode=OneWay, Converter={StaticResource UpperCaseConverter}}" Grid.Column="2" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </instruments:Plate>
+
+                                <!-- Current Connection -->
+                                <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Connected To" Style="{StaticResource CardSubtitleStyle}"/>
+                                            <TextBlock Text="{x:Bind ViewModel.ConnectedNetwork, Mode=OneWay}" Style="{StaticResource CardTitleStyle}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0"
+                                                        Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{x:Bind ViewModel.ConnectionChannel, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                <TextBlock Text="{x:Bind ViewModel.ConnectionSpeed, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                    Visibility="{x:Bind ViewModel.IsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <TextBlock FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
+                                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.ConnectionStatusState, Mode=OneWay}">
+                                                <Run Text="{x:Bind ViewModel.ConnectionSignal, Mode=OneWay}"/><Run Text="%"/>
+                                            </TextBlock>
+                                            <TextBlock Text="Signal" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </instruments:Plate>
                             </Grid>
-                        </instruments:Plate>
-                    </Grid>
+                        </StackPanel>
+                    </instruments:Faceplate>
                 </StackPanel>
 
                 <!-- Stats Section -->
                 <StackPanel Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="NETWORK STATISTICS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="WIFI - NETWORK STATISTICS - 28B" Serial="{instruments:SerialFor Module=WIFI-NETWORK-STATISTICS}">
+                        <StackPanel Spacing="8">
 
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="Networks" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.NetworksFound, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
+                                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Networks" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.NetworksFound, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
 
-                        <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="Secure" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.SecureNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
+                                <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Secure" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.SecureNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateGoBrush}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
 
-                        <instruments:Plate Grid.Column="2" Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="Open" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.OpenNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateHoldBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
+                                <instruments:Plate Grid.Column="2" Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Open" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.OpenNetworks, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateHoldBrush}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
 
-                        <instruments:Plate Grid.Column="3" Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="2.4 GHz" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.Networks24GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
+                                <instruments:Plate Grid.Column="3" Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="2.4 GHz" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.Networks24GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
 
-                        <instruments:Plate Grid.Column="4" Padding="16" VerticalContentAlignment="Stretch">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="5 GHz" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.Networks5GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </instruments:Plate>
-                    </Grid>
+                                <instruments:Plate Grid.Column="4" Padding="16" VerticalContentAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="5 GHz" Style="{StaticResource CardSubtitleStyle}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.Networks5GHz, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </instruments:Plate>
+                            </Grid>
+                        </StackPanel>
+                    </instruments:Faceplate>
                 </StackPanel>
 
                 <!-- Scan Status -->
@@ -208,85 +208,85 @@
 
                 <!-- Networks List Section -->
                 <StackPanel Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="AVAILABLE NETWORKS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="WIFI - AVAILABLE NETWORKS - 28C" Serial="{instruments:SerialFor Module=WIFI-AVAILABLE-NETWORKS}">
+                        <StackPanel Spacing="8">
 
-                    <instruments:Plate Padding="0" MinHeight="350" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <ListView ItemsSource="{x:Bind ViewModel.Networks, Mode=OneWay}"
-                                      Background="Transparent" SelectionMode="None">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="Padding" Value="12"/>
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:WiFiNetworkDisplay">
-                                        <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="6" Padding="16">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                            <instruments:Plate Padding="0" MinHeight="350" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <ListView ItemsSource="{x:Bind ViewModel.Networks, Mode=OneWay}"
+                                              Background="Transparent" SelectionMode="None">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                <Setter Property="Padding" Value="12"/>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:WiFiNetworkDisplay">
+                                                <instruments:Well Padding="16">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
 
-                                                <!-- Signal Icon -->
-                                                <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48" VerticalAlignment="Center">
-                                                    <FontIcon Glyph="{x:Bind SignalIcon}" instruments:StateBrush.Foreground="{x:Bind SignalState}" FontSize="20"/>
-                                                </Border>
+                                                        <!-- Signal Icon -->
+                                                        <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48" VerticalAlignment="Center">
+                                                            <FontIcon Glyph="{x:Bind SignalIcon}" instruments:StateBrush.Foreground="{x:Bind SignalState}" FontSize="20"/>
+                                                        </Border>
 
-                                                <!-- Network Info -->
-                                                <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <TextBlock Text="{x:Bind Ssid}" Style="{StaticResource CardTitleStyle}"/>
-                                                        <FontIcon Glyph="{x:Bind SecurityIcon}" instruments:StateBrush.Foreground="{x:Bind SecurityState}" FontSize="12" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                    <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,2,0,0">
-                                                        <Run Text="{x:Bind Security}"/> - <Run Text="{x:Bind Band}"/>
-                                                    </TextBlock>
-                                                    <TextBlock Text="{x:Bind Bssid}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,2,0,0"/>
-                                                </StackPanel>
+                                                        <!-- Network Info -->
+                                                        <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <TextBlock Text="{x:Bind Ssid}" Style="{StaticResource CardTitleStyle}"/>
+                                                                <FontIcon Glyph="{x:Bind SecurityIcon}" instruments:StateBrush.Foreground="{x:Bind SecurityState}" FontSize="12" VerticalAlignment="Center"/>
+                                                            </StackPanel>
+                                                            <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,2,0,0">
+                                                                <Run Text="{x:Bind Security}"/> - <Run Text="{x:Bind Band}"/>
+                                                            </TextBlock>
+                                                            <TextBlock Text="{x:Bind Bssid}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,2,0,0"/>
+                                                        </StackPanel>
 
-                                                <!-- Channel -->
-                                                <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="60">
-                                                    <TextBlock Text="Channel" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                                    <TextBlock Text="{x:Bind Channel}" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
-                                                </StackPanel>
+                                                        <!-- Channel -->
+                                                        <StackPanel Grid.Column="2" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="60">
+                                                            <TextBlock Text="Channel" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                                                            <TextBlock Text="{x:Bind Channel}" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
+                                                        </StackPanel>
 
-                                                <!-- Frequency -->
-                                                <StackPanel Grid.Column="3" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="80">
-                                                    <TextBlock Text="Frequency" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
-                                                    <TextBlock Text="{x:Bind Frequency}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
-                                                </StackPanel>
+                                                        <!-- Frequency -->
+                                                        <StackPanel Grid.Column="3" Margin="16,0" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="80">
+                                                            <TextBlock Text="Frequency" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                                                            <TextBlock Text="{x:Bind Frequency}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
+                                                        </StackPanel>
 
-                                                <!-- Signal Strength -->
-                                                <StackPanel Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="60">
-                                                    <TextBlock FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"
-                                                               instruments:StateBrush.Foreground="{x:Bind SignalState}">
-                                                        <Run Text="{x:Bind SignalStrength}"/><Run Text="%" FontSize="12"/>
-                                                    </TextBlock>
-                                                    <ProgressBar Value="{x:Bind SignalStrength}" Maximum="100" Width="50" Height="4" Margin="0,4,0,0"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                                                        <!-- Signal Strength -->
+                                                        <StackPanel Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center" MinWidth="60">
+                                                            <TextBlock FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"
+                                                                       instruments:StateBrush.Foreground="{x:Bind SignalState}">
+                                                                <Run Text="{x:Bind SignalStrength}"/><Run Text="%" FontSize="12"/>
+                                                            </TextBlock>
+                                                            <ProgressBar Value="{x:Bind SignalStrength}" Maximum="100" Width="50" Height="4" Margin="0,4,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </instruments:Well>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
 
-                            <!-- Empty State -->
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                                        Visibility="{x:Bind ViewModel.NetworksFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
-                                <FontIcon Glyph="&#xE701;" FontSize="48" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                <TextBlock Text="No WiFi networks found" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
-                                <TextBlock Text="Click 'SCAN' to search for available networks" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </instruments:Plate>
+                                    <!-- Empty State -->
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                Visibility="{x:Bind ViewModel.NetworksFound, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}">
+                                        <FontIcon Glyph="&#xE701;" FontSize="48" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                        <TextBlock Text="No WiFi networks found" FontSize="14" Foreground="{ThemeResource SilverBrush}" Margin="0,12,0,0"/>
+                                        <TextBlock Text="Click 'SCAN' to search for available networks" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </instruments:Plate>
+                        </StackPanel>
+                    </instruments:Faceplate>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

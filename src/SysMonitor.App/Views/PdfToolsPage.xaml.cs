@@ -197,11 +197,10 @@ public sealed partial class PdfToolsPage : Page
         {
             using var device = CanvasDevice.GetSharedDevice();
 
-            // Create text format with cursive font
-            // Try different script fonts that might be available on Windows
+            // The PDF's signature is drawn in the face the preview shows it in
             var textFormat = new CanvasTextFormat
             {
-                FontFamily = "Segoe Script",
+                FontFamily = ((FontFamily)Application.Current.Resources["SignatureInkFontFamily"]).Source,
                 FontSize = 48,
                 FontWeight = Microsoft.UI.Text.FontWeights.Normal,
                 WordWrapping = CanvasWordWrapping.NoWrap

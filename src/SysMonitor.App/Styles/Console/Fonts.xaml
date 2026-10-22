@@ -28,6 +28,10 @@
     <!-- Iosevka: code, paths and command lines. -->
     <FontFamily x:Key="ConsoleCodeFontFamily">ms-appx:///Assets/Fonts/Iosevka-Regular.ttf#Iosevka</FontFamily>
 
+    <!-- A typed signature's ink: Windows' own script face, which ships with every Windows the app supports. It is
+         document data, not the console's chrome, and PdfToolsPage renders the PDF's signature in the same face. -->
+    <FontFamily x:Key="SignatureInkFontFamily">Segoe Script</FontFamily>
+
     <!-- The face every control's own template falls back to, so the framework's text is Public Sans as well. -->
     <FontFamily x:Key="ContentControlThemeFontFamily">ms-appx:///Assets/Fonts/PublicSans-Regular.ttf#Public Sans</FontFamily>
 </ResourceDictionary>

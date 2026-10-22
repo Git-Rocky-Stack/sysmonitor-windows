@@ -24,351 +24,351 @@
 
             <!-- Main Toggle Section -->
             <StackPanel Grid.Row="1" Spacing="12">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="GAME MODE CONTROL" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="GAME - GAME MODE CONTROL - 11A" Serial="{instruments:SerialFor Module=GAME-GAME-MODE-CONTROL}">
+                    <StackPanel Spacing="12">
 
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                    <Grid Padding="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <Grid Padding="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Status Display -->
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="8">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Grid Width="60" Height="60">
-                                    <!-- Outer glow -->
-                                    <Ellipse Fill="Transparent" StrokeThickness="3" Opacity="0.3"
-                                             instruments:StateBrush.Stroke="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
-                                    <!-- Inner circle with icon -->
-                                    <Border CornerRadius="30" Margin="8"
-                                            instruments:StateBrush.Wash="{x:Bind ViewModel.StatusState, Mode=OneWay}">
-                                        <FontIcon Glyph="&#xE7FC;" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
-                                    </Border>
-                                </Grid>
+                                <!-- Status Display -->
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <Grid Width="60" Height="60">
+                                            <!-- Outer glow -->
+                                            <Ellipse Fill="Transparent" StrokeThickness="3" Opacity="0.3"
+                                                     instruments:StateBrush.Stroke="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
+                                            <!-- Inner circle with icon -->
+                                            <Border CornerRadius="30" Margin="8"
+                                                    instruments:StateBrush.Wash="{x:Bind ViewModel.StatusState, Mode=OneWay}">
+                                                <FontIcon Glyph="&#xE7FC;" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
+                                            </Border>
+                                        </Grid>
 
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                                               FontSize="24" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
-                                    <TextBlock Text="Click the button to toggle" FontSize="13"
-                                               Foreground="{ThemeResource SilverBrush}"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                                                       FontSize="24" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                            <TextBlock Text="Click the button to toggle" FontSize="13"
+                                                       Foreground="{ThemeResource SilverBrush}"/>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
 
-                        <!-- Toggle Button -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <Button Command="{x:Bind ViewModel.ToggleGameModeCommand}"
-                                    IsEnabled="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
-                                    Style="{StaticResource ChromeCapButtonStyle}"
-                                    Width="200">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeIconConverter}}"
-                                              FontSize="14"/>
-                                    <TextBlock Text="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeTextConverter}}"/>
+                                <!-- Toggle Button -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <Button Command="{x:Bind ViewModel.ToggleGameModeCommand}"
+                                            IsEnabled="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                            Style="{StaticResource ChromeCapButtonStyle}"
+                                            Width="200">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeIconConverter}}"
+                                                      FontSize="14"/>
+                                            <TextBlock Text="{x:Bind ViewModel.IsGameModeEnabled, Mode=OneWay, Converter={StaticResource GameModeTextConverter}}"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <instruments:Lamp State="Armed" Code="EXEC" Size="Small" Margin="0,8,0,0" HorizontalAlignment="Center"
+                                                  Visibility="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 </StackPanel>
-                            </Button>
-                            <instruments:Lamp State="Armed" Code="EXEC" Size="Small" Margin="0,8,0,0" HorizontalAlignment="Center"
-                                          Visibility="{x:Bind ViewModel.IsActivating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                        </StackPanel>
-                    </Grid>
-                </instruments:Plate>
+                            </Grid>
+                        </instruments:Plate>
+                    </StackPanel>
+                </instruments:Faceplate>
             </StackPanel>
 
             <!-- Advanced Features Grid (4 Cards) -->
             <StackPanel Grid.Row="2" Spacing="12">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="ADVANCED FEATURES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="GAME - ADVANCED FEATURES - 11B" Serial="{instruments:SerialFor Module=GAME-ADVANCED-FEATURES}">
+                    <StackPanel Spacing="12">
 
-                <Grid ColumnSpacing="16" RowSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <Grid ColumnSpacing="16" RowSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Auto Game Mode Card -->
-                    <instruments:Plate Grid.Column="0" Padding="16" VerticalContentAlignment="Stretch">
-                        <StackPanel Spacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="{ThemeResource ArmedLitBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="AUTO MODE" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Auto-detect games" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                            <!-- Auto Game Mode Card -->
+                            <instruments:Plate Grid.Column="0" Padding="16" VerticalContentAlignment="Stretch">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
+                                            <FontIcon Glyph="&#xE7FC;" FontSize="18" Foreground="{ThemeResource ArmedLitBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="AUTO MODE" Style="{StaticResource CardTitleStyle}"/>
+                                            <TextBlock Text="Auto-detect games" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <ToggleSwitch IsOn="{x:Bind ViewModel.AutoModeEnabled, Mode=TwoWay}"
+                                                  OnContent="Enabled" OffContent="Disabled"
+                                                  Margin="0"/>
+
+                                    <TextBlock Text="{x:Bind ViewModel.DetectedGamesText, Mode=OneWay}"
+                                               FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                                 </StackPanel>
-                            </StackPanel>
+                            </instruments:Plate>
 
-                            <ToggleSwitch IsOn="{x:Bind ViewModel.AutoModeEnabled, Mode=TwoWay}"
-                                          OnContent="Enabled" OffContent="Disabled"
-                                          Margin="0"/>
+                            <!-- Performance Profiles Card -->
+                            <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
+                                            <FontIcon Glyph="&#xE9D5;" FontSize="18" Foreground="{ThemeResource StateHoldBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="PROFILES" Style="{StaticResource CardTitleStyle}"/>
+                                            <TextBlock Text="Optimization presets" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                            <TextBlock Text="{x:Bind ViewModel.DetectedGamesText, Mode=OneWay}"
-                                       FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
-                        </StackPanel>
-                    </instruments:Plate>
+                                    <ComboBox ItemsSource="{x:Bind ViewModel.Profiles, Mode=OneWay}"
+                                              SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}"
+                                              DisplayMemberPath="Name"
+                                              PlaceholderText="Select profile"
+                                              HorizontalAlignment="Stretch"/>
 
-                    <!-- Performance Profiles Card -->
-                    <instruments:Plate Grid.Column="1" Padding="16" VerticalContentAlignment="Stretch">
-                        <StackPanel Spacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE9D5;" FontSize="18" Foreground="{ThemeResource StateHoldBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="PROFILES" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Optimization presets" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Content="APPLY"
+                                                Command="{x:Bind ViewModel.ApplyProfileCommand}"
+                                                CommandParameter="{x:Bind ViewModel.SelectedProfile, Mode=OneWay}"
+                                                HorizontalAlignment="Stretch"/>
+                                        <Button Grid.Column="1" Content="CLEAR"
+                                                Command="{x:Bind ViewModel.DeactivateProfileCommand}"
+                                                IsEnabled="{x:Bind ViewModel.HasActiveProfile, Mode=OneWay}"
+                                                HorizontalAlignment="Stretch"/>
+                                    </Grid>
                                 </StackPanel>
-                            </StackPanel>
+                            </instruments:Plate>
 
-                            <ComboBox ItemsSource="{x:Bind ViewModel.Profiles, Mode=OneWay}"
-                                      SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}"
-                                      DisplayMemberPath="Name"
-                                      PlaceholderText="Select profile"
-                                      HorizontalAlignment="Stretch"/>
+                            <!-- In-game overlay card -->
+                            <instruments:Plate Grid.Column="2" Padding="20" VerticalContentAlignment="Stretch">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
+                                            <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{ThemeResource StateGoBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="GAME OVERLAY" Style="{StaticResource CardTitleStyle}"/>
+                                            <TextBlock Text="Temperatures, load and power on top of your game" Style="{StaticResource CardSubtitleStyle}" FontSize="11" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Content="APPLY"
-                                        Command="{x:Bind ViewModel.ApplyProfileCommand}"
-                                        CommandParameter="{x:Bind ViewModel.SelectedProfile, Mode=OneWay}"
-                                        HorizontalAlignment="Stretch"/>
-                                <Button Grid.Column="1" Content="CLEAR"
-                                        Command="{x:Bind ViewModel.DeactivateProfileCommand}"
-                                        IsEnabled="{x:Bind ViewModel.HasActiveProfile, Mode=OneWay}"
-                                        HorizontalAlignment="Stretch"/>
-                            </Grid>
-                        </StackPanel>
-                    </instruments:Plate>
+                                    <Button Command="{x:Bind ViewModel.ToggleOverlayCommand}"
+                                            Content="{x:Bind ViewModel.OverlayButtonText, Mode=OneWay}"
+                                            HorizontalAlignment="Stretch" Margin="0,0,0,6"/>
 
-                    <!-- In-game overlay card -->
-                    <instruments:Plate Grid.Column="2" Padding="20" VerticalContentAlignment="Stretch">
-                        <StackPanel Spacing="10">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="40" Height="40">
-                                    <FontIcon Glyph="&#xE7F4;" FontSize="18" Foreground="{ThemeResource StateGoBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="GAME OVERLAY" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Temperatures, load and power on top of your game" Style="{StaticResource CardSubtitleStyle}" FontSize="11" TextWrapping="Wrap"/>
+                                    <StackPanel Spacing="4" Margin="0,4,0,0">
+                                        <TextBlock Text="Drag overlay to reposition"
+                                                   FontSize="11" Foreground="{ThemeResource SilverBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Frame rate needs a GPU that reports it; the overlay says so when yours does not."
+                                                   FontSize="11" Foreground="{ThemeResource SilverBrush}"
+                                                   HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
+                                            <FontIcon Glyph="&#xE7C2;" FontSize="10" Foreground="{ThemeResource SilverBrush}"/>
+                                            <TextBlock Text="Click &amp; drag anywhere"
+                                                       FontSize="10" Foreground="{ThemeResource SilverBrush}" Opacity="0.7"/>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
+                            </instruments:Plate>
 
-                            <Button Command="{x:Bind ViewModel.ToggleOverlayCommand}"
-                                    Content="{x:Bind ViewModel.OverlayButtonText, Mode=OneWay}"
-                                    HorizontalAlignment="Stretch" Margin="0,0,0,6"/>
-
-                            <StackPanel Spacing="4" Margin="0,4,0,0">
-                                <TextBlock Text="Drag overlay to reposition"
-                                           FontSize="11" Foreground="{ThemeResource SilverBrush}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="Frame rate needs a GPU that reports it; the overlay says so when yours does not."
-                                           FontSize="11" Foreground="{ThemeResource SilverBrush}"
-                                           HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
-                                    <FontIcon Glyph="&#xE7C2;" FontSize="10" Foreground="{ThemeResource SilverBrush}"/>
-                                    <TextBlock Text="Click &amp; drag anywhere"
-                                               FontSize="10" Foreground="{ThemeResource SilverBrush}" Opacity="0.7"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-                    </instruments:Plate>
-
-                </Grid>
+                        </Grid>
+                    </StackPanel>
+                </instruments:Faceplate>
             </StackPanel>
 
             <!-- System Monitoring Section -->
             <StackPanel Grid.Row="3" Spacing="12">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="SYSTEM MONITORING" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="GAME - SYSTEM MONITORING - 11C" Serial="{instruments:SerialFor Module=GAME-SYSTEM-MONITORING}">
+                    <StackPanel Spacing="12">
 
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Fan Speed Widget -->
-                    <instruments:Plate Grid.Column="0" Padding="20" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                            <!-- Fan Speed Widget -->
+                            <instruments:Plate Grid.Column="0" Padding="20" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                            <!-- Header -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
-                                    <FontIcon Glyph="&#xE9CA;" FontSize="22" Foreground="{ThemeResource StateGoBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="FAN SPEEDS" Style="{StaticResource CardTitleStyle}" FontSize="16"/>
-                                    <TextBlock Text="Real-time cooling status" Style="{StaticResource CardSubtitleStyle}"/>
-                                </StackPanel>
-                            </StackPanel>
+                                    <!-- Header -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
+                                            <FontIcon Glyph="&#xE9CA;" FontSize="22" Foreground="{ThemeResource StateGoBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="FAN SPEEDS" Style="{StaticResource CardTitleStyle}" FontSize="16"/>
+                                            <TextBlock Text="Real-time cooling status" Style="{StaticResource CardSubtitleStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                            <!-- Fan Speed Display -->
-                            <Grid Grid.Row="1" Margin="0,16,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                                    <!-- Fan Speed Display -->
+                                    <Grid Grid.Row="1" Margin="0,16,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                <!-- CPU Fan -->
-                                <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="8">
-                                    <Grid Width="80" Height="80">
-                                        <!-- Outer ring -->
-                                        <Ellipse Stroke="{ThemeResource HairlineStrongBrush}" StrokeThickness="3"/>
-                                        <!-- Progress ring background -->
-                                        <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
-                                        <!-- Progress ring -->
-                                        <Ellipse x:Name="CpuFanRing" Stroke="{ThemeResource RailGoBrush}" StrokeThickness="6" Margin="4"
-                                                 StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
-                                            <Ellipse.RenderTransform>
-                                                <RotateTransform Angle="0"/>
-                                            </Ellipse.RenderTransform>
-                                        </Ellipse>
-                                        <!-- Center icon -->
-                                        <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"
-                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <!-- CPU Fan -->
+                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="8">
+                                            <Grid Width="80" Height="80">
+                                                <!-- Outer ring -->
+                                                <Ellipse Stroke="{ThemeResource HairlineStrongBrush}" StrokeThickness="3"/>
+                                                <!-- Progress ring background -->
+                                                <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
+                                                <!-- Progress ring -->
+                                                <Ellipse x:Name="CpuFanRing" Stroke="{ThemeResource RailGoBrush}" StrokeThickness="6" Margin="4"
+                                                         StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
+                                                    <Ellipse.RenderTransform>
+                                                        <RotateTransform Angle="0"/>
+                                                    </Ellipse.RenderTransform>
+                                                </Ellipse>
+                                                <!-- Center icon -->
+                                                <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Grid>
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock x:Name="CpuFanSpeedText" Text="N/A"
+                                                           FontSize="14" FontWeight="Bold" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"
+                                                           Foreground="{ThemeResource PlatinumBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="CPU Fan" FontSize="11"
+                                                           Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- System Fan -->
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="8">
+                                            <Grid Width="80" Height="80">
+                                                <Ellipse Stroke="{ThemeResource HairlineStrongBrush}" StrokeThickness="3"/>
+                                                <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
+                                                <Ellipse x:Name="SysFanRing" Stroke="{ThemeResource RailExecBrush}" StrokeThickness="6" Margin="4"
+                                                         StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
+                                                    <Ellipse.RenderTransform>
+                                                        <RotateTransform Angle="0"/>
+                                                    </Ellipse.RenderTransform>
+                                                </Ellipse>
+                                                <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Grid>
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock x:Name="SysFanSpeedText" Text="N/A"
+                                                           FontSize="14" FontWeight="Bold" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"
+                                                           Foreground="{ThemeResource PlatinumBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="System Fan" FontSize="11"
+                                                           Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </Grid>
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock x:Name="CpuFanSpeedText" Text="N/A"
-                                                   FontSize="14" FontWeight="Bold" FontFamily="Consolas"
-                                                   Foreground="{ThemeResource PlatinumBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="CPU Fan" FontSize="11"
-                                                   Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </StackPanel>
 
-                                <!-- System Fan -->
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="8">
-                                    <Grid Width="80" Height="80">
-                                        <Ellipse Stroke="{ThemeResource HairlineStrongBrush}" StrokeThickness="3"/>
-                                        <Ellipse Stroke="{ThemeResource Carbon750Brush}" StrokeThickness="6" Margin="4"/>
-                                        <Ellipse x:Name="SysFanRing" Stroke="{ThemeResource RailExecBrush}" StrokeThickness="6" Margin="4"
-                                                 StrokeDashArray="4,2" RenderTransformOrigin="0.5,0.5">
-                                            <Ellipse.RenderTransform>
-                                                <RotateTransform Angle="0"/>
-                                            </Ellipse.RenderTransform>
-                                        </Ellipse>
-                                        <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"
-                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Info Panel with clickable link -->
+                                    <StackPanel Grid.Row="2" Spacing="8" Margin="0,12,0,0">
+                                        <Border Background="{ThemeResource Carbon700Brush}" CornerRadius="6" Padding="12,8">
+                                            <StackPanel Spacing="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
+                                                    <TextBlock Text="Hardware sensor support required"
+                                                               FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
+                                                </StackPanel>
+                                                <TextBlock Text="Your system must expose fan sensors to display readings here."
+                                                           FontSize="10" Foreground="{ThemeResource SilverBrush}"
+                                                           TextWrapping="Wrap" Opacity="0.7"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <HyperlinkButton Content="View available hardware sensors"
+                                                         Click="ViewSensors_Click"
+                                                         HorizontalAlignment="Center"
+                                                         FontSize="11"/>
+                                    </StackPanel>
+                                </Grid>
+                            </instruments:Plate>
+
+                            <!-- System Power Widget -->
+                            <instruments:Plate Grid.Column="1" Padding="20" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Header -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
+                                            <FontIcon Glyph="&#xEA91;" FontSize="22" Foreground="{ThemeResource StateHoldBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="POWER DRAW" Style="{StaticResource CardTitleStyle}" FontSize="16"/>
+                                            <TextBlock Text="Real-time wattage" Style="{StaticResource CardSubtitleStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Power Display -->
+                                    <Grid Grid.Row="1" Margin="0,16,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- CPU Power -->
+                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="4">
+                                            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="12,8">
+                                                <StackPanel HorizontalAlignment="Center">
+                                                    <TextBlock x:Name="CpuPowerText" Text="--W"
+                                                               FontSize="24" FontWeight="Bold" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"
+                                                               Foreground="{ThemeResource StateHoldBrush}" HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Text="CPU" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!-- GPU Power -->
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">
+                                            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="12,8">
+                                                <StackPanel HorizontalAlignment="Center">
+                                                    <TextBlock x:Name="GpuPowerText" Text="--W"
+                                                               FontSize="24" FontWeight="Bold" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"
+                                                               Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Text="GPU" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!-- Total Power -->
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" Spacing="4">
+                                            <Border CornerRadius="8" Padding="12,8" Background="{ThemeResource WarnSoftBrush}">
+                                                <StackPanel HorizontalAlignment="Center">
+                                                    <TextBlock x:Name="TotalPowerText" Text="--W"
+                                                               FontSize="24" FontWeight="Bold" FontFamily="{StaticResource ConsoleTelemetryFontFamily}"
+                                                               Foreground="{ThemeResource StateWarnBrush}" HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Text="TOTAL" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                        </StackPanel>
                                     </Grid>
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock x:Name="SysFanSpeedText" Text="N/A"
-                                                   FontSize="14" FontWeight="Bold" FontFamily="Consolas"
-                                                   Foreground="{ThemeResource PlatinumBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="System Fan" FontSize="11"
-                                                   Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- Info Panel with clickable link -->
-                            <StackPanel Grid.Row="2" Spacing="8" Margin="0,12,0,0">
-                                <Border Background="{ThemeResource Carbon700Brush}" CornerRadius="6" Padding="12,8">
-                                    <StackPanel Spacing="4">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE946;" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
-                                            <TextBlock Text="Hardware sensor support required"
-                                                       FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
-                                        </StackPanel>
-                                        <TextBlock Text="Your system must expose fan sensors to display readings here."
-                                                   FontSize="10" Foreground="{ThemeResource SilverBrush}"
-                                                   TextWrapping="Wrap" Opacity="0.7"/>
-                                    </StackPanel>
-                                </Border>
-                                <HyperlinkButton Content="View available hardware sensors"
-                                                 Click="ViewSensors_Click"
-                                                 HorizontalAlignment="Center"
-                                                 FontSize="11"/>
-                            </StackPanel>
+                                </Grid>
+                            </instruments:Plate>
                         </Grid>
-                    </instruments:Plate>
-
-                    <!-- System Power Widget -->
-                    <instruments:Plate Grid.Column="1" Padding="20" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Header -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48">
-                                    <FontIcon Glyph="&#xEA91;" FontSize="22" Foreground="{ThemeResource StateHoldBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="POWER DRAW" Style="{StaticResource CardTitleStyle}" FontSize="16"/>
-                                    <TextBlock Text="Real-time wattage" Style="{StaticResource CardSubtitleStyle}"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Power Display -->
-                            <Grid Grid.Row="1" Margin="0,16,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- CPU Power -->
-                                <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="4">
-                                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="12,8">
-                                        <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock x:Name="CpuPowerText" Text="--W"
-                                                       FontSize="24" FontWeight="Bold" FontFamily="Consolas"
-                                                       Foreground="{ThemeResource StateHoldBrush}" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <TextBlock Text="CPU" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                                </StackPanel>
-
-                                <!-- GPU Power -->
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Spacing="4">
-                                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="12,8">
-                                        <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock x:Name="GpuPowerText" Text="--W"
-                                                       FontSize="24" FontWeight="Bold" FontFamily="Consolas"
-                                                       Foreground="{ThemeResource StateExecBrush}" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <TextBlock Text="GPU" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                                </StackPanel>
-
-                                <!-- Total Power -->
-                                <StackPanel Grid.Column="2" HorizontalAlignment="Center" Spacing="4">
-                                    <Border CornerRadius="8" Padding="12,8" Background="{ThemeResource WarnSoftBrush}">
-                                        <StackPanel HorizontalAlignment="Center">
-                                            <TextBlock x:Name="TotalPowerText" Text="--W"
-                                                       FontSize="24" FontWeight="Bold" FontFamily="Consolas"
-                                                       Foreground="{ThemeResource StateWarnBrush}" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <TextBlock Text="TOTAL" FontSize="11" FontWeight="SemiBold"
-                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Grid>
-                        </Grid>
-                    </instruments:Plate>
-                </Grid>
+                    </StackPanel>
+                </instruments:Faceplate>
             </StackPanel>
 
             <!-- What Game Mode Does -->
@@ -380,87 +380,128 @@
 
                 <!-- When Enabled Info -->
                 <StackPanel Grid.Column="0" Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="WHEN ENABLED" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="GAME - WHEN ENABLED - 11D" Serial="{instruments:SerialFor Module=GAME-WHEN-ENABLED}">
+                        <StackPanel Spacing="8">
 
-                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                        <StackPanel Spacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
-                                    <FontIcon Glyph="&#xE71A;" FontSize="16" Foreground="{ThemeResource StateNoGoBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Lowers Background Apps" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Browsers, Discord, Spotify and the rest keep running, below the game"
-                                               Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap"/>
-                                    <CheckBox Content="Ask them to close instead (may lose unsaved work)"
-                                              IsChecked="{x:Bind ViewModel.CloseBackgroundApps, Mode=TwoWay}"
-                                              Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </StackPanel>
+                            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
+                                            <FontIcon Glyph="&#xE71A;" FontSize="16" Foreground="{ThemeResource StateNoGoBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Lowers Background Apps" Style="{StaticResource CardTitleStyle}"/>
+                                            <TextBlock Text="Browsers, Discord, Spotify and the rest keep running, below the game"
+                                                       Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap"/>
+                                            <CheckBox Content="Ask them to close instead (may lose unsaved work)"
+                                                      IsChecked="{x:Bind ViewModel.CloseBackgroundApps, Mode=TwoWay}"
+                                                      Margin="0,8,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
-                                    <FontIcon Glyph="&#xE945;" FontSize="16" Foreground="{ThemeResource StateHoldBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="High Performance Mode" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Sets Windows to High Performance power plan" Style="{StaticResource CardSubtitleStyle}"/>
-                                </StackPanel>
-                            </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
+                                            <FontIcon Glyph="&#xE945;" FontSize="16" Foreground="{ThemeResource StateHoldBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="High Performance Mode" Style="{StaticResource CardTitleStyle}"/>
+                                            <TextBlock Text="Sets Windows to High Performance power plan" Style="{StaticResource CardSubtitleStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
-                                    <FontIcon Glyph="&#xE74C;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Trims Memory" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Trims background app working sets; Windows can page them back" Style="{StaticResource CardSubtitleStyle}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}" Width="36" Height="36">
+                                            <FontIcon Glyph="&#xE74C;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Trims Memory" Style="{StaticResource CardTitleStyle}"/>
+                                            <TextBlock Text="Trims background app working sets; Windows can page them back" Style="{StaticResource CardSubtitleStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
+                            </instruments:Plate>
                         </StackPanel>
-                    </instruments:Plate>
+                    </instruments:Faceplate>
                 </StackPanel>
 
                 <!-- Last Session Info -->
                 <StackPanel Grid.Column="1" Spacing="8">
-                    <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                        <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                        <TextBlock Text="LAST SESSION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    </StackPanel>
+                    <instruments:Faceplate Kicker="GAME - LAST SESSION - 11E" Serial="{instruments:SerialFor Module=GAME-LAST-SESSION}">
+                        <StackPanel Spacing="8">
 
-                    <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                        <StackPanel Spacing="16">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                                <StackPanel Spacing="16">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.LastBackgroundAppsAffected, Mode=OneWay}"
-                                               FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
-                                               Foreground="{ThemeResource ArmedLitBrush}"/>
-                                    <TextBlock Text="{x:Bind ViewModel.LastSessionAppsLabel, Mode=OneWay}" FontSize="12"
+                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                            <TextBlock Text="{x:Bind ViewModel.LastBackgroundAppsAffected, Mode=OneWay}"
+                                                       FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
+                                                       Foreground="{ThemeResource ArmedLitBrush}"/>
+                                            <TextBlock Text="{x:Bind ViewModel.LastSessionAppsLabel, Mode=OneWay}" FontSize="12"
+                                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                            <TextBlock Text="{x:Bind ViewModel.LastMemoryTrimmed, Mode=OneWay}"
+                                                       FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
+                                                       Foreground="{ThemeResource StateGoBrush}"/>
+                                            <TextBlock Text="Trimmed" FontSize="12"
+                                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Killed Apps List -->
+                                    <StackPanel Visibility="{x:Bind ViewModel.AffectedApps.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
+                                        <TextBlock Text="Closed Applications:" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{ThemeResource SilverBrush}" Margin="0,0,0,8"/>
+                                        <ItemsControl ItemsSource="{x:Bind ViewModel.AffectedApps, Mode=OneWay}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="8"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="x:String">
+                                                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="4" Padding="8,4">
+                                                        <TextBlock Text="{x:Bind}" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </StackPanel>
+                            </instruments:Plate>
+
+                            <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                                    <FontIcon Glyph="&#xE946;" FontSize="32" Foreground="{ThemeResource SilverBrush}"
+                                              HorizontalAlignment="Center"/>
+                                    <TextBlock Text="No session data yet" FontSize="14"
+                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Enable Game Mode to see results" FontSize="12"
                                                Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
                                 </StackPanel>
+                            </instruments:Plate>
+                        </StackPanel>
+                    </instruments:Faceplate>
+                </StackPanel>
+            </Grid>
 
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <TextBlock Text="{x:Bind ViewModel.LastMemoryTrimmed, Mode=OneWay}"
-                                               FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"
-                                               Foreground="{ThemeResource StateGoBrush}"/>
-                                    <TextBlock Text="Trimmed" FontSize="12"
-                                               Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Grid>
+            <!-- Target Apps List -->
+            <StackPanel Grid.Row="5" Spacing="8">
+                <instruments:Faceplate Kicker="GAME - TARGET APPLICATIONS - 11F" Serial="{instruments:SerialFor Module=GAME-TARGET-APPLICATIONS}">
+                    <StackPanel Spacing="8">
 
-                            <!-- Killed Apps List -->
-                            <StackPanel Visibility="{x:Bind ViewModel.AffectedApps.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
-                                <TextBlock Text="Closed Applications:" FontSize="12" FontWeight="SemiBold"
-                                           Foreground="{ThemeResource SilverBrush}" Margin="0,0,0,8"/>
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.AffectedApps, Mode=OneWay}">
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="The apps Game Mode acts on. Their priority is lowered; tick &quot;Ask them to close instead&quot; above and they are asked to close, and anything that declines keeps running:"
+                                           TextWrapping="Wrap"
+                                           FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.TargetApps, Mode=OneWay}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Horizontal" Spacing="8"/>
@@ -468,57 +509,16 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="x:String">
-                                            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="4" Padding="8,4">
-                                                <TextBlock Text="{x:Bind}" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
+                                            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="4" Padding="10,6">
+                                                <TextBlock Text="{x:Bind}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </StackPanel>
-                        </StackPanel>
-                    </instruments:Plate>
-
-                    <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasLastSession, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-                            <FontIcon Glyph="&#xE946;" FontSize="32" Foreground="{ThemeResource SilverBrush}"
-                                      HorizontalAlignment="Center"/>
-                            <TextBlock Text="No session data yet" FontSize="14"
-                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Enable Game Mode to see results" FontSize="12"
-                                       Foreground="{ThemeResource SilverBrush}" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </instruments:Plate>
-                </StackPanel>
-            </Grid>
-
-            <!-- Target Apps List -->
-            <StackPanel Grid.Row="5" Spacing="8">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="TARGET APPLICATIONS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
-
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="The apps Game Mode acts on. Their priority is lowered; tick &quot;Ask them to close instead&quot; above and they are asked to close, and anything that declines keeps running:"
-                                   TextWrapping="Wrap"
-                                   FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.TargetApps, Mode=OneWay}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="8"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="x:String">
-                                    <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="4" Padding="10,6">
-                                        <TextBlock Text="{x:Bind}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        </instruments:Plate>
                     </StackPanel>
-                </instruments:Plate>
+                </instruments:Faceplate>
             </StackPanel>
         </Grid>
     </ScrollViewer>

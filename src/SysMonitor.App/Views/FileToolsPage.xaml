@@ -15,288 +15,288 @@
                                     Description="Compress and extract files"/>
 
             <!-- File Selection Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="SELECT FILE OR FOLDER" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="FILES - SELECT FILE OR FOLDER - 24A" Serial="{instruments:SerialFor Module=FILES-SELECT-FILE-OR-FOLDER}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="16">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                    <!-- Selection Buttons -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                        <Button Command="{x:Bind ViewModel.SelectFileCommand}"
-                                Width="180">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
-                                <TextBlock Text="SELECT FILE"/>
+                            <!-- Selection Buttons -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                                <Button Command="{x:Bind ViewModel.SelectFileCommand}"
+                                        Width="180">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
+                                        <TextBlock Text="SELECT FILE"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{x:Bind ViewModel.SelectFolderCommand}"
+                                        Width="180">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE8B7;" FontSize="14"/>
+                                        <TextBlock Text="SELECT FOLDER"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Content="CLEAR" Command="{x:Bind ViewModel.ClearSelectionCommand}"
+                                        Visibility="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </StackPanel>
-                        </Button>
-                        <Button Command="{x:Bind ViewModel.SelectFolderCommand}"
-                                Width="180">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8B7;" FontSize="14"/>
-                                <TextBlock Text="SELECT FOLDER"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Content="CLEAR" Command="{x:Bind ViewModel.ClearSelectionCommand}"
-                                Visibility="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    </StackPanel>
 
-                    <!-- Selected File Info -->
-                    <Border Grid.Row="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
-                            Visibility="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid ColumnSpacing="16">
+                            <!-- Selected File Info -->
+                            <Border Grid.Row="1" Background="{ThemeResource Carbon800Brush}" CornerRadius="8" Padding="16"
+                                    Visibility="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="8"
+                                            Background="{ThemeResource RailExecBrush}">
+                                        <FontIcon Glyph="&#xE7C3;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedFileName, Mode=OneWay}"
+                                                   FontWeight="SemiBold" FontSize="16"
+                                                   Foreground="{ThemeResource PlatinumBrush}"/>
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedFilePath, Mode=OneWay}"
+                                                   Style="{StaticResource CardSubtitleStyle}" FontSize="11"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <TextBlock Text="SIZE" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{x:Bind ViewModel.FileSize, Mode=OneWay}"
+                                                   Foreground="{ThemeResource StateExecBrush}"
+                                                   FontWeight="Bold" FontSize="18"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </instruments:Plate>
+
+                    <!-- Action Feedback -->
+                    <instruments:Well Padding="16"
+                            Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <Border Grid.Column="0" Width="48" Height="48" CornerRadius="8"
-                                    Background="{ThemeResource RailExecBrush}">
-                                <FontIcon Glyph="&#xE7C3;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.SelectedFileName, Mode=OneWay}"
-                                           FontWeight="SemiBold" FontSize="16"
-                                           Foreground="{ThemeResource PlatinumBrush}"/>
-                                <TextBlock Text="{x:Bind ViewModel.SelectedFilePath, Mode=OneWay}"
-                                           Style="{StaticResource CardSubtitleStyle}" FontSize="11"
-                                           TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                <TextBlock Text="SIZE" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Right"/>
-                                <TextBlock Text="{x:Bind ViewModel.FileSize, Mode=OneWay}"
-                                           Foreground="{ThemeResource StateExecBrush}"
-                                           FontWeight="Bold" FontSize="18"/>
-                            </StackPanel>
+                            <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20"
+                                      instruments:StateBrush.Foreground="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
+                                       Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
+                                       TextWrapping="Wrap"/>
                         </Grid>
-                    </Border>
-                </Grid>
-            </instruments:Plate>
-
-            <!-- Action Feedback -->
-            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
-                    Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <FontIcon Grid.Column="0" Glyph="&#xE73E;" FontSize="20"
-                              instruments:StateBrush.Foreground="{x:Bind ViewModel.ActionStatusState, Mode=OneWay}"/>
-                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
-                               Foreground="{ThemeResource PlatinumBrush}" VerticalAlignment="Center"
-                               TextWrapping="Wrap"/>
-                </Grid>
-            </Border>
+                    </instruments:Well>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Compression Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="COMPRESSION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
-
-            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Compression Options -->
-                    <Grid Grid.Row="0" ColumnSpacing="24">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Compress Card -->
-                        <Border Grid.Column="0" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="12" Padding="20">
-                            <StackPanel Spacing="16">
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <Border Width="48" Height="48" CornerRadius="8"
-                                            Background="{ThemeResource RailGoBrush}">
-                                        <FontIcon Glyph="&#xE81E;" FontSize="24"
-                                                  Foreground="{ThemeResource PlatinumBrush}"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="COMPRESS" FontWeight="Bold" FontSize="16"
-                                                   Foreground="{ThemeResource PlatinumBrush}"/>
-                                        <TextBlock Text="Create archive from file/folder"
-                                                   Style="{StaticResource CardSubtitleStyle}"/>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <TextBlock Text="Format:" VerticalAlignment="Center"
-                                               Foreground="{ThemeResource SilverBrush}"/>
-                                    <ComboBox ItemsSource="{x:Bind ViewModel.CompressionFormats}"
-                                              SelectedItem="{x:Bind ViewModel.SelectedCompressionFormat, Mode=TwoWay}"
-                                              Width="120"/>
-                                </StackPanel>
-
-                                <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
-                                        Style="{StaticResource ChromeCapButtonStyle}" HorizontalAlignment="Stretch"
-                                        IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon Glyph="&#xE81E;" FontSize="14"/>
-                                                <TextBlock Text="COMPRESS"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Extract Card -->
-                        <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="12" Padding="20">
-                            <StackPanel Spacing="16">
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <Border Width="48" Height="48" CornerRadius="8"
-                                            Background="{ThemeResource RailExecBrush}">
-                                        <FontIcon Glyph="&#xE896;" FontSize="24"
-                                                  Foreground="{ThemeResource PlatinumBrush}"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="EXTRACT" FontWeight="Bold" FontSize="16"
-                                                   Foreground="{ThemeResource PlatinumBrush}"/>
-                                        <TextBlock Text="Extract files from archive"
-                                                   Style="{StaticResource CardSubtitleStyle}"/>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <TextBlock Text="Supports: .zip, .gz archives"
-                                           Foreground="{ThemeResource SilverBrush}"
-                                           FontSize="12"/>
-
-                                <Button Content="EXTRACT" Command="{x:Bind ViewModel.DecompressCommand}"
-                                        HorizontalAlignment="Stretch"
-                                        IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
-                                    <Button.ContentTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <FontIcon Glyph="&#xE896;" FontSize="14"/>
-                                                <TextBlock Text="EXTRACT"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Button.ContentTemplate>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-
-                    <!-- Processing Indicator -->
-                    <instruments:BusyWell Grid.Row="1" Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
-                                          Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                </Grid>
-            </instruments:Plate>
-
-            <!-- Result Section -->
-            <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+            <instruments:Faceplate Kicker="FILES - COMPRESSION - 24B" Serial="{instruments:SerialFor Module=FILES-COMPRESSION}">
                 <StackPanel Spacing="16">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE73E;" FontSize="28" Foreground="{ThemeResource StateGoBrush}"/>
-                        <TextBlock Text="OPERATION COMPLETE" FontWeight="Bold" FontSize="18"
-                                   VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
-                    </StackPanel>
 
-                    <Grid ColumnSpacing="24">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
+                        <Grid RowSpacing="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                        <Border Grid.Column="0" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="ORIGINAL SIZE" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ResultOriginalSize, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="20"
-                                           Foreground="{ThemeResource SilverBrush}"
-                                           HorizontalAlignment="Center"/>
+                            <!-- Compression Options -->
+                            <Grid Grid.Row="0" ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Compress Card -->
+                                <Border Grid.Column="0" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="12" Padding="20">
+                                    <StackPanel Spacing="16">
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <Border Width="48" Height="48" CornerRadius="8"
+                                                    Background="{ThemeResource RailGoBrush}">
+                                                <FontIcon Glyph="&#xE81E;" FontSize="24"
+                                                          Foreground="{ThemeResource PlatinumBrush}"/>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="COMPRESS" FontWeight="Bold" FontSize="16"
+                                                           Foreground="{ThemeResource PlatinumBrush}"/>
+                                                <TextBlock Text="Create archive from file/folder"
+                                                           Style="{StaticResource CardSubtitleStyle}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <TextBlock Text="Format:" VerticalAlignment="Center"
+                                                       Foreground="{ThemeResource SilverBrush}"/>
+                                            <ComboBox ItemsSource="{x:Bind ViewModel.CompressionFormats}"
+                                                      SelectedItem="{x:Bind ViewModel.SelectedCompressionFormat, Mode=TwoWay}"
+                                                      Width="120"/>
+                                        </StackPanel>
+
+                                        <Button Content="COMPRESS" Command="{x:Bind ViewModel.CompressCommand}"
+                                                Style="{StaticResource ChromeCapButtonStyle}" HorizontalAlignment="Stretch"
+                                                IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
+                                            <Button.ContentTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <FontIcon Glyph="&#xE81E;" FontSize="14"/>
+                                                        <TextBlock Text="COMPRESS"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </Button.ContentTemplate>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Extract Card -->
+                                <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="12" Padding="20">
+                                    <StackPanel Spacing="16">
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <Border Width="48" Height="48" CornerRadius="8"
+                                                    Background="{ThemeResource RailExecBrush}">
+                                                <FontIcon Glyph="&#xE896;" FontSize="24"
+                                                          Foreground="{ThemeResource PlatinumBrush}"/>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="EXTRACT" FontWeight="Bold" FontSize="16"
+                                                           Foreground="{ThemeResource PlatinumBrush}"/>
+                                                <TextBlock Text="Extract files from archive"
+                                                           Style="{StaticResource CardSubtitleStyle}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <TextBlock Text="Supports: .zip, .gz archives"
+                                                   Foreground="{ThemeResource SilverBrush}"
+                                                   FontSize="12"/>
+
+                                        <Button Content="EXTRACT" Command="{x:Bind ViewModel.DecompressCommand}"
+                                                HorizontalAlignment="Stretch"
+                                                IsEnabled="{x:Bind ViewModel.HasSelectedFile, Mode=OneWay}">
+                                            <Button.ContentTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <FontIcon Glyph="&#xE896;" FontSize="14"/>
+                                                        <TextBlock Text="EXTRACT"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </Button.ContentTemplate>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Processing Indicator -->
+                            <instruments:BusyWell Grid.Row="1" Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"
+                                                  Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        </Grid>
+                    </instruments:Plate>
+
+                    <!-- Result Section -->
+                    <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE73E;" FontSize="28" Foreground="{ThemeResource StateGoBrush}"/>
+                                <TextBlock Text="OPERATION COMPLETE" FontWeight="Bold" FontSize="18"
+                                           VerticalAlignment="Center" Foreground="{ThemeResource PlatinumBrush}"/>
                             </StackPanel>
-                        </Border>
 
-                        <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="NEW SIZE" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ResultNewSize, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="20"
-                                           Foreground="{ThemeResource StateGoBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="2" Background="{ThemeResource Carbon800Brush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="SPACE SAVED" Style="{StaticResource StatLabelStyle}"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.ResultSaved, Mode=OneWay}"
-                                           FontWeight="Bold" FontSize="20"
-                                           Foreground="{ThemeResource StateExecBrush}"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+                                <Border Grid.Column="0" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="8" Padding="16">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="ORIGINAL SIZE" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ResultOriginalSize, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="20"
+                                                   Foreground="{ThemeResource SilverBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
 
-                    <Button Content="OPEN OUTPUT FOLDER" Command="{x:Bind ViewModel.OpenOutputFolderCommand}"
-                            HorizontalAlignment="Center">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE838;" FontSize="14"/>
-                                    <TextBlock Text="OPEN OUTPUT FOLDER"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
+                                <Border Grid.Column="1" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="8" Padding="16">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="NEW SIZE" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ResultNewSize, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="20"
+                                                   Foreground="{ThemeResource StateGoBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="2" Background="{ThemeResource Carbon800Brush}"
+                                        CornerRadius="8" Padding="16">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="SPACE SAVED" Style="{StaticResource StatLabelStyle}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.ResultSaved, Mode=OneWay}"
+                                                   FontWeight="Bold" FontSize="20"
+                                                   Foreground="{ThemeResource StateExecBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Button Content="OPEN OUTPUT FOLDER" Command="{x:Bind ViewModel.OpenOutputFolderCommand}"
+                                    HorizontalAlignment="Center">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE838;" FontSize="14"/>
+                                            <TextBlock Text="OPEN OUTPUT FOLDER"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Tips Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="COMPRESSION TIPS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="FILES - COMPRESSION TIPS - 24C" Serial="{instruments:SerialFor Module=FILES-COMPRESSION-TIPS}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE8B7;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="ZIP format is widely compatible and supports multiple files/folders"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE81E;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="GZIP provides higher compression for single files"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE946;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="Already compressed files (videos, images) won't compress much further"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
+                    <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE8B7;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="ZIP format is widely compatible and supports multiple files/folders"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE81E;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="GZIP provides higher compression for single files"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE946;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="Already compressed files (videos, images) won't compress much further"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

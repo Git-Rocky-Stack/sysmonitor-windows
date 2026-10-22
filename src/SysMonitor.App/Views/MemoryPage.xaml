@@ -14,284 +14,284 @@
                                     Description="Real-time RAM analytics"/>
 
             <!-- Memory Usage Overview Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="MEMORY USAGE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="MEM - MEMORY USAGE - 04A" Serial="{instruments:SerialFor Module=MEM-MEMORY-USAGE}">
+                <StackPanel Spacing="16">
 
-            <!-- Main Memory Card -->
-            <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Main Memory Card -->
+                    <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Memory Icon -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <Border Style="{StaticResource IconContainerRedStyle}" Width="64" Height="64" CornerRadius="12">
-                            <FontIcon Glyph="&#xE964;" FontSize="32" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                    </StackPanel>
+                            <!-- Memory Icon -->
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <Border Style="{StaticResource IconContainerRedStyle}" Width="64" Height="64" CornerRadius="12">
+                                    <FontIcon Glyph="&#xE964;" FontSize="32" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                            </StackPanel>
 
-                    <!-- Memory Info -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
-                        <TextBlock Text="Physical Memory (RAM)" Style="{StaticResource MenuItemTextStyle}" FontSize="16"/>
-                        <!-- Status with State Indicator -->
-                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                            <instruments:LedDot State="{x:Bind ViewModel.StatusState, Mode=OneWay}" VerticalAlignment="Center"/>
-                            <TextBlock FontSize="13"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}">
-                                <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
+                            <!-- Memory Info -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
+                                <TextBlock Text="Physical Memory (RAM)" Style="{StaticResource MenuItemTextStyle}" FontSize="16"/>
+                                <!-- Status with State Indicator -->
+                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                    <instruments:LedDot State="{x:Bind ViewModel.StatusState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                    <TextBlock FontSize="13"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}">
+                                        <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                                <ProgressBar Value="{x:Bind ViewModel.UsagePercent, Mode=OneWay}"
+                                             Maximum="100" Style="{StaticResource RedProgressBarStyle}"
+                                             Margin="0,12,0,0" Height="8"/>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,8,0,0">
+                                    <Run Text="{x:Bind ViewModel.UsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                    <Run Text="GB used of"/>
+                                    <Run Text="{x:Bind ViewModel.TotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                    <Run Text="GB"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Usage Display -->
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                    <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
+                                    <instruments:LedDot State="{x:Bind ViewModel.StatusState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock Text="{x:Bind ViewModel.UsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"
+                                               Style="{StaticResource LargeStatValueStyle}" FontSize="48"/>
+                                    <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,12"
+                                               Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
+                                </StackPanel>
+                                <!-- Status Badge -->
+                                <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right"
+                                        instruments:StateBrush.Wash="{x:Bind ViewModel.StatusState, Mode=OneWay}">
+                                    <TextBlock FontSize="11" FontWeight="SemiBold"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}">
+                                        <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Border>
+                                <Button Content="TRIM MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
+                                        Style="{StaticResource ChromeCapButtonStyle}" Margin="0,8,0,0"
+                                        IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                        ToolTipService.ToolTip="Trim the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM."/>
+                            </StackPanel>
+                        </Grid>
+                    </instruments:Plate>
+
+                    <!-- Action Feedback Banner -->
+                    <instruments:Well Padding="16"
+                            Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Status Icon / Progress -->
+                            <Grid Grid.Column="0" MinWidth="32" MinHeight="32">
+                                <instruments:Lamp State="Armed" Code="EXEC" Size="Small" VerticalAlignment="Center"
+                                              Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                <FontIcon Glyph="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessGlyphConverter}}"
+                                          FontSize="20"
+                                          instruments:StateBrush.Foreground="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"
+                                          Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Status Message -->
+                            <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
+                                       Foreground="{ThemeResource PlatinumBrush}" FontSize="14"
+                                       VerticalAlignment="Center" Margin="12,0,0,0"/>
+
+                            <!-- Shown once a trim has worked -->
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                       Visibility="{x:Bind ViewModel.HasTrimmed, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       Foreground="{ThemeResource StateExecBrush}" FontSize="12" FontWeight="SemiBold">
+                                <Run Text="MEMORY TRIMMED"/>
                             </TextBlock>
-                        </StackPanel>
-                        <ProgressBar Value="{x:Bind ViewModel.UsagePercent, Mode=OneWay}"
-                                     Maximum="100" Style="{StaticResource RedProgressBarStyle}"
-                                     Margin="0,12,0,0" Height="8"/>
-                        <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,8,0,0">
-                            <Run Text="{x:Bind ViewModel.UsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB used of"/>
-                            <Run Text="{x:Bind ViewModel.TotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB"/>
-                        </TextBlock>
-                    </StackPanel>
-
-                    <!-- Usage Display -->
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                            <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
-                            <instruments:LedDot State="{x:Bind ViewModel.StatusState, Mode=OneWay}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock Text="{x:Bind ViewModel.UsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"
-                                       Style="{StaticResource LargeStatValueStyle}" FontSize="48"/>
-                            <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,12"
-                                       Foreground="{ThemeResource SilverBrush}" FontSize="20"/>
-                        </StackPanel>
-                        <!-- Status Badge -->
-                        <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right"
-                                instruments:StateBrush.Wash="{x:Bind ViewModel.StatusState, Mode=OneWay}">
-                            <TextBlock FontSize="11" FontWeight="SemiBold"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}">
-                                <Run Text="{x:Bind ViewModel.MemoryStatus, Mode=OneWay}"/>
-                            </TextBlock>
-                        </Border>
-                        <Button Content="TRIM MEMORY" Command="{x:Bind ViewModel.OptimizeMemoryCommand}"
-                                Style="{StaticResource ChromeCapButtonStyle}" Margin="0,8,0,0"
-                                IsEnabled="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
-                                ToolTipService.ToolTip="Trim the working sets of background apps. Windows moves those pages to the standby list and can page them back, so this does not free RAM."/>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
-
-            <!-- Action Feedback Banner -->
-            <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="8" Padding="16"
-                    Visibility="{x:Bind ViewModel.HasActionStatus, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Status Icon / Progress -->
-                    <Grid Grid.Column="0" MinWidth="32" MinHeight="32">
-                        <instruments:Lamp State="Armed" Code="EXEC" Size="Small" VerticalAlignment="Center"
-                                      Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                        <FontIcon Glyph="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToSuccessGlyphConverter}}"
-                                  FontSize="20"
-                                  instruments:StateBrush.Foreground="{x:Bind ViewModel.IsActionSuccess, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"
-                                  Visibility="{x:Bind ViewModel.IsOptimizing, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Grid>
-
-                    <!-- Status Message -->
-                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.ActionStatus, Mode=OneWay}"
-                               Foreground="{ThemeResource PlatinumBrush}" FontSize="14"
-                               VerticalAlignment="Center" Margin="12,0,0,0"/>
-
-                    <!-- Shown once a trim has worked -->
-                    <TextBlock Grid.Column="2" VerticalAlignment="Center"
-                               Visibility="{x:Bind ViewModel.HasTrimmed, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                               Foreground="{ThemeResource StateExecBrush}" FontSize="12" FontWeight="SemiBold">
-                        <Run Text="MEMORY TRIMMED"/>
-                    </TextBlock>
-                </Grid>
-            </Border>
+                        </Grid>
+                    </instruments:Well>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Memory Stats Grid -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="MEMORY BREAKDOWN" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="MEM - MEMORY BREAKDOWN - 04B" Serial="{instruments:SerialFor Module=MEM-MEMORY-BREAKDOWN}">
+                <StackPanel Spacing="16">
 
-            <Grid ColumnSpacing="12" RowSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid ColumnSpacing="12" RowSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <!-- Used Memory Card -->
-                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                        <!-- Used Memory Card -->
+                        <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerRedStyle}">
-                                <FontIcon Glyph="&#xE73A;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock Text="Active Memory" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerRedStyle}">
+                                        <FontIcon Glyph="&#xE73A;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}"/>
+                                        <TextBlock Text="Active Memory" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
 
-                        <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{ThemeResource ArmedLitBrush}">
-                            <Run Text="{x:Bind ViewModel.UsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
-                        </TextBlock>
+                                <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                           Foreground="{ThemeResource ArmedLitBrush}">
+                                    <Run Text="{x:Bind ViewModel.UsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                    <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
+                                </TextBlock>
 
-                        <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.UsagePercent, Mode=OneWay}"
-                                     Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
+                                <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.UsagePercent, Mode=OneWay}"
+                                             Maximum="100" Style="{StaticResource RedProgressBarStyle}"/>
+                            </Grid>
+                        </instruments:Plate>
+
+                        <!-- Available Memory Card -->
+                        <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}">
+                                        <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="AVAILABLE" Style="{StaticResource StatLabelStyle}"/>
+                                        <TextBlock Text="Free Memory" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                           Foreground="{ThemeResource StateGoBrush}">
+                                    <Run Text="{x:Bind ViewModel.AvailableGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                    <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
+                                </TextBlock>
+
+                                <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.AvailableGB, Mode=OneWay}"
+                                             Maximum="{x:Bind ViewModel.TotalGB, Mode=OneWay}"
+                                             Style="{StaticResource GreenProgressBarStyle}"/>
+                            </Grid>
+                        </instruments:Plate>
+
+                        <!-- Total Memory Card -->
+                        <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}">
+                                        <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="TOTAL" Style="{StaticResource StatLabelStyle}"/>
+                                        <TextBlock Text="Installed RAM" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                           Foreground="{ThemeResource StateExecBrush}">
+                                    <Run Text="{x:Bind ViewModel.TotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                    <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
+                                </TextBlock>
+
+                                <ProgressBar Grid.Row="2" Value="100" Maximum="100"
+                                             Style="{StaticResource CyanProgressBarStyle}"/>
+                            </Grid>
+                        </instruments:Plate>
                     </Grid>
-                </instruments:Plate>
-
-                <!-- Available Memory Card -->
-                <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource RailGoBrush}">
-                                <FontIcon Glyph="&#xE73E;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="AVAILABLE" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock Text="Free Memory" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{ThemeResource StateGoBrush}">
-                            <Run Text="{x:Bind ViewModel.AvailableGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
-                        </TextBlock>
-
-                        <ProgressBar Grid.Row="2" Value="{x:Bind ViewModel.AvailableGB, Mode=OneWay}"
-                                     Maximum="{x:Bind ViewModel.TotalGB, Mode=OneWay}"
-                                     Style="{StaticResource GreenProgressBarStyle}"/>
-                    </Grid>
-                </instruments:Plate>
-
-                <!-- Total Memory Card -->
-                <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}">
-                                <FontIcon Glyph="&#xE964;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="TOTAL" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock Text="Installed RAM" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                   Foreground="{ThemeResource StateExecBrush}">
-                            <Run Text="{x:Bind ViewModel.TotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                            <Run Text="GB" FontSize="18" Foreground="{ThemeResource SilverBrush}"/>
-                        </TextBlock>
-
-                        <ProgressBar Grid.Row="2" Value="100" Maximum="100"
-                                     Style="{StaticResource CyanProgressBarStyle}"/>
-                    </Grid>
-                </instruments:Plate>
-            </Grid>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Virtual Memory Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="VIRTUAL MEMORY (PAGE FILE)" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="MEM - VIRTUAL MEMORY (PAGE FILE) - 04C" Serial="{instruments:SerialFor Module=MEM-VIRTUAL-MEMORY-PAGE-FILE}">
+                <StackPanel Spacing="16">
 
-            <!-- Page File Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="16" ColumnSpacing="24">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Page File Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <Grid RowSpacing="16" ColumnSpacing="24">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Page File Used -->
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xEDA2;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="PAGE FILE USED" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Foreground="{ThemeResource StateHoldBrush}">
-                                <Run Text="{x:Bind ViewModel.PageFileUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                                <Run Text="GB"/>
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
+                            <!-- Page File Used -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xEDA2;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="PAGE FILE USED" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Foreground="{ThemeResource StateHoldBrush}">
+                                        <Run Text="{x:Bind ViewModel.PageFileUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                        <Run Text="GB"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
 
-                    <!-- Page File Total -->
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE958;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="PAGE FILE TOTAL" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Foreground="{ThemeResource PlatinumBrush}">
-                                <Run Text="{x:Bind ViewModel.PageFileTotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                                <Run Text="GB"/>
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
+                            <!-- Page File Total -->
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE958;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="PAGE FILE TOTAL" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="{x:Bind ViewModel.PageFileTotalGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                        <Run Text="GB"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
 
-                    <!-- Page File Usage -->
-                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="12">
-                        <Border Style="{StaticResource IconContainerStyle}">
-                            <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Foreground="{ThemeResource StateExecBrush}">
-                                <Run Text="{x:Bind ViewModel.PageFileUsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                                <Run Text="%"/>
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
+                            <!-- Page File Usage -->
+                            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                                <Border Style="{StaticResource IconContainerStyle}">
+                                    <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}"/>
+                                    <TextBlock Foreground="{ThemeResource StateExecBrush}">
+                                        <Run Text="{x:Bind ViewModel.PageFileUsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                        <Run Text="%"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
 
-                    <!-- Progress Bar spanning all columns -->
-                    <ProgressBar Grid.Row="1" Grid.ColumnSpan="3"
-                                 Value="{x:Bind ViewModel.PageFileUsagePercent, Mode=OneWay}"
-                                 Maximum="100" Style="{StaticResource CyanProgressBarStyle}"/>
-                </Grid>
-            </instruments:Plate>
+                            <!-- Progress Bar spanning all columns -->
+                            <ProgressBar Grid.Row="1" Grid.ColumnSpan="3"
+                                         Value="{x:Bind ViewModel.PageFileUsagePercent, Mode=OneWay}"
+                                         Maximum="100" Style="{StaticResource CyanProgressBarStyle}"/>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">

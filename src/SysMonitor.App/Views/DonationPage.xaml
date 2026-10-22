@@ -13,124 +13,125 @@
                                     Description="Support STX.1 System Monitor"/>
 
             <!-- Help Support Section Header -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="HELP SUPPORT THIS PROJECT" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="DONATE - HELP SUPPORT THIS PROJECT - 33A" Serial="{instruments:SerialFor Module=DONATE-HELP-SUPPORT-THIS-PROJECT}">
+                <StackPanel Spacing="16">
 
-            <!-- Main Content Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="20">
-                    <!-- Introduction Text -->
-                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
-                        STX.1 System Monitor is a free app created with love to help you get the most out of your PC.
-                        It's designed to keep your system running smoothly without cost - because everyone deserves
-                        access to good tools.
-                    </TextBlock>
+                    <!-- Main Content Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="20">
+                            <!-- Introduction Text -->
+                            <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
+                                STX.1 System Monitor is a free app created with love to help you get the most out of your PC.
+                                It's designed to keep your system running smoothly without cost - because everyone deserves
+                                access to good tools.
+                            </TextBlock>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
-                        But building and maintaining software takes time and resources. If this app has been helpful to you,
-                        consider buying us a coffee (or helping with the electric bill). Your support helps us keep improving
-                        STX.1 and creating more useful tools.
-                    </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
+                                But building and maintaining software takes time and resources. If this app has been helpful to you,
+                                consider buying us a coffee (or helping with the electric bill). Your support helps us keep improving
+                                STX.1 and creating more useful tools.
+                            </TextBlock>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="13" FontStyle="Italic">
-                        Every bit helps - and we truly appreciate it.
-                    </TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="13" FontStyle="Italic">
+                                Every bit helps - and we truly appreciate it.
+                            </TextBlock>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Donate Section Header -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="MAKE A DONATION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="DONATE - MAKE A DONATION - 33B" Serial="{instruments:SerialFor Module=DONATE-MAKE-A-DONATION}">
+                <StackPanel Spacing="16">
 
-            <!-- Donation Options Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <Grid ColumnSpacing="32">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Donation Options Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <Grid ColumnSpacing="32">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- PayPal Button Section -->
-                    <StackPanel Grid.Column="0" Spacing="16" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="#003087" Width="48" Height="48">
-                                <FontIcon Glyph="&#xE719;" FontSize="20" Foreground="White"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="PayPal" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
-                                <TextBlock Text="Secure donation via PayPal" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
+                            <!-- PayPal Button Section -->
+                            <StackPanel Grid.Column="0" Spacing="16" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}" Background="#003087" Width="48" Height="48">
+                                        <FontIcon Glyph="&#xE719;" FontSize="20" Foreground="White"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="PayPal" FontWeight="Bold" FontSize="18" Foreground="{ThemeResource PlatinumBrush}"/>
+                                        <TextBlock Text="Secure donation via PayPal" Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="13">
+                                    Click the button below to make a secure donation through PayPal.
+                                    You can choose your own amount.
+                                </TextBlock>
+
+                                <!-- Donate Button -->
+                                <Button Command="{x:Bind ViewModel.DonateCommand}"
+                                        Style="{StaticResource ChromeCapButtonStyle}"
+                                        HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon Glyph="&#xE719;" FontSize="14"/>
+                                        <TextBlock Text="DONATE WITH PAYPAL"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
-                        </StackPanel>
 
-                        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="13">
-                            Click the button below to make a secure donation through PayPal.
-                            You can choose your own amount.
-                        </TextBlock>
-
-                        <!-- Donate Button -->
-                        <Button Command="{x:Bind ViewModel.DonateCommand}"
-                                Style="{StaticResource ChromeCapButtonStyle}"
-                                HorizontalAlignment="Left">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <FontIcon Glyph="&#xE719;" FontSize="14"/>
-                                <TextBlock Text="DONATE WITH PAYPAL"/>
+                            <!-- QR Code Section -->
+                            <StackPanel Grid.Column="1" Spacing="12" HorizontalAlignment="Center">
+                                <TextBlock Text="Or scan QR code" Foreground="{ThemeResource SilverBrush}"
+                                           FontSize="12" HorizontalAlignment="Center"/>
+                                <!-- White is paper: a QR code needs a white quiet zone around it to scan -->
+                                <Border Background="White" CornerRadius="8" Padding="12">
+                                    <Image Source="ms-appx:///Assets/DonateQR.png"
+                                           Width="150" Height="150"
+                                           Stretch="Uniform"/>
+                                </Border>
+                                <TextBlock Text="Scan with PayPal app" Foreground="{ThemeResource SilverBrush}"
+                                           FontSize="11" HorizontalAlignment="Center"/>
                             </StackPanel>
-                        </Button>
-                    </StackPanel>
-
-                    <!-- QR Code Section -->
-                    <StackPanel Grid.Column="1" Spacing="12" HorizontalAlignment="Center">
-                        <TextBlock Text="Or scan QR code" Foreground="{ThemeResource SilverBrush}"
-                                   FontSize="12" HorizontalAlignment="Center"/>
-                        <!-- White is paper: a QR code needs a white quiet zone around it to scan -->
-                        <Border Background="White" CornerRadius="8" Padding="12">
-                            <Image Source="ms-appx:///Assets/DonateQR.png"
-                                   Width="150" Height="150"
-                                   Stretch="Uniform"/>
-                        </Border>
-                        <TextBlock Text="Scan with PayPal app" Foreground="{ThemeResource SilverBrush}"
-                                   FontSize="11" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Thank You Section Header -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="THANK YOU" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
-
-            <!-- Thank You Card -->
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+            <instruments:Faceplate Kicker="DONATE - THANK YOU - 33C" Serial="{instruments:SerialFor Module=DONATE-THANK-YOU}">
                 <StackPanel Spacing="16">
-                    <StackPanel Orientation="Horizontal" Spacing="16">
-                        <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
-                            <FontIcon Glyph="&#xEB51;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Your Support Matters" FontWeight="Bold" FontSize="16"
-                                       Foreground="{ThemeResource PlatinumBrush}"/>
-                            <TextBlock Text="Thank you for using STX.1 System Monitor"
-                                       Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
+
+                    <!-- Thank You Card -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <Border Style="{StaticResource IconContainerRedStyle}" Width="56" Height="56">
+                                    <FontIcon Glyph="&#xEB51;" FontSize="24" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Your Support Matters" FontWeight="Bold" FontSize="16"
+                                               Foreground="{ThemeResource PlatinumBrush}"/>
+                                    <TextBlock Text="Thank you for using STX.1 System Monitor"
+                                               Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
+                                Whether you donate or not, we're grateful that you're using STX.1 System Monitor.
+                                Your feedback, reviews, and word-of-mouth recommendations help us grow and improve.
+                            </TextBlock>
+
+                            <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource StateGoBrush}" FontSize="14" FontWeight="SemiBold">
+                                Thank you for being part of the STX.1 community!
+                            </TextBlock>
                         </StackPanel>
-                    </StackPanel>
+                    </instruments:Plate>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
-                        Whether you donate or not, we're grateful that you're using STX.1 System Monitor.
-                        Your feedback, reviews, and word-of-mouth recommendations help us grow and improve.
-                    </TextBlock>
-
-                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource StateGoBrush}" FontSize="14" FontWeight="SemiBold">
-                        Thank you for being part of the STX.1 community!
-                    </TextBlock>
+                    <!-- Footer with Strategia-X branding -->
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
-            <!-- Footer with Strategia-X branding -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">
                 <Image Source="ms-appx:///Assets/Header_Main1.png"
                        Height="16" HorizontalAlignment="Center"

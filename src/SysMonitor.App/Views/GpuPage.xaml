@@ -18,255 +18,252 @@
                                   Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- GPU Info Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}"
-                        Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="GRAPHICS CARD" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="GPU - GRAPHICS CARD - 03A" Serial="{instruments:SerialFor Module=GPU-GRAPHICS-CARD}" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="16">
 
-            <!-- Main GPU Card -->
-            <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Main GPU Card -->
+                    <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- GPU Icon -->
-                    <Border Grid.Column="0" Width="80" Height="80" CornerRadius="16"
-                            Background="{ThemeResource ArmedBrush}">
-                        <FontIcon Glyph="&#xE7F4;" FontSize="40" Foreground="{ThemeResource PlatinumBrush}"/>
-                    </Border>
+                            <!-- GPU Icon -->
+                            <Border Grid.Column="0" Width="80" Height="80" CornerRadius="16"
+                                    Background="{ThemeResource ArmedBrush}">
+                                <FontIcon Glyph="&#xE7F4;" FontSize="40" Foreground="{ThemeResource PlatinumBrush}"/>
+                            </Border>
 
-                    <!-- GPU Info -->
-                    <StackPanel Grid.Column="1" Margin="24,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind ViewModel.GpuName, Mode=OneWay}"
-                                   Style="{StaticResource MenuItemTextStyle}" FontSize="20" FontWeight="Bold"
-                                   TextWrapping="Wrap"/>
-                        <StackPanel Orientation="Horizontal" Spacing="24" Margin="0,8,0,0">
-                            <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                <Run Text="VRAM:"/>
-                                <Run Text="{x:Bind ViewModel.GpuMemory, Mode=OneWay}" Foreground="{ThemeResource StateExecBrush}"/>
-                            </TextBlock>
-                            <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                <Run Text="Resolution:"/>
-                                <Run Text="{x:Bind ViewModel.GpuResolution, Mode=OneWay}" Foreground="{ThemeResource StateExecBrush}"/>
-                            </TextBlock>
-                        </StackPanel>
-                        <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
-                            <Run Text="Driver:"/>
-                            <Run Text="{x:Bind ViewModel.GpuDriver, Mode=OneWay}" Foreground="{ThemeResource PlatinumBrush}"/>
-                        </TextBlock>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
+                            <!-- GPU Info -->
+                            <StackPanel Grid.Column="1" Margin="24,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.GpuName, Mode=OneWay}"
+                                           Style="{StaticResource MenuItemTextStyle}" FontSize="20" FontWeight="Bold"
+                                           TextWrapping="Wrap"/>
+                                <StackPanel Orientation="Horizontal" Spacing="24" Margin="0,8,0,0">
+                                    <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                        <Run Text="VRAM:"/>
+                                        <Run Text="{x:Bind ViewModel.GpuMemory, Mode=OneWay}" Foreground="{ThemeResource StateExecBrush}"/>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                        <Run Text="Resolution:"/>
+                                        <Run Text="{x:Bind ViewModel.GpuResolution, Mode=OneWay}" Foreground="{ThemeResource StateExecBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,4,0,0">
+                                    <Run Text="Driver:"/>
+                                    <Run Text="{x:Bind ViewModel.GpuDriver, Mode=OneWay}" Foreground="{ThemeResource PlatinumBrush}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Temperature Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0"
-                        Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="TEMPERATURE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="GPU - TEMPERATURE - 03B" Serial="{instruments:SerialFor Module=GPU-TEMPERATURE}" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="16">
 
-            <!-- Temperature Cards Grid -->
-            <Grid ColumnSpacing="12"
-                  Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                    <!-- Temperature Cards Grid -->
+                    <Grid ColumnSpacing="12"
+                          Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <!-- Main GPU Temp -->
-                <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid RowSpacing="12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                        <!-- Main GPU Temp -->
+                        <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <Grid RowSpacing="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48"
-                                    instruments:StateBrush.Background="{x:Bind ViewModel.TempState, Mode=OneWay}">
-                                <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource ArmedFgBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="GPU CORE" Style="{StaticResource StatLabelStyle}"/>
-                                    <instruments:LedDot State="{x:Bind ViewModel.TempState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48"
+                                            instruments:StateBrush.Background="{x:Bind ViewModel.TempState, Mode=OneWay}">
+                                        <FontIcon Glyph="&#xE9CA;" FontSize="24" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="GPU CORE" Style="{StaticResource StatLabelStyle}"/>
+                                            <instruments:LedDot State="{x:Bind ViewModel.TempState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <TextBlock Text="Main Temperature" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
                                 </StackPanel>
-                                <TextBlock Text="Main Temperature" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
 
-                        <StackPanel Grid.Row="1" HorizontalAlignment="Center">
-                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.TempState, Mode=OneWay}">
-                                <Run Text="{x:Bind ViewModel.GpuTemperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
-                                <Run Text="°F" FontSize="28" FontWeight="Normal"/>
-                            </TextBlock>
-                        </StackPanel>
-
-                        <!-- Status Badge -->
-                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center"
-                                instruments:StateBrush.Wash="{x:Bind ViewModel.TempState, Mode=OneWay}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <instruments:LedDot State="{x:Bind ViewModel.TempState, Mode=OneWay}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.TempStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.TempState, Mode=OneWay}"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </instruments:Plate>
-
-                <!-- Hot Spot Temp -->
-                <instruments:Plate Grid.Column="1" Visibility="{x:Bind ViewModel.HasHotSpot, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid RowSpacing="12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48"
-                                    instruments:StateBrush.Background="{x:Bind ViewModel.HotSpotState, Mode=OneWay}">
-                                <FontIcon Glyph="&#xE7A6;" FontSize="24" Foreground="{ThemeResource ArmedFgBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="HOT SPOT" Style="{StaticResource StatLabelStyle}"/>
-                                    <instruments:LedDot State="{x:Bind ViewModel.HotSpotState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center">
+                                    <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.TempState, Mode=OneWay}">
+                                        <Run Text="{x:Bind ViewModel.GpuTemperature, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
+                                        <Run Text="°F" FontSize="28" FontWeight="Normal"/>
+                                    </TextBlock>
                                 </StackPanel>
-                                <TextBlock Text="Junction Temp" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
 
-                        <StackPanel Grid.Row="1" HorizontalAlignment="Center">
-                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.HotSpotState, Mode=OneWay}">
-                                <Run Text="{x:Bind ViewModel.GpuHotSpot, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
-                                <Run Text="°F" FontSize="28" FontWeight="Normal"/>
-                            </TextBlock>
-                        </StackPanel>
+                                <!-- Status Badge -->
+                                <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center"
+                                        instruments:StateBrush.Wash="{x:Bind ViewModel.TempState, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <instruments:LedDot State="{x:Bind ViewModel.TempState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.TempStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.TempState, Mode=OneWay}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </instruments:Plate>
 
-                        <!-- Status Badge -->
-                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center"
-                                instruments:StateBrush.Wash="{x:Bind ViewModel.HotSpotState, Mode=OneWay}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <instruments:LedDot State="{x:Bind ViewModel.HotSpotState, Mode=OneWay}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.HotSpotStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.HotSpotState, Mode=OneWay}"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </instruments:Plate>
+                        <!-- Hot Spot Temp -->
+                        <instruments:Plate Grid.Column="1" Visibility="{x:Bind ViewModel.HasHotSpot, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <Grid RowSpacing="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                <!-- Memory Temp -->
-                <instruments:Plate Grid.Column="2" Visibility="{x:Bind ViewModel.HasMemoryTemp, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                    <Grid RowSpacing="12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48"
-                                    instruments:StateBrush.Background="{x:Bind ViewModel.MemTempState, Mode=OneWay}">
-                                <FontIcon Glyph="&#xE964;" FontSize="24" Foreground="{ThemeResource ArmedFgBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="VRAM" Style="{StaticResource StatLabelStyle}"/>
-                                    <instruments:LedDot State="{x:Bind ViewModel.MemTempState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48"
+                                            instruments:StateBrush.Background="{x:Bind ViewModel.HotSpotState, Mode=OneWay}">
+                                        <FontIcon Glyph="&#xE7A6;" FontSize="24" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="HOT SPOT" Style="{StaticResource StatLabelStyle}"/>
+                                            <instruments:LedDot State="{x:Bind ViewModel.HotSpotState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <TextBlock Text="Junction Temp" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
                                 </StackPanel>
-                                <TextBlock Text="Memory Temp" Style="{StaticResource CardSubtitleStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
 
-                        <StackPanel Grid.Row="1" HorizontalAlignment="Center">
-                            <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.MemTempState, Mode=OneWay}">
-                                <Run Text="{x:Bind ViewModel.GpuMemoryTemp, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
-                                <Run Text="°F" FontSize="28" FontWeight="Normal"/>
-                            </TextBlock>
-                        </StackPanel>
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center">
+                                    <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.HotSpotState, Mode=OneWay}">
+                                        <Run Text="{x:Bind ViewModel.GpuHotSpot, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
+                                        <Run Text="°F" FontSize="28" FontWeight="Normal"/>
+                                    </TextBlock>
+                                </StackPanel>
 
-                        <!-- Status Badge -->
-                        <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center"
-                                instruments:StateBrush.Wash="{x:Bind ViewModel.MemTempState, Mode=OneWay}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <instruments:LedDot State="{x:Bind ViewModel.MemTempState, Mode=OneWay}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{x:Bind ViewModel.MemTempStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.MemTempState, Mode=OneWay}"/>
-                            </StackPanel>
-                        </Border>
+                                <!-- Status Badge -->
+                                <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center"
+                                        instruments:StateBrush.Wash="{x:Bind ViewModel.HotSpotState, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <instruments:LedDot State="{x:Bind ViewModel.HotSpotState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.HotSpotStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.HotSpotState, Mode=OneWay}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </instruments:Plate>
+
+                        <!-- Memory Temp -->
+                        <instruments:Plate Grid.Column="2" Visibility="{x:Bind ViewModel.HasMemoryTemp, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                            <Grid RowSpacing="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}" Width="48" Height="48"
+                                            instruments:StateBrush.Background="{x:Bind ViewModel.MemTempState, Mode=OneWay}">
+                                        <FontIcon Glyph="&#xE964;" FontSize="24" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="VRAM" Style="{StaticResource StatLabelStyle}"/>
+                                            <instruments:LedDot State="{x:Bind ViewModel.MemTempState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <TextBlock Text="Memory Temp" Style="{StaticResource CardSubtitleStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center">
+                                    <TextBlock FontSize="56" FontWeight="Bold" HorizontalAlignment="Center"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.MemTempState, Mode=OneWay}">
+                                        <Run Text="{x:Bind ViewModel.GpuMemoryTemp, Mode=OneWay, Converter={StaticResource CelsiusToFahrenheitConverter}}"/>
+                                        <Run Text="°F" FontSize="28" FontWeight="Normal"/>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <!-- Status Badge -->
+                                <Border Grid.Row="2" CornerRadius="8" Padding="16,8" HorizontalAlignment="Center"
+                                        instruments:StateBrush.Wash="{x:Bind ViewModel.MemTempState, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <instruments:LedDot State="{x:Bind ViewModel.MemTempState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind ViewModel.MemTempStatus, Mode=OneWay}" FontWeight="SemiBold" FontSize="14"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.MemTempState, Mode=OneWay}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </instruments:Plate>
                     </Grid>
-                </instruments:Plate>
-            </Grid>
 
-            <!-- Temperature Legend -->
-            <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                <Grid ColumnSpacing="24">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Temperature Legend -->
+                    <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <Grid ColumnSpacing="24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                        <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailExecBrush}"/>
-                        <TextBlock Text="Cool &lt;122°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                        <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailGoBrush}"/>
-                        <TextBlock Text="Normal &lt;158°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                        <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailHoldBrush}"/>
-                        <TextBlock Text="Warm &lt;185°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                        <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailWarnBrush}"/>
-                        <TextBlock Text="Hot &lt;203°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                        <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailNoGoBrush}"/>
-                        <TextBlock Text="Critical 203°F+" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailExecBrush}"/>
+                                <TextBlock Text="Cool &lt;122°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailGoBrush}"/>
+                                <TextBlock Text="Normal &lt;158°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailHoldBrush}"/>
+                                <TextBlock Text="Warm &lt;185°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailWarnBrush}"/>
+                                <TextBlock Text="Hot &lt;203°F" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Border Width="12" Height="12" CornerRadius="6" Background="{ThemeResource RailNoGoBrush}"/>
+                                <TextBlock Text="Critical 203°F+" Style="{StaticResource CardSubtitleStyle}" FontSize="11"/>
+                            </StackPanel>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- GPU Tips Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0"
-                        Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="GPU TIPS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="GPU - GPU TIPS - 03C" Serial="{instruments:SerialFor Module=GPU-GPU-TIPS}" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE9CA;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="GPU temperatures below 185°F are ideal for sustained gaming performance"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE71E;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="Ensure proper case airflow and clean dust filters regularly"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE7F4;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="Keep graphics drivers updated for optimal performance and stability"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
+                    <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE9CA;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="GPU temperatures below 185°F are ideal for sustained gaming performance"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE71E;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="Ensure proper case airflow and clean dust filters regularly"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE7F4;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="Keep graphics drivers updated for optimal performance and stability"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- No GPU Message -->
             <instruments:Plate Padding="32" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">

@@ -29,242 +29,242 @@
             <StackPanel Spacing="16" Visibility="{x:Bind ViewModel.HasBattery, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
 
                 <!-- Battery Level Section -->
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="BATTERY LEVEL" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="BATT - BATTERY LEVEL - 19A" Serial="{instruments:SerialFor Module=BATT-BATTERY-LEVEL}">
+                    <StackPanel Spacing="16">
 
-                <!-- Main Battery Card -->
-                <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <!-- Main Battery Card -->
+                        <instruments:Plate Padding="24" VerticalContentAlignment="Stretch">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Battery Icon -->
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <Border Width="80" Height="80" CornerRadius="16"
-                                    instruments:StateBrush.Background="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
-                                <FontIcon Glyph="{x:Bind ViewModel.BatteryIcon, Mode=OneWay}" FontSize="40"
-                                          Foreground="{ThemeResource ArmedFgBrush}"/>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Battery Info -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
-                            <!-- Charging Status with Indicator -->
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <instruments:LedDot State="{x:Bind ViewModel.ChargingStatusState, Mode=OneWay}" VerticalAlignment="Center"/>
-                                <TextBlock FontSize="18" FontWeight="SemiBold"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargingStatusState, Mode=OneWay}">
-                                    <Run Text="{x:Bind ViewModel.ChargingStatus, Mode=OneWay}"/>
-                                </TextBlock>
-                            </StackPanel>
-                            <ProgressBar Value="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
-                                         Maximum="100" Height="12" CornerRadius="6" Margin="0,12,0,0"
-                                         Background="{ThemeResource Carbon700Brush}"
-                                         instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}"/>
-                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock Text="Health:" Style="{StaticResource CardSubtitleStyle}"/>
-                                    <TextBlock FontWeight="SemiBold"
-                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.HealthState, Mode=OneWay}">
-                                        <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"/>
-                                    </TextBlock>
+                                <!-- Battery Icon -->
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <Border Width="80" Height="80" CornerRadius="16"
+                                            instruments:StateBrush.Background="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
+                                        <FontIcon Glyph="{x:Bind ViewModel.BatteryIcon, Mode=OneWay}" FontSize="40"
+                                                  Foreground="{ThemeResource ArmedFgBrush}"/>
+                                    </Border>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" Spacing="4"
-                                           Visibility="{x:Bind ViewModel.HasEstimatedRuntime, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <TextBlock Text="Remaining:" Style="{StaticResource CardSubtitleStyle}"/>
-                                    <TextBlock Foreground="{ThemeResource StateExecBrush}" FontWeight="SemiBold">
-                                        <Run Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
 
-                        <!-- Charge Percent Display -->
-                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                                <TextBlock Text="CHARGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
-                                <instruments:LedDot State="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <TextBlock Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
-                                           Style="{StaticResource LargeStatValueStyle}" FontSize="56"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}"/>
-                                <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,14"
-                                           Foreground="{ThemeResource SilverBrush}" FontSize="24"/>
-                            </StackPanel>
-                            <!-- Charge Level Status Badge -->
-                            <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right"
-                                    instruments:StateBrush.Wash="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
-                                <TextBlock FontSize="11" FontWeight="SemiBold"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
-                                    <Run Text="{x:Bind ViewModel.ChargeLevelStatus, Mode=OneWay}"/>
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </instruments:Plate>
+                                <!-- Battery Info -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
+                                    <!-- Charging Status with Indicator -->
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <instruments:LedDot State="{x:Bind ViewModel.ChargingStatusState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        <TextBlock FontSize="18" FontWeight="SemiBold"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargingStatusState, Mode=OneWay}">
+                                            <Run Text="{x:Bind ViewModel.ChargingStatus, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <ProgressBar Value="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
+                                                 Maximum="100" Height="12" CornerRadius="6" Margin="0,12,0,0"
+                                                 Background="{ThemeResource Carbon700Brush}"
+                                                 instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Health:" Style="{StaticResource CardSubtitleStyle}"/>
+                                            <TextBlock FontWeight="SemiBold"
+                                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.HealthState, Mode=OneWay}">
+                                                <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="4"
+                                                   Visibility="{x:Bind ViewModel.HasEstimatedRuntime, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <TextBlock Text="Remaining:" Style="{StaticResource CardSubtitleStyle}"/>
+                                            <TextBlock Foreground="{ThemeResource StateExecBrush}" FontWeight="SemiBold">
+                                                <Run Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Charge Percent Display -->
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                        <TextBlock Text="CHARGE" Style="{StaticResource StatLabelStyle}" VerticalAlignment="Center"/>
+                                        <instruments:LedDot State="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"
+                                                   Style="{StaticResource LargeStatValueStyle}" FontSize="56"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}"/>
+                                        <TextBlock Text="%" VerticalAlignment="Bottom" Margin="2,0,0,14"
+                                                   Foreground="{ThemeResource SilverBrush}" FontSize="24"/>
+                                    </StackPanel>
+                                    <!-- Charge Level Status Badge -->
+                                    <Border CornerRadius="12" Padding="12,4" HorizontalAlignment="Right"
+                                            instruments:StateBrush.Wash="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
+                                        <TextBlock FontSize="11" FontWeight="SemiBold"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
+                                            <Run Text="{x:Bind ViewModel.ChargeLevelStatus, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </instruments:Plate>
+                    </StackPanel>
+                </instruments:Faceplate>
 
                 <!-- Power Status Section -->
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="POWER STATUS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="BATT - POWER STATUS - 19B" Serial="{instruments:SerialFor Module=BATT-POWER-STATUS}">
+                    <StackPanel Spacing="16">
 
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Plugged In Card -->
-                    <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
+                            <!-- Plugged In Card -->
+                            <instruments:Plate Grid.Column="0" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}"
-                                        instruments:StateBrush.Background="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}">
-                                    <FontIcon Glyph="&#xE83E;" FontSize="20" Foreground="{ThemeResource ArmedFgBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="POWER SOURCE" Style="{StaticResource StatLabelStyle}"/>
-                                    <TextBlock Text="AC Adapter" Style="{StaticResource CardSubtitleStyle}"/>
-                                </StackPanel>
-                            </StackPanel>
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}"
+                                                instruments:StateBrush.Background="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}">
+                                            <FontIcon Glyph="&#xE83E;" FontSize="20" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="POWER SOURCE" Style="{StaticResource StatLabelStyle}"/>
+                                            <TextBlock Text="AC Adapter" Style="{StaticResource CardSubtitleStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                            <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                       Text="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToPluggedInConverter}}"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"/>
+                                    <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                               Text="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToPluggedInConverter}}"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.IsPluggedIn, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"/>
+                                </Grid>
+                            </instruments:Plate>
+
+                            <!-- Charging Card -->
+                            <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}"
+                                                instruments:StateBrush.Background="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}">
+                                            <FontIcon Glyph="&#xEA93;" FontSize="20" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="CHARGING" Style="{StaticResource StatLabelStyle}"/>
+                                            <TextBlock Text="Battery Status" Style="{StaticResource CardSubtitleStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                               Text="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToChargingConverter}}"
+                                               instruments:StateBrush.Foreground="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"/>
+                                </Grid>
+                            </instruments:Plate>
+
+                            <!-- Estimated Runtime Card -->
+                            <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
+                                        <Border Style="{StaticResource IconContainerStyle}">
+                                            <FontIcon Glyph="&#xE916;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="TIME REMAINING" Style="{StaticResource StatLabelStyle}"/>
+                                            <TextBlock Text="Estimated" Style="{StaticResource CardSubtitleStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
+                                               Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"
+                                               Foreground="{ThemeResource StateExecBrush}"/>
+                                </Grid>
+                            </instruments:Plate>
                         </Grid>
-                    </instruments:Plate>
-
-                    <!-- Charging Card -->
-                    <instruments:Plate Grid.Column="1" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}"
-                                        instruments:StateBrush.Background="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}">
-                                    <FontIcon Glyph="&#xEA93;" FontSize="20" Foreground="{ThemeResource ArmedFgBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="CHARGING" Style="{StaticResource StatLabelStyle}"/>
-                                    <TextBlock Text="Battery Status" Style="{StaticResource CardSubtitleStyle}"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                       Text="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToChargingConverter}}"
-                                       instruments:StateBrush.Foreground="{x:Bind ViewModel.IsCharging, Mode=OneWay, Converter={StaticResource BoolToGoNoGoConverter}}"/>
-                        </Grid>
-                    </instruments:Plate>
-
-                    <!-- Estimated Runtime Card -->
-                    <instruments:Plate Grid.Column="2" Padding="16" MinWidth="200" MinHeight="100" VerticalContentAlignment="Stretch">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-                                <Border Style="{StaticResource IconContainerStyle}">
-                                    <FontIcon Glyph="&#xE916;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="TIME REMAINING" Style="{StaticResource StatLabelStyle}"/>
-                                    <TextBlock Text="Estimated" Style="{StaticResource CardSubtitleStyle}"/>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <TextBlock Grid.Row="1" Style="{StaticResource StatValueStyle}" Margin="0,16,0,0"
-                                       Text="{x:Bind ViewModel.EstimatedRuntime, Mode=OneWay}"
-                                       Foreground="{ThemeResource StateExecBrush}"/>
-                        </Grid>
-                    </instruments:Plate>
-                </Grid>
+                    </StackPanel>
+                </instruments:Faceplate>
 
                 <!-- Battery Health Section -->
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="BATTERY HEALTH" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                </StackPanel>
+                <instruments:Faceplate Kicker="BATT - BATTERY HEALTH - 19C" Serial="{instruments:SerialFor Module=BATT-BATTERY-HEALTH}">
+                    <StackPanel Spacing="16">
 
-                <!-- Health Info Card -->
-                <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                    <Grid RowSpacing="16" ColumnSpacing="24">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                        <!-- Health Info Card -->
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <Grid RowSpacing="16" ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Health Status -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}"
-                                    instruments:StateBrush.Background="{x:Bind ViewModel.HealthState, Mode=OneWay}">
-                                <FontIcon Glyph="&#xE8E1;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="OVERALL HEALTH" Style="{StaticResource StatLabelStyle}"/>
-                                    <instruments:LedDot State="{x:Bind ViewModel.HealthState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                <!-- Health Status -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}"
+                                            instruments:StateBrush.Background="{x:Bind ViewModel.HealthState, Mode=OneWay}">
+                                        <FontIcon Glyph="&#xE8E1;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="OVERALL HEALTH" Style="{StaticResource StatLabelStyle}"/>
+                                            <instruments:LedDot State="{x:Bind ViewModel.HealthState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <TextBlock FontWeight="SemiBold"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.HealthState, Mode=OneWay}">
+                                            <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
                                 </StackPanel>
-                                <TextBlock FontWeight="SemiBold"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.HealthState, Mode=OneWay}">
-                                    <Run Text="{x:Bind ViewModel.HealthStatus, Mode=OneWay}"/>
+
+                                <!-- Current Level -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                    <Border Style="{StaticResource IconContainerStyle}"
+                                            instruments:StateBrush.Background="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
+                                        <FontIcon Glyph="&#xE83F;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="CURRENT LEVEL" Style="{StaticResource StatLabelStyle}"/>
+                                        <TextBlock FontWeight="SemiBold"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
+                                            <Run Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"/>
+                                            <Run Text="% charged"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </instruments:Plate>
+
+                        <!-- Power Tips Card -->
+                        <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="12">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE82F;" FontSize="16" Foreground="{ThemeResource StateHoldBrush}"/>
+                                    <TextBlock Text="Power Saving Tips" Style="{StaticResource MenuItemTextStyle}"/>
+                                </StackPanel>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
+                                    • Reduce screen brightness to extend battery life
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
+                                    • Close unused applications running in the background
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
+                                    • Enable battery saver mode when below 20%
                                 </TextBlock>
                             </StackPanel>
-                        </StackPanel>
-
-                        <!-- Current Level -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                            <Border Style="{StaticResource IconContainerStyle}"
-                                    instruments:StateBrush.Background="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
-                                <FontIcon Glyph="&#xE83F;" FontSize="18" Foreground="{ThemeResource ArmedFgBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="CURRENT LEVEL" Style="{StaticResource StatLabelStyle}"/>
-                                <TextBlock FontWeight="SemiBold"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.ChargeStatusState, Mode=OneWay}">
-                                    <Run Text="{x:Bind ViewModel.ChargePercent, Mode=OneWay}"/>
-                                    <Run Text="% charged"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </instruments:Plate>
-
-                <!-- Power Tips Card -->
-                <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
-                    <StackPanel Spacing="12">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE82F;" FontSize="16" Foreground="{ThemeResource StateHoldBrush}"/>
-                            <TextBlock Text="Power Saving Tips" Style="{StaticResource MenuItemTextStyle}"/>
-                        </StackPanel>
-                        <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
-                            • Reduce screen brightness to extend battery life
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
-                            • Close unused applications running in the background
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap">
-                            • Enable battery saver mode when below 20%
-                        </TextBlock>
+                        </instruments:Plate>
                     </StackPanel>
-                </instruments:Plate>
+                </instruments:Faceplate>
 
             </StackPanel>
 

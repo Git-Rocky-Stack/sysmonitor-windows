@@ -54,24 +54,24 @@
                             </StackPanel>
                         </Button>
                         <!-- Print/Compress/Search -->
-                        <Button Click="Print_Click" ToolTipService.ToolTip="Print (Ctrl+P)" Padding="8"
+                        <Button Click="Print_Click" ToolTipService.ToolTip="Print (Ctrl+P)" AutomationProperties.Name="Print" Style="{StaticResource IconCapButtonStyle}"
                                 IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
                             <FontIcon Glyph="&#xE749;" FontSize="14"/>
                         </Button>
-                        <Button Click="Compress_Click" ToolTipService.ToolTip="Compress PDF" Padding="8"
+                        <Button Click="Compress_Click" ToolTipService.ToolTip="Compress PDF" AutomationProperties.Name="Compress PDF" Style="{StaticResource IconCapButtonStyle}"
                                 IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
                             <FontIcon Glyph="&#xE81E;" FontSize="14"/>
                         </Button>
-                        <Button Click="Search_Click" ToolTipService.ToolTip="Find in annotations" Padding="8"
+                        <Button Click="Search_Click" ToolTipService.ToolTip="Find in annotations" AutomationProperties.Name="Find in annotations" Style="{StaticResource IconCapButtonStyle}"
                                 IsEnabled="{x:Bind ViewModel.HasDocument, Mode=OneWay}">
                             <FontIcon Glyph="&#xE721;" FontSize="14"/>
                         </Button>
                         <!-- Undo/Redo -->
-                        <Button Click="Undo_Click" ToolTipService.ToolTip="Undo (Ctrl+Z)" Padding="8"
+                        <Button Click="Undo_Click" ToolTipService.ToolTip="Undo (Ctrl+Z)" AutomationProperties.Name="Undo" Style="{StaticResource IconCapButtonStyle}"
                                 IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}">
                             <FontIcon Glyph="&#xE7A7;" FontSize="14"/>
                         </Button>
-                        <Button Click="Redo_Click" ToolTipService.ToolTip="Redo (Ctrl+Y)" Padding="8"
+                        <Button Click="Redo_Click" ToolTipService.ToolTip="Redo (Ctrl+Y)" AutomationProperties.Name="Redo" Style="{StaticResource IconCapButtonStyle}"
                                 IsEnabled="{x:Bind ViewModel.CanRedo, Mode=OneWay}">
                             <FontIcon Glyph="&#xE7A6;" FontSize="14"/>
                         </Button>
@@ -85,61 +85,61 @@
                 <StackPanel Grid.Column="2" Spacing="4"
                             Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="2">
-                        <Button Click="SelectTool_Click" Tag="Select" ToolTipService.ToolTip="Select (V)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsSelectToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Select" ToolTipService.ToolTip="Select (V)" AutomationProperties.Name="Select"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsSelectToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8B3;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Pen" ToolTipService.ToolTip="Pen Tool (P)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsPenToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Pen" ToolTipService.ToolTip="Pen Tool (P)" AutomationProperties.Name="Pen Tool"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsPenToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xED63;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Text" ToolTipService.ToolTip="Text Box (T)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsTextToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Text" ToolTipService.ToolTip="Text Box (T)" AutomationProperties.Name="Text Box"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsTextToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8D2;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Highlight" ToolTipService.ToolTip="Highlight (H)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsHighlightToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Highlight" ToolTipService.ToolTip="Highlight (H)" AutomationProperties.Name="Highlight"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsHighlightToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE7E6;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Rectangle" ToolTipService.ToolTip="Rectangle (R)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsRectangleToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Rectangle" ToolTipService.ToolTip="Rectangle (R)" AutomationProperties.Name="Rectangle"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsRectangleToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE739;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Ellipse" ToolTipService.ToolTip="Ellipse (E)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsEllipseToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Ellipse" ToolTipService.ToolTip="Ellipse (E)" AutomationProperties.Name="Ellipse"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsEllipseToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xEA3A;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Line" ToolTipService.ToolTip="Line (L)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsLineToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Line" ToolTipService.ToolTip="Line (L)" AutomationProperties.Name="Line"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsLineToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE762;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Arrow" ToolTipService.ToolTip="Arrow (A)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsArrowToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Arrow" ToolTipService.ToolTip="Arrow (A)" AutomationProperties.Name="Arrow"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsArrowToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE759;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="StickyNote" ToolTipService.ToolTip="Sticky Note (N)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsStickyNoteToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="StickyNote" ToolTipService.ToolTip="Sticky Note (N)" AutomationProperties.Name="Sticky Note"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsStickyNoteToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE70B;" FontSize="14"/>
                         </Button>
-                        <Button Click="SelectTool_Click" Tag="Signature" ToolTipService.ToolTip="Signature (S)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsSignatureToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="SelectTool_Click" Tag="Signature" ToolTipService.ToolTip="Signature (S)" AutomationProperties.Name="Signature"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsSignatureToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8FA;" FontSize="14"/>
                         </Button>
-                        <Button Click="InsertImage_Click" Tag="Image" ToolTipService.ToolTip="Insert Image (I)"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsImageToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="InsertImage_Click" Tag="Image" ToolTipService.ToolTip="Insert Image (I)" AutomationProperties.Name="Insert Image"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsImageToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xEB9F;" FontSize="14"/>
                         </Button>
                         <Button Click="SelectTool_Click" Tag="Redaction"
-                                ToolTipService.ToolTip="Redact (X) — on save, the page becomes an image and whatever is under the box is gone from the file"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsRedactionToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                                ToolTipService.ToolTip="Redact (X) — on save, the page becomes an image and whatever is under the box is gone from the file" AutomationProperties.Name="Redact — on save, the page becomes an image and whatever is under the box is gone from the file"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsRedactionToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE738;" FontSize="14"/>
                         </Button>
-                        <Button Click="StampTool_Click" ToolTipService.ToolTip="Add Stamp"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsStampToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="StampTool_Click" ToolTipService.ToolTip="Add Stamp" AutomationProperties.Name="Add Stamp"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsStampToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE7C3;" FontSize="14"/>
                         </Button>
-                        <Button Click="WatermarkTool_Click" ToolTipService.ToolTip="Add Watermark"
-                                Padding="8" instruments:StateBrush.Wash="{x:Bind ViewModel.IsWatermarkToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
+                        <Button Click="WatermarkTool_Click" ToolTipService.ToolTip="Add Watermark" AutomationProperties.Name="Add Watermark"
+                                Style="{StaticResource IconCapButtonStyle}" instruments:StateBrush.Wash="{x:Bind ViewModel.IsWatermarkToolActive, Mode=OneWay, Converter={StaticResource BoolToArmedConverter}}">
                             <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
                         </Button>
                     </StackPanel>
@@ -240,16 +240,16 @@
                 <StackPanel Grid.Column="6" Spacing="4"
                             Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Button Click="ZoomOut_Click" Padding="8" ToolTipService.ToolTip="Zoom Out (-)">
+                        <Button Click="ZoomOut_Click" Style="{StaticResource IconCapButtonStyle}" ToolTipService.ToolTip="Zoom Out (-)" AutomationProperties.Name="Zoom Out">
                             <FontIcon Glyph="&#xE71F;" FontSize="14"/>
                         </Button>
                         <Border Background="{ThemeResource Carbon700Brush}" CornerRadius="4" Padding="8,4" VerticalAlignment="Center">
                             <TextBlock Text="{x:Bind ViewModel.ZoomDisplay, Mode=OneWay}" FontSize="12" MinWidth="40" TextAlignment="Center"/>
                         </Border>
-                        <Button Click="ZoomIn_Click" Padding="8" ToolTipService.ToolTip="Zoom In (+)">
+                        <Button Click="ZoomIn_Click" Style="{StaticResource IconCapButtonStyle}" ToolTipService.ToolTip="Zoom In (+)" AutomationProperties.Name="Zoom In">
                             <FontIcon Glyph="&#xE710;" FontSize="14"/>
                         </Button>
-                        <Button Click="ZoomReset_Click" Padding="8" ToolTipService.ToolTip="Reset Zoom (0)">
+                        <Button Click="ZoomReset_Click" Style="{StaticResource IconCapButtonStyle}" ToolTipService.ToolTip="Reset Zoom (0)" AutomationProperties.Name="Reset Zoom">
                             <FontIcon Glyph="&#xE71E;" FontSize="14"/>
                         </Button>
                     </StackPanel>
@@ -417,8 +417,8 @@
                             <TextBox x:Name="SearchBox" Grid.Column="0" PlaceholderText="Find text in annotations"
                                      KeyDown="SearchBox_KeyDown"
                                      Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            <Button Grid.Column="1" Click="RunSearch_Click" Padding="8"
-                                    ToolTipService.ToolTip="Find">
+                            <Button Grid.Column="1" Click="RunSearch_Click" Style="{StaticResource IconCapButtonStyle}"
+                                    ToolTipService.ToolTip="Find" AutomationProperties.Name="Find">
                                 <FontIcon Glyph="&#xE721;" FontSize="14"/>
                             </Button>
                         </Grid>

@@ -21,137 +21,135 @@
 
         <!-- Controls Section -->
         <StackPanel Grid.Row="1" Spacing="12">
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="SECURE DELETION" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="WIPE - SECURE DELETION - 13A" Serial="{instruments:SerialFor Module=WIPE-SECURE-DELETION}">
+                <StackPanel Spacing="12">
 
-            <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
-                        <FontIcon Glyph="&#xE74D;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
-                    </Border>
+                            <Border Grid.Column="0" Style="{StaticResource IconContainerRedStyle}" Margin="0,0,16,0">
+                                <FontIcon Glyph="&#xE74D;" FontSize="20" Foreground="{ThemeResource PlatinumBrush}"/>
+                            </Border>
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"/>
-                        <TextBlock Text="{x:Bind ViewModel.MethodDescription, Mode=OneWay}"
-                                   Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap" MaxWidth="400"/>
-                        <TextBlock Text="{x:Bind ViewModel.MediaWarning, Mode=OneWay}"
-                                   Visibility="{x:Bind ViewModel.HasMediaWarning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                   Foreground="{ThemeResource StateHoldBrush}" TextWrapping="Wrap" MaxWidth="400"
-                                   FontSize="12" Margin="0,6,0,0"/>
-                    </StackPanel>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.MethodDescription, Mode=OneWay}"
+                                           Style="{StaticResource CardSubtitleStyle}" TextWrapping="Wrap" MaxWidth="400"/>
+                                <TextBlock Text="{x:Bind ViewModel.MediaWarning, Mode=OneWay}"
+                                           Visibility="{x:Bind ViewModel.HasMediaWarning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                           Foreground="{ThemeResource StateHoldBrush}" TextWrapping="Wrap" MaxWidth="400"
+                                           FontSize="12" Margin="0,6,0,0"/>
+                            </StackPanel>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                        <Button Content="ADD FILES" Command="{x:Bind ViewModel.AddFilesCommand}"/>
-                        <Button Content="ADD FOLDER" Command="{x:Bind ViewModel.AddFolderCommand}"/>
-                        <Button Content="WIPE NOW" Command="{x:Bind ViewModel.WipeFilesCommand}"
-                                Style="{StaticResource ArmedCapButtonStyle}"
-                                IsEnabled="{x:Bind ViewModel.HasFiles, Mode=OneWay}"/>
-                    </StackPanel>
-                </Grid>
-            </instruments:Plate>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                <Button Content="ADD FILES" Command="{x:Bind ViewModel.AddFilesCommand}"/>
+                                <Button Content="ADD FOLDER" Command="{x:Bind ViewModel.AddFolderCommand}"/>
+                                <Button Content="WIPE NOW" Command="{x:Bind ViewModel.WipeFilesCommand}"
+                                        Style="{StaticResource ArmedCapButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.HasFiles, Mode=OneWay}"/>
+                            </StackPanel>
+                        </Grid>
+                    </instruments:Plate>
 
-            <!-- Wipe Method Selection -->
-            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Wipe Method Selection -->
+                    <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="Wipe Method:" VerticalAlignment="Center"
-                               Foreground="{ThemeResource SilverBrush}" Margin="0,0,16,0"/>
-                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.WipeMethods}"
-                              SelectedValue="{x:Bind ViewModel.SelectedMethod, Mode=TwoWay}"
-                              SelectedValuePath="Method" DisplayMemberPath="Name"
-                              IsEnabled="{x:Bind ViewModel.IsWiping, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
-                              HorizontalAlignment="Stretch"/>
-                </Grid>
-            </instruments:Plate>
+                            <TextBlock Grid.Column="0" Text="Wipe Method:" VerticalAlignment="Center"
+                                       Foreground="{ThemeResource SilverBrush}" Margin="0,0,16,0"/>
+                            <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.WipeMethods}"
+                                      SelectedValue="{x:Bind ViewModel.SelectedMethod, Mode=TwoWay}"
+                                      SelectedValuePath="Method" DisplayMemberPath="Name"
+                                      IsEnabled="{x:Bind ViewModel.IsWiping, Mode=OneWay, Converter={StaticResource InvertBoolConverter}}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
         </StackPanel>
 
         <!-- Files List -->
-        <Grid Grid.Row="2" RowSpacing="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <instruments:Faceplate Grid.Row="2" Kicker="WIPE - FILES TO WIPE - 13B" Serial="{instruments:SerialFor Module=WIPE-FILES-TO-WIPE}">
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
-                <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}">
-                    <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                    <TextBlock Text="FILES TO WIPE" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                <Grid Grid.Row="0">
+                    <Button Content="CLEAR ALL" Command="{x:Bind ViewModel.ClearAllCommand}"
+                            HorizontalAlignment="Right"
+                            IsEnabled="{x:Bind ViewModel.HasFiles, Mode=OneWay}"/>
+                </Grid>
+
+                <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.FilesToWipe, Mode=OneWay}" Background="Transparent">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Margin" Value="0,4,0,4"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}"
+                                            Width="40" Height="40" Margin="0,0,12,0">
+                                        <FontIcon Glyph="{Binding Icon}" FontSize="16"
+                                                  Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource CardTitleStyle}"/>
+                                        <TextBlock Text="{Binding Path}" Style="{StaticResource CardSubtitleStyle}"
+                                                   TextTrimming="CharacterEllipsis" MaxWidth="400"/>
+                                        <TextBlock Text="{Binding Error}" Foreground="{ThemeResource StateNoGoBrush}"
+                                                   FontSize="11" Visibility="{Binding Error, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="2" Text="{Binding FormattedSize}"
+                                               Foreground="{ThemeResource StateHoldBrush}" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" Margin="16,0"/>
+
+                                    <Button Grid.Column="3"
+                                            ToolTipService.ToolTip="Remove from list"
+                                            Command="{Binding DataContext.RemoveFileCommand, ElementName=ContentArea}"
+                                            CommandParameter="{Binding}">
+                                        <FontIcon Glyph="&#xE711;" FontSize="12"/>
+                                    </Button>
+                                </Grid>
+                            </instruments:Plate>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Empty State -->
+                <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Visibility="{x:Bind ViewModel.HasFiles, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
+                    <FontIcon Glyph="&#xE74D;" FontSize="48" Foreground="{ThemeResource SilverBrush}"/>
+                    <TextBlock Text="No files added" Style="{StaticResource CardTitleStyle}"
+                               HorizontalAlignment="Center" Margin="0,16,0,0"/>
+                    <TextBlock Text="Add files or folders to securely delete them" Style="{StaticResource CardSubtitleStyle}"
+                               HorizontalAlignment="Center"/>
                 </StackPanel>
-                <Button Content="CLEAR ALL" Command="{x:Bind ViewModel.ClearAllCommand}"
-                        HorizontalAlignment="Right"
-                        IsEnabled="{x:Bind ViewModel.HasFiles, Mode=OneWay}"/>
             </Grid>
-
-            <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.FilesToWipe, Mode=OneWay}" Background="Transparent">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Margin" Value="0,4,0,4"/>
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Border Grid.Column="0" Style="{StaticResource IconContainerStyle}"
-                                        Width="40" Height="40" Margin="0,0,12,0">
-                                    <FontIcon Glyph="{Binding Icon}" FontSize="16"
-                                              Foreground="{ThemeResource PlatinumBrush}"/>
-                                </Border>
-
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="{Binding Path}" Style="{StaticResource CardSubtitleStyle}"
-                                               TextTrimming="CharacterEllipsis" MaxWidth="400"/>
-                                    <TextBlock Text="{Binding Error}" Foreground="{ThemeResource StateNoGoBrush}"
-                                               FontSize="11" Visibility="{Binding Error, Converter={StaticResource NullToVisibilityConverter}}"/>
-                                </StackPanel>
-
-                                <TextBlock Grid.Column="2" Text="{Binding FormattedSize}"
-                                           Foreground="{ThemeResource StateHoldBrush}" FontWeight="SemiBold"
-                                           VerticalAlignment="Center" Margin="16,0"/>
-
-                                <Button Grid.Column="3"
-                                        ToolTipService.ToolTip="Remove from list"
-                                        Command="{Binding DataContext.RemoveFileCommand, ElementName=ContentArea}"
-                                        CommandParameter="{Binding}">
-                                    <FontIcon Glyph="&#xE711;" FontSize="12"/>
-                                </Button>
-                            </Grid>
-                        </instruments:Plate>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-
-            <!-- Empty State -->
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
-                        Visibility="{x:Bind ViewModel.HasFiles, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}">
-                <FontIcon Glyph="&#xE74D;" FontSize="48" Foreground="{ThemeResource SilverBrush}"/>
-                <TextBlock Text="No files added" Style="{StaticResource CardTitleStyle}"
-                           HorizontalAlignment="Center" Margin="0,16,0,0"/>
-                <TextBlock Text="Add files or folders to securely delete them" Style="{StaticResource CardSubtitleStyle}"
-                           HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
+        </instruments:Faceplate>
 
         <!-- Progress Section -->
         <Grid Grid.Row="3" Visibility="{x:Bind ViewModel.IsWiping, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">

@@ -175,6 +175,36 @@
         <Setter Property="Foreground" Value="{ThemeResource ChromeCapForegroundBrush}"/>
         <Setter Property="BorderBrush" Value="{ThemeResource ChromeEdgeBrush}"/>
     </Style>
+
+    <!-- Tile: the plain cap cut tall, for a panel's row of large actions - an icon, a word and a line under it.
+         It is the cap's face, states and travel, only stretched to its column and padded to hold the stack; the
+         tile is the key itself, never a button seated inside a plate, which drew a second bezel round the first. -->
+    <Style x:Key="TileCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
+        <Setter Property="Padding" Value="16"/>
+        <Setter Property="MinHeight" Value="112"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+    </Style>
+
+    <!-- Icon: the plain cap cut square, the cap's own 34 on each side, for a glyph with no word - a row's open,
+         restore or remove. The glyph's name is the button's AutomationProperties.Name and its tooltip. -->
+    <Style x:Key="IconCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Armed icon: the square cap on the armed face, for a row's one action that cannot simply be undone. -->
+    <Style x:Key="ArmedIconCapButtonStyle" TargetType="Button" BasedOn="{StaticResource ConsoleCapButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource ArmedCapFaceBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource ArmedFgBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
     <!-- ============================================================ BAT-LEVER SWITCH (.switch, :2323) -->
 
     <!-- A switch on the console is a lever, not a pill: a recess cut into the chassis with a machined cap for a

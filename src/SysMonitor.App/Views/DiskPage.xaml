@@ -19,277 +19,274 @@
                                   Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <!-- Total Storage Overview Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}"
-                        Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="STORAGE OVERVIEW" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="DISK - STORAGE OVERVIEW - 17A" Serial="{instruments:SerialFor Module=DISK-STORAGE-OVERVIEW}" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="16">
 
-            <!-- Total Storage Card -->
-            <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                <Grid RowSpacing="16">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <!-- Total Storage Card -->
+                    <instruments:Plate Padding="24" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                    <!-- Header with Icon -->
-                    <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                            <!-- Header with Icon -->
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
-                            <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource ArmedBrush}"
-                                    Width="56" Height="56">
-                                <FontIcon Glyph="&#xE8B7;" FontSize="28" Foreground="{ThemeResource PlatinumBrush}"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="TOTAL STORAGE" Style="{StaticResource StatLabelStyle}" FontSize="14"/>
-                                <TextBlock Foreground="{ThemeResource PlatinumBrush}" FontWeight="Bold" FontSize="28">
-                                    <Run Text="{x:Bind ViewModel.TotalStorageGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                                    <Run Text="GB" FontWeight="Normal" FontSize="16"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                                    <Border Style="{StaticResource IconContainerStyle}" Background="{ThemeResource ArmedBrush}"
+                                            Width="56" Height="56">
+                                        <FontIcon Glyph="&#xE8B7;" FontSize="28" Foreground="{ThemeResource PlatinumBrush}"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="TOTAL STORAGE" Style="{StaticResource StatLabelStyle}" FontSize="14"/>
+                                        <TextBlock Foreground="{ThemeResource PlatinumBrush}" FontWeight="Bold" FontSize="28">
+                                            <Run Text="{x:Bind ViewModel.TotalStorageGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                            <Run Text="GB" FontWeight="Normal" FontSize="16"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
 
-                        <!-- Status Badge -->
-                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                                <instruments:LedDot State="{x:Bind ViewModel.TotalStorageState, Mode=OneWay}" VerticalAlignment="Center"/>
-                                <TextBlock FontSize="13" FontWeight="SemiBold"
-                                           instruments:StateBrush.Foreground="{x:Bind ViewModel.TotalStorageState, Mode=OneWay}">
-                                    <Run Text="{x:Bind ViewModel.TotalStorageStatus, Mode=OneWay}"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
+                                <!-- Status Badge -->
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                        <instruments:LedDot State="{x:Bind ViewModel.TotalStorageState, Mode=OneWay}" VerticalAlignment="Center"/>
+                                        <TextBlock FontSize="13" FontWeight="SemiBold"
+                                                   instruments:StateBrush.Foreground="{x:Bind ViewModel.TotalStorageState, Mode=OneWay}">
+                                            <Run Text="{x:Bind ViewModel.TotalStorageStatus, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
 
-                    <!-- Progress Bar -->
-                    <Grid Grid.Row="1">
-                        <ProgressBar Value="{x:Bind ViewModel.TotalUsagePercent, Mode=OneWay}"
-                                     Maximum="100" Height="12" CornerRadius="6"
-                                     Background="{ThemeResource Carbon700Brush}"
-                                     Foreground="{ThemeResource ArmedBrush}"/>
-                    </Grid>
+                            <!-- Progress Bar -->
+                            <Grid Grid.Row="1">
+                                <ProgressBar Value="{x:Bind ViewModel.TotalUsagePercent, Mode=OneWay}"
+                                             Maximum="100" Height="12" CornerRadius="6"
+                                             Background="{ThemeResource Carbon700Brush}"
+                                             Foreground="{ThemeResource ArmedBrush}"/>
+                            </Grid>
 
-                    <!-- Stats Row -->
-                    <Grid Grid.Row="2" ColumnSpacing="24">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            <!-- Stats Row -->
+                            <Grid Grid.Row="2" ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Used Space -->
-                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                            <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource ArmedLitBrush}"
-                                       FontWeight="SemiBold" FontSize="18">
-                                <Run Text="{x:Bind ViewModel.TotalUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                                <Run Text="GB" FontSize="12"/>
-                            </TextBlock>
-                        </StackPanel>
+                                <!-- Used Space -->
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                    <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                    <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource ArmedLitBrush}"
+                                               FontWeight="SemiBold" FontSize="18">
+                                        <Run Text="{x:Bind ViewModel.TotalUsedGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                        <Run Text="GB" FontSize="12"/>
+                                    </TextBlock>
+                                </StackPanel>
 
-                        <!-- Free Space -->
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                            <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource StateGoBrush}"
-                                       FontWeight="SemiBold" FontSize="18">
-                                <Run Text="{x:Bind ViewModel.TotalFreeGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
-                                <Run Text="GB" FontSize="12"/>
-                            </TextBlock>
-                        </StackPanel>
+                                <!-- Free Space -->
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                    <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                    <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource StateGoBrush}"
+                                               FontWeight="SemiBold" FontSize="18">
+                                        <Run Text="{x:Bind ViewModel.TotalFreeGB, Mode=OneWay, Converter={StaticResource GBConverter}}"/>
+                                        <Run Text="GB" FontSize="12"/>
+                                    </TextBlock>
+                                </StackPanel>
 
-                        <!-- Usage Percent -->
-                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                            <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource StateExecBrush}"
-                                       FontWeight="SemiBold" FontSize="18">
-                                <Run Text="{x:Bind ViewModel.TotalUsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
-                                <Run Text="%" FontSize="12"/>
-                            </TextBlock>
-                        </StackPanel>
-                    </Grid>
-                </Grid>
-            </instruments:Plate>
+                                <!-- Usage Percent -->
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                    <TextBlock Text="USAGE" Style="{StaticResource StatLabelStyle}" HorizontalAlignment="Center"/>
+                                    <TextBlock HorizontalAlignment="Center" Foreground="{ThemeResource StateExecBrush}"
+                                               FontWeight="SemiBold" FontSize="18">
+                                        <Run Text="{x:Bind ViewModel.TotalUsagePercent, Mode=OneWay, Converter={StaticResource PercentConverter}}"/>
+                                        <Run Text="%" FontSize="12"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </instruments:Plate>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Drives Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0"
-                        Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="DRIVES" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="DISK - DRIVES - 17B" Serial="{instruments:SerialFor Module=DISK-DRIVES}" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="16">
 
-            <!-- Drives List -->
-            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Disks, Mode=OneWay}">
-                <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Vertical" Spacing="12"/>
-                </ItemsRepeater.Layout>
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="viewmodels:DiskDisplayInfo">
-                        <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
-                            <Grid RowSpacing="16">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                    <!-- Drives List -->
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.Disks, Mode=OneWay}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Orientation="Vertical" Spacing="12"/>
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:DiskDisplayInfo">
+                                <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">
+                                    <Grid RowSpacing="16">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                <!-- Drive Header -->
-                                <Grid Grid.Row="0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+                                        <!-- Drive Header -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    <!-- Drive Icon -->
-                                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="10"
-                                            Background="{ThemeResource Carbon700Brush}">
-                                        <FontIcon Glyph="{x:Bind DriveIcon}" FontSize="24"
-                                                  Foreground="{ThemeResource PlatinumBrush}"/>
-                                    </Border>
+                                            <!-- Drive Icon -->
+                                            <Border Grid.Column="0" Width="48" Height="48" CornerRadius="10"
+                                                    Background="{ThemeResource Carbon700Brush}">
+                                                <FontIcon Glyph="{x:Bind DriveIcon}" FontSize="24"
+                                                          Foreground="{ThemeResource PlatinumBrush}"/>
+                                            </Border>
 
-                                    <!-- Drive Info -->
-                                    <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="{x:Bind Name}" Style="{StaticResource MenuItemTextStyle}"
-                                                       FontSize="18" FontWeight="Bold"/>
-                                            <TextBlock Text="{x:Bind Label}" Style="{StaticResource CardSubtitleStyle}"
-                                                       VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
-                                            <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                                <Run Text="{x:Bind FileSystem}"/>
-                                            </TextBlock>
-                                            <TextBlock Text="|" Style="{StaticResource CardSubtitleStyle}"/>
-                                            <TextBlock Style="{StaticResource CardSubtitleStyle}">
-                                                <Run Text="{x:Bind DriveType}"/>
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </StackPanel>
-
-                                    <!-- Status and Type Badges -->
-                                    <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center">
-                                        <!-- Status Badge -->
-                                        <Border CornerRadius="8" Padding="10,4"
-                                                instruments:StateBrush.Wash="{x:Bind UsageState}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <instruments:LedDot State="{x:Bind UsageState}" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{x:Bind UsageStatus}" FontWeight="SemiBold" FontSize="11"
-                                                           instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
+                                            <!-- Drive Info -->
+                                            <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{x:Bind Name}" Style="{StaticResource MenuItemTextStyle}"
+                                                               FontSize="18" FontWeight="Bold"/>
+                                                    <TextBlock Text="{x:Bind Label}" Style="{StaticResource CardSubtitleStyle}"
+                                                               VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                                                    <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                                        <Run Text="{x:Bind FileSystem}"/>
+                                                    </TextBlock>
+                                                    <TextBlock Text="|" Style="{StaticResource CardSubtitleStyle}"/>
+                                                    <TextBlock Style="{StaticResource CardSubtitleStyle}">
+                                                        <Run Text="{x:Bind DriveType}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
                                             </StackPanel>
-                                        </Border>
-                                        <!-- Storage Type Badge -->
-                                        <Border CornerRadius="8" Padding="12,4"
-                                                Background="{ThemeResource Carbon700Brush}"
-                                                HorizontalAlignment="Right">
-                                            <TextBlock Text="{x:Bind StorageType}" FontWeight="SemiBold" FontSize="11"
-                                                       Foreground="{ThemeResource StateExecBrush}"/>
-                                        </Border>
-                                    </StackPanel>
-                                </Grid>
 
-                                <!-- Progress Bar with Percentage -->
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+                                            <!-- Status and Type Badges -->
+                                            <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center">
+                                                <!-- Status Badge -->
+                                                <Border CornerRadius="8" Padding="10,4"
+                                                        instruments:StateBrush.Wash="{x:Bind UsageState}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <instruments:LedDot State="{x:Bind UsageState}" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{x:Bind UsageStatus}" FontWeight="SemiBold" FontSize="11"
+                                                                   instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
+                                                    </StackPanel>
+                                                </Border>
+                                                <!-- Storage Type Badge -->
+                                                <Border CornerRadius="8" Padding="12,4"
+                                                        Background="{ThemeResource Carbon700Brush}"
+                                                        HorizontalAlignment="Right">
+                                                    <TextBlock Text="{x:Bind StorageType}" FontWeight="SemiBold" FontSize="11"
+                                                               Foreground="{ThemeResource StateExecBrush}"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
 
-                                    <ProgressBar Grid.Column="0" Value="{x:Bind UsagePercent}"
-                                                 Maximum="100" Height="10" CornerRadius="5"
-                                                 Background="{ThemeResource Carbon700Brush}"
-                                                 Margin="0,0,16,0"
-                                                 instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
+                                        <!-- Progress Bar with Percentage -->
+                                        <Grid Grid.Row="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="14"
-                                               VerticalAlignment="Center"
-                                               instruments:StateBrush.Foreground="{x:Bind UsageState}">
-                                        <Run Text="{x:Bind FormattedPercent}"/>
-                                    </TextBlock>
-                                </Grid>
+                                            <ProgressBar Grid.Column="0" Value="{x:Bind UsagePercent}"
+                                                         Maximum="100" Height="10" CornerRadius="5"
+                                                         Background="{ThemeResource Carbon700Brush}"
+                                                         Margin="0,0,16,0"
+                                                         instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
 
-                                <!-- Storage Details -->
-                                <Grid Grid.Row="2" ColumnSpacing="16">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="14"
+                                                       VerticalAlignment="Center"
+                                                       instruments:StateBrush.Foreground="{x:Bind UsageState}">
+                                                <Run Text="{x:Bind FormattedPercent}"/>
+                                            </TextBlock>
+                                        </Grid>
 
-                                    <!-- Used -->
-                                    <Border Grid.Column="0" Background="{ThemeResource Carbon700Brush}"
-                                            CornerRadius="8" Padding="12,8">
-                                        <StackPanel>
-                                            <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}"
-                                                       HorizontalAlignment="Center" FontSize="10"/>
-                                            <TextBlock Text="{x:Bind FormattedUsed}" HorizontalAlignment="Center"
-                                                       FontWeight="SemiBold"
-                                                       instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
-                                        </StackPanel>
-                                    </Border>
+                                        <!-- Storage Details -->
+                                        <Grid Grid.Row="2" ColumnSpacing="16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    <!-- Free -->
-                                    <Border Grid.Column="1" Background="{ThemeResource Carbon700Brush}"
-                                            CornerRadius="8" Padding="12,8">
-                                        <StackPanel>
-                                            <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}"
-                                                       HorizontalAlignment="Center" FontSize="10"/>
-                                            <TextBlock Text="{x:Bind FormattedFree}" HorizontalAlignment="Center"
-                                                       Foreground="{ThemeResource StateGoBrush}"
-                                                       FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Border>
+                                            <!-- Used -->
+                                            <Border Grid.Column="0" Background="{ThemeResource Carbon700Brush}"
+                                                    CornerRadius="8" Padding="12,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}"
+                                                               HorizontalAlignment="Center" FontSize="10"/>
+                                                    <TextBlock Text="{x:Bind FormattedUsed}" HorizontalAlignment="Center"
+                                                               FontWeight="SemiBold"
+                                                               instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
+                                                </StackPanel>
+                                            </Border>
 
-                                    <!-- Total -->
-                                    <Border Grid.Column="2" Background="{ThemeResource Carbon700Brush}"
-                                            CornerRadius="8" Padding="12,8">
-                                        <StackPanel>
-                                            <TextBlock Text="TOTAL" Style="{StaticResource StatLabelStyle}"
-                                                       HorizontalAlignment="Center" FontSize="10"/>
-                                            <TextBlock Text="{x:Bind FormattedTotal}" HorizontalAlignment="Center"
-                                                       Foreground="{ThemeResource PlatinumBrush}"
-                                                       FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Border>
-                                </Grid>
-                            </Grid>
-                        </instruments:Plate>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                                            <!-- Free -->
+                                            <Border Grid.Column="1" Background="{ThemeResource Carbon700Brush}"
+                                                    CornerRadius="8" Padding="12,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}"
+                                                               HorizontalAlignment="Center" FontSize="10"/>
+                                                    <TextBlock Text="{x:Bind FormattedFree}" HorizontalAlignment="Center"
+                                                               Foreground="{ThemeResource StateGoBrush}"
+                                                               FontWeight="SemiBold"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- Total -->
+                                            <Border Grid.Column="2" Background="{ThemeResource Carbon700Brush}"
+                                                    CornerRadius="8" Padding="12,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="TOTAL" Style="{StaticResource StatLabelStyle}"
+                                                               HorizontalAlignment="Center" FontSize="10"/>
+                                                    <TextBlock Text="{x:Bind FormattedTotal}" HorizontalAlignment="Center"
+                                                               Foreground="{ThemeResource PlatinumBrush}"
+                                                               FontWeight="SemiBold"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+                                </instruments:Plate>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+            </instruments:Faceplate>
 
             <!-- Storage Tips Section -->
-            <StackPanel Style="{StaticResource SectionHeaderWithAccentStyle}" Margin="0,8,0,0"
-                        Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Style="{StaticResource AccentBarStyle}" Height="20"/>
-                <TextBlock Text="STORAGE TIPS" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-            </StackPanel>
+            <instruments:Faceplate Kicker="DISK - STORAGE TIPS - 17C" Serial="{instruments:SerialFor Module=DISK-STORAGE-TIPS}" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="16">
 
-            <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
-                <StackPanel Spacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE8C8;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="Keep at least 10-15% of each drive free for optimal performance"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="Use the Cleaner tool to remove temporary and cache files"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE8B7;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
-                        <TextBlock Text="Consider using an SSD for your operating system for faster boot times"
-                                   Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
-                    </StackPanel>
+                    <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.HasDisks, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE8C8;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="Keep at least 10-15% of each drive free for optimal performance"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE74D;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="Use the Cleaner tool to remove temporary and cache files"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE8B7;" Foreground="{ThemeResource StateExecBrush}" FontSize="18"/>
+                                <TextBlock Text="Consider using an SSD for your operating system for faster boot times"
+                                           Foreground="{ThemeResource PlatinumBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </instruments:Plate>
                 </StackPanel>
-            </instruments:Plate>
+            </instruments:Faceplate>
 
             <!-- Footer -->
             <StackPanel HorizontalAlignment="Center" Spacing="8" Margin="0,16,0,0">
