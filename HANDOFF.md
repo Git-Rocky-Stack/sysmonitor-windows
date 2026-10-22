@@ -61,7 +61,7 @@ The rest of the suite needs Windows (COM, `ping.exe`) and crashes the test host 
   label, the dark parts, NumberBox's single dimming, no page restyling a field). The locked rule admits the
   field's twin only on `ContentElement.Foreground`; the presenter rule's exemption gains the three fields;
   the cap rule reads only the dictionary's own styles, not the clear button inside the field.
-- **Smoke run**: `UiSmokeRun.CheckFieldsAsync` (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:805`) builds the
+- **Smoke run**: `UiSmokeRun.CheckFieldsAsync` (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:806`) builds the
   three in each shift, measures each well against the palette, focuses the text box and measures the armed
   edge and outline. A refused focus is a note, not a failure. **Not yet run** - CI is its first run.
 

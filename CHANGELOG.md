@@ -28,7 +28,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   the cap face since the tokens were generated; until this dictionary existed nothing read
   any of them. The smoke run builds each cap in the live tree, in both shifts, and checks
   the face it came out with against the palette
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:603`), and each measurement is pinned to
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:604`), and each measurement is pinned to
   the rule it was read from, so a cap cannot be quietly resized
   (`tests/SysMonitor.Tests/Architecture/ConsoleCapTests.cs:131`).
 
@@ -50,7 +50,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   words stay for the same reason: the pages use both. The smoke run builds a switch in both
   shifts, turns it on and off again, and checks every face against the palette and the travel
   against the number WinUI works out for itself
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:665`).
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:666`).
 - **A status is a word and a lamp state, all the way down.** Services and view models graded
   their readings into Material hex colours - a temperature "Hot" in `#FF5722`, a driver problem
   in `#F44336` - and the pages parsed those strings into brushes that ignored the shift. Every
@@ -130,7 +130,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   pages' legacy `SearchTextBoxStyle`, `InputFieldStyle` and local face overrides are gone, and a
   test keeps them gone (`tests/SysMonitor.Tests/Architecture/ConsoleFieldTests.cs:337`); the smoke
   run builds each field in both shifts and measures its well and its focus against the palette
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:805`).
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:806`).
 
 - **Every button is a System-X cap.** The 121 buttons that still asked for the first-generation
   styles - a 24px pill, hardcoded red or outlined, many wrapped in a hand-copied chrome bezel -
@@ -153,7 +153,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:93`, `:94`). Because no
   test could have caught this by reading the code, the smoke run now opens a confirmation
   in both shifts and asks both buttons which face they were drawn in
-  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:662`).
+  (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:663`).
 
 - **Every dialog comes from the one helper.** Nine dialogs across four pages were still
   built by hand, so each missed whatever it was not told: the application's dialog style,

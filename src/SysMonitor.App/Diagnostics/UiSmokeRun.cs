@@ -108,21 +108,22 @@ internal sealed class UiSmokeRun
         debug.IsXamlResourceReferenceTracingEnabled = true;
         debug.XamlResourceReferenceFailed += (_, args) => Problem($"Resource not found: {args.Message}");
 
-        // Binding failures are worth reading, but the pages are full of old ones; they are noted, not failed.
+        // Binding failures were noted rather than failed while the pages still carried old ones. The run of
+        // 2026-10-22 noted none, in either theme or animation mode, so one now fails the page it happens on.
         debug.IsBindingTracingEnabled = true;
-        debug.BindingFailed += (_, args) => Note($"Binding failed: {args.Message}");
+        debug.BindingFailed += (_, args) => Problem($"Binding failed: {args.Message}");
     }
 
     /// <summary>
-    /// Takes an exception nothing else handled. A XAML parse error fails the page it happened on; anything else
-    /// is noted against it and the run carries on.
+    /// Takes an exception nothing else handled, and fails the page it happened on: an exception that reaches the
+    /// application on a page is one a user would have met there. The run carries on to the next page.
     /// </summary>
     public void Absorb(Exception exception)
     {
         if (exception is XamlParseException)
             Problem($"XAML parse error: {exception}");
         else
-            Note($"Unhandled {exception.GetType().Name}: {exception.Message}");
+            Problem($"Unhandled {exception.GetType().Name}: {exception.Message}");
     }
 
     /// <summary>Opens every page in every theme, then exits with 0 when all of them opened cleanly.</summary>

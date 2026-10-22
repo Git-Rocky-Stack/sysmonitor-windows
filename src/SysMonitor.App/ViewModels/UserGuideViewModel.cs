@@ -21,28 +21,23 @@ public partial class UserGuideViewModel : ObservableObject
             Version = $"{version.Major}.{version.Minor}.{version.Build}";
         }
 
-        // Get build date from assembly (linker timestamp or file info)
-        try
-        {
-            var buildDateTime = GetBuildDate(assembly);
-            BuildDate = buildDateTime.ToString("MMMM yyyy");
-        }
-        catch
-        {
-            BuildDate = "December 2024";
-        }
+        BuildDate = BuildDateOf(assembly)?.ToString("MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture)
+                    ?? "an unrecorded date";
     }
 
-    private static DateTime GetBuildDate(Assembly assembly)
+    /// <summary>
+    /// The date the build stamped into the assembly (SysMonitor.App.csproj, AssemblyMetadata "BuildDate"). The
+    /// file's modified time, read before, is the day the installer unpacked it - or the Store's packaging date -
+    /// and the fallback named a December 2024 build that never was.
+    /// </summary>
+    internal static DateTime? BuildDateOf(Assembly assembly)
     {
-        // Try to get from assembly file info
-        var location = assembly.Location;
-        if (!string.IsNullOrEmpty(location) && File.Exists(location))
-        {
-            return File.GetLastWriteTime(location);
-        }
+        var stamped = assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(attribute => attribute.Key == "BuildDate")?.Value;
 
-        // Fallback to current date
-        return DateTime.Now;
+        return DateTime.TryParseExact(stamped, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AssumeUniversal, out var date)
+            ? date
+            : null;
     }
 }

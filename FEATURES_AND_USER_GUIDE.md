@@ -42,7 +42,7 @@ STX.1 System Monitor is a comprehensive Windows system utility that provides rea
 ### System Requirements
 
 - **OS:** Windows 10 version 2004 (build 19041) or later, or Windows 11
-  (`src/SysMonitor.App/SysMonitor.App.csproj:5`, `src/SysMonitor.App/Package.appxmanifest:23`)
+  (`src/SysMonitor.App/SysMonitor.App.csproj:5`, `src/SysMonitor.App/Package.appxmanifest:20`)
 - **Architecture:** x64. The projects also build for x86 and ARM64, but the released
   installer is x64 only (`Build-Release.ps1:81-82`, `installer/SysMonitorSetup.iss:57`)
 - **Runtime:** none to install - the release is self-contained and carries the .NET 8 and

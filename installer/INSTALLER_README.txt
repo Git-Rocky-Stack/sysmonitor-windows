@@ -49,10 +49,11 @@ SysMonitorSetup.iss  - The Inno Setup script. The only one: every build path
                        second AppId, which Inno Setup treats as a different
                        product - so installing from both would leave two
                        copies side by side instead of upgrading.
-(The licence shown during install is ..icense, the mit text at the
-                       repository root - see licensefile in the .iss.)
-README_BEFORE.txt    - Pre-installation information
-README_AFTER.txt     - Post-installation information
+                       (The licence shown during install is ..\LICENSE, the
+                       MIT text at the repository root - see LicenseFile in
+                       the .iss. The page before it is ..\README_INSTALLER.txt,
+                       InfoBeforeFile. Setup refuses Windows older than 10
+                       version 2004, build 19041 - MinVersion.)
 installer_icon.ico   - Installer icon
 build-installer.bat  - Windows batch build script
 build-installer.ps1  - PowerShell build script

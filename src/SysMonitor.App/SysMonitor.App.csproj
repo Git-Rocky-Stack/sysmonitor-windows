@@ -92,4 +92,9 @@
     </Content>
   </ItemGroup>
 
+  <!-- The day this build was made, which the User's Guide shows as "Built". -->
+  <ItemGroup>
+    <AssemblyMetadata Include="BuildDate" Value="$([System.DateTime]::UtcNow.ToString('yyyy-MM-dd'))" />
+  </ItemGroup>
+
 </Project>
