@@ -19,8 +19,8 @@ header of their own. They are listed here in the order the menu shows them.
 | Processes | `:93` | Running processes with per-process processor and memory use, and the ability to end one |
 | Directory Cleaner | `:98` | Scans thirteen categories of reclaimable files and removes the ones you select (`src/SysMonitor.Core/Models/CleanerModels.cs:56-70`) |
 | Registry Cleaner | `:103` | Finds registry issues. Exports every key a selected fix will touch with `reg.exe` before changing anything, and a failed export stops the clean (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:913-915`, `:940`, `:973`) |
-| Startup | `:108` | Enables and disables startup entries through `Explorer\StartupApproved`, the mechanism Task Manager uses (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:12`, `:52-53`) |
-| Installed Programs | `:113` | Inventory and uninstall. Exit codes are reported in words, including restart-needed and already-removed, which are not failures |
+| Startup | `:108` | Enables and disables startup entries through `Explorer\StartupApproved`, the mechanism Task Manager uses (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:12`, `:57-58`) |
+| Installed Programs | `:132` | Inventory and uninstall. Exit codes are reported in words, including restart-needed and already-removed, which are not failures |
 
 ## Maintenance
 
@@ -31,7 +31,7 @@ Header at `MainWindow.xaml:119`.
 | Health Check | `:120` | System-wide checks producing a score, a grade, counts of critical issues and warnings, and recommended actions |
 | Game Mode | `:125` | Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`) |
 | Browser Privacy | `:130` | Clears browsing traces across installed browsers, counted per browser actually found |
-| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406`, `:589`, `:20`). It asks before it starts, naming the count and size, with Cancel as the default (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`) |
+| Drive Wiper | `:135` | Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406`, `:602`, `:20`). It asks before it starts, naming the count and size, with Cancel as the default (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`) |
 | Scheduled Cleaning | `:140` | Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs`) |
 | Backup Manager | `:145` | Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (`src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:20-22`) |
 | Driver Updater | `:150` | Device driver inventory, with problem and unsigned drivers flagged, and links out to Device Manager and Windows Update |

@@ -31,7 +31,21 @@ public class PdfTools : IPdfTools
         {
             try
             {
-                var files = inputPaths.Where(File.Exists).ToList();
+                // Every file the user put in the merge is in it, or the merge does not happen: a merged document
+                // quietly missing one of its parts reads as complete.
+                var requested = inputPaths.ToList();
+                var unusable = requested.Where(path => !File.Exists(path) || !IsValidPdf(path)).ToList();
+                if (unusable.Count > 0)
+                {
+                    return new PdfOperationResult
+                    {
+                        Success = false,
+                        ErrorMessage = $"Not merged: {string.Join(", ", unusable.Select(Path.GetFileName))} " +
+                                       (unusable.Count == 1 ? "is missing or is not a readable PDF" : "are missing or are not readable PDFs")
+                    };
+                }
+
+                var files = requested;
                 if (files.Count < 2)
                 {
                     return new PdfOperationResult
@@ -46,8 +60,6 @@ public class PdfTools : IPdfTools
 
                 foreach (var file in files)
                 {
-                    if (!IsValidPdf(file)) continue;
-
                     using var inputDoc = PdfReader.Open(file, PdfDocumentOpenMode.Import);
                     for (int i = 0; i < inputDoc.PageCount; i++)
                     {

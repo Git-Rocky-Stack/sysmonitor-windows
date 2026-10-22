@@ -23,7 +23,7 @@ Version 3.0.1 | Windows Desktop Application | Built with WinUI 3 & .NET 8
 
 ## Overview
 
-STX.1 System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:18`), system optimization (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:18`), privacy protection (`src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs:60`), and productivity tools (`src/SysMonitor.Core/Services/Utilities/PdfTools.cs:12`). Designed with a sleek AMOLED dark theme, it offers professional-grade features in an intuitive interface.
+STX.1 System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:18`), system optimization (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:18`), privacy protection (`src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs:61`), and productivity tools (`src/SysMonitor.Core/Services/Utilities/PdfTools.cs:12`). Designed with a sleek AMOLED dark theme, it offers professional-grade features in an intuitive interface.
 
 ### Key Features at a Glance
 
@@ -340,7 +340,7 @@ Overwrite a file's contents so the old data is gone from the disk. Read the limi
 below before relying on it.
 
 **Wipe Methods** (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:27-32`, pass
-counts at `:498-505`):
+counts at `:511-518`):
 
 | Method | Passes | Speed |
 |--------|--------|-------|
@@ -350,13 +350,13 @@ counts at `:498-505`):
 | Gutmann 35-Pass | 35 | Very Slow |
 
 The Gutmann passes follow the table in Peter Gutmann's 1996 paper
-(`DriveWiper.cs:561-566`). Before v3.0.0 the middle passes were filled with
+(`DriveWiper.cs:574-579`). Before v3.0.0 the middle passes were filled with
 `(pass * 17) % 256`, which is not that method.
 
 **How It Works:**
 - Overwrites file data with the pattern set you chose
 - Every wipe reads its last pass back off the disk and compares it against the pattern
-  that should be there (`DriveWiper.cs:406`, `:589`). A file that cannot be confirmed is
+  that should be there (`DriveWiper.cs:406`, `:602`). A file that cannot be confirmed is
   reported as **unconfirmed** rather than counted as wiped
 - Directory wipes stay inside the folder you chose, and do not follow junctions or
   symbolic links out of it
@@ -516,9 +516,9 @@ Image processing and optimization:
 File compression and archiving:
 
 **Compression Formats** (`src/SysMonitor.Core/Services/Utilities/IUtilities.cs:94-98`)**:**
-- **ZIP** - a file or a whole folder (`FileConverter.cs:195-218`)
+- **ZIP** - a file or a whole folder (`FileConverter.cs:216-239`)
 - **GZip** (`.gz`) - a single file only. This is plain gzip, not a tar archive, so it
-  compresses one file rather than bundling several (`FileConverter.cs:221-226`)
+  compresses one file rather than bundling several (`FileConverter.cs:242-247`)
 
 7z is not offered: the code behind it wrote a zip file with a different name.
 

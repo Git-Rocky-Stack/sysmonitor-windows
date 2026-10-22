@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Helpers;
+using SysMonitor.Core.Services.Utilities;
 
 namespace SysMonitor.Core.Services.Cleaners;
 
@@ -290,10 +291,20 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
     {
         if (!Directory.Exists(browser.BasePath)) return;
 
-        // Firefox uses profile folders
-        foreach (var profileDir in Directory.GetDirectories(browser.BasePath))
+        // Firefox keeps its profiles in Roaming and each profile's cache in a folder of the same name under Local.
+        // The profile is the one in use: of the .default ones, the one whose history was written to last - an
+        // old, empty xxxx.default often sits beside the xxxx.default-release Firefox actually opens.
+        var localProfiles = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Mozilla", "Firefox", "Profiles");
+        var inUse = Directory.GetDirectories(browser.BasePath)
+            .Where(dir => Path.GetFileName(dir).Contains(".default", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(dir => File.Exists(Path.Combine(dir, "places.sqlite"))
+                ? File.GetLastWriteTimeUtc(Path.Combine(dir, "places.sqlite"))
+                : DateTime.MinValue)
+            .Take(1);
+
+        foreach (var profileDir in inUse)
         {
-            if (!profileDir.Contains(".default")) continue;
 
             // Cookies
             var cookiesPath = Path.Combine(profileDir, "cookies.sqlite");
@@ -325,18 +336,19 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     BrowserName = browser.Name,
                     BrowserIcon = browser.Icon,
                     DataType = PrivacyDataType.BrowsingHistory,
-                    DisplayName = "Browsing History",
-                    Description = "Visited websites, bookmarks, and search history",
+                    // Firefox keeps bookmarks in the same database as history, so clearing one clears both.
+                    DisplayName = "History and Bookmarks",
+                    Description = "Visited websites and search history - and every bookmark (WARNING: Firefox keeps them in the same file)",
                     Path = historyPath,
                     SizeBytes = size,
                     FormattedSize = FormatHelper.FormatSize(size),
                     IsSelected = false,
-                    RiskLevel = PrivacyRiskLevel.Low
+                    RiskLevel = PrivacyRiskLevel.High
                 });
             }
 
             // Cache
-            var cachePath = Path.Combine(profileDir, "cache2");
+            var cachePath = Path.Combine(localProfiles, Path.GetFileName(profileDir), "cache2");
             if (Directory.Exists(cachePath))
             {
                 var (size, count) = GetDirectorySize(cachePath);
@@ -395,8 +407,6 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                     RiskLevel = PrivacyRiskLevel.Medium
                 });
             }
-
-            break; // Only process default profile
         }
     }
 
@@ -420,26 +430,37 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
                         File.Delete(item.Path);
                         result.BytesCleaned += size;
                         result.ItemsDeleted++;
+
+                        // A database's journal and write-ahead log hold the same rows; left behind, the browser
+                        // replays them into a fresh file on its next start, or finds them torn from their database.
+                        foreach (var sidecar in new[] { "-journal", "-wal", "-shm" }.Select(suffix => item.Path + suffix))
+                        {
+                            if (File.Exists(sidecar))
+                            {
+                                result.BytesCleaned += new FileInfo(sidecar).Length;
+                                File.Delete(sidecar);
+                            }
+                        }
                     }
                     else if (Directory.Exists(item.Path))
                     {
-                        var (size, count) = GetDirectorySize(item.Path);
-
-                        foreach (var file in Directory.EnumerateFiles(item.Path, "*", SearchOption.AllDirectories))
+                        // Freed is counted file by file, from what was actually deleted: a running browser holds
+                        // part of its cache open, and that part is still on the disk.
+                        foreach (var file in FileScanning.EnumerateFiles(item.Path, cancellationToken))
                         {
                             try
                             {
+                                var size = new FileInfo(file).Length;
                                 File.Delete(file);
+                                result.BytesCleaned += size;
                                 result.ItemsDeleted++;
                             }
-                            catch (Exception ex)
+                            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                             {
                                 result.ErrorCount++;
                                 _logger.LogTrace(ex, "Failed to delete file during privacy clean");
                             }
                         }
-
-                        result.BytesCleaned += size;
                     }
 
                     // Track by browser
@@ -457,7 +478,8 @@ public class BrowserPrivacyCleaner : IBrowserPrivacyCleaner
         }, cancellationToken);
 
         result.Duration = DateTime.Now - startTime;
-        result.Success = result.ErrorCount < result.ItemsDeleted;
+        // Files a running browser holds open are left, not failures; see TempFileCleaner.CleanAsync.
+        result.Success = result.Errors.Count == 0 && !(result.ItemsDeleted == 0 && result.ErrorCount > 0);
         _logger.LogInformation("Privacy clean complete: {ItemsDeleted} items deleted, {BytesCleaned} bytes freed",
             result.ItemsDeleted, result.BytesCleaned);
         return result;

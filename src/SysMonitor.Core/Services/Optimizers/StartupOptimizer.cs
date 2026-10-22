@@ -47,13 +47,32 @@ public class StartupOptimizer : IStartupOptimizer
     /// <summary>The folder whose shortcuts start with Windows, and the key that says which of them may run.</summary>
     internal sealed record StartupFolder(string Path, RegistryKey ApprovalRoot, string ApprovalPath);
 
-    internal static IReadOnlyList<StartupLocation> DefaultLocations() =>
-    [
-        new(Registry.CurrentUser, "HKCU Run", $@"{CurrentVersion}\Run", $@"{CurrentVersion}\Explorer\StartupApproved\Run", $@"{CurrentVersion}\Run-Disabled"),
-        new(Registry.LocalMachine, "HKLM Run", $@"{CurrentVersion}\Run", $@"{CurrentVersion}\Explorer\StartupApproved\Run", $@"{CurrentVersion}\Run-Disabled"),
-        new(Registry.CurrentUser, "HKCU RunOnce", $@"{CurrentVersion}\RunOnce", null, $@"{CurrentVersion}\RunOnce-Disabled"),
-        new(Registry.LocalMachine, "HKLM RunOnce", $@"{CurrentVersion}\RunOnce", null, $@"{CurrentVersion}\RunOnce-Disabled"),
-    ];
+    /// <summary>Where a 64-bit Windows keeps what 32-bit installers write under HKLM's CurrentVersion.</summary>
+    private const string CurrentVersion32 = @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion";
+
+    internal static IReadOnlyList<StartupLocation> DefaultLocations()
+    {
+        var locations = new List<StartupLocation>
+        {
+            new(Registry.CurrentUser, "HKCU Run", $@"{CurrentVersion}\Run", $@"{CurrentVersion}\Explorer\StartupApproved\Run", $@"{CurrentVersion}\Run-Disabled"),
+            new(Registry.LocalMachine, "HKLM Run", $@"{CurrentVersion}\Run", $@"{CurrentVersion}\Explorer\StartupApproved\Run", $@"{CurrentVersion}\Run-Disabled"),
+            new(Registry.CurrentUser, "HKCU RunOnce", $@"{CurrentVersion}\RunOnce", null, $@"{CurrentVersion}\RunOnce-Disabled"),
+            new(Registry.LocalMachine, "HKLM RunOnce", $@"{CurrentVersion}\RunOnce", null, $@"{CurrentVersion}\RunOnce-Disabled"),
+        };
+
+        // A 32-bit program that starts for every user is listed under WOW6432Node, and Windows records whether it
+        // may run under StartupApproved\Run32, which is where Task Manager reads it. A 64-bit process has to ask
+        // for that node by name; a 32-bit one is already redirected there, and asking would list everything twice.
+        if (Environment.Is64BitProcess)
+        {
+            locations.Add(new(Registry.LocalMachine, "HKLM Run (32-bit)", $@"{CurrentVersion32}\Run",
+                $@"{CurrentVersion}\Explorer\StartupApproved\Run32", $@"{CurrentVersion32}\Run-Disabled"));
+            locations.Add(new(Registry.LocalMachine, "HKLM RunOnce (32-bit)", $@"{CurrentVersion32}\RunOnce", null,
+                $@"{CurrentVersion32}\RunOnce-Disabled"));
+        }
+
+        return locations;
+    }
 
     private static StartupFolder DefaultStartupFolder() => new(
         Environment.GetFolderPath(Environment.SpecialFolder.Startup),

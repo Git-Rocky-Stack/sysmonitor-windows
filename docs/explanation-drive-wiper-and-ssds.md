@@ -44,7 +44,7 @@ changes is the claim. The app will not tell you the data is unrecoverable, becau
 cannot know that.
 
 The read-back check still applies on every wipe. Every wipe reads its last pass back
-and compares it against the pattern that should be there (`DriveWiper.cs:406`, `:589`).
+and compares it against the pattern that should be there (`DriveWiper.cs:406`, `:602`).
 That confirms the logical write landed. It does not and cannot confirm that the
 physical cells holding the original were erased.
 

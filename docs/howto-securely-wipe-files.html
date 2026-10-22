@@ -79,7 +79,7 @@
        selection were overwritten and deleted
        (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs</code>).</p>
     <ol start="3">
-    <li>Choose a method (<code>DriveWiper.cs:27-32</code>, pass counts at <code>:498-505</code>):</li>
+    <li>Choose a method (<code>DriveWiper.cs:27-32</code>, pass counts at <code>:511-518</code>):</li>
     </ol>
     <div class="tablewrap"><table>
     <thead>
@@ -113,7 +113,7 @@
     </tbody>
     </table></div>
     <p>The Gutmann passes now follow the table in Peter Gutmann's 1996 paper
-       (<code>DriveWiper.cs:561-566</code>). Before v3.0.0 the middle passes were filled with
+       (<code>DriveWiper.cs:574-579</code>). Before v3.0.0 the middle passes were filled with
        <code>(pass * 17) % 256</code>, which is not that method.</p>
     <ol start="4">
     <li>Click <strong>WIPE NOW</strong>.</li>
@@ -131,7 +131,7 @@
     <h2>Verification</h2>
     <p>This is the part that changed in v3.0.0, and it is the reason to trust the result.</p>
     <p>Every wipe reads its last pass back off the disk and compares it against the pattern
-    that was supposed to be written (<code>DriveWiper.cs:406</code>, <code>:589</code>). A file that cannot be
+    that was supposed to be written (<code>DriveWiper.cs:406</code>, <code>:602</code>). A file that cannot be
     confirmed is reported as <strong>unconfirmed</strong> rather than counted as wiped.</p>
     <p>So read the result. "Wiped" means the app wrote the patterns and then read the final
     one back and it matched. "Unconfirmed" means it could not prove that, and you should

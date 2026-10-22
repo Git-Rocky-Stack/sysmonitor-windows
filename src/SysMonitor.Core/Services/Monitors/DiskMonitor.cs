@@ -49,9 +49,11 @@ public class DiskMonitor : IDiskMonitor
                         DriveType = drive.DriveType.ToString(),
                         FileSystem = drive.DriveFormat,
                         TotalBytes = drive.TotalSize,
+                        // Free is what this user may still write; used is what the volume holds. Under a disk
+                        // quota the two differ, and "used" read from the quota counted space nobody had filled.
                         FreeBytes = drive.AvailableFreeSpace,
-                        UsedBytes = drive.TotalSize - drive.AvailableFreeSpace,
-                        UsagePercent = (1 - (double)drive.AvailableFreeSpace / drive.TotalSize) * 100,
+                        UsedBytes = drive.TotalSize - drive.TotalFreeSpace,
+                        UsagePercent = (1 - (double)drive.TotalFreeSpace / drive.TotalSize) * 100,
                         IsSSD = IsSSDCached(drive.Name)
                     });
                 }

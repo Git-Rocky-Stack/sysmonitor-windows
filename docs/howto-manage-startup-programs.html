@@ -70,7 +70,7 @@
     that nothing read again. Disabling from inside the app was one-way, and Task Manager
     knew nothing about it (<code>src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs</code>).</p>
     <p>Entries now use <code>Explorer\StartupApproved</code>, which is the same mechanism Task Manager
-    writes (<code>StartupOptimizer.cs:12</code>, <code>:52-53</code>, <code>:61</code>). The app, Task Manager and Windows
+    writes (<code>StartupOptimizer.cs:12</code>, <code>:57-58</code>, <code>:80</code>). The app, Task Manager and Windows
     now agree with each other.</p>
     <h2>Steps</h2>
     <ol>

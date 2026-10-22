@@ -454,6 +454,14 @@ public class DriveWiper : IDriveWiper
                 var bytesWritten = await FillFreeSpaceAsync(tempPath, freeSpace, pattern, pass, passes, progress, cancellationToken);
 
                 result.BytesWiped += bytesWritten;
+
+                if (!CoveredFreeSpace(bytesWritten, freeSpace))
+                {
+                    result.ErrorMessage = $"Pass {pass} stopped after {FormatSize(bytesWritten)} of {FormatSize(freeSpace)} free; " +
+                                          "the rest of the free space was not overwritten";
+                    return Finish(result, startTime);
+                }
+
                 result.PassesCompleted = pass;
 
                 // Delete temp file after each pass
@@ -474,6 +482,11 @@ public class DriveWiper : IDriveWiper
             result.ErrorMessage = ex.Message;
         }
 
+        return Finish(result, startTime);
+    }
+
+    private static WipeResult Finish(WipeResult result, DateTime startTime)
+    {
         result.Duration = DateTime.Now - startTime;
         return result;
     }
@@ -650,61 +663,109 @@ public class DriveWiper : IDriveWiper
         await fs.FlushAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// The largest file one fill writes before starting the next. FAT32 refuses any file past 4 GiB, and exFAT
+    /// volumes formatted by some cameras do too, so a single file stopped there and left the rest of the free
+    /// space unwritten while the wipe reported success.
+    /// </summary>
+    internal const long FillFileLimit = 2L * 1024 * 1024 * 1024;
+
     private static async Task<long> FillFreeSpaceAsync(string tempPath, long targetSize, byte[] pattern,
         int currentPass, int totalPasses, IProgress<WipeProgress>? progress, CancellationToken cancellationToken)
     {
         long bytesWritten = 0;
         var startTime = DateTime.Now;
 
+        // Every fill file stays open until the pass is done, so the space it holds is not handed back to the next
+        // one; DeleteOnClose removes them all when they close, however the pass ends.
+        var streams = new List<FileStream>();
         try
         {
-            await using var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None,
-                BufferSize, FileOptions.WriteThrough | FileOptions.DeleteOnClose);
-
-            // Write until disk is full or we reach target
-            while (bytesWritten < targetSize)
+            var full = false;
+            for (var index = 0; !full && bytesWritten < targetSize; index++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
+                FileStream fs;
                 try
                 {
-                    await fs.WriteAsync(pattern, cancellationToken);
-                    bytesWritten += pattern.Length;
-
-                    if (bytesWritten % (BufferSize * 50) == 0)
-                    {
-                        var elapsed = DateTime.Now - startTime;
-                        var rate = bytesWritten / Math.Max(elapsed.TotalSeconds, 1);
-                        var remaining = TimeSpan.FromSeconds((targetSize - bytesWritten) / Math.Max(rate, 1));
-
-                        progress?.Report(new WipeProgress
-                        {
-                            CurrentPass = currentPass,
-                            TotalPasses = totalPasses,
-                            BytesWritten = bytesWritten,
-                            TotalBytes = targetSize,
-                            PercentComplete = (double)bytesWritten / targetSize * 100,
-                            Status = $"Pass {currentPass}/{totalPasses}: {FormatSize(bytesWritten)} written",
-                            EstimatedTimeRemaining = remaining
-                        });
-                    }
+                    fs = new FileStream(index == 0 ? tempPath : $"{tempPath}.{index}", FileMode.Create, FileAccess.Write,
+                        FileShare.None, BufferSize, FileOptions.WriteThrough | FileOptions.DeleteOnClose);
                 }
                 catch (IOException)
                 {
-                    // Disk full - this is expected
+                    // Best effort: no room left even for a new file is the disk being full, which is the point.
                     break;
                 }
-            }
 
-            await fs.FlushAsync(cancellationToken);
+                streams.Add(fs);
+                long inThisFile = 0;
+
+                // Write until the disk is full, the target is reached, or this file is as large as it may be
+                while (bytesWritten < targetSize && inThisFile < FillFileLimit)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        await fs.WriteAsync(pattern, cancellationToken);
+                        bytesWritten += pattern.Length;
+                        inThisFile += pattern.Length;
+
+                        if (bytesWritten % (BufferSize * 50) == 0)
+                        {
+                            var elapsed = DateTime.Now - startTime;
+                            var rate = bytesWritten / Math.Max(elapsed.TotalSeconds, 1);
+                            var remaining = TimeSpan.FromSeconds((targetSize - bytesWritten) / Math.Max(rate, 1));
+
+                            progress?.Report(new WipeProgress
+                            {
+                                CurrentPass = currentPass,
+                                TotalPasses = totalPasses,
+                                BytesWritten = bytesWritten,
+                                TotalBytes = targetSize,
+                                PercentComplete = (double)bytesWritten / targetSize * 100,
+                                Status = $"Pass {currentPass}/{totalPasses}: {FormatSize(bytesWritten)} written",
+                                EstimatedTimeRemaining = remaining
+                            });
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // Disk full - this is expected; WipeFreeSpaceAsync judges whether it came soon enough
+                        full = true;
+                        break;
+                    }
+                }
+
+                try
+                {
+                    await fs.FlushAsync(cancellationToken);
+                }
+                catch (IOException)
+                {
+                    // Best effort: the last buffer not fitting is the disk being full, which is the point.
+                }
+            }
         }
-        catch (IOException)
+        finally
         {
-            // Best effort: filling the free space is the point, so running out of it is success.
+            foreach (var stream in streams)
+            {
+                await stream.DisposeAsync();
+            }
         }
 
         return bytesWritten;
     }
+
+    /// <summary>
+    /// Whether a pass covered the free space it set out to. Other writers and the file system's own metadata take
+    /// a little while it runs, so a pass is whole at 95%; a pass that stopped well short was cut off by something
+    /// that was not the disk filling, and the space it did not reach still holds what was deleted there.
+    /// </summary>
+    internal static bool CoveredFreeSpace(long bytesWritten, long freeSpace) =>
+        freeSpace <= 0 || bytesWritten >= freeSpace * 0.95;
 
     private static string FormatSize(long bytes)
     {

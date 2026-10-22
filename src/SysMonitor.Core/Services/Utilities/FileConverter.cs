@@ -75,7 +75,7 @@ public class FileConverter : IFileConverter
                     _ => ".zip"
                 };
 
-                var targetPath = outputPath ?? sourcePath + extension;
+                var targetPath = outputPath ?? FreePath(sourcePath + extension);
 
                 switch (format)
                 {
@@ -133,18 +133,19 @@ public class FileConverter : IFileConverter
                 switch (extension)
                 {
                     case ".zip":
-                        targetPath = outputPath ?? Path.Combine(
+                        targetPath = outputPath ?? FreePath(Path.Combine(
                             sourceInfo.DirectoryName ?? "",
-                            Path.GetFileNameWithoutExtension(sourcePath));
+                            Path.GetFileNameWithoutExtension(sourcePath)));
 
                         if (!Directory.Exists(targetPath))
                             Directory.CreateDirectory(targetPath);
 
-                        ZipFile.ExtractToDirectory(sourcePath, targetPath, true);
+                        // Never over a file that is already there: an archive's copy is older than the user's.
+                        ZipFile.ExtractToDirectory(sourcePath, targetPath, overwriteFiles: false);
                         break;
 
                     case ".gz":
-                        targetPath = outputPath ?? sourcePath[..^3]; // Remove .gz
+                        targetPath = outputPath ?? FreePath(sourcePath[..^3]); // Remove .gz
                         DecompressGZip(sourcePath, targetPath);
                         break;
 
@@ -185,6 +186,26 @@ public class FileConverter : IFileConverter
                 };
             }
         });
+    }
+
+    /// <summary>
+    /// The path itself when nothing is there, else the first free "name (2).ext" beside it. Unpacking
+    /// report.txt.gz next to report.txt used to replace it, losing every edit made since the archive was taken.
+    /// </summary>
+    internal static string FreePath(string path)
+    {
+        if (!File.Exists(path) && !Directory.Exists(path))
+            return path;
+
+        var folder = Path.GetDirectoryName(path) ?? string.Empty;
+        var stem = Path.GetFileNameWithoutExtension(path);
+        var extension = Path.GetExtension(path);
+        for (var n = 2; ; n++)
+        {
+            var candidate = Path.Combine(folder, $"{stem} ({n}){extension}");
+            if (!File.Exists(candidate) && !Directory.Exists(candidate))
+                return candidate;
+        }
     }
 
     public IEnumerable<string> GetSupportedImageFormats() => SupportedImageFormats;
@@ -230,7 +251,7 @@ public class FileConverter : IFileConverter
     {
         using var sourceStream = File.OpenRead(sourcePath);
         using var gzipStream = new GZipStream(sourceStream, CompressionMode.Decompress);
-        using var targetStream = File.Create(targetPath);
+        using var targetStream = new FileStream(targetPath, FileMode.CreateNew);
         gzipStream.CopyTo(targetStream);
     }
 }

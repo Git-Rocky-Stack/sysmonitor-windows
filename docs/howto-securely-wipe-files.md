@@ -24,7 +24,7 @@ of this page, but the explanation matters.
    selection were overwritten and deleted
    (`src/SysMonitor.Core/Services/Utilities/DriveWiper.cs`).
 
-3. Choose a method (`DriveWiper.cs:27-32`, pass counts at `:498-505`):
+3. Choose a method (`DriveWiper.cs:27-32`, pass counts at `:511-518`):
 
    | Method | Passes | Use it when |
    |---|---|---|
@@ -34,7 +34,7 @@ of this page, but the explanation matters.
    | Gutmann | 35 | You have a specific reason and time to spare |
 
    The Gutmann passes now follow the table in Peter Gutmann's 1996 paper
-   (`DriveWiper.cs:561-566`). Before v3.0.0 the middle passes were filled with
+   (`DriveWiper.cs:574-579`). Before v3.0.0 the middle passes were filled with
    `(pass * 17) % 256`, which is not that method.
 
 4. Click **WIPE NOW**.
@@ -54,7 +54,7 @@ of this page, but the explanation matters.
 This is the part that changed in v3.0.0, and it is the reason to trust the result.
 
 Every wipe reads its last pass back off the disk and compares it against the pattern
-that was supposed to be written (`DriveWiper.cs:406`, `:589`). A file that cannot be
+that was supposed to be written (`DriveWiper.cs:406`, `:602`). A file that cannot be
 confirmed is reported as **unconfirmed** rather than counted as wiped.
 
 So read the result. "Wiped" means the app wrote the patterns and then read the final
