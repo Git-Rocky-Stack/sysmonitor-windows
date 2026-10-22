@@ -138,7 +138,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                    <CheckBox AutomationProperties.Name="{Binding Title}" Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                               IsEnabled="{Binding CanAutoFix}" VerticalAlignment="Center"/>
 
                                     <Border Grid.Column="1" Style="{StaticResource IconContainerStyle}"

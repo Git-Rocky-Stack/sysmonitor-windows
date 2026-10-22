@@ -129,10 +129,14 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
+                                        <!-- The kicker names the section, so a screen reader can move between sections by
+                                             heading; the serial is decoration to a listener, and is not read out. -->
                                         <TextBlock Style="{StaticResource KickerTextStyle}" VerticalAlignment="Center"
-                                                   Text="{TemplateBinding Kicker}"/>
+                                                   Text="{TemplateBinding Kicker}"
+                                                   AutomationProperties.HeadingLevel="Level2"/>
                                         <TextBlock Grid.Column="1" Style="{StaticResource SerialTextStyle}" VerticalAlignment="Center"
-                                                   Text="{TemplateBinding Serial}"/>
+                                                   Text="{TemplateBinding Serial}"
+                                                   AutomationProperties.AccessibilityView="Raw"/>
                                         <!-- A ContentControl, not a ContentPresenter. WinUI binds a presenter in a
                                              ContentControl's template to the control's own Content while its Content
                                              is unset, and a TemplateBinding to a property the app registers does not

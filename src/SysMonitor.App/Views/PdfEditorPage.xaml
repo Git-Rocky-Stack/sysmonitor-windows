@@ -76,7 +76,7 @@
                             <FontIcon Glyph="&#xE7A6;" FontSize="14"/>
                         </Button>
                     </StackPanel>
-                    <TextBlock Text="FILE / EDIT" FontSize="9" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="FILE / EDIT" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <Border Grid.Column="1" Width="1" Background="{ThemeResource HairlineStrongBrush}" Margin="0,4"/>
@@ -143,7 +143,7 @@
                             <FontIcon Glyph="&#xE8A5;" FontSize="14"/>
                         </Button>
                     </StackPanel>
-                    <TextBlock Text="ANNOTATE" FontSize="9" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="ANNOTATE" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <Border Grid.Column="3" Width="1" Background="{ThemeResource HairlineStrongBrush}" Margin="0,4"
@@ -156,7 +156,7 @@
                         <!-- Color Picker -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <TextBlock Text="Color:" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox x:Name="ColorPicker" SelectedIndex="0" Width="80" SelectionChanged="ColorPicker_SelectionChanged">
+                            <ComboBox AutomationProperties.Name="Color" x:Name="ColorPicker" SelectedIndex="0" Width="80" SelectionChanged="ColorPicker_SelectionChanged">
                                 <ComboBoxItem Tag="#FF0000">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <Border Width="14" Height="14" Background="#FF0000" CornerRadius="2"/>
@@ -199,7 +199,7 @@
                         <!-- Font Size (for text tool) -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <TextBlock Text="Size:" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox x:Name="FontSizePicker" SelectedIndex="2" Width="65" SelectionChanged="FontSize_SelectionChanged">
+                            <ComboBox AutomationProperties.Name="Size" x:Name="FontSizePicker" SelectedIndex="2" Width="65" SelectionChanged="FontSize_SelectionChanged">
                                 <ComboBoxItem Content="8" Tag="8"/>
                                 <ComboBoxItem Content="10" Tag="10"/>
                                 <ComboBoxItem Content="12" Tag="12"/>
@@ -214,7 +214,7 @@
                         <!-- Stroke Width (for shapes) -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <TextBlock Text="Stroke:" VerticalAlignment="Center" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
-                            <ComboBox x:Name="StrokeWidthPicker" SelectedIndex="1" Width="60" SelectionChanged="StrokeWidth_SelectionChanged">
+                            <ComboBox AutomationProperties.Name="Stroke" x:Name="StrokeWidthPicker" SelectedIndex="1" Width="60" SelectionChanged="StrokeWidth_SelectionChanged">
                                 <ComboBoxItem Content="1px" Tag="1"/>
                                 <ComboBoxItem Content="2px" Tag="2"/>
                                 <ComboBoxItem Content="3px" Tag="3"/>
@@ -233,7 +233,7 @@
                             </ToggleButton>
                         </StackPanel>
                     </StackPanel>
-                    <TextBlock Text="FORMAT" FontSize="9" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="FORMAT" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Zoom Controls (right side) -->
@@ -253,7 +253,7 @@
                             <FontIcon Glyph="&#xE71E;" FontSize="14"/>
                         </Button>
                     </StackPanel>
-                    <TextBlock Text="ZOOM" FontSize="9" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="ZOOM" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -307,8 +307,8 @@
                                                     <TextBlock Text="{Binding PageNumber}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Rotation}" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                                    <TextBlock Text="°" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="{Binding Rotation}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="°" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
@@ -434,8 +434,8 @@
                                                 Background="Transparent">
                                             <StackPanel Spacing="2">
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <TextBlock Text="PAGE" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                                    <TextBlock Text="{Binding PageNumber}" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="PAGE" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="{Binding PageNumber}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                 </StackPanel>
                                                 <TextBlock Text="{Binding Preview}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"
                                                            TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"/>
@@ -576,9 +576,9 @@
 
                             <Border Background="{ThemeResource Carbon750Brush}" CornerRadius="4" Padding="10">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Text="• Click + drag on page to add annotations" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
-                                    <TextBlock Text="• Use scroll wheel to navigate pages" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
-                                    <TextBlock Text="• Ctrl+S to save, Ctrl+Z to undo" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="• Click + drag on page to add annotations" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="• Use scroll wheel to navigate pages" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="• Ctrl+S to save, Ctrl+Z to undo" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>

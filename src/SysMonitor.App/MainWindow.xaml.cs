@@ -1,4 +1,5 @@
-﻿using Microsoft.UI;
+﻿using SysMonitor.App.Helpers;
+using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -60,6 +61,7 @@ public sealed partial class MainWindow : Window
     private TrayIconService? _trayService;
     private IHistoryService? _historyService;
     private bool _isExiting;
+    private WindowMinimumSize? _minimumSize;
 
     public MainWindow()
     {
@@ -68,6 +70,9 @@ public sealed partial class MainWindow : Window
 
         // Set window icon
         SetWindowIcon();
+
+        // Small enough for a 1280-wide screen with room to spare; below it the pages' columns clip.
+        _minimumSize = WindowMinimumSize.Apply(this, 1100, 700);
 
         // A smoke run only opens pages and takes pictures of them: no tray icon, no history recording, and no
         // hiding in the tray when it closes.
@@ -171,7 +176,29 @@ public sealed partial class MainWindow : Window
         {
             appWindow.Show();
         }
+
+        // Back to the page that was showing when the window went to the tray.
+        if (_parkedPage is { } parked)
+        {
+            _parkedPage = null;
+            ContentFrame.Navigate(parked);
+        }
     }
+
+    /// <summary>
+    /// The pages that only watch: hidden in the tray they would go on sampling - Processes walks every process
+    /// every three seconds, the CPU page every second - for a window nobody can see. They are left while the window
+    /// is hidden and opened again when it is shown. A page doing work (a backup, a wipe, a scan) is never left,
+    /// since leaving it ends the work.
+    /// </summary>
+    private static readonly HashSet<Type> WatchOnlyPages =
+    [
+        typeof(DashboardPage), typeof(CpuPage), typeof(GpuPage), typeof(MemoryPage), typeof(ProcessesPage),
+        typeof(DiskPage), typeof(NetworkPage), typeof(BatteryPage), typeof(TemperaturePage),
+        typeof(SystemInfoPage), typeof(PerformancePage),
+    ];
+
+    private Type? _parkedPage;
 
     private void HideWindow()
     {
@@ -179,6 +206,12 @@ public sealed partial class MainWindow : Window
         if (appWindow != null)
         {
             appWindow.Hide();
+        }
+
+        if (ContentFrame.Content?.GetType() is { } showing && WatchOnlyPages.Contains(showing))
+        {
+            _parkedPage = showing;
+            ContentFrame.Navigate(typeof(Page));
         }
     }
 

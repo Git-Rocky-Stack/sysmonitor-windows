@@ -195,18 +195,26 @@ public partial class MemoryViewModel : ObservableObject, IDisposable
         }
     }
 
+    private int _actionShown;
+
     private void ShowActionStatus(string message, bool isSuccess)
     {
         ActionStatus = message;
         IsActionSuccess = isSuccess;
         HasActionStatus = true;
+        _actionShown++;
     }
 
+    /// <summary>Clears the message shown when it was called, and not one that has replaced it since.</summary>
     private async Task ClearActionStatusAfterDelayAsync()
     {
+        var shown = _actionShown;
         await Task.Delay(5000);
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (shown != _actionShown)
+                return;
+
             HasActionStatus = false;
             ActionStatus = "";
         });

@@ -52,7 +52,7 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}"
+                                <ToggleSwitch AutomationProperties.Name="Scheduled cleaning" Grid.Column="2" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}"
                                               OnContent="Enabled" OffContent="Disabled"/>
                             </Grid>
                         </instruments:Plate>
@@ -73,7 +73,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Schedule Type:" VerticalAlignment="Center"
                                                Foreground="{ThemeResource SilverBrush}"/>
-                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.ScheduleOptions}"
+                                    <ComboBox AutomationProperties.Name="Schedule Type" Grid.Column="1" ItemsSource="{x:Bind ViewModel.ScheduleOptions}"
                                               SelectedValue="{x:Bind ViewModel.SelectedSchedule, Mode=TwoWay}"
                                               SelectedValuePath="Schedule" DisplayMemberPath="Name"
                                               HorizontalAlignment="Stretch"/>
@@ -87,7 +87,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Day of Week:" VerticalAlignment="Center"
                                                Foreground="{ThemeResource SilverBrush}"/>
-                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfWeek}"
+                                    <ComboBox AutomationProperties.Name="Day of Week" Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfWeek}"
                                               SelectedItem="{x:Bind ViewModel.SelectedDayOfWeek, Mode=TwoWay}"
                                               HorizontalAlignment="Stretch"/>
                                 </Grid>
@@ -100,7 +100,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Day of Month:" VerticalAlignment="Center"
                                                Foreground="{ThemeResource SilverBrush}"/>
-                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfMonth}"
+                                    <ComboBox AutomationProperties.Name="Day of Month" Grid.Column="1" ItemsSource="{x:Bind ViewModel.DaysOfMonth}"
                                               SelectedItem="{x:Bind ViewModel.SelectedDayOfMonth, Mode=TwoWay}"
                                               HorizontalAlignment="Stretch"/>
                                 </Grid>
@@ -115,11 +115,11 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Time:" VerticalAlignment="Center"
                                                Foreground="{ThemeResource SilverBrush}"/>
-                                    <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.Hours}"
+                                    <ComboBox AutomationProperties.Name="Hour" Grid.Column="1" ItemsSource="{x:Bind ViewModel.Hours}"
                                               SelectedItem="{x:Bind ViewModel.SelectedHour, Mode=TwoWay}"
                                               Width="80"/>
                                     <TextBlock Grid.Column="2" Text=":" VerticalAlignment="Center" Margin="8,0"/>
-                                    <ComboBox Grid.Column="3" ItemsSource="{x:Bind ViewModel.Minutes}"
+                                    <ComboBox AutomationProperties.Name="Minute" Grid.Column="3" ItemsSource="{x:Bind ViewModel.Minutes}"
                                               SelectedItem="{x:Bind ViewModel.SelectedMinute, Mode=TwoWay}"
                                               Width="80"/>
                                 </Grid>

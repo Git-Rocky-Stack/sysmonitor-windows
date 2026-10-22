@@ -104,7 +104,7 @@
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <ToggleSwitch IsOn="{x:Bind ViewModel.AutoModeEnabled, Mode=TwoWay}"
+                                    <ToggleSwitch AutomationProperties.Name="Auto-detect games" IsOn="{x:Bind ViewModel.AutoModeEnabled, Mode=TwoWay}"
                                                   OnContent="Enabled" OffContent="Disabled"
                                                   Margin="0"/>
 
@@ -126,7 +126,7 @@
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <ComboBox ItemsSource="{x:Bind ViewModel.Profiles, Mode=OneWay}"
+                                    <ComboBox AutomationProperties.Name="Optimization presets" ItemsSource="{x:Bind ViewModel.Profiles, Mode=OneWay}"
                                               SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}"
                                               DisplayMemberPath="Name"
                                               PlaceholderText="Select profile"
@@ -174,9 +174,9 @@
                                                    FontSize="11" Foreground="{ThemeResource SilverBrush}"
                                                    HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
-                                            <FontIcon Glyph="&#xE7C2;" FontSize="10" Foreground="{ThemeResource SilverBrush}"/>
+                                            <FontIcon Glyph="&#xE7C2;" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
                                             <TextBlock Text="Click &amp; drag anywhere"
-                                                       FontSize="10" Foreground="{ThemeResource SilverBrush}" Opacity="0.7"/>
+                                                       FontSize="11" Foreground="{ThemeResource SilverBrush}" Opacity="0.7"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
@@ -286,7 +286,7 @@
                                                                FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
                                                 </StackPanel>
                                                 <TextBlock Text="Your system must expose fan sensors to display readings here."
-                                                           FontSize="10" Foreground="{ThemeResource SilverBrush}"
+                                                           FontSize="11" Foreground="{ThemeResource SilverBrush}"
                                                            TextWrapping="Wrap" Opacity="0.7"/>
                                             </StackPanel>
                                         </Border>

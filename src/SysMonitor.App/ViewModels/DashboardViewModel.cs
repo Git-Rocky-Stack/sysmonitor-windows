@@ -448,18 +448,27 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
             HasActionStatus = true;
         });
 
-        // Auto-clear after 5 seconds (for success messages)
+        // Auto-clear after 5 seconds (for success messages), unless a newer message has replaced this one
+        var shown = Interlocked.Increment(ref _actionShown);
         if (success && !message.Contains("..."))
         {
-            Task.Delay(5000).ContinueWith(_ =>
-            {
-                _dispatcherQueue.TryEnqueue(() =>
-                {
-                    HasActionStatus = false;
-                    ActionStatus = "";
-                });
-            });
+            _ = ClearActionStatusLaterAsync(shown);
         }
+    }
+
+    private int _actionShown;
+
+    private async Task ClearActionStatusLaterAsync(int shown)
+    {
+        await Task.Delay(5000);
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            if (shown != _actionShown)
+                return;
+
+            HasActionStatus = false;
+            ActionStatus = "";
+        });
     }
 
     private static string FormatUptime(TimeSpan uptime)

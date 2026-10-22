@@ -86,7 +86,7 @@
                                            FontSize="12" HorizontalAlignment="Center"/>
                                 <!-- White is paper: a QR code needs a white quiet zone around it to scan -->
                                 <Border Background="White" CornerRadius="8" Padding="12">
-                                    <Image Source="ms-appx:///Assets/DonateQR.png"
+                                    <Image Source="ms-appx:///Assets/DonateQR.png" AutomationProperties.Name="PayPal donation QR code"
                                            Width="150" Height="150"
                                            Stretch="Uniform"/>
                                 </Border>

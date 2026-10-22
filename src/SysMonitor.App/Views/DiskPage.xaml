@@ -223,7 +223,7 @@
                                                     CornerRadius="8" Padding="12,8">
                                                 <StackPanel>
                                                     <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}"
-                                                               HorizontalAlignment="Center" FontSize="10"/>
+                                                               HorizontalAlignment="Center" FontSize="11"/>
                                                     <TextBlock Text="{x:Bind FormattedUsed}" HorizontalAlignment="Center"
                                                                FontWeight="SemiBold"
                                                                instruments:StateBrush.Foreground="{x:Bind UsageState}"/>
@@ -235,7 +235,7 @@
                                                     CornerRadius="8" Padding="12,8">
                                                 <StackPanel>
                                                     <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}"
-                                                               HorizontalAlignment="Center" FontSize="10"/>
+                                                               HorizontalAlignment="Center" FontSize="11"/>
                                                     <TextBlock Text="{x:Bind FormattedFree}" HorizontalAlignment="Center"
                                                                Foreground="{ThemeResource StateGoBrush}"
                                                                FontWeight="SemiBold"/>
@@ -247,7 +247,7 @@
                                                     CornerRadius="8" Padding="12,8">
                                                 <StackPanel>
                                                     <TextBlock Text="TOTAL" Style="{StaticResource StatLabelStyle}"
-                                                               HorizontalAlignment="Center" FontSize="10"/>
+                                                               HorizontalAlignment="Center" FontSize="11"/>
                                                     <TextBlock Text="{x:Bind FormattedTotal}" HorizontalAlignment="Center"
                                                                Foreground="{ThemeResource PlatinumBrush}"
                                                                FontWeight="SemiBold"/>

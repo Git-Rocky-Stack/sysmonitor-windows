@@ -139,7 +139,7 @@
                                         <StackPanel Orientation="Horizontal" Spacing="12">
                                             <TextBlock Text="Format:" VerticalAlignment="Center"
                                                        Foreground="{ThemeResource SilverBrush}"/>
-                                            <ComboBox ItemsSource="{x:Bind ViewModel.CompressionFormats}"
+                                            <ComboBox AutomationProperties.Name="Format" ItemsSource="{x:Bind ViewModel.CompressionFormats}"
                                                       SelectedItem="{x:Bind ViewModel.SelectedCompressionFormat, Mode=TwoWay}"
                                                       Width="120"/>
                                         </StackPanel>

@@ -188,7 +188,9 @@
                 <!-- All Drivers Section -->
                 <instruments:Faceplate Kicker="DRIVERS - ALL DRIVERS - 16D" Serial="{instruments:SerialFor Module=DRIVERS-ALL-DRIVERS}">
                     <instruments:Faceplate.StripeRight>
-                        <TextBlock Text="{x:Bind ViewModel.LastScanTime, Mode=OneWay}" Style="{StaticResource SerialTextStyle}"/>
+                        <TextBlock Style="{StaticResource SerialTextStyle}">
+                            <Run Text="LAST SCAN "/><Run Text="{x:Bind ViewModel.LastScanTime, Mode=OneWay}"/>
+                        </TextBlock>
                     </instruments:Faceplate.StripeRight>
                     <StackPanel Spacing="8">
 
@@ -227,11 +229,11 @@
                                                             <!-- Badges -->
                                                             <Border Background="{ThemeResource RailNoGoBrush}" CornerRadius="3" Padding="6,2"
                                                                     Visibility="{x:Bind ProblemBadgeVisibility}">
-                                                                <TextBlock Text="PROBLEM" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                                                <TextBlock Text="PROBLEM" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
                                                             </Border>
                                                             <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="3" Padding="6,2"
                                                                     Visibility="{x:Bind OutdatedBadgeVisibility}">
-                                                                <TextBlock Text="OUTDATED" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                                                <TextBlock Text="OUTDATED" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
                                                             </Border>
                                                         </StackPanel>
                                                         <TextBlock Style="{StaticResource CardSubtitleStyle}" Margin="0,2,0,0">
@@ -241,14 +243,14 @@
 
                                                     <!-- Version -->
                                                     <StackPanel Grid.Column="2" Margin="12,0" VerticalAlignment="Center" MinWidth="100">
-                                                        <TextBlock Text="Version" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                        <TextBlock Text="Version" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                         <TextBlock Text="{x:Bind DriverVersion}" FontSize="12" Foreground="{ThemeResource SilverBrush}"
                                                                    TextTrimming="CharacterEllipsis" MaxWidth="100"/>
                                                     </StackPanel>
 
                                                     <!-- Date -->
                                                     <StackPanel Grid.Column="3" Margin="12,0" VerticalAlignment="Center" MinWidth="90">
-                                                        <TextBlock Text="Driver Date" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                        <TextBlock Text="Driver Date" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                         <TextBlock Text="{x:Bind DriverDateText}" FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                                                     </StackPanel>
 

@@ -174,7 +174,7 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Slider Grid.Column="0" Minimum="10" Maximum="100"
+                                        <Slider AutomationProperties.Name="Quality" Grid.Column="0" Minimum="10" Maximum="100"
                                                 Value="{x:Bind ViewModel.CompressionQuality, Mode=TwoWay}"/>
                                         <TextBlock Grid.Column="1" VerticalAlignment="Center"
                                                    Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold">
@@ -218,7 +218,7 @@
 
                                 <StackPanel Spacing="8">
                                     <TextBlock Text="Target Format:" Foreground="{ThemeResource SilverBrush}"/>
-                                    <ComboBox ItemsSource="{x:Bind ViewModel.ImageFormats}"
+                                    <ComboBox AutomationProperties.Name="Target Format" ItemsSource="{x:Bind ViewModel.ImageFormats}"
                                               SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}"
                                               HorizontalAlignment="Stretch"/>
                                 </StackPanel>

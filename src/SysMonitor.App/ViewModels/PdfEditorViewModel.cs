@@ -1174,13 +1174,23 @@ public partial class PdfEditorViewModel : ObservableObject
         StatusMessage = message;
         StatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasStatusMessage = true;
-        _ = ClearStatusAfterDelayAsync();
+        // Good news fades; a failure stays until the next message replaces it, and a timer started for an older
+        // message never clears a newer one (as LargeFilesViewModel does).
+        var shown = ++_statusShown;
+        if (isSuccess)
+            _ = ClearStatusAfterDelayAsync(shown);
     }
 
-    private async Task ClearStatusAfterDelayAsync()
+    private int _statusShown;
+
+    private async Task ClearStatusAfterDelayAsync(int shown)
     {
         await Task.Delay(4000);
-        GetDispatcher().TryEnqueue(() => HasStatusMessage = false);
+        GetDispatcher().TryEnqueue(() =>
+        {
+            if (shown == _statusShown)
+                HasStatusMessage = false;
+        });
     }
 }
 

@@ -460,13 +460,23 @@ public partial class ImageToolsViewModel : ObservableObject
         ActionStatus = message;
         ActionStatusState = isSuccess ? LampState.Go : LampState.NoGo;
         HasActionStatus = true;
-        _ = ClearActionAfterDelayAsync();
+        // Good news fades; a failure stays until the next message replaces it, and a timer started for an older
+        // message never clears a newer one (as LargeFilesViewModel does).
+        var shown = ++_statusShown;
+        if (isSuccess)
+            _ = ClearActionAfterDelayAsync(shown);
     }
 
-    private async Task ClearActionAfterDelayAsync()
+    private int _statusShown;
+
+    private async Task ClearActionAfterDelayAsync(int shown)
     {
         await Task.Delay(5000);
-        _dispatcherQueue.TryEnqueue(() => HasActionStatus = false);
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            if (shown == _statusShown)
+                HasActionStatus = false;
+        });
     }
 
     private static string FormatSize(long bytes)

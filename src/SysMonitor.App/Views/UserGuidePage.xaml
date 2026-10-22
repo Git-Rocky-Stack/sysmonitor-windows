@@ -693,7 +693,7 @@
                                 <TextBlock Text="Changes since v3.0.1" FontSize="16" FontWeight="Bold"
                                            Foreground="{ThemeResource PlatinumBrush}"/>
                                 <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="4" Padding="8,2">
-                                    <TextBlock Text="LATEST" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
+                                    <TextBlock Text="LATEST" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource ArmedFgBrush}"/>
                                 </Border>
                             </StackPanel>
 

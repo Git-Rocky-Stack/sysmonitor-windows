@@ -116,7 +116,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                <CheckBox AutomationProperties.Name="{Binding Description}" Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                           IsEnabled="{Binding IsProtected, Converter={StaticResource InvertBoolConverter}}"
                                           VerticalAlignment="Center"/>
 
@@ -133,16 +133,16 @@
                                         <!-- Protected badge -->
                                         <Border CornerRadius="4" Padding="6,2" Background="{ThemeResource NoGoSoftBrush}"
                                                 Visibility="{Binding IsProtected, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <TextBlock Text="PROTECTED" FontSize="9" FontWeight="Bold" Foreground="{ThemeResource StateNoGoBrush}"/>
+                                            <TextBlock Text="PROTECTED" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource StateNoGoBrush}"/>
                                         </Border>
                                     </StackPanel>
                                     <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleStyle}"
                                                TextTrimming="CharacterEllipsis" MaxWidth="400"/>
                                     <TextBlock Text="{Binding Key}" Style="{StaticResource CardSubtitleStyle}"
-                                               Foreground="{ThemeResource SilverMuteBrush}" FontSize="10"
+                                               Foreground="{ThemeResource SilverMuteBrush}" FontSize="11"
                                                TextTrimming="CharacterEllipsis" MaxWidth="400"/>
                                     <!-- Protection reason -->
-                                    <TextBlock Text="{Binding ProtectionReason}" FontSize="10" Foreground="{ThemeResource StateWarnBrush}"
+                                    <TextBlock Text="{Binding ProtectionReason}" FontSize="11" Foreground="{ThemeResource StateWarnBrush}"
                                                Visibility="{Binding IsProtected, Converter={StaticResource BoolToVisibilityConverter}}"
                                                Margin="0,2,0,0"/>
                                 </StackPanel>

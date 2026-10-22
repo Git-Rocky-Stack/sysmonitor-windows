@@ -119,7 +119,7 @@
                                                         </StackPanel>
 
                                                         <Border Grid.Column="2" CornerRadius="4" Padding="8,4" Background="{ThemeResource Carbon700Brush}" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding TypeDisplay}" FontSize="10" Foreground="{ThemeResource SilverBrush}"/>
+                                                            <TextBlock Text="{Binding TypeDisplay}" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
                                                         </Border>
 
                                                         <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
@@ -215,14 +215,14 @@
                                                     <FontIcon Grid.Column="0" Glyph="{Binding Icon}" FontSize="18" Margin="0,0,8,0"/>
                                                     <StackPanel Grid.Column="1">
                                                         <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="12"/>
-                                                        <TextBlock Text="{Binding Path}" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                        <TextBlock Text="{Binding Path}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                     </StackPanel>
                                                 </Grid>
                                                 <ProgressBar Value="{Binding UsedPercent}" Maximum="100" Height="4" CornerRadius="2"/>
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <TextBlock Text="{Binding FormattedFree}" FontSize="10" Foreground="{ThemeResource StateGoBrush}"/>
-                                                    <TextBlock Text="free of" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                                    <TextBlock Text="{Binding FormattedTotal}" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="{Binding FormattedFree}" FontSize="11" Foreground="{ThemeResource StateGoBrush}"/>
+                                                    <TextBlock Text="free of" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="{Binding FormattedTotal}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </instruments:Well>
@@ -235,9 +235,9 @@
                         <instruments:Well Padding="12">
                             <StackPanel Spacing="6">
                                 <TextBlock Text="BACKUP TIPS" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                <TextBlock Text="&#x2022; Use USB drives for portable backups" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
-                                <TextBlock Text="&#x2022; Create restore points before updates" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
-                                <TextBlock Text="&#x2022; Schedule weekly backups for safety" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                <TextBlock Text="&#x2022; Use USB drives for portable backups" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                <TextBlock Text="&#x2022; Create restore points before updates" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
+                                <TextBlock Text="&#x2022; Schedule weekly backups for safety" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"/>
                             </StackPanel>
                         </instruments:Well>
                     </StackPanel>
@@ -501,7 +501,7 @@
                         <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Compression" FontWeight="SemiBold"/>
-                                <ComboBox x:Name="CompressionPicker" SelectedIndex="1" HorizontalAlignment="Stretch">
+                                <ComboBox AutomationProperties.Name="Compression" x:Name="CompressionPicker" SelectedIndex="1" HorizontalAlignment="Stretch">
                                     <ComboBoxItem Content="None - Fastest, largest size" Tag="None"/>
                                     <ComboBoxItem Content="Normal - Balanced (Recommended)" Tag="Normal"/>
                                     <ComboBoxItem Content="Maximum - Smallest size, slower" Tag="Maximum"/>
@@ -536,7 +536,7 @@
                                 <TextBlock Text="Retention Policy" FontWeight="SemiBold"/>
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Text="Keep last" VerticalAlignment="Center"/>
-                                    <NumberBox Value="{x:Bind ViewModel.MaxBackupsToKeep, Mode=TwoWay}" Minimum="1" Maximum="100" SpinButtonPlacementMode="Compact"/>
+                                    <NumberBox AutomationProperties.Name="Number of backups to keep" Value="{x:Bind ViewModel.MaxBackupsToKeep, Mode=TwoWay}" Minimum="1" Maximum="100" SpinButtonPlacementMode="Compact"/>
                                     <TextBlock Text="backups" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </StackPanel>

@@ -126,86 +126,92 @@
                 <StackPanel Spacing="16">
 
                     <instruments:Plate Padding="16" MinHeight="200" VerticalContentAlignment="Stretch">
-                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.DuplicateGroups, Mode=OneWay}">
-                            <ItemsRepeater.Layout>
-                                <StackLayout Orientation="Vertical" Spacing="16"/>
-                            </ItemsRepeater.Layout>
-                            <ItemsRepeater.ItemTemplate>
-                                <DataTemplate x:DataType="vm:DuplicateGroupDisplay">
-                                    <instruments:Well Padding="16">
-                                        <StackPanel Spacing="12">
-                                            <!-- Group Header -->
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                        <Grid>
+                            <ItemsRepeater ItemsSource="{x:Bind ViewModel.DuplicateGroups, Mode=OneWay}">
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Orientation="Vertical" Spacing="16"/>
+                                </ItemsRepeater.Layout>
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:DuplicateGroupDisplay">
+                                        <instruments:Well Padding="16">
+                                            <StackPanel Spacing="12">
+                                                <!-- Group Header -->
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
-                                                    <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="8"
-                                                            Padding="8,4">
-                                                        <TextBlock FontSize="11" FontWeight="Bold"
-                                                                   Foreground="{ThemeResource PlatinumBrush}">
-                                                            <Run Text="{x:Bind DuplicateCount}"/>
-                                                            <Run Text="DUPLICATES"/>
-                                                        </TextBlock>
-                                                    </Border>
-                                                    <TextBlock Text="{x:Bind FormattedSize}" VerticalAlignment="Center"
-                                                               Foreground="{ThemeResource SilverBrush}"/>
-                                                </StackPanel>
-
-                                                <TextBlock Grid.Column="1" VerticalAlignment="Center"
-                                                           Foreground="{ThemeResource ArmedLitBrush}" FontWeight="Bold">
-                                                    <Run Text="Wasted:"/>
-                                                    <Run Text="{x:Bind WastedSpace}"/>
-                                                </TextBlock>
-                                            </Grid>
-
-                                            <!-- Files in Group -->
-                                            <ItemsRepeater ItemsSource="{x:Bind Files}">
-                                                <ItemsRepeater.Layout>
-                                                    <StackLayout Orientation="Vertical" Spacing="8"/>
-                                                </ItemsRepeater.Layout>
-                                                <ItemsRepeater.ItemTemplate>
-                                                    <DataTemplate x:DataType="vm:DuplicateFileDisplay">
-                                                        <Border Background="{ThemeResource Carbon700Brush}"
-                                                                CornerRadius="8" Padding="12">
-                                                            <Grid ColumnSpacing="12">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-
-                                                                <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
-                                                                          IsEnabled="{x:Bind IsOriginal, Converter={StaticResource InvertBoolConverter}}"
-                                                                          VerticalAlignment="Center"/>
-
-                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                                    <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
-                                                                               Foreground="{ThemeResource PlatinumBrush}"/>
-                                                                    <TextBlock Text="{x:Bind Directory}" FontSize="11"
-                                                                               Foreground="{ThemeResource SilverBrush}"
-                                                                               TextTrimming="CharacterEllipsis"/>
-                                                                </StackPanel>
-
-                                                                <Border Grid.Column="2" CornerRadius="6" Padding="10,4"
-                                                                        VerticalAlignment="Center"
-                                                                        instruments:StateBrush.Wash="{x:Bind StatusState}">
-                                                                    <TextBlock Text="{x:Bind StatusText}" FontSize="10" FontWeight="Bold"
-                                                                               instruments:StateBrush.Foreground="{x:Bind StatusState}"/>
-                                                                </Border>
-                                                            </Grid>
+                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                                        <Border Background="{ThemeResource RailHoldBrush}" CornerRadius="8"
+                                                                Padding="8,4">
+                                                            <TextBlock FontSize="11" FontWeight="Bold"
+                                                                       Foreground="{ThemeResource PlatinumBrush}">
+                                                                <Run Text="{x:Bind DuplicateCount}"/>
+                                                                <Run Text="DUPLICATES"/>
+                                                            </TextBlock>
                                                         </Border>
-                                                    </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
-                                        </StackPanel>
-                                    </instruments:Well>
-                                </DataTemplate>
-                            </ItemsRepeater.ItemTemplate>
-                        </ItemsRepeater>
+                                                        <TextBlock Text="{x:Bind FormattedSize}" VerticalAlignment="Center"
+                                                                   Foreground="{ThemeResource SilverBrush}"/>
+                                                    </StackPanel>
+
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                                               Foreground="{ThemeResource ArmedLitBrush}" FontWeight="Bold">
+                                                        <Run Text="Wasted:"/>
+                                                        <Run Text="{x:Bind WastedSpace}"/>
+                                                    </TextBlock>
+                                                </Grid>
+
+                                                <!-- Files in Group -->
+                                                <ItemsRepeater ItemsSource="{x:Bind Files}">
+                                                    <ItemsRepeater.Layout>
+                                                        <StackLayout Orientation="Vertical" Spacing="8"/>
+                                                    </ItemsRepeater.Layout>
+                                                    <ItemsRepeater.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:DuplicateFileDisplay">
+                                                            <Border Background="{ThemeResource Carbon700Brush}"
+                                                                    CornerRadius="8" Padding="12">
+                                                                <Grid ColumnSpacing="12">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <CheckBox AutomationProperties.Name="{x:Bind FileName}" Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                                              IsEnabled="{x:Bind IsOriginal, Converter={StaticResource InvertBoolConverter}}"
+                                                                              VerticalAlignment="Center"/>
+
+                                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                        <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
+                                                                                   Foreground="{ThemeResource PlatinumBrush}"/>
+                                                                        <TextBlock Text="{x:Bind Directory}" FontSize="11"
+                                                                                   Foreground="{ThemeResource SilverBrush}"
+                                                                                   TextTrimming="CharacterEllipsis"/>
+                                                                    </StackPanel>
+
+                                                                    <Border Grid.Column="2" CornerRadius="6" Padding="10,4"
+                                                                            VerticalAlignment="Center"
+                                                                            instruments:StateBrush.Wash="{x:Bind StatusState}">
+                                                                        <TextBlock Text="{x:Bind StatusText}" FontSize="11" FontWeight="Bold"
+                                                                                   instruments:StateBrush.Foreground="{x:Bind StatusState}"/>
+                                                                    </Border>
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsRepeater.ItemTemplate>
+                                                </ItemsRepeater>
+                                            </StackPanel>
+                                        </instruments:Well>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                            <!-- Before a scan, and after one that finds nothing, the plate says so rather than standing empty. -->
+                            <TextBlock Text="No duplicates to show. Choose a folder and press SCAN; files that match byte for byte are listed here." Style="{StaticResource DescriptionTextStyle}" TextWrapping="Wrap"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Margin="24"
+                                       Visibility="{x:Bind ViewModel.DuplicateGroups.Count, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}"/>
+                        </Grid>
                     </instruments:Plate>
                 </StackPanel>
             </instruments:Faceplate>

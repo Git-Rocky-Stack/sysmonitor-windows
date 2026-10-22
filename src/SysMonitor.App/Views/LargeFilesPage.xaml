@@ -45,7 +45,7 @@
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <TextBlock Text="Minimum Size:" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
-                            <NumberBox Value="{x:Bind ViewModel.MinSizeMB, Mode=TwoWay}"
+                            <NumberBox AutomationProperties.Name="Minimum Size" Value="{x:Bind ViewModel.MinSizeMB, Mode=TwoWay}"
                                        Minimum="1" Maximum="10000" SpinButtonPlacementMode="Inline"
                                        Width="120"/>
                             <TextBlock Text="MB" Style="{StaticResource CardSubtitleStyle}" VerticalAlignment="Center"/>
@@ -151,58 +151,64 @@
                 <StackPanel Spacing="16">
 
                     <instruments:Plate Padding="0" MinHeight="200" VerticalContentAlignment="Stretch">
-                        <ListView ItemsSource="{x:Bind ViewModel.LargeFiles, Mode=OneWay}"
-                                  SelectionMode="None" Background="Transparent">
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:LargeFileDisplay">
-                                    <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8"
-                                            Padding="16" Margin="0,4">
-                                        <Grid ColumnSpacing="16">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                        <Grid>
+                            <ListView ItemsSource="{x:Bind ViewModel.LargeFiles, Mode=OneWay}"
+                                      SelectionMode="None" Background="Transparent">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LargeFileDisplay">
+                                        <Border Background="{ThemeResource Carbon800Brush}" CornerRadius="8"
+                                                Padding="16" Margin="0,4">
+                                            <Grid ColumnSpacing="16">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                            <!-- Selection Checkbox -->
-                                            <CheckBox Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
-                                                      VerticalAlignment="Center"/>
+                                                <!-- Selection Checkbox -->
+                                                <CheckBox AutomationProperties.Name="{x:Bind FileName}" Grid.Column="0" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                          VerticalAlignment="Center"/>
 
-                                            <!-- File Type Icon -->
-                                            <Border Grid.Column="1" Width="44" Height="44" CornerRadius="8"
-                                                    Background="{ThemeResource ChipFaceBrush}">
-                                                <FontIcon Glyph="{x:Bind FileIcon}" FontSize="20"
-                                                          Foreground="{ThemeResource SilverBrush}"/>
-                                            </Border>
+                                                <!-- File Type Icon -->
+                                                <Border Grid.Column="1" Width="44" Height="44" CornerRadius="8"
+                                                        Background="{ThemeResource ChipFaceBrush}">
+                                                    <FontIcon Glyph="{x:Bind FileIcon}" FontSize="20"
+                                                              Foreground="{ThemeResource SilverBrush}"/>
+                                                </Border>
 
-                                            <!-- File Info -->
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                                <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
-                                                           Foreground="{ThemeResource PlatinumBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{x:Bind Directory}" Style="{StaticResource CardSubtitleStyle}"
-                                                           FontSize="11" TextTrimming="CharacterEllipsis"/>
-                                            </StackPanel>
+                                                <!-- File Info -->
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind FileName}" FontWeight="SemiBold"
+                                                               Foreground="{ThemeResource PlatinumBrush}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{x:Bind Directory}" Style="{StaticResource CardSubtitleStyle}"
+                                                               FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
 
-                                            <!-- File Type Badge -->
-                                            <Border Grid.Column="3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center"
-                                                    Background="{ThemeResource ChipFaceBrush}">
-                                                <TextBlock Text="{x:Bind FileType}" FontSize="11" FontWeight="SemiBold"
-                                                           Foreground="{ThemeResource SilverBrush}"/>
-                                            </Border>
+                                                <!-- File Type Badge -->
+                                                <Border Grid.Column="3" CornerRadius="8" Padding="10,4" VerticalAlignment="Center"
+                                                        Background="{ThemeResource ChipFaceBrush}">
+                                                    <TextBlock Text="{x:Bind FileType}" FontSize="11" FontWeight="SemiBold"
+                                                               Foreground="{ThemeResource SilverBrush}"/>
+                                                </Border>
 
-                                            <!-- Size -->
-                                            <TextBlock Grid.Column="4" Text="{x:Bind FormattedSize}"
-                                                       FontWeight="Bold" FontSize="16"
-                                                       Foreground="{ThemeResource StateExecBrush}"
-                                                       VerticalAlignment="Center" MinWidth="80" TextAlignment="Right"/>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                                                <!-- Size -->
+                                                <TextBlock Grid.Column="4" Text="{x:Bind FormattedSize}"
+                                                           FontWeight="Bold" FontSize="16"
+                                                           Foreground="{ThemeResource StateExecBrush}"
+                                                           VerticalAlignment="Center" MinWidth="80" TextAlignment="Right"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <!-- Before a scan, and after one that finds nothing, the plate says so rather than standing empty. -->
+                            <TextBlock Text="No files to show. Choose a drive or folder and press SCAN; files over the minimum size are listed here." Style="{StaticResource DescriptionTextStyle}" TextWrapping="Wrap"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Margin="24"
+                                       Visibility="{x:Bind ViewModel.LargeFiles.Count, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}"/>
+                        </Grid>
                     </instruments:Plate>
                 </StackPanel>
             </instruments:Faceplate>

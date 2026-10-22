@@ -291,12 +291,12 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                        <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" FontSize="11"/>
                                         <TextBlock Text="{x:Bind ViewModel.UsedMemory, Mode=OneWay}"
                                                    Foreground="{ThemeResource ArmedLitBrush}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
-                                        <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                        <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" FontSize="11"/>
                                         <TextBlock Text="{x:Bind ViewModel.FreeMemory, Mode=OneWay}"
                                                    Foreground="{ThemeResource StateGoBrush}" FontWeight="SemiBold"/>
                                     </StackPanel>
@@ -338,12 +338,12 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                        <TextBlock Text="USED" Style="{StaticResource StatLabelStyle}" FontSize="11"/>
                                         <TextBlock Text="{x:Bind ViewModel.UsedStorage, Mode=OneWay}"
                                                    Foreground="{ThemeResource ArmedLitBrush}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
-                                        <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" FontSize="10"/>
+                                        <TextBlock Text="FREE" Style="{StaticResource StatLabelStyle}" FontSize="11"/>
                                         <TextBlock Text="{x:Bind ViewModel.FreeStorage, Mode=OneWay}"
                                                    Foreground="{ThemeResource StateGoBrush}" FontWeight="SemiBold"/>
                                     </StackPanel>
