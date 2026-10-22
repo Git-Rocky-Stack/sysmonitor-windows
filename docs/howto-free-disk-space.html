@@ -68,84 +68,93 @@
     <p>Open <strong>Directory Cleaner</strong> from the navigation menu.</p>
     </li>
     <li>
-    <p>Click <strong>Scan</strong>.</p>
+    <p>In CLEANING CONTROLS (06A), click <strong>SCAN</strong>.</p>
     </li>
     </ol>
-    <p>The scan sorts what it finds into categories
-       (<code>src/SysMonitor.Core/Models/CleanerModels.cs:56-70</code>):</p>
+    <p>The results appear in SCAN RESULTS (06B), one row per location that holds
+       something (<code>src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:73-80</code>,
+       <code>:140</code>, and <code>src/SysMonitor.Core/Services/Cleaners/BrowserCacheCleaner.cs:78</code>):</p>
     <div class="tablewrap"><table>
     <thead>
     <tr>
     <th>Category</th>
     <th>What it holds</th>
+    <th>Ticked after a scan</th>
     </tr>
     </thead>
     <tbody>
     <tr>
-    <td>Windows Temp</td>
+    <td>Windows Temporary Files</td>
     <td>The system temporary folder. Needs administrator rights</td>
+    <td>Yes</td>
     </tr>
     <tr>
-    <td>User Temp</td>
+    <td>User Temporary Files</td>
     <td>Your own temporary folder</td>
+    <td>Yes</td>
     </tr>
     <tr>
-    <td>Browser Cache</td>
-    <td>Cached page content for installed browsers</td>
+    <td>Windows Prefetch Files</td>
+    <td>Windows launch-time optimisation data</td>
+    <td>Yes</td>
     </tr>
     <tr>
-    <td>Browser Cookies</td>
-    <td>Site cookies. Clearing these signs you out of sites</td>
-    </tr>
-    <tr>
-    <td>Browser History</td>
-    <td>Visited page records</td>
-    </tr>
-    <tr>
-    <td>Recycle Bin</td>
-    <td>Files already deleted but still recoverable</td>
-    </tr>
-    <tr>
-    <td>Thumbnails</td>
+    <td>Thumbnail Cache</td>
     <td>Explorer thumbnail database</td>
+    <td>Yes</td>
     </tr>
     <tr>
     <td>Windows Update Cache</td>
     <td>Downloaded update payloads already applied</td>
+    <td>Yes</td>
     </tr>
     <tr>
-    <td>Prefetch</td>
-    <td>Windows launch-time optimisation data</td>
-    </tr>
-    <tr>
-    <td>Memory Dumps</td>
+    <td>Memory Dump Files</td>
     <td>Crash dumps written by Windows</td>
+    <td>Yes</td>
     </tr>
     <tr>
-    <td>Error Reports</td>
+    <td>Windows Error Reports</td>
     <td>Windows Error Reporting queues</td>
+    <td>Yes</td>
     </tr>
     <tr>
-    <td>Log Files</td>
-    <td>Application and system logs</td>
+    <td>Windows Log Files</td>
+    <td>System logs</td>
+    <td>No</td>
     </tr>
     <tr>
-    <td>Registry</td>
-    <td>Registry issues, handled by the Registry Cleaner page</td>
+    <td>Recycle Bin</td>
+    <td>Files already deleted but still recoverable</td>
+    <td>No</td>
+    </tr>
+    <tr>
+    <td>Browser cache</td>
+    <td>Cached page content, one row per installed browser</td>
+    <td>Yes</td>
     </tr>
     </tbody>
     </table></div>
+    <p>Cookies, history and saved passwords are not here. They are on the <strong>Browser
+       Privacy</strong> page, which asks before it deletes any of them.</p>
     <ol start="3">
-    <li>Uncheck anything you want to keep.</li>
+    <li>Untick anything you want to keep, and tick anything you want gone.</li>
     </ol>
-    <p>Two worth thinking about before you tick them. <strong>Browser Cookies</strong> signs you out
-       of every site you are signed into. <strong>Prefetch</strong> makes the next launch of your
-       common applications slower until Windows rebuilds it.</p>
+    <p><strong>Prefetch</strong> makes the next launch of your common applications slower until
+       Windows rebuilds it. The <strong>Recycle Bin</strong> is never ticked for you
+       (<code>TempFileCleaner.cs:147</code>): emptying it destroys what you deleted with a way back,
+       so it goes only if you tick it.</p>
     <ol start="4">
-    <li>Click <strong>Clean</strong>.</li>
+    <li>Click <strong>CLEAN SELECTED</strong>.</li>
     </ol>
-    <p>The app reports what it actually removed, by category, rather than what it
-       intended to remove.</p>
+    <p>The app asks first, saying how many categories and roughly how much space are
+       involved. If the Recycle Bin is ticked, the question says it will be emptied and
+       that what is in it cannot be restored afterwards
+       (<code>src/SysMonitor.App/ViewModels/CleanerViewModel.cs:81-86</code>). Click
+       <strong>CLEAN SELECTED</strong> in the question to go ahead, or <strong>CANCEL</strong> to leave everything
+       where it is.</p>
+    <p>The app reports what it actually removed rather than what it intended to remove,
+       and how many files it skipped because they were in use.</p>
     <h2>Verification</h2>
     <p>Check the reported figure against real free space. Before and after, run:</p>
     <pre><code class="language-powershell">Get-PSDrive C | Select-Object Used, Free
@@ -157,16 +166,18 @@
     space is going to a handful of big files instead, use the <strong>Large Files</strong> page:</p>
     <ol>
     <li>
-    <p>Choose a folder, set the minimum size, and click <strong>Scan</strong>. The results are listed
-       largest first (<code>src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs:163</code>).</p>
+    <p>Choose a folder with <strong>BROWSE</strong>, set the minimum size, and click <strong>SCAN</strong>. The
+       results are listed largest first
+       (<code>src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs:163</code>).</p>
     </li>
     <li>
-    <p>Tick the files you no longer need, and click <strong>Delete Selected</strong>.</p>
+    <p>Tick the files you no longer need, or use <strong>SELECT ALL</strong> and <strong>SELECT NONE</strong>, and
+       click <strong>DELETE SELECTED</strong>.</p>
     </li>
     <li>
     <p>The app asks first, naming how many files and how much they hold
-       (<code>src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31</code>). <strong>Cancel</strong> is the default.
-       Confirm with <strong>Move to Recycle Bin</strong>.</p>
+       (<code>src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31</code>). No button is the default,
+       so Enter arms nothing and Escape cancels. Confirm with <strong>MOVE TO RECYCLE BIN</strong>.</p>
     </li>
     </ol>
     <p>The files go to the Recycle Bin, where you can restore them. A file Windows cannot
@@ -174,11 +185,12 @@
     Bin is set to hold, is left where it is, and the result says how many and why
     (<code>src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136</code>). A file is only reported
     as moved once it has been found in the Recycle Bin.</p>
-    <p>Up to and including v3.0.1, Delete Selected removed the files without asking, and
+    <p>Up to and including v3.0.1, DELETE SELECTED removed the files without asking, and
     Windows deleted any file it could not recycle permanently while the page reported it
     as moved to the Recycle Bin.</p>
     <p>A file in the Recycle Bin still takes up its space. The space comes back when the
-    Recycle Bin is emptied, which the Directory Cleaner's Recycle Bin category does.</p>
+    Recycle Bin is emptied, which the Directory Cleaner's Recycle Bin category does when
+    you tick it. The Dashboard's QUICK CLEAN never empties it.</p>
     <h2>If you want this to happen on a schedule</h2>
     <p>Use the <strong>Scheduled Cleaning</strong> page. It registers a Windows scheduled task that runs
     headlessly, writes its outcome to the log, and returns an exit code so Task Scheduler

@@ -72,6 +72,11 @@
     <p>Entries now use <code>Explorer\StartupApproved</code>, which is the same mechanism Task Manager
     writes (<code>StartupOptimizer.cs:12</code>, <code>:57-58</code>, <code>:80</code>). The app, Task Manager and Windows
     now agree with each other.</p>
+    <p>Programs a 32-bit installer set to start for every user are listed too. Windows keeps
+    them under <code>WOW6432Node</code> and records whether they may run under
+    <code>StartupApproved\Run32</code>, which is where Task Manager reads them
+    (<code>StartupOptimizer.cs:68-69</code>). Up to and including v3.0.1 those entries were missing
+    from the list.</p>
     <h2>Steps</h2>
     <ol>
     <li>
@@ -82,22 +87,29 @@
        much it costs you at sign-in.</p>
     </li>
     <li>
-    <p>Select an entry and click <strong>Disable</strong>.</p>
+    <p>Select an entry and click <strong>DISABLE</strong>.</p>
     </li>
     </ol>
+    <p>The caps act on the selected entry, so <strong>DISABLE</strong>, <strong>ENABLE</strong> and <strong>DELETE</strong> stay
+       dimmed until you select one (<code>src/SysMonitor.App/Views/StartupPage.xaml:38-46</code>).</p>
     <p>The entry stays where it is. What changes is its approval value under
        <code>Explorer\StartupApproved</code>, which is how Windows itself records that an entry is
        switched off.</p>
     <ol start="4">
-    <li>To undo, select the entry and click <strong>Enable</strong> (<code>src/SysMonitor.App/Views/StartupPage.xaml:66</code>).</li>
+    <li>To undo, select the entry and click <strong>ENABLE</strong> (<code>src/SysMonitor.App/Views/StartupPage.xaml:42</code>).</li>
     </ol>
+    <p><strong>DELETE</strong> is different. It is a red cap: it removes the entry from where it is
+    registered, and the program stays installed. It asks first, and the question says
+    that DISABLE keeps the entry so it can be turned back on while DELETE does not
+    (<code>src/SysMonitor.App/ViewModels/StartupViewModel.cs:68-70</code>). Click <strong>DELETE</strong> in the
+    question to go ahead, or <strong>CANCEL</strong>. Use DISABLE unless you mean to lose the entry.</p>
     <h2>Verification</h2>
     <p>Open Task Manager, go to the <strong>Startup apps</strong> tab, and find the entry. It should show
     as Disabled there too. That agreement is the point. If the two disagree, the app has
     a bug worth reporting.</p>
     <h2>Troubleshooting</h2>
-    <p><strong>An entry will not change state.</strong> Machine-wide entries live under HKLM and need
-    administrator rights. Restart the app as administrator.</p>
+    <p><strong>An entry will not change state.</strong> Machine-wide entries live under HKLM, the 32-bit
+    ones included, and need administrator rights. Restart the app as administrator.</p>
     <p><strong>An entry you enabled points at a program that is not installed any more.</strong> Earlier
     versions could restore a stale copy of an entry that an older version of this app had
     set aside, overwriting a newer one Windows already had. That is fixed

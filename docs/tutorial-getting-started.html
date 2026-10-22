@@ -63,7 +63,7 @@
     <li>A PC running Windows 10 version 2004 (build 19041) or later, or Windows 11
       (<code>src/SysMonitor.App/SysMonitor.App.csproj:5</code>)</li>
     <li>An x64 processor. The released installer is x64 only
-      (<code>installer/SysMonitorSetup.iss:57</code>)</li>
+      (<code>installer/SysMonitorSetup.iss:59</code>)</li>
     <li>About 300 MB of free disk space</li>
     <li>An administrator account. Windows will prompt you during installation</li>
     </ul>
@@ -83,10 +83,14 @@
     </code></pre>
     <p>When setup finishes, the app is installed and <code>LICENSE.txt</code> and
     <code>THIRD-PARTY-NOTICES.txt</code> sit next to the executable in the install folder
-    (<code>installer/SysMonitorSetup.iss:87-88</code>).</p>
+    (<code>installer/SysMonitorSetup.iss:89-90</code>).</p>
     <h2>Step 2: Read your health score</h2>
-    <p>Launch STX.1. It opens on the Dashboard, and the first thing you see is a health
-    score out of 100 (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:159-160</code>).</p>
+    <p>Launch STX.1. It opens on the Dashboard. Each section of a page is a faceplate whose
+    stripe names it, such as <code>DASH - QUICK ACCESS - 01A</code>, and this tutorial refers to
+    sections by that name.</p>
+    <p>The first faceplate, QUICK ACCESS (01A), shows a live reading each for network,
+    temperature, system, disk, battery and processes. Below it, SYSTEM HEALTH (01B) holds
+    a health score out of 100 (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:159-160</code>).</p>
     <p>The score maps to a word (<code>DashboardViewModel.cs:229-233</code>):</p>
     <div class="tablewrap"><table>
     <thead>
@@ -118,31 +122,44 @@
     </tr>
     </tbody>
     </table></div>
-    <p>Around it are live cards for processor use, memory, disk, network, temperature and
-    uptime. If a card says "Not reported", that is the truth about your hardware, not an
-    error. Battery health in particular is computed from design capacity against
+    <p>Further down, SYSTEM RESOURCES (01C) has faceplate readings for processor use, memory,
+    disk and battery, and SYSTEM INFORMATION (01D) shows the operating system, uptime and
+    cleanable space. If a reading says "Not reported", that is the truth about your
+    hardware, not an error. Battery health in particular is computed from design capacity against
     full-charge capacity, and many machines do not publish those figures to Windows at
     all (<code>src/SysMonitor.Core/Services/Monitors/BatteryMonitor.cs</code>).</p>
     <p>Run the app as administrator if temperature readings are missing. Hardware sensors
     need it.</p>
     <h2>Step 3: Reclaim some disk space</h2>
-    <p>On the Dashboard, click <strong>QUICK CLEAN</strong>
+    <p>In SYSTEM HEALTH (01B), click <strong>QUICK CLEAN</strong>
     (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:260</code>).</p>
-    <p>It deletes temporary files from eight fixed Windows locations, such as the temp
-    folders, the thumbnail cache and old crash dumps
+    <p>QUICK CLEAN is a red cap, and a red cap asks before it acts. The question says what
+    will be deleted, and that log files and the Recycle Bin are left
+    (<code>DashboardViewModel.cs:262-266</code>). Click <strong>QUICK CLEAN</strong> in it to go ahead, or
+    <strong>CANCEL</strong>.</p>
+    <p>It deletes temporary files from fixed Windows locations, such as the temp folders,
+    the thumbnail cache and old crash dumps
     (<code>src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:73-80</code>), and tells you how
-    many files it removed. This is the safe subset. Nothing it touches is a document, a
-    download or a setting.</p>
+    many files it removed. Windows log files are scanned but not pre-selected, so it
+    leaves them (<code>TempFileCleaner.cs:117</code>), and the Recycle Bin is never pre-selected
+    (<code>TempFileCleaner.cs:147</code>). This is the safe subset. Nothing it touches is a document,
+    a download or a setting.</p>
     <p>If you want to choose exactly what goes, use the <strong>Directory Cleaner</strong> page instead
-    and read <a href="howto-free-disk-space.html">Free up disk space</a>. Quick Clean is the version
-    that does not ask questions.</p>
+    and read <a href="howto-free-disk-space.html">Free up disk space</a>. QUICK CLEAN is the version
+    with no choices to make.</p>
     <h2>Step 4: Save a report you can send</h2>
-    <p>Still on the Dashboard, click <strong>EXPORT</strong>
-    (<code>DashboardViewModel.cs:319</code>).</p>
+    <p>Still in SYSTEM HEALTH (01B), click <strong>EXPORT</strong>
+    (<code>DashboardViewModel.cs:320</code>).</p>
     <p>The app writes a plain-text diagnostic summary into your Documents folder and tells
-    you the file name (<code>DashboardViewModel.cs:327-335</code>). It contains your health score,
+    you the file name (<code>DashboardViewModel.cs:328-336</code>). It contains your health score,
     hardware inventory and current readings. Open it before you send it to anyone, so you
     know what is in it.</p>
+    <h2>If you start it twice</h2>
+    <p>STX.1 runs as one copy. With Minimize to system tray on, which is the default, closing
+    the window hides it in the notification area, and starting the app again from the
+    Start menu brings the running copy's window back rather than starting a second one (<code>src/SysMonitor.App/App.xaml.cs:366-376</code>). Alerts
+    are checked by that one copy whichever page is showing, and while the window is in
+    the notification area (<code>src/SysMonitor.App/Services/TrayIconService.cs:145-149</code>).</p>
     <h2>What you built</h2>
     <p>You now have STX.1 installed, you have read a health score you can interpret, you have
     freed disk space without guessing, and you have a report on disk.</p>

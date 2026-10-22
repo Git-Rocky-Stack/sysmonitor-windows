@@ -260,8 +260,9 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private async Task QuickCleanAsync()
     {
         if (!await Confirm.AskAsync("Clean temporary files?",
-                "Temporary files, caches and old logs Windows and your apps leave behind are deleted. The Recycle Bin " +
-                "is left as it is; empty it from Directory Cleaner if you mean to.", "QUICK CLEAN"))
+                "Temporary files and caches Windows and your apps leave behind are deleted - the categories Directory " +
+                "Cleaner selects by itself. Log files and the Recycle Bin are left; clean those from Directory Cleaner " +
+                "if you mean to.", "QUICK CLEAN"))
         {
             return;
         }

@@ -56,240 +56,297 @@
     <h1>Reference: pages</h1>
     <p>Every entry in the navigation menu of STX.1 System Monitor v3.0.1. There are 34,
     verified by counting <code>NavigationViewItem</code> entries in
-    <code>src/SysMonitor.App/MainWindow.xaml</code>.</p>
-    <p>The app defines three group headers (<code>MainWindow.xaml:119</code>, <code>:182</code>, <code>:209</code>). The nine
-    entries above the first header, and the five below the Wireless group, are not under a
-    header of their own. They are listed here in the order the menu shows them.</p>
+    <code>src/SysMonitor.App/MainWindow.xaml</code>. A 35th page, the PDF Editor, is not on the menu:
+    it opens from the EDIT PDF cap on the PDF Tools page
+    (<code>src/SysMonitor.App/Views/PdfToolsPage.xaml:48</code>).</p>
+    <p>The app defines three group headers (<code>MainWindow.xaml:103</code>, <code>:166</code>, <code>:193</code>). The nine
+    entries above the first header are not under a header of their own, and the five at
+    the bottom are the menu's footer (<code>MainWindow.xaml:211</code>). In the tables, Line is the
+    entry's line in <code>MainWindow.xaml</code>. They are listed in the order the menu shows them.</p>
+    <h2>How a page is laid out</h2>
+    <p>Every page opens on a view header whose stripe reads <code>MOD - &lt;MODULE&gt; - &lt;NN&gt;</code>: the
+    module code in the Module column below, and the page's place in the menu
+    (<code>src/SysMonitor.App/Controls/Instruments/ViewHeader.cs:134</code>). The header carries the
+    page's title and one line of description, and a page's scan and stop caps sit at its
+    right.</p>
+    <p>Below it, each section is a faceplate whose stripe names it with the module, the
+    section and a letter: <code>CPU - CORE USAGE - 02B</code> is the second section of module 02.
+    Those names are given here and in the other documents so you can point to a section
+    exactly.</p>
+    <p>Buttons are caps, and their words are written in capitals. A red cap does something
+    that cannot simply be undone, and asks first: the question says what will happen and
+    what cannot be recovered, Enter arms nothing and Escape cancels
+    (<code>src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:92-93</code>).</p>
     <h2>Top of the menu</h2>
     <div class="tablewrap"><table>
     <thead>
     <tr>
     <th>Page</th>
     <th>Line</th>
+    <th>Module</th>
     <th>What it does</th>
     </tr>
     </thead>
     <tbody>
     <tr>
     <td>Dashboard</td>
-    <td><code>:73</code></td>
-    <td>Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:260</code>, <code>:292</code>, <code>:319</code>). The middle button read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see <a href="reference-settings-and-data.html">Settings and data</a></td>
+    <td><code>:57</code></td>
+    <td><code>DASH 01</code></td>
+    <td>QUICK ACCESS (01A) shows a live reading each for network, temperature, system, disk, battery and processes. SYSTEM HEALTH (01B) has the health score out of 100 and three caps: QUICK CLEAN, TRIM MEMORY and EXPORT (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:260</code>, <code>:293</code>, <code>:320</code>). QUICK CLEAN asks first and leaves the Recycle Bin alone. SYSTEM RESOURCES (01C) and SYSTEM INFORMATION (01D) follow. The middle cap read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see <a href="reference-settings-and-data.html">Settings and data</a></td>
     </tr>
     <tr>
     <td>CPU Monitor</td>
-    <td><code>:78</code></td>
+    <td><code>:62</code></td>
+    <td><code>CPU 02</code></td>
     <td>Processor usage, core counts, clock speeds, per-core figures where the hardware reports them</td>
     </tr>
     <tr>
     <td>GPU Monitor</td>
-    <td><code>:83</code></td>
+    <td><code>:67</code></td>
+    <td><code>GPU 03</code></td>
     <td>Graphics adapter load, memory and temperature</td>
     </tr>
     <tr>
     <td>Memory Monitor</td>
-    <td><code>:88</code></td>
-    <td>RAM in use and available, and working-set trimming</td>
+    <td><code>:72</code></td>
+    <td><code>MEM 04</code></td>
+    <td>RAM in use and available, the page file, and working-set trimming with TRIM MEMORY</td>
     </tr>
     <tr>
     <td>Processes</td>
-    <td><code>:93</code></td>
-    <td>Running processes with per-process processor and memory use, and the ability to end one</td>
+    <td><code>:77</code></td>
+    <td><code>PROC 05</code></td>
+    <td>Running processes with per-process processor and memory use. END TASK asks first, refuses the processes Windows cannot run without, and says whether the process ended (<code>src/SysMonitor.Core/Services/Monitors/ProcessMonitor.cs:282</code>)</td>
     </tr>
     <tr>
     <td>Directory Cleaner</td>
-    <td><code>:98</code></td>
-    <td>Scans thirteen categories of reclaimable files and removes the ones you select (<code>src/SysMonitor.Core/Models/CleanerModels.cs:56-70</code>)</td>
+    <td><code>:82</code></td>
+    <td><code>CLEAN 06</code></td>
+    <td>Scans for reclaimable files and removes the ones you select with CLEAN SELECTED, after a confirmation. The Recycle Bin is offered but never pre-selected (<code>src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:147</code>)</td>
     </tr>
     <tr>
     <td>Registry Cleaner</td>
-    <td><code>:103</code></td>
-    <td>Finds registry issues. Exports every key a selected fix will touch with <code>reg.exe</code> before changing anything, and a failed export stops the clean (<code>src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:947-949</code>, <code>:974</code>, <code>:1007</code>)</td>
+    <td><code>:87</code></td>
+    <td><code>REG 07</code></td>
+    <td>Finds registry issues. FIX SELECTED asks first, then exports every key a selected fix will touch with <code>reg.exe</code> before changing anything, and a failed export stops the clean (<code>src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:947-949</code>, <code>:974</code>, <code>:997</code>). RESTORE BACKUP puts them back</td>
     </tr>
     <tr>
     <td>Startup</td>
-    <td><code>:108</code></td>
-    <td>Enables and disables startup entries through <code>Explorer\StartupApproved</code>, the mechanism Task Manager uses (<code>src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:12</code>, <code>:57-58</code>)</td>
+    <td><code>:92</code></td>
+    <td><code>BOOT 08</code></td>
+    <td>Enables and disables startup entries through <code>Explorer\StartupApproved</code>, the mechanism Task Manager uses, including 32-bit machine-wide entries (<code>src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:12</code>, <code>:57-58</code>, <code>:68-69</code>). DELETE asks first</td>
     </tr>
     <tr>
     <td>Installed Programs</td>
-    <td><code>:113</code></td>
-    <td>Inventory and uninstall. Exit codes are reported in words, including restart-needed and already-removed, which are not failures</td>
+    <td><code>:97</code></td>
+    <td><code>APPS 09</code></td>
+    <td>Inventory and uninstall. Uninstall asks before it starts the program's own uninstaller. Exit codes are reported in words, including restart-needed and already-removed, which are not failures</td>
     </tr>
     </tbody>
     </table></div>
     <h2>Maintenance</h2>
-    <p>Header at <code>MainWindow.xaml:119</code>.</p>
+    <p>Header at <code>MainWindow.xaml:103</code>. A separator divides it after Driver Updater
+    (<code>MainWindow.xaml:139</code>); the five entries after it have no header of their own.</p>
     <div class="tablewrap"><table>
     <thead>
     <tr>
     <th>Page</th>
     <th>Line</th>
+    <th>Module</th>
     <th>What it does</th>
     </tr>
     </thead>
     <tbody>
     <tr>
     <td>Health Check</td>
-    <td><code>:120</code></td>
-    <td>System-wide checks producing a score, a grade, counts of critical issues and warnings, and recommended actions</td>
+    <td><code>:104</code></td>
+    <td><code>HEALTH 10</code></td>
+    <td>System-wide checks producing a score, a grade, counts of critical issues and warnings, and recommended actions. QUICK FIX ALL asks first, fixes only the issues ticked, and backs the registry up before touching it</td>
     </tr>
     <tr>
     <td>Game Mode</td>
-    <td><code>:125</code></td>
+    <td><code>:109</code></td>
+    <td><code>GAME 11</code></td>
     <td>Lowers background apps below your game in the processor queue and puts them back afterwards. Asking apps to close is a separate opt-in that only ever asks (<code>src/SysMonitor.Core/Services/GameMode/GameModeService.cs</code>)</td>
     </tr>
     <tr>
     <td>Browser Privacy</td>
-    <td><code>:130</code></td>
-    <td>Clears browsing traces across installed browsers, counted per browser actually found</td>
+    <td><code>:114</code></td>
+    <td><code>PRIVACY 12</code></td>
+    <td>Clears browsing traces across installed browsers, counted per browser actually found. CLEAN SELECTED asks first, naming what cannot be recovered</td>
     </tr>
     <tr>
     <td>Drive Wiper</td>
-    <td><code>:135</code></td>
-    <td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406</code>, <code>:602</code>, <code>:20</code>). It asks before it starts, naming the count and size, with Cancel as the default (<code>src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37</code>)</td>
+    <td><code>:119</code></td>
+    <td><code>WIPE 13</code></td>
+    <td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is an SSD (<code>src/SysMonitor.Core/Services/Utilities/DriveWiper.cs:406</code>, <code>:602</code>, <code>:20</code>). WIPE NOW asks before it starts, naming the count and size, with no default button (<code>src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37</code>)</td>
     </tr>
     <tr>
     <td>Scheduled Cleaning</td>
-    <td><code>:140</code></td>
-    <td>Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs</code>)</td>
+    <td><code>:124</code></td>
+    <td><code>SCHED 14</code></td>
+    <td>Daily, weekly or monthly cleans that run headlessly and return an exit code to Task Scheduler (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningRun.cs</code>). DELETE TASK asks first</td>
     </tr>
     <tr>
     <td>Backup Manager</td>
-    <td><code>:145</code></td>
-    <td>Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable (<code>src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:20-22</code>)</td>
+    <td><code>:129</code></td>
+    <td><code>BACKUP 15</code></td>
+    <td>Full and incremental backups, with optional AES-256 encryption that is authenticated and restorable (<code>src/SysMonitor.Core/Services/Backup/BackupEncryption.cs:20-22</code>), and system restore points</td>
     </tr>
     <tr>
     <td>Driver Updater</td>
-    <td><code>:150</code></td>
+    <td><code>:134</code></td>
+    <td><code>DRIVERS 16</code></td>
     <td>Device driver inventory, with problem and unsigned drivers flagged, and links out to Device Manager and Windows Update</td>
     </tr>
     <tr>
     <td>Disk Analyzer</td>
-    <td><code>:156</code></td>
-    <td>Storage use per drive and drive health where SMART is available</td>
+    <td><code>:140</code></td>
+    <td><code>DISK 17</code></td>
+    <td>Storage use per drive</td>
     </tr>
     <tr>
     <td>Network</td>
-    <td><code>:161</code></td>
+    <td><code>:145</code></td>
+    <td><code>NET 18</code></td>
     <td>Live throughput read from the adapter that actually carries your traffic, selected by routed interface rather than claimed link speed (<code>src/SysMonitor.Core/Services/Monitors/NetworkMonitor.cs</code>)</td>
     </tr>
     <tr>
     <td>Battery</td>
-    <td><code>:166</code></td>
+    <td><code>:150</code></td>
+    <td><code>BATT 19</code></td>
     <td>Charge, power state, and health from design capacity against full-charge capacity. Reports "Not reported" when Windows does not supply those figures (<code>src/SysMonitor.Core/Services/Monitors/BatteryMonitor.cs</code>)</td>
     </tr>
     <tr>
     <td>Temperature</td>
-    <td><code>:171</code></td>
+    <td><code>:155</code></td>
+    <td><code>TEMP 20</code></td>
     <td>Processor and graphics thermal sensors and fan speeds, through LibreHardwareMonitor</td>
     </tr>
     <tr>
     <td>System Info</td>
-    <td><code>:176</code></td>
-    <td>Hardware and operating system inventory</td>
+    <td><code>:160</code></td>
+    <td><code>SYS 21</code></td>
+    <td>Operating system, processor, memory and storage</td>
     </tr>
     </tbody>
     </table></div>
     <h2>Utilities</h2>
-    <p>Header at <code>MainWindow.xaml:182</code>.</p>
+    <p>Header at <code>MainWindow.xaml:166</code>.</p>
     <div class="tablewrap"><table>
     <thead>
     <tr>
     <th>Page</th>
     <th>Line</th>
+    <th>Module</th>
     <th>What it does</th>
     </tr>
     </thead>
     <tbody>
     <tr>
     <td>Large Files</td>
-    <td><code>:183</code></td>
+    <td><code>:167</code></td>
+    <td><code>LARGE 22</code></td>
     <td>Finds large files, largest first. Deletion goes to the Recycle Bin after a confirmation naming the count and size, and does not follow links; a file Windows cannot recycle is left where it is, and the result says so (<code>src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31</code>, <code>src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136</code>)</td>
     </tr>
     <tr>
     <td>Duplicate Finder</td>
-    <td><code>:188</code></td>
+    <td><code>:172</code></td>
+    <td><code>DUPES 23</code></td>
     <td>Duplicates decided by SHA-256 of the whole file, never by sampling. One physical file is counted once, the oldest copy is kept, and deletion goes to the Recycle Bin after a confirmation naming the count and size; a file Windows cannot recycle is left where it is, and the result says so (<code>src/SysMonitor.Core/Services/Utilities/DuplicateFinder.cs:161</code>, <code>:224</code>)</td>
     </tr>
     <tr>
     <td>File Tools</td>
-    <td><code>:193</code></td>
+    <td><code>:177</code></td>
+    <td><code>FILES 24</code></td>
     <td>ZIP compression of a file or a folder, and GZip of a single file. See the note on formats below</td>
     </tr>
     <tr>
     <td>PDF Tools</td>
-    <td><code>:198</code></td>
-    <td>Merge, split, extract pages, convert images and text to PDF, and sign</td>
+    <td><code>:182</code></td>
+    <td><code>PDF 25</code></td>
+    <td>Merge, split, extract pages, convert images and text to PDF, and sign. EDIT PDF opens the PDF Editor, module <code>PDF EDIT 35</code></td>
     </tr>
     <tr>
     <td>Image Tools</td>
-    <td><code>:203</code></td>
+    <td><code>:187</code></td>
+    <td><code>IMAGE 26</code></td>
     <td>Compress, convert, resize, and read image metadata</td>
     </tr>
     </tbody>
     </table></div>
     <h2>Wireless</h2>
-    <p>Header at <code>MainWindow.xaml:209</code>.</p>
+    <p>Header at <code>MainWindow.xaml:193</code>.</p>
     <div class="tablewrap"><table>
     <thead>
     <tr>
     <th>Page</th>
     <th>Line</th>
+    <th>Module</th>
     <th>What it does</th>
     </tr>
     </thead>
     <tbody>
     <tr>
     <td>Bluetooth</td>
-    <td><code>:210</code></td>
+    <td><code>:194</code></td>
+    <td><code>BT 27</code></td>
     <td>Paired and discoverable device listing</td>
     </tr>
     <tr>
     <td>WiFi Analyzer</td>
-    <td><code>:215</code></td>
+    <td><code>:199</code></td>
+    <td><code>WIFI 28</code></td>
     <td>Nearby networks, channels, signal strength and security type</td>
     </tr>
     <tr>
     <td>Network Mapper</td>
-    <td><code>:220</code></td>
+    <td><code>:204</code></td>
+    <td><code>MAP 29</code></td>
     <td>Devices on the local network with IP and MAC addresses</td>
     </tr>
     </tbody>
     </table></div>
-    <h2>Below the groups</h2>
-    <p>These five have no header of their own.</p>
+    <h2>The footer</h2>
+    <p>These five sit at the bottom of the menu, under <code>MainWindow.xaml:211</code>.</p>
     <div class="tablewrap"><table>
     <thead>
     <tr>
     <th>Page</th>
     <th>Line</th>
+    <th>Module</th>
     <th>What it does</th>
     </tr>
     </thead>
     <tbody>
     <tr>
     <td>Performance</td>
-    <td><code>:228</code></td>
+    <td><code>:212</code></td>
+    <td><code>PERF 30</code></td>
     <td>Operation metrics and timing, with P95 and P99 figures and CSV export</td>
     </tr>
     <tr>
     <td>History</td>
-    <td><code>:233</code></td>
+    <td><code>:217</code></td>
+    <td><code>HIST 31</code></td>
     <td>Thirty days of stored readings, charted</td>
     </tr>
     <tr>
     <td>Settings</td>
-    <td><code>:238</code></td>
+    <td><code>:222</code></td>
+    <td><code>SET 32</code></td>
     <td>See <a href="reference-settings-and-data.html">Settings and data</a></td>
     </tr>
     <tr>
     <td>Donate</td>
-    <td><code>:243</code></td>
+    <td><code>:227</code></td>
+    <td><code>DONATE 33</code></td>
     <td>Support the project</td>
     </tr>
     <tr>
     <td>User's Guide</td>
-    <td><code>:248</code></td>
+    <td><code>:232</code></td>
+    <td><code>GUIDE 34</code></td>
     <td>The full guide, inside the app</td>
     </tr>
     </tbody>
@@ -306,8 +363,9 @@
     changed the extension, so asking for 7z produced a ZIP named <code>.7z</code>.</p>
     <h2>Keyboard input</h2>
     <p>There are no application-wide keyboard shortcuts. The app registers no
-    <code>KeyboardAccelerator</code> anywhere. All five keys it handles are in the PDF editor
-    (<code>src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-112</code>, <code>:371-378</code>, <code>:1418-1430</code>):</p>
+    <code>KeyboardAccelerator</code> anywhere, so no key opens a page or works outside the PDF Editor.
+    Every key the app handles is in the PDF Editor
+    (<code>src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:84-141</code>, <code>:391-398</code>, <code>:1431-1443</code>):</p>
     <div class="tablewrap"><table>
     <thead>
     <tr>
@@ -317,6 +375,41 @@
     </tr>
     </thead>
     <tbody>
+    <tr>
+    <td>Ctrl+O</td>
+    <td>Editor</td>
+    <td>Open a PDF</td>
+    </tr>
+    <tr>
+    <td>Ctrl+S</td>
+    <td>Editor</td>
+    <td>Save the PDF</td>
+    </tr>
+    <tr>
+    <td>Ctrl+P</td>
+    <td>Editor</td>
+    <td>Print</td>
+    </tr>
+    <tr>
+    <td>Ctrl+Z</td>
+    <td>Editor, outside a text field</td>
+    <td>Undo</td>
+    </tr>
+    <tr>
+    <td>Ctrl+Y</td>
+    <td>Editor, outside a text field</td>
+    <td>Redo</td>
+    </tr>
+    <tr>
+    <td>V, P, T, H, R, E, L, A, N, S, X</td>
+    <td>Editor, with a document open, outside a text field</td>
+    <td>Select, Pen, Text, Highlight, Rectangle, Ellipse, Line, Arrow, Sticky Note, Signature and Redact tools (<code>:64-77</code>)</td>
+    </tr>
+    <tr>
+    <td>I</td>
+    <td>Editor, with a document open, outside a text field</td>
+    <td>Insert an image</td>
+    </tr>
     <tr>
     <td>Delete</td>
     <td>Editor canvas</td>
@@ -344,6 +437,9 @@
     </tr>
     </tbody>
     </table></div>
+    <p>The tool letters are ignored while a text field has the keyboard, where they are the
+    words being typed. The zoom caps' tooltips name -, + and 0, but the editor does not
+    handle those keys; use the caps.</p>
     <p>Note that the PDF editor's search looks at annotations, not page text. The app does
     not extract or search text inside a PDF.</p>
     <h2>Related</h2>

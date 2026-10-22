@@ -107,8 +107,9 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void SaveSettings()
     {
-        // Appearance
+        // Appearance, applied as it is saved
         SaveSetting("ThemeIndex", SelectedThemeIndex);
+        (App.MainWindow as MainWindow)?.ApplyTheme(SelectedThemeIndex);
 
         // Behavior
         SaveSetting("RunAtStartup", RunAtStartup);

@@ -32,7 +32,7 @@ Information oriented. Complete and accurate. Look things up here.
 
 | Reference | Covers |
 |---|---|
-| [Pages](reference-pages.md) | Every one of the 34 entries in the navigation menu |
+| [Pages](reference-pages.md) | Every one of the 34 entries in the navigation menu, with each page's module code, and the PDF Editor's keys |
 | [Settings and data](reference-settings-and-data.md) | Every setting, where files are written, what to delete to reset |
 
 ## Explanation

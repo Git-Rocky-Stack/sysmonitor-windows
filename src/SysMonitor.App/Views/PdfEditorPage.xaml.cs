@@ -78,8 +78,8 @@ public sealed partial class PdfEditorPage : Page
     };
 
     /// <summary>
-    /// Every shortcut a tooltip on this page promises: Ctrl+O, S, P, Z and Y, and a letter per tool. The letters
-    /// are ignored while a text field has the keyboard, where they are the words being typed.
+    /// Every shortcut a tooltip on this page promises: Ctrl+O, S, P, Z and Y, a letter per tool, and - + 0 for zoom.
+    /// Keys without Ctrl are ignored while a text field has the keyboard, where they are the words being typed.
     /// </summary>
     private async void Page_KeyDown(object sender, KeyRoutedEventArgs e)
     {
@@ -110,6 +110,23 @@ public sealed partial class PdfEditorPage : Page
         {
             ClearSelection();
             e.Handled = true;
+        }
+        else if (!typing && ViewModel.HasDocument && e.Key is Windows.System.VirtualKey.Subtract or (Windows.System.VirtualKey)189)
+        {
+            // Minus, on the number pad or the main keys, as the zoom tooltip says
+            e.Handled = true;
+            ViewModel.ZoomOutCommand.Execute(null);
+        }
+        else if (!typing && ViewModel.HasDocument && e.Key is Windows.System.VirtualKey.Add or (Windows.System.VirtualKey)187)
+        {
+            // Plus: the number pad's, or the main keys' = / + key
+            e.Handled = true;
+            ViewModel.ZoomInCommand.Execute(null);
+        }
+        else if (!typing && ViewModel.HasDocument && e.Key is Windows.System.VirtualKey.Number0 or Windows.System.VirtualKey.NumberPad0)
+        {
+            e.Handled = true;
+            ViewModel.ResetZoomCommand.Execute(null);
         }
         else if (!typing && ViewModel.HasDocument && e.Key == Windows.System.VirtualKey.I)
         {
@@ -216,8 +233,10 @@ public sealed partial class PdfEditorPage : Page
 
     private async void ClearAnnotations_Click(object sender, RoutedEventArgs e)
     {
-        if (await ConsoleDialog.ConfirmAsync(this, "Clear every annotation?",
-                "Every annotation on every page is removed. The file on disk changes only when you save.", "CLEAR ALL"))
+        // ClearAnnotations empties the page on screen, not the document, so the question says so.
+        if (await ConsoleDialog.ConfirmAsync(this, $"Clear the annotations on page {ViewModel.CurrentPageNumber}?",
+                "Every annotation on this page is removed; other pages keep theirs. The file on disk changes only when you save.",
+                "CLEAR ALL"))
         {
             ViewModel.ClearAnnotationsCommand.Execute(null);
         }

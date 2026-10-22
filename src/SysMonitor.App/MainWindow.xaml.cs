@@ -90,6 +90,12 @@ public sealed partial class MainWindow : Window
             }
         }
 
+        // The shift the user chose in Settings. The smoke run sets each shift itself, so it is left alone there.
+        if (App.SmokeRun is null)
+        {
+            ApplyTheme(App.GetService<ISettingsStore>().Get("ThemeIndex", 2));
+        }
+
         // The rail follows the frame, whoever navigated it: the rail itself, the tray menu, the smoke run, or
         // PDF Tools opening the editor.
         ContentFrame.Navigated += (_, e) => SelectRailItemFor(e.SourcePageType);
@@ -166,6 +172,42 @@ public sealed partial class MainWindow : Window
     /// packaged build never wrote, so in the Store build switching minimize-to-tray off did nothing.
     /// </summary>
     private static bool IsMinimizeToTrayEnabled() => App.GetService<ISettingsStore>().Get("MinimizeToTray", true);
+
+    /// <summary>
+    /// Shows the window in the shift Settings names: 0 follows Windows' own light or dark choice, 1 is Day Shift,
+    /// anything else Night Ops. The setting used to be saved and never read, and App.xaml holds the application
+    /// at Dark, so the app was Night Ops whatever was chosen. The theme is set on the window's content, which every
+    /// page, dialog owner and well inside it inherits; the title bar keeps its own black, as System-X's does.
+    /// </summary>
+    internal void ApplyTheme(int themeIndex)
+    {
+        if (Content is not FrameworkElement root)
+            return;
+
+        root.RequestedTheme = themeIndex switch
+        {
+            0 => WindowsUsesDarkApps() ? ElementTheme.Dark : ElementTheme.Light,
+            1 => ElementTheme.Light,
+            _ => ElementTheme.Dark,
+        };
+    }
+
+    /// <summary>Whether Windows is set to dark apps, read off the background colour it hands apps.</summary>
+    private static bool WindowsUsesDarkApps()
+    {
+        try
+        {
+            var background = new Windows.UI.ViewManagement.UISettings()
+                .GetColorValue(Windows.UI.ViewManagement.UIColorType.Background);
+            return background.R + background.G + background.B < 384;
+        }
+        catch (Exception ex)
+        {
+            // Best effort: a Windows that will not say is taken as dark, the app's own default.
+            Log.Debug(ex, "Reading Windows' app theme failed");
+            return true;
+        }
+    }
 
     /// <summary>Brings the window back from the tray or behind other windows - what a second launch asks for.</summary>
     internal void ShowWindow()

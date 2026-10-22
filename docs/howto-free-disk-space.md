@@ -13,37 +13,46 @@ goes, and delete only what you chose.
 
 1. Open **Directory Cleaner** from the navigation menu.
 
-2. Click **Scan**.
+2. In CLEANING CONTROLS (06A), click **SCAN**.
 
-   The scan sorts what it finds into categories
-   (`src/SysMonitor.Core/Models/CleanerModels.cs:56-70`):
+   The results appear in SCAN RESULTS (06B), one row per location that holds
+   something (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:73-80`,
+   `:140`, and `src/SysMonitor.Core/Services/Cleaners/BrowserCacheCleaner.cs:78`):
 
-   | Category | What it holds |
-   |---|---|
-   | Windows Temp | The system temporary folder. Needs administrator rights |
-   | User Temp | Your own temporary folder |
-   | Browser Cache | Cached page content for installed browsers |
-   | Browser Cookies | Site cookies. Clearing these signs you out of sites |
-   | Browser History | Visited page records |
-   | Recycle Bin | Files already deleted but still recoverable |
-   | Thumbnails | Explorer thumbnail database |
-   | Windows Update Cache | Downloaded update payloads already applied |
-   | Prefetch | Windows launch-time optimisation data |
-   | Memory Dumps | Crash dumps written by Windows |
-   | Error Reports | Windows Error Reporting queues |
-   | Log Files | Application and system logs |
-   | Registry | Registry issues, handled by the Registry Cleaner page |
+   | Category | What it holds | Ticked after a scan |
+   |---|---|---|
+   | Windows Temporary Files | The system temporary folder. Needs administrator rights | Yes |
+   | User Temporary Files | Your own temporary folder | Yes |
+   | Windows Prefetch Files | Windows launch-time optimisation data | Yes |
+   | Thumbnail Cache | Explorer thumbnail database | Yes |
+   | Windows Update Cache | Downloaded update payloads already applied | Yes |
+   | Memory Dump Files | Crash dumps written by Windows | Yes |
+   | Windows Error Reports | Windows Error Reporting queues | Yes |
+   | Windows Log Files | System logs | No |
+   | Recycle Bin | Files already deleted but still recoverable | No |
+   | Browser cache | Cached page content, one row per installed browser | Yes |
 
-3. Uncheck anything you want to keep.
+   Cookies, history and saved passwords are not here. They are on the **Browser
+   Privacy** page, which asks before it deletes any of them.
 
-   Two worth thinking about before you tick them. **Browser Cookies** signs you out
-   of every site you are signed into. **Prefetch** makes the next launch of your
-   common applications slower until Windows rebuilds it.
+3. Untick anything you want to keep, and tick anything you want gone.
 
-4. Click **Clean**.
+   **Prefetch** makes the next launch of your common applications slower until
+   Windows rebuilds it. The **Recycle Bin** is never ticked for you
+   (`TempFileCleaner.cs:147`): emptying it destroys what you deleted with a way back,
+   so it goes only if you tick it.
 
-   The app reports what it actually removed, by category, rather than what it
-   intended to remove.
+4. Click **CLEAN SELECTED**.
+
+   The app asks first, saying how many categories and roughly how much space are
+   involved. If the Recycle Bin is ticked, the question says it will be emptied and
+   that what is in it cannot be restored afterwards
+   (`src/SysMonitor.App/ViewModels/CleanerViewModel.cs:81-86`). Click
+   **CLEAN SELECTED** in the question to go ahead, or **CANCEL** to leave everything
+   where it is.
+
+   The app reports what it actually removed rather than what it intended to remove,
+   and how many files it skipped because they were in use.
 
 ## Verification
 
@@ -61,14 +70,16 @@ because Windows writes to disk while you work.
 The Directory Cleaner removes what Windows and your browsers leave behind. When the
 space is going to a handful of big files instead, use the **Large Files** page:
 
-1. Choose a folder, set the minimum size, and click **Scan**. The results are listed
-   largest first (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs:163`).
+1. Choose a folder with **BROWSE**, set the minimum size, and click **SCAN**. The
+   results are listed largest first
+   (`src/SysMonitor.Core/Services/Utilities/LargeFileFinder.cs:163`).
 
-2. Tick the files you no longer need, and click **Delete Selected**.
+2. Tick the files you no longer need, or use **SELECT ALL** and **SELECT NONE**, and
+   click **DELETE SELECTED**.
 
 3. The app asks first, naming how many files and how much they hold
-   (`src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). **Cancel** is the default.
-   Confirm with **Move to Recycle Bin**.
+   (`src/SysMonitor.App/Views/LargeFilesPage.xaml.cs:31`). No button is the default,
+   so Enter arms nothing and Escape cancels. Confirm with **MOVE TO RECYCLE BIN**.
 
 The files go to the Recycle Bin, where you can restore them. A file Windows cannot
 recycle, such as one on a network or removable drive or one larger than the Recycle
@@ -76,12 +87,13 @@ Bin is set to hold, is left where it is, and the result says how many and why
 (`src/SysMonitor.Core/Services/Utilities/RecycleBin.cs:136`). A file is only reported
 as moved once it has been found in the Recycle Bin.
 
-Up to and including v3.0.1, Delete Selected removed the files without asking, and
+Up to and including v3.0.1, DELETE SELECTED removed the files without asking, and
 Windows deleted any file it could not recycle permanently while the page reported it
 as moved to the Recycle Bin.
 
 A file in the Recycle Bin still takes up its space. The space comes back when the
-Recycle Bin is emptied, which the Directory Cleaner's Recycle Bin category does.
+Recycle Bin is emptied, which the Directory Cleaner's Recycle Bin category does when
+you tick it. The Dashboard's QUICK CLEAN never empties it.
 
 ## If you want this to happen on a schedule
 

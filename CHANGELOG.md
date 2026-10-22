@@ -79,6 +79,12 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   while the window is hidden in the tray (`src/SysMonitor.App/MainWindow.xaml.cs`).
 - **Navigation** keeps the rail on the page showing, footer items and the PDF Editor
   included, and no longer opens a page twice from the tray.
+- **The Theme setting works.** It was saved and never read, and App.xaml holds the app at
+  Dark, so Day Shift never appeared. The choice now applies on save and at every start, and
+  System Default follows Windows' light or dark app setting (`src/SysMonitor.App/MainWindow.xaml.cs`).
+- The PDF Editor's zoom keys (- + 0) work as their tooltips say, and CLEAR ALL's question says
+  it clears the page shown, which is what it does. QUICK CLEAN's question no longer promises old
+  logs it leaves.
 - Performance's EXPORT CSV reports a refused write instead of closing the app; Settings'
   status is coloured by outcome and clears; status lines keep failures on screen.
 
@@ -292,7 +298,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
 
 - The Dashboard's TRIM MEMORY button says "Trimming memory..." while it runs and "Trim
   failed" when it fails, matching its label and the Memory page.
-  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:295`)
+  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:296`)
 
 ### Removed
 
@@ -367,7 +373,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   without its unit - the form a caller with its own unit label uses - and a NaN reading
   came out as "NaN"; the first is now `--`, NaN counts as no reading, and tests cover both.
   (`src/SysMonitor.App/Converters/Converters.cs:317`,
-  `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:439`,
+  `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:440`,
   `src/SysMonitor.Core/Helpers/FormatHelper.cs:111`)
 
 - **The game overlay labels its temperatures in the unit they are in.** Since v2.2.0 it
@@ -442,7 +448,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
 - **The PDF editor's sticky note opens instead of closing the app.** Clicking the page with
   the Sticky Note tool built the note's Save button from `AccentButtonStyle`, asked of the
   page's own resources, which do not look in App.xaml where the Fluent styles are merged. The
-  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:725`).
+  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:744`).
   A new check reads every resource the XAML and the code ask for and fails when one cannot be
   reached (`tests/SysMonitor.Tests/Architecture/ResourceKeyTests.cs`).
 

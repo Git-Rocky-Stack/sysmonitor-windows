@@ -5,7 +5,7 @@
 > stay on the user's machine: no account, no telemetry, no network call home.
 
 STX.1 reads Windows hardware in real time and provides maintenance tools across 34
-pages: monitoring (CPU, GPU, memory, disk, network, battery, temperature, processes,
+navigation entries, plus a PDF Editor opened from PDF Tools: monitoring (CPU, GPU, memory, disk, network, battery, temperature, processes,
 performance, history), maintenance (directory cleaner, registry cleaner, startup
 manager, installed programs, health check, game mode, browser privacy, drive wiper,
 scheduled cleaning, backup manager, driver updater), utilities (large files,
@@ -48,5 +48,7 @@ Clean does instead of promising a speed-up. No feature was added or removed.
 
 - Requires Windows 10 version 2004 (build 19041) or later, x64. Self contained: no runtime to install.
 - The released builds are not code signed. SHA-256 checksums are published on the public page and in the release notes.
-- The application has no keyboard shortcuts, no PDF text extraction, no 7z or tar support, no RAM disk, and no self-updating.
+- The interface is the Command Console. Each page opens on a view header reading MOD - <MODULE> - <NN> (for example MOD - CPU - 02), and each section is a faceplate named like CPU - CORE USAGE - 02B. Buttons are caps written in capitals; a red cap cannot simply be undone and asks for confirmation first.
+- The application runs as a single instance: a second launch brings the running window back.
+- The application has no application-wide keyboard shortcuts; only the PDF Editor handles keys (Ctrl+O/S/P/Z/Y and single-letter tool keys). It has no PDF text extraction, no 7z or tar support, no RAM disk, and no self-updating.
 - Documentation is versioned in the repository under docs/ and is regenerated per release.

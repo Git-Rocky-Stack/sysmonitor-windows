@@ -17,7 +17,9 @@ of this page, but the explanation matters.
 
 1. Open **Drive Wiper** from the navigation menu.
 
-2. Add the files or the folder you want to destroy.
+2. In SECURE DELETION (13A), click **ADD FILES** or **ADD FOLDER** and choose what you
+   want to destroy. It is listed in FILES TO WIPE (13B), where **CLEAR ALL** empties
+   the list without touching anything on disk.
 
    Directory wipes stay inside the folder you chose. They do not follow junctions or
    symbolic links out of it. Before v3.0.0 they did, which meant files outside your
@@ -41,13 +43,13 @@ of this page, but the explanation matters.
 
    The app asks first. The question names how many files and folders are listed and
    how much they hold, and says that none of it goes to the Recycle Bin. When the
-   selection sits on an SSD, the page's warning is repeated in it. **Wipe** is the armed
-   button and **Cancel** the plain one; neither is the default, so Enter arms nothing and
+   selection sits on an SSD, the page's warning is repeated in it. **WIPE** is the armed
+   red cap and **CANCEL** the plain one; neither is the default, so Enter arms nothing and
    Escape leaves everything where it is
    (`src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:37`). Up to and including v3.0.1
    the wipe started the moment the button was pressed.
 
-5. Confirm with **Wipe**, and let it finish.
+5. Confirm with **WIPE**, and let it finish.
 
 ## Verification
 

@@ -23,6 +23,12 @@ Entries now use `Explorer\StartupApproved`, which is the same mechanism Task Man
 writes (`StartupOptimizer.cs:12`, `:57-58`, `:80`). The app, Task Manager and Windows
 now agree with each other.
 
+Programs a 32-bit installer set to start for every user are listed too. Windows keeps
+them under `WOW6432Node` and records whether they may run under
+`StartupApproved\Run32`, which is where Task Manager reads them
+(`StartupOptimizer.cs:68-69`). Up to and including v3.0.1 those entries were missing
+from the list.
+
 ## Steps
 
 1. Open **Startup** from the navigation menu.
@@ -30,13 +36,22 @@ now agree with each other.
 2. Read the list. Each entry shows where it is registered and an impact rating for how
    much it costs you at sign-in.
 
-3. Select an entry and click **Disable**.
+3. Select an entry and click **DISABLE**.
+
+   The caps act on the selected entry, so **DISABLE**, **ENABLE** and **DELETE** stay
+   dimmed until you select one (`src/SysMonitor.App/Views/StartupPage.xaml:38-46`).
 
    The entry stays where it is. What changes is its approval value under
    `Explorer\StartupApproved`, which is how Windows itself records that an entry is
    switched off.
 
-4. To undo, select the entry and click **Enable** (`src/SysMonitor.App/Views/StartupPage.xaml:66`).
+4. To undo, select the entry and click **ENABLE** (`src/SysMonitor.App/Views/StartupPage.xaml:42`).
+
+**DELETE** is different. It is a red cap: it removes the entry from where it is
+registered, and the program stays installed. It asks first, and the question says
+that DISABLE keeps the entry so it can be turned back on while DELETE does not
+(`src/SysMonitor.App/ViewModels/StartupViewModel.cs:68-70`). Click **DELETE** in the
+question to go ahead, or **CANCEL**. Use DISABLE unless you mean to lose the entry.
 
 ## Verification
 
@@ -46,8 +61,8 @@ a bug worth reporting.
 
 ## Troubleshooting
 
-**An entry will not change state.** Machine-wide entries live under HKLM and need
-administrator rights. Restart the app as administrator.
+**An entry will not change state.** Machine-wide entries live under HKLM, the 32-bit
+ones included, and need administrator rights. Restart the app as administrator.
 
 **An entry you enabled points at a program that is not installed any more.** Earlier
 versions could restore a stale copy of an entry that an older version of this app had

@@ -26,15 +26,19 @@ Re-verify anything you are relying on.
 
 ## Steps
 
-1. Open **Backup Manager** from the navigation menu and start a new backup.
+1. Open **Backup Manager** from the navigation menu. In QUICK ACTIONS (15A), click
+   **NEW BACKUP**.
 
 2. Choose a type:
 
    | Type | Copies |
    |---|---|
-   | Full | Everything you selected |
-   | Incremental | Only what changed since the last backup of any kind |
-   | Differential | Everything changed since the last full backup |
+   | FULL BACKUP | Everything you selected |
+   | INCREMENTAL BACKUP | Only what changed since the last full backup with the same name (`src/SysMonitor.Core/Services/Backup/BackupService.cs:124`, `:1567-1570`) |
+
+   The wizard also offers SYSTEM IMAGE and MIRROR BACKUP. In this version either one
+   copies everything you selected, as a full backup does, and a mirror deletes nothing
+   at the destination.
 
 3. Select the folders to back up, then the destination.
 
@@ -50,19 +54,21 @@ Re-verify anything you are relying on.
    than a single file, which is fine and is no longer a failure case
    (`BackupService.cs`).
 
-5. Run it and wait for the summary.
+5. Click **START BACKUP** and wait for the summary. **CANCEL BACKUP** stops it.
 
 ## Verification
 
-Use the **Verify** command on the completed backup. It hashes the backup and checks it
-against what was recorded at the time it was written.
+In HISTORY (15B), use the **Verify backup** cap on the completed backup. It hashes the
+backup and checks it against what was recorded at the time it was written.
 
 This is worth doing now rather than on the day you need it, because until v3.0.0 it
 was checking the wrong thing.
 
 ## Restoring
 
-Select a backup from the history and restore it.
+In HISTORY (15B), use the **Restore backup** cap on the backup you want. The app asks
+first, saying what will be restored and where. The **Delete backup** cap beside it is
+red and asks before it removes anything.
 
 Restore decides where files go, rather than trusting the path recorded inside the
 archive. Destinations are planned up front and confined to the folders the backup was
