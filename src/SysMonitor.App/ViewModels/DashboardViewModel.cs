@@ -19,6 +19,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class DashboardViewModel : ObservableObject, IDisposable
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly ISystemInfoService _systemInfoService;
     private readonly ITempFileCleaner _tempFileCleaner;
     private readonly IMemoryOptimizer _memoryOptimizer;
@@ -266,6 +269,13 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task QuickCleanAsync()
     {
+        if (!await Confirm.AskAsync("Clean temporary files?",
+                "Temporary files, caches and old logs Windows and your apps leave behind are deleted. The Recycle Bin " +
+                "is left as it is; empty it from Directory Cleaner if you mean to.", "QUICK CLEAN"))
+        {
+            return;
+        }
+
         IsOptimizing = true;
         ShowActionStatus("Cleaning temporary files...", true);
 

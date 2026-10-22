@@ -203,8 +203,8 @@ public sealed partial class BackupPage : Page
         var dialog = ConsoleDialog.Create(this);
         dialog.Title = "Encrypted Backup";
         dialog.Content = content;
-        dialog.PrimaryButtonText = actionText;
-        dialog.CloseButtonText = "Cancel";
+        dialog.PrimaryButtonText = actionText.ToUpperInvariant();
+        dialog.CloseButtonText = "CANCEL";
         dialog.DefaultButton = ContentDialogButton.Primary;
 
         return await dialog.ShowAsync() == ContentDialogResult.Primary && !string.IsNullOrEmpty(passwordBox.Password)

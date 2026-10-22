@@ -51,6 +51,11 @@
                             </StackPanel>
                         </Grid>
                     </instruments:Plate>
+
+                    <!-- What the last END TASK did: ended, refused because Windows needs it, or denied. -->
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap"
+                               Foreground="{ThemeResource SilverBrush}"
+                               Visibility="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
                 </StackPanel>
             </instruments:Faceplate>
         </StackPanel>

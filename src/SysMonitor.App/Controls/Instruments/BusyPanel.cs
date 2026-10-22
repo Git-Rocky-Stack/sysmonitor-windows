@@ -40,7 +40,7 @@ public sealed class BusyPanel : Control
         nameof(CancelCommand), typeof(ICommand), typeof(BusyPanel), new PropertyMetadata(null, OnLookChanged));
 
     public static readonly DependencyProperty CancelTextProperty = DependencyProperty.Register(
-        nameof(CancelText), typeof(string), typeof(BusyPanel), new PropertyMetadata("Cancel"));
+        nameof(CancelText), typeof(string), typeof(BusyPanel), new PropertyMetadata("CANCEL"));
 
     public static readonly DependencyProperty PercentTextProperty = DependencyProperty.Register(
         nameof(PercentText), typeof(string), typeof(BusyPanel), new PropertyMetadata(string.Empty));

@@ -7,6 +7,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class BrowserPrivacyViewModel : ObservableObject
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly IBrowserPrivacyCleaner _browserPrivacyCleaner;
 
     [ObservableProperty] private ObservableCollection<BrowserGroupViewModel> _browserGroups = new();
@@ -78,12 +81,20 @@ public partial class BrowserPrivacyViewModel : ObservableObject
             return;
         }
 
-        // Warn about high-risk items
+        // Ask first, and name what cannot come back: saved passwords and Firefox's bookmarks are not a cache.
         var highRiskSelected = selectedItems.Where(i => i.RiskLevel == PrivacyRiskLevel.High).ToList();
-        if (highRiskSelected.Any())
+        var message = $"{selectedItems.Count} item(s) will be deleted from your browsers. Close the browsers first; " +
+                      "anything a running browser holds open is left.";
+        if (highRiskSelected.Count > 0)
         {
-            // In a real app, we'd show a confirmation dialog here
-            // For now, we'll proceed but note it in the status
+            message += "\n\nThese cannot be recovered:\n" + string.Join("\n",
+                highRiskSelected.Select(i => $"- {i.BrowserName}: {i.DisplayName}"));
+        }
+
+        if (!await Confirm.AskAsync("Delete browser data?", message, "DELETE"))
+        {
+            StatusMessage = "Nothing was deleted";
+            return;
         }
 
         IsCleaning = true;

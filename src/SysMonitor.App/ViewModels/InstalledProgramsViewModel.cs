@@ -7,6 +7,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class InstalledProgramsViewModel : ObservableObject
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly IInstalledProgramsService _programsService;
 
     [ObservableProperty] private ObservableCollection<InstalledProgram> _programs = new();
@@ -72,6 +75,11 @@ public partial class InstalledProgramsViewModel : ObservableObject
     private async Task UninstallProgramAsync(InstalledProgram? program)
     {
         if (program == null || !program.CanUninstall) return;
+        if (!await Confirm.AskAsync($"Uninstall {program.Name}?",
+                "Its own uninstaller is started. Some uninstallers remove the program without asking again.", "UNINSTALL"))
+        {
+            return;
+        }
 
         IsUninstalling = true;
         StatusMessage = $"Uninstalling {program.Name}...";

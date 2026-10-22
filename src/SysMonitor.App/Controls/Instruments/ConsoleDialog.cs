@@ -49,12 +49,12 @@ internal static class ConsoleDialog
     /// Says something and waits to be dismissed. Nothing is decided, so nothing is armed and there is one
     /// button. <paramref name="content"/> is text or an element, as <see cref="ContentDialog.Content"/> takes it.
     /// </summary>
-    public static async Task TellAsync(FrameworkElement owner, string title, object content, string closeText = "Close")
+    public static async Task TellAsync(FrameworkElement owner, string title, object content, string closeText = "CLOSE")
     {
         var dialog = Create(owner);
         dialog.Title = title;
         dialog.Content = content is string text ? new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap } : content;
-        dialog.CloseButtonText = closeText;
+        dialog.CloseButtonText = closeText.ToUpperInvariant();
 
         await dialog.ShowAsync();
     }
@@ -85,8 +85,9 @@ internal static class ConsoleDialog
         var dialog = Create(owner);
         dialog.Title = title;
         dialog.Content = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap };
-        dialog.PrimaryButtonText = confirmText;
-        dialog.CloseButtonText = "Cancel";
+        // The buttons are caps, and a cap's word is written in capitals (the cap's style does not change case).
+        dialog.PrimaryButtonText = confirmText.ToUpperInvariant();
+        dialog.CloseButtonText = "CANCEL";
 
         // The consequential button is the armed cap; Cancel keeps the plain one Create gave it.
         dialog.PrimaryButtonStyle = Cap("ArmedCapButtonStyle");

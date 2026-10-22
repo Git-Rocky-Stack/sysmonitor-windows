@@ -9,6 +9,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly ILogger _logger;
 
     // The store the whole app shares (SettingsStore). This page used to keep a private one - LocalSettings when
@@ -130,8 +133,15 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ResetSettings()
+    private async Task ResetSettingsAsync()
     {
+        if (!await Confirm.AskAsync("Reset to defaults?",
+                "Every setting on this page goes back to its default. Nothing is saved until you press SAVE SETTINGS.",
+                "RESET TO DEFAULTS"))
+        {
+            return;
+        }
+
         // Appearance
         SelectedThemeIndex = 2;
 
@@ -161,6 +171,12 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task ClearAllDataAsync()
     {
+        if (!await Confirm.AskAsync("Clear every setting?",
+                "Every setting is erased and saved at its default straight away. Your history and logs are kept.", "CLEAR"))
+        {
+            return;
+        }
+
         try
         {
             // Every setting, in both builds. This used to clear LocalSettings alone, which the unpackaged build
@@ -180,7 +196,6 @@ public partial class SettingsViewModel : ObservableObject
         {
             ShowStatus($"Error clearing data: {ex.Message}");
         }
-        await Task.CompletedTask;
     }
 
     private void UpdateStartupRegistration()

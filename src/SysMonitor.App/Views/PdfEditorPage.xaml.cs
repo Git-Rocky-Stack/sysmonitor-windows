@@ -382,9 +382,9 @@ public sealed partial class PdfEditorPage : Page
         // Show watermark dialog
         var dialog = ConsoleDialog.Create(this);
         dialog.Title = "Add Watermark";
-        dialog.PrimaryButtonText = "Add to All Pages";
-        dialog.SecondaryButtonText = "Add to Current Page";
-        dialog.CloseButtonText = "Cancel";
+        dialog.PrimaryButtonText = "ADD TO ALL PAGES";
+        dialog.SecondaryButtonText = "ADD TO CURRENT PAGE";
+        dialog.CloseButtonText = "CANCEL";
         dialog.DefaultButton = ContentDialogButton.Primary;
 
         var panel = new StackPanel { Spacing = 12 };
@@ -916,8 +916,8 @@ public sealed partial class PdfEditorPage : Page
         var dialog = ConsoleDialog.Create(this);
         dialog.Title = "Sign Document";
         dialog.Content = new TextBox { PlaceholderText = "Enter your name", Width = 300 };
-        dialog.PrimaryButtonText = "Sign";
-        dialog.CloseButtonText = "Cancel";
+        dialog.PrimaryButtonText = "SIGN";
+        dialog.CloseButtonText = "CANCEL";
 
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary && dialog.Content is TextBox textBox)

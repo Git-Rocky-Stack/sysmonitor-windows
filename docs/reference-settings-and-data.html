@@ -56,8 +56,8 @@
     <h1>Reference: settings and data</h1>
     <p>Every setting on the Settings page of STX.1 System Monitor v3.0.1, with its default,
     and every location the app writes to.</p>
-    <p>Defaults are read from <code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:20-52</code>. The
-    Reset command restores exactly these values (<code>SettingsViewModel.cs:133-159</code>).</p>
+    <p>Defaults are read from <code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:23-55</code>. The
+    Reset command restores exactly these values (<code>SettingsViewModel.cs:136-169</code>).</p>
     <h2>Appearance</h2>
     <div class="tablewrap"><table>
     <thead>
@@ -73,7 +73,7 @@
     <td>Theme</td>
     <td>Light, Dark, System</td>
     <td>Dark (index 2)</td>
-    <td>Application colour scheme (<code>:20</code>)</td>
+    <td>Application colour scheme (<code>:23</code>)</td>
     </tr>
     </tbody>
     </table></div>
@@ -91,19 +91,19 @@
     <tr>
     <td>Run at Startup</td>
     <td>On or off</td>
-    <td>Off (<code>:23</code>)</td>
+    <td>Off (<code>:26</code>)</td>
     <td>Launches the app when you sign in</td>
     </tr>
     <tr>
     <td>Minimize to Tray</td>
     <td>On or off</td>
-    <td>On (<code>:24</code>)</td>
+    <td>On (<code>:27</code>)</td>
     <td>Closing the window keeps the app running in the notification area</td>
     </tr>
     <tr>
     <td>Show Notifications</td>
     <td>On or off</td>
-    <td>On (<code>:25</code>)</td>
+    <td>On (<code>:28</code>)</td>
     <td>Enables alert toasts (<code>src/SysMonitor.App/Views/SettingsPage.xaml:76</code>)</td>
     </tr>
     </tbody>
@@ -135,7 +135,7 @@
     </table></div>
     <p>The memory threshold raises an alert and nothing else: crossing it trims nothing.
     Working sets are trimmed by the TRIM MEMORY button on the Dashboard
-    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:292</code>) and on the Memory page
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:302</code>) and on the Memory page
     (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176</code>), and by Game Mode, whose memory
     step is on unless a caller turns it off
     (<code>src/SysMonitor.Core/Services/GameMode/GameModeService.cs:111</code>,
@@ -149,7 +149,7 @@
     of making more of it available
     (<code>src/SysMonitor.Core/Services/Optimizers/MemoryOptimizer.cs:90-91</code>). The result message
     has said so since v3.0.0: it reads "Trimmed N from background apps"
-    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:306</code>). Up to and including v3.0.1
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:316</code>). Up to and including v3.0.1
     the Memory page's button read OPTIMIZE MEMORY and reported the drop in used memory as
     memory freed; it now reads TRIM MEMORY and reports the same count in the same words
     (<code>src/SysMonitor.App/ViewModels/MemoryViewModel.cs:179</code>).</p>
@@ -229,7 +229,7 @@
     swallowed (<code>src/SysMonitor.Core/Services/Alerts/AlertService.cs</code>).</p>
     <h2>Version</h2>
     <p>The Settings page reads the version from the running assembly
-    (<code>SettingsViewModel.cs:65</code>), so it reports what is actually installed rather than a
+    (<code>SettingsViewModel.cs:68</code>), so it reports what is actually installed rather than a
     number written by hand. For this release it reads 3.0.1.0.</p>
     <h2>Where the app writes</h2>
     <p>Everything the application stores about you is under one folder:</p>
@@ -266,14 +266,14 @@
     <p>Two settings also leave an entry outside that folder, and deleting it does not remove
     them. Run at Startup adds a <code>SysMonitor</code> value under
     <code>HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</code>
-    (<code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:202</code>), and a cleaning schedule is a
+    (<code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:217</code>), and a cleaning schedule is a
     Task Scheduler task named <code>SysMonitor Scheduled Cleaning</code>
     (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningService.cs:56</code>). Switch both off
     in the app before deleting the folder, and nothing is left behind.</p>
     <p>The install folder holds the application, plus <code>LICENSE.txt</code> and
     <code>THIRD-PARTY-NOTICES.txt</code> (<code>installer/SysMonitorSetup.iss:87-88</code>).</p>
     <p>Exported reports go to your Documents folder
-    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:327-335</code>).</p>
+    (<code>src/SysMonitor.App/ViewModels/DashboardViewModel.cs:337-345</code>).</p>
     <h3>The packaged build</h3>
     <p>The same paths hold for the packaged (MSIX) build, as the app sees them. Windows
     redirects what a packaged app writes under <code>%LocalAppData%</code> into that app's own package
@@ -294,8 +294,8 @@
     update, download the new release and run it.</p>
     <h2>Clearing data</h2>
     <p>The Settings page has a Clear All Data command
-    (<code>SettingsViewModel.cs:162</code>). It resets every setting to its default and saves that
-    straight away (<code>SettingsViewModel.cs:168-169</code>). It clears settings only: the history
+    (<code>SettingsViewModel.cs:172</code>). It resets every setting to its default and saves that
+    straight away (<code>SettingsViewModel.cs:184-185</code>). It clears settings only: the history
     database and the logs stay where they are.</p>
     <p>Up to and including v3.0.1 it cleared the packaged build's <code>LocalSettings</code> and nothing
     else, so in the unpackaged build it changed nothing on disk. Later versions reset every

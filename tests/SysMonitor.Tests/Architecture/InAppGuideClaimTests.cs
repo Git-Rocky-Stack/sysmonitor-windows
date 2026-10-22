@@ -78,12 +78,13 @@ public class InAppGuideClaimTests
     {
         StillClaimed("One click deletes temporary files and tells you how many it removed.");
 
-        // "deletes temporary files": the command runs the temp-file cleaner, not some general optimiser.
-        ShouldMatch(Dashboard, @"QuickCleanAsync[\s\S]{0,400}?_tempFileCleaner\.CleanAsync",
+        // "deletes temporary files": the command runs the temp-file cleaner, not some general optimiser. The
+        // window allows for the confirmation it asks first.
+        ShouldMatch(Dashboard, @"QuickCleanAsync[\s\S]{0,1000}?_tempFileCleaner\.CleanAsync",
             "the tip promises deletion, so the command has to be the one that deletes");
 
         // "tells you how many it removed": the count is the only result the user is shown.
-        ShouldMatch(Dashboard, @"QuickCleanAsync[\s\S]{0,400}?ShowActionStatus\(\$""Cleaned \{cleaned\.FilesDeleted\}",
+        ShouldMatch(Dashboard, @"QuickCleanAsync[\s\S]{0,1000}?ShowActionStatus\(\$""Cleaned \{cleaned\.FilesDeleted\}",
             "the tip promises a count of removed files, and this is the line that reports it");
     }
 

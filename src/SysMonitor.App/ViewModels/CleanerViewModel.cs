@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Monitoring;
@@ -9,6 +10,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class CleanerViewModel : ObservableObject
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly ITempFileCleaner _tempFileCleaner;
     private readonly IBrowserCacheCleaner _browserCacheCleaner;
     private readonly IPerformanceMonitor _performanceMonitor;
@@ -66,6 +70,24 @@ public partial class CleanerViewModel : ObservableObject
     private async Task CleanAsync()
     {
         if (!HasResults) return;
+
+        var chosen = ScanResults.Where(r => r.IsSelected).ToList();
+        if (chosen.Count == 0)
+        {
+            StatusMessage = "Nothing is selected";
+            return;
+        }
+
+        var bin = chosen.Any(r => r.Category == CleanerCategory.RecycleBin)
+            ? " The Recycle Bin is emptied, and what is in it cannot be restored afterwards."
+            : string.Empty;
+        if (!await Confirm.AskAsync("Delete the selected files?",
+                $"{chosen.Count} categor{(chosen.Count == 1 ? "y" : "ies")}, about {FormatHelper.FormatSize(chosen.Sum(r => r.SizeBytes))}, are deleted.{bin}",
+                "CLEAN SELECTED"))
+        {
+            return;
+        }
+
         IsCleaning = true;
         StatusMessage = "Cleaning...";
 

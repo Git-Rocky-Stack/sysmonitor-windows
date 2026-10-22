@@ -1,3 +1,4 @@
+using SysMonitor.App.Controls.Instruments;
 using Microsoft.UI.Xaml.Controls;
 using SysMonitor.App.ViewModels;
 
@@ -11,6 +12,9 @@ public sealed partial class InstalledProgramsPage : Page
     {
         ViewModel = App.GetService<InstalledProgramsViewModel>();
         InitializeComponent();
+
+        // Armed actions ask first, over this page (see Confirmation).
+        ViewModel.Confirm = (title, message, confirmText) => ConsoleDialog.ConfirmAsync(this, title, message, confirmText);
         DataContext = ViewModel;
 
         // Auto-load programs when page loads

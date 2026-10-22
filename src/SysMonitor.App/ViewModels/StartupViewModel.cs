@@ -8,6 +8,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class StartupViewModel : ObservableObject
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly IStartupOptimizer _startupOptimizer;
 
     [ObservableProperty] private ObservableCollection<StartupItem> _startupItems = new();
@@ -62,6 +65,13 @@ public partial class StartupViewModel : ObservableObject
     private async Task DeleteItemAsync()
     {
         if (SelectedItem == null) return;
+        if (!await Confirm.AskAsync($"Delete {SelectedItem.Name} from startup?",
+                $"The entry is removed from {SelectedItem.Location}; the program itself stays installed. DISABLE " +
+                "keeps the entry so it can be turned back on - DELETE does not.", "DELETE"))
+        {
+            return;
+        }
+
         await ApplyAsync(await _startupOptimizer.DeleteStartupItemAsync(SelectedItem));
     }
 

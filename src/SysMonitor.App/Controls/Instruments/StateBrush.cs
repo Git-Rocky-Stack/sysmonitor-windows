@@ -126,9 +126,16 @@ public static class StateBrush
             SetBackgroundOf(element, ConsolePalette.BrushFor(element, FillKey(fill)));
 
         if (element.GetValue(WashProperty) is LampState wash)
-            SetBackgroundOf(element, WashKey(wash) is { } key
-                ? ConsolePalette.BrushFor(element, key)
-                : new SolidColorBrush(Microsoft.UI.Colors.Transparent));
+        {
+            if (WashKey(wash) is { } key)
+                SetBackgroundOf(element, ConsolePalette.BrushFor(element, key));
+            else if (element is Control control)
+                // No wash on a control is its own face: a cap the PDF Editor's tools wash when active keeps its
+                // cap when not, instead of going transparent and losing the cap it is.
+                control.ClearValue(Control.BackgroundProperty);
+            else
+                SetBackgroundOf(element, new SolidColorBrush(Microsoft.UI.Colors.Transparent));
+        }
 
         if (element.GetValue(BorderBrushProperty) is LampState edge)
         {

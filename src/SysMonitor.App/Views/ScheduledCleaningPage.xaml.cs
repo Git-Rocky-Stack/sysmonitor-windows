@@ -1,3 +1,4 @@
+using SysMonitor.App.Controls.Instruments;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SysMonitor.App.ViewModels;
@@ -12,6 +13,9 @@ public sealed partial class ScheduledCleaningPage : Page
     {
         ViewModel = App.GetService<ScheduledCleaningViewModel>();
         InitializeComponent();
+
+        // Armed actions ask first, over this page (see Confirmation).
+        ViewModel.Confirm = (title, message, confirmText) => ConsoleDialog.ConfirmAsync(this, title, message, confirmText);
     }
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)

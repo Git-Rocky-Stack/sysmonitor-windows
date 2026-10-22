@@ -14,6 +14,9 @@ public sealed partial class RegistryCleanerPage : Page
     {
         ViewModel = App.GetService<RegistryCleanerViewModel>();
         InitializeComponent();
+
+        // Armed actions ask first, over this page (see Confirmation).
+        ViewModel.Confirm = (title, message, confirmText) => ConsoleDialog.ConfirmAsync(this, title, message, confirmText);
     }
 
     /// <summary>

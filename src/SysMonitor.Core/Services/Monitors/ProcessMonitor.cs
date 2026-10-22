@@ -278,6 +278,21 @@ public class ProcessMonitor : IProcessMonitor
         });
     }
 
+    /// <summary>
+    /// Processes Windows cannot run without. Ending csrss, wininit or smss stops the machine with a bug check,
+    /// winlogon or lsass ends every session, and PID 0 and 4 are the idle loop and the kernel - none of which
+    /// "end task" means to a person, so the app refuses rather than relying on access being denied.
+    /// </summary>
+    public static bool IsCriticalToWindows(string processName, int processId) =>
+        processId is 0 or 4 ||
+        CriticalProcessNames.Contains(Path.GetFileNameWithoutExtension(processName ?? string.Empty));
+
+    private static readonly HashSet<string> CriticalProcessNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "System", "Idle", "Registry", "smss", "csrss", "wininit", "winlogon", "services", "lsass", "lsaiso",
+        "fontdrvhost", "dwm", "Memory Compression", "Secure System",
+    };
+
     public async Task<bool> KillProcessAsync(int processId)
     {
         return await Task.Run(() =>
@@ -285,6 +300,9 @@ public class ProcessMonitor : IProcessMonitor
             try
             {
                 using var proc = Process.GetProcessById(processId);
+                if (IsCriticalToWindows(proc.ProcessName, processId))
+                    return false;
+
                 proc.Kill();
 
                 // Remove from cache immediately
@@ -292,8 +310,11 @@ public class ProcessMonitor : IProcessMonitor
 
                 return proc.WaitForExit(5000);
             }
-            catch
+            catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or
+                                           System.ComponentModel.Win32Exception or NotSupportedException)
             {
+                // Gone already, or not ours to end: the caller says it could not be ended.
+                _logger.LogDebug(ex, "Ending process {Id} failed", processId);
                 return false;
             }
         });

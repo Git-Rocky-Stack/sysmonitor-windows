@@ -7,6 +7,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class ScheduledCleaningViewModel : ObservableObject
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly IScheduledCleaningService _scheduledCleaningService;
 
     [ObservableProperty] private bool _isLoading;
@@ -136,6 +139,12 @@ public partial class ScheduledCleaningViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteTaskAsync()
     {
+        if (!await Confirm.AskAsync("Delete the scheduled clean?",
+                "The task is removed from Task Scheduler and no clean runs until you schedule one again.", "DELETE TASK"))
+        {
+            return;
+        }
+
         IsSaving = true;
         StatusMessage = "Removing scheduled task...";
 

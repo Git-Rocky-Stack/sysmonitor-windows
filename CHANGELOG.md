@@ -200,7 +200,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 - The Dashboard's TRIM MEMORY button says "Trimming memory..." while it runs and "Trim
   failed" when it fails, matching its label and the Memory page.
-  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:295`)
+  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:305`)
 
 ### Removed
 
@@ -265,7 +265,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   Dashboard's Cleanable Space line and the Processes page's Memory column appended
   another, and read "512 MB MB" and "1.2 GB MB".
   (`src/SysMonitor.App/Views/DashboardPage.xaml:469`,
-  `src/SysMonitor.App/Views/ProcessesPage.xaml:111`)
+  `src/SysMonitor.App/Views/ProcessesPage.xaml:116`)
 
 - **A missing temperature reads as missing.** With no sensor the monitors report 0 C,
   which the Fahrenheit converter turned into 32F on the Dashboard, the Temperature page
@@ -275,7 +275,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   without its unit - the form a caller with its own unit label uses - and a NaN reading
   came out as "NaN"; the first is now `--`, NaN counts as no reading, and tests cover both.
   (`src/SysMonitor.App/Converters/Converters.cs:317`,
-  `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:439`,
+  `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:449`,
   `src/SysMonitor.Core/Helpers/FormatHelper.cs:111`)
 
 - **The game overlay labels its temperatures in the unit they are in.** Since v2.2.0 it
@@ -394,7 +394,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **Refresh Interval is described as it is.** The user guide and the settings reference
   said it sets how often readings update. It is saved and nothing reads it: each page
   refreshes on a fixed timer of its own
-  (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:79`). The troubleshooting steps
+  (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:82`). The troubleshooting steps
   built on it, and on an auto-refresh switch the app does not have, are replaced by steps
   that work, and the advice to install the .NET runtime is gone: the released builds carry
   it.

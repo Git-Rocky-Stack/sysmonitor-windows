@@ -653,7 +653,7 @@ Detailed system specifications:
 ### Monitoring
 
 - **Refresh Interval** - Saved, but no page reads it yet: each page refreshes on a fixed timer of its own,
-  and stops when you move to another page (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:79`)
+  and stops when you move to another page (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:82`)
 - **Memory Threshold** - The usage level that raises a memory alert. Crossing it trims nothing. Working
   sets are trimmed only by TRIM MEMORY on the Dashboard or the Memory page, and by Game Mode - including
   when auto mode, if you have turned it on, starts Game Mode because it saw a game launch.

@@ -7,6 +7,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class HealthCheckViewModel : ObservableObject
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly IHealthCheckService _healthCheckService;
     private readonly ISystemRestoreService _systemRestoreService;
 
@@ -85,6 +88,12 @@ public partial class HealthCheckViewModel : ObservableObject
     private async Task QuickFixAsync()
     {
         if (!HasResults || _currentReport == null) return;
+        if (!await Confirm.AskAsync("Apply the quick fix?",
+                "The selected junk files and browser cache are deleted, and the selected low-risk registry issues are " +
+                "fixed after the keys they touch are backed up.", "QUICK FIX"))
+        {
+            return;
+        }
 
         IsApplyingFix = true;
         StatusMessage = "Applying fixes...";

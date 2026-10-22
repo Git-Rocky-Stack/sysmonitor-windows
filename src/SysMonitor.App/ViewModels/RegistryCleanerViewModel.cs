@@ -9,6 +9,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class RegistryCleanerViewModel : ObservableObject, IDisposable
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     /// <summary>Cancelled when the user leaves the page, so the work it started can stop.</summary>
     private readonly CancellationTokenSource _pageCts = new();
 
@@ -112,6 +115,13 @@ public partial class RegistryCleanerViewModel : ObservableObject, IDisposable
         if (selectedCount == 0)
         {
             StatusMessage = "No issues selected. Select issues to fix first.";
+            return;
+        }
+
+        if (!await Confirm.AskAsync($"Fix {selectedCount} registry issue(s)?",
+                "Every key the fixes touch is exported to a .reg backup first, and nothing changes if that fails. " +
+                "RESTORE BACKUP puts them back.", "FIX SELECTED"))
+        {
             return;
         }
 

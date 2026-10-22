@@ -14,6 +14,9 @@ namespace SysMonitor.App.ViewModels;
 
 public partial class ProcessesViewModel : ObservableObject, IDisposable
 {
+
+    /// <summary>Asks before the armed action runs; the page wires it to a dialog (see <see cref="Confirmation"/>).</summary>
+    public Confirmation? Confirm { get; set; }
     private readonly IProcessMonitor _processMonitor;
     private readonly IPerformanceMonitor _performanceMonitor;
     private readonly DispatcherQueue _dispatcherQueue;
@@ -33,6 +36,7 @@ public partial class ProcessesViewModel : ObservableObject, IDisposable
     [ObservableProperty] private int _totalProcesses = 0;
     [ObservableProperty] private double _totalCpuUsage = 0;
     [ObservableProperty] private double _totalMemoryMB = 0;
+    [ObservableProperty] private string _statusMessage = string.Empty;
 
     public ProcessesViewModel(IProcessMonitor processMonitor, IPerformanceMonitor performanceMonitor)
     {
@@ -200,7 +204,25 @@ public partial class ProcessesViewModel : ObservableObject, IDisposable
     private async Task KillProcessAsync()
     {
         if (SelectedProcess == null) return;
-        await _processMonitor.KillProcessAsync(SelectedProcess.Id);
+        var target = SelectedProcess;
+
+        // Ending one of these stops Windows itself - a blue screen or an instant sign-out - so it is not offered.
+        if (ProcessMonitor.IsCriticalToWindows(target.Name, target.Id))
+        {
+            StatusMessage = $"{target.Name} is part of Windows and is not ended from here";
+            return;
+        }
+
+        if (!await Confirm.AskAsync($"End {target.Name}?",
+                $"{target.Name} (PID {target.Id}) is closed at once. Anything it has not saved is lost.", "END TASK"))
+        {
+            return;
+        }
+
+        var ended = await _processMonitor.KillProcessAsync(target.Id);
+        StatusMessage = ended
+            ? $"{target.Name} was ended"
+            : $"{target.Name} could not be ended; it may belong to another user or to Windows, which needs administrator rights";
         await RefreshProcessesAsync();
     }
 
