@@ -248,7 +248,7 @@ public class RegistryCleaner : IRegistryCleaner
                 if (value.Contains(":\\") || value.StartsWith("\\\\"))
                 {
                     var cleanPath = ExtractFilePath(value);
-                    if (!string.IsNullOrEmpty(cleanPath) && !File.Exists(cleanPath) && !Directory.Exists(cleanPath))
+                    if (IsProvablyMissing(cleanPath, allowDirectory: true))
                     {
                         issues.Add(new RegistryIssue
                         {
@@ -283,7 +283,7 @@ public class RegistryCleaner : IRegistryCleaner
                 var uninstallString = subKey.GetValue("UninstallString")?.ToString();
 
                 // Check if install location exists
-                if (!string.IsNullOrEmpty(installLocation) && !Directory.Exists(installLocation))
+                if (IsProvablyMissing(installLocation?.Trim('"', ' ') ?? string.Empty, allowDirectory: true))
                 {
                     issues.Add(new RegistryIssue
                     {
@@ -300,7 +300,7 @@ public class RegistryCleaner : IRegistryCleaner
                 if (!string.IsNullOrEmpty(uninstallString))
                 {
                     var exePath = ExtractFilePath(uninstallString);
-                    if (!string.IsNullOrEmpty(exePath) && !File.Exists(exePath))
+                    if (IsProvablyMissing(exePath))
                     {
                         issues.Add(new RegistryIssue
                         {
@@ -347,7 +347,7 @@ public class RegistryCleaner : IRegistryCleaner
                 if (!string.IsNullOrEmpty(dllPath))
                 {
                     var cleanPath = ExtractFilePath(dllPath);
-                    if (!string.IsNullOrEmpty(cleanPath) && !File.Exists(cleanPath))
+                    if (IsProvablyMissing(cleanPath))
                     {
                         issues.Add(new RegistryIssue
                         {
@@ -378,7 +378,7 @@ public class RegistryCleaner : IRegistryCleaner
                 if (string.IsNullOrEmpty(value)) continue;
 
                 var exePath = ExtractFilePath(value);
-                if (!string.IsNullOrEmpty(exePath) && !File.Exists(exePath))
+                if (IsProvablyMissing(exePath))
                 {
                     issues.Add(new RegistryIssue
                     {
@@ -480,11 +480,13 @@ public class RegistryCleaner : IRegistryCleaner
                     if (versionKey == null) continue;
 
                     var tlbPath = versionKey.GetValue("")?.ToString();
-                    if (!string.IsNullOrEmpty(tlbPath) && !File.Exists(tlbPath))
+                    if (!string.IsNullOrEmpty(tlbPath) && IsProvablyMissing(StripResourceIndex(Environment.ExpandEnvironmentVariables(tlbPath.Trim('"', ' ')))))
                     {
+                        // The issue is the one broken version, not the library: other versions of the same
+                        // GUID can be registered and working, and the fix deletes the key named here.
                         issues.Add(new RegistryIssue
                         {
-                            Key = $"{rootName}\\{keyPath}\\{typeLibId}",
+                            Key = $"{rootName}\\{keyPath}\\{typeLibId}\\{version}",
                             ValueName = version,
                             IssueType = "Invalid Type Library",
                             Description = $"Type library file missing: {tlbPath}",
@@ -587,24 +589,56 @@ public class RegistryCleaner : IRegistryCleaner
     /// must not act on a guess.
     /// </para>
     /// </summary>
-    internal static bool IsMissingComServer(string registeredValue)
+    internal static bool IsMissingComServer(string registeredValue) =>
+        IsProvablyMissing(ExtractFilePath(registeredValue));
+
+    /// <summary>
+    /// Whether a path a registry entry names can be shown to be gone - the one test every scan in this cleaner
+    /// makes before it calls an entry broken, because every one of them ends in a delete.
+    /// <para>
+    /// The COM rule above holds for all of them: only a fully qualified path can be proved absent. An uninstall
+    /// string reads <c>MsiExec.exe /X{GUID}</c> and a Run value <c>ctfmon.exe</c>; both are found by the search
+    /// order, and <c>File.Exists</c> on the bare name looks in this process's own folder and says no. A path on a
+    /// drive that is not mounted now - a USB disk, an unmapped share - proves nothing either: the program may be
+    /// installed there and the drive simply out. Windows' own folders are left to Windows.
+    /// </para>
+    /// </summary>
+    internal static bool IsProvablyMissing(string path, bool allowDirectory = false)
     {
-        var path = ExtractFilePath(registeredValue);
-        if (string.IsNullOrWhiteSpace(path))
+        if (string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path))
             return false;
 
-        if (!Path.IsPathFullyQualified(path))
-            return false;
-
-        // Windows' own files are left to Windows, as they always have been.
         if (path.Contains("system32", StringComparison.OrdinalIgnoreCase) ||
             path.Contains("syswow64", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        return !File.Exists(path);
+        try
+        {
+            var root = Path.GetPathRoot(path);
+            if (string.IsNullOrEmpty(root) || !Directory.Exists(root))
+                return false;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+
+        return !File.Exists(path) && !(allowDirectory && Directory.Exists(path));
     }
 
-    private static string ExtractFilePath(string value)
+    /// <summary>
+    /// A type library registered inside a module carries the resource's index after the file,
+    /// <c>C:\Windows\System32\ieframe.dll\1</c>; the file is the path without it.
+    /// </summary>
+    internal static string StripResourceIndex(string path)
+    {
+        var slash = path.LastIndexOf('\\');
+        return slash > 0 && slash < path.Length - 1 && path[(slash + 1)..].All(char.IsAsciiDigit)
+            ? path[..slash]
+            : path;
+    }
+
+    internal static string ExtractFilePath(string value)
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;
 

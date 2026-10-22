@@ -39,6 +39,29 @@ public class FileScanningTests : IDisposable
         FileScanning.EnumerateFiles(_temp.Path).Should().ContainSingle().Which.Should().Be(original);
     }
 
+    /// <summary>
+    /// A temp clean removes the folders it emptied, and nothing else: not a folder still holding a file too new to
+    /// clean, and never what a junction planted in Temp points at - the scheduled clean runs elevated.
+    /// </summary>
+    [Fact]
+    public void OnlyEmptyFoldersAreRemovedAndAJunctionIsNotFollowed()
+    {
+        var elsewhere = Path.Combine(_temp.Path, "elsewhere");
+        Directory.CreateDirectory(Path.Combine(elsewhere, "empty-inside"));
+        var root = Path.Combine(_temp.Path, "temp");
+        Directory.CreateDirectory(Path.Combine(root, "a", "b"));
+        Directory.CreateDirectory(Path.Combine(root, "kept"));
+        File.WriteAllText(Path.Combine(root, "kept", "in-use.tmp"), "still here");
+        FileSystemLinks.CreateJunction(Path.Combine(root, "planted"), elsewhere);
+
+        var removed = FileScanning.RemoveEmptyFolders(root);
+
+        removed.Should().Be(2, "a and a\\b were empty");
+        Directory.Exists(Path.Combine(root, "a")).Should().BeFalse();
+        File.Exists(Path.Combine(root, "kept", "in-use.tmp")).Should().BeTrue();
+        Directory.Exists(Path.Combine(elsewhere, "empty-inside")).Should().BeTrue("a junction is not walked into");
+    }
+
     [Fact]
     public void EveryOrdinaryFileIsFound()
     {

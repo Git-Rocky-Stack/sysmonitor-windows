@@ -65,4 +65,45 @@ public class RegistryComScanTests
     public void AnExpandedSystemPathIsStillRecognisedAsASystemPath() =>
         RegistryCleaner.IsMissingComServer(@"%SystemRoot%\System32\nosuchfile-98d2c1.dll")
             .Should().BeFalse();
+
+    // ------------------------------------------------ the same rule, for every scan that ends in a delete
+
+    /// <summary>
+    /// An MSI product's uninstall string names msiexec by bare name. Believing File.Exists about it flagged
+    /// every MSI-installed program as orphaned, and the fix deleted its Uninstall key.
+    /// </summary>
+    [Theory]
+    [InlineData("MsiExec.exe /X{6F320B93-EE3C-4826-85E0-ADF79F8D4C61}")]
+    [InlineData("ctfmon.exe")]
+    [InlineData("rundll32.exe shell32.dll,Control_RunDLL")]
+    public void AnUninstallOrStartupCommandNamedByBareNameIsNotMissing(string command) =>
+        RegistryCleaner.IsProvablyMissing(RegistryCleaner.ExtractFilePath(command)).Should().BeFalse();
+
+    [Fact]
+    public void APathOnADriveThatIsNotMountedProvesNothing() =>
+        RegistryCleaner.IsProvablyMissing(UnmountedDrive() + @"Games\Launcher\launcher.exe")
+            .Should().BeFalse("a program on an unplugged disk is installed, only out of reach");
+
+    [Fact]
+    public void AnExistingFolderCountsWhereAFolderIsAsked()
+    {
+        var folder = Path.GetTempPath();
+        RegistryCleaner.IsProvablyMissing(folder, allowDirectory: true).Should().BeFalse();
+        RegistryCleaner.IsProvablyMissing(Path.Combine(folder, "no-such-folder-98d2c1"), allowDirectory: true)
+            .Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(@"C:\Windows\System32\ieframe.dll\1", @"C:\Windows\System32\ieframe.dll")]
+    [InlineData(@"C:\Program Files\App\app.tlb", @"C:\Program Files\App\app.tlb")]
+    [InlineData(@"C:\Program Files\App 2\lib.dll\12", @"C:\Program Files\App 2\lib.dll")]
+    public void ATypeLibrarysResourceIndexIsNotPartOfItsFile(string registered, string file) =>
+        RegistryCleaner.StripResourceIndex(registered).Should().Be(file);
+
+    private static string UnmountedDrive()
+    {
+        var mounted = DriveInfo.GetDrives().Select(drive => char.ToUpperInvariant(drive.Name[0])).ToHashSet();
+        var free = "ZYXWVUTSRQPONMLKJIHGFED".First(letter => !mounted.Contains(letter));
+        return $"{free}:\\";
+    }
 }

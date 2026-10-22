@@ -301,6 +301,7 @@ public class HealthCheckService : IHealthCheckService
             {
                 var junkResult = await _tempFileCleaner.CleanAsync(report.JunkFiles.Where(j => j.IsSelected));
                 result.BytesCleaned += junkResult.BytesCleaned;
+                result.Errors.AddRange(junkResult.Errors);
                 result.Actions.Add($"Cleaned {FormatSize(junkResult.BytesCleaned)} of junk files");
             }
             tasksCompleted++;
@@ -319,6 +320,7 @@ public class HealthCheckService : IHealthCheckService
             {
                 var browserResult = await _browserCacheCleaner.CleanAsync(report.BrowserCache.Where(b => b.IsSelected));
                 result.BytesCleaned += browserResult.BytesCleaned;
+                result.Errors.AddRange(browserResult.Errors);
                 result.Actions.Add($"Cleaned {FormatSize(browserResult.BytesCleaned)} of browser cache");
             }
             tasksCompleted++;
@@ -333,22 +335,29 @@ public class HealthCheckService : IHealthCheckService
                 TotalTasks = totalTasks
             });
 
+            // Only what the scan left selected and rates safe: Quick Fix never widens the user's selection, and
+            // nothing in the registry changes without a backup of every key it touches, as on the Registry page.
             var safeRegistryIssues = report.RegistryIssues
-                .Where(r => !r.IsProtected && (r.RiskLevel == CleanerRiskLevel.Safe || r.RiskLevel == CleanerRiskLevel.Low))
+                .Where(r => r.IsSelected && !r.IsProtected && (r.RiskLevel == CleanerRiskLevel.Safe || r.RiskLevel == CleanerRiskLevel.Low))
                 .ToList();
 
-            if (safeRegistryIssues.Any())
+            if (safeRegistryIssues.Count > 0)
             {
-                // Mark them as selected for cleaning
-                foreach (var issue in safeRegistryIssues)
+                var backup = await _registryCleaner.BackupRegistryAsync(safeRegistryIssues);
+                if (!backup.Success)
                 {
-                    issue.IsSelected = true;
+                    result.Errors.Add($"Registry left unchanged: {backup.Message}");
                 }
-                var registryResult = await _registryCleaner.CleanAsync(safeRegistryIssues);
-                result.RegistryIssuesFixed = registryResult.FilesDeleted; // FilesDeleted tracks successful fixes
-                if (result.RegistryIssuesFixed > 0)
+                else
                 {
-                    result.Actions.Add($"Fixed {result.RegistryIssuesFixed} registry issues");
+                    var registryResult = await _registryCleaner.CleanAsync(safeRegistryIssues, cancellationToken);
+                    result.RegistryIssuesFixed = registryResult.FilesDeleted; // FilesDeleted tracks successful fixes
+                    result.Errors.AddRange(registryResult.Errors);
+                    if (result.RegistryIssuesFixed > 0)
+                    {
+                        var where = backup.BackupPath is null ? string.Empty : $" (backup: {backup.BackupPath})";
+                        result.Actions.Add($"Fixed {result.RegistryIssuesFixed} registry issues{where}");
+                    }
                 }
             }
             tasksCompleted++;

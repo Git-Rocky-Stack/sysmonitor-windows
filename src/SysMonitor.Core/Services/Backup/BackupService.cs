@@ -148,6 +148,9 @@ public class BackupService : IBackupService
                 }
             };
 
+            // Each source gets a folder of its own in the backup, named once, before any file is copied.
+            var sourceFolders = SourceFolderNames(job.SourcePaths);
+
             // Backup files
             var lastProgressUpdate = DateTime.Now;
             var bytesSinceLastUpdate = 0L;
@@ -158,14 +161,19 @@ public class BackupService : IBackupService
 
                 try
                 {
-                    // Calculate relative path
-                    var sourcePath = job.SourcePaths.FirstOrDefault(s => file.FullName.StartsWith(s, StringComparison.OrdinalIgnoreCase));
-                    var relativePath = sourcePath != null
+                    // The source this file came from: the deepest one that holds it, matched on whole folders, so
+                    // a file in D:\TempProjects is not taken to be inside a source D:\Temp.
+                    var sourcePath = job.SourcePaths
+                        .Where(source => string.Equals(source, file.FullName, StringComparison.OrdinalIgnoreCase)
+                                         || PathHelper.IsPathWithinDirectory(file.FullName, source))
+                        .OrderByDescending(source => source.Length)
+                        .FirstOrDefault();
+                    var relativePath = sourcePath != null && !string.Equals(sourcePath, file.FullName, StringComparison.OrdinalIgnoreCase)
                         ? Path.GetRelativePath(sourcePath, file.FullName)
                         : file.Name;
 
                     // Preserve folder structure
-                    var sourceRootName = sourcePath != null ? new DirectoryInfo(sourcePath).Name : "Files";
+                    var sourceRootName = sourcePath != null ? sourceFolders[sourcePath] : "Files";
                     var destFilePath = Path.Combine(backupPath, sourceRootName, relativePath);
                     var destDir = Path.GetDirectoryName(destFilePath);
                     if (!string.IsNullOrEmpty(destDir))
@@ -281,7 +289,18 @@ public class BackupService : IBackupService
                 }
 
                 var encryptedPath = finalBackupPath + ".enc";
-                await BackupEncryption.EncryptFileAsync(finalBackupPath, encryptedPath, job.EncryptionPassword, _currentBackupCts.Token);
+                try
+                {
+                    await BackupEncryption.EncryptFileAsync(finalBackupPath, encryptedPath, job.EncryptionPassword, _currentBackupCts.Token);
+                }
+                catch
+                {
+                    // The user asked for an encrypted backup, so a failed encryption must not leave the plain copy
+                    // behind at the destination - a USB stick or a synced folder - nor half a .enc beside it.
+                    TryDeleteFile(finalBackupPath);
+                    TryDeleteFile(encryptedPath);
+                    throw;
+                }
                 File.Delete(finalBackupPath);
                 finalBackupPath = encryptedPath;
                 isEncrypted = true;
@@ -339,8 +358,12 @@ public class BackupService : IBackupService
                 };
             }
 
-            // Cleanup old backups
-            await CleanupOldBackupsAsync(job);
+            // Old backups are pruned only after a complete one: a run that could not copy every file is not a
+            // replacement for the backup retention would delete to make room for it.
+            if (failedFiles == 0)
+            {
+                await CleanupOldBackupsAsync(job);
+            }
 
             var status = failedFiles > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed;
 
@@ -562,66 +585,29 @@ public class BackupService : IBackupService
         };
     }
 
+    /// <summary>
+    /// The restore points, read through the System Restore service's WMI query. Parsing PowerShell's JSON here
+    /// never worked: CreationTime comes back in WMI's <c>20240101120000.000000-000</c> form, which DateTime.Parse
+    /// rejects, and RestorePointType is a number, so every call threw and the page always showed none.
+    /// </summary>
     public async Task<List<RestorePointInfo>> GetRestorePointsAsync()
     {
-        return await Task.Run(() =>
+        try
         {
-            var restorePoints = new List<RestorePointInfo>();
-
-            try
+            var points = await _systemRestore.GetRestorePointsAsync();
+            return points.Select(point => new RestorePointInfo
             {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powershell",
-                    Arguments = "-Command \"Get-ComputerRestorePoint | ConvertTo-Json\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                };
-
-                using var process = Process.Start(psi);
-                if (process == null) return restorePoints;
-
-                var output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-
-                if (!string.IsNullOrWhiteSpace(output))
-                {
-                    // Parse JSON output
-                    using var doc = JsonDocument.Parse(output);
-                    var root = doc.RootElement;
-
-                    if (root.ValueKind == JsonValueKind.Array)
-                    {
-                        foreach (var item in root.EnumerateArray())
-                        {
-                            restorePoints.Add(ParseRestorePoint(item));
-                        }
-                    }
-                    else if (root.ValueKind == JsonValueKind.Object)
-                    {
-                        restorePoints.Add(ParseRestorePoint(root));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "GetRestorePointsAsync failed");
-            }
-
-            return restorePoints;
-        });
-    }
-
-    private static RestorePointInfo ParseRestorePoint(JsonElement element)
-    {
-        return new RestorePointInfo
+                SequenceNumber = (int)point.SequenceNumber,
+                Description = point.Description,
+                CreationTime = point.CreationTime,
+                RestorePointType = point.Type.ToString(),
+            }).ToList();
+        }
+        catch (Exception ex)
         {
-            SequenceNumber = element.TryGetProperty("SequenceNumber", out var seq) ? seq.GetInt32() : 0,
-            Description = element.TryGetProperty("Description", out var desc) ? desc.GetString() ?? "" : "",
-            CreationTime = element.TryGetProperty("CreationTime", out var time) ? DateTime.Parse(time.GetString() ?? "") : DateTime.MinValue,
-            RestorePointType = element.TryGetProperty("RestorePointType", out var type) ? type.GetString() ?? "" : ""
-        };
+            _logger.LogDebug(ex, "GetRestorePointsAsync failed");
+            return [];
+        }
     }
 
     // ==================== RESTORE OPERATIONS ====================
@@ -778,10 +764,13 @@ public class BackupService : IBackupService
 
             stopwatch.Stop();
 
+            // A restore that wrote nothing of what there was to write did not succeed, whatever the reason.
+            var restoredNothing = processedFiles == 0 && (errors.Count > 0 || plan.Refused.Count > 0);
+
             return new BackupResult
             {
-                Success = true,
-                Status = errors.Count > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed,
+                Success = !restoredNothing,
+                Status = restoredNothing ? BackupStatus.Failed : errors.Count > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed,
                 Message = plan.Refused.Count > 0
                     ? $"Restored {processedFiles} file(s); {plan.Refused.Count} entry(ies) in the backup asked to be written outside the folders it was taken from and were refused"
                     : errors.Count > 0 ? $"Restored with {errors.Count} errors" : "Restore completed successfully",
@@ -1201,6 +1190,49 @@ public class BackupService : IBackupService
 
     // ==================== HELPER METHODS ====================
 
+    /// <summary>
+    /// The folder each source is copied into inside a backup. Its own name where that is unique; a drive root,
+    /// which has no name of its own, is <c>Drive-D</c>; and two sources sharing a name - D:\A\Photos and
+    /// E:\Photos - are told apart by a number, rather than one being written over the other.
+    /// </summary>
+    internal static Dictionary<string, string> SourceFolderNames(IEnumerable<string> sources)
+    {
+        var names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var taken = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var source in sources)
+        {
+            if (names.ContainsKey(source))
+                continue;
+
+            var trimmed = source.TrimEnd('\\', '/');
+            var name = trimmed[(trimmed.LastIndexOfAny(['\\', '/']) + 1)..];
+            if (string.IsNullOrEmpty(name) || trimmed.EndsWith(':'))
+                name = "Drive-" + new string(trimmed.Where(char.IsLetterOrDigit).ToArray());
+            if (string.IsNullOrEmpty(name) || name == "Drive-")
+                name = "Files";
+
+            var unique = name;
+            for (var n = 2; !taken.Add(unique); n++)
+                unique = $"{name}-{n}";
+
+            names[source] = unique;
+        }
+
+        return names;
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+    }
+
     private async Task<List<FileInfo>> CollectFilesAsync(BackupJob job, CancellationToken cancellationToken)
     {
         return await Task.Run(() =>
@@ -1217,8 +1249,10 @@ public class BackupService : IBackupService
                 }
                 else if (Directory.Exists(sourcePath))
                 {
-                    var dirFiles = new DirectoryInfo(sourcePath)
-                        .EnumerateFiles("*", SearchOption.AllDirectories)
+                    // Skips what this account cannot read - Documents' legacy My Music junction denies listing, and
+                    // one denied folder used to fail the whole backup - and never follows a link out of the source.
+                    var dirFiles = FileScanning.EnumerateEveryFile(sourcePath, cancellationToken)
+                        .Select(path => new FileInfo(path))
                         .Where(f => ShouldIncludeFile(f, job));
 
                     files.AddRange(dirFiles);
@@ -1231,8 +1265,9 @@ public class BackupService : IBackupService
 
     private static bool ShouldIncludeFile(FileInfo file, BackupJob job)
     {
-        // Check exclusion paths
-        if (job.ExcludePaths.Any(p => file.FullName.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+        // Check exclusion paths, on whole folders: excluding ...\Temp leaves ...\TempProjects in
+        if (job.ExcludePaths.Any(p => string.Equals(file.FullName, p, StringComparison.OrdinalIgnoreCase)
+                                      || PathHelper.IsPathWithinDirectory(file.FullName, p)))
             return false;
 
         // Check exclusion patterns
@@ -1539,17 +1574,17 @@ public class BackupService : IBackupService
             .OrderByDescending(a => a.CreatedDate)
             .ToList();
 
-        // Remove old backups beyond retention count
-        var toDelete = jobArchives.Skip(job.MaxBackupsToKeep);
-        foreach (var archive in toDelete)
-        {
-            await DeleteBackupAsync(archive);
-        }
+        // The newest full backup is what every later incremental is taken against
+        // (GetLastBackupManifestAsync), so neither the count nor the age ever removes it.
+        var newestFull = jobArchives.FirstOrDefault(a => a.Type == BackupType.Full);
 
-        // Remove backups older than max age
         var cutoffDate = DateTime.Now.AddDays(-job.MaxAgeDays);
-        var oldBackups = jobArchives.Where(a => a.CreatedDate < cutoffDate);
-        foreach (var archive in oldBackups)
+        var toDelete = jobArchives.Skip(job.MaxBackupsToKeep)
+            .Concat(jobArchives.Where(a => a.CreatedDate < cutoffDate))
+            .Where(a => !ReferenceEquals(a, newestFull))
+            .Distinct();
+
+        foreach (var archive in toDelete)
         {
             await DeleteBackupAsync(archive);
         }

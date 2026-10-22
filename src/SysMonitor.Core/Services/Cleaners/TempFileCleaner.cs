@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
+using SysMonitor.Core.Services.Utilities;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
@@ -141,7 +142,9 @@ public class TempFileCleaner : ITempFileCleaner
                     Path = "All Drives",
                     SizeBytes = rbInfo.i64Size,
                     FileCount = (int)rbInfo.i64NumItems,
-                    IsSelected = true,
+                    // Emptying the bin is the one category that destroys what the user chose to keep a way back
+                    // from, so it is offered and never pre-selected; a one-click clean leaves it alone.
+                    IsSelected = false,
                     RiskLevel = CleanerRiskLevel.Safe,
                     Description = $"{rbInfo.i64NumItems:N0} items, {FormatHelper.FormatSize(rbInfo.i64Size)}"
                 });
@@ -191,10 +194,14 @@ public class TempFileCleaner : ITempFileCleaner
                         var hr = SHEmptyRecycleBin(IntPtr.Zero, null,
                             SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
 
-                        if (hr == 0 || hr == 1 || hr == -2147418113)
+                        // Only S_OK empties the bin. What it held is counted from what is gone, read back from the
+                        // bin itself, not from the size the scan saw minutes earlier.
+                        if (hr == 0)
                         {
-                            Interlocked.Add(ref bytesCleaned, item.SizeBytes);
-                            Interlocked.Add(ref filesDeleted, item.FileCount);
+                            var left = new SHQUERYRBINFO { cbSize = Marshal.SizeOf<SHQUERYRBINFO>() };
+                            var remaining = SHQueryRecycleBin(null, ref left) == 0 ? left : default;
+                            Interlocked.Add(ref bytesCleaned, Math.Max(0, item.SizeBytes - remaining.i64Size));
+                            Interlocked.Add(ref filesDeleted, (int)Math.Max(0, item.FileCount - remaining.i64NumItems));
                         }
                         else
                         {
@@ -244,21 +251,10 @@ public class TempFileCleaner : ITempFileCleaner
                         }
                     });
 
-                    // Clean empty subdirectories (sequential to avoid conflicts)
+                    // Folders the clean has emptied, and only those (sequential to avoid conflicts)
                     if (item.Category != CleanerCategory.LogFiles)
                     {
-                        foreach (var dir in Directory.GetDirectories(item.Path))
-                        {
-                            try
-                            {
-                                Directory.Delete(dir, true);
-                                Interlocked.Increment(ref foldersDeleted);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogTrace(ex, "Failed to delete directory {Dir}", dir);
-                            }
-                        }
+                        Interlocked.Add(ref foldersDeleted, FileScanning.RemoveEmptyFolders(item.Path));
                     }
                 }
                 catch (Exception ex)
@@ -276,7 +272,9 @@ public class TempFileCleaner : ITempFileCleaner
         result.ErrorCount = errorCount;
         result.Errors = errors.ToList();
         result.Duration = DateTime.Now - startTime;
-        result.Success = errorCount < filesDeleted;
+        // Files in use are expected in a temp folder and are left, not failures; a clean fails when something went
+        // wrong that was not that, or when there was something to clean and none of it could be.
+        result.Success = errors.IsEmpty && !(filesDeleted == 0 && errorCount > 0);
 
         _logger.LogInformation("Cleaned {FilesDeleted} files ({BytesCleaned} bytes) with {ErrorCount} errors",
             filesDeleted, bytesCleaned, errorCount);
@@ -291,7 +289,7 @@ public class TempFileCleaner : ITempFileCleaner
     {
         var now = DateTime.Now;
 
-        foreach (var file in EnumerateFilesSafe(path))
+        foreach (var file in FileScanning.EnumerateFiles(path)) // never through a junction or link
         {
             FileInfo? fileInfo = null;
             try
@@ -327,49 +325,6 @@ public class TempFileCleaner : ITempFileCleaner
         }
     }
 
-    /// <summary>
-    /// Safe file enumeration that handles access denied errors gracefully.
-    /// </summary>
-    private static IEnumerable<string> EnumerateFilesSafe(string path)
-    {
-        var directories = new Stack<string>();
-        directories.Push(path);
-
-        while (directories.Count > 0)
-        {
-            var currentDir = directories.Pop();
-
-            // Enumerate files in current directory
-            IEnumerable<string> files;
-            try
-            {
-                files = Directory.EnumerateFiles(currentDir);
-            }
-            catch
-            {
-                continue;
-            }
-
-            foreach (var file in files)
-            {
-                yield return file;
-            }
-
-            // Add subdirectories
-            try
-            {
-                foreach (var subDir in Directory.EnumerateDirectories(currentDir))
-                {
-                    directories.Push(subDir);
-                }
-            }
-            catch
-            {
-                // Best effort: a folder this account cannot read holds nothing this clean may delete.
-            }
-        }
-    }
-
     public async Task<long> GetTotalCleanableBytesAsync()
     {
         var results = await ScanAsync();
@@ -386,7 +341,7 @@ public class TempFileCleaner : ITempFileCleaner
         int count = 0;
         var now = DateTime.Now;
 
-        foreach (var file in EnumerateFilesSafe(path))
+        foreach (var file in FileScanning.EnumerateFiles(path)) // never through a junction or link
         {
             try
             {

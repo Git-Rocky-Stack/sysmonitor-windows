@@ -17,7 +17,15 @@ public static class FileScanning
     /// shows the same file twice, and a finder that calls the second one a duplicate deletes the only copy.
     /// </summary>
     public static IEnumerable<string> EnumerateFiles(string root, CancellationToken cancellationToken = default) =>
-        Walk(root, recurse: true, cancellationToken);
+        Walk(root, recurse: true, skipSystemFolders: true, cancellationToken);
+
+    /// <summary>
+    /// Every file under a folder, as <see cref="EnumerateFiles(string, CancellationToken)"/> but walking every
+    /// folder that is not a link - a backup copies a project's <c>.git</c> and a drive's <c>Program Files</c>,
+    /// which a file finder rightly passes by.
+    /// </summary>
+    public static IEnumerable<string> EnumerateEveryFile(string root, CancellationToken cancellationToken = default) =>
+        Walk(root, recurse: true, skipSystemFolders: false, cancellationToken);
 
     /// <summary>
     /// The files sitting directly in a folder, without descending into it. A caller that walks each
@@ -25,9 +33,9 @@ public static class FileScanning
     /// would see everything below it twice.
     /// </summary>
     public static IEnumerable<string> EnumerateFilesIn(string folder, CancellationToken cancellationToken = default) =>
-        Walk(folder, recurse: false, cancellationToken);
+        Walk(folder, recurse: false, skipSystemFolders: true, cancellationToken);
 
-    private static IEnumerable<string> Walk(string root, bool recurse, CancellationToken cancellationToken)
+    private static IEnumerable<string> Walk(string root, bool recurse, bool skipSystemFolders, CancellationToken cancellationToken)
     {
         var options = new EnumerationOptions
         {
@@ -74,7 +82,7 @@ public static class FileScanning
 
                 if (attributes.HasFlag(FileAttributes.Directory))
                 {
-                    if (recurse && !IsSkippedFolder(entry.Name))
+                    if (recurse && !(skipSystemFolders && IsSkippedFolder(entry.Name)))
                     {
                         directories.Push(entry.FullName);
                     }
@@ -85,6 +93,74 @@ public static class FileScanning
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Removes the folders under <paramref name="root"/> that are empty once a clean is done, deepest first, and
+    /// returns how many went. A folder still holding anything stays, and so does a link to a folder: removing the
+    /// link is harmless, but walking into it is how a clean of a temp folder reaches the folder it points at, and
+    /// a clean that runs elevated must never be steered into System32 by a junction someone planted in Temp.
+    /// <para>
+    /// This replaces <c>Directory.Delete(dir, recursive: true)</c> on each subfolder, which removed whatever was
+    /// left inside - files too new to clean, files the size total never counted - and followed junctions.
+    /// </para>
+    /// </summary>
+    public static int RemoveEmptyFolders(string root, CancellationToken cancellationToken = default)
+    {
+        var removed = 0;
+        foreach (var folder in FoldersDeepestFirst(root, cancellationToken))
+        {
+            try
+            {
+                if (!Directory.EnumerateFileSystemEntries(folder).Any())
+                {
+                    Directory.Delete(folder, recursive: false);
+                    removed++;
+                }
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
+
+        return removed;
+    }
+
+    private static List<string> FoldersDeepestFirst(string root, CancellationToken cancellationToken)
+    {
+        var options = new EnumerationOptions { AttributesToSkip = 0, IgnoreInaccessible = true };
+        var found = new List<string>();
+        var pending = new Stack<string>();
+        pending.Push(root);
+
+        while (pending.Count > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var current = pending.Pop();
+            IEnumerable<DirectoryInfo> children;
+            try
+            {
+                children = new DirectoryInfo(current).EnumerateDirectories("*", options).ToList();
+            }
+            catch (IOException) { continue; }
+            catch (UnauthorizedAccessException) { continue; }
+
+            foreach (var child in children)
+            {
+                FileAttributes attributes;
+                try { attributes = child.Attributes; }
+                catch (IOException) { continue; }
+
+                if (IsLinkToElsewhere(attributes, LinkTargetOf(child)))
+                    continue;
+
+                found.Add(child.FullName);
+                pending.Push(child.FullName);
+            }
+        }
+
+        // A parent was found before its children, so the reverse removes children first.
+        found.Reverse();
+        return found;
     }
 
     /// <summary>

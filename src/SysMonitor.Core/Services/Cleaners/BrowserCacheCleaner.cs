@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
+using SysMonitor.Core.Services.Utilities;
 
 namespace SysMonitor.Core.Services.Cleaners;
 
@@ -134,7 +135,7 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                 {
                     if (!Directory.Exists(item.Path)) continue;
 
-                    foreach (var file in Directory.EnumerateFiles(item.Path, "*", SearchOption.AllDirectories))
+                    foreach (var file in FileScanning.EnumerateFiles(item.Path))
                     {
                         try
                         {
@@ -162,19 +163,8 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
                         }
                     }
 
-                    // Try to delete empty subdirectories
-                    foreach (var dir in Directory.GetDirectories(item.Path))
-                    {
-                        try
-                        {
-                            Directory.Delete(dir, true);
-                            result.FoldersDeleted++;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogTrace(ex, "Failed to delete directory {Dir}", dir);
-                        }
-                    }
+                    // Folders the clean has emptied, and only those
+                    result.FoldersDeleted += FileScanning.RemoveEmptyFolders(item.Path);
                 }
                 catch (Exception ex)
                 {
@@ -185,7 +175,8 @@ public class BrowserCacheCleaner : IBrowserCacheCleaner
             }
 
             result.Duration = DateTime.Now - startTime;
-            result.Success = result.ErrorCount < result.FilesDeleted; // Allow some errors
+            // Files a running browser holds open are left, not failures; see TempFileCleaner.CleanAsync.
+            result.Success = result.Errors.Count == 0 && !(result.FilesDeleted == 0 && result.ErrorCount > 0);
             _logger.LogInformation("Cleaned {FilesDeleted} browser cache files ({BytesCleaned} bytes)",
                 result.FilesDeleted, result.BytesCleaned);
             return result;

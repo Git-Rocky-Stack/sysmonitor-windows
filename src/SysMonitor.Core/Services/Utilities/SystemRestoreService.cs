@@ -59,6 +59,8 @@ public class SystemRestoreService : ISystemRestoreService
         {
             await Task.Run(() =>
             {
+                var newestBefore = NewestSequenceNumber();
+
                 // Use WMI to create restore point
                 using var restorePointClass = new ManagementClass("\\\\.\\root\\default", "SystemRestore", new ObjectGetOptions());
 
@@ -71,10 +73,21 @@ public class SystemRestoreService : ISystemRestoreService
 
                 var returnValue = Convert.ToUInt32(outParams["ReturnValue"]);
 
-                if (returnValue == 0)
+                // Since Windows 8, CreateRestorePoint answers 0 without making one when another was made in the last
+                // 24 hours. Success is a new point in the list, not the return code alone.
+                // When the list cannot be read at all, the return code is all there is to go on.
+                var newestAfter = returnValue == 0 ? NewestSequenceNumber() : null;
+                if (returnValue == 0 && (newestAfter is null || newestAfter != newestBefore))
                 {
                     result.Success = true;
+                    result.SequenceNumber = newestAfter;
                     result.Message = $"Restore point '{description}' created successfully.";
+                }
+                else if (returnValue == 0)
+                {
+                    result.Success = false;
+                    result.Message = "Windows did not create a new restore point. It makes at most one every 24 hours; " +
+                                     "the most recent one is still in place.";
                 }
                 else
                 {
@@ -101,6 +114,33 @@ public class SystemRestoreService : ISystemRestoreService
 
         result.Duration = DateTime.Now - startTime;
         return result;
+    }
+
+    /// <summary>The highest sequence number System Restore holds, or null when it holds none or cannot be read.</summary>
+    private uint? NewestSequenceNumber()
+    {
+        try
+        {
+            using var searcher = new ManagementObjectSearcher("root\\default", "SELECT SequenceNumber FROM SystemRestore");
+            using var points = searcher.Get();
+            uint? newest = null;
+            foreach (ManagementObject point in points)
+            {
+                using (point)
+                {
+                    var number = Convert.ToUInt32(point["SequenceNumber"] ?? 0);
+                    if (newest is null || number > newest)
+                        newest = number;
+                }
+            }
+
+            return newest;
+        }
+        catch (Exception ex) when (ex is ManagementException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException)
+        {
+            _logger.LogDebug(ex, "Reading restore point sequence numbers failed");
+            return null;
+        }
     }
 
     public async Task<List<RestorePointInfo>> GetRestorePointsAsync()
