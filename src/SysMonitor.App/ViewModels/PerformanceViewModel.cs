@@ -20,6 +20,7 @@ public partial class PerformanceViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isMonitoring = true;
     [ObservableProperty] private double _memoryUsageMB = 0;
     [ObservableProperty] private double _gcPressure = 0;
+    [ObservableProperty] private string _statusMessage = string.Empty;
 
     public PerformanceViewModel(IPerformanceMonitor performanceMonitor)
     {
@@ -44,6 +45,10 @@ public partial class PerformanceViewModel : ObservableObject, IDisposable
 
     private void StartMonitoring()
     {
+        // The first refresh is awaited before this runs; a page left during it is already disposed, and a loop
+        // started now would have no one to cancel it for the rest of the session.
+        if (_isDisposed) return;
+
         _cts = new CancellationTokenSource();
         _ = MonitoringLoopAsync(_cts.Token);
     }
@@ -154,19 +159,31 @@ public partial class PerformanceViewModel : ObservableObject, IDisposable
     private async Task ExportMetricsAsync()
     {
         var stats = _performanceMonitor.GetAllStats();
-        var csv = "Operation,Count,Average(ms),Min(ms),Max(ms),P95(ms),P99(ms)\n";
+        var csv = new System.Text.StringBuilder("Operation,Count,Average(ms),Min(ms),Max(ms),P95(ms),P99(ms)\n");
 
+        // Invariant numbers: a decimal comma would split every figure into two columns.
+        var invariant = System.Globalization.CultureInfo.InvariantCulture;
         foreach (var kvp in stats)
         {
-            csv += $"{kvp.Key},{kvp.Value.Count},{kvp.Value.AverageMs:F2}," +
-                   $"{kvp.Value.MinMs:F2},{kvp.Value.MaxMs:F2}," +
-                   $"{kvp.Value.P95Ms:F2},{kvp.Value.P99Ms:F2}\n";
+            csv.Append(invariant, $"{kvp.Key},{kvp.Value.Count},{kvp.Value.AverageMs:F2},")
+               .Append(invariant, $"{kvp.Value.MinMs:F2},{kvp.Value.MaxMs:F2},")
+               .Append(invariant, $"{kvp.Value.P95Ms:F2},{kvp.Value.P99Ms:F2}\n");
         }
 
         var fileName = $"performance_metrics_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
         var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), fileName);
 
-        await File.WriteAllTextAsync(path, csv);
+        // A Desktop that Controlled Folder Access guards, or that OneDrive holds offline, refuses the write; that
+        // is said on the page, where an exception thrown from the command closed the app.
+        try
+        {
+            await File.WriteAllTextAsync(path, csv.ToString());
+            StatusMessage = $"Exported to {path}";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            StatusMessage = $"Could not write {fileName} to the Desktop: {ex.Message}";
+        }
     }
 
     public void Dispose()

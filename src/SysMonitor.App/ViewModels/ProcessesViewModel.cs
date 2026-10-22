@@ -56,6 +56,10 @@ public partial class ProcessesViewModel : ObservableObject, IDisposable
 
     private void StartAutoRefresh()
     {
+        // The first refresh is awaited before this runs; a page left during it is already disposed, and a loop
+        // started now would have no one to cancel it for the rest of the session.
+        if (_isDisposed) return;
+
         _cts = new CancellationTokenSource();
         _ = RefreshLoopAsync(_cts.Token);
     }

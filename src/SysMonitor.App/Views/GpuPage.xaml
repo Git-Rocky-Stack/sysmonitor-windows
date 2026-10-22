@@ -240,7 +240,7 @@
             </instruments:Faceplate>
 
             <!-- GPU Tips Section -->
-            <instruments:Faceplate Kicker="GPU - GPU TIPS - 03C" Serial="{instruments:SerialFor Module=GPU-GPU-TIPS}" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <instruments:Faceplate Kicker="GPU - TIPS - 03C" Serial="{instruments:SerialFor Module=GPU-TIPS}" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel Spacing="16">
 
                     <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.HasGpu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">

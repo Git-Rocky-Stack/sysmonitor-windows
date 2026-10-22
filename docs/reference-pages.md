@@ -12,15 +12,15 @@ header of their own. They are listed here in the order the menu shows them.
 
 | Page | Line | What it does |
 |---|---|---|
-| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:270`, `:302`, `:329`). The middle button read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see [Settings and data](reference-settings-and-data.md) |
-| CPU Monitor | `:81` | Processor usage, core counts, clock speeds, per-core figures where the hardware reports them |
-| GPU Monitor | `:86` | Graphics adapter load, memory and temperature |
-| Memory Monitor | `:91` | RAM in use and available, and working-set trimming |
-| Processes | `:96` | Running processes with per-process processor and memory use, and the ability to end one |
-| Directory Cleaner | `:101` | Scans thirteen categories of reclaimable files and removes the ones you select (`src/SysMonitor.Core/Models/CleanerModels.cs:56-70`) |
-| Registry Cleaner | `:103` | Finds registry issues. Exports every key a selected fix will touch with `reg.exe` before changing anything, and a failed export stops the clean (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:913-915`, `:940`, `:973`) |
+| Dashboard | `:73` | Health score out of 100, live cards, and three buttons: QUICK CLEAN, TRIM MEMORY and EXPORT (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:260`, `:292`, `:319`). The middle button read BOOST RAM up to v3.0.0 and was renamed in v3.0.1, see [Settings and data](reference-settings-and-data.md) |
+| CPU Monitor | `:78` | Processor usage, core counts, clock speeds, per-core figures where the hardware reports them |
+| GPU Monitor | `:83` | Graphics adapter load, memory and temperature |
+| Memory Monitor | `:88` | RAM in use and available, and working-set trimming |
+| Processes | `:93` | Running processes with per-process processor and memory use, and the ability to end one |
+| Directory Cleaner | `:98` | Scans thirteen categories of reclaimable files and removes the ones you select (`src/SysMonitor.Core/Models/CleanerModels.cs:56-70`) |
+| Registry Cleaner | `:103` | Finds registry issues. Exports every key a selected fix will touch with `reg.exe` before changing anything, and a failed export stops the clean (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:947-949`, `:974`, `:1007`) |
 | Startup | `:108` | Enables and disables startup entries through `Explorer\StartupApproved`, the mechanism Task Manager uses (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:12`, `:57-58`) |
-| Installed Programs | `:132` | Inventory and uninstall. Exit codes are reported in words, including restart-needed and already-removed, which are not failures |
+| Installed Programs | `:113` | Inventory and uninstall. Exit codes are reported in words, including restart-needed and already-removed, which are not failures |
 
 ## Maintenance
 
@@ -91,7 +91,7 @@ changed the extension, so asking for 7z produced a ZIP named `.7z`.
 
 There are no application-wide keyboard shortcuts. The app registers no
 `KeyboardAccelerator` anywhere. All five keys it handles are in the PDF editor
-(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1361-1373`):
+(`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-112`, `:371-378`, `:1418-1430`):
 
 | Key | Where | Action |
 |---|---|---|

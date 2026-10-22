@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services;
-using SysMonitor.Core.Services.Alerts;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Monitors;
 using SysMonitor.Core.Services.Monitoring;
@@ -28,7 +27,6 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
     private readonly INetworkMonitor _networkMonitor;
     private readonly ITemperatureMonitor _temperatureMonitor;
     private readonly IPerformanceMonitor _performanceMonitor;
-    private readonly IAlertService _alertService;
     private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _cts;
     private bool _isDisposed;
@@ -77,8 +75,7 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         IMemoryOptimizer memoryOptimizer,
         INetworkMonitor networkMonitor,
         ITemperatureMonitor temperatureMonitor,
-        IPerformanceMonitor performanceMonitor,
-        IAlertService alertService)
+        IPerformanceMonitor performanceMonitor)
     {
         _systemInfoService = systemInfoService;
         _tempFileCleaner = tempFileCleaner;
@@ -86,7 +83,6 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         _networkMonitor = networkMonitor;
         _temperatureMonitor = temperatureMonitor;
         _performanceMonitor = performanceMonitor;
-        _alertService = alertService;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     }
 
@@ -102,6 +98,10 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
 
     private void StartAutoRefresh()
     {
+        // The first refresh is awaited before this runs; a page left during it is already disposed, and a loop
+        // started now would have no one to cancel it for the rest of the session.
+        if (_isDisposed) return;
+
         _cts = new CancellationTokenSource();
         _ = RefreshLoopAsync(_cts.Token);
     }
@@ -114,16 +114,6 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
                 await RefreshDataAsync();
-
-                // Check thresholds and trigger alerts if needed
-                try
-                {
-                    await _alertService.CheckThresholdsAsync();
-                }
-                catch (Exception ex)
-                {
-                    Log.Debug(ex, "Checking alert thresholds failed during a dashboard refresh");
-                }
             }
         }
         catch (OperationCanceledException)

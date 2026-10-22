@@ -319,8 +319,16 @@ public partial class App : Application
             .Build();
     }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    /// <summary>The key every normal launch registers under, so a second one can find the first.</summary>
+    private const string SingleInstanceKey = "SysMonitor.Main";
+
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+        if (_smokeRun is null && await HandedToRunningCopyAsync())
+        {
+            return;
+        }
+
         if (_smokeRun is not null)
         {
             _smokeRun.Attach(this);
@@ -339,6 +347,41 @@ public partial class App : Application
         _ = RestorePowerPlanAfterCrashAsync();
 
         _mainWindow.Activate();
+    }
+
+    /// <summary>
+    /// One copy of the app. Minimize-to-tray is on by default, so closing the window only hides it, and starting
+    /// the app again from the Start menu used to start a whole second copy: a second tray icon, a second history
+    /// recorder writing every snapshot twice into the one database, and every alert twice. A second launch now
+    /// hands its activation to the copy already running, which shows its window, and exits.
+    /// <para>
+    /// The elevated registry fix and the scheduled clean never get here (they exit from the constructor), and the
+    /// smoke run is exempt, so neither is ever redirected into an interactive copy.
+    /// </para>
+    /// </summary>
+    private async Task<bool> HandedToRunningCopyAsync()
+    {
+        try
+        {
+            var primary = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey(SingleInstanceKey);
+            if (!primary.IsCurrent)
+            {
+                var activation = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+                await primary.RedirectActivationToAsync(activation);
+                Exit();
+                return true;
+            }
+
+            primary.Activated += (_, _) =>
+                _mainWindow?.DispatcherQueue.TryEnqueue(() => (_mainWindow as MainWindow)?.ShowWindow());
+        }
+        catch (Exception ex)
+        {
+            // Best effort: without the instance broker the app still runs, as it always has, one copy per launch.
+            Log.Warning(ex, "Single-instance registration failed; this launch runs on its own");
+        }
+
+        return false;
     }
 
     private static async Task RestorePowerPlanAfterCrashAsync()

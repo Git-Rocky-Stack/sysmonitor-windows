@@ -142,6 +142,17 @@ public class TrayIconService : IDisposable
 
                 var tooltip = $"SysMonitor\nCPU: {cpuUsage:F0}% | RAM: {memInfo.UsagePercent:F0}%";
 
+                // Alerts are checked here, for as long as the app runs, and not by a page: the Dashboard used to be
+                // the only caller, so with any other page open - or the window in the tray - no alert ever fired.
+                try
+                {
+                    await _alertService.CheckThresholdsAsync();
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug(ex, "Checking alert thresholds failed");
+                }
+
                 _dispatcherQueue.TryEnqueue(() =>
                 {
                     if (_trayIcon != null)

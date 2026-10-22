@@ -56,6 +56,11 @@
                                 </StackPanel>
                             </Grid>
                         </instruments:Plate>
+
+                        <!-- Where the export went, or why it could not be written. -->
+                        <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap"
+                                   Foreground="{ThemeResource SilverBrush}"
+                                   Visibility="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
                     </StackPanel>
                 </instruments:Faceplate>
             </StackPanel>

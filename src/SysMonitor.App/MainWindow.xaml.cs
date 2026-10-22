@@ -85,9 +85,12 @@ public sealed partial class MainWindow : Window
             }
         }
 
+        // The rail follows the frame, whoever navigated it: the rail itself, the tray menu, the smoke run, or
+        // PDF Tools opening the editor.
+        ContentFrame.Navigated += (_, e) => SelectRailItemFor(e.SourcePageType);
+
         // Navigate to dashboard on startup
         ContentFrame.Navigate(typeof(DashboardPage));
-        NavView.SelectedItem = NavView.MenuItems[0];
     }
 
     private async void InitializeServicesAsync()
@@ -159,7 +162,8 @@ public sealed partial class MainWindow : Window
     /// </summary>
     private static bool IsMinimizeToTrayEnabled() => App.GetService<ISettingsStore>().Get("MinimizeToTray", true);
 
-    private void ShowWindow()
+    /// <summary>Brings the window back from the tray or behind other windows - what a second launch asks for.</summary>
+    internal void ShowWindow()
     {
         Activate();
         var appWindow = GetAppWindow();
@@ -207,19 +211,41 @@ public sealed partial class MainWindow : Window
 
     internal void NavigateToPage(string tag)
     {
-        if (_pageMap.TryGetValue(tag, out var pageType))
+        // Navigating selects the rail's item (ContentFrame.Navigated). Selecting it here as well raised
+        // SelectionChanged, which navigated a second time and disposed the first page part way through loading.
+        if (_pageMap.TryGetValue(tag, out var pageType) && ContentFrame.Content?.GetType() != pageType)
         {
             ContentFrame.Navigate(pageType);
+        }
+    }
 
-            // Try to select the nav item
-            foreach (var item in NavView.MenuItems.OfType<NavigationViewItem>())
-            {
-                if (item.Tag?.ToString() == tag)
-                {
-                    NavView.SelectedItem = item;
-                    break;
-                }
-            }
+    /// <summary>
+    /// Selects the rail item for the page now showing, in the menu or the footer; a page with no item of its own,
+    /// such as the PDF Editor, leaves nothing selected, so pressing the item it was opened from opens that again.
+    /// </summary>
+    private void SelectRailItemFor(Type pageType)
+    {
+        var tag = _pageMap.FirstOrDefault(entry => entry.Value == pageType).Key;
+        var item = tag is null ? null : RailItems().FirstOrDefault(candidate => candidate.Tag?.ToString() == tag);
+
+        if (!ReferenceEquals(NavView.SelectedItem, item))
+        {
+            NavView.SelectedItem = item;
+        }
+    }
+
+    /// <summary>Every item on the rail, the footer's included, and those inside a group.</summary>
+    private IEnumerable<NavigationViewItem> RailItems()
+    {
+        var pending = new Stack<object>(NavView.MenuItems.Concat(NavView.FooterMenuItems).Reverse());
+        while (pending.Count > 0)
+        {
+            if (pending.Pop() is not NavigationViewItem item)
+                continue;
+
+            yield return item;
+            foreach (var child in item.MenuItems.Reverse())
+                pending.Push(child);
         }
     }
 
@@ -242,7 +268,7 @@ public sealed partial class MainWindow : Window
         if (args.SelectedItemContainer is NavigationViewItem item)
         {
             var tag = item.Tag?.ToString();
-            if (tag != null && _pageMap.TryGetValue(tag, out var pageType))
+            if (tag != null && _pageMap.TryGetValue(tag, out var pageType) && ContentFrame.Content?.GetType() != pageType)
             {
                 ContentFrame.Navigate(pageType);
             }

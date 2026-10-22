@@ -61,7 +61,7 @@ STX.1 System Monitor is a comprehensive Windows system utility that provides rea
 
 ## Dashboard
 
-The Dashboard provides a comprehensive overview of your system's health and performance (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:20`).
+The Dashboard provides a comprehensive overview of your system's health and performance (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:19`).
 
 ### Health Score
 
@@ -222,7 +222,7 @@ Fix Windows Registry issues:
 **Safety Features:**
 - Every key a selected fix will modify is exported with `reg.exe` before anything is
   cleaned, and a failed export stops the clean
-  (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:913-915`, `:940`, `:973`)
+  (`src/SysMonitor.Core/Services/Cleaners/RegistryCleaner.cs:947-949`, `:974`, `:1007`)
 - Each key is exported on its own, because `reg.exe` exits 0 while silently omitting
   subkeys it cannot read, so exporting a parent would hide a failure
 - Selective cleaning: only the issues you tick are fixed
@@ -259,7 +259,7 @@ Control programs that launch at startup:
 1. View startup programs list
 2. Select a program to see details
 3. Click **Disable** to prevent auto-start
-4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:62`)
+4. Click **Enable** to restore auto-start (`src/SysMonitor.App/Views/StartupPage.xaml:66`)
 
 ### Scheduled Cleaning
 
@@ -653,7 +653,7 @@ Detailed system specifications:
 ### Monitoring
 
 - **Refresh Interval** - Saved, but no page reads it yet: each page refreshes on a fixed timer of its own,
-  and stops when you move to another page (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:82`)
+  and stops when you move to another page (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:88`)
 - **Memory Threshold** - The usage level that raises a memory alert. Crossing it trims nothing. Working
   sets are trimmed only by TRIM MEMORY on the Dashboard or the Memory page, and by Game Mode - including
   when auto mode, if you have turned it on, starts Game Mode because it saw a game launch.
@@ -684,15 +684,15 @@ There are no application-wide keyboard shortcuts. The app registers no
 page or cancels a running operation - use the navigation menu and the on-screen
 buttons.
 
-All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-74`, `:314-321`, `:1361-1373`):
+All five keys the app handles live in the **PDF Editor** (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:63-112`, `:371-378`, `:1418-1430`):
 
 | Key | Where | Action |
 |-----|-------|--------|
-| `Delete` | Editor canvas | Delete the selected annotation (`:65-69`) |
-| `Esc` | Editor canvas | Clear the current selection (`:70-74`) |
-| `Enter` | Search box | Run the annotation search (`:314-321`) |
-| `Enter` | Text annotation box | Commit the text annotation (`:1362-1366`) |
-| `Esc` | Text annotation box | Cancel the text annotation (`:1367-1371`) |
+| `Delete` | Editor canvas | Delete the selected annotation (`:66-107`) |
+| `Esc` | Editor canvas | Clear the current selection (`:108-112`) |
+| `Enter` | Search box | Run the annotation search (`:371-378`) |
+| `Enter` | Text annotation box | Commit the text annotation (`:1419-1423`) |
+| `Esc` | Text annotation box | Cancel the text annotation (`:1424-1428`) |
 
 ---
 

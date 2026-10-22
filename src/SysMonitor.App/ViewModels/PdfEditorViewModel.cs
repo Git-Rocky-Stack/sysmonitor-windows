@@ -26,10 +26,17 @@ public partial class PdfEditorViewModel : ObservableObject
     [ObservableProperty] private bool _hasDocument;
     [ObservableProperty] private bool _isModified;
     [ObservableProperty] private string _documentName = "";
-    [ObservableProperty] private int _totalPages;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    private int _totalPages;
 
     // Current Page
-    [ObservableProperty] private int _currentPageNumber = 1;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNextPage))]
+    private int _currentPageNumber = 1;
+
+    /// <summary>Whether there is a page after this one, so NEXT is not offered on the last page.</summary>
+    public bool HasNextPage => CurrentPageNumber < TotalPages;
     [ObservableProperty] private PdfPageInfo? _currentPage;
     [ObservableProperty] private BitmapImage? _currentPageImage;
 

@@ -61,9 +61,47 @@ public sealed partial class PdfEditorPage : Page
     }
 
     // Keyboard handler for Delete key
-    private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
+    /// <summary>The single-letter shortcuts the tool tooltips name, each to its tool's Tag.</summary>
+    private static readonly Dictionary<Windows.System.VirtualKey, string> ToolKeys = new()
     {
-        if (e.Key == Windows.System.VirtualKey.Delete && _selectedAnnotationId.HasValue)
+        [Windows.System.VirtualKey.V] = "Select",
+        [Windows.System.VirtualKey.P] = "Pen",
+        [Windows.System.VirtualKey.T] = "Text",
+        [Windows.System.VirtualKey.H] = "Highlight",
+        [Windows.System.VirtualKey.R] = "Rectangle",
+        [Windows.System.VirtualKey.E] = "Ellipse",
+        [Windows.System.VirtualKey.L] = "Line",
+        [Windows.System.VirtualKey.A] = "Arrow",
+        [Windows.System.VirtualKey.N] = "StickyNote",
+        [Windows.System.VirtualKey.S] = "Signature",
+        [Windows.System.VirtualKey.X] = "Redaction",
+    };
+
+    /// <summary>
+    /// Every shortcut a tooltip on this page promises: Ctrl+O, S, P, Z and Y, and a letter per tool. The letters
+    /// are ignored while a text field has the keyboard, where they are the words being typed.
+    /// </summary>
+    private async void Page_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        var ctrl = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control)
+            .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+        var typing = FocusManager.GetFocusedElement(XamlRoot) is TextBox or PasswordBox or RichEditBox or NumberBox;
+
+        if (ctrl)
+        {
+            switch (e.Key)
+            {
+                case Windows.System.VirtualKey.O: e.Handled = true; OpenPdf_Click(this, new RoutedEventArgs()); return;
+                case Windows.System.VirtualKey.S: e.Handled = true; SavePdf_Click(this, new RoutedEventArgs()); return;
+                case Windows.System.VirtualKey.P: e.Handled = true; Print_Click(this, new RoutedEventArgs()); return;
+                case Windows.System.VirtualKey.Z when !typing: e.Handled = true; Undo_Click(this, new RoutedEventArgs()); return;
+                case Windows.System.VirtualKey.Y when !typing: e.Handled = true; Redo_Click(this, new RoutedEventArgs()); return;
+            }
+
+            return;
+        }
+
+        if (e.Key == Windows.System.VirtualKey.Delete && _selectedAnnotationId.HasValue && !typing)
         {
             DeleteSelectedAnnotation();
             e.Handled = true;
@@ -72,6 +110,16 @@ public sealed partial class PdfEditorPage : Page
         {
             ClearSelection();
             e.Handled = true;
+        }
+        else if (!typing && ViewModel.HasDocument && e.Key == Windows.System.VirtualKey.I)
+        {
+            e.Handled = true;
+            InsertImage_Click(this, new RoutedEventArgs());
+        }
+        else if (!typing && ViewModel.HasDocument && ToolKeys.TryGetValue(e.Key, out var tool))
+        {
+            e.Handled = true;
+            await SelectToolAsync(tool);
         }
     }
 
@@ -120,7 +168,12 @@ public sealed partial class PdfEditorPage : Page
 
     private async void DeletePage_Click(object sender, RoutedEventArgs e)
     {
-        await ViewModel.DeleteCurrentPageCommand.ExecuteAsync(null);
+        if (await ConsoleDialog.ConfirmAsync(this, $"Delete page {ViewModel.CurrentPageNumber}?",
+                "The page and everything drawn on it leave the document. The file on disk changes only when you save.",
+                "DELETE PAGE"))
+        {
+            await ViewModel.DeleteCurrentPageCommand.ExecuteAsync(null);
+        }
     }
 
     private async void MovePageUp_Click(object sender, RoutedEventArgs e)
@@ -161,9 +214,13 @@ public sealed partial class PdfEditorPage : Page
         ViewModel.SelectToolCommand.Execute(toolName);
     }
 
-    private void ClearAnnotations_Click(object sender, RoutedEventArgs e)
+    private async void ClearAnnotations_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.ClearAnnotationsCommand.Execute(null);
+        if (await ConsoleDialog.ConfirmAsync(this, "Clear every annotation?",
+                "Every annotation on every page is removed. The file on disk changes only when you save.", "CLEAR ALL"))
+        {
+            ViewModel.ClearAnnotationsCommand.Execute(null);
+        }
     }
 
     private void ClearAnnotationVisuals()

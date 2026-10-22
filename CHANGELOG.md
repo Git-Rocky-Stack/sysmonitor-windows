@@ -150,7 +150,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   Confirmations now have no default button at all, so that state never runs: the
   destructive button is the armed cap, Cancel is the plain one, Enter still arms nothing
   and Escape still cancels
-  (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:92`, `:93`). Because no
+  (`src/SysMonitor.App/Controls/Instruments/ConsoleDialog.cs:93`, `:94`). Because no
   test could have caught this by reading the code, the smoke run now opens a confirmation
   in both shifts and asks both buttons which face they were drawn in
   (`src/SysMonitor.App/Diagnostics/UiSmokeRun.cs:662`).
@@ -200,7 +200,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 - The Dashboard's TRIM MEMORY button says "Trimming memory..." while it runs and "Trim
   failed" when it fails, matching its label and the Memory page.
-  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:305`)
+  (`src/SysMonitor.App/ViewModels/DashboardViewModel.cs:295`)
 
 ### Removed
 
@@ -240,7 +240,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   page that never set a `DataContext`, so the binding found nothing and the button did
   nothing. It now reaches the command the way Installed Programs and PDF Tools do, and
   its tooltip says it removes the file from the list rather than wiping it.
-  (`src/SysMonitor.App/Views/DriveWiperPage.xaml:7`, `:132`,
+  (`src/SysMonitor.App/Views/DriveWiperPage.xaml:7`, `:134`,
   `src/SysMonitor.App/Views/DriveWiperPage.xaml.cs:17`)
 
 - **Nothing on the Drive Wiper page changes while a wipe runs.** The wipe works through
@@ -275,7 +275,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   without its unit - the form a caller with its own unit label uses - and a NaN reading
   came out as "NaN"; the first is now `--`, NaN counts as no reading, and tests cover both.
   (`src/SysMonitor.App/Converters/Converters.cs:317`,
-  `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:449`,
+  `src/SysMonitor.App/ViewModels/DashboardViewModel.cs:439`,
   `src/SysMonitor.Core/Helpers/FormatHelper.cs:111`)
 
 - **The game overlay labels its temperatures in the unit they are in.** Since v2.2.0 it
@@ -293,7 +293,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   and its button reads TRIM MEMORY. After a failed trim the banner showed a green tick
   and "MEMORY OPTIMIZED" beside the failure; the tick is now a red cross on failure, and
   the badge appears only once a trim has worked.
-  (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:176`, `:52`,
+  (`src/SysMonitor.App/ViewModels/MemoryViewModel.cs:180`, `:52`,
   `src/SysMonitor.App/Views/MemoryPage.xaml:78`, `:100`, `:113`)
 
 - **The in-app guide describes Game Mode's session stats as they read.** It listed
@@ -311,7 +311,7 @@ Each entry describes a behaviour change and cites the file it lives in.
   `src/SysMonitor.Core/Services/GameMode/IGameModeService.cs:31`). The getting-started
   tutorial said Quick Clean clears browser cache and tells you how much it freed; it
   empties eight fixed Windows locations, none of them a browser's
-  (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:72-79`), and tells you how
+  (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:73-80`), and tells you how
   many files it removed. The settings reference cited the comment above the Dashboard's
   trim message instead of the line that prints it.
   (`FEATURES_AND_USER_GUIDE.md`, `docs/reference-settings-and-data.md`,
@@ -350,7 +350,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **The PDF editor's sticky note opens instead of closing the app.** Clicking the page with
   the Sticky Note tool built the note's Save button from `AccentButtonStyle`, asked of the
   page's own resources, which do not look in App.xaml where the Fluent styles are merged. The
-  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:668`).
+  lookup threw, and nothing caught it (`src/SysMonitor.App/Views/PdfEditorPage.xaml.cs:725`).
   A new check reads every resource the XAML and the code ask for and fails when one cannot be
   reached (`tests/SysMonitor.Tests/Architecture/ResourceKeyTests.cs`).
 
@@ -394,7 +394,7 @@ Each entry describes a behaviour change and cites the file it lives in.
 - **Refresh Interval is described as it is.** The user guide and the settings reference
   said it sets how often readings update. It is saved and nothing reads it: each page
   refreshes on a fixed timer of its own
-  (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:82`). The troubleshooting steps
+  (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:88`). The troubleshooting steps
   built on it, and on an auto-refresh switch the app does not have, are replaced by steps
   that work, and the advice to install the .NET runtime is gone: the released builds carry
   it.
@@ -439,7 +439,7 @@ labels on top of them, and this release finishes that.
 - **The in-app guide describes Quick Clean rather than praising it.** "One-click cleanup
   to free space and boost performance instantly" promised a speed-up nothing in the
   application measures. Quick Clean deletes temporary files from eight fixed Windows
-  locations (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:72-79`) and reports
+  locations (`src/SysMonitor.Core/Services/Cleaners/TempFileCleaner.cs:73-80`) and reports
   a file count, so that is what the guide now says. The card subtitle "Free space and
   boost performance" headed six tools of which a registry cleaner and a startup manager
   free no space; it now names what the tools under it do.

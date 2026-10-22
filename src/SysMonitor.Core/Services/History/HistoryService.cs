@@ -29,6 +29,7 @@ public class HistoryService : IHistoryService
     private readonly ConcurrentQueue<MetricSnapshot> _pendingWrites = new();
     private readonly SemaphoreSlim _writeLock = new(1, 1);
     private CancellationTokenSource? _cts;
+    private volatile bool _disposed;
     private Task? _recordingTask;
     private Task? _writeTask;
 
@@ -66,6 +67,11 @@ public class HistoryService : IHistoryService
         // Purge old data on startup
         await PurgeOldDataAsync(DateTime.UtcNow.AddDays(-RetentionDays));
 
+        // A window closed while the database was being prepared has already disposed this; starting the loops now
+        // would run them against a disposed lock, recording into a session that has ended.
+        if (_disposed)
+            return;
+
         // Start background tasks
         _cts = new CancellationTokenSource();
         _recordingTask = RecordingLoopAsync(_cts.Token);
@@ -74,6 +80,9 @@ public class HistoryService : IHistoryService
 
     public void StopRecording()
     {
+        if (_disposed)
+            return;
+
         _cts?.Cancel();
     }
 
@@ -339,9 +348,18 @@ public class HistoryService : IHistoryService
         return await context.MetricSnapshots.CountAsync();
     }
 
+    /// <summary>
+    /// Safe to call twice. The window disposes this on close and the host disposes it again on exit; the second
+    /// call used to cancel a disposed token source, and the ObjectDisposedException it threw ended the host's
+    /// dispose loop, so the services built before this one - the hardware monitor among them - were never closed.
+    /// </summary>
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
         StopRecording();
+        _disposed = true;
 
         // The write loop still has a final flush to do, and it needs _writeLock to do it. Disposing the
         // lock out from under it turns the last snapshots into an ObjectDisposedException nobody sees.

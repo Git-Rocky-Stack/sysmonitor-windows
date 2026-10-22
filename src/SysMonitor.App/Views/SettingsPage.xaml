@@ -347,27 +347,28 @@
                             </TextBlock>
                         </StackPanel>
                     </instruments:Plate>
-
-                    <!-- Actions -->
-                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                        <!-- SAVE SETTINGS -->
-                        <Button Content="SAVE SETTINGS" Command="{x:Bind ViewModel.SaveSettingsCommand}"/>
-                        <!-- RESET TO DEFAULTS -->
-                        <Button Content="RESET TO DEFAULTS" Command="{x:Bind ViewModel.ResetSettingsCommand}"
-                                Style="{StaticResource ArmedCapButtonStyle}"/>
-                    </StackPanel>
-
-                    <!-- Status Message -->
-                    <instruments:Well Padding="16,12"
-                            Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <FontIcon Glyph="&#xE73E;" FontSize="16" Foreground="{ThemeResource StateGoBrush}"/>
-                            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                                       Foreground="{ThemeResource StateGoBrush}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </instruments:Well>
                 </StackPanel>
             </instruments:Faceplate>
+
+            <!-- Actions -->
+            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                <!-- SAVE SETTINGS -->
+                <Button Content="SAVE SETTINGS" Command="{x:Bind ViewModel.SaveSettingsCommand}"/>
+                <!-- RESET TO DEFAULTS -->
+                <Button Content="RESET TO DEFAULTS" Command="{x:Bind ViewModel.ResetSettingsCommand}"
+                        Style="{StaticResource ArmedCapButtonStyle}"/>
+            </StackPanel>
+
+            <!-- Status Message -->
+            <instruments:Well Padding="16,12"
+                    Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <FontIcon Glyph="&#xE946;" FontSize="16"
+                              instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
+                    <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" VerticalAlignment="Center"
+                               instruments:StateBrush.Foreground="{x:Bind ViewModel.StatusState, Mode=OneWay}"/>
+                </StackPanel>
+            </instruments:Well>
 
         </StackPanel>
     </ScrollViewer>

@@ -35,12 +35,16 @@
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
                     <!-- DISABLE -->
-                    <Button Content="DISABLE" Command="{x:Bind ViewModel.DisableItemCommand}"/>
+                    <!-- Each acts on the selected entry, so none is offered until one is selected. -->
+                    <Button Content="DISABLE" Command="{x:Bind ViewModel.DisableItemCommand}"
+                            IsEnabled="{x:Bind ViewModel.SelectedItem, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"/>
                     <!-- ENABLE -->
-                    <Button Content="ENABLE" Command="{x:Bind ViewModel.EnableItemCommand}"/>
+                    <Button Content="ENABLE" Command="{x:Bind ViewModel.EnableItemCommand}"
+                            IsEnabled="{x:Bind ViewModel.SelectedItem, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"/>
                     <!-- DELETE -->
                     <Button Content="DELETE" Command="{x:Bind ViewModel.DeleteItemCommand}"
-                            Style="{StaticResource ArmedCapButtonStyle}"/>
+                            Style="{StaticResource ArmedCapButtonStyle}"
+                            IsEnabled="{x:Bind ViewModel.SelectedItem, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"/>
                 </StackPanel>
             </Grid>
         </instruments:Plate>

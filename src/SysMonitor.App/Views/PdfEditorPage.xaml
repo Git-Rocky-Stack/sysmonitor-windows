@@ -13,7 +13,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <instruments:ViewHeader Grid.Row="0" Module="PDF EDIT" Index="25B" Title="PDF EDITOR"
+        <instruments:ViewHeader Grid.Row="0" Module="PDF EDIT" Index="35" Title="PDF EDITOR"
                                 Description="{x:Bind ViewModel.DocumentName, Mode=OneWay}"/>
 
         <!-- Main Toolbar Ribbon -->
@@ -225,10 +225,10 @@
 
                         <!-- Bold/Italic -->
                         <StackPanel Orientation="Horizontal" Spacing="2">
-                            <ToggleButton x:Name="BoldToggle" Click="BoldToggle_Click" Padding="8" ToolTipService.ToolTip="Bold">
+                            <ToggleButton x:Name="BoldToggle" Click="BoldToggle_Click" Padding="8" ToolTipService.ToolTip="Bold" AutomationProperties.Name="Bold">
                                 <FontIcon Glyph="&#xE8DD;" FontSize="14"/>
                             </ToggleButton>
-                            <ToggleButton x:Name="ItalicToggle" Click="ItalicToggle_Click" Padding="8" ToolTipService.ToolTip="Italic">
+                            <ToggleButton x:Name="ItalicToggle" Click="ItalicToggle_Click" Padding="8" ToolTipService.ToolTip="Italic" AutomationProperties.Name="Italic">
                                 <FontIcon Glyph="&#xE8DB;" FontSize="14"/>
                             </ToggleButton>
                         </StackPanel>
@@ -303,7 +303,7 @@
                                             </Border>
                                             <StackPanel VerticalAlignment="Center" Spacing="2">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="Page " FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
+                                                    <TextBlock Text="PAGE " FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
                                                     <TextBlock Text="{Binding PageNumber}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"/>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
@@ -380,7 +380,8 @@
                         CornerRadius="8,8,0,0" Padding="16,8" Margin="0,0,0,0"
                         Visibility="{x:Bind ViewModel.HasDocument, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Button Click="PreviousPage_Click" Padding="8,4" Background="Transparent"
+                        <Button Click="PreviousPage_Click" Style="{StaticResource IconCapButtonStyle}"
+                                ToolTipService.ToolTip="Previous page" AutomationProperties.Name="Previous page"
                                 IsEnabled="{x:Bind ViewModel.CurrentPageNumber, Mode=OneWay, Converter={StaticResource GreaterThanOneConverter}}">
                             <FontIcon Glyph="&#xE76B;" FontSize="12"/>
                         </Button>
@@ -390,7 +391,9 @@
                             <TextBlock Text=" of " FontSize="12" Foreground="{ThemeResource SilverBrush}"/>
                             <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}" FontSize="12" FontWeight="SemiBold"/>
                         </StackPanel>
-                        <Button Click="NextPage_Click" Padding="8,4" Background="Transparent">
+                        <Button Click="NextPage_Click" Style="{StaticResource IconCapButtonStyle}"
+                                ToolTipService.ToolTip="Next page" AutomationProperties.Name="Next page"
+                                IsEnabled="{x:Bind ViewModel.HasNextPage, Mode=OneWay}">
                             <FontIcon Glyph="&#xE76C;" FontSize="12"/>
                         </Button>
                     </StackPanel>
@@ -431,7 +434,7 @@
                                                 Background="Transparent">
                                             <StackPanel Spacing="2">
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
-                                                    <TextBlock Text="Page" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                                    <TextBlock Text="PAGE" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                     <TextBlock Text="{Binding PageNumber}" FontSize="10" Foreground="{ThemeResource SilverMuteBrush}"/>
                                                 </StackPanel>
                                                 <TextBlock Text="{Binding Preview}" FontSize="12" Foreground="{ThemeResource PlatinumBrush}"
@@ -474,7 +477,7 @@
                                             ToolTipService.ToolTip="Rotate page 90° counter-clockwise">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE7AD;" FontSize="14"/>
-                                            <TextBlock Text="Left" FontSize="11"/>
+                                            <TextBlock Text="LEFT" FontSize="11"/>
                                         </StackPanel>
                                     </Button>
                                     <Button Grid.Column="1" Click="RotateRight_Click" HorizontalAlignment="Stretch" Padding="8,10"
@@ -485,7 +488,7 @@
                                                     <ScaleTransform ScaleX="-1"/>
                                                 </FontIcon.RenderTransform>
                                             </FontIcon>
-                                            <TextBlock Text="Right" FontSize="11"/>
+                                            <TextBlock Text="RIGHT" FontSize="11"/>
                                         </StackPanel>
                                     </Button>
                                 </Grid>
@@ -499,14 +502,14 @@
                                             ToolTipService.ToolTip="Move page up in order">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE74A;" FontSize="14"/>
-                                            <TextBlock Text="Move Up" FontSize="11"/>
+                                            <TextBlock Text="MOVE UP" FontSize="11"/>
                                         </StackPanel>
                                     </Button>
                                     <Button Grid.Column="1" Click="MovePageDown_Click" HorizontalAlignment="Stretch" Padding="8,10"
                                             ToolTipService.ToolTip="Move page down in order">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE74B;" FontSize="14"/>
-                                            <TextBlock Text="Move Down" FontSize="11"/>
+                                            <TextBlock Text="MOVE DOWN" FontSize="11"/>
                                         </StackPanel>
                                     </Button>
                                 </Grid>
@@ -520,23 +523,23 @@
                                             ToolTipService.ToolTip="Insert blank page after current page">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE710;" FontSize="14"/>
-                                            <TextBlock Text="Insert" FontSize="11"/>
+                                            <TextBlock Text="INSERT" FontSize="11"/>
                                         </StackPanel>
                                     </Button>
                                     <Button Grid.Column="1" Click="DuplicatePage_Click" HorizontalAlignment="Stretch" Padding="8,10"
                                             ToolTipService.ToolTip="Duplicate current page">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <FontIcon Glyph="&#xE8C8;" FontSize="14"/>
-                                            <TextBlock Text="Duplicate" FontSize="11"/>
+                                            <TextBlock Text="DUPLICATE" FontSize="11"/>
                                         </StackPanel>
                                     </Button>
                                 </Grid>
 
-                                <Button Click="DeletePage_Click" HorizontalAlignment="Stretch" Padding="8,10"
-                                        Background="{ThemeResource NoGoSoftBrush}" ToolTipService.ToolTip="Delete current page">
+                                <Button Click="DeletePage_Click" Style="{StaticResource ArmedCapButtonStyle}" HorizontalAlignment="Stretch" Padding="8,10"
+                                        ToolTipService.ToolTip="Delete current page">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="{ThemeResource StateNoGoBrush}"/>
-                                        <TextBlock Text="Delete Page" FontSize="11" Foreground="{ThemeResource StateNoGoBrush}"/>
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                        <TextBlock Text="DELETE PAGE" FontSize="11"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -559,7 +562,7 @@
                                     ToolTipService.ToolTip="Remove all annotations from current page">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon Glyph="&#xE894;" FontSize="14"/>
-                                    <TextBlock Text="Clear All Annotations" FontSize="11"/>
+                                    <TextBlock Text="CLEAR ALL ANNOTATIONS" FontSize="11"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>

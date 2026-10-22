@@ -129,6 +129,8 @@
 
                                     <Button Grid.Column="3"
                                             ToolTipService.ToolTip="Remove from list"
+                                            AutomationProperties.Name="Remove from list"
+                                            Style="{StaticResource IconCapButtonStyle}"
                                             Command="{Binding DataContext.RemoveFileCommand, ElementName=ContentArea}"
                                             CommandParameter="{Binding}">
                                         <FontIcon Glyph="&#xE711;" FontSize="12"/>

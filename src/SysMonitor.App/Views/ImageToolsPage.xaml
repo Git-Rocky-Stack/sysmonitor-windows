@@ -389,7 +389,7 @@
             </instruments:Faceplate>
 
             <!-- Tips Section -->
-            <instruments:Faceplate Kicker="IMAGE - IMAGE TIPS - 26B" Serial="{instruments:SerialFor Module=IMAGE-IMAGE-TIPS}">
+            <instruments:Faceplate Kicker="IMAGE - TIPS - 26B" Serial="{instruments:SerialFor Module=IMAGE-TIPS}">
                 <StackPanel Spacing="16">
 
                     <instruments:Plate Padding="20" VerticalContentAlignment="Stretch">

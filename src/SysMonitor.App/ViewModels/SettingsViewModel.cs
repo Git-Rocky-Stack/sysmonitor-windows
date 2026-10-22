@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SysMonitor.Core.Models;
 using System.Reflection;
 using SysMonitor.Core.Services.Settings;
 
@@ -57,6 +58,11 @@ public partial class SettingsViewModel : ObservableObject
     // About
     [ObservableProperty] private string _version = "1.0.0";
     [ObservableProperty] private string _statusMessage = "";
+
+    /// <summary>Go when the last action did what it said, NoGo when it did not; the status line is coloured by it.</summary>
+    [ObservableProperty] private LampState _statusState = LampState.Go;
+
+    private int _statusVersion;
     [ObservableProperty] private bool _hasStatusMessage = false;
 
     public SettingsViewModel(ISettingsStore settings, ILogger<SettingsViewModel>? logger = null)
@@ -129,7 +135,7 @@ public partial class SettingsViewModel : ObservableObject
         // Handle startup registration
         UpdateStartupRegistration();
 
-        ShowStatus(saved ? "Settings saved successfully" : "Settings could not be saved; the log says why");
+        ShowStatus(saved ? "Settings saved successfully" : "Settings could not be saved; the log says why", saved);
     }
 
     [RelayCommand]
@@ -190,11 +196,11 @@ public partial class SettingsViewModel : ObservableObject
             // Settings are all this clears: the history database and the logs stay where they are.
             ShowStatus(saved
                 ? "Every setting is back to its default"
-                : "Settings were reset but could not be saved; the log says why");
+                : "Settings were reset but could not be saved; the log says why", saved);
         }
         catch (Exception ex)
         {
-            ShowStatus($"Error clearing data: {ex.Message}");
+            ShowStatus($"Error clearing data: {ex.Message}", succeeded: false);
         }
     }
 
@@ -231,16 +237,26 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
-    private void ShowStatus(string message)
+    /// <summary>
+    /// Shows a result for a few seconds. It is cleared from the UI thread it was shown on - a ContinueWith ran the
+    /// clear on the thread pool, where a bound property throws and the message stayed - and only if no newer message
+    /// has replaced it since. A failure stays a little longer than a success.
+    /// </summary>
+    private void ShowStatus(string message, bool succeeded = true)
     {
         StatusMessage = message;
+        StatusState = succeeded ? LampState.Go : LampState.NoGo;
         HasStatusMessage = true;
+        _ = ClearStatusLaterAsync(++_statusVersion, succeeded ? 3000 : 8000);
+    }
 
-        // Auto-clear after 3 seconds
-        Task.Delay(3000).ContinueWith(_ =>
-        {
-            HasStatusMessage = false;
-            StatusMessage = "";
-        });
+    private async Task ClearStatusLaterAsync(int version, int delayMs)
+    {
+        await Task.Delay(delayMs);
+        if (version != _statusVersion)
+            return;
+
+        HasStatusMessage = false;
+        StatusMessage = "";
     }
 }

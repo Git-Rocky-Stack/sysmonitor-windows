@@ -78,7 +78,7 @@
 
                         <!-- Backup History -->
                         <StackPanel Spacing="8">
-                            <instruments:Faceplate Kicker="BACKUP - BACKUP HISTORY - 15B" Serial="{instruments:SerialFor Module=BACKUP-BACKUP-HISTORY}">
+                            <instruments:Faceplate Kicker="BACKUP - HISTORY - 15B" Serial="{instruments:SerialFor Module=BACKUP-HISTORY}">
                                 <StackPanel Spacing="8">
 
                                     <instruments:Plate Padding="0" Visibility="{x:Bind ViewModel.HasBackups, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">

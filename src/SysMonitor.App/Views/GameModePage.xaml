@@ -24,7 +24,7 @@
 
             <!-- Main Toggle Section -->
             <StackPanel Grid.Row="1" Spacing="12">
-                <instruments:Faceplate Kicker="GAME - GAME MODE CONTROL - 11A" Serial="{instruments:SerialFor Module=GAME-GAME-MODE-CONTROL}">
+                <instruments:Faceplate Kicker="GAME - CONTROL - 11A" Serial="{instruments:SerialFor Module=GAME-CONTROL}">
                     <StackPanel Spacing="12">
 
                         <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">

@@ -59,7 +59,7 @@
 
                 <!-- Merge Mode -->
                 <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.IsMergeMode, Mode=OneWay}">
-                    <instruments:Faceplate Kicker="PDF - MERGE PDFs - 25B" Serial="{instruments:SerialFor Module=PDF-MERGE-PDFS}">
+                    <instruments:Faceplate Kicker="PDF - MERGE - 25B" Serial="{instruments:SerialFor Module=PDF-MERGE}">
                         <StackPanel Spacing="12">
 
                             <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
@@ -87,7 +87,8 @@
                                                     <TextBlock Text="ADD PDFS"/>
                                                 </StackPanel>
                                             </Button>
-                                            <Button Command="{x:Bind ViewModel.ClearFilesCommand}">
+                                            <Button Command="{x:Bind ViewModel.ClearFilesCommand}" Style="{StaticResource IconCapButtonStyle}"
+                                                    ToolTipService.ToolTip="Clear the list" AutomationProperties.Name="Clear the list of files to merge">
                                                 <FontIcon Glyph="&#xE74D;" FontSize="14"/>
                                             </Button>
                                         </StackPanel>
@@ -126,11 +127,13 @@
                                                         </StackPanel>
 
                                                         <Button Grid.Column="2" Command="{Binding DataContext.MoveFileUpCommand, ElementName=ContentArea}"
-                                                                CommandParameter="{x:Bind}" Padding="8" Background="Transparent">
+                                                                CommandParameter="{x:Bind}" Style="{StaticResource IconCapButtonStyle}"
+                                                                ToolTipService.ToolTip="Move up" AutomationProperties.Name="Move up">
                                                             <FontIcon Glyph="&#xE74A;" FontSize="12"/>
                                                         </Button>
                                                         <Button Grid.Column="3" Command="{Binding DataContext.RemoveFileCommand, ElementName=ContentArea}"
-                                                                CommandParameter="{x:Bind}" Padding="8" Background="Transparent">
+                                                                CommandParameter="{x:Bind}" Style="{StaticResource IconCapButtonStyle}"
+                                                                ToolTipService.ToolTip="Remove from the list" AutomationProperties.Name="Remove from the list">
                                                             <FontIcon Glyph="&#xE711;" FontSize="12"/>
                                                         </Button>
                                                     </Grid>
@@ -358,7 +361,8 @@
                                                     <TextBlock Text="BROWSE"/>
                                                 </StackPanel>
                                             </Button>
-                                            <Button Grid.Column="2" Command="{x:Bind ViewModel.ClearSignatureImageCommand}"
+                                            <Button Grid.Column="2" Command="{x:Bind ViewModel.ClearSignatureImageCommand}" Style="{StaticResource IconCapButtonStyle}"
+                                                    ToolTipService.ToolTip="Remove the signature image" AutomationProperties.Name="Remove the signature image"
                                                     Visibility="{x:Bind ViewModel.HasSignatureImage, Mode=OneWay}">
                                                 <FontIcon Glyph="&#xE711;" FontSize="14"/>
                                             </Button>
@@ -504,7 +508,8 @@
                                                 <TextBlock Text="BROWSE"/>
                                             </StackPanel>
                                         </Button>
-                                        <Button Grid.Column="3" Command="{x:Bind ViewModel.ClearConvertFileCommand}"
+                                        <Button Grid.Column="3" Command="{x:Bind ViewModel.ClearConvertFileCommand}" Style="{StaticResource IconCapButtonStyle}"
+                                                ToolTipService.ToolTip="Clear the file" AutomationProperties.Name="Clear the file to convert"
                                                 Visibility="{x:Bind ViewModel.HasConvertFile, Mode=OneWay}">
                                             <FontIcon Glyph="&#xE711;" FontSize="14"/>
                                         </Button>

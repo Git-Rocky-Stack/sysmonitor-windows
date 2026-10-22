@@ -147,7 +147,7 @@
             </instruments:Faceplate>
 
             <!-- File List -->
-            <instruments:Faceplate Kicker="LARGE - LARGE FILES - 22B" Serial="{instruments:SerialFor Module=LARGE-LARGE-FILES}">
+            <instruments:Faceplate Kicker="LARGE - FILES FOUND - 22B" Serial="{instruments:SerialFor Module=LARGE-FILES-FOUND}">
                 <StackPanel Spacing="16">
 
                     <instruments:Plate Padding="0" MinHeight="200" VerticalContentAlignment="Stretch">

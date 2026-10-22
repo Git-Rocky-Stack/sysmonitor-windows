@@ -53,6 +53,11 @@ public sealed partial class GameModePage : Page
     {
         // Ensure temperature monitor is initialized
         await _temperatureMonitor.InitializeAsync();
+
+        // Opening the sensors takes seconds; a page left meanwhile has stopped its timer already, and starting it
+        // now would poll the hardware every second behind whatever page is showing.
+        if (!IsLoaded) return;
+
         _updateTimer.Start();
         await UpdateMonitoringWidgetsAsync();
     }

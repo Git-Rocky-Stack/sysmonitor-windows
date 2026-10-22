@@ -89,10 +89,19 @@ public partial class StartupViewModel : ObservableObject
     private async Task DisableAllHighImpactAsync()
     {
         var highImpact = StartupItems.Where(i => i.Impact == StartupImpact.High && i.IsEnabled).ToList();
+        var refused = new List<string>();
         foreach (var item in highImpact)
         {
-            await _startupOptimizer.DisableStartupItemAsync(item);
+            var result = await _startupOptimizer.DisableStartupItemAsync(item);
+            if (!result.Success)
+                refused.Add(item.Name);
         }
         await RefreshStartupItemsAsync();
+
+        // The list looks the same whether a change happened or not, so the outcome is said in words.
+        StatusMessage = refused.Count == 0
+            ? $"{highImpact.Count} high-impact program(s) turned off"
+            : $"{highImpact.Count - refused.Count} of {highImpact.Count} turned off; not changed: {string.Join(", ", refused)}" +
+              " (machine-wide entries need the app run as administrator)";
     }
 }

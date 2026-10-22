@@ -122,7 +122,7 @@
             </instruments:Faceplate>
 
             <!-- Duplicate Groups List -->
-            <instruments:Faceplate Kicker="DUPES - DUPLICATE FILES - 23B" Serial="{instruments:SerialFor Module=DUPES-DUPLICATE-FILES}">
+            <instruments:Faceplate Kicker="DUPES - DUPLICATES FOUND - 23B" Serial="{instruments:SerialFor Module=DUPES-DUPLICATES-FOUND}">
                 <StackPanel Spacing="16">
 
                     <instruments:Plate Padding="16" MinHeight="200" VerticalContentAlignment="Stretch">
