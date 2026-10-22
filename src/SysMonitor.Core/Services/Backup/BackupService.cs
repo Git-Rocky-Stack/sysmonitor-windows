@@ -1229,8 +1229,14 @@ public class BackupService : IBackupService
             if (File.Exists(path))
                 File.Delete(path);
         }
-        catch (IOException) { }
-        catch (UnauthorizedAccessException) { }
+        catch (IOException)
+        {
+            // Best effort: this runs while a failure is already being reported, and that failure is the one to tell.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Best effort: as above - the encryption error is what the user needs to hear.
+        }
     }
 
     private async Task<List<FileInfo>> CollectFilesAsync(BackupJob job, CancellationToken cancellationToken)

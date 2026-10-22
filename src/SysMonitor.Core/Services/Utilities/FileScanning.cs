@@ -118,8 +118,14 @@ public static class FileScanning
                     removed++;
                 }
             }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
+            catch (IOException)
+            {
+                // Best effort: a folder something else is using now is left for the next clean.
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Best effort: a folder this account may not remove is not one the clean emptied for it.
+            }
         }
 
         return removed;
