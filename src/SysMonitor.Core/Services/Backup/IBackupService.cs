@@ -47,7 +47,7 @@ public enum BackupType
     Incremental,    // Only files changed since the previous backup of the same name, full or incremental
     Differential,   // All files changed since last full backup
     SystemImage,    // Full system/partition image
-    Mirror          // Exact mirror (deletes files not in source)
+    Mirror          // No longer offered (it only ever made a full copy); kept so backups recorded as one still load
 }
 
 public enum BackupDestinationType

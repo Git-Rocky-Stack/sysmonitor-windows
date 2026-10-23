@@ -78,7 +78,6 @@ public sealed partial class BackupPage : Page
                 "Full" => BackupType.Full,
                 "Incremental" => BackupType.Incremental,
                 "SystemImage" => BackupType.SystemImage,
-                "Mirror" => BackupType.Mirror,
                 _ => BackupType.Full
             };
             ViewModel.NextStepCommand.Execute(null);

@@ -285,24 +285,13 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Grid.Row="1" Grid.Column="0" Click="SelectBackupType_Click" Tag="SystemImage"
+                        <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Click="SelectBackupType_Click" Tag="SystemImage"
                                 Style="{StaticResource TileCapButtonStyle}" HorizontalContentAlignment="Left" Padding="20">
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <FontIcon Glyph="&#xE770;" FontSize="32"/>
                                 <StackPanel>
                                     <TextBlock Text="SYSTEM IMAGE"/>
                                     <TextBlock Text="Complete system backup for disaster recovery" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Button>
-
-                        <Button Grid.Row="1" Grid.Column="1" Click="SelectBackupType_Click" Tag="Mirror"
-                                Style="{StaticResource TileCapButtonStyle}" HorizontalContentAlignment="Left" Padding="20">
-                            <StackPanel Orientation="Horizontal" Spacing="16">
-                                <FontIcon Glyph="&#xE8AB;" FontSize="32"/>
-                                <StackPanel>
-                                    <TextBlock Text="MIRROR BACKUP"/>
-                                    <TextBlock Text="Exact mirror of selected folders" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Button>

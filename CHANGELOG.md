@@ -51,6 +51,9 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   starts a new chain and holds every file. A backup a later incremental builds on cannot be
   deleted first, and retention keeps it (`src/SysMonitor.Core/Services/Backup/BackupService.cs`,
   `BackupService.AssignLayers`, `BackupEncryption.PasswordOpensAsync`).
+- **MIRROR BACKUP is removed from the wizard.** It promised an exact mirror and made an ordinary
+  full copy; backups already recorded as Mirror still list and restore
+  (`src/SysMonitor.App/Views/BackupPage.xaml`).
 - **Results say what happened.** A created restore point is confirmed by a new sequence number
   (Windows answers success without making one within 24 hours of the last); a free-space wipe
   that stops short fails, and fills in files under FAT32's 4 GiB limit; a PDF merge with an

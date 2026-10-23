@@ -550,8 +550,8 @@ POINTS (15C) and STATUS (15D).
   same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`).
   Restoring one rebuilds every file as it was then, from the full backup and each
   incremental after it; a backup a later incremental builds on cannot be deleted first
-- **SYSTEM IMAGE** and **MIRROR BACKUP** - Offered by the wizard. In this version
-  either one copies everything you selected, as a full backup does
+- **SYSTEM IMAGE** - Offered by the wizard. In this version it copies everything you
+  selected, as a full backup does
 
 **Destination Options:**
 - Local Drive

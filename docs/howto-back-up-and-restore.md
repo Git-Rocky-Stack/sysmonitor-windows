@@ -42,9 +42,8 @@ Re-verify anything you are relying on.
    (or not encrypted when this one is), the incremental starts a new chain and copies
    everything; the summary says which.
 
-   The wizard also offers SYSTEM IMAGE and MIRROR BACKUP. In this version either one
-   copies everything you selected, as a full backup does, and a mirror deletes nothing
-   at the destination.
+   The wizard also offers SYSTEM IMAGE. In this version it copies everything you
+   selected, as a full backup does.
 
 3. Select the folders to back up, then the destination.
 
