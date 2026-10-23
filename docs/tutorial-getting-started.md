@@ -1,6 +1,6 @@
-# Getting started with STX.1 System Monitor
+# Getting started with STX-1 ULTIMATE System Monitor
 
-In about ten minutes you will install STX.1, read your machine's health score, clean
+In about ten minutes you will install STX-1 ULTIMATE, read your machine's health score, clean
 up disk space you can actually spare, and save a diagnostic report you can send to
 someone. By the end you will know where the app keeps its data and how to undo
 anything it did.
@@ -41,7 +41,7 @@ When setup finishes, the app is installed and `LICENSE.txt` and
 
 ## Step 2: Read your health score
 
-Launch STX.1. It opens on the Dashboard. Each section of a page is a faceplate whose
+Launch STX-1 ULTIMATE. It opens on the Dashboard. Each section of a page is a faceplate whose
 stripe names it, such as `DASH - QUICK ACCESS - 01A`, and this tutorial refers to
 sections by that name.
 
@@ -103,7 +103,7 @@ know what is in it.
 
 ## If you start it twice
 
-STX.1 runs as one copy. With Minimize to system tray on, which is the default, closing
+STX-1 ULTIMATE runs as one copy. With Minimize to system tray on, which is the default, closing
 the window hides it in the notification area, and starting the app again from the
 Start menu brings the running copy's window back rather than starting a second one (`src/SysMonitor.App/App.xaml.cs:366-376`). Alerts
 are checked by that one copy whichever page is showing, and while the window is in
@@ -111,7 +111,7 @@ the notification area (`src/SysMonitor.App/Services/TrayIconService.cs:145-149`)
 
 ## What you built
 
-You now have STX.1 installed, you have read a health score you can interpret, you have
+You now have STX-1 ULTIMATE installed, you have read a health score you can interpret, you have
 freed disk space without guessing, and you have a report on disk.
 
 Everything the app stores about you lives in one folder:

@@ -1,6 +1,6 @@
 # Reference: settings and data
 
-Every setting on the Settings page of STX.1 System Monitor v3.0.1, with its default,
+Every setting on the Settings page of STX-1 ULTIMATE System Monitor v3.0.1, with its default,
 and every location the app writes to.
 
 Defaults are read from `src/SysMonitor.App/ViewModels/SettingsViewModel.cs:24-56`. The

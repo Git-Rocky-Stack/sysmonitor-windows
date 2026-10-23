@@ -1,4 +1,4 @@
-# STX.1 System Monitor - Features & User Guide
+# STX-1 ULTIMATE System Monitor - Features & User Guide
 
 **Strategic. Excellence. Engineered.**
 
@@ -25,7 +25,7 @@ Version 3.0.1 | Windows Desktop Application | Built with WinUI 3 & .NET 8
 
 ## Overview
 
-STX.1 System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:18`), system optimization (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:18`), privacy protection (`src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs:61`), and productivity tools (`src/SysMonitor.Core/Services/Utilities/PdfTools.cs:12`). Its interface is the Command Console, laid out as an instrument panel so every reading and every control has a fixed place you can name.
+STX-1 ULTIMATE System Monitor is a comprehensive Windows system utility that provides real-time hardware monitoring (`src/SysMonitor.Core/Services/Monitors/CpuMonitor.cs:18`), system optimization (`src/SysMonitor.Core/Services/Optimizers/StartupOptimizer.cs:18`), privacy protection (`src/SysMonitor.Core/Services/Cleaners/BrowserPrivacyCleaner.cs:61`), and productivity tools (`src/SysMonitor.Core/Services/Utilities/PdfTools.cs:12`). Its interface is the Command Console, laid out as an instrument panel so every reading and every control has a fixed place you can name.
 
 ### Key Features at a Glance
 
@@ -76,7 +76,7 @@ Section names in this guide are the names the navigation menu uses
 
 ### First Launch
 
-1. Launch STX.1 System Monitor
+1. Launch STX-1 ULTIMATE System Monitor
 2. The Dashboard opens. QUICK ACCESS (01A) is at the top, and your system's health
    score is in SYSTEM HEALTH (01B) below it
 3. Use the left navigation menu to access different features
@@ -1023,7 +1023,7 @@ For issues and feature requests:
 
 ---
 
-**STX.1 System Monitor**
+**STX-1 ULTIMATE System Monitor**
 *Strategic. Excellence. Engineered.*
 
 Copyright (c) 2024-2026 Strategia / Rocky Stack.

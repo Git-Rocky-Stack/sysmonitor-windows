@@ -1,4 +1,4 @@
-# STX1 System Monitor - Installer Build Script
+# STX-1 ULTIMATE System Monitor - Installer Build Script
 # This script builds the installer using Inno Setup
 
 param(
@@ -11,7 +11,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent $ScriptDir
 
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  STX1 System Monitor - Installer Builder" -ForegroundColor Cyan
+Write-Host "  STX-1 ULTIMATE System Monitor - Installer Builder" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -103,7 +103,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "============================================" -ForegroundColor Green
     Write-Host ""
     
-    $outputFile = Join-Path $RootDir "publish\installer\STX1-SystemMonitor-Setup-1.0.0.exe"
+    $outputFile = Join-Path $RootDir "publish\installer\STX-1-ULTIMATE-Setup-1.0.0.exe"
     if (Test-Path $outputFile) {
         $fileInfo = Get-Item $outputFile
         Write-Host "Output: $outputFile" -ForegroundColor Cyan

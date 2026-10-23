@@ -1,6 +1,6 @@
 @echo off
 echo ============================================
-echo   STX1 System Monitor - Installer Builder
+echo   STX-1 ULTIMATE System Monitor - Installer Builder
 echo ============================================
 echo.
 
@@ -33,7 +33,7 @@ if %ERRORLEVEL% EQU 0 (
     echo   Installer built successfully!
     echo ============================================
     echo.
-    echo Output: ..\publish\installer\STX1-SystemMonitor-Setup-1.0.0.exe
+    echo Output: ..\publish\installer\STX-1-ULTIMATE-Setup-1.0.0.exe
     echo.
 ) else (
     echo.

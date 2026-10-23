@@ -10,7 +10,7 @@
         <StackPanel Spacing="16" Padding="0,0,0,24">
 
             <instruments:ViewHeader Module="DONATE" Index="33" Title="DONATE"
-                                    Description="Support STX.1 System Monitor"/>
+                                    Description="Support STX-1 ULTIMATE System Monitor"/>
 
             <!-- Help Support Section Header -->
             <instruments:Faceplate Kicker="DONATE - HELP SUPPORT THIS PROJECT - 33A" Serial="{instruments:SerialFor Module=DONATE-HELP-SUPPORT-THIS-PROJECT}">
@@ -21,7 +21,7 @@
                         <StackPanel Spacing="20">
                             <!-- Introduction Text -->
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
-                                STX.1 System Monitor is a free app created with love to help you get the most out of your PC.
+                                STX-1 ULTIMATE System Monitor is a free app created with love to help you get the most out of your PC.
                                 It's designed to keep your system running smoothly without cost - because everyone deserves
                                 access to good tools.
                             </TextBlock>
@@ -29,7 +29,7 @@
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
                                 But building and maintaining software takes time and resources. If this app has been helpful to you,
                                 consider buying us a coffee (or helping with the electric bill). Your support helps us keep improving
-                                STX.1 and creating more useful tools.
+                                STX-1 ULTIMATE and creating more useful tools.
                             </TextBlock>
 
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource SilverBrush}" FontSize="13" FontStyle="Italic">
@@ -112,18 +112,18 @@
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="Your Support Matters" FontWeight="Bold" FontSize="16"
                                                Foreground="{ThemeResource PlatinumBrush}"/>
-                                    <TextBlock Text="Thank you for using STX.1 System Monitor"
+                                    <TextBlock Text="Thank you for using STX-1 ULTIMATE System Monitor"
                                                Foreground="{ThemeResource SilverBrush}" FontSize="12"/>
                                 </StackPanel>
                             </StackPanel>
 
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
-                                Whether you donate or not, we're grateful that you're using STX.1 System Monitor.
+                                Whether you donate or not, we're grateful that you're using STX-1 ULTIMATE System Monitor.
                                 Your feedback, reviews, and word-of-mouth recommendations help us grow and improve.
                             </TextBlock>
 
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource StateGoBrush}" FontSize="14" FontWeight="SemiBold">
-                                Thank you for being part of the STX.1 community!
+                                Thank you for being part of the STX-1 ULTIMATE community!
                             </TextBlock>
                         </StackPanel>
                     </instruments:Plate>

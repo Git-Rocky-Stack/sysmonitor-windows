@@ -354,8 +354,8 @@ public partial class DashboardViewModel : ObservableObject, IDisposable
         var gpuTemp = await _temperatureMonitor.GetGpuTemperatureAsync();
 
         sb.AppendLine("╔══════════════════════════════════════════════════════════════════╗");
-        sb.AppendLine("║           STX.1 SYSTEM MONITOR - DIAGNOSTIC REPORT               ║");
-        sb.AppendLine("║                Strategic. Excellence. Engineered.                 ║");
+        sb.AppendLine("║        STX-1 ULTIMATE SYSTEM MONITOR - DIAGNOSTIC REPORT         ║");
+        sb.AppendLine("║                Strategic. Excellence. Engineered.                ║");
         sb.AppendLine("╚══════════════════════════════════════════════════════════════════╝");
         sb.AppendLine();
         sb.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");

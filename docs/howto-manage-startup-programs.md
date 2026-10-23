@@ -6,13 +6,13 @@ reversible from either place.
 
 ## Prerequisites
 
-- STX.1 System Monitor v3.0.0 or later installed
+- STX-1 ULTIMATE System Monitor v3.0.0 or later installed
 - Administrator rights, if you want to change machine-wide entries under HKLM. Your
   own entries under HKCU do not need it
 
 ## Before you start
 
-If you used an earlier version of STX.1 to disable startup items, read this.
+If you used an earlier version of STX-1 ULTIMATE to disable startup items, read this.
 
 Before v3.0.0, **Enable** logged a line and changed nothing, every item was listed as
 enabled whatever its real state, and **Disable** moved the entry into a private key

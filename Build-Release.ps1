@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Master build script for STX1 System Monitor release.
+    Master build script for STX-1 ULTIMATE System Monitor release.
 
 .DESCRIPTION
     This script performs a complete release build:
@@ -48,7 +48,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $ScriptDir "signing\SigningCommon.ps1")
 
 # Configuration
-$AppName = "STX1 System Monitor"
+$AppName = "STX-1 ULTIMATE System Monitor"
 # The one place the version is written is the app's csproj. Copied here by hand it read 1.0.0 while
 # the app was 2.2.2, and named both the installer and the portable zip after a release that never was.
 $AppCsproj = Join-Path $ScriptDir "src\SysMonitor.App\SysMonitor.App.csproj"
@@ -182,7 +182,7 @@ if (-not $SkipInstaller) {
                 Write-Host ""
                 Write-Host "[4/5] Signing installer..." -ForegroundColor Yellow
 
-                $installerPath = Join-Path $InstallerDir "STX1-SystemMonitor-Setup-$AppVersion.exe"
+                $installerPath = Join-Path $InstallerDir "STX-1-ULTIMATE-Setup-$AppVersion.exe"
 
                 if (-not (Test-Path $installerPath)) {
                     Write-Host "ERROR: Installer not found for signing: $installerPath" -ForegroundColor Red
@@ -219,7 +219,7 @@ else {
 Write-Host ""
 Write-Host "[5/5] Creating portable ZIP..." -ForegroundColor Yellow
 
-$ZipPath = Join-Path $ScriptDir "publish\STX1-SystemMonitor-$AppVersion-Portable-x64.zip"
+$ZipPath = Join-Path $ScriptDir "publish\STX-1-ULTIMATE-$AppVersion-Portable-x64.zip"
 
 if (Test-Path $ZipPath) {
     Remove-Item $ZipPath -Force
@@ -285,7 +285,7 @@ if ($ZipFile) {
     Write-Host "      $ZipPath" -ForegroundColor Gray
 }
 
-$InstallerFile = Get-Item (Join-Path $InstallerDir "STX1-SystemMonitor-Setup-$AppVersion.exe") -ErrorAction SilentlyContinue
+$InstallerFile = Get-Item (Join-Path $InstallerDir "STX-1-ULTIMATE-Setup-$AppVersion.exe") -ErrorAction SilentlyContinue
 if ($InstallerFile) {
     Write-Host "    - Installer: $([math]::Round($InstallerFile.Length / 1MB, 1)) MB" -ForegroundColor White
     Write-Host "      $($InstallerFile.FullName)" -ForegroundColor Gray

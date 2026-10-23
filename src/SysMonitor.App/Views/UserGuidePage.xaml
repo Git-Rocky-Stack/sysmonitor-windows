@@ -18,11 +18,11 @@
 
                     <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="16">
-                            <TextBlock Text="Welcome to STX.1 System Monitor" FontSize="18" FontWeight="Bold"
+                            <TextBlock Text="Welcome to STX-1 ULTIMATE System Monitor" FontSize="18" FontWeight="Bold"
                                        Foreground="{ThemeResource ArmedLitBrush}"/>
 
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="14" LineHeight="24">
-                                STX.1 System Monitor is your all-in-one Windows optimization and monitoring toolkit.
+                                STX-1 ULTIMATE System Monitor is your all-in-one Windows optimization and monitoring toolkit.
                                 Designed with performance and simplicity in mind, it helps you keep your PC running
                                 at peak efficiency.
                             </TextBlock>
@@ -399,7 +399,7 @@
                             </StackPanel>
 
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="13" LineHeight="22">
-                                STX.1 runs quietly in the system tray, providing live stats and alerts without interrupting your work.
+                                STX-1 ULTIMATE runs quietly in the system tray, providing live stats and alerts without interrupting your work.
                                 Configure thresholds in Settings and receive toast notifications when temperatures or memory usage exceed limits.
                             </TextBlock>
 
@@ -517,7 +517,7 @@
                             </StackPanel>
 
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="13" LineHeight="22">
-                                The Performance page provides real-time insights into how STX.1 System Monitor operates internally.
+                                The Performance page provides real-time insights into how STX-1 ULTIMATE System Monitor operates internally.
                                 Monitor operation timing, identify bottlenecks, and export metrics for analysis.
                             </TextBlock>
 
@@ -662,9 +662,9 @@
                                     <!-- App Name with Branding -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                         <TextBlock Text="STX" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
-                                        <TextBlock Text="." FontSize="20" FontWeight="Bold" Foreground="{ThemeResource ArmedLitBrush}"/>
+                                        <TextBlock Text="-" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource ArmedLitBrush}"/>
                                         <TextBlock Text="1" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
-                                        <TextBlock Text=" SYSTEM MONITOR" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                        <TextBlock Text=" ULTIMATE SYSTEM MONITOR" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="16">
                                         <TextBlock Foreground="{ThemeResource StateExecBrush}" FontWeight="SemiBold">
@@ -1081,7 +1081,7 @@
                             </StackPanel>
 
                             <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}" FontSize="13" LineHeight="20">
-                                <Run Text="STX.1 System Monitor is released under the"/>
+                                <Run Text="STX-1 ULTIMATE System Monitor is released under the"/>
                                 <Run Text="MIT License" FontWeight="SemiBold" Foreground="{ThemeResource StateGoBrush}"/>
                                 <Run Text="."/>
                             </TextBlock>

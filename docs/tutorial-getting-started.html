@@ -3,33 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Getting started with STX.1 System Monitor</title>
-<meta name="description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
+<title>Getting started with STX-1 ULTIMATE System Monitor</title>
+<meta name="description" content="Install STX-1 ULTIMATE System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html">
 <link rel="icon" href="assets/favicon.png" type="image/png">
 <meta property="og:type" content="article">
-<meta property="og:site_name" content="STX.1 System Monitor">
-<meta property="og:title" content="Getting started with STX.1 System Monitor">
-<meta property="og:description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
+<meta property="og:site_name" content="STX-1 ULTIMATE System Monitor">
+<meta property="og:title" content="Getting started with STX-1 ULTIMATE System Monitor">
+<meta property="og:description" content="Install STX-1 ULTIMATE System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
 <meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html">
 <meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Getting started with STX.1 System Monitor">
-<meta name="twitter:description" content="Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
+<meta name="twitter:title" content="Getting started with STX-1 ULTIMATE System Monitor">
+<meta name="twitter:description" content="Install STX-1 ULTIMATE System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.">
 <meta name="twitter:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  "headline": "Getting started with STX.1 System Monitor",
-  "description": "Install STX.1 System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.",
+  "headline": "Getting started with STX-1 ULTIMATE System Monitor",
+  "description": "Install STX-1 ULTIMATE System Monitor, read your system health score, free up disk space and save a diagnostic report, in about ten minutes.",
   "url": "https://git-rocky-stack.github.io/sysmonitor-windows/tutorial-getting-started.html",
   "inLanguage": "en",
-  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX.1 System Monitor" },
+  "isPartOf": { "@type": "WebSite", "url": "https://git-rocky-stack.github.io/sysmonitor-windows/", "name": "STX-1 ULTIMATE System Monitor" },
   "author": { "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" },
-  "about": { "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
+  "about": { "@type": "SoftwareApplication", "name": "STX-1 ULTIMATE System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }
 }
 </script>
 <link rel="stylesheet" href="assets/style.css">
@@ -39,7 +39,7 @@
 
 <header class="site">
   <div class="wrap nav">
-    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX-1 ULTIMATE System Monitor</a>
     <nav class="navlinks" aria-label="Primary">
       <a href="./#download">Download</a>
       <a href="./#whatsnew">What is new</a>
@@ -53,8 +53,8 @@
 <main id="main" class="doc">
   <div class="wrap">
     <p class="crumbs"><a href="./">Home</a> / <a href="documentation.html">Documentation</a> / Tutorial</p>
-    <h1>Getting started with STX.1 System Monitor</h1>
-    <p>In about ten minutes you will install STX.1, read your machine's health score, clean
+    <h1>Getting started with STX-1 ULTIMATE System Monitor</h1>
+    <p>In about ten minutes you will install STX-1 ULTIMATE, read your machine's health score, clean
     up disk space you can actually spare, and save a diagnostic report you can send to
     someone. By the end you will know where the app keeps its data and how to undo
     anything it did.</p>
@@ -85,7 +85,7 @@
     <code>THIRD-PARTY-NOTICES.txt</code> sit next to the executable in the install folder
     (<code>installer/SysMonitorSetup.iss:89-90</code>).</p>
     <h2>Step 2: Read your health score</h2>
-    <p>Launch STX.1. It opens on the Dashboard. Each section of a page is a faceplate whose
+    <p>Launch STX-1 ULTIMATE. It opens on the Dashboard. Each section of a page is a faceplate whose
     stripe names it, such as <code>DASH - QUICK ACCESS - 01A</code>, and this tutorial refers to
     sections by that name.</p>
     <p>The first faceplate, QUICK ACCESS (01A), shows a live reading each for network,
@@ -155,13 +155,13 @@
     hardware inventory and current readings. Open it before you send it to anyone, so you
     know what is in it.</p>
     <h2>If you start it twice</h2>
-    <p>STX.1 runs as one copy. With Minimize to system tray on, which is the default, closing
+    <p>STX-1 ULTIMATE runs as one copy. With Minimize to system tray on, which is the default, closing
     the window hides it in the notification area, and starting the app again from the
     Start menu brings the running copy's window back rather than starting a second one (<code>src/SysMonitor.App/App.xaml.cs:366-376</code>). Alerts
     are checked by that one copy whichever page is showing, and while the window is in
     the notification area (<code>src/SysMonitor.App/Services/TrayIconService.cs:145-149</code>).</p>
     <h2>What you built</h2>
-    <p>You now have STX.1 installed, you have read a health score you can interpret, you have
+    <p>You now have STX-1 ULTIMATE installed, you have read a health score you can interpret, you have
     freed disk space without guessing, and you have a report on disk.</p>
     <p>Everything the app stores about you lives in one folder:</p>
     <pre><code>%LocalAppData%\SysMonitor

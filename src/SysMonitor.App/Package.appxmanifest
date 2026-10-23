@@ -41,7 +41,7 @@
           Wide310x150Logo="Assets\StoreLogo\Wide310x150Logo.png"
           Square310x310Logo="Assets\StoreLogo\Square310x310Logo.png"
           Square71x71Logo="Assets\StoreLogo\Square71x71Logo.png"
-          ShortName="STX.1">
+          ShortName="STX-1 ULTIMATE">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo"/>
             <uap:ShowOn Tile="wide310x150Logo"/>

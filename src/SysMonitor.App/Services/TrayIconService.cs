@@ -50,7 +50,7 @@ public class TrayIconService : IDisposable
         var iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
 
         _trayIcon = new TaskbarIcon();
-        _trayIcon.ToolTipText = "SysMonitor - Loading...";
+        _trayIcon.ToolTipText = "STX-1 ULTIMATE - Loading...";
 
         // Set icon from file
         if (File.Exists(iconPath))
@@ -140,7 +140,7 @@ public class TrayIconService : IDisposable
                 var cpuUsage = _cpuSampler.Sample();
                 var memInfo = await _memoryMonitor.GetMemoryInfoAsync();
 
-                var tooltip = $"SysMonitor\nCPU: {cpuUsage:F0}% | RAM: {memInfo.UsagePercent:F0}%";
+                var tooltip = $"STX-1 ULTIMATE\nCPU: {cpuUsage:F0}% | RAM: {memInfo.UsagePercent:F0}%";
 
                 // Alerts are checked here, for as long as the app runs, and not by a page: the Dashboard used to be
                 // the only caller, so with any other page open - or the window in the tray - no alert ever fired.

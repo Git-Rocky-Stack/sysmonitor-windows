@@ -1,6 +1,6 @@
-# Code Signing Guide for STX1 System Monitor
+# Code Signing Guide for STX-1 ULTIMATE System Monitor
 
-This guide explains how to sign the STX1 System Monitor application for distribution.
+This guide explains how to sign the STX-1 ULTIMATE System Monitor application for distribution.
 
 ## Why Sign Your Code?
 
@@ -48,7 +48,7 @@ or passwords, and they stop with an error if signing fails.
 ### Option 1: Development Certificate (Testing Only)
 
 ```powershell
-# Run from repository root. Creates "CN=STX1 System Monitor (Development)" in CurrentUser\My
+# Run from repository root. Creates "CN=STX-1 ULTIMATE System Monitor (Development)" in CurrentUser\My
 # the first time; it is never exported.
 .\Build-Release.ps1 -SignCode -UseSelfSignedCert
 ```
@@ -118,7 +118,7 @@ You'll need to provide:
 Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert
 
 # Sign using the thumbprint (SHA-256 digest, RFC 3161 timestamp)
-signtool sign /sha1 "THUMBPRINT" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /d "STX1 System Monitor" "SysMonitor.App.exe"
+signtool sign /sha1 "THUMBPRINT" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /d "STX-1 ULTIMATE System Monitor" "SysMonitor.App.exe"
 
 # Verify signature
 signtool verify /pa "SysMonitor.App.exe"

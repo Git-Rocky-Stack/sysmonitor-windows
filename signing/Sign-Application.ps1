@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Signs the STX1 System Monitor application files.
+    Signs the STX-1 ULTIMATE System Monitor application files.
 
 .DESCRIPTION
     Signs executables and DLLs with a code-signing certificate installed in the Windows
@@ -45,7 +45,7 @@ $RootDir = Split-Path -Parent $ScriptDir
 . (Join-Path $ScriptDir "SigningCommon.ps1")
 
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  STX1 System Monitor - Code Signing" -ForegroundColor Cyan
+Write-Host "  STX-1 ULTIMATE System Monitor - Code Signing" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 

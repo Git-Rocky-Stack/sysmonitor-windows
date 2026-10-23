@@ -1,10 +1,10 @@
-﻿; STX1 System Monitor - Inno Setup Script
+﻿; STX-1 ULTIMATE System Monitor - Inno Setup Script
 ; Copyright (c) 2024 Rocky Stack
 ;
 ; To sign the installer, use SignTool after compilation with a certificate from the Windows certificate store:
-; signtool sign /sha1 <thumbprint> /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "STX1-SystemMonitor-Setup-<version>.exe"
+; signtool sign /sha1 <thumbprint> /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "STX-1-ULTIMATE-Setup-<version>.exe"
 
-#define MyAppName "STX1 System Monitor"
+#define MyAppName "STX-1 ULTIMATE System Monitor"
 
 ; Read straight out of the executable being packaged. Written by hand this said 1.0.0 for a 2.2.2
 ; build, so Add/Remove Programs and HKLM\SOFTWARE\...\Version both reported a release that never
@@ -12,7 +12,7 @@
 #define AppExeFile "..\publish\installer-build\SysMonitor.App.exe"
 #define FullVersion GetFileVersion(AppExeFile)
 #define MyAppVersion Copy(FullVersion, 1, RPos(".", FullVersion) - 1)
-#define MyAppPublisher "Rocky Stack"
+#define MyAppPublisher "Strategia-X"
 #define MyAppURL "https://github.com/Git-Rocky-Stack/sysmonitor-windows"
 #define MyAppExeName "SysMonitor.App.exe"
 #define MyAppAssocName "System Monitor"
@@ -41,7 +41,7 @@ InfoBeforeFile=..\README_INSTALLER.txt
 
 ; Output settings
 OutputDir=..\publish\installer
-OutputBaseFilename=STX1-SystemMonitor-Setup-{#MyAppVersion}
+OutputBaseFilename=STX-1-ULTIMATE-Setup-{#MyAppVersion}
 SetupIconFile=installer_icon.ico
 
 ; Compression - use LZMA2 for best compression

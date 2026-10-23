@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-STX.1 System Monitor is itself released under the [MIT License](LICENSE). It ships as a
+STX-1 ULTIMATE System Monitor is itself released under the [MIT License](LICENSE). It ships as a
 self-contained build, so the components below are redistributed inside the installed
 application, and each keeps its own terms.
 
@@ -95,7 +95,7 @@ asks for. Full text: https://openfontlicense.org
 | Departure Mono | Copyright 2022-2024 Helena Zhang | https://helenazhang.com |
 | Iosevka | Copyright 2015-2023, Renzhi Li (aka. Belleve Invis, belleve@typeof.net) | https://github.com/be5invis/Iosevka |
 
-They are built from the Latin web fonts STX.1's sister application, System-X, serves
+They are built from the Latin web fonts STX-1 ULTIMATE's sister application, System-X, serves
 (`scripts/build-fonts.py`). Public Sans and Archivo are variable fonts there; what ships
 are static instances at the weights and widths the design uses, each named as a family
 of its own, which makes them Modified Versions under the license. No family declares a

@@ -5,7 +5,7 @@ itself is intact, and restore files from it.
 
 ## Prerequisites
 
-- STX.1 System Monitor v3.0.0 or later installed
+- STX-1 ULTIMATE System Monitor v3.0.0 or later installed
 - Somewhere to write the backup with enough free space
 - If you encrypt: a password you will not lose. There is no recovery path
 

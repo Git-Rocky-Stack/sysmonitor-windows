@@ -1,10 +1,10 @@
-# STX.1 System Monitor
+# STX-1 ULTIMATE System Monitor
 
 > A free and open source Windows desktop application for system monitoring and
 > maintenance, built with WinUI 3 and .NET 8. Version 3.0.1, MIT licensed. Readings
 > stay on the user's machine: no account, no telemetry, no network call home.
 
-STX.1 reads Windows hardware in real time and provides maintenance tools across 34
+STX-1 ULTIMATE reads Windows hardware in real time and provides maintenance tools across 34
 navigation entries, plus a PDF Editor opened from PDF Tools: monitoring (CPU, GPU, memory, disk, network, battery, temperature, processes,
 performance, history), maintenance (directory cleaner, registry cleaner, startup
 manager, installed programs, health check, game mode, browser privacy, drive wiper,

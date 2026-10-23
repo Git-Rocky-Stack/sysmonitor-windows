@@ -1,13 +1,13 @@
 # Privacy Policy
 
-**STX-1 ULTIMATE System Monitor** (also published as STX.1 System Monitor)
+**STX-1 ULTIMATE System Monitor**
 **Effective Date:** January 3, 2026
 **Last Updated:** October 22, 2026
 
 ## Overview
 
-STX-1 ULTIMATE System Monitor ("the App") is developed by Rocky Stack and published in the
-Microsoft Store by Strategia-X. This policy explains what the App reads, what it keeps, and
+STX-1 ULTIMATE System Monitor ("the App") is developed by Rocky Stack and published by
+Strategia-X, in the Microsoft Store and on GitHub. This policy explains what the App reads, what it keeps, and
 what - if anything - leaves your computer. It describes the code as it is; where a statement
 can be checked, it says where.
 
@@ -100,4 +100,4 @@ GitHub Issues: [https://github.com/Git-Rocky-Stack/sysmonitor-windows/issues](ht
 
 ---
 
-*This privacy policy applies to STX-1 ULTIMATE System Monitor (STX.1 System Monitor) for Windows.*
+*This privacy policy applies to STX-1 ULTIMATE System Monitor for Windows.*

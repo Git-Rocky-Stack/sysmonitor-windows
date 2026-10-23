@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to STX.1 System Monitor are documented here.
+All notable changes to STX-1 ULTIMATE System Monitor are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -287,7 +287,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   only says something now takes one button and arms nothing. The sensor list is read in
   Iosevka, the console's code face, in place of a hard-coded Consolas.
 
-- **Text is set in Public Sans, the first of the Command Console's faces.** STX.1 is
+- **Text is set in Public Sans, the first of the Command Console's faces.** STX-1 ULTIMATE is
   being restyled to match System-X, and the type comes first: Public Sans for text,
   Archivo at the widths System-X draws for titles, caps and lamps, Departure Mono for live
   numbers and Iosevka for code and paths. They ship as TrueType files built from System-X's

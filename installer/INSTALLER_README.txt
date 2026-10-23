@@ -36,7 +36,7 @@ Option 3: Manual compilation
 
 OUTPUT
 ------
-   publish\installer\STX1-SystemMonitor-Setup-<version>.exe
+   publish\installer\STX-1-ULTIMATE-Setup-<version>.exe
 
 <version> is taken from the published SysMonitor.App.exe, which
 takes it from <Version> in src\SysMonitor.App\SysMonitor.App.csproj.
@@ -77,7 +77,7 @@ CUSTOMIZATION
 
 4. CHANGE PUBLISHER INFO:
    Edit these lines in SysMonitorSetup.iss:
-   #define MyAppPublisher "Rocky Stack"
+   #define MyAppPublisher "Strategia-X"
    #define MyAppURL "https://github.com/Git-Rocky-Stack/sysmonitor-windows"
 
 
@@ -108,7 +108,7 @@ To sign the installer for Windows SmartScreen:
 
 3. Sign after build, selecting the certificate by thumbprint:
    signtool sign /sha1 <thumbprint> /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 ^
-     ..\publish\installer\STX1-SystemMonitor-Setup-<version>.exe
+     ..\publish\installer\STX-1-ULTIMATE-Setup-<version>.exe
 
    (Build-Release.ps1 -SignCode -CertificateThumbprint <thumbprint> does this for you.)
 

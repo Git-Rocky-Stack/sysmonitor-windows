@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SysMonitor.App"
     xmlns:views="using:SysMonitor.App.Views"
-    Title="SysMonitor - Windows System Monitor &amp; Optimizer">
+    Title="STX-1 ULTIMATE System Monitor">
 
     <Grid Background="{ThemeResource Carbon950Brush}">
         <Grid.RowDefinitions>
@@ -29,9 +29,9 @@
                    Height="29" Margin="16,0,0,0" VerticalAlignment="Center"
                    Stretch="Uniform"/>
 
-            <!-- SYSTEM MONITOR text -->
+            <!-- Product name beside the publisher's mark -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
-                <TextBlock Text="SYSTEM MONITOR" FontFamily="{StaticResource ConsolePlacardFontFamily}" FontSize="14"
+                <TextBlock Text="STX-1 ULTIMATE SYSTEM MONITOR" FontFamily="{StaticResource ConsolePlacardFontFamily}" FontSize="14"
                            Foreground="{ThemeResource PlatinumBrush}"
                            CharacterSpacing="80" VerticalAlignment="Center"/>
             </StackPanel>

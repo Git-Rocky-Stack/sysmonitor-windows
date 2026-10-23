@@ -1,6 +1,6 @@
 # What v3.0.0 removed, and why
 
-If you used STX.1 before version 3.0.0 and something you relied on has disappeared,
+If you used STX-1 ULTIMATE before version 3.0.0 and something you relied on has disappeared,
 this page explains the reasoning. It is not a list of features cut for size. Every one
 of them was a thing the app said it did and did not do.
 

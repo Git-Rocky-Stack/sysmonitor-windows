@@ -129,10 +129,11 @@ public class ReleaseVersionTests
     {
         var version = ProjectVersion();
 
-        // Every way a release artifact is named: the two file names and the tag folder they live under.
+        // Every way a release artifact is named: the two file names - as they were until 3.0.1, and with the
+        // product's name from 3.1.0 - and the tag folder they live under.
         var artifact = new Regex(
-            @"STX1-SystemMonitor-Setup-(?<v>\d+\.\d+\.\d+)\.exe"
-            + @"|STX1-SystemMonitor-(?<v>\d+\.\d+\.\d+)-Portable-x64\.zip"
+            @"(?:STX1-SystemMonitor|STX-1-ULTIMATE)-Setup-(?<v>\d+\.\d+\.\d+)\.exe"
+            + @"|(?:STX1-SystemMonitor|STX-1-ULTIMATE)-(?<v>\d+\.\d+\.\d+)-Portable-x64\.zip"
             + @"|/releases/download/v(?<v>\d+\.\d+\.\d+)/");
 
         var stale = new List<string>();

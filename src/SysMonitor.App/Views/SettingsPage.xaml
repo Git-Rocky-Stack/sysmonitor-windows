@@ -326,9 +326,9 @@
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                         <TextBlock Text="STX" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
-                                        <TextBlock Text="." FontSize="14" FontWeight="Bold" Foreground="{ThemeResource ArmedLitBrush}"/>
+                                        <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource ArmedLitBrush}"/>
                                         <TextBlock Text="1" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource SilverBrush}"/>
-                                        <TextBlock Text=" SYSTEM MONITOR" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
+                                        <TextBlock Text=" ULTIMATE SYSTEM MONITOR" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource PlatinumBrush}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Version " Foreground="{ThemeResource SilverBrush}"/>

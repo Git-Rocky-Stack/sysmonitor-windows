@@ -92,7 +92,7 @@ function Invoke-CodeSign {
         [Parameter(Mandatory)][string]$Thumbprint,
         [Parameter(Mandatory)][string]$TimestampServer,
         [Parameter(Mandatory)][string]$FilePath,
-        [string]$Description = 'STX1 System Monitor'
+        [string]$Description = 'STX-1 ULTIMATE System Monitor'
     )
 
     $output = & $SignTool sign /sha1 $Thumbprint /fd SHA256 /tr $TimestampServer /td SHA256 /d $Description $FilePath 2>&1

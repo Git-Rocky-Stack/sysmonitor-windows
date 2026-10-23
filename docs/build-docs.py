@@ -45,39 +45,39 @@ OUTPUT_NAMES = {
 PAGES = {
     "README.md": (
         "Documentation",
-        "Every guide for STX.1 System Monitor, split into tutorial, how-to, reference "
+        "Every guide for STX-1 ULTIMATE System Monitor, split into tutorial, how-to, reference "
         "and explanation, with a note on how each claim in them was checked."),
     "tutorial-getting-started.md": (
         "Tutorial",
-        "Install STX.1 System Monitor, read your system health score, free up disk "
+        "Install STX-1 ULTIMATE System Monitor, read your system health score, free up disk "
         "space and save a diagnostic report, in about ten minutes."),
     "howto-free-disk-space.md": (
         "How-to guide",
-        "Scan your PC for reclaimable files with STX.1 System Monitor, choose what "
+        "Scan your PC for reclaimable files with STX-1 ULTIMATE System Monitor, choose what "
         "goes category by category, and verify how much space you actually got back."),
     "howto-securely-wipe-files.md": (
         "How-to guide",
-        "Overwrite a file's contents with STX.1 System Monitor, choose a wipe method, "
+        "Overwrite a file's contents with STX-1 ULTIMATE System Monitor, choose a wipe method, "
         "and understand what wiping does and does not guarantee on a solid-state drive."),
     "howto-back-up-and-restore.md": (
         "How-to guide",
-        "Create an encrypted, verified backup with STX.1 System Monitor and restore "
+        "Create an encrypted, verified backup with STX-1 ULTIMATE System Monitor and restore "
         "files from it. Covers AES-256 encryption and what changed in version 3.0.0."),
     "howto-manage-startup-programs.md": (
         "How-to guide",
-        "Stop programs launching at sign-in with STX.1 System Monitor, reversibly, "
+        "Stop programs launching at sign-in with STX-1 ULTIMATE System Monitor, reversibly, "
         "using the same mechanism Task Manager writes."),
     "reference-pages.md": (
         "Reference",
-        "Every one of the 34 pages in STX.1 System Monitor, what each one does, and "
+        "Every one of the 34 pages in STX-1 ULTIMATE System Monitor, what each one does, and "
         "the source line it is defined on."),
     "reference-settings-and-data.md": (
         "Reference",
-        "Every setting in STX.1 System Monitor with its default value, and every "
+        "Every setting in STX-1 ULTIMATE System Monitor with its default value, and every "
         "location on disk the application writes to."),
     "explanation-honest-reporting.md": (
         "Explanation",
-        "Why STX.1 System Monitor 3.0.0 removed four working features rather than "
+        "Why STX-1 ULTIMATE System Monitor 3.0.0 removed four working features rather than "
         "rewording them, and the trade-offs that came with that decision."),
     "explanation-drive-wiper-and-ssds.md": (
         "Explanation",
@@ -96,7 +96,7 @@ TEMPLATE = """<!DOCTYPE html>
 <link rel="canonical" href="{canonical}">
 <link rel="icon" href="assets/favicon.png" type="image/png">
 <meta property="og:type" content="article">
-<meta property="og:site_name" content="STX.1 System Monitor">
+<meta property="og:site_name" content="STX-1 ULTIMATE System Monitor">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">
 <meta property="og:url" content="{canonical}">
@@ -114,9 +114,9 @@ TEMPLATE = """<!DOCTYPE html>
   "description": "{description}",
   "url": "{canonical}",
   "inLanguage": "en",
-  "isPartOf": {{ "@type": "WebSite", "url": "{site}", "name": "STX.1 System Monitor" }},
+  "isPartOf": {{ "@type": "WebSite", "url": "{site}", "name": "STX-1 ULTIMATE System Monitor" }},
   "author": {{ "@type": "Organization", "name": "Rocky Stack", "url": "https://github.com/Git-Rocky-Stack" }},
-  "about": {{ "@type": "SoftwareApplication", "name": "STX.1 System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }}
+  "about": {{ "@type": "SoftwareApplication", "name": "STX-1 ULTIMATE System Monitor", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows" }}
 }}
 </script>
 <link rel="stylesheet" href="assets/style.css">
@@ -126,7 +126,7 @@ TEMPLATE = """<!DOCTYPE html>
 
 <header class="site">
   <div class="wrap nav">
-    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX.1 System Monitor</a>
+    <a class="brand" href="./"><span class="mark" aria-hidden="true">S1</span> STX-1 ULTIMATE System Monitor</a>
     <nav class="navlinks" aria-label="Primary">
       <a href="./#download">Download</a>
       <a href="./#whatsnew">What is new</a>
@@ -214,9 +214,9 @@ def render(source):
                   % (output_name("README.md"), esc(kind)))
         up, up_label = output_name("README.md"), "All documentation"
 
-    # "STX.1 System Monitor documentation - STX.1 System Monitor" is what appends the product name
+    # "STX-1 ULTIMATE System Monitor documentation - STX-1 ULTIMATE System Monitor" is what appends the product name
     # unconditionally; a title is read in a browser tab and a search result, where it is 60 characters wide.
-    title = heading if "STX.1" in heading else heading + " - STX.1 System Monitor"
+    title = heading if "STX-1" in heading else heading + " - STX-1 ULTIMATE System Monitor"
 
     return TEMPLATE.format(
         title=esc(title),
@@ -234,7 +234,7 @@ def render(source):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Build the STX.1 documentation pages.")
+    ap = argparse.ArgumentParser(description="Build the STX-1 ULTIMATE documentation pages.")
     ap.add_argument("--check", action="store_true",
                     help="verify generated pages are current; write nothing")
     args = ap.parse_args()

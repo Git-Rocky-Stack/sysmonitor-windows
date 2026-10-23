@@ -1,4 +1,4 @@
-# Release Checklist - STX.1 System Monitor
+# Release Checklist - STX-1 ULTIMATE System Monitor
 
 How a version goes from a green branch to people's machines: the GitHub release (Setup and
 portable zip), the public page, and the Microsoft Store. Work top to bottom; each step names the
@@ -34,8 +34,8 @@ One number drives everything. `ReleaseVersionTests` fails if any of these disagr
 - [ ] On Windows with the .NET 8 SDK and Inno Setup 6: `.\Build-Release.ps1 -SignCode`
       (certificate by thumbprint in `SYSMONITOR_SIGNING_THUMBPRINT`; see `signing/`). Without a
       code-signing certificate, build unsigned and keep the SmartScreen note in the tutorial.
-- [ ] Outputs: `publish\installer\STX1-SystemMonitor-Setup-3.1.0.exe` and the portable
-      `STX1-SystemMonitor-3.1.0-Portable-x64.zip`.
+- [ ] Outputs: `publish\installer\STX-1-ULTIMATE-Setup-3.1.0.exe` and the portable
+      `STX-1-ULTIMATE-3.1.0-Portable-x64.zip`.
 - [ ] Smoke the two outputs by hand on a clean VM: UAT cases I-1 to I-5.
 - [ ] Record SHA-256 of both: `Get-FileHash <file> -Algorithm SHA256`.
 
@@ -43,7 +43,9 @@ One number drives everything. `ReleaseVersionTests` fails if any of these disagr
 
 - [ ] Tag `v3.1.0` on the release commit and create the release from it, attaching both files.
       Body: the CHANGELOG 3.1.0 section, and both SHA-256s.
-- [ ] `docs/index.html` (hand-written, not generated): every `3.0.1` in the download links,
+- [ ] `docs/index.html` (hand-written, not generated): every `3.0.1` in the download links -
+      and their file names, which from 3.1.0 are `STX-1-ULTIMATE-...` rather than
+      `STX1-SystemMonitor-...` (also in `docs/tutorial-getting-started.md`) -
       the structured data, the title and description, the "Version ... released" line, and the
       two checksums under "SHA-256 checksums". Put in the checksums you recorded - never a
       placeholder. Add a short "3.1.0" section beside "3.0.1, a wording release".
@@ -71,9 +73,9 @@ One number drives everything. `ReleaseVersionTests` fails if any of these disagr
         are stand-ins.
   - [ ] Description and features list agree with `README.md` - especially the features that
         were removed in 3.0.0 (RAM Cache, 7z, Auto-Optimize Memory, the Performance FPS card).
-- [ ] One name and one publisher across the listing, the manifest (`STX-1 ULTIMATE System
-      Monitor`, Strategia-X), the installer (`STX1 System Monitor`, Rocky Stack) and the README
-      (`STX.1 System Monitor`). Choose one and align the others in the next release.
+- [ ] The listing uses the one name and publisher the app, installer and docs now use:
+      **STX-1 ULTIMATE System Monitor**, published by **Strategia-X**. Upgrading from 3.0.1,
+      Apps & features shows the new name on the same entry (the installer's AppId is unchanged).
 
 ## 6. After release
 
@@ -82,13 +84,3 @@ One number drives everything. `ReleaseVersionTests` fails if any of these disagr
 - [ ] Watch GitHub Issues for a week. Support asks for the log folder,
       `%LocalAppData%\SysMonitor\Logs`, and the page's kicker (`DASH - SYSTEM HEALTH - 01B`) to
       say exactly where something happened.
-
-## Repository housekeeping (do once)
-
-These are tracked in the repository but are not part of the Windows app; confirm and remove, or
-move out of the repo:
-
-- `App Bundle/app-release.aab` (an Android bundle, about 20 MB)
-- `v.2.0.1 Exec/`
-- `Microsot Store Submission.png`
-- `STX-1 ULTIMATE System Monitor - LinkedIn.txt`

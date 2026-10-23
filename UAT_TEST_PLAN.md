@@ -1,4 +1,4 @@
-# UAT Test Plan - STX.1 System Monitor
+# UAT Test Plan - STX-1 ULTIMATE System Monitor
 
 The acceptance pass a person runs on real Windows before a release ships. Automated CI already
 builds the app, runs the whole test suite, and opens every page in both themes with animations
@@ -29,7 +29,7 @@ one); a PDF of several pages.
 | ID | Steps | Expected |
 |---|---|---|
 | I-1 | Run Setup on Windows 10 1909 or older (a VM is fine) | Setup refuses: the Windows version is too old |
-| I-2 | Install with 3.0.1 already installed | One "STX1 System Monitor" entry in Apps; settings kept; About shows the new version |
+| I-2 | Install with 3.0.1 already installed | One "STX-1 ULTIMATE System Monitor" entry in Apps; settings kept; About shows the new version |
 | I-3 | Fresh install | Licence page is MIT; `LICENSE.txt` and `THIRD-PARTY-NOTICES.txt` sit next to the exe |
 | I-4 | Start the app, close the window (minimize to tray on), start it again from Start | The first window comes back; one tray icon; no second copy in Task Manager |
 | I-5 | Uninstall | App and Start entry gone; `%LocalAppData%\SysMonitor` left (it is user data) |

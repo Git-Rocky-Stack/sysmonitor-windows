@@ -1,4 +1,4 @@
-# STX.1 System Monitor
+# STX-1 ULTIMATE System Monitor
 
 **Strategic. Excellence. Engineered.**
 
@@ -11,13 +11,13 @@ A Windows system monitoring and optimization desktop application, built with Win
 and .NET 8. **Free and open source under the MIT License** - use it, read it, change
 it, ship it.
 
-![STX.1 System Monitor - CPU Monitor in the Command Console look, Day Shift](App%20Screenshots/Command%20Console/cpu-monitor-day-shift.png)
+![STX-1 ULTIMATE System Monitor - CPU Monitor in the Command Console look, Day Shift](App%20Screenshots/Command%20Console/cpu-monitor-day-shift.png)
 
 ---
 
 ## What it is
 
-STX.1 reads your hardware in real time, and gives you a set of maintenance tools that
+STX-1 ULTIMATE reads your hardware in real time, and gives you a set of maintenance tools that
 report honestly about what they did. The emphasis of the current release is that second
 part: if a tool says it removed something, verified something, or restored something,
 that is what happened. Where a feature could not deliver what its label promised, the
@@ -28,7 +28,7 @@ feature was removed rather than reworded. See [CHANGELOG.md](CHANGELOG.md).
 Changes since v3.0.1, planned as 3.1.0. Each one is described in full, with the file it
 lives in, in [CHANGELOG.md](CHANGELOG.md) under Unreleased.
 
-**The Command Console look.** STX.1 now looks like System-X, its sister app, so the two read
+**The Command Console look.** STX-1 ULTIMATE now looks like System-X, its sister app, so the two read
 as one family. Every page opens on a bolted view header, and every section of a page is a
 brushed faceplate whose stripe names it - `CPU - CORE USAGE - 02B` - so a section can be
 pointed at in a support thread. Buttons are machined caps; the one that does something that

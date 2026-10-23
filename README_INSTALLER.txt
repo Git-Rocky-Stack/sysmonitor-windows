@@ -1,5 +1,5 @@
 ================================================================================
-                        STX1 SYSTEM MONITOR
+                        STX-1 ULTIMATE SYSTEM MONITOR
                      Copyright (c) 2024-2026 Rocky Stack
 ================================================================================
 
@@ -7,11 +7,11 @@
 the executable being packaged, so it cannot drift out of step with this text --
 see installer/SysMonitorSetup.iss.)
 
-Thank you for choosing STX1 System Monitor!
+Thank you for choosing STX-1 ULTIMATE System Monitor!
 
 ABOUT THIS APPLICATION
 ----------------------
-STX1 System Monitor is a comprehensive Windows system monitoring and
+STX-1 ULTIMATE System Monitor is a comprehensive Windows system monitoring and
 optimization tool that helps you:
 
   * Monitor CPU, GPU, memory, disk, network, battery and temperatures in
@@ -49,7 +49,7 @@ INSTALLATION NOTES
 
 LICENSE
 -------
-STX1 System Monitor is free and open source software, released under the
+STX-1 ULTIMATE System Monitor is free and open source software, released under the
 MIT License. In plain terms: use it for anything including commercial
 purposes, read and modify the source, and redistribute it -- provided you
 keep the copyright and permission notice with any copy you pass on.

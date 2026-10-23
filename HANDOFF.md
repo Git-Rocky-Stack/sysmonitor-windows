@@ -91,8 +91,6 @@ PRIVACY_POLICY (network activity, browser profiles, Wi-Fi, where data lives), an
 |---|---|---|
 | Cut 3.1.0 | Needs the built files' checksums for `docs/index.html` | RELEASE_CHECKLIST.md 2-4 |
 | Store screenshots in the new look | Need real hardware; CI's VM has no sensors | RELEASE_CHECKLIST.md 5 |
-| One product name (STX-1 ULTIMATE / STX.1 / STX1) and one publisher | A brand decision | RELEASE_CHECKLIST.md 5 |
-| Stray non-app files (`App Bundle/*.aab`, `v.2.0.1 Exec/`, ...) | Owner's files; confirm before removing | RELEASE_CHECKLIST.md, housekeeping |
 | x86 / ARM64 and the MSIX build in CI | CI builds x64 unpackaged only | not tracked |
 | `saturate(.5)` on locked controls; NumberBox spinners as caps | Template work with no user-visible defect | Controls.xaml comments |
 | ElevatedRegistryHelper's result file in a user-writable folder | Plausible, not verified: needs a pipe instead of a file | audit note, not tracked |

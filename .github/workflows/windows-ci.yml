@@ -196,7 +196,7 @@ jobs:
           $fonts = @(Get-ChildItem -Path src/SysMonitor.App/Assets/Fonts -File)
           if ($fonts.Count -eq 0) { throw 'src/SysMonitor.App/Assets/Fonts holds no files, so there is nothing to check' }
 
-          $zipFile = Get-ChildItem -Path publish -Filter 'STX1-SystemMonitor-*-Portable-x64.zip' | Select-Object -First 1
+          $zipFile = Get-ChildItem -Path publish -Filter 'STX-1-ULTIMATE-*-Portable-x64.zip' | Select-Object -First 1
           if (-not $zipFile) { throw 'Build-Release.ps1 made no portable zip' }
 
           Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -234,7 +234,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: portable-x64
-          path: publish/STX1-SystemMonitor-*-Portable-x64.zip
+          path: publish/STX-1-ULTIMATE-*-Portable-x64.zip
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
