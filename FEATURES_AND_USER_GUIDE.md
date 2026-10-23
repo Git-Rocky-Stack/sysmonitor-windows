@@ -550,8 +550,11 @@ POINTS (15C) and STATUS (15D).
   same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`).
   Restoring one rebuilds every file as it was then, from the full backup and each
   incremental after it; a backup a later incremental builds on cannot be deleted first
-- **SYSTEM IMAGE** - Offered by the wizard. In this version it copies everything you
-  selected, as a full backup does
+- **SYSTEM IMAGE** - Windows Backup's image of the system drive and the partitions
+  Windows starts from, saved on another NTFS drive or a network folder after Windows asks
+  for administrator permission (`src/SysMonitor.Core/Services/Backup/SystemImage.cs`).
+  It is put back from Windows Recovery: Settings > System > Recovery > Advanced startup,
+  then Troubleshoot > Advanced options > System Image Recovery
 
 **Destination Options:**
 - Local Drive

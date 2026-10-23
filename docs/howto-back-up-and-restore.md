@@ -34,7 +34,7 @@ Re-verify anything you are relying on.
    | Type | Copies |
    |---|---|
    | FULL BACKUP | Everything you selected |
-   | INCREMENTAL BACKUP | Only what is new or changed since the previous backup with the same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`, `:1521`) |
+   | INCREMENTAL BACKUP | Only what is new or changed since the previous backup with the same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`, `:1608`) |
 
    An incremental builds on the backup before it, and that one on the one before, back to
    a full backup: a chain. If nothing has changed, no backup is made. With no earlier
@@ -42,8 +42,17 @@ Re-verify anything you are relying on.
    (or not encrypted when this one is), the incremental starts a new chain and copies
    everything; the summary says which.
 
-   The wizard also offers SYSTEM IMAGE. In this version it copies everything you
-   selected, as a full backup does.
+   | SYSTEM IMAGE | Windows Backup's image of the system drive and every partition Windows needs to start (`src/SysMonitor.Core/Services/Backup/SystemImage.cs`) |
+
+   A system image has no sources or options to choose: after the type, pick the drive to
+   save it on, which cannot be the drive Windows is on. It must be an NTFS drive (a USB
+   drive formatted FAT32 or exFAT is refused, with the reason) or a network folder such
+   as `\\nas\backups`. The app shows where it goes and about how much space it needs,
+   then Windows asks for administrator permission and Windows Backup (`wbadmin`) writes
+   the image to `WindowsImageBackup` at the root of that drive. The progress shown is
+   Windows Backup's own, and its report is kept in `%LocalAppData%\SysMonitor\Logs`.
+   Later images on the same drive add only what changed; a network folder keeps only the
+   newest. Cancelling asks Windows Backup to stop, and Windows asks for permission again.
 
 3. Select the folders to back up, then the destination.
 
@@ -83,6 +92,13 @@ taken from, and anything refused is reported to you rather than silently skipped
 That matters because before v3.0.0 an edited backup file could write its contents
 anywhere you could write, including your Startup folder.
 
+A system image is not restored from inside Windows. Open Settings > System > Recovery,
+choose Advanced startup > **Restart now**, then Troubleshoot > Advanced options >
+**System Image Recovery**. It replaces everything on the drives in the image. Its
+**Restore backup** cap in HISTORY says the same, **Verify backup** says Windows Backup
+checked it as it was written, and **Delete backup** only takes it off the list: Windows
+manages its files (Control Panel > Backup and Restore (Windows 7) > **Manage space**).
+
 Restoring an incremental puts back every file as it was when that incremental was taken,
 reading each one from the newest backup in its chain that holds it. A file deleted before
 the incremental was taken is not restored. An encrypted chain asks for its one password.
@@ -103,6 +119,11 @@ check doing its job.
 **An incremental will not restore: a backup it builds on is missing.** One of the backups
 in its chain was deleted or moved outside the app. Nothing is written; restore the newest
 full backup instead, or move the missing backup back.
+
+**A system image is refused for a drive.** The message says why: it is the drive
+Windows is on, it is not NTFS, it is a mapped network drive (choose its `\\server\share`
+folder instead), or it is not connected. If Windows Backup itself fails, the message
+quotes its error and names the report in the Logs folder.
 
 **Verification fails on a backup that used to pass.** If the backup was made before
 v3.0.0, the original pass may have been meaningless, because verification hashed the

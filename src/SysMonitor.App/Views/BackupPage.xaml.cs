@@ -18,6 +18,7 @@ public sealed partial class BackupPage : Page
 
         // A restore writes files onto someone's machine; they get to see where first.
         ViewModel.ConfirmRestore = AskBeforeRestoringAsync;
+        ViewModel.Confirm = (title, message, confirmText) => ConsoleDialog.ConfirmAsync(this, title, message, confirmText);
     }
 
     /// <summary>
@@ -215,8 +216,14 @@ public sealed partial class BackupPage : Page
     {
         if (sender is Button button && button.Tag is BackupArchiveViewModel archive)
         {
-            var message = $"Are you sure you want to delete '{archive.Name}'?\n\nThis action cannot be undone.";
-            if (await ConsoleDialog.ConfirmAsync(this, "Delete Backup", message, "Delete"))
+            // Windows manages a system image's files, so for one the app only takes it off the list.
+            var (title, message, confirm) = archive.IsSystemImage
+                ? ("Remove from the list",
+                   $"Take '{archive.Name}' off this list?\n\nThe image itself stays in {archive.FilePath}. Windows manages it: " +
+                   "Control Panel > Backup and Restore (Windows 7) > Manage space frees its space.",
+                   "Remove")
+                : ("Delete Backup", $"Are you sure you want to delete '{archive.Name}'?\n\nThis action cannot be undone.", "Delete");
+            if (await ConsoleDialog.ConfirmAsync(this, title, message, confirm))
             {
                 await ViewModel.DeleteBackupCommand.ExecuteAsync(archive);
             }

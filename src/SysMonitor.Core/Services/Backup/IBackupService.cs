@@ -7,6 +7,8 @@ public interface IBackupService : IDisposable
 {
     // Backup Operations
     Task<BackupResult> CreateBackupAsync(BackupJob job, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default);
+    /// <summary>Where a system image would go and how much it may need, or why it cannot go there.</summary>
+    Task<SystemImagePlan> PrepareSystemImageAsync(string destinationPath);
     Task<BackupResult> CreateSystemImageAsync(string destinationPath, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default);
     Task<BackupResult> CreateRestorePointAsync(string description);
 
@@ -46,7 +48,7 @@ public enum BackupType
     Full,           // Complete backup of all selected items
     Incremental,    // Only files changed since the previous backup of the same name, full or incremental
     Differential,   // All files changed since last full backup
-    SystemImage,    // Full system/partition image
+    SystemImage,    // Windows Backup's image of the system drive and boot partitions, restored from Windows Recovery
     Mirror          // No longer offered (it only ever made a full copy); kept so backups recorded as one still load
 }
 

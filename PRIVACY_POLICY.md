@@ -82,8 +82,9 @@ do not record passwords, browser data or file contents.
 
 The App runs as an ordinary user. A few actions ask Windows for administrator permission when
 you start them: changing machine-wide registry keys or startup entries, creating a restore
-point, and some hardware sensors. The Microsoft Store build declares the "full trust"
-capability because it is a desktop application that reads hardware and manages files.
+point or a system image, and some hardware sensors. The Microsoft Store build declares the
+"full trust" capability because it is a desktop application that reads hardware and manages
+files.
 
 ## Children's privacy
 

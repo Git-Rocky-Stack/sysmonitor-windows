@@ -110,6 +110,10 @@ capitals.
 | B-5a | Full; change one file and add one; Incremental; delete a file, change another; Incremental | Each incremental's file count is only what changed; restoring the last gives every file at its newest, without the deleted one |
 | B-5b | Incremental with nothing changed since the last backup | Says nothing has changed; no new backup in HISTORY |
 | B-5c | Delete the Full of a chain while its incrementals exist | Refused, saying later incrementals build on it |
+| B-8 | SYSTEM IMAGE to C: and to a FAT32 stick | Each refused before anything starts, saying why |
+| B-9 | SYSTEM IMAGE to an NTFS USB drive; accept the permission prompt | Progress follows Windows Backup's percent; `E:\WindowsImageBackup` appears; HISTORY shows "System image of C:" |
+| B-10 | SYSTEM IMAGE, then refuse the permission prompt | Says no image was made; nothing in HISTORY |
+| B-11 | Restore, Verify and Delete on the system image in HISTORY | Restore gives the System Image Recovery steps; Delete only takes it off the list and the folder stays |
 | B-6 | Create restore point twice within a few minutes | The second time says Windows did not create a new one |
 | B-7 | Restore points list | Shows the machine's restore points with dates |
 

@@ -291,7 +291,7 @@
                                 <FontIcon Glyph="&#xE770;" FontSize="32"/>
                                 <StackPanel>
                                     <TextBlock Text="SYSTEM IMAGE"/>
-                                    <TextBlock Text="Complete system backup for disaster recovery" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                    <TextBlock Text="Windows Backup's image of the system drive, restored from Windows Recovery. Needs administrator permission" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Button>

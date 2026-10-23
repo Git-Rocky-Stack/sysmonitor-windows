@@ -97,7 +97,7 @@
     </tr>
     <tr>
     <td>INCREMENTAL BACKUP</td>
-    <td>Only what is new or changed since the previous backup with the same name, full or incremental (<code>src/SysMonitor.Core/Services/Backup/BackupService.cs:125</code>, <code>:1521</code>)</td>
+    <td>Only what is new or changed since the previous backup with the same name, full or incremental (<code>src/SysMonitor.Core/Services/Backup/BackupService.cs:125</code>, <code>:1608</code>)</td>
     </tr>
     </tbody>
     </table></div>
@@ -106,8 +106,16 @@
        backup of that name, or when the earlier one was encrypted with a different password
        (or not encrypted when this one is), the incremental starts a new chain and copies
        everything; the summary says which.</p>
-    <p>The wizard also offers SYSTEM IMAGE. In this version it copies everything you
-       selected, as a full backup does.</p>
+    <p>| SYSTEM IMAGE | Windows Backup's image of the system drive and every partition Windows needs to start (<code>src/SysMonitor.Core/Services/Backup/SystemImage.cs</code>) |</p>
+    <p>A system image has no sources or options to choose: after the type, pick the drive to
+       save it on, which cannot be the drive Windows is on. It must be an NTFS drive (a USB
+       drive formatted FAT32 or exFAT is refused, with the reason) or a network folder such
+       as <code>\\nas\backups</code>. The app shows where it goes and about how much space it needs,
+       then Windows asks for administrator permission and Windows Backup (<code>wbadmin</code>) writes
+       the image to <code>WindowsImageBackup</code> at the root of that drive. The progress shown is
+       Windows Backup's own, and its report is kept in <code>%LocalAppData%\SysMonitor\Logs</code>.
+       Later images on the same drive add only what changed; a network folder keeps only the
+       newest. Cancelling asks Windows Backup to stop, and Windows asks for permission again.</p>
     <ol start="3">
     <li>
     <p>Select the folders to back up, then the destination.</p>
@@ -142,6 +150,12 @@
     (<code>BackupService.cs</code>).</p>
     <p>That matters because before v3.0.0 an edited backup file could write its contents
     anywhere you could write, including your Startup folder.</p>
+    <p>A system image is not restored from inside Windows. Open Settings &gt; System &gt; Recovery,
+    choose Advanced startup &gt; <strong>Restart now</strong>, then Troubleshoot &gt; Advanced options &gt;
+    <strong>System Image Recovery</strong>. It replaces everything on the drives in the image. Its
+    <strong>Restore backup</strong> cap in HISTORY says the same, <strong>Verify backup</strong> says Windows Backup
+    checked it as it was written, and <strong>Delete backup</strong> only takes it off the list: Windows
+    manages its files (Control Panel &gt; Backup and Restore (Windows 7) &gt; <strong>Manage space</strong>).</p>
     <p>Restoring an incremental puts back every file as it was when that incremental was taken,
     reading each one from the newest backup in its chain that holds it. A file deleted before
     the incremental was taken is not restored. An encrypted chain asks for its one password.</p>
@@ -157,6 +171,10 @@
     <p><strong>An incremental will not restore: a backup it builds on is missing.</strong> One of the backups
     in its chain was deleted or moved outside the app. Nothing is written; restore the newest
     full backup instead, or move the missing backup back.</p>
+    <p><strong>A system image is refused for a drive.</strong> The message says why: it is the drive
+    Windows is on, it is not NTFS, it is a mapped network drive (choose its <code>\\server\share</code>
+    folder instead), or it is not connected. If Windows Backup itself fails, the message
+    quotes its error and names the report in the Logs folder.</p>
     <p><strong>Verification fails on a backup that used to pass.</strong> If the backup was made before
     v3.0.0, the original pass may have been meaningless, because verification hashed the
     source files. Make a fresh backup.</p>

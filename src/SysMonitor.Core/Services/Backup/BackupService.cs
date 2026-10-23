@@ -485,118 +485,179 @@ public class BackupService : IBackupService
 
     // ==================== SYSTEM IMAGE BACKUP ====================
 
+    /// <summary>The drive facts a system image is planned from; tests stand in drives that are not there.</summary>
+    internal Func<string, DriveFacts?> InspectDrive { get; set; } = SystemImage.InspectDrive;
+
+    /// <summary>Runs a program as administrator with its output in a file; tests stand in Windows Backup.</summary>
+    internal Func<string, string, string, Task<int>> RunElevatedAsync { get; set; } = SystemImage.RunElevatedAsync;
+
+    /// <summary>Windows' own folder; the system drive is the one it is on.</summary>
+    internal string SystemDirectory { get; set; } = Environment.SystemDirectory;
+
+    private string LogFolder => Path.Combine(Path.GetDirectoryName(_backupMetadataFolder) ?? _backupMetadataFolder, "Logs");
+
+    public Task<SystemImagePlan> PrepareSystemImageAsync(string destinationPath) =>
+        Task.Run(() => SystemImage.Plan(destinationPath, SystemDirectory, InspectDrive));
+
+    /// <summary>
+    /// Makes a system image with Windows Backup: the system drive and the partitions Windows starts from, which
+    /// Windows Recovery's System Image Recovery can put back onto this disk or a new one. wbadmin needs
+    /// administrator rights, so Windows asks for them; its report is read as it is written, for progress, and
+    /// kept in the log folder. Cancelling asks Windows Backup to stop, which needs the same permission again.
+    /// </summary>
     public async Task<BackupResult> CreateSystemImageAsync(string destinationPath, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         var startTime = DateTime.Now;
         var stopwatch = Stopwatch.StartNew();
 
+        BackupResult Finish(bool success, BackupStatus status, string message, string? outputPath = null, BackupArchive? archive = null) => new()
+        {
+            Success = success,
+            Status = status,
+            Message = message,
+            OutputPath = outputPath,
+            Duration = stopwatch.Elapsed,
+            StartTime = startTime,
+            EndTime = DateTime.Now,
+            Archive = archive
+        };
+
+        if (_isBackupInProgress)
+            return Finish(false, BackupStatus.Failed, "A backup is already in progress");
+
+        var plan = await PrepareSystemImageAsync(destinationPath);
+        if (plan.Problem != null)
+            return Finish(false, BackupStatus.Failed, plan.Problem);
+
+        _isBackupInProgress = true;
         try
         {
+            Directory.CreateDirectory(LogFolder);
+            var logPath = Path.Combine(LogFolder, $"{SystemImage.LogPrefix}{DateTime.Now:yyyyMMdd-HHmmss}.log");
+
             progress?.Report(new BackupProgress
             {
                 Status = BackupStatus.Running,
-                CurrentOperation = "Creating system image backup...",
-                CurrentFile = "Using Windows Backup (wbadmin)"
+                CurrentOperation = "Waiting for administrator permission...",
+                CurrentFile = "Windows Backup needs it to read the whole drive"
             });
 
-            // Use wbadmin for system image
-            var systemDrive = Path.GetPathRoot(Environment.SystemDirectory) ?? "C:\\";
-            var destinationDrive = Path.GetPathRoot(destinationPath);
-
-            if (string.IsNullOrEmpty(destinationDrive))
+            Task<int> run;
+            try
             {
-                return new BackupResult
+                run = RunElevatedAsync(SystemImage.WbadminPath(), SystemImage.Arguments(plan), logPath);
+            }
+            catch (Exception ex)
+            {
+                // A refusal can come before there is a task to await; it is handled below with the rest.
+                run = Task.FromException<int>(ex);
+            }
+            var stopping = false;
+            while (!run.IsCompleted)
+            {
+                await Task.WhenAny(run, Task.Delay(1000, CancellationToken.None));
+
+                if (cancellationToken.IsCancellationRequested && !stopping)
                 {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = "Invalid destination path"
-                };
+                    stopping = true;
+                    _ = StopWindowsBackupAsync();
+                }
+
+                var report = SystemImage.ReadLog(logPath);
+                var percent = SystemImage.LastPercent(report) ?? 0;
+                progress?.Report(new BackupProgress
+                {
+                    Status = BackupStatus.Running,
+                    CurrentOperation = stopping ? "Stopping Windows Backup..." : "Creating system image...",
+                    CurrentFile = SystemImage.LastLine(report) ?? "Starting Windows Backup...",
+                    TotalBytes = 100,
+                    ProcessedBytes = percent,
+                    Elapsed = stopwatch.Elapsed
+                });
             }
 
-            // wbadmin needs administrator rights and this code cannot obtain them: the output is redirected,
-            // which requires UseShellExecute = false, and a verb is only honoured when the shell starts the
-            // process. The "runas" that used to sit here did nothing - wbadmin ran unelevated, failed with
-            // access denied, and the user was shown that as though the backup itself had gone wrong. Say
-            // what is actually needed instead of appearing to ask for it.
-            if (!ElevatedRegistryHelper.IsRunningElevated())
+            int exitCode;
+            try
             {
-                return new BackupResult
-                {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = "A system image needs administrator rights. Close STX.1 System Monitor and " +
-                              "start it again with \"Run as administrator\", then try again.",
-                    Duration = stopwatch.Elapsed,
-                    StartTime = startTime,
-                    EndTime = DateTime.Now
-                };
+                exitCode = await run;
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+            {
+                return Finish(false, BackupStatus.Cancelled,
+                    "Windows did not get administrator permission, so no system image was made.");
             }
 
-            var psi = new ProcessStartInfo
-            {
-                FileName = "wbadmin",
-                Arguments = $"start backup -backupTarget:{destinationDrive} -include:{systemDrive} -allCritical -quiet",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            using var process = Process.Start(psi);
-            if (process == null)
-            {
-                return new BackupResult
-                {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = "Failed to start wbadmin"
-                };
-            }
-
-            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var error = await process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
-
+            var log = SystemImage.ReadLog(logPath);
             stopwatch.Stop();
 
-            if (process.ExitCode == 0)
-            {
-                return new BackupResult
-                {
-                    Success = true,
-                    Status = BackupStatus.Completed,
-                    Message = "System image created successfully",
-                    OutputPath = destinationPath,
-                    Duration = stopwatch.Elapsed,
-                    StartTime = startTime,
-                    EndTime = DateTime.Now
-                };
-            }
-            else
-            {
-                return new BackupResult
-                {
-                    Success = false,
-                    Status = BackupStatus.Failed,
-                    Message = $"System image failed: {error}",
-                    Duration = stopwatch.Elapsed,
-                    StartTime = startTime,
-                    EndTime = DateTime.Now
-                };
-            }
+            if (stopping)
+                return Finish(false, BackupStatus.Cancelled,
+                    $"The system image was cancelled. Windows keeps only complete images, so nothing usable was added. Windows Backup's report is in {logPath}.");
+
+            if (exitCode != 0)
+                return Finish(false, BackupStatus.Failed,
+                    $"No system image was made: {SystemImage.FailureLine(log, exitCode)} Windows Backup's report is in {logPath}.");
+
+            var archive = await RecordSystemImageAsync(plan);
+            return Finish(true, BackupStatus.Completed,
+                $"System image of {plan.SystemDrive} saved in {plan.ImageFolder}", plan.ImageFolder, archive);
         }
         catch (Exception ex)
         {
-            return new BackupResult
-            {
-                Success = false,
-                Status = BackupStatus.Failed,
-                Message = $"System image error: {ex.Message}",
-                Duration = stopwatch.Elapsed,
-                StartTime = startTime,
-                EndTime = DateTime.Now
-            };
+            return Finish(false, BackupStatus.Failed, $"System image error: {ex.Message}");
         }
+        finally
+        {
+            _isBackupInProgress = false;
+        }
+    }
+
+    /// <summary>Asks Windows Backup to stop the image it is writing; Windows asks for permission again.</summary>
+    private async Task StopWindowsBackupAsync()
+    {
+        try
+        {
+            var logPath = Path.Combine(LogFolder, $"{SystemImage.LogPrefix}stop-{DateTime.Now:yyyyMMdd-HHmmss}.log");
+            await RunElevatedAsync(SystemImage.WbadminPath(), "stop job -quiet", logPath);
+        }
+        catch (Exception ex)
+        {
+            // The person may refuse the second prompt; the image then runs to its end and is reported as cancelled.
+            _logger.LogDebug(ex, "StopWindowsBackupAsync failed");
+        }
+    }
+
+    /// <summary>
+    /// Puts the image in the history. Windows keeps every version of a target's images in one WindowsImageBackup
+    /// folder, so one entry stands for that folder: it replaces the earlier entry, and its size grows by what this
+    /// run added (the folder itself is closed to ordinary accounts, so the free space is what can be read).
+    /// </summary>
+    private async Task<BackupArchive> RecordSystemImageAsync(SystemImagePlan plan)
+    {
+        var earlier = (await LoadArchivesAsync(onlyPresent: false))
+            .Where(a => a.Type == BackupType.SystemImage && string.Equals(a.FilePath, plan.ImageFolder, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var added = 0L;
+        if (!plan.IsNetworkTarget && InspectDrive(plan.Target + "\\") is { IsReady: true } after)
+            added = Math.Max(0, plan.TargetFreeBytes - after.FreeBytes);
+
+        var archive = new BackupArchive
+        {
+            Name = $"System image of {plan.SystemDrive}",
+            FilePath = plan.ImageFolder,
+            Type = BackupType.SystemImage,
+            CreatedDate = DateTime.Now,
+            SizeBytes = earlier.Select(a => a.SizeBytes).DefaultIfEmpty(0).Max() + added,
+            IsVerified = false,
+            Description = SystemImage.RestoreInstructions,
+            SourcePaths = [plan.SystemDrive + "\\"]
+        };
+
+        foreach (var old in earlier)
+            TryDeleteFile(Path.Combine(_backupMetadataFolder, $"{old.Id}.json"));
+        await SaveArchiveMetadataAsync(archive);
+        return archive;
     }
 
     // ==================== RESTORE POINT ====================
@@ -656,6 +717,9 @@ public class BackupService : IBackupService
     /// </summary>
     public async Task<BackupResult> RestoreBackupAsync(BackupArchive archive, string destinationPath, RestoreOptions options, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
     {
+        if (archive.Type == BackupType.SystemImage)
+            return new BackupResult { Success = false, Status = BackupStatus.Failed, Message = SystemImage.RestoreInstructions };
+
         if (archive.ParentBackupId == null)
             return await RestoreLayerAsync(archive, destinationPath, options, progress, cancellationToken);
 
@@ -932,7 +996,10 @@ public class BackupService : IBackupService
 
     // ==================== BACKUP MANAGEMENT ====================
 
-    public async Task<List<BackupArchive>> GetBackupHistoryAsync(string? backupLocation = null)
+    public Task<List<BackupArchive>> GetBackupHistoryAsync(string? backupLocation = null) => LoadArchivesAsync(onlyPresent: true);
+
+    /// <summary>Every recorded backup, newest first; with <paramref name="onlyPresent"/>, those whose files are still there.</summary>
+    private async Task<List<BackupArchive>> LoadArchivesAsync(bool onlyPresent)
     {
         return await Task.Run(() =>
         {
@@ -950,7 +1017,7 @@ public class BackupService : IBackupService
                         if (archive != null)
                         {
                             // Check if backup file still exists
-                            if (File.Exists(archive.FilePath) || Directory.Exists(archive.FilePath))
+                            if (!onlyPresent || File.Exists(archive.FilePath) || Directory.Exists(archive.FilePath))
                             {
                                 archives.Add(archive);
                             }
@@ -981,6 +1048,12 @@ public class BackupService : IBackupService
         string? decryptedArchivePath = null;
         try
         {
+            if (archive.Type == BackupType.SystemImage)
+            {
+                return Failed("Windows Backup checks a system image as it writes it, and its folder is closed to " +
+                              "this app, so there is nothing more it can check.");
+            }
+
             if (archive.Manifest == null)
             {
                 return Failed("No manifest available for verification");
@@ -1153,6 +1226,20 @@ public class BackupService : IBackupService
         {
             try
             {
+                // WindowsImageBackup holds every version Windows keeps, and other computers' images too; the app
+                // takes it off the list and leaves the files to Windows, which manages them.
+                if (archive.Type == BackupType.SystemImage)
+                {
+                    TryDeleteFile(Path.Combine(_backupMetadataFolder, $"{archive.Id}.json"));
+                    return new BackupResult
+                    {
+                        Success = true,
+                        Status = BackupStatus.Completed,
+                        Message = $"Removed from the list. The image is still in {archive.FilePath}; to free its space, use " +
+                                  "Control Panel > Backup and Restore (Windows 7) > Manage space."
+                    };
+                }
+
                 // Delete backup file/folder
                 if (File.Exists(archive.FilePath))
                 {
@@ -1749,6 +1836,9 @@ public class BackupService : IBackupService
         // Nothing is extracted for a preview, so the place files would be read from stands in for the real
         // one; it is only used to check that no entry points out of the backup.
         var notionalExtractPath = Path.Combine(Path.GetTempPath(), "sysmonitor-restore-preview");
+
+        if (archive.Type == BackupType.SystemImage)
+            return new RestorePlan { Problem = SystemImage.RestoreInstructions };
 
         if (archive.ParentBackupId != null)
         {

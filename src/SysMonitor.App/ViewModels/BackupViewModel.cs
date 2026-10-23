@@ -246,9 +246,31 @@ public partial class BackupViewModel : ObservableObject, IDisposable
         BackupName = $"Backup_{DateTime.Now:yyyyMMdd}";
     }
 
+    /// <summary>Set by the page to its confirmation dialog; unset, nothing that asks first will run.</summary>
+    public Confirmation? Confirm { get; set; }
+
+    private bool IsSystemImage => SelectedBackupType == BackupType.SystemImage;
+
     [RelayCommand]
     private void NextStep()
     {
+        // A system image is of the whole system drive, with Windows Backup's own settings: it has no sources to
+        // choose and none of the file backup's options, so the wizard goes from the type to the destination, and
+        // from there to the image.
+        if (IsSystemImage && CurrentStep is 1 or 3)
+        {
+            if (CurrentStep == 1)
+            {
+                CurrentStep = 3;
+                UpdateWizardTitle();
+            }
+            else
+            {
+                _ = StartSystemImageAsync();
+            }
+            return;
+        }
+
         if (CurrentStep < 5)
         {
             CurrentStep++;
@@ -266,7 +288,7 @@ public partial class BackupViewModel : ObservableObject, IDisposable
     {
         if (CurrentStep > 1)
         {
-            CurrentStep--;
+            CurrentStep = IsSystemImage && CurrentStep == 3 ? 1 : CurrentStep - 1;
             UpdateWizardTitle();
         }
     }
@@ -282,7 +304,14 @@ public partial class BackupViewModel : ObservableObject, IDisposable
 
     private void UpdateWizardTitle()
     {
-        (WizardTitle, WizardSubtitle) = CurrentStep switch
+        (WizardTitle, WizardSubtitle) = IsSystemImage ? CurrentStep switch
+        {
+            1 => ("Create New Backup", "Step 1: Select backup type"),
+            3 => ("Select Destination", "Step 2: Choose the drive the system image is saved on - not the one Windows is on"),
+            5 => ("System Image in Progress", "Windows Backup is writing the image; keep the computer on"),
+            6 => ("System Image", LastResult?.Success == true ? "The system image was saved" : "No system image was made"),
+            _ => ("BACKUP MANAGER", "Protect your files with automated backups")
+        } : CurrentStep switch
         {
             1 => ("Create New Backup", "Step 1: Select backup type"),
             2 => ("Select Source", "Step 2: Choose files and folders to backup"),
@@ -603,32 +632,79 @@ public partial class BackupViewModel : ObservableObject, IDisposable
         }
     }
 
-    [RelayCommand]
-    private async Task CreateSystemImageAsync()
+    /// <summary>
+    /// Plans the image, says what it will do and asks, then runs Windows Backup and shows its progress. Windows
+    /// asks for administrator permission itself.
+    /// </summary>
+    private async Task StartSystemImageAsync()
     {
-        if (string.IsNullOrEmpty(DestinationPath))
+        var plan = await _backupService.PrepareSystemImageAsync(DestinationPath);
+        if (plan.Problem != null)
         {
-            ShowStatus("Please select a destination drive first", false);
+            ShowStatus(plan.Problem, false);
             return;
         }
 
+        var space = plan.IsNetworkTarget
+            ? "A network folder keeps only the newest image."
+            : $"The first image needs up to about {FormatSize(plan.SystemUsedBytes)}; {plan.Target} has {FormatSize(plan.TargetFreeBytes)} free." +
+              (plan.MayRunOutOfSpace ? " It may not fit." : " Later images add only what changed, and Windows removes the oldest when space runs short.");
+        var message =
+            $"Windows Backup will save an image of {plan.SystemDrive} and the partitions Windows starts from in {plan.ImageFolder}.\n\n" +
+            $"{space}\n\n" +
+            "Windows asks for administrator permission next. It can take an hour or more; keep the computer on.\n\n" +
+            "To put the image back, start Windows Recovery and choose System Image Recovery. It replaces everything on those drives.";
+        if (!await Confirm.AskAsync("Create a system image?", message, "Create image"))
+            return;
+
+        CurrentStep = 5;
+        UpdateWizardTitle();
         IsBackupRunning = true;
-        ProgressStatus = "Creating system image...";
         ProgressPercent = 0;
+        ProgressSpeed = "";
+        ProgressEta = "";
+        ProgressStatus = "Preparing system image...";
+        _backupCts = CancellationTokenSource.CreateLinkedTokenSource(_pageCts.Token);
 
         var progress = new Progress<BackupProgress>(p =>
         {
             GetDispatcher().TryEnqueue(() =>
             {
+                ProgressPercent = p.PercentComplete;
                 ProgressStatus = p.CurrentOperation;
+                CurrentFile = p.CurrentFile;
+                ProcessedInfo = $"{p.ProcessedBytes}% - {p.Elapsed:hh\\:mm\\:ss} so far";
             });
         });
 
-        var result = await _backupService.CreateSystemImageAsync(DestinationPath, progress);
+        try
+        {
+            LastResult = await _backupService.CreateSystemImageAsync(DestinationPath, progress, _backupCts.Token);
+            HasResult = true;
+            ResultSuccess = LastResult.Success;
+            ResultMessage = LastResult.Success ? "System image saved" : "No system image was made";
+            ResultDetails = LastResult.Success
+                ? $"Duration: {LastResult.Duration:hh\\:mm\\:ss}\nSaved to: {LastResult.OutputPath}\n\nTo restore it: {SystemImageRestoreSteps}"
+                : LastResult.Message;
 
-        IsBackupRunning = false;
-        ShowStatus(result.Message, result.Success);
+            CurrentStep = 6;
+            UpdateWizardTitle();
+            await LoadBackupHistoryAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"System image error: {ex.Message}", false);
+        }
+        finally
+        {
+            IsBackupRunning = false;
+            _backupCts?.Dispose();
+            _backupCts = null;
+        }
     }
+
+    private const string SystemImageRestoreSteps =
+        "Settings > System > Recovery > Advanced startup > Restart now, then Troubleshoot > Advanced options > System Image Recovery.";
 
     // ==================== BACKUP HISTORY ACTIONS ====================
 
@@ -648,6 +724,13 @@ public partial class BackupViewModel : ObservableObject, IDisposable
     public async Task RestoreBackupWithPasswordAsync(BackupArchiveViewModel archive, string? password)
     {
         if (archive?.Archive == null) return;
+
+        // Windows puts a system image back from outside Windows; the app can only say how.
+        if (archive.Archive.Type == BackupType.SystemImage)
+        {
+            ShowStatus($"To restore a system image: {SystemImageRestoreSteps}", true);
+            return;
+        }
 
         try
         {
@@ -740,6 +823,12 @@ public partial class BackupViewModel : ObservableObject, IDisposable
     public async Task VerifyBackupWithPasswordAsync(BackupArchiveViewModel archive, string? password)
     {
         if (archive?.Archive == null) return;
+
+        if (archive.Archive.Type == BackupType.SystemImage)
+        {
+            ShowStatus("Windows Backup checked this system image as it wrote it; its folder is closed to the app.", true);
+            return;
+        }
 
         IsBackupRunning = true;
         ProgressStatus = "Verifying backup...";
@@ -848,6 +937,7 @@ public partial class BackupArchiveViewModel : ObservableObject
     public int FileCount => Archive.FileCount;
     public string TypeDisplay => Archive.Type.ToString();
     public bool IsEncrypted => Archive.IsEncrypted;
+    public bool IsSystemImage => Archive.Type == BackupType.SystemImage;
     public string Icon => Archive.Type switch
     {
         BackupType.Full => "\uE8F1",

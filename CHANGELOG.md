@@ -51,6 +51,17 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   starts a new chain and holds every file. A backup a later incremental builds on cannot be
   deleted first, and retention keeps it (`src/SysMonitor.Core/Services/Backup/BackupService.cs`,
   `BackupService.AssignLayers`, `BackupEncryption.PasswordOpensAsync`).
+- **SYSTEM IMAGE makes a real system image.** It copied the selected files like a full backup.
+  It is now Windows Backup's image of the system drive and every partition Windows needs to
+  start (`wbadmin start backup -allCritical`), saved in `WindowsImageBackup` on another NTFS
+  drive or a network folder and put back with Windows Recovery's System Image Recovery. The
+  wizard skips sources and options; the drive is checked first (not the system drive, NTFS,
+  connected, not a mapped drive) and the space it needs is shown before Windows asks for
+  administrator permission - which the app now asks for, where it used to say to restart it
+  as administrator. Progress is Windows Backup's own, its report is kept in the Logs folder,
+  a failure quotes its error, and cancelling asks it to stop. In HISTORY, Restore gives the
+  recovery steps and Delete only takes the image off the list
+  (`src/SysMonitor.Core/Services/Backup/SystemImage.cs`, `BackupService.CreateSystemImageAsync`).
 - **MIRROR BACKUP is removed from the wizard.** It promised an exact mirror and made an ordinary
   full copy; backups already recorded as Mirror still list and restore
   (`src/SysMonitor.App/Views/BackupPage.xaml`).
