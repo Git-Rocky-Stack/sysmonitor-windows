@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Security.Cryptography;
 using System.Text.Json;
+using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
 
 namespace SysMonitor.Core.Services.Cleaners;
@@ -54,7 +55,7 @@ public static class ElevatedRegistryHelper
 
             // The elevated side is handed the fingerprint of the list on its command line, which nothing else
             // can rewrite, and acts only on a list that matches it.
-            var fingerprint = Convert.ToHexString(SHA256.HashData(payload));
+            var fingerprint = ElevatedFingerprint.Of(payload);
 
             // Environment.ProcessPath is the same value as Process.GetCurrentProcess().MainModule.FileName
             // without opening a handle on ourselves that nothing then closes.
@@ -160,8 +161,8 @@ public static class ElevatedRegistryHelper
         try
         {
             await pipe.WaitForConnectionAsync(cancellationToken);
-            await WriteFrameAsync(pipe, payload, cancellationToken);
-            var reply = await ReadFrameAsync(pipe, cancellationToken);
+            await PipeFrames.WriteAsync(pipe, payload, cancellationToken);
+            var reply = await PipeFrames.ReadAsync(pipe, cancellationToken);
             return reply == null ? null : JsonSerializer.Deserialize<ElevatedCleanResult>(reply);
         }
         catch (Exception ex) when (ex is OperationCanceledException or IOException or JsonException)
@@ -185,10 +186,10 @@ public static class ElevatedRegistryHelper
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             await pipe.ConnectAsync(cts.Token);
 
-            var payload = await ReadFrameAsync(pipe, cts.Token) ?? [];
+            var payload = await PipeFrames.ReadAsync(pipe, cts.Token) ?? [];
             var (exitCode, result) = await CleanApprovedAsync(payload, fingerprint);
 
-            await WriteFrameAsync(pipe, JsonSerializer.SerializeToUtf8Bytes(result), CancellationToken.None);
+            await PipeFrames.WriteAsync(pipe, JsonSerializer.SerializeToUtf8Bytes(result), CancellationToken.None);
             return exitCode;
         }
         catch (Exception)
@@ -288,53 +289,8 @@ public static class ElevatedRegistryHelper
         }
     }
 
-    /// <summary>The largest list either side accepts: far beyond any scan, far short of exhausting memory.</summary>
-    private const int MaxFrameBytes = 16 * 1024 * 1024;
-
-    /// <summary>A length, then that many bytes: a pipe has no end-of-message of its own in byte mode.</summary>
-    internal static async Task WriteFrameAsync(Stream stream, byte[] body, CancellationToken cancellationToken)
-    {
-        var length = new byte[4];
-        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(length, body.Length);
-        await stream.WriteAsync(length, cancellationToken);
-        await stream.WriteAsync(body, cancellationToken);
-        await stream.FlushAsync(cancellationToken);
-    }
-
-    /// <summary>The next frame, or null when the other side closed without sending one.</summary>
-    internal static async Task<byte[]?> ReadFrameAsync(Stream stream, CancellationToken cancellationToken)
-    {
-        var length = new byte[4];
-        if (await stream.ReadAtLeastAsync(length, 4, throwOnEndOfStream: false, cancellationToken) < 4)
-            return null;
-
-        var size = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(length);
-        if (size is < 0 or > MaxFrameBytes)
-            throw new IOException("The other side sent a frame of an impossible size.");
-
-        var body = new byte[size];
-        await stream.ReadExactlyAsync(body, cancellationToken);
-        return body;
-    }
-
     /// <summary>Whether a payload is the one whose fingerprint was passed on the command line.</summary>
-    internal static bool MatchesFingerprint(byte[] payload, string fingerprint)
-    {
-        if (string.IsNullOrWhiteSpace(fingerprint))
-            return false;
-
-        byte[] expected;
-        try
-        {
-            expected = Convert.FromHexString(fingerprint.Trim());
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
-
-        return CryptographicOperations.FixedTimeEquals(SHA256.HashData(payload), expected);
-    }
+    internal static bool MatchesFingerprint(byte[] payload, string fingerprint) => ElevatedFingerprint.Matches(payload, fingerprint);
 
     /// <summary>
     /// The entries a fresh scan on this machine agrees are broken. An entry counts only when the same key,

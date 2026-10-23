@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using FluentAssertions;
 using Moq;
+using SysMonitor.Core.Helpers;
 using SysMonitor.Core.Models;
 using SysMonitor.Core.Services.Cleaners;
 using SysMonitor.Core.Services.Utilities;
@@ -99,7 +100,7 @@ public class ElevatedHandoffTests : IDisposable
     {
         using var stream = new MemoryStream([0xFF, 0xFF, 0xFF, 0x7F]);
 
-        var read = () => ElevatedRegistryHelper.ReadFrameAsync(stream, CancellationToken.None);
+        var read = () => PipeFrames.ReadAsync(stream, CancellationToken.None);
 
         await read.Should().ThrowAsync<IOException>();
     }

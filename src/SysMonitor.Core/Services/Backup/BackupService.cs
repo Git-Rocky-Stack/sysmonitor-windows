@@ -181,6 +181,7 @@ public class BackupService : IBackupService
             var lastProgressUpdate = DateTime.Now;
             var bytesSinceLastUpdate = 0L;
             var notCopied = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var inUse = new List<(FileInfo File, string Destination, string RelativePath)>();
 
             foreach (var file in filesToBackup)
             {
@@ -208,22 +209,18 @@ public class BackupService : IBackupService
                         Directory.CreateDirectory(destDir);
                     }
 
-                    // Copy file
-                    await CopyFileWithProgressAsync(file.FullName, destFilePath, _currentBackupCts.Token);
-
-                    // Calculate hash for verification
-                    var hash = job.VerifyAfterBackup ? await CalculateFileHashAsync(destFilePath) : "";
-
-                    // Add to manifest
-                    manifest.Files.Add(new BackupFileEntry
+                    // Copy file. One another program holds open is set aside for a shadow copy, below.
+                    try
                     {
-                        RelativePath = Path.Combine(sourceRootName, relativePath),
-                        OriginalPath = file.FullName,
-                        SizeBytes = file.Length,
-                        ModifiedDate = file.LastWriteTime,
-                        Hash = hash,
-                        Attributes = file.Attributes
-                    });
+                        await CopyFileWithProgressAsync(file.FullName, destFilePath, _currentBackupCts.Token);
+                    }
+                    catch (IOException ex) when (ShadowCopy.IsInUse(ex))
+                    {
+                        inUse.Add((file, destFilePath, Path.Combine(sourceRootName, relativePath)));
+                        continue;
+                    }
+
+                    await RecordCopiedAsync(manifest, file, destFilePath, Path.Combine(sourceRootName, relativePath), job.VerifyAfterBackup);
 
                     processedFiles++;
                     processedBytes += file.Length;
@@ -264,6 +261,53 @@ public class BackupService : IBackupService
                         FilePath = file.FullName,
                         ErrorMessage = ex.Message
                     });
+                }
+            }
+
+            // Files another program held open: copied from a shadow copy of their volume when the job asks for
+            // one, which takes administrator rights; otherwise reported, saying what would have copied them.
+            var fromShadowCopy = 0;
+            if (inUse.Count > 0)
+            {
+                _currentBackupCts.Token.ThrowIfCancellationRequested();
+                List<ShadowCopyOutcome> outcomes;
+                if (job.UseVss)
+                {
+                    progress?.Report(new BackupProgress
+                    {
+                        Status = BackupStatus.Running,
+                        CurrentOperation = $"Copying {inUse.Count} file(s) in use from a shadow copy...",
+                        CurrentFile = AllowElevationPrompt ? "Windows may ask for administrator permission" : "",
+                        TotalBytes = totalBytes,
+                        ProcessedBytes = processedBytes,
+                        TotalFiles = totalFiles,
+                        ProcessedFiles = processedFiles
+                    });
+                    outcomes = await CopyLockedFilesAsync(inUse.Select(f => new LockedFile(f.File.FullName, f.Destination)).ToList(),
+                        AllowElevationPrompt, _currentBackupCts.Token);
+                }
+                else
+                {
+                    outcomes = inUse.Select(f => new ShadowCopyOutcome(new LockedFile(f.File.FullName, f.Destination), false,
+                        "Not copied: another program has it open. Turn on \"Use Volume Shadow Copy\" to back up files in use.")).ToList();
+                }
+
+                for (var i = 0; i < inUse.Count; i++)
+                {
+                    var (file, destination, relative) = inUse[i];
+                    if (outcomes[i].Copied)
+                    {
+                        await RecordCopiedAsync(manifest, file, destination, relative, job.VerifyAfterBackup);
+                        processedFiles++;
+                        processedBytes += file.Length;
+                        fromShadowCopy++;
+                    }
+                    else
+                    {
+                        failedFiles++;
+                        notCopied.Add(file.FullName);
+                        errors.Add(new BackupError { FilePath = file.FullName, ErrorMessage = outcomes[i].Error ?? "Not copied." });
+                    }
                 }
             }
 
@@ -398,7 +442,9 @@ public class BackupService : IBackupService
 
             var status = failedFiles > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed;
 
-            // An incremental says what it holds and what it builds on, or why it had nothing to build on.
+            // An incremental says what it holds and what it builds on, or why it had nothing to build on; and any
+            // backup says how many files it read from a shadow copy because they were in use.
+            var shadowNote = fromShadowCopy > 0 ? $"; {fromShadowCopy} file(s) in use were copied from a shadow copy" : "";
             var kind = job.Type != BackupType.Incremental
                 ? ""
                 : parent != null
@@ -410,8 +456,8 @@ public class BackupService : IBackupService
                 Success = true,
                 Status = status,
                 Message = failedFiles > 0
-                    ? $"Backup completed with {failedFiles} errors{kind}"
-                    : $"Backup completed successfully{kind}",
+                    ? $"Backup completed with {failedFiles} errors{kind}{shadowNote}"
+                    : $"Backup completed successfully{kind}{shadowNote}",
                 OutputPath = finalBackupPath,
                 TotalBytes = totalBytes,
                 ProcessedBytes = processedBytes,
@@ -482,6 +528,20 @@ public class BackupService : IBackupService
 
         GC.SuppressFinalize(this);
     }
+
+    // ==================== SHADOW COPIES ====================
+
+    /// <summary>
+    /// Whether a shadow copy may ask the person for administrator rights. A scheduled run has nobody to ask:
+    /// it copies files in use only when its task already runs with those rights.
+    /// </summary>
+    public bool AllowElevationPrompt { get; set; } = true;
+
+    /// <summary>Copies files in use from shadow copies; tests stand in for Windows' Volume Shadow Copy Service.</summary>
+    internal Func<IReadOnlyList<LockedFile>, bool, CancellationToken, Task<List<ShadowCopyOutcome>>> CopyLockedFilesAsync { get; set; } =
+        (files, mayAsk, cancellationToken) => OperatingSystem.IsWindows()
+            ? ShadowCopy.CopyLockedAsync(files, mayAsk, cancellationToken)
+            : Task.FromResult(files.Select(f => new ShadowCopyOutcome(f, false, "Not copied: shadow copies are a Windows service.")).ToList());
 
     // ==================== SYSTEM IMAGE BACKUP ====================
 
@@ -1292,49 +1352,106 @@ public class BackupService : IBackupService
 
     // ==================== SCHEDULING ====================
 
-    public async Task<bool> ScheduleBackupAsync(BackupSchedule schedule)
+    /// <summary>Windows Task Scheduler; tests stand in for it.</summary>
+    internal IBackupTaskScheduler TaskScheduler { get; set; } = OperatingSystem.IsWindows()
+        ? new WindowsBackupTaskScheduler()
+        : new UnavailableTaskScheduler();
+
+    /// <summary>The program a schedule's task starts; tests name one that need not exist.</summary>
+    internal string? Executable { get; set; } = Environment.ProcessPath;
+
+    private string SchedulesFolder => Path.Combine(_backupMetadataFolder, "schedules");
+
+    private string SchedulePath(string scheduleId) => Path.Combine(SchedulesFolder, $"{scheduleId}.json");
+
+    private static readonly byte[] PasswordEntropy = "STX-1 ULTIMATE backup schedule"u8.ToArray();
+
+    /// <summary>
+    /// Saves a schedule and registers its task in Windows Task Scheduler, which starts the app at the set time
+    /// to run the backup with no window. An encrypted job's password is kept for those runs with Windows' data
+    /// protection for this account (DPAPI): readable only by this person on this PC, never in clear text.
+    /// </summary>
+    public async Task<BackupResult> ScheduleBackupAsync(BackupSchedule schedule)
     {
-        return await Task.Run(() =>
+        static BackupResult Failed(string message) => new() { Success = false, Status = BackupStatus.Failed, Message = message };
+
+        if (schedule.Job.SourcePaths.Count == 0 || string.IsNullOrWhiteSpace(schedule.Job.DestinationPath))
+            return Failed("A schedule needs something to back up and somewhere to put it.");
+        if (schedule.Frequency is not (BackupFrequency.Daily or BackupFrequency.Weekly or BackupFrequency.Monthly))
+            return Failed("A backup can repeat daily, weekly or monthly.");
+        if (schedule.Job.Type == BackupType.SystemImage)
+            return Failed("A system image is not scheduled here; Windows Backup has its own schedule.");
+        if (string.IsNullOrEmpty(Executable))
+            return Failed("The app could not find itself, so Task Scheduler would have nothing to start.");
+
+        if (schedule.Job.EnableEncryption)
         {
-            try
-            {
-                var schedulePath = Path.Combine(_backupMetadataFolder, "schedules");
-                Directory.CreateDirectory(schedulePath);
+            if (string.IsNullOrEmpty(schedule.Job.EncryptionPassword))
+                return Failed("An encrypted backup needs its password to repeat on a schedule.");
+            if (!OperatingSystem.IsWindows())
+                return Failed("An encrypted backup can repeat only on Windows, which keeps its password safe.");
+            schedule.ProtectedPassword = Convert.ToBase64String(System.Security.Cryptography.ProtectedData.Protect(
+                System.Text.Encoding.UTF8.GetBytes(schedule.Job.EncryptionPassword),
+                PasswordEntropy, System.Security.Cryptography.DataProtectionScope.CurrentUser));
+        }
+        else
+        {
+            schedule.ProtectedPassword = null;
+        }
 
-                var filePath = Path.Combine(schedulePath, $"{schedule.Id}.json");
-                var json = JsonSerializer.Serialize(schedule, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(filePath, json);
+        schedule.Name = string.IsNullOrWhiteSpace(schedule.Name) ? schedule.Job.Name : schedule.Name;
+        schedule.NextRunTime = CalculateNextRunTime(schedule);
+        await SaveScheduleAsync(schedule);
 
-                // Calculate next run time
-                schedule.NextRunTime = CalculateNextRunTime(schedule);
+        var (registered, elevated, error) = await Task.Run(() => TaskScheduler.Register(schedule, Executable));
+        if (!registered)
+        {
+            TryDeleteFile(SchedulePath(schedule.Id));
+            return Failed($"Windows Task Scheduler did not take the schedule: {error}");
+        }
 
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        });
+        schedule.NextRunTime = await Task.Run(() => TaskScheduler.NextRun(schedule.Id)) ?? schedule.NextRunTime;
+        schedule.RunsElevated = elevated;
+        await SaveScheduleAsync(schedule);
+
+        return new BackupResult
+        {
+            Success = true,
+            Status = BackupStatus.Completed,
+            Message = $"\"{schedule.Name}\" repeats {Describe(schedule)}; next run {schedule.NextRunTime:g}." +
+                      (elevated || !schedule.Job.UseVss ? "" :
+                          " Windows did not let it run with administrator rights, so files in use when it runs are reported, not copied.")
+        };
+    }
+
+    /// <summary>When a schedule repeats, in words: "weekly on Sunday at 2:00 AM".</summary>
+    public static string Describe(BackupSchedule schedule)
+    {
+        var time = DateTime.Today.Add(schedule.TimeOfDay).ToString("t");
+        return schedule.Frequency switch
+        {
+            BackupFrequency.Weekly => $"weekly on {schedule.DayOfWeek ?? DayOfWeek.Sunday} at {time}",
+            BackupFrequency.Monthly => $"monthly on day {schedule.DayOfMonth ?? 1} at {time}",
+            _ => $"daily at {time}",
+        };
     }
 
     public async Task<bool> RemoveScheduledBackupAsync(string scheduleId)
     {
-        return await Task.Run(() =>
+        if (!Guid.TryParse(scheduleId, out _))
+            return false;
+
+        try
         {
-            try
-            {
-                var filePath = Path.Combine(_backupMetadataFolder, "schedules", $"{scheduleId}.json");
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        });
+            await Task.Run(() => TaskScheduler.Remove(scheduleId));
+            TryDeleteFile(SchedulePath(scheduleId));
+            return !File.Exists(SchedulePath(scheduleId));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "RemoveScheduledBackupAsync failed");
+            return false;
+        }
     }
 
     public async Task<List<BackupSchedule>> GetScheduledBackupsAsync()
@@ -1342,20 +1459,26 @@ public class BackupService : IBackupService
         return await Task.Run(() =>
         {
             var schedules = new List<BackupSchedule>();
-            var schedulePath = Path.Combine(_backupMetadataFolder, "schedules");
+            if (!Directory.Exists(SchedulesFolder)) return schedules;
 
-            if (!Directory.Exists(schedulePath)) return schedules;
-
-            foreach (var file in Directory.GetFiles(schedulePath, "*.json"))
+            foreach (var file in Directory.GetFiles(SchedulesFolder, "*.json"))
             {
                 try
                 {
-                    var json = File.ReadAllText(file);
-                    var schedule = JsonSerializer.Deserialize<BackupSchedule>(json);
-                    if (schedule != null)
+                    var schedule = JsonSerializer.Deserialize<BackupSchedule>(File.ReadAllText(file));
+                    if (schedule == null) continue;
+
+                    // Task Scheduler knows when it will next start the backup; the saved estimate is the fallback.
+                    try
                     {
-                        schedules.Add(schedule);
+                        schedule.NextRunTime = TaskScheduler.NextRun(schedule.Id) ?? CalculateNextRunTime(schedule);
                     }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Reading a backup task's next run failed");
+                    }
+
+                    schedules.Add(schedule);
                 }
                 catch (Exception ex)
                 {
@@ -1363,8 +1486,89 @@ public class BackupService : IBackupService
                 }
             }
 
-            return schedules;
+            return schedules.OrderBy(s => s.NextRunTime ?? DateTime.MaxValue).ToList();
         });
+    }
+
+    /// <summary>
+    /// Runs a schedule's backup: started by its task with <c>--run-backup &lt;id&gt;</c>, or by RUN NOW on the page.
+    /// The outcome is kept with the schedule, for the page to show.
+    /// </summary>
+    public async Task<BackupResult> RunScheduledBackupAsync(string scheduleId, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
+    {
+        static BackupResult Failed(string message) => new() { Success = false, Status = BackupStatus.Failed, Message = message };
+
+        if (!Guid.TryParse(scheduleId, out _) || !File.Exists(SchedulePath(scheduleId)))
+            return Failed("That backup schedule no longer exists.");
+
+        BackupSchedule? schedule;
+        try
+        {
+            schedule = JsonSerializer.Deserialize<BackupSchedule>(await File.ReadAllTextAsync(SchedulePath(scheduleId), cancellationToken));
+        }
+        catch (JsonException)
+        {
+            schedule = null;
+        }
+
+        if (schedule == null)
+            return Failed("That backup schedule could not be read.");
+
+        var job = schedule.Job;
+        if (job.EnableEncryption)
+        {
+            if (!OperatingSystem.IsWindows() || string.IsNullOrEmpty(schedule.ProtectedPassword))
+                return await RecordRunAsync(schedule, Failed("This encrypted backup's password is not stored with its schedule. Set the schedule up again."));
+
+            try
+            {
+                job.EncryptionPassword = System.Text.Encoding.UTF8.GetString(System.Security.Cryptography.ProtectedData.Unprotect(
+                    Convert.FromBase64String(schedule.ProtectedPassword), PasswordEntropy,
+                    System.Security.Cryptography.DataProtectionScope.CurrentUser));
+            }
+            catch (Exception ex) when (ex is System.Security.Cryptography.CryptographicException or FormatException)
+            {
+                return await RecordRunAsync(schedule, Failed("This encrypted backup's password could not be read back on this account. Set the schedule up again."));
+            }
+        }
+
+        var result = await CreateBackupAsync(job, progress, cancellationToken);
+        return await RecordRunAsync(schedule, result);
+    }
+
+    private async Task<BackupResult> RecordRunAsync(BackupSchedule schedule, BackupResult result)
+    {
+        schedule.LastRunTime = DateTime.Now;
+        // Kept small: the outcome and its first few errors, not the archive and its manifest.
+        schedule.LastResult = result with { Archive = null, Errors = result.Errors.Take(10).ToList() };
+        try
+        {
+            await SaveScheduleAsync(schedule);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _logger.LogDebug(ex, "Recording a scheduled backup's outcome failed");
+        }
+
+        return result;
+    }
+
+    private async Task SaveScheduleAsync(BackupSchedule schedule)
+    {
+        Directory.CreateDirectory(SchedulesFolder);
+        await File.WriteAllTextAsync(SchedulePath(schedule.Id),
+            JsonSerializer.Serialize(schedule, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    /// <summary>Where Task Scheduler is not available, nothing can be scheduled, and saying so is the whole job.</summary>
+    private sealed class UnavailableTaskScheduler : IBackupTaskScheduler
+    {
+        public (bool Registered, bool Elevated, string? Error) Register(BackupSchedule schedule, string executable) =>
+            (false, false, "Task Scheduler is a Windows service");
+
+        public void Remove(string scheduleId) { }
+
+        public DateTime? NextRun(string scheduleId) => null;
     }
 
     private static DateTime? CalculateNextRunTime(BackupSchedule schedule)
@@ -1711,10 +1915,29 @@ public class BackupService : IBackupService
         $"\"{archive.Name}\" is an incremental backup, and a backup it builds on has been deleted or moved, " +
         "so it cannot be restored. Restore the newest full backup instead.";
 
+    /// <summary>Puts a file that reached the backup into its manifest, with its checksum when the job verifies.</summary>
+    private static async Task RecordCopiedAsync(BackupManifest manifest, FileInfo file, string destination, string relativePath, bool verify)
+    {
+        manifest.Files.Add(new BackupFileEntry
+        {
+            RelativePath = relativePath,
+            OriginalPath = file.FullName,
+            SizeBytes = file.Length,
+            ModifiedDate = file.LastWriteTime,
+            Hash = verify ? await CalculateFileHashAsync(destination) : "",
+            Attributes = file.Attributes
+        });
+    }
+
+    /// <summary>
+    /// The source is opened letting others go on reading, writing and deleting it, as Explorer's copy does, so a
+    /// log or a document another program merely has open copies straight away; only a file held exclusively is
+    /// left for a shadow copy.
+    /// </summary>
     private static async Task CopyFileWithProgressAsync(string source, string destination, CancellationToken cancellationToken)
     {
         const int bufferSize = 81920; // 80KB buffer
-        await using var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        await using var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, bufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
         await using var destStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
 
         await sourceStream.CopyToAsync(destStream, bufferSize, cancellationToken);

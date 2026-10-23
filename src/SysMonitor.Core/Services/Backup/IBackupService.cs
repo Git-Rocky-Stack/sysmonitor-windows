@@ -30,7 +30,10 @@ public interface IBackupService : IDisposable
     Task<BackupResult> DeleteBackupAsync(BackupArchive archive);
 
     // Scheduling
-    Task<bool> ScheduleBackupAsync(BackupSchedule schedule);
+    /// <summary>Saves a schedule and registers it with Windows Task Scheduler; the message says when it next runs.</summary>
+    Task<BackupResult> ScheduleBackupAsync(BackupSchedule schedule);
+    /// <summary>Runs a schedule's backup now - from its task, or from RUN NOW - and keeps the outcome with it.</summary>
+    Task<BackupResult> RunScheduledBackupAsync(string scheduleId, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default);
     Task<bool> RemoveScheduledBackupAsync(string scheduleId);
     Task<List<BackupSchedule>> GetScheduledBackupsAsync();
 
@@ -360,6 +363,12 @@ public class BackupSchedule
     public DateTime? NextRunTime { get; set; }
     public DateTime? LastRunTime { get; set; }
     public BackupResult? LastResult { get; set; }
+
+    /// <summary>An encrypted job's password, protected with DPAPI for this account; null for any other job.</summary>
+    public string? ProtectedPassword { get; set; }
+
+    /// <summary>Whether its task runs with administrator rights, which copying files in use needs.</summary>
+    public bool RunsElevated { get; set; }
     public bool NotifyOnCompletion { get; set; } = true;
     public bool NotifyOnFailure { get; set; } = true;
 }

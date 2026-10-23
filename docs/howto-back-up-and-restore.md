@@ -34,7 +34,7 @@ Re-verify anything you are relying on.
    | Type | Copies |
    |---|---|
    | FULL BACKUP | Everything you selected |
-   | INCREMENTAL BACKUP | Only what is new or changed since the previous backup with the same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`, `:1622`) |
+   | INCREMENTAL BACKUP | Only what is new or changed since the previous backup with the same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`, `:1826`) |
 
    An incremental builds on the backup before it, and that one on the one before, back to
    a full backup: a chain. If nothing has changed, no backup is made. With no earlier
@@ -68,7 +68,32 @@ Re-verify anything you are relying on.
    than a single file, which is fine and is no longer a failure case
    (`BackupService.cs`).
 
+   **Use Volume Shadow Copy** (on by default) backs up files other programs hold open,
+   such as an open Outlook data file. A file that is merely open copies directly; one
+   held exclusively is read from a shadow copy of its drive, which Windows asks
+   administrator permission for. The helper that reads it copies only files your own
+   account may read, and hands the bytes back to the app rather than writing anything
+   itself (`src/SysMonitor.Core/Services/Backup/ShadowCopy.cs`). Refuse the prompt, or
+   turn the option off, and those files are listed as not backed up.
+
+   **Repeat** runs the backup now and then daily, weekly or monthly at the hour you pick,
+   through Windows Task Scheduler while you are signed in. A run missed while the PC was
+   off happens when it is next on. Each run is a new backup in HISTORY - an incremental
+   repeat builds on the one before. An encrypted backup's password is kept for its runs,
+   protected by Windows for your account; it is never stored in clear text.
+
 5. Click **START BACKUP** and wait for the summary. **CANCEL BACKUP** stops it.
+
+## Schedules
+
+SCHEDULES (15D) lists every backup that repeats, with when it next runs and how its last
+run went. **Run now** runs it at once, here. **Stop schedule** asks first, then removes its
+task from Task Scheduler; the backups it made stay in HISTORY.
+
+A scheduled run has no window and nobody to answer a prompt. When Windows let its task run
+with administrator rights - you are an administrator - files in use are still copied from a
+shadow copy; otherwise they are reported in the run's result. Windows shows a notification
+when a run finishes.
 
 ## Verification
 

@@ -23,7 +23,7 @@ as the page writes them.
 | Setting | Type | Default | Effect |
 |---|---|---|---|
 | Run at Windows startup | On or off | Off (`:27`) | Launches the app when you sign in |
-| Minimize to system tray | On or off | On (`:28`) | Closing the window keeps the app running in the notification area. Starting the app again brings that window back rather than a second copy (`src/SysMonitor.App/App.xaml.cs:365-375`) |
+| Minimize to system tray | On or off | On (`:28`) | Closing the window keeps the app running in the notification area. Starting the app again brings that window back rather than a second copy (`src/SysMonitor.App/App.xaml.cs:396-406`) |
 | Show notifications | On or off | On (`:29`) | Enables alert toasts, which fire whichever page is showing and while the window is in the notification area (`src/SysMonitor.App/Views/SettingsPage.xaml:76`, `src/SysMonitor.App/Services/TrayIconService.cs:145-149`) |
 
 ## Monitoring
@@ -108,7 +108,7 @@ Everything the application stores about you is under one folder:
 |---|---|
 | `%LocalAppData%\SysMonitor` | The SQLite history database, `history.db` (`src/SysMonitor.Core/Data/HistoryDbContext.cs:26`), and application state |
 | `%LocalAppData%\SysMonitor\settings.json` | Settings (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:56`) |
-| `%LocalAppData%\SysMonitor\Logs` | Serilog output (`src/SysMonitor.App/App.xaml.cs:81`) |
+| `%LocalAppData%\SysMonitor\Logs` | Serilog output (`src/SysMonitor.App/App.xaml.cs:112`) |
 | `%LocalAppData%\SysMonitor\Logs` | Crash reports. These were written to the Desktop before v3.0.0 |
 
 Deleting `%LocalAppData%\SysMonitor` resets everything the application keeps in files.
@@ -119,8 +119,12 @@ them. Run at Startup adds a `SysMonitor` value under
 `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 (`src/SysMonitor.App/ViewModels/SettingsViewModel.cs:224`), and a cleaning schedule is a
 Task Scheduler task named `SysMonitor Scheduled Cleaning`
-(`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningService.cs:56`). Switch both off
-in the app before deleting the folder, and nothing is left behind.
+(`src/SysMonitor.Core/Services/Utilities/ScheduledCleaningService.cs:56`). Each repeating
+backup is a task named `Backup <id>` in the same `SysMonitor` folder, and its settings are in
+`%LocalAppData%\SysMonitor\Backups\schedules` (an encrypted backup's password there is
+protected with Windows' data protection for your account). Switch these off in the app -
+Settings, Scheduled Cleaning, and **Stop schedule** in Backup - before deleting the folder,
+and nothing is left behind.
 
 The install folder holds the application, plus `LICENSE.txt` and
 `THIRD-PARTY-NOTICES.txt` (`installer/SysMonitorSetup.iss:89-90`).

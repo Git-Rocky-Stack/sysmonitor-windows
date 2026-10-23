@@ -59,6 +59,22 @@ public partial class BackupViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _includeHiddenFiles;
     [ObservableProperty] private int _maxBackupsToKeep = 5;
 
+    // Repeat: 0 is once, now; 1 daily, 2 weekly, 3 monthly - registered with Windows Task Scheduler.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsWeeklyRepeat), nameof(IsMonthlyRepeat), nameof(IsRepeating))]
+    private int _repeatFrequency;
+    [ObservableProperty] private int _repeatHour = 2;
+
+    /// <summary>The hours a schedule can start at, in this PC's own time format.</summary>
+    public IReadOnlyList<string> RepeatHours { get; } =
+        Enumerable.Range(0, 24).Select(hour => DateTime.Today.AddHours(hour).ToString("t")).ToList();
+    [ObservableProperty] private int _repeatDayOfWeek; // Sunday first, as DayOfWeek counts
+    [ObservableProperty] private double _repeatDayOfMonth = 1;
+
+    public bool IsRepeating => RepeatFrequency > 0;
+    public bool IsWeeklyRepeat => RepeatFrequency == 2;
+    public bool IsMonthlyRepeat => RepeatFrequency == 3;
+
     // ==================== PROGRESS STATE ====================
 
     [ObservableProperty] private bool _isBackupRunning;
@@ -94,6 +110,12 @@ public partial class BackupViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<BackupScheduleViewModel> Schedules { get; } = [];
     [ObservableProperty] private bool _hasSchedules;
+
+    // ==================== LAST BACKUP ====================
+
+    [ObservableProperty] private bool _hasLastBackup;
+    [ObservableProperty] private string _lastBackupName = "";
+    [ObservableProperty] private string _lastBackupWhen = "";
 
     // ==================== QUICK ACTIONS ====================
 
@@ -182,6 +204,11 @@ public partial class BackupViewModel : ObservableObject, IDisposable
                     BackupHistory.Add(new BackupArchiveViewModel(archive));
                 }
                 HasBackups = BackupHistory.Count > 0;
+
+                var latest = history.FirstOrDefault();
+                HasLastBackup = latest != null;
+                LastBackupName = latest?.Name ?? "";
+                LastBackupWhen = latest == null ? "" : Ago(latest.CreatedDate);
             });
         }
         catch (Exception ex)
@@ -567,6 +594,23 @@ public partial class BackupViewModel : ObservableObject, IDisposable
                 ResultDetails += $"\nSaved to: {LastResult.OutputPath}";
             }
 
+            // Repeat: the job, as it was just run, registered with Task Scheduler. Its outcome goes under the
+            // backup's, whether or not this first run went well - the schedule is its own thing.
+            if (IsRepeating)
+            {
+                var scheduled = await _backupService.ScheduleBackupAsync(new BackupSchedule
+                {
+                    Name = BackupName,
+                    Job = job,
+                    Frequency = RepeatFrequency switch { 2 => BackupFrequency.Weekly, 3 => BackupFrequency.Monthly, _ => BackupFrequency.Daily },
+                    TimeOfDay = TimeSpan.FromHours(Math.Clamp(RepeatHour, 0, 23)),
+                    DayOfWeek = (DayOfWeek)Math.Clamp(RepeatDayOfWeek, 0, 6),
+                    DayOfMonth = (int)Math.Clamp(RepeatDayOfMonth, 1, 31),
+                });
+                ResultDetails += $"\n\n{scheduled.Message}";
+                await LoadSchedulesAsync();
+            }
+
             CurrentStep = 6;
             UpdateWizardTitle();
 
@@ -705,6 +749,58 @@ public partial class BackupViewModel : ObservableObject, IDisposable
 
     private const string SystemImageRestoreSteps =
         "Settings > System > Recovery > Advanced startup > Restart now, then Troubleshoot > Advanced options > System Image Recovery.";
+
+    // ==================== SCHEDULES ====================
+
+    /// <summary>Runs a schedule's backup now, here, with its progress on screen.</summary>
+    [RelayCommand]
+    private async Task RunScheduleNowAsync(BackupScheduleViewModel schedule)
+    {
+        if (schedule == null || IsBackupRunning) return;
+
+        IsBackupRunning = true;
+        ProgressStatus = $"Running \"{schedule.Name}\"...";
+        try
+        {
+            var result = await _backupService.RunScheduledBackupAsync(schedule.Schedule.Id);
+            ShowStatus(result.Message, result.Success);
+            await Task.WhenAll(LoadSchedulesAsync(), LoadBackupHistoryAsync());
+        }
+        finally
+        {
+            IsBackupRunning = false;
+        }
+    }
+
+    /// <summary>Removes a schedule and its task; the backups it already made stay.</summary>
+    [RelayCommand]
+    private async Task DeleteScheduleAsync(BackupScheduleViewModel schedule)
+    {
+        if (schedule == null) return;
+
+        if (!await Confirm.AskAsync("Stop this schedule?",
+                $"\"{schedule.Name}\" will no longer run {schedule.FrequencyDisplay}. Its task leaves Task Scheduler. The backups it already made stay.",
+                "Stop schedule"))
+            return;
+
+        var removed = await _backupService.RemoveScheduledBackupAsync(schedule.Schedule.Id);
+        ShowStatus(removed ? $"\"{schedule.Name}\" no longer repeats" : $"\"{schedule.Name}\" could not be removed; Task Scheduler may still run it", removed);
+        if (removed)
+        {
+            Schedules.Remove(schedule);
+            HasSchedules = Schedules.Count > 0;
+        }
+    }
+
+    private static string Ago(DateTime when)
+    {
+        var age = DateTime.Now - when;
+        return age.TotalMinutes < 1 ? "just now"
+            : age.TotalHours < 1 ? $"{(int)age.TotalMinutes} minute(s) ago"
+            : age.TotalDays < 1 ? $"{(int)age.TotalHours} hour(s) ago"
+            : age.TotalDays < 30 ? $"{(int)age.TotalDays} day(s) ago"
+            : when.ToString("d");
+    }
 
     // ==================== BACKUP HISTORY ACTIONS ====================
 
@@ -958,9 +1054,12 @@ public partial class BackupScheduleViewModel : ObservableObject
 
     public string Name => Schedule.Name;
     public bool IsEnabled => Schedule.IsEnabled;
-    public string FrequencyDisplay => Schedule.Frequency.ToString();
-    public string NextRunDisplay => Schedule.NextRunTime?.ToString("g") ?? "Not scheduled";
-    public string LastRunDisplay => Schedule.LastRunTime?.ToString("g") ?? "Never";
+    public string FrequencyDisplay => BackupService.Describe(Schedule);
+    public string NextRunDisplay => Schedule.NextRunTime is { } next ? $"Next: {next:g}" : "Not scheduled";
+    public string LastRunDisplay => Schedule.LastRunTime is { } last
+        ? $"Last: {last:g} - {(Schedule.LastResult?.Success == true ? "completed" : "did not complete")}"
+        : "Not run yet";
+    public string Destination => Schedule.Job.DestinationPath;
 
     public BackupScheduleViewModel(BackupSchedule schedule)
     {

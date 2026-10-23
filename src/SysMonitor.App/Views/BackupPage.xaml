@@ -183,19 +183,74 @@
                                 </StackPanel>
                             </instruments:Faceplate>
                         </StackPanel>
+
+                        <!-- Schedules: backups that repeat through Windows Task Scheduler -->
+                        <StackPanel Spacing="8">
+                            <instruments:Faceplate Kicker="BACKUP - SCHEDULES - 15D" Serial="{instruments:SerialFor Module=BACKUP-SCHEDULES}">
+                                <StackPanel Spacing="8">
+
+                                    <instruments:Plate Padding="12" Visibility="{x:Bind ViewModel.HasSchedules, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                                        <ItemsControl ItemsSource="{x:Bind ViewModel.Schedules, Mode=OneWay}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,6" ColumnSpacing="12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <FontIcon Grid.Column="0" Glyph="&#xE787;" FontSize="18" VerticalAlignment="Center"/>
+
+                                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding FrequencyDisplay}" FontSize="11" Foreground="{ThemeResource SilverBrush}"/>
+                                                            <TextBlock FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextTrimming="CharacterEllipsis">
+                                                                <Run Text="{Binding NextRunDisplay}"/>
+                                                                <Run Text=" | "/>
+                                                                <Run Text="{Binding LastRunDisplay}"/>
+                                                            </TextBlock>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                            <Button Click="RunSchedule_Click" Tag="{Binding}" ToolTipService.ToolTip="Run now" AutomationProperties.Name="Run scheduled backup now" Style="{StaticResource IconCapButtonStyle}">
+                                                                <FontIcon Glyph="&#xE768;" FontSize="14"/>
+                                                            </Button>
+                                                            <Button Click="DeleteSchedule_Click" Tag="{Binding}" ToolTipService.ToolTip="Stop schedule" AutomationProperties.Name="Stop schedule" Style="{StaticResource ArmedIconCapButtonStyle}">
+                                                                <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </instruments:Plate>
+
+                                    <instruments:Plate Padding="16" Visibility="{x:Bind ViewModel.HasSchedules, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
+                                        <TextBlock Text="No backup repeats yet. In a new backup's options, choose how often it repeats."
+                                                   FontSize="12" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Center"
+                                                   TextAlignment="Center" TextWrapping="Wrap"/>
+                                    </instruments:Plate>
+                                </StackPanel>
+                            </instruments:Faceplate>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
 
                 <!-- Right Sidebar - Status -->
-                <instruments:Faceplate Grid.Column="1" VerticalAlignment="Top" Kicker="BACKUP - STATUS - 15D" Serial="{instruments:SerialFor Module=BACKUP-STATUS}">
+                <instruments:Faceplate Grid.Column="1" VerticalAlignment="Top" Kicker="BACKUP - STATUS - 15E" Serial="{instruments:SerialFor Module=BACKUP-STATUS}">
                     <StackPanel Spacing="16">
 
                         <!-- Last Backup Info -->
                         <instruments:Well Padding="12">
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Last Backup" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
-                                <TextBlock Text="Documents_Backup" FontWeight="SemiBold"/>
-                                <TextBlock Text="2 hours ago" FontSize="12" Foreground="{ThemeResource StateGoBrush}"/>
+                                <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.HasLastBackup, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind ViewModel.LastBackupName, Mode=OneWay}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{x:Bind ViewModel.LastBackupWhen, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource StateGoBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="None yet" FontSize="12" Foreground="{ThemeResource SilverMuteBrush}"
+                                           Visibility="{x:Bind ViewModel.HasLastBackup, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"/>
                             </StackPanel>
                         </instruments:Well>
 
@@ -515,7 +570,7 @@
                                 <TextBlock Text="Additional Options" FontWeight="SemiBold"/>
                                 <ToggleSwitch Header="Verify backup after completion" IsOn="{x:Bind ViewModel.VerifyAfterBackup, Mode=TwoWay}"/>
                                 <ToggleSwitch Header="Include hidden files" IsOn="{x:Bind ViewModel.IncludeHiddenFiles, Mode=TwoWay}"/>
-                                <ToggleSwitch Header="Use Volume Shadow Copy (backup files in use)" IsOn="{x:Bind ViewModel.UseVss, Mode=TwoWay}"/>
+                                <ToggleSwitch Header="Use Volume Shadow Copy - back up files other programs have open (Windows asks for administrator permission when one is)" IsOn="{x:Bind ViewModel.UseVss, Mode=TwoWay}"/>
                             </StackPanel>
                         </instruments:Plate>
 
@@ -528,6 +583,43 @@
                                     <NumberBox AutomationProperties.Name="Number of backups to keep" Value="{x:Bind ViewModel.MaxBackupsToKeep, Mode=TwoWay}" Minimum="1" Maximum="100" SpinButtonPlacementMode="Compact"/>
                                     <TextBlock Text="backups" VerticalAlignment="Center"/>
                                 </StackPanel>
+                            </StackPanel>
+                        </instruments:Plate>
+
+                        <!-- Repeat -->
+                        <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Repeat" FontWeight="SemiBold"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ComboBox AutomationProperties.Name="How often the backup repeats" MinWidth="160"
+                                              SelectedIndex="{x:Bind ViewModel.RepeatFrequency, Mode=TwoWay}">
+                                        <ComboBoxItem Content="Once, now"/>
+                                        <ComboBoxItem Content="Daily"/>
+                                        <ComboBoxItem Content="Weekly"/>
+                                        <ComboBoxItem Content="Monthly"/>
+                                    </ComboBox>
+                                    <ComboBox AutomationProperties.Name="Day of the week" MinWidth="140"
+                                              SelectedIndex="{x:Bind ViewModel.RepeatDayOfWeek, Mode=TwoWay}"
+                                              Visibility="{x:Bind ViewModel.IsWeeklyRepeat, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <ComboBoxItem Content="Sunday"/>
+                                        <ComboBoxItem Content="Monday"/>
+                                        <ComboBoxItem Content="Tuesday"/>
+                                        <ComboBoxItem Content="Wednesday"/>
+                                        <ComboBoxItem Content="Thursday"/>
+                                        <ComboBoxItem Content="Friday"/>
+                                        <ComboBoxItem Content="Saturday"/>
+                                    </ComboBox>
+                                    <NumberBox AutomationProperties.Name="Day of the month" Minimum="1" Maximum="31" SpinButtonPlacementMode="Compact"
+                                               Value="{x:Bind ViewModel.RepeatDayOfMonth, Mode=TwoWay}"
+                                               Visibility="{x:Bind ViewModel.IsMonthlyRepeat, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <ComboBox AutomationProperties.Name="Time the backup starts" MinWidth="120"
+                                              ItemsSource="{x:Bind ViewModel.RepeatHours}"
+                                              SelectedIndex="{x:Bind ViewModel.RepeatHour, Mode=TwoWay}"
+                                              Visibility="{x:Bind ViewModel.IsRepeating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </StackPanel>
+                                <TextBlock FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" TextWrapping="Wrap"
+                                           Visibility="{x:Bind ViewModel.IsRepeating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                           Text="It runs now, then through Windows Task Scheduler while you are signed in, with no window. A run missed while the PC was off happens when it is next on. An encrypted backup's password is kept for it, protected by Windows for your account."/>
                             </StackPanel>
                         </instruments:Plate>
 

@@ -66,7 +66,8 @@ own policies.
 | Logs, for troubleshooting | `%LocalAppData%\SysMonitor\Logs\` |
 | Registry backups taken before the Registry Cleaner changes anything | `%LocalAppData%\SysMonitor\RegistryBackups\` |
 | Reports you export | Dashboard EXPORT: your Documents folder. Performance EXPORT CSV: your Desktop. Driver Updater: where you choose. The App names the file it wrote |
-| Backups you make | The destination you choose. Encrypted backups use AES-256 with a key derived from your password, which the App does not store |
+| Backups you make | The destination you choose. Encrypted backups use AES-256 with a key derived from your password, which the App does not store - except for a backup you set to repeat, whose password is kept for its runs, encrypted with Windows' data protection for your account and readable only by you on that PC |
+| Backup schedules | `%LocalAppData%\SysMonitor\Backups\schedules`, and a task in Windows Task Scheduler for each |
 
 Logs record what the App did and any errors, with file paths where an operation failed. They
 do not record passwords, browser data or file contents.
@@ -82,7 +83,7 @@ do not record passwords, browser data or file contents.
 
 The App runs as an ordinary user. A few actions ask Windows for administrator permission when
 you start them: changing machine-wide registry keys or startup entries, creating a restore
-point or a system image, and some hardware sensors. The Microsoft Store build declares the
+point or a system image, copying files in use from a shadow copy, and some hardware sensors. The Microsoft Store build declares the
 "full trust" capability because it is a desktop application that reads hardware and manages
 files.
 

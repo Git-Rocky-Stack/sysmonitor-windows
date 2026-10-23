@@ -230,6 +230,18 @@ public sealed partial class BackupPage : Page
         }
     }
 
+    private async void RunSchedule_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: BackupScheduleViewModel schedule })
+            await ViewModel.RunScheduleNowCommand.ExecuteAsync(schedule);
+    }
+
+    private async void DeleteSchedule_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: BackupScheduleViewModel schedule })
+            await ViewModel.DeleteScheduleCommand.ExecuteAsync(schedule);
+    }
+
     /// <summary>Shows what a restore would write and where, and asks before it happens.</summary>
     private async Task<bool> AskBeforeRestoringAsync(RestorePlan plan)
     {

@@ -103,7 +103,7 @@
     <td>Minimize to system tray</td>
     <td>On or off</td>
     <td>On (<code>:28</code>)</td>
-    <td>Closing the window keeps the app running in the notification area. Starting the app again brings that window back rather than a second copy (<code>src/SysMonitor.App/App.xaml.cs:365-375</code>)</td>
+    <td>Closing the window keeps the app running in the notification area. Starting the app again brings that window back rather than a second copy (<code>src/SysMonitor.App/App.xaml.cs:396-406</code>)</td>
     </tr>
     <tr>
     <td>Show notifications</td>
@@ -260,7 +260,7 @@
     </tr>
     <tr>
     <td><code>%LocalAppData%\SysMonitor\Logs</code></td>
-    <td>Serilog output (<code>src/SysMonitor.App/App.xaml.cs:81</code>)</td>
+    <td>Serilog output (<code>src/SysMonitor.App/App.xaml.cs:112</code>)</td>
     </tr>
     <tr>
     <td><code>%LocalAppData%\SysMonitor\Logs</code></td>
@@ -275,8 +275,12 @@
     <code>HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</code>
     (<code>src/SysMonitor.App/ViewModels/SettingsViewModel.cs:224</code>), and a cleaning schedule is a
     Task Scheduler task named <code>SysMonitor Scheduled Cleaning</code>
-    (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningService.cs:56</code>). Switch both off
-    in the app before deleting the folder, and nothing is left behind.</p>
+    (<code>src/SysMonitor.Core/Services/Utilities/ScheduledCleaningService.cs:56</code>). Each repeating
+    backup is a task named <code>Backup &lt;id&gt;</code> in the same <code>SysMonitor</code> folder, and its settings are in
+    <code>%LocalAppData%\SysMonitor\Backups\schedules</code> (an encrypted backup's password there is
+    protected with Windows' data protection for your account). Switch these off in the app -
+    Settings, Scheduled Cleaning, and <strong>Stop schedule</strong> in Backup - before deleting the folder,
+    and nothing is left behind.</p>
     <p>The install folder holds the application, plus <code>LICENSE.txt</code> and
     <code>THIRD-PARTY-NOTICES.txt</code> (<code>installer/SysMonitorSetup.iss:89-90</code>).</p>
     <p>Exported reports go to your Documents folder

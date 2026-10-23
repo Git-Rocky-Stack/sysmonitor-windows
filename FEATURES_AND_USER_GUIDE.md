@@ -87,7 +87,7 @@ Section names in this guide are the names the navigation menu uses
 The app runs as one copy. With Minimize to system tray on, which is the default,
 closing the window hides it in the notification area. Starting the app again brings
 that window back rather than starting a second copy
-(`src/SysMonitor.App/App.xaml.cs:365-375`). Alerts are checked by that one copy
+(`src/SysMonitor.App/App.xaml.cs:396-406`). Alerts are checked by that one copy
 whichever page is showing, and while the window is in the notification area
 (`src/SysMonitor.App/Services/TrayIconService.cs:145-149`).
 
@@ -415,7 +415,7 @@ Make room for a game, in CONTROL (11A), ADVANCED FEATURES (11B), SYSTEM MONITORI
   below the game in the processor queue, and are put back afterwards
 - **High Performance Mode** - Sets Windows to the High Performance power plan. If the
   app ends without switching Game Mode off, the previous plan is put back the next time
-  it starts (`src/SysMonitor.App/App.xaml.cs:386-390`)
+  it starts (`src/SysMonitor.App/App.xaml.cs:417-421`)
 - **Trims Memory** - Trims background app working sets; Windows can page them back
 
 Asking the apps to close is a separate opt-in: tick "Ask them to close instead (may
@@ -535,7 +535,7 @@ Overwriting a single file is not one of them. See
 ### Backup Manager
 
 Create and manage file backups, in QUICK ACTIONS (15A), HISTORY (15B), SYSTEM RESTORE
-POINTS (15C) and STATUS (15D).
+POINTS (15C), SCHEDULES (15D) and STATUS (15E), which shows the newest backup.
 
 **Quick Actions:**
 - **NEW BACKUP** - Start the backup wizard
@@ -564,7 +564,15 @@ POINTS (15C) and STATUS (15D).
 **Features:**
 - Encryption support (AES-256)
 - Compression options (None, Normal, Maximum)
-- Volume Shadow Copy (VSS) support
+- Volume Shadow Copy: a file another program has open exclusively - a mail store, a
+  database - is read from a shadow copy of its drive, after Windows asks for administrator
+  permission. Only files your own account may read are copied that way
+  (`src/SysMonitor.Core/Services/Backup/ShadowCopy.cs`). With the option off, such a
+  file is listed as not backed up, saying why
+- Repeat: daily, weekly or monthly at a set hour, through Windows Task Scheduler while
+  you are signed in. SCHEDULES (15D) lists each one with its next and last run, **RUN
+  NOW**, and an armed **Stop schedule** cap that asks first. An encrypted backup's
+  password is kept for its runs with Windows' data protection for your account
 - Backup verification
 - Retention policies (keep last N backups). Retention runs only after a complete
   backup, and never removes the full backup later ones depend on

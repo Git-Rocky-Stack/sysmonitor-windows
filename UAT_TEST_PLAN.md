@@ -115,6 +115,12 @@ capitals.
 | B-9 | SYSTEM IMAGE to an NTFS USB drive; accept the permission prompt | Progress follows Windows Backup's percent; `E:\WindowsImageBackup` appears; HISTORY shows "System image of C:" |
 | B-10 | SYSTEM IMAGE, then refuse the permission prompt | Says no image was made; nothing in HISTORY |
 | B-11 | Restore, Verify and Delete on the system image in HISTORY | Restore gives the System Image Recovery steps; Delete only takes it off the list and the folder stays |
+| B-12 | Back up a folder holding an Outlook .pst (Outlook open), Volume Shadow Copy on; accept the prompt | The .pst is in the backup; the result says files in use were copied from a shadow copy |
+| B-13 | Same, refuse the prompt; then with Volume Shadow Copy off | The .pst is listed as not backed up, saying why; the rest of the backup is complete |
+| B-14 | New backup, Repeat Daily at the next hour; check Task Scheduler > SysMonitor | A "Backup <id>" task; SCHEDULES lists it with its next run |
+| B-15 | Wait for the run (PC on, signed in) | A notification; a new backup in HISTORY; SCHEDULES shows the last run completed |
+| B-16 | Encrypted backup set to repeat; RUN NOW; restore it with the password | Runs without asking for the password; restores with it |
+| B-17 | Stop schedule | Asks first; the task leaves Task Scheduler; its backups stay |
 | B-6 | Create restore point twice within a few minutes | The second time says Windows did not create a new one |
 | B-7 | Restore points list | Shows the machine's restore points with dates |
 

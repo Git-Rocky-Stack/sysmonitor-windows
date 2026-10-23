@@ -37,7 +37,7 @@ Passed!  - Failed: 0, Passed: 183
 
 ### 2.1 The look is complete (`559cfd0`, `5fda861`)
 
-- **Every major section is a `Faceplate`**, 106 across the pages plus Backup's status sidebar (15D). The stripe's
+- **Every major section is a `Faceplate`**, 106 across the pages plus Backup's status sidebar (15E). The stripe's
   kicker is `<MODULE> - <SECTION> - <INDEX><LETTER>`, the module and index from the page's `ViewHeader`, letters in
   document order, serial from `SerialFor`. `FaceplateKickerTests` holds it. Gated sections carry their gate on the
   faceplate; footers stay on the chassis; a narrow stripe cuts its serial, not its kicker.
@@ -91,8 +91,6 @@ PRIVACY_POLICY (network activity, browser profiles, Wi-Fi, where data lives), an
 |---|---|---|
 | Cut 3.1.0 | Needs the built files' checksums for `docs/index.html` | RELEASE_CHECKLIST.md 2-4 |
 | Store screenshots in the new look | Need real hardware; CI's VM has no sensors | RELEASE_CHECKLIST.md 5 |
-| Backup's "Use Volume Shadow Copy" switch does nothing | Remove it, or build shadow copies (needs administrator rights) - the owner's call | not tracked |
-| Backup schedules are saved but never run, and no page lists them | Build them on Task Scheduler as Scheduled Cleaning is, or remove them - the owner's call | not tracked |
 
 ---
 

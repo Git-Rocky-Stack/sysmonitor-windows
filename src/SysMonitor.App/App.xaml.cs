@@ -52,6 +52,37 @@ public partial class App : Application
             return; // Don't initialize the rest of the app
         }
 
+        // The shadow copy helper: started as administrator by a backup that found files in use. It reads them
+        // from a shadow copy and streams them back over the pipe it is named, then exits.
+        if (args.Length >= 4 && args[1] == "--vss-copy")
+        {
+            var pipeName = args[2];
+            var fingerprint = args[3];
+
+            Task.Run(async () =>
+            {
+                var exitCode = await ShadowCopy.RunHelperAsync(pipeName, fingerprint);
+                Environment.Exit(exitCode);
+            }).GetAwaiter().GetResult();
+
+            return;
+        }
+
+        // A backup schedule's task starts the app with --run-backup <id>: run that backup with no window, keep
+        // the outcome with the schedule, say what happened, and exit.
+        if (args.Length >= 3 && args[1] == "--run-backup")
+        {
+            var scheduleId = args[2];
+
+            Task.Run(async () =>
+            {
+                var exitCode = await RunScheduledBackupAsync(scheduleId);
+                Environment.Exit(exitCode);
+            }).GetAwaiter().GetResult();
+
+            return;
+        }
+
         // Windows Task Scheduler starts the app with these switches at the scheduled time. Clean and exit:
         // opening the whole app with highest privileges and cleaning nothing is what M4 was about.
         if (ScheduledCleaningRequest.FromCommandLine(args) is { } cleaningRequest)
@@ -478,6 +509,69 @@ public partial class App : Application
         finally
         {
             Log.CloseAndFlush();
+        }
+    }
+
+    /// <summary>
+    /// Runs a scheduled backup with no window. Nobody is there to answer a prompt, so files in use are copied
+    /// from a shadow copy only when the task already runs as administrator. Returns the exit code Task
+    /// Scheduler's history shows.
+    /// </summary>
+    private static async Task<int> RunScheduledBackupAsync(string scheduleId)
+    {
+        var logPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SysMonitor", "Logs", "sysmonitor-.log");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.File(logPath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog());
+
+        try
+        {
+            using var backups = new BackupService(loggerFactory.CreateLogger<BackupService>()) { AllowElevationPrompt = false };
+            var result = await backups.RunScheduledBackupAsync(scheduleId);
+            Log.Information("Scheduled backup {ScheduleId}: {Message}", scheduleId, result.Message);
+            ShowNotification(result.Success ? "Scheduled backup finished" : "Scheduled backup did not finish", result.Message);
+            return result.Success ? 0 : 1;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Scheduled backup failed");
+            return 1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+
+    private static void ShowNotification(string title, string body)
+    {
+        try
+        {
+            var template = Windows.UI.Notifications.ToastNotificationManager.GetTemplateContent(
+                Windows.UI.Notifications.ToastTemplateType.ToastText02);
+            var textNodes = template.GetElementsByTagName("text");
+            if (textNodes.Length >= 2)
+            {
+                textNodes[0].AppendChild(template.CreateTextNode(title));
+                textNodes[1].AppendChild(template.CreateTextNode(body));
+            }
+
+            Windows.UI.Notifications.ToastNotificationManager.CreateToastNotifier("SysMonitor")
+                .Show(new Windows.UI.Notifications.ToastNotification(template));
+        }
+        catch (Exception ex)
+        {
+            // Nobody is watching a scheduled run; the log is the record that matters.
+            Log.Warning(ex, "A scheduled run finished but its notification could not be shown");
         }
     }
 

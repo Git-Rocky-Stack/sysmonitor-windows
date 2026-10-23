@@ -140,6 +140,28 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
 - The PDF editor's unused stand-in page renderer is removed; pages were always drawn by
   Windows' own PDF renderer.
 
+### Added - backups of files in use, and backups that repeat
+
+- **Volume Shadow Copy works.** The switch was saved and never read. A file another program
+  merely has open now copies directly (the source is opened sharing read, write and delete, as
+  Explorer's copy does); one held exclusively is read from a shadow copy of its volume
+  (Win32_ShadowCopy, ClientAccessible), deleted afterwards. That needs administrator rights:
+  Windows asks, and a helper started as administrator reads the files and streams them back
+  over a pipe only this account can open - it writes nothing itself, and reads only files the
+  person's own unelevated account may read (an access check against the linked token). With
+  the switch off, or the prompt refused, such files are reported, saying why
+  (`src/SysMonitor.Core/Services/Backup/ShadowCopy.cs`).
+- **Backups repeat.** The schedule types existed and nothing ran them. The options step has
+  Repeat - daily, weekly or monthly at an hour - which registers a task in Task Scheduler's
+  SysMonitor folder that starts the app with `--run-backup <id>`: it runs with no window,
+  keeps the outcome with the schedule and shows a notification. The task asks for the
+  person's highest rights, so files in use are copied without a prompt when they are an
+  administrator, and runs with ordinary rights otherwise. An encrypted backup's password is
+  kept for its runs with DPAPI for the account. SCHEDULES (15D) lists each with its next and
+  last run, RUN NOW and a confirmed Stop schedule
+  (`src/SysMonitor.Core/Services/Backup/BackupTaskScheduler.cs`, `BackupService.RunScheduledBackupAsync`).
+- STATUS (now 15E) shows the newest backup; it showed a fixed "Documents_Backup, 2 hours ago".
+
 ### Changed - one name and one publisher
 
 - The app, installer, docs and site say **STX-1 ULTIMATE System Monitor**, published by
@@ -499,7 +521,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   whole file back from a copy the page took when it opened, erasing any custom game Auto
   Game Mode had added since. One store now serves every reader and writer in both builds
   (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:25`, registered at
-  `src/SysMonitor.App/App.xaml.cs:113`). A save reads the file again and writes only its
+  `src/SysMonitor.App/App.xaml.cs:144`). A save reads the file again and writes only its
   own changes on top, and a file it could not read is never written over. On its first
   start the packaged build copies across what an earlier version left in `LocalSettings`.
   Auto Game Mode's saves are written in the order they were made, and the last one lands

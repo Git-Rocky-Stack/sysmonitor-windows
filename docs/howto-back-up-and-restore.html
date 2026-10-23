@@ -97,7 +97,7 @@
     </tr>
     <tr>
     <td>INCREMENTAL BACKUP</td>
-    <td>Only what is new or changed since the previous backup with the same name, full or incremental (<code>src/SysMonitor.Core/Services/Backup/BackupService.cs:125</code>, <code>:1622</code>)</td>
+    <td>Only what is new or changed since the previous backup with the same name, full or incremental (<code>src/SysMonitor.Core/Services/Backup/BackupService.cs:125</code>, <code>:1826</code>)</td>
     </tr>
     </tbody>
     </table></div>
@@ -132,9 +132,29 @@
     <p>Compression can be None, Normal or Maximum. With None the backup is a folder rather
        than a single file, which is fine and is no longer a failure case
        (<code>BackupService.cs</code>).</p>
+    <p><strong>Use Volume Shadow Copy</strong> (on by default) backs up files other programs hold open,
+       such as an open Outlook data file. A file that is merely open copies directly; one
+       held exclusively is read from a shadow copy of its drive, which Windows asks
+       administrator permission for. The helper that reads it copies only files your own
+       account may read, and hands the bytes back to the app rather than writing anything
+       itself (<code>src/SysMonitor.Core/Services/Backup/ShadowCopy.cs</code>). Refuse the prompt, or
+       turn the option off, and those files are listed as not backed up.</p>
+    <p><strong>Repeat</strong> runs the backup now and then daily, weekly or monthly at the hour you pick,
+       through Windows Task Scheduler while you are signed in. A run missed while the PC was
+       off happens when it is next on. Each run is a new backup in HISTORY - an incremental
+       repeat builds on the one before. An encrypted backup's password is kept for its runs,
+       protected by Windows for your account; it is never stored in clear text.</p>
     <ol start="5">
     <li>Click <strong>START BACKUP</strong> and wait for the summary. <strong>CANCEL BACKUP</strong> stops it.</li>
     </ol>
+    <h2>Schedules</h2>
+    <p>SCHEDULES (15D) lists every backup that repeats, with when it next runs and how its last
+    run went. <strong>Run now</strong> runs it at once, here. <strong>Stop schedule</strong> asks first, then removes its
+    task from Task Scheduler; the backups it made stay in HISTORY.</p>
+    <p>A scheduled run has no window and nobody to answer a prompt. When Windows let its task run
+    with administrator rights - you are an administrator - files in use are still copied from a
+    shadow copy; otherwise they are reported in the run's result. Windows shows a notification
+    when a run finishes.</p>
     <h2>Verification</h2>
     <p>In HISTORY (15B), use the <strong>Verify backup</strong> cap on the completed backup. It hashes the
     backup and checks it against what was recorded at the time it was written.</p>
