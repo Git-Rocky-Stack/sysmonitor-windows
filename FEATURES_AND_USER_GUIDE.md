@@ -87,7 +87,7 @@ Section names in this guide are the names the navigation menu uses
 The app runs as one copy. With Minimize to system tray on, which is the default,
 closing the window hides it in the notification area. Starting the app again brings
 that window back rather than starting a second copy
-(`src/SysMonitor.App/App.xaml.cs:366-376`). Alerts are checked by that one copy
+(`src/SysMonitor.App/App.xaml.cs:365-375`). Alerts are checked by that one copy
 whichever page is showing, and while the window is in the notification area
 (`src/SysMonitor.App/Services/TrayIconService.cs:145-149`).
 
@@ -415,7 +415,7 @@ Make room for a game, in CONTROL (11A), ADVANCED FEATURES (11B), SYSTEM MONITORI
   below the game in the processor queue, and are put back afterwards
 - **High Performance Mode** - Sets Windows to the High Performance power plan. If the
   app ends without switching Game Mode off, the previous plan is put back the next time
-  it starts (`src/SysMonitor.App/App.xaml.cs:387-391`)
+  it starts (`src/SysMonitor.App/App.xaml.cs:386-390`)
 - **Trims Memory** - Trims background app working sets; Windows can page them back
 
 Asking the apps to close is a separate opt-in: tick "Ask them to close instead (may

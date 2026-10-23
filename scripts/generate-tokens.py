@@ -45,6 +45,16 @@ def css(c):
 def fade(c):
     return (c[0], c[1], c[2], 0, None)
 
+def saturate(c, amount=0.5):
+    """CSS filter saturate(amount): the colour matrix the Filter Effects spec gives for it, alpha untouched."""
+    r, g, b, a = c[:4]
+    s = amount
+    m = ((0.213 + 0.787 * s, 0.715 - 0.715 * s, 0.072 - 0.072 * s),
+         (0.213 - 0.213 * s, 0.715 + 0.285 * s, 0.072 - 0.072 * s),
+         (0.213 - 0.213 * s, 0.715 - 0.715 * s, 0.072 + 0.928 * s))
+    out = [min(255, max(0, int(row[0] * r + row[1] * g + row[2] * b + 0.5))) for row in m]
+    return (out[0], out[1], out[2], a, None)
+
 def over(top, bottom):
     """top (translucent) composited over opaque bottom."""
     a = top[3] / 255
@@ -374,7 +384,29 @@ def locked_block(theme):
     else:
         out.append(f'{I}<SolidColorBrush x:Key="ConsoleDisabledFieldForegroundBrush" Color="{lit(colours(theme)["FieldForeground"])}"/>')
 
+    # The armed faces, half-saturated, for a locked control. CSS desaturates a locked control with saturate(.5) as
+    # well as dimming it (:2016-2023, :2367-2369); WinUI has no filter, so the faces that are not grey to begin
+    # with - armed red, on a cap and on the lever - get a twin worked out the way the filter would. High Contrast
+    # keeps the user's colours, as it does for every locked control.
+    if theme == 'hc':
+        for key, sysc in LOCKED_ARMED_HC.items():
+            out.append(f'{I}<SolidColorBrush x:Key="{key}" Color="{{ThemeResource {sysc}}}"/>')
+    else:
+        c = colours(theme)
+        half = lambda col: saturate(c[col] if isinstance(col, str) else col)
+        lines = (lin(c, 'ArmedCapFaceLockedBrush', [(0, half(hexc('c8333a'))), (0.55, half('Armed')), (1, half('ArmedDeep'))])
+                 + [f'<SolidColorBrush x:Key="ArmedEdgeLockedBrush" Color="{lit(half("ArmedEdge"))}"/>',
+                    f'<SolidColorBrush x:Key="ArmedDeepLockedBrush" Color="{lit(half("ArmedDeep"))}"/>']
+                 + lin(c, 'SwitchTrackArmedLockedBrush', [(0, half(hexc('3b0d0f'))), (1, half(hexc('240809')))])
+                 + lin(c, 'SwitchThumbArmedLockedBrush', [(0, half(hexc('c8333a'))), (1, half('ArmedDeep'))]))
+        out.extend(I + line for line in lines)
     return out
+
+# The locked armed faces in High Contrast: the same system colours the unlocked ones take.
+LOCKED_ARMED_HC = {
+    'ArmedCapFaceLockedBrush': HL, 'ArmedEdgeLockedBrush': HL, 'ArmedDeepLockedBrush': HL,
+    'SwitchTrackArmedLockedBrush': HL, 'SwitchThumbArmedLockedBrush': HLT,
+}
 
 def theme_block(theme):
     out = []

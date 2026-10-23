@@ -92,6 +92,7 @@ capitals.
 | C-2 | CLEAN SELECTED with Temp ticked while an app has a temp file open | Clean finishes; the open file is left; result does not claim it |
 | C-3 | Registry Cleaner: SCAN on a machine with MSI-installed programs (Office, Visual C++ runtimes) | None of them is listed as an invalid uninstall entry |
 | C-4 | FIX SELECTED, then RESTORE BACKUP | The `.reg` backup is under `%LocalAppData%\SysMonitor\RegistryBackups`; restore puts the values back |
+| C-4a | FIX SELECTED with an HKLM entry ticked, accept the administrator prompt | Fixed and reported; nothing new appears in `%LocalAppData%\SysMonitor\Temp` |
 | C-5 | Health Check: SCAN, QUICK FIX | Only ticked items are fixed; result lists errors if any |
 | C-6 | Browser Privacy on the throwaway profile, browser closed: clean Cache only | Cache emptied; passwords and bookmarks intact |
 | C-7 | Same, ticking Firefox "History and Bookmarks" | Warned as unrecoverable; afterwards Firefox has no history or bookmarks |

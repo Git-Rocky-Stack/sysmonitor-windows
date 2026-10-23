@@ -921,6 +921,20 @@ public class BackupService : IBackupService
 
                     File.Copy(sourceFile, destFile, options.OverwriteExisting);
 
+                    // The copy is checked against the checksum taken when the file was backed up, so a restore
+                    // that wrote something else - a failing disk, a damaged archive - says so instead of
+                    // counting it as restored.
+                    if (options.VerifyAfterRestore && !string.IsNullOrEmpty(fileEntry.Hash)
+                        && !string.Equals(await CalculateFileHashAsync(destFile), fileEntry.Hash, StringComparison.OrdinalIgnoreCase))
+                    {
+                        errors.Add(new BackupError
+                        {
+                            FilePath = destFile,
+                            ErrorMessage = "The restored copy does not match the file that was backed up"
+                        });
+                        continue;
+                    }
+
                     if (options.PreservePermissions)
                     {
                         File.SetAttributes(destFile, fileEntry.Attributes);

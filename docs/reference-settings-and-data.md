@@ -23,7 +23,7 @@ as the page writes them.
 | Setting | Type | Default | Effect |
 |---|---|---|---|
 | Run at Windows startup | On or off | Off (`:27`) | Launches the app when you sign in |
-| Minimize to system tray | On or off | On (`:28`) | Closing the window keeps the app running in the notification area. Starting the app again brings that window back rather than a second copy (`src/SysMonitor.App/App.xaml.cs:366-376`) |
+| Minimize to system tray | On or off | On (`:28`) | Closing the window keeps the app running in the notification area. Starting the app again brings that window back rather than a second copy (`src/SysMonitor.App/App.xaml.cs:365-375`) |
 | Show notifications | On or off | On (`:29`) | Enables alert toasts, which fire whichever page is showing and while the window is in the notification area (`src/SysMonitor.App/Views/SettingsPage.xaml:76`, `src/SysMonitor.App/Services/TrayIconService.cs:145-149`) |
 
 ## Monitoring
@@ -108,7 +108,7 @@ Everything the application stores about you is under one folder:
 |---|---|
 | `%LocalAppData%\SysMonitor` | The SQLite history database, `history.db` (`src/SysMonitor.Core/Data/HistoryDbContext.cs:26`), and application state |
 | `%LocalAppData%\SysMonitor\settings.json` | Settings (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:56`) |
-| `%LocalAppData%\SysMonitor\Logs` | Serilog output (`src/SysMonitor.App/App.xaml.cs:82`) |
+| `%LocalAppData%\SysMonitor\Logs` | Serilog output (`src/SysMonitor.App/App.xaml.cs:81`) |
 | `%LocalAppData%\SysMonitor\Logs` | Crash reports. These were written to the Desktop before v3.0.0 |
 
 Deleting `%LocalAppData%\SysMonitor` resets everything the application keeps in files.

@@ -13,8 +13,9 @@ namespace SysMonitor.Tests.Services;
 
 /// <summary>
 /// What gets done as administrator must not be decided by something another process can change. The list of
-/// registry fixes lives in a file any process running as this user can rewrite while the UAC prompt is open,
-/// so the elevated side checks it against the fingerprint it was given and against its own scan.
+/// registry fixes and the result travel over a named pipe only this account can open - never a file, which a
+/// planted link could turn into an administrator's write anywhere - and the elevated side still checks the list
+/// against the fingerprint on its command line and against its own scan.
 /// </summary>
 public class ElevatedHandoffTests : IDisposable
 {
@@ -51,22 +52,56 @@ public class ElevatedHandoffTests : IDisposable
     public async Task TheElevatedSideCleansNothingWhenTheListNoLongerMatches()
     {
         var approved = Encoding.UTF8.GetBytes("[]");
-        var input = Path.Combine(_temp.Path, "issues.json");
-        var output = Path.Combine(_temp.Path, "result.json");
 
-        // What an attacker leaves behind after the approved list was written.
-        await File.WriteAllTextAsync(input, JsonSerializer.Serialize(new[]
+        // What an attacker would put in place of the approved list.
+        var swapped = JsonSerializer.SerializeToUtf8Bytes(new[]
         {
             new RegistryIssue { Key = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet", Category = RegistryIssueCategory.OrphanedSoftware },
-        }));
+        });
 
-        var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(input, output, Fingerprint(approved));
+        var (exitCode, result) = await ElevatedRegistryHelper.CleanApprovedAsync(swapped, Fingerprint(approved));
 
         exitCode.Should().Be(1);
-        var result = JsonSerializer.Deserialize<ElevatedCleanResult>(await File.ReadAllTextAsync(output));
-        result!.Success.Should().BeFalse();
+        result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("changed after it was approved");
         result.FixedCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task TheListAndTheResultTravelOverThePipe()
+    {
+        var payload = Encoding.UTF8.GetBytes("[]");
+        var pipeName = $"SysMonitor-test-{Guid.NewGuid():N}";
+        await using var pipe = ElevatedRegistryHelper.CreatePipe(pipeName);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        var served = ElevatedRegistryHelper.ServeAsync(pipe, payload, cts.Token);
+        var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(pipeName, Fingerprint(payload));
+        var result = await served;
+
+        exitCode.Should().Be(0);
+        result.Should().NotBeNull();
+        result!.Success.Should().BeTrue();
+        result.Message.Should().Be("No issues to fix");
+    }
+
+    [Fact]
+    public async Task AHelperThatNeverConnectsReportsNothingRatherThanSuccess()
+    {
+        await using var pipe = ElevatedRegistryHelper.CreatePipe($"SysMonitor-test-{Guid.NewGuid():N}");
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+
+        (await ElevatedRegistryHelper.ServeAsync(pipe, [], cts.Token)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task AFrameOfAnImpossibleSizeIsRefused()
+    {
+        using var stream = new MemoryStream([0xFF, 0xFF, 0xFF, 0x7F]);
+
+        var read = () => ElevatedRegistryHelper.ReadFrameAsync(stream, CancellationToken.None);
+
+        await read.Should().ThrowAsync<IOException>();
     }
 
     [Fact]

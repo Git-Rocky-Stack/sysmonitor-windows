@@ -1,7 +1,7 @@
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.IO.Pipes;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using SysMonitor.Core.Models;
 
@@ -13,10 +13,6 @@ namespace SysMonitor.Core.Services.Cleaners;
 /// </summary>
 public static class ElevatedRegistryHelper
 {
-    private static readonly string TempFolder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "SysMonitor", "Temp");
-
     /// <summary>
     /// Check if any issues require elevation (HKLM or HKCR keys)
     /// </summary>
@@ -40,31 +36,28 @@ public static class ElevatedRegistryHelper
     }
 
     /// <summary>
-    /// Launch an elevated process to fix registry issues
+    /// Launch an elevated process to fix registry issues.
+    /// <para>
+    /// The two sides talk over a named pipe that only this account can open, never through files. The list
+    /// and the result used to go through files in a folder any program running as the user can write to, and
+    /// the elevated side wrote its result there: a link planted at that name would have had an administrator
+    /// write over a file of the attacker's choosing. A pipe has no path to plant anything at, and the elevated
+    /// side connects at identification level, so the side that made the pipe cannot borrow its rights.
+    /// </para>
     /// </summary>
     public static async Task<ElevatedCleanResult> RunElevatedCleanAsync(IEnumerable<RegistryIssue> issues)
     {
-        Directory.CreateDirectory(TempFolder);
-
-        var inputFile = Path.Combine(TempFolder, $"reg_issues_{Guid.NewGuid():N}.json");
-        var outputFile = Path.Combine(TempFolder, $"reg_results_{Guid.NewGuid():N}.json");
-
         try
         {
-            // Serialize issues to temp file
             var issueList = issues.Where(i => i.IsSelected).ToList();
-            var json = JsonSerializer.Serialize(issueList, new JsonSerializerOptions { WriteIndented = true });
-            var payload = Encoding.UTF8.GetBytes(json);
+            var payload = JsonSerializer.SerializeToUtf8Bytes(issueList);
 
-            // Any process running as this user can rewrite a file in the temp folder while the UAC prompt is
-            // open, and the elevated process would then carry out whatever it found. It is handed the
-            // fingerprint of what was written on its command line, which cannot be rewritten, and checks it.
+            // The elevated side is handed the fingerprint of the list on its command line, which nothing else
+            // can rewrite, and acts only on a list that matches it.
             var fingerprint = Convert.ToHexString(SHA256.HashData(payload));
-            await File.WriteAllBytesAsync(inputFile, payload);
 
-            // Get the current executable path. Environment.ProcessPath is the same value as
-            // Process.GetCurrentProcess().MainModule.FileName without opening a handle on ourselves that
-            // nothing then closes.
+            // Environment.ProcessPath is the same value as Process.GetCurrentProcess().MainModule.FileName
+            // without opening a handle on ourselves that nothing then closes.
             var exePath = Environment.ProcessPath;
             if (string.IsNullOrEmpty(exePath))
             {
@@ -75,11 +68,15 @@ public static class ElevatedRegistryHelper
                 };
             }
 
-            // Launch elevated process
+            var pipeName = $"SysMonitor-registry-{Guid.NewGuid():N}";
+            await using var pipe = CreatePipe(pipeName);
+            using var exchangeCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            var exchange = ServeAsync(pipe, payload, exchangeCts.Token);
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = exePath,
-                Arguments = $"--fix-registry \"{inputFile}\" \"{outputFile}\" {fingerprint}",
+                Arguments = $"--fix-registry {pipeName} {fingerprint}",
                 UseShellExecute = true,
                 Verb = "runas", // This triggers UAC
                 CreateNoWindow = false
@@ -109,43 +106,26 @@ public static class ElevatedRegistryHelper
                 };
             }
 
-            // Read results
-            if (File.Exists(outputFile))
+            // The helper has exited, so whatever it was going to send has been sent.
+            exchangeCts.CancelAfter(TimeSpan.FromSeconds(5));
+            var result = await exchange;
+            if (result != null)
+                return result;
+
+            return process.ExitCode switch
             {
-                var resultJson = await File.ReadAllTextAsync(outputFile);
-                var result = JsonSerializer.Deserialize<ElevatedCleanResult>(resultJson);
-                return result ?? new ElevatedCleanResult { Success = false, ErrorMessage = "Failed to parse results" };
-            }
-            else
-            {
-                // Check exit code
-                if (process.ExitCode == 0)
+                1223 => new ElevatedCleanResult // ERROR_CANCELLED - user declined UAC
                 {
-                    return new ElevatedCleanResult
-                    {
-                        Success = true,
-                        FixedCount = issueList.Count,
-                        Message = "Registry cleaning completed"
-                    };
-                }
-                else if (process.ExitCode == 1223) // ERROR_CANCELLED - user declined UAC
+                    Success = false,
+                    WasCancelled = true,
+                    ErrorMessage = "Elevation was cancelled by user"
+                },
+                _ => new ElevatedCleanResult
                 {
-                    return new ElevatedCleanResult
-                    {
-                        Success = false,
-                        WasCancelled = true,
-                        ErrorMessage = "Elevation was cancelled by user"
-                    };
+                    Success = false,
+                    ErrorMessage = $"The elevated helper exited with code {process.ExitCode} without reporting what it did"
                 }
-                else
-                {
-                    return new ElevatedCleanResult
-                    {
-                        Success = false,
-                        ErrorMessage = $"Elevated process exited with code {process.ExitCode}"
-                    };
-                }
-            }
+            };
         }
         catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
         {
@@ -165,43 +145,73 @@ public static class ElevatedRegistryHelper
                 ErrorMessage = ex.Message
             };
         }
-        finally
+    }
+
+    /// <summary>A pipe only this account can open; one connection, so nothing can queue behind the helper.</summary>
+    internal static NamedPipeServerStream CreatePipe(string pipeName) =>
+        new(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+
+    /// <summary>
+    /// The unelevated side of the exchange: hands the list to the helper when it connects and reads back its
+    /// result. Null when the helper never connected or sent nothing - the person refused the prompt, say.
+    /// </summary>
+    internal static async Task<ElevatedCleanResult?> ServeAsync(NamedPipeServerStream pipe, byte[] payload, CancellationToken cancellationToken)
+    {
+        try
         {
-            // Cleanup temp files
-            // Best effort: temporary files in the user's temp folder, which Windows clears anyway.
-            try { if (File.Exists(inputFile)) File.Delete(inputFile); } catch { }
-            try { if (File.Exists(outputFile)) File.Delete(outputFile); } catch { }
+            await pipe.WaitForConnectionAsync(cancellationToken);
+            await WriteFrameAsync(pipe, payload, cancellationToken);
+            var reply = await ReadFrameAsync(pipe, cancellationToken);
+            return reply == null ? null : JsonSerializer.Deserialize<ElevatedCleanResult>(reply);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or IOException or JsonException)
+        {
+            return null;
         }
     }
 
     /// <summary>
-    /// Execute registry cleaning in elevated mode (called from command line).
+    /// Execute registry cleaning in elevated mode (called from command line): reads the approved list from the
+    /// pipe, cleans what still matches, and sends the result back the same way.
     /// </summary>
-    /// <param name="fingerprint">
-    /// SHA-256 of the bytes the unelevated side wrote, in hex. The file lives where any process running as
-    /// this user can rewrite it, so it is only acted on when it still matches.
-    /// </param>
-    public static async Task<int> ExecuteElevatedClean(string inputFile, string outputFile, string fingerprint)
+    /// <param name="fingerprint">SHA-256 of the list the unelevated side approved, in hex.</param>
+    public static async Task<int> ExecuteElevatedClean(string pipeName, string fingerprint)
+    {
+        try
+        {
+            // Identification only: whoever made the pipe can learn who connected, and cannot act as them.
+            await using var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut,
+                PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly, System.Security.Principal.TokenImpersonationLevel.Identification);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await pipe.ConnectAsync(cts.Token);
+
+            var payload = await ReadFrameAsync(pipe, cts.Token) ?? [];
+            var (exitCode, result) = await CleanApprovedAsync(payload, fingerprint);
+
+            await WriteFrameAsync(pipe, JsonSerializer.SerializeToUtf8Bytes(result), CancellationToken.None);
+            return exitCode;
+        }
+        catch (Exception)
+        {
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// The elevated side's decision: nothing unless the list is the approved one, and then only what this
+    /// process's own scan still reports as broken.
+    /// </summary>
+    internal static async Task<(int ExitCode, ElevatedCleanResult Result)> CleanApprovedAsync(byte[] payload, string fingerprint)
     {
         var result = new ElevatedCleanResult();
 
         try
         {
-            if (!File.Exists(inputFile))
-            {
-                result.Success = false;
-                result.ErrorMessage = "Input file not found";
-                await WriteResultAsync(outputFile, result);
-                return 1;
-            }
-
-            var payload = await File.ReadAllBytesAsync(inputFile);
             if (!MatchesFingerprint(payload, fingerprint))
             {
                 result.Success = false;
                 result.ErrorMessage = "The list of registry fixes changed after it was approved. Nothing was cleaned.";
-                await WriteResultAsync(outputFile, result);
-                return 1;
+                return (1, result);
             }
 
             var issues = JsonSerializer.Deserialize<List<RegistryIssue>>(payload);
@@ -210,8 +220,7 @@ public static class ElevatedRegistryHelper
             {
                 result.Success = true;
                 result.Message = "No issues to fix";
-                await WriteResultAsync(outputFile, result);
-                return 0;
+                return (0, result);
             }
 
             // Second gate: clean only what this process's own scan reports as broken. Even a list that
@@ -224,8 +233,7 @@ public static class ElevatedRegistryHelper
                 result.ErrorMessage = refused > 0
                     ? $"None of the {refused} entries are still broken according to this machine's own scan. Nothing was cleaned."
                     : "No issues to fix";
-                await WriteResultAsync(outputFile, result);
-                return refused > 0 ? 1 : 0;
+                return (refused > 0 ? 1 : 0, result);
             }
 
             issues = confirmed;
@@ -270,16 +278,43 @@ public static class ElevatedRegistryHelper
                 ? $"Fixed {fixedCount} of {issues.Count} registry issues; {refused} were left alone"
                 : $"Fixed {fixedCount} of {issues.Count} registry issues";
 
-            await WriteResultAsync(outputFile, result);
-            return result.Success ? 0 : 1;
+            return (result.Success ? 0 : 1, result);
         }
         catch (Exception ex)
         {
             result.Success = false;
             result.ErrorMessage = ex.Message;
-            await WriteResultAsync(outputFile, result);
-            return 1;
+            return (1, result);
         }
+    }
+
+    /// <summary>The largest list either side accepts: far beyond any scan, far short of exhausting memory.</summary>
+    private const int MaxFrameBytes = 16 * 1024 * 1024;
+
+    /// <summary>A length, then that many bytes: a pipe has no end-of-message of its own in byte mode.</summary>
+    internal static async Task WriteFrameAsync(Stream stream, byte[] body, CancellationToken cancellationToken)
+    {
+        var length = new byte[4];
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(length, body.Length);
+        await stream.WriteAsync(length, cancellationToken);
+        await stream.WriteAsync(body, cancellationToken);
+        await stream.FlushAsync(cancellationToken);
+    }
+
+    /// <summary>The next frame, or null when the other side closed without sending one.</summary>
+    internal static async Task<byte[]?> ReadFrameAsync(Stream stream, CancellationToken cancellationToken)
+    {
+        var length = new byte[4];
+        if (await stream.ReadAtLeastAsync(length, 4, throwOnEndOfStream: false, cancellationToken) < 4)
+            return null;
+
+        var size = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(length);
+        if (size is < 0 or > MaxFrameBytes)
+            throw new IOException("The other side sent a frame of an impossible size.");
+
+        var body = new byte[size];
+        await stream.ReadExactlyAsync(body, cancellationToken);
+        return body;
     }
 
     /// <summary>Whether a payload is the one whose fingerprint was passed on the command line.</summary>
@@ -399,12 +434,6 @@ public static class ElevatedRegistryHelper
             var existsAfter = key.GetValueNames().Contains(issue.ValueName, StringComparer.OrdinalIgnoreCase);
             return !existsAfter;
         }
-    }
-
-    private static async Task WriteResultAsync(string outputFile, ElevatedCleanResult result)
-    {
-        var json = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(outputFile, json);
     }
 }
 

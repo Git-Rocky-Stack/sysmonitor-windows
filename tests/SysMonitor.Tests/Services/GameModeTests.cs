@@ -247,4 +247,29 @@ public class GameModeTests : IDisposable
             return Task.FromResult(true);
         }
     }
+
+    /// <summary>
+    /// Windows gives a process ID to a new process once the old one exits. A priority is put back only on the
+    /// process Game Mode lowered - same name, same start time - never on whatever holds its number now.
+    /// </summary>
+    [Theory]
+    [InlineData("chrome", 0, true)]
+    [InlineData("CHROME", 0, true)]
+    [InlineData("notepad", 0, false)]
+    [InlineData("chrome", 5, false)]
+    public void APriorityGoesBackOnlyToTheProcessThatWasLowered(string nameNow, int startedSecondsLater, bool restored)
+    {
+        var started = new DateTime(2026, 10, 23, 8, 0, 0);
+        var lowered = new LoweredProcess(4242, "chrome", started, ProcessPriorityClass.Normal);
+
+        lowered.IsSameAs(nameNow, started.AddSeconds(startedSecondsLater)).Should().Be(restored);
+    }
+
+    [Fact]
+    public void AStartTimeThatCanNoLongerBeReadIsNotTakenAsAMatch()
+    {
+        var lowered = new LoweredProcess(4242, "chrome", new DateTime(2026, 10, 23, 8, 0, 0), ProcessPriorityClass.Normal);
+
+        lowered.IsSameAs("chrome", null).Should().BeFalse();
+    }
 }

@@ -238,3 +238,102 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+  # The project builds for x86 and ARM64 as well as x64 (SysMonitor.App.csproj Platforms), and nothing else
+  # compiled them: a change that broke either would surface only on someone's machine or in the Store's
+  # certification. The tests run in build-test on x64; an ARM64 runner is not available to run them here.
+  platforms:
+    name: Build (Debug ${{ matrix.platform }})
+    runs-on: windows-2022
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x86, ARM64]
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build
+        run: dotnet build src/SysMonitor.App/SysMonitor.App.csproj -c Debug -p:Platform=${{ matrix.platform }}
+
+  # The Microsoft Store takes an MSIX, built from the Release configuration (WindowsPackageType MSIX in
+  # SysMonitor.App.csproj), which nothing built before it was made by hand for a submission. This builds it,
+  # unsigned - the Store signs what it accepts - and checks the package says what the listing expects: the
+  # reserved identity, the product's name and publisher, and the version the project builds.
+  msix:
+    name: Store package (MSIX x64)
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Build MSIX
+        shell: pwsh
+        run: >
+          msbuild src/SysMonitor.App/SysMonitor.App.csproj /restore /v:minimal
+          /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64
+          /p:GenerateAppxPackageOnBuild=true /p:AppxBundle=Never /p:UapAppxPackageBuildMode=SideloadOnly
+          /p:AppxPackageSigningEnabled=false "/p:AppxPackageDir=$env:GITHUB_WORKSPACE\publish\msix\\"
+
+      - name: Package says what the listing expects
+        shell: pwsh
+        run: |
+          $msix = Get-ChildItem -Path publish/msix -Recurse -Filter *.msix | Select-Object -First 1
+          if (-not $msix) { throw 'No .msix was built' }
+          "Built $($msix.Name), $([math]::Round($msix.Length / 1MB, 1)) MB"
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($msix.FullName)
+          try {
+            $entry = $zip.GetEntry('AppxManifest.xml')
+            if (-not $entry) { throw "$($msix.Name) has no AppxManifest.xml" }
+            $reader = New-Object System.IO.StreamReader($entry.Open())
+            try { [xml]$built = $reader.ReadToEnd() } finally { $reader.Dispose() }
+          }
+          finally { $zip.Dispose() }
+
+          [xml]$source = Get-Content src/SysMonitor.App/Package.appxmanifest -Raw
+          [xml]$project = Get-Content src/SysMonitor.App/SysMonitor.App.csproj -Raw
+          $version = ($project.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
+
+          $wrong = @()
+          if ($built.Package.Identity.Name -ne $source.Package.Identity.Name) { $wrong += "identity name is $($built.Package.Identity.Name)" }
+          if ($built.Package.Identity.Publisher -ne $source.Package.Identity.Publisher) { $wrong += "publisher is $($built.Package.Identity.Publisher)" }
+          if ($built.Package.Identity.Version -ne "$version.0") { $wrong += "version is $($built.Package.Identity.Version), the project builds $version" }
+          if ($built.Package.Properties.DisplayName -ne 'STX-1 ULTIMATE System Monitor') { $wrong += "display name is $($built.Package.Properties.DisplayName)" }
+          if ($built.Package.Properties.PublisherDisplayName -ne 'Strategia-X') { $wrong += "publisher display name is $($built.Package.Properties.PublisherDisplayName)" }
+
+          if ($wrong) {
+            $wrong | ForEach-Object { "Wrong: $_" }
+            throw "$($msix.Name) does not match the Store listing"
+          }
+          "$($built.Package.Identity.Name) $($built.Package.Identity.Version), $($built.Package.Properties.DisplayName) by $($built.Package.Properties.PublisherDisplayName)"
+
+      - name: Upload MSIX
+        uses: actions/upload-artifact@v6
+        with:
+          name: msix-x64
+          path: publish/msix/**/*.msix
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

@@ -34,7 +34,7 @@ Re-verify anything you are relying on.
    | Type | Copies |
    |---|---|
    | FULL BACKUP | Everything you selected |
-   | INCREMENTAL BACKUP | Only what is new or changed since the previous backup with the same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`, `:1608`) |
+   | INCREMENTAL BACKUP | Only what is new or changed since the previous backup with the same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`, `:1622`) |
 
    An incremental builds on the backup before it, and that one on the one before, back to
    a full backup: a chain. If nothing has changed, no backup is made. With no earlier

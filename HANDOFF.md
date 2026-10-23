@@ -91,10 +91,8 @@ PRIVACY_POLICY (network activity, browser profiles, Wi-Fi, where data lives), an
 |---|---|---|
 | Cut 3.1.0 | Needs the built files' checksums for `docs/index.html` | RELEASE_CHECKLIST.md 2-4 |
 | Store screenshots in the new look | Need real hardware; CI's VM has no sensors | RELEASE_CHECKLIST.md 5 |
-| x86 / ARM64 and the MSIX build in CI | CI builds x64 unpackaged only | not tracked |
-| `saturate(.5)` on locked controls; NumberBox spinners as caps | Template work with no user-visible defect | Controls.xaml comments |
-| ElevatedRegistryHelper's result file in a user-writable folder | Plausible, not verified: needs a pipe instead of a file | audit note, not tracked |
-| Game Mode restores priorities by process ID | Plausible: an ID can be reused before restore | audit note, not tracked |
+| Backup's "Use Volume Shadow Copy" switch does nothing | Remove it, or build shadow copies (needs administrator rights) - the owner's call | not tracked |
+| Backup schedules are saved but never run, and no page lists them | Build them on Task Scheduler as Scheduled Cleaning is, or remove them - the owner's call | not tracked |
 
 ---
 

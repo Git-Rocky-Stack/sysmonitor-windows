@@ -113,6 +113,43 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
 - Performance's EXPORT CSV reports a refused write instead of closing the app; Settings'
   status is coloured by outcome and clears; status lines keep failures on screen.
 
+### Fixed - what runs as administrator, and the gaps the audit left
+
+- **The elevated registry fix trades no files.** The list went to the elevated helper, and its
+  result came back, through files in `%LocalAppData%\SysMonitor\Temp`, a folder any program
+  running as the user can write; a link planted at the result's name would have had an
+  administrator write over a file of its choosing. Both now travel over a named pipe only this
+  account can open, which the helper joins at identification level so the pipe's owner cannot
+  act as it. The fingerprint check and the helper's own re-scan stay
+  (`src/SysMonitor.Core/Services/Cleaners/ElevatedRegistryHelper.cs`).
+- **Game Mode puts a priority back only on the process it lowered.** It restored by process ID,
+  which Windows hands to a new process once the old one exits; it now also matches the name
+  and start time (`src/SysMonitor.Core/Services/GameMode/GameModeService.cs`, `LoweredProcess`).
+- **A restore checks what it wrote.** "Verify after restore" was carried and never read; each
+  restored file is now compared with the checksum taken when it was backed up, and one that
+  differs is reported rather than counted (`src/SysMonitor.Core/Services/Backup/BackupService.cs`).
+- **CI builds every platform and the Store package.** x86 and ARM64 are compiled on every pull
+  request, and the Release MSIX is built and checked for the reserved identity, the product's
+  name and publisher and the project's version (`.github/workflows/windows-ci.yml`).
+- **Locked armed controls are half-saturated, as the stylesheet says** (`saturate(.5)`): the
+  palette writes a desaturated twin of each armed face, which an armed cap takes while locked
+  (`instruments:LockedFace`) and the switch's locked state draws
+  (`scripts/generate-tokens.py`, `src/SysMonitor.App/Controls/Instruments/LockedFace.cs`).
+- **A number field's arrows are console caps**, inline and in the compact popup
+  (`ConsoleRepeatCapStyle`, `src/SysMonitor.App/Styles/Console/Controls.xaml`).
+- The PDF editor's unused stand-in page renderer is removed; pages were always drawn by
+  Windows' own PDF renderer.
+
+### Changed - one name and one publisher
+
+- The app, installer, docs and site say **STX-1 ULTIMATE System Monitor**, published by
+  **Strategia-X**: the window title, title bar, tray, About blocks, User's Guide, installer and
+  Apps entry (same AppId, so an upgrade keeps one entry), assembly company and Store short
+  name. Release files from 3.1.0 are `STX-1-ULTIMATE-Setup-<version>.exe` and
+  `STX-1-ULTIMATE-<version>-Portable-x64.zip`. Files that were not part of this app - an
+  Android bundle, its phone screenshots and recordings, old release notes, a Firebase Studio
+  workspace - are removed from the repository.
+
 ### Changed - the look is complete
 
 - **Every major section is a bolted `Faceplate`** (106 across 35 pages), its stripe carrying
@@ -143,11 +180,11 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   finger and dimming to .42 when they are disabled, which is what System-X dims a locked
   control to, except in High Contrast, where the palette leaves the dimming at 1 and greys
   the word with the user's own GrayText instead
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:67`,
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:69`,
   `src/SysMonitor.App/App.xaml:24`). Two caps carry more weight and differ only in their
   face: the armed cap for a command that cannot simply be undone
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:166`) and the chrome cap for a page's
-  single call to action (`:173`). The palette had written all three faces and Fonts.xaml
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:168`) and the chrome cap for a page's
+  single call to action (`:177`). The palette had written all three faces and Fonts.xaml
   the cap face since the tokens were generated; until this dictionary existed nothing read
   any of them. The smoke run builds each cap in the live tree, in both shifts, and checks
   the face it came out with against the palette
@@ -160,7 +197,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   radius, the thumb 16 square on the 3px inset radius, and the shade the top edge casts into the
   recess drawn as a gradient, since WinUI has no inset shadow. Turned on it arms - the track, its
   rim and the thumb all going over to armed red together, the thumb travelling 20
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:226`). Locked, it dims to .42, which is what
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:307`). Locked, it dims to .42, which is what
   a locked cap does, because System-X writes that rule once and points the switch at it. The palette
   gains the eight colours the lever needs, written for all three shifts by the generator
   (`scripts/generate-tokens.py:192`, `:305`).
@@ -245,7 +282,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   a grey placeholder, and the shade the top edge casts in drawn as a gradient. Focused, the edge
   goes to armed edge and a 2px armed outline stands 1px off it, drawn by the field itself on any
   focus, not only the keyboard's. A header is a field label - Departure Mono 10, tracked .12em
-  (`src/SysMonitor.App/Styles/Console/Controls.xaml:585`, `:788`, `:974`). NumberBox's own text
+  (`src/SysMonitor.App/Styles/Console/Controls.xaml:669`, `:872`, `:1058`). NumberBox's own text
   box is pointed at the same field, so a form reads as one idiom; ComboBox is not a field, since
   System-X gives `select` only the armed accent. The palette gains the field's colours for all
   three shifts, and a locked field's words keep their white on Day Shift, where the chassis'
@@ -462,7 +499,7 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   whole file back from a copy the page took when it opened, erasing any custom game Auto
   Game Mode had added since. One store now serves every reader and writer in both builds
   (`src/SysMonitor.Core/Services/Settings/SettingsStore.cs:25`, registered at
-  `src/SysMonitor.App/App.xaml.cs:114`). A save reads the file again and writes only its
+  `src/SysMonitor.App/App.xaml.cs:113`). A save reads the file again and writes only its
   own changes on top, and a file it could not read is never written over. On its first
   start the packaged build copies across what an earlier version left in `LocalSettings`.
   Auto Game Mode's saves are written in the order they were made, and the last one lands

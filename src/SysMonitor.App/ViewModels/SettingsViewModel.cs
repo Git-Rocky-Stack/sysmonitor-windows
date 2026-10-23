@@ -207,8 +207,8 @@ public partial class SettingsViewModel : ObservableObject
 
     private void UpdateStartupRegistration()
     {
-        // Note: Full startup registration requires additional Windows APIs
-        // This is a placeholder for the registry-based approach
+        // Starting with Windows is the current user's Run key, minimized to the tray. Task Manager's Startup apps
+        // lists it there, and the Startup page can disable it like any other entry.
         try
         {
             var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(

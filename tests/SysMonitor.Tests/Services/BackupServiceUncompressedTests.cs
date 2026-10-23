@@ -124,4 +124,30 @@ public class BackupServiceUncompressedTests : IDisposable
         history.Where(a => a.Name == "Kept").Select(a => a.Id).Should().Contain(full.Archive!.Id);
         Directory.Exists(full.Archive.FilePath).Should().BeTrue();
     }
+
+    /// <summary>
+    /// A restored file is checked against the checksum taken when it was backed up. One that comes back
+    /// different - the backup damaged since - is reported, not counted as restored.
+    /// </summary>
+    [Fact]
+    public async Task ARestoredFileThatDoesNotMatchItsBackupIsReported()
+    {
+        var job = new BackupJob
+        {
+            Name = "Checked",
+            SourcePaths = [Path.Combine(_root.Path, "source")],
+            DestinationPath = Directory.CreateDirectory(Path.Combine(_root.Path, "dest-checked")).FullName,
+            Compression = BackupCompression.None
+        };
+        var backup = await _service.CreateBackupAsync(job);
+        backup.Success.Should().BeTrue(backup.Message);
+        File.WriteAllText(Path.Combine(backup.Archive!.FilePath, "source", "a.txt"), "damaged");
+
+        var target = Directory.CreateDirectory(Path.Combine(_root.Path, "restored-checked")).FullName;
+        var restore = await _service.RestoreBackupAsync(backup.Archive, target, new RestoreOptions { RestoreToOriginalLocation = false });
+
+        restore.Status.Should().Be(BackupStatus.PartialSuccess);
+        restore.ProcessedFiles.Should().Be(1, "b.txt still matches");
+        restore.Errors.Should().ContainSingle(e => e.ErrorMessage.Contains("does not match"));
+    }
 }

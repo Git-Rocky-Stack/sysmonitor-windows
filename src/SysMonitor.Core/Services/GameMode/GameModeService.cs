@@ -41,7 +41,7 @@ public sealed class GameModeService : IGameModeService, IDisposable
     private readonly IPowerPlanController _powerPlans;
     private readonly string _stateFilePath;
     private readonly object _gate = new();
-    private readonly Dictionary<int, ProcessPriorityClass> _loweredPriorities = new();
+    private readonly List<LoweredProcess> _loweredPriorities = new();
 
     /// <summary>
     /// Serialises turning Game Mode on and off. Three callers can do it - the page's toggle, the
@@ -256,10 +256,14 @@ public sealed class GameModeService : IGameModeService, IDisposable
             return false;
         }
 
+        // Who it was, not only its number: Windows hands a process ID to a new process once the old one exits,
+        // and putting a remembered priority back by number alone could change an unrelated program.
+        var recorded = new LoweredProcess(process.Id, process.ProcessName, StartTimeOf(process), current);
         process.PriorityClass = ProcessPriorityClass.BelowNormal;
         lock (_gate)
         {
-            _loweredPriorities[process.Id] = current;
+            _loweredPriorities.RemoveAll(p => p.Id == recorded.Id);
+            _loweredPriorities.Add(recorded);
         }
 
         return true;
@@ -281,27 +285,40 @@ public sealed class GameModeService : IGameModeService, IDisposable
 
     private void RestoreLoweredPriorities()
     {
-        KeyValuePair<int, ProcessPriorityClass>[] lowered;
+        LoweredProcess[] lowered;
         lock (_gate)
         {
             lowered = _loweredPriorities.ToArray();
             _loweredPriorities.Clear();
         }
 
-        foreach (var (processId, priority) in lowered)
+        foreach (var recorded in lowered)
         {
             try
             {
-                using var process = Process.GetProcessById(processId);
-                if (!process.HasExited)
+                using var process = Process.GetProcessById(recorded.Id);
+                if (!process.HasExited && recorded.IsSameAs(process.ProcessName, StartTimeOf(process)))
                 {
-                    process.PriorityClass = priority;
+                    process.PriorityClass = recorded.OriginalPriority;
                 }
             }
             catch
             {
                 // Best effort: it has gone, or it is not ours to change any more.
             }
+        }
+    }
+
+    /// <summary>When a process started, or null when this account may not read it.</summary>
+    private static DateTime? StartTimeOf(Process process)
+    {
+        try
+        {
+            return process.StartTime;
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or NotSupportedException)
+        {
+            return null;
         }
     }
 
@@ -423,4 +440,15 @@ internal sealed class PowerCfgController : IPowerPlanController
             }
         });
     }
+}
+
+/// <summary>A process Game Mode lowered, and enough about it to know it again.</summary>
+internal sealed record LoweredProcess(int Id, string Name, DateTime? StartTime, ProcessPriorityClass OriginalPriority)
+{
+    /// <summary>
+    /// The same process, not a new one given its ID: the same name, and - when it could be read - the same start
+    /// time. A start time that could be read when it was lowered but not now is treated as a different process.
+    /// </summary>
+    internal bool IsSameAs(string name, DateTime? startTime) =>
+        string.Equals(Name, name, StringComparison.OrdinalIgnoreCase) && StartTime == startTime;
 }

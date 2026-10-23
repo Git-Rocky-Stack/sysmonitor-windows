@@ -566,6 +566,21 @@
             <x:Double x:Key="ConsoleDisabledOpacity">0.42</x:Double>
             <SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="#D1D1D1"/>
             <SolidColorBrush x:Key="ConsoleDisabledFieldForegroundBrush" Color="#F5F5F5"/>
+            <LinearGradientBrush x:Key="ArmedCapFaceLockedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#8E4347"/>
+                <GradientStop Offset="0.55" Color="#742F31"/>
+                <GradientStop Offset="1" Color="#562224"/>
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="ArmedEdgeLockedBrush" Color="#59A1474A"/>
+            <SolidColorBrush x:Key="ArmedDeepLockedBrush" Color="#562224"/>
+            <LinearGradientBrush x:Key="SwitchTrackArmedLockedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#291213"/>
+                <GradientStop Offset="1" Color="#190B0C"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbArmedLockedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#8E4347"/>
+                <GradientStop Offset="1" Color="#562224"/>
+            </LinearGradientBrush>
         </ResourceDictionary>
 
         <!-- ============================================================ DAY SHIFT -->
@@ -1108,6 +1123,21 @@
             <x:Double x:Key="ConsoleDisabledOpacity">0.42</x:Double>
             <SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="#2E2E2C"/>
             <SolidColorBrush x:Key="ConsoleDisabledFieldForegroundBrush" Color="#F5F5F5"/>
+            <LinearGradientBrush x:Key="ArmedCapFaceLockedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#8E4347"/>
+                <GradientStop Offset="0.55" Color="#742F31"/>
+                <GradientStop Offset="1" Color="#562224"/>
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="ArmedEdgeLockedBrush" Color="#736F2C2F"/>
+            <SolidColorBrush x:Key="ArmedDeepLockedBrush" Color="#562224"/>
+            <LinearGradientBrush x:Key="SwitchTrackArmedLockedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#291213"/>
+                <GradientStop Offset="1" Color="#190B0C"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbArmedLockedBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#8E4347"/>
+                <GradientStop Offset="1" Color="#562224"/>
+            </LinearGradientBrush>
         </ResourceDictionary>
 
         <!-- ============================================================ HIGH CONTRAST -->
@@ -1467,6 +1497,11 @@
             <x:Double x:Key="ConsoleDisabledOpacity">1</x:Double>
             <SolidColorBrush x:Key="ConsoleDisabledForegroundBrush" Color="{ThemeResource SystemColorGrayTextColor}"/>
             <SolidColorBrush x:Key="ConsoleDisabledFieldForegroundBrush" Color="{ThemeResource SystemColorGrayTextColor}"/>
+            <SolidColorBrush x:Key="ArmedCapFaceLockedBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="ArmedEdgeLockedBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="ArmedDeepLockedBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="SwitchTrackArmedLockedBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
+            <SolidColorBrush x:Key="SwitchThumbArmedLockedBrush" Color="{ThemeResource SystemColorHighlightTextColor}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

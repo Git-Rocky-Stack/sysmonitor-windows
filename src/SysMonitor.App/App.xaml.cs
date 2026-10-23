@@ -36,17 +36,16 @@ public partial class App : Application
     {
         // Check for elevated registry cleaning mode BEFORE InitializeComponent
         var args = Environment.GetCommandLineArgs();
-        if (args.Length >= 5 && args[1] == "--fix-registry")
+        if (args.Length >= 4 && args[1] == "--fix-registry")
         {
-            // Run elevated registry cleaning and exit. The fingerprint is what the unelevated side wrote;
-            // the elevated side refuses a list that no longer matches it.
-            var inputFile = args[2];
-            var outputFile = args[3];
-            var fingerprint = args[4];
+            // Run elevated registry cleaning and exit. The list comes over the named pipe; the fingerprint is
+            // what the unelevated side approved, and the elevated side refuses a list that does not match it.
+            var pipeName = args[2];
+            var fingerprint = args[3];
 
             Task.Run(async () =>
             {
-                var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(inputFile, outputFile, fingerprint);
+                var exitCode = await ElevatedRegistryHelper.ExecuteElevatedClean(pipeName, fingerprint);
                 Environment.Exit(exitCode);
             }).GetAwaiter().GetResult();
 

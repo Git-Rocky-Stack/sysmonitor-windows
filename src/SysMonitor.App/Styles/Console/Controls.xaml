@@ -41,7 +41,9 @@
                  comes up and the edge sharpens. WinUI has no filter, and the glint wants a clip animated per cap.
       disabled   `opacity: .42` with `saturate(.5)`. The dimming is drawn, through the palette's per-shift
                  ConsoleDisabledOpacity, which High Contrast writes as 1 and greys the word with GrayText instead.
-                 The desaturation is not: WinUI has no filter (the switch's locked state says what it would take).
+                 WinUI has no filter, so the desaturation is a twin face: a cap whose face is not grey to begin
+                 with - armed red - names its half-saturated face with instruments:LockedFace, which it takes
+                 while locked. A grey face desaturates to itself, so the plain and chrome caps need none.
       pressed    `translateY(1px)` over 80ms on the snap easing. The travel is transcribed; the 80ms is not, as a
                  visual state setter arrives at once.
       the rest   `gap: 8px` between an icon and its word, `text-transform: uppercase` and `white-space: nowrap`
@@ -167,6 +169,8 @@
         <Setter Property="Background" Value="{ThemeResource ArmedCapFaceBrush}"/>
         <Setter Property="Foreground" Value="{ThemeResource ArmedFgBrush}"/>
         <Setter Property="BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+        <Setter Property="instruments:LockedFace.Background" Value="{ThemeResource ArmedCapFaceLockedBrush}"/>
+        <Setter Property="instruments:LockedFace.BorderBrush" Value="{ThemeResource ArmedEdgeLockedBrush}"/>
     </Style>
 
     <!-- Chrome (.btn-chrome, :2116): the one polished call to action on a page, black gloss on Day Shift. -->
@@ -202,11 +206,88 @@
         <Setter Property="Background" Value="{ThemeResource ArmedCapFaceBrush}"/>
         <Setter Property="Foreground" Value="{ThemeResource ArmedFgBrush}"/>
         <Setter Property="BorderBrush" Value="{ThemeResource ArmedEdgeBrush}"/>
+        <Setter Property="instruments:LockedFace.Background" Value="{ThemeResource ArmedCapFaceLockedBrush}"/>
+        <Setter Property="instruments:LockedFace.BorderBrush" Value="{ThemeResource ArmedEdgeLockedBrush}"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Width" Value="34"/>
         <Setter Property="Height" Value="34"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
+    <!-- A held key: the cap for a RepeatButton - a number field's arrows - which fires again while it is held.
+         RepeatButton is not a Button, so the cap's style cannot be its base; this is the cap's face, key light,
+         lip and states, restated for it, and nothing more. A change to the cap belongs in both. -->
+    <Style x:Key="ConsoleRepeatCapStyle" TargetType="RepeatButton">
+        <Setter Property="Background" Value="{ThemeResource CapFaceBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource SilverBrightBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource CapEdgeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource CapCornerRadius}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="UseSystemFocusVisuals" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Grid x:Name="Root" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}">
+                        <Grid.RenderTransform>
+                            <TranslateTransform x:Name="Press"/>
+                        </Grid.RenderTransform>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="KeyLight.Opacity" Value="1"/>
+                                        <Setter Target="Face.BorderBrush" Value="{ThemeResource HairlineStrongBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="KeyLight.Opacity" Value="0"/>
+                                        <Setter Target="Lip.Opacity" Value="0"/>
+                                        <Setter Target="Press.Y" Value="1"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                        <Setter Target="KeyLight.Opacity" Value="0"/>
+                                        <Setter Target="Lip.Opacity" Value="0"/>
+                                        <Setter Target="Word.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Border x:Name="Face" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
+
+                        <Border x:Name="KeyLight" Opacity="0.85" Margin="1"
+                                Background="{ThemeResource CapKeyLightBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                IsHitTestVisible="False"/>
+
+                        <Border x:Name="Lip" Height="1" Margin="1,1,1,0" VerticalAlignment="Top"
+                                Background="{ThemeResource PlateLipBrush}" IsHitTestVisible="False"/>
+
+                        <ContentPresenter x:Name="Word" Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Padding="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          FontFamily="{TemplateBinding FontFamily}"
+                                          FontSize="{TemplateBinding FontSize}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          AutomationProperties.AccessibilityView="Raw"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ============================================================ BAT-LEVER SWITCH (.switch, :2323) -->
 
     <!-- A switch on the console is a lever, not a pill: a recess cut into the chassis with a machined cap for a
@@ -266,13 +347,16 @@
                                      for its contrast is the one thing that shift must not do, so it greys the
                                      words with the user's own GrayText instead.
 
-                                     `filter: saturate(.5)` is not drawn. WinUI has no filter, and the only
-                                     route to it is a desaturated twin of every armed face the lever can show,
-                                     generated beside the original. Dimming carries the meaning on its own;
-                                     desaturating a red that is already dimmed to .42 is the smaller half. -->
+                                     `filter: saturate(.5)` is drawn as the twin of each armed face the lever
+                                     shows - track, thumb and rim - which scripts/generate-tokens.py works out the
+                                     way the filter would; WinUI has no filter. High Contrast's twins are its own
+                                     system colours. The glow is already out: a locked lever is not lit. -->
                                 <VisualState x:Name="Disabled">
                                     <VisualState.Setters>
                                         <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
+                                        <Setter Target="SwitchKnobBounds.Background" Value="{ThemeResource SwitchTrackArmedLockedBrush}"/>
+                                        <Setter Target="SwitchKnobOn.Background" Value="{ThemeResource SwitchThumbArmedLockedBrush}"/>
+                                        <Setter Target="ArmedRim.BorderBrush" Value="{ThemeResource ArmedDeepLockedBrush}"/>
                                         <Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
                                         <Setter Target="OnContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
                                         <Setter Target="OffContentPresenter.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
@@ -965,9 +1049,9 @@
          The rest is WinUI's template. Two things are left out of it: the theme dictionaries that re-point the spin
          buttons at the text box's button colours, because a theme dictionary belongs in a dictionary App.xaml
          merges itself (ConsoleDictionaryTests), and the popup state's redundant re-setting of InputBox's style.
-         So the inline spinners are WinUI's repeat buttons in the dark theme, small keys on the dark well, and the
-         compact popup's are WinUI's own on the popup's ground. Making them console caps is the spinners' own
-         piece of work, not a field's.
+         The spinners, inline and in the compact popup, are held keys (ConsoleRepeatCapStyle): the console's cap,
+         cut small. The inline pair keeps the dark theme, so on Day Shift as on Night Ops they are Night Ops' caps
+         on the dark well, as the well's own buttons are.
 
          Locked, InputBox dims itself as every field does, so this dims what InputBox does not cover - the label
          and the inline spinners - rather than its whole root, which would dim the field twice. -->
@@ -986,14 +1070,13 @@
 
                         <!-- WinUI's own spin button styles are declared by x:Name, which nothing outside its
                              dictionary can find - asked for from here they throw as the number box lays out. So
-                             they are restated, as WinUI writes them, where the buttons can reach them. -->
+                             they are declared here, where the buttons can reach them, as held keys cut to size. -->
                         <Grid.Resources>
-                            <Style x:Key="FieldSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
+                            <Style x:Key="FieldSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource ConsoleRepeatCapStyle}">
                                 <Setter Property="IsTabStop" Value="False"/>
                                 <Setter Property="MinWidth" Value="32"/>
                                 <Setter Property="Padding" Value="0"/>
                                 <Setter Property="VerticalAlignment" Value="Stretch"/>
-                                <Setter Property="BorderThickness" Value="{ThemeResource NumberBoxSpinButtonBorderThickness}"/>
                                 <Setter Property="FontSize" Value="12"/>
                                 <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}"/>
                             </Style>
@@ -1090,16 +1173,14 @@
                                   BorderThickness="{ThemeResource NumberBoxPopupBorderThickness}"
                                   CornerRadius="{ThemeResource OverlayCornerRadius}">
                                 <Grid.Resources>
-                                    <Style x:Key="FieldPopupSpinButtonStyle" TargetType="RepeatButton">
+                                    <Style x:Key="FieldPopupSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource ConsoleRepeatCapStyle}">
                                         <Setter Property="AutomationProperties.AccessibilityView" Value="Raw"/>
                                         <Setter Property="IsTabStop" Value="False"/>
                                         <Setter Property="Width" Value="36"/>
                                         <Setter Property="Height" Value="36"/>
                                         <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="BorderThickness" Value="{ThemeResource NumberBoxPopupSpinButtonBorderThickness}"/>
                                         <Setter Property="FontSize" Value="16"/>
                                         <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}"/>
-                                        <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}"/>
                                     </Style>
                                 </Grid.Resources>
                                 <Grid.RowDefinitions>

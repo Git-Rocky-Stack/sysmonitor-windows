@@ -105,7 +105,7 @@ know what is in it.
 
 STX-1 ULTIMATE runs as one copy. With Minimize to system tray on, which is the default, closing
 the window hides it in the notification area, and starting the app again from the
-Start menu brings the running copy's window back rather than starting a second one (`src/SysMonitor.App/App.xaml.cs:366-376`). Alerts
+Start menu brings the running copy's window back rather than starting a second one (`src/SysMonitor.App/App.xaml.cs:365-375`). Alerts
 are checked by that one copy whichever page is showing, and while the window is in
 the notification area (`src/SysMonitor.App/Services/TrayIconService.cs:145-149`).
 
@@ -120,7 +120,7 @@ Everything the app stores about you lives in one folder:
 %LocalAppData%\SysMonitor
 ```
 
-Logs are under `Logs` inside it (`src/SysMonitor.App/App.xaml.cs:82`). Deleting that
+Logs are under `Logs` inside it (`src/SysMonitor.App/App.xaml.cs:81`). Deleting that
 folder resets everything the app keeps in files. The
 [settings and data reference](reference-settings-and-data.md) covers the two entries Run
 at Startup and a cleaning schedule leave elsewhere, and where the packaged build keeps

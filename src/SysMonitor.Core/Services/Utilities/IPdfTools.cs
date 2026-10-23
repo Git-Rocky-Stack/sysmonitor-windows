@@ -134,7 +134,6 @@ public interface IPdfEditor
     // Document Operations
     Task<PdfEditorDocument?> OpenPdfAsync(string filePath);
     Task<PdfOperationResult> SavePdfAsync(PdfEditorDocument document, string outputPath);
-    Task<byte[]?> RenderPageToImageAsync(string filePath, int pageNumber, double scale = 1.0);
     Task<List<PdfPageInfo>> GetPagesInfoAsync(string filePath);
     /// <summary>
     /// Writes a Word document describing this PDF: its pages, their sizes, and the annotations on each one.
