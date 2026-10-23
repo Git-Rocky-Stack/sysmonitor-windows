@@ -546,8 +546,10 @@ POINTS (15C) and STATUS (15D).
 
 **Backup Types:**
 - **FULL BACKUP** - Complete copy of selected files
-- **INCREMENTAL BACKUP** - Only files changed since the last full backup with the same
-  name (`src/SysMonitor.Core/Services/Backup/BackupService.cs:124`)
+- **INCREMENTAL BACKUP** - Only files new or changed since the previous backup with the
+  same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`).
+  Restoring one rebuilds every file as it was then, from the full backup and each
+  incremental after it; a backup a later incremental builds on cannot be deleted first
 - **SYSTEM IMAGE** and **MIRROR BACKUP** - Offered by the wizard. In this version
   either one copies everything you selected, as a full backup does
 

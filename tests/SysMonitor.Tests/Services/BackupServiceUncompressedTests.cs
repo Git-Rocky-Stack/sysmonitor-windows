@@ -96,8 +96,8 @@ public class BackupServiceUncompressedTests : IDisposable
         BackupService.SourceFolderNames(sources).Values.Should().Equal(expected);
 
     /// <summary>
-    /// Incrementals are taken against the newest full backup, so retention keeps it however old or far down the
-    /// list it is, and prunes the rest.
+    /// An incremental builds on the backups before it, so retention keeps them however old or far down the list
+    /// they are (more in BackupServiceIncrementalTests).
     /// </summary>
     [Fact]
     public async Task RetentionNeverRemovesTheFullBackupLaterOnesDependOn()

@@ -34,7 +34,13 @@ Re-verify anything you are relying on.
    | Type | Copies |
    |---|---|
    | FULL BACKUP | Everything you selected |
-   | INCREMENTAL BACKUP | Only what changed since the last full backup with the same name (`src/SysMonitor.Core/Services/Backup/BackupService.cs:124`, `:1567-1570`) |
+   | INCREMENTAL BACKUP | Only what is new or changed since the previous backup with the same name, full or incremental (`src/SysMonitor.Core/Services/Backup/BackupService.cs:125`, `:1521`) |
+
+   An incremental builds on the backup before it, and that one on the one before, back to
+   a full backup: a chain. If nothing has changed, no backup is made. With no earlier
+   backup of that name, or when the earlier one was encrypted with a different password
+   (or not encrypted when this one is), the incremental starts a new chain and copies
+   everything; the summary says which.
 
    The wizard also offers SYSTEM IMAGE and MIRROR BACKUP. In this version either one
    copies everything you selected, as a full backup does, and a mirror deletes nothing
@@ -47,7 +53,7 @@ Re-verify anything you are relying on.
    If you tick **Encrypt Backup**, the format is PBKDF2-HMAC-SHA256 with 600,000
    iterations, AES-256-CBC, and encrypt-then-MAC with an HMAC-SHA256 tag that is
    verified before any plaintext is written
-   (`BackupEncryption.cs:20-22`, `:31`, `:218`). In practice that means a tampered
+   (`BackupEncryption.cs:20-22`, `:31`, `:261`). In practice that means a tampered
    backup fails to restore rather than quietly handing you altered files.
 
    Compression can be None, Normal or Maximum. With None the backup is a folder rather
@@ -78,6 +84,14 @@ taken from, and anything refused is reported to you rather than silently skipped
 That matters because before v3.0.0 an edited backup file could write its contents
 anywhere you could write, including your Startup folder.
 
+Restoring an incremental puts back every file as it was when that incremental was taken,
+reading each one from the newest backup in its chain that holds it. A file deleted before
+the incremental was taken is not restored. An encrypted chain asks for its one password.
+
+A backup that a later incremental builds on cannot be deleted while that incremental
+exists: delete the newer incrementals first. "Keep last" never removes one either, so a
+long chain keeps its full backup; make a new FULL BACKUP now and then to start a fresh one.
+
 ## Troubleshooting
 
 **The password does not work.** There is no recovery. The key is derived from your
@@ -86,6 +100,10 @@ password with 600,000 PBKDF2 iterations, which is the point.
 **Restore reported refused entries.** Those files pointed outside the folders the
 backup covered, so they were not written. The report names them. This is the safety
 check doing its job.
+
+**An incremental will not restore: a backup it builds on is missing.** One of the backups
+in its chain was deleted or moved outside the app. Nothing is written; restore the newest
+full backup instead, or move the missing backup back.
 
 **Verification fails on a backup that used to pass.** If the backup was made before
 v3.0.0, the original pass may have been meaningless, because verification hashed the

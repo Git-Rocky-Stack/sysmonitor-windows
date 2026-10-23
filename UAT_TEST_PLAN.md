@@ -107,6 +107,9 @@ capitals.
 | B-3 | Encrypted backup, then restore with the wrong password | Restore refuses and writes nothing |
 | B-4 | Encrypted backup to a nearly full USB stick | If it fails, no unencrypted `.zip` is left on the stick |
 | B-5 | Set "Keep last" to 1, make a Full then an Incremental | The Full is kept |
+| B-5a | Full; change one file and add one; Incremental; delete a file, change another; Incremental | Each incremental's file count is only what changed; restoring the last gives every file at its newest, without the deleted one |
+| B-5b | Incremental with nothing changed since the last backup | Says nothing has changed; no new backup in HISTORY |
+| B-5c | Delete the Full of a chain while its incrementals exist | Refused, saying later incrementals build on it |
 | B-6 | Create restore point twice within a few minutes | The second time says Windows did not create a new one |
 | B-7 | Restore points list | Shows the machine's restore points with dates |
 

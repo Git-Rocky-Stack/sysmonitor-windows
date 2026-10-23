@@ -93,10 +93,8 @@ public class BackupService : IBackupService
                 };
             }
 
-            // Create backup destination folder
             var backupFolderName = $"Backup_{job.Name}_{DateTime.Now:yyyyMMdd_HHmmss}";
             var backupPath = Path.Combine(job.DestinationPath, backupFolderName);
-            Directory.CreateDirectory(backupPath);
 
             // Collect files to backup
             progress?.Report(new BackupProgress
@@ -106,11 +104,10 @@ public class BackupService : IBackupService
                 CurrentFile = ""
             });
 
-            var filesToBackup = await CollectFilesAsync(job, _currentBackupCts.Token);
-            var totalFiles = filesToBackup.Count;
-            var totalBytes = filesToBackup.Sum(f => f.Length);
+            var sourceFiles = await CollectFilesAsync(job, _currentBackupCts.Token);
+            var filesToBackup = sourceFiles;
 
-            if (totalFiles == 0)
+            if (sourceFiles.Count == 0)
             {
                 return new BackupResult
                 {
@@ -120,17 +117,45 @@ public class BackupService : IBackupService
                 };
             }
 
-            // For incremental backup, filter to only changed files
+            // An incremental copies only what is new or changed since the backup it builds on - the newest of this
+            // name, full or incremental - so each one holds the difference from the one before it.
+            BackupArchive? parent = null;
+            Dictionary<string, BackupCatalogEntry>? parentCatalog = null;
+            var startedNewChain = "";
             if (job.Type == BackupType.Incremental)
             {
-                var lastBackup = await GetLastBackupManifestAsync(job);
-                if (lastBackup != null)
+                progress?.Report(new BackupProgress
                 {
-                    filesToBackup = FilterChangedFiles(filesToBackup, lastBackup);
-                    totalFiles = filesToBackup.Count;
-                    totalBytes = filesToBackup.Sum(f => f.Length);
+                    Status = BackupStatus.Running,
+                    CurrentOperation = "Finding the backup this one builds on...",
+                    CurrentFile = ""
+                });
+
+                (parent, startedNewChain) = await FindParentAsync(job, _currentBackupCts.Token);
+                if (parent != null)
+                {
+                    parentCatalog = CatalogByPath(CatalogOf(parent.Manifest!));
+                    filesToBackup = sourceFiles.Where(f => IsNewOrChanged(f, parentCatalog)).ToList();
+
+                    if (filesToBackup.Count == 0 && CatalogOf(parent.Manifest!).Count == sourceFiles.Count)
+                    {
+                        return new BackupResult
+                        {
+                            Success = true,
+                            Status = BackupStatus.Completed,
+                            Message = $"Nothing has changed since the backup of {parent.CreatedDate:g}, so no new backup was needed",
+                            TotalFiles = sourceFiles.Count,
+                            Duration = stopwatch.Elapsed,
+                            StartTime = startTime,
+                            EndTime = DateTime.Now
+                        };
+                    }
                 }
             }
+
+            var totalFiles = filesToBackup.Count;
+            var totalBytes = filesToBackup.Sum(f => f.Length);
+            Directory.CreateDirectory(backupPath);
 
             // Create manifest
             var manifest = new BackupManifest
@@ -138,6 +163,7 @@ public class BackupService : IBackupService
                 BackupId = Guid.NewGuid().ToString(),
                 CreatedDate = DateTime.Now,
                 Files = [],
+                ParentBackupId = parent?.Id,
                 SourceRoots = job.SourcePaths.ToList(),
                 Metadata = new Dictionary<string, string>
                 {
@@ -154,6 +180,7 @@ public class BackupService : IBackupService
             // Backup files
             var lastProgressUpdate = DateTime.Now;
             var bytesSinceLastUpdate = 0L;
+            var notCopied = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var file in filesToBackup)
             {
@@ -228,9 +255,10 @@ public class BackupService : IBackupService
                         bytesSinceLastUpdate = 0;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     failedFiles++;
+                    notCopied.Add(file.FullName);
                     errors.Add(new BackupError
                     {
                         FilePath = file.FullName,
@@ -238,6 +266,8 @@ public class BackupService : IBackupService
                     });
                 }
             }
+
+            manifest.Catalog = BuildCatalog(sourceFiles, notCopied, parentCatalog);
 
             // Save manifest
             var manifestPath = Path.Combine(backupPath, _manifestFileName);
@@ -322,6 +352,7 @@ public class BackupService : IBackupService
                 IsVerified = false,
                 Description = job.Description,
                 SourcePaths = job.SourcePaths,
+                ParentBackupId = parent?.Id,
                 Manifest = manifest
             };
 
@@ -367,13 +398,20 @@ public class BackupService : IBackupService
 
             var status = failedFiles > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed;
 
+            // An incremental says what it holds and what it builds on, or why it had nothing to build on.
+            var kind = job.Type != BackupType.Incremental
+                ? ""
+                : parent != null
+                    ? $": {processedFiles} new or changed file(s) since the backup of {parent.CreatedDate:g}"
+                    : $": {startedNewChain}, so this one holds every file";
+
             return new BackupResult
             {
                 Success = true,
                 Status = status,
                 Message = failedFiles > 0
-                    ? $"Backup completed with {failedFiles} errors"
-                    : "Backup completed successfully",
+                    ? $"Backup completed with {failedFiles} errors{kind}"
+                    : $"Backup completed successfully{kind}",
                 OutputPath = finalBackupPath,
                 TotalBytes = totalBytes,
                 ProcessedBytes = processedBytes,
@@ -612,7 +650,91 @@ public class BackupService : IBackupService
 
     // ==================== RESTORE OPERATIONS ====================
 
+    /// <summary>
+    /// Restores a backup. An incremental holds only what changed, so it is rebuilt from its chain: each file the
+    /// incremental stands for comes from the newest backup in the chain that holds it, and nothing is written twice.
+    /// </summary>
     public async Task<BackupResult> RestoreBackupAsync(BackupArchive archive, string destinationPath, RestoreOptions options, IProgress<BackupProgress>? progress = null, CancellationToken cancellationToken = default)
+    {
+        if (archive.ParentBackupId == null)
+            return await RestoreLayerAsync(archive, destinationPath, options, progress, cancellationToken);
+
+        var startTime = DateTime.Now;
+        var stopwatch = Stopwatch.StartNew();
+
+        BackupResult Finish(bool success, BackupStatus status, string message, int processed = 0, int total = 0, List<BackupError>? errors = null) => new()
+        {
+            Success = success,
+            Status = status,
+            Message = message,
+            ProcessedFiles = processed,
+            TotalFiles = total,
+            Duration = stopwatch.Elapsed,
+            StartTime = startTime,
+            EndTime = DateTime.Now,
+            Errors = errors ?? []
+        };
+
+        var chain = await ChainForAsync(archive);
+        if (chain == null || chain.Any(a => a.Manifest == null))
+            return Finish(false, BackupStatus.Failed, MissingChainMessage(archive));
+
+        var layers = AssignLayers(chain.Select(a => (a, a.Manifest!)).ToList(), options.SelectiveFiles, out var unheld);
+        var errors = new List<BackupError>();
+        if (unheld > 0)
+            errors.Add(new BackupError { FilePath = archive.FilePath, ErrorMessage = $"{unheld} file(s) are in no backup of this chain" });
+
+        var processed = 0;
+        var total = 0;
+        for (var i = 0; i < layers.Count; i++)
+        {
+            var (layer, entries) = layers[i];
+            if (entries.Count == 0)
+                continue;
+
+            var layerOptions = new RestoreOptions
+            {
+                OverwriteExisting = options.OverwriteExisting,
+                PreservePermissions = options.PreservePermissions,
+                RestoreToOriginalLocation = options.RestoreToOriginalLocation,
+                AlternateDestination = options.AlternateDestination,
+                SelectiveFiles = entries.Select(e => e.RelativePath).ToList(),
+                VerifyAfterRestore = options.VerifyAfterRestore,
+                Password = options.Password
+            };
+            var layerProgress = progress == null ? null : new LayerProgress(progress, i + 1, layers.Count);
+
+            var result = await RestoreLayerAsync(layer, destinationPath, layerOptions, layerProgress, cancellationToken);
+            if (!result.Success && result.ProcessedFiles == 0 && result.Errors.Count == 0)
+            {
+                // The layer could not be opened at all - a wrong password, a damaged archive: say which one.
+                return Finish(false, BackupStatus.Failed,
+                    $"The backup of {layer.CreatedDate:g} in this chain could not be read: {result.Message}", processed, total, errors);
+            }
+
+            processed += result.ProcessedFiles;
+            total += result.TotalFiles;
+            errors.AddRange(result.Errors);
+        }
+
+        var restoredNothing = processed == 0 && errors.Count > 0;
+        return Finish(!restoredNothing,
+            restoredNothing ? BackupStatus.Failed : errors.Count > 0 ? BackupStatus.PartialSuccess : BackupStatus.Completed,
+            errors.Count > 0
+                ? $"Restored {processed} file(s) from {chain.Count} backups in the chain, with {errors.Count} errors"
+                : $"Restore completed successfully: {processed} file(s), rebuilt from {chain.Count} backups in the chain",
+            processed, total, errors);
+    }
+
+    /// <summary>Reports a chain restore's progress with which backup of the chain it is reading.</summary>
+    private sealed class LayerProgress(IProgress<BackupProgress> inner, int layer, int layers) : IProgress<BackupProgress>
+    {
+        public void Report(BackupProgress value) =>
+            inner.Report(value with { CurrentOperation = $"{value.CurrentOperation} (backup {layer} of {layers})" });
+    }
+
+    /// <summary>Restores what one backup holds, without looking at any backup it builds on.</summary>
+    private async Task<BackupResult> RestoreLayerAsync(BackupArchive archive, string destinationPath, RestoreOptions options, IProgress<BackupProgress>? progress, CancellationToken cancellationToken)
     {
         var startTime = DateTime.Now;
         var stopwatch = Stopwatch.StartNew();
@@ -703,14 +825,14 @@ public class BackupService : IBackupService
             }
 
             var manifest = await LoadManifestAsync(manifestPath);
-            var totalFiles = options.SelectiveFiles?.Count ?? manifest.Files.Count;
-            var filesToRestore = options.SelectiveFiles != null
-                ? manifest.Files.Where(f => options.SelectiveFiles.Contains(f.RelativePath)).ToList()
+            var selective = options.SelectiveFiles?.ToHashSet(StringComparer.Ordinal);
+            var filesToRestore = selective != null
+                ? manifest.Files.Where(f => selective.Contains(f.RelativePath)).ToList()
                 : manifest.Files;
 
             var plan = PlanRestore(manifest, filesToRestore, extractPath, destinationPath, options);
             errors.AddRange(plan.Refused);
-            totalFiles = plan.Files.Count;
+            var totalFiles = plan.Files.Count;
 
             foreach (var planned in plan.Files)
             {
@@ -864,6 +986,17 @@ public class BackupService : IBackupService
                 return Failed("No manifest available for verification");
             }
 
+            // An incremental taken after files were only deleted copies nothing: there is nothing in it to be wrong.
+            if (archive.Manifest.Files.Count == 0 && archive.Manifest.ParentBackupId != null)
+            {
+                return new BackupResult
+                {
+                    Success = true,
+                    Status = BackupStatus.Completed,
+                    Message = "Backup verified: it holds no files of its own, only which files were deleted since the backup before it"
+                };
+            }
+
             var hashedFiles = archive.Manifest.Files.Where(f => !string.IsNullOrEmpty(f.Hash)).ToList();
             if (hashedFiles.Count == 0)
             {
@@ -994,7 +1127,27 @@ public class BackupService : IBackupService
 
     private static string NormalizeEntryName(string name) => name.Replace('\\', '/').TrimStart('/');
 
+    /// <summary>
+    /// Deletes a backup, unless a later incremental builds on it: that one could not be restored without it.
+    /// </summary>
     public async Task<BackupResult> DeleteBackupAsync(BackupArchive archive)
+    {
+        var dependents = (await GetBackupHistoryAsync()).Count(a => a.ParentBackupId == archive.Id);
+        if (dependents > 0)
+        {
+            return new BackupResult
+            {
+                Success = false,
+                Status = BackupStatus.Failed,
+                Message = $"Not deleted: {dependents} later incremental backup(s) build on this one and could not be " +
+                          "restored without it. Delete the newer incrementals first."
+            };
+        }
+
+        return await DeleteArchiveAsync(archive);
+    }
+
+    private async Task<BackupResult> DeleteArchiveAsync(BackupArchive archive)
     {
         return await Task.Run(() =>
         {
@@ -1299,17 +1452,163 @@ public class BackupService : IBackupService
         return System.Text.RegularExpressions.Regex.IsMatch(fileName, regex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
     }
 
-    private static List<FileInfo> FilterChangedFiles(List<FileInfo> files, BackupManifest lastBackup)
-    {
-        var lastBackupFiles = lastBackup.Files.ToDictionary(f => f.OriginalPath, f => f.ModifiedDate);
-
-        return files.Where(f =>
+    /// <summary>
+    /// The files a backup stands for. Backups written before the catalog existed stand for the files they hold.
+    /// </summary>
+    internal static List<BackupCatalogEntry> CatalogOf(BackupManifest manifest) =>
+        manifest.Catalog ?? manifest.Files.Select(f => new BackupCatalogEntry
         {
-            if (!lastBackupFiles.TryGetValue(f.FullName, out var lastModified))
-                return true; // New file
-            return f.LastWriteTime > lastModified; // Changed file
+            OriginalPath = f.OriginalPath,
+            SizeBytes = f.SizeBytes,
+            ModifiedDate = f.ModifiedDate.ToUniversalTime()
         }).ToList();
+
+    private static Dictionary<string, BackupCatalogEntry> CatalogByPath(IEnumerable<BackupCatalogEntry> catalog)
+    {
+        var byPath = new Dictionary<string, BackupCatalogEntry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in catalog)
+            byPath.TryAdd(entry.OriginalPath, entry);
+        return byPath;
     }
+
+    /// <summary>
+    /// New, or not as the last backup saw it. Any difference counts, not only a newer date: a file put back from
+    /// an older copy has an older date and is still a change.
+    /// </summary>
+    private static bool IsNewOrChanged(FileInfo file, IReadOnlyDictionary<string, BackupCatalogEntry> catalog) =>
+        !catalog.TryGetValue(file.FullName, out var seen)
+        || seen.SizeBytes != file.Length
+        || seen.ModifiedDate.ToUniversalTime() != file.LastWriteTimeUtc;
+
+    /// <summary>
+    /// What this backup stands for: every source file as it is now, except one this run failed to copy, which
+    /// keeps the earlier backup's entry - that copy is still the one to restore, and the next incremental, seeing
+    /// the file differ from it, tries again.
+    /// </summary>
+    private static List<BackupCatalogEntry> BuildCatalog(
+        IEnumerable<FileInfo> sourceFiles, IReadOnlySet<string> notCopied, IReadOnlyDictionary<string, BackupCatalogEntry>? parentCatalog)
+    {
+        var catalog = new List<BackupCatalogEntry>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var file in sourceFiles)
+        {
+            if (!seen.Add(file.FullName))
+                continue;
+
+            if (notCopied.Contains(file.FullName))
+            {
+                if (parentCatalog != null && parentCatalog.TryGetValue(file.FullName, out var earlier))
+                    catalog.Add(earlier);
+                continue;
+            }
+
+            catalog.Add(new BackupCatalogEntry
+            {
+                OriginalPath = file.FullName,
+                SizeBytes = file.Length,
+                ModifiedDate = file.LastWriteTimeUtc
+            });
+        }
+
+        return catalog;
+    }
+
+    /// <summary>
+    /// The backup an incremental builds on: the newest full or incremental of the same name whose chain is whole.
+    /// When there is none it can use, the reason, so the result can say why this one holds every file.
+    /// </summary>
+    private async Task<(BackupArchive? Parent, string Reason)> FindParentAsync(BackupJob job, CancellationToken cancellationToken)
+    {
+        var history = await GetBackupHistoryAsync();
+        var byId = ById(history);
+
+        var parent = history
+            .Where(a => a.Name == job.Name && a.Manifest != null)
+            .Where(a => a.Type == BackupType.Full || (a.Type == BackupType.Incremental && a.Manifest!.Catalog != null))
+            .Where(a => ChainOf(a, byId) != null)
+            .OrderByDescending(a => a.CreatedDate)
+            .FirstOrDefault();
+
+        if (parent == null)
+            return (null, $"there was no earlier backup named \"{job.Name}\" to build on");
+
+        // One chain, one password: restoring an incremental opens every backup it builds on with the same one.
+        if (parent.IsEncrypted != job.EnableEncryption)
+            return (null, parent.IsEncrypted
+                ? $"the backup of {parent.CreatedDate:g} is encrypted and this one is not"
+                : $"the backup of {parent.CreatedDate:g} is not encrypted and this one is");
+
+        if (parent.IsEncrypted && !await BackupEncryption.PasswordOpensAsync(parent.FilePath, job.EncryptionPassword!, cancellationToken))
+            return (null, $"the backup of {parent.CreatedDate:g} was encrypted with a different password");
+
+        return (parent, "");
+    }
+
+    private static Dictionary<string, BackupArchive> ById(IEnumerable<BackupArchive> archives)
+    {
+        var byId = new Dictionary<string, BackupArchive>(StringComparer.Ordinal);
+        foreach (var archive in archives)
+            byId.TryAdd(archive.Id, archive);
+        return byId;
+    }
+
+    /// <summary>
+    /// The backup and every one it builds on, oldest first; null when one of them is gone, since the files it
+    /// held cannot then be put back.
+    /// </summary>
+    internal static List<BackupArchive>? ChainOf(BackupArchive archive, IReadOnlyDictionary<string, BackupArchive> byId)
+    {
+        var chain = new List<BackupArchive> { archive };
+        var seen = new HashSet<string>(StringComparer.Ordinal) { archive.Id };
+
+        for (var current = archive; current.ParentBackupId != null;)
+        {
+            if (!byId.TryGetValue(current.ParentBackupId, out var parent) || !seen.Add(parent.Id))
+                return null;
+            chain.Add(parent);
+            current = parent;
+        }
+
+        chain.Reverse();
+        return chain;
+    }
+
+    /// <summary>
+    /// Which backup in a chain each file is restored from: every file the newest one stands for, taken from the
+    /// newest backup that holds a copy of it. A file deleted before the newest backup is in none, so it stays deleted.
+    /// </summary>
+    internal static List<(BackupArchive Archive, List<BackupFileEntry> Entries)> AssignLayers(
+        IReadOnlyList<(BackupArchive Archive, BackupManifest Manifest)> chain, List<string>? selectiveFiles, out int unheld)
+    {
+        var wanted = new HashSet<string>(CatalogOf(chain[^1].Manifest).Select(e => e.OriginalPath), StringComparer.OrdinalIgnoreCase);
+        var selective = selectiveFiles?.ToHashSet(StringComparer.Ordinal);
+        var layers = new List<(BackupArchive, List<BackupFileEntry>)>();
+
+        for (var i = chain.Count - 1; i >= 0; i--)
+        {
+            var entries = chain[i].Manifest.Files
+                .Where(f => wanted.Remove(f.OriginalPath))
+                .Where(f => selective == null || selective.Contains(f.RelativePath))
+                .ToList();
+            layers.Add((chain[i].Archive, entries));
+        }
+
+        unheld = selective == null ? wanted.Count : 0;
+        layers.Reverse();
+        return layers;
+    }
+
+    private async Task<List<BackupArchive>?> ChainForAsync(BackupArchive archive)
+    {
+        var byId = ById(await GetBackupHistoryAsync());
+        byId.TryAdd(archive.Id, archive);
+        return ChainOf(archive, byId);
+    }
+
+    private static string MissingChainMessage(BackupArchive archive) =>
+        $"\"{archive.Name}\" is an incremental backup, and a backup it builds on has been deleted or moved, " +
+        "so it cannot be restored. Restore the newest full backup instead.";
 
     private static async Task CopyFileWithProgressAsync(string source, string destination, CancellationToken cancellationToken)
     {
@@ -1447,6 +1746,47 @@ public class BackupService : IBackupService
     public async Task<RestorePlan> PrepareRestoreAsync(
         BackupArchive archive, string destinationPath, RestoreOptions options, CancellationToken cancellationToken = default)
     {
+        // Nothing is extracted for a preview, so the place files would be read from stands in for the real
+        // one; it is only used to check that no entry points out of the backup.
+        var notionalExtractPath = Path.Combine(Path.GetTempPath(), "sysmonitor-restore-preview");
+
+        if (archive.ParentBackupId != null)
+        {
+            var chain = await ChainForAsync(archive);
+            if (chain == null)
+                return new RestorePlan { Problem = MissingChainMessage(archive) };
+
+            var read = new List<(BackupArchive, BackupManifest)>();
+            foreach (var member in chain)
+            {
+                var memberManifest = await ReadManifestOnlyAsync(member, options, cancellationToken);
+                if (memberManifest == null)
+                {
+                    return new RestorePlan
+                    {
+                        Problem = $"The backup of {member.CreatedDate:g}, which this incremental builds on, could not be read" +
+                                  (member.IsEncrypted ? " with this password." : ".")
+                    };
+                }
+                read.Add((member, memberManifest));
+            }
+
+            var plans = AssignLayers(read, options.SelectiveFiles, out _)
+                .Select((layer, i) => PlanRestore(read[i].Item2, layer.Entries, notionalExtractPath, destinationPath, options))
+                .ToList();
+
+            return new RestorePlan
+            {
+                Files = plans.SelectMany(p => p.Files).ToList(),
+                DestinationFolders = plans.SelectMany(p => p.DestinationFolders)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                    .ToList(),
+                Refused = plans.SelectMany(p => p.Refused).ToList(),
+                HasRecordedSourceRoots = plans.All(p => p.HasRecordedSourceRoots),
+            };
+        }
+
         var manifest = await ReadManifestOnlyAsync(archive, options, cancellationToken);
         if (manifest == null)
         {
@@ -1457,9 +1797,6 @@ public class BackupService : IBackupService
             ? manifest.Files.Where(f => options.SelectiveFiles.Contains(f.RelativePath)).ToList()
             : manifest.Files;
 
-        // Nothing is extracted for a preview, so the place files would be read from stands in for the real
-        // one; it is only used to check that no entry points out of the backup.
-        var notionalExtractPath = Path.Combine(Path.GetTempPath(), "sysmonitor-restore-preview");
         return PlanRestore(manifest, entries, notionalExtractPath, destinationPath, options);
     }
 
@@ -1561,38 +1898,36 @@ public class BackupService : IBackupService
         await File.WriteAllTextAsync(path, json);
     }
 
-    private async Task<BackupManifest?> GetLastBackupManifestAsync(BackupJob job)
-    {
-        var archives = await GetBackupHistoryAsync();
-        var lastBackup = archives
-            .Where(a => a.Name == job.Name && a.Type == BackupType.Full)
-            .OrderByDescending(a => a.CreatedDate)
-            .FirstOrDefault();
-
-        return lastBackup?.Manifest;
-    }
-
     private async Task CleanupOldBackupsAsync(BackupJob job)
     {
         var archives = await GetBackupHistoryAsync();
+        var byId = ById(archives);
         var jobArchives = archives
             .Where(a => a.Name == job.Name)
             .OrderByDescending(a => a.CreatedDate)
             .ToList();
 
-        // The newest full backup is what every later incremental is taken against
-        // (GetLastBackupManifestAsync), so neither the count nor the age ever removes it.
-        var newestFull = jobArchives.FirstOrDefault(a => a.Type == BackupType.Full);
-
         var cutoffDate = DateTime.Now.AddDays(-job.MaxAgeDays);
-        var toDelete = jobArchives.Skip(job.MaxBackupsToKeep)
+        var expired = jobArchives.Skip(job.MaxBackupsToKeep)
             .Concat(jobArchives.Where(a => a.CreatedDate < cutoffDate))
-            .Where(a => !ReferenceEquals(a, newestFull))
-            .Distinct();
+            .Select(a => a.Id)
+            .ToHashSet(StringComparer.Ordinal);
 
-        foreach (var archive in toDelete)
+        // Neither the count nor the age removes a backup that one being kept builds on, since that one could not
+        // be restored without it; nor the newest full backup, which incrementals written before chains were
+        // recorded were taken against.
+        var needed = jobArchives
+            .Where(a => !expired.Contains(a.Id))
+            .SelectMany(a => ChainOf(a, byId) ?? [a])
+            .Select(a => a.Id)
+            .ToHashSet(StringComparer.Ordinal);
+        var newestFull = jobArchives.FirstOrDefault(a => a.Type == BackupType.Full);
+        if (newestFull != null)
+            needed.Add(newestFull.Id);
+
+        foreach (var archive in jobArchives.Where(a => expired.Contains(a.Id) && !needed.Contains(a.Id)))
         {
-            await DeleteBackupAsync(archive);
+            await DeleteArchiveAsync(archive);
         }
     }
 }

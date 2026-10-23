@@ -40,6 +40,17 @@ the cut. The entries for the redesign's earlier phases follow the first five sec
   the unencrypted copy, retention runs only after a complete backup and never removes the full
   backup later ones depend on, and restore points are listed (the old parse always threw)
   (`src/SysMonitor.Core/Services/Backup/BackupService.cs`).
+- **An incremental backup holds only what changed since the backup before it**, full or
+  incremental; it was compared against the last full backup every time, so each one grew into a
+  differential. A file counts as changed when its size or date differs at all, not only when
+  the date is newer. Each backup records every file the sources held, so restoring an
+  incremental rebuilds them as they were when it was taken - each file from the newest backup in
+  the chain that has it, and a file deleted in between stays deleted; it used to put back only
+  the files that one backup copied. When nothing changed no backup is made. An encrypted chain
+  shares one password: with a different one, or a different encryption choice, the incremental
+  starts a new chain and holds every file. A backup a later incremental builds on cannot be
+  deleted first, and retention keeps it (`src/SysMonitor.Core/Services/Backup/BackupService.cs`,
+  `BackupService.AssignLayers`, `BackupEncryption.PasswordOpensAsync`).
 - **Results say what happened.** A created restore point is confirmed by a new sequence number
   (Windows answers success without making one within 24 hours of the last); a free-space wipe
   that stops short fails, and fills in files under FAT32's 4 GiB limit; a PDF merge with an

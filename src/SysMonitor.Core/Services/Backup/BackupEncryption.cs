@@ -153,17 +153,7 @@ public static class BackupEncryption
         try
         {
             // Pass 1: authenticate header + ciphertext before any plaintext is produced.
-            using (var hmac = IncrementalHash.CreateHMAC(HashAlgorithmName.SHA256, macKey))
-            {
-                hmac.AppendData(header);
-                input.Position = HeaderSize;
-                await CopyRangeAsync(input, ciphertextLength, chunk => { hmac.AppendData(chunk.Span); return ValueTask.CompletedTask; }, cancellationToken);
-
-                var expectedTag = new byte[TagSize];
-                await input.ReadExactlyAsync(expectedTag, cancellationToken);
-                if (!CryptographicOperations.FixedTimeEquals(hmac.GetHashAndReset(), expectedTag))
-                    throw new BackupPasswordException(WrongPasswordMessage);
-            }
+            await AuthenticateV2Async(input, header, macKey, ciphertextLength, cancellationToken);
 
             // Pass 2: decrypt.
             input.Position = HeaderSize;
@@ -179,6 +169,59 @@ public static class BackupEncryption
             CryptographicOperations.ZeroMemory(encryptionKey);
             CryptographicOperations.ZeroMemory(macKey);
         }
+    }
+
+    /// <summary>
+    /// Whether <paramref name="password"/> opens this encrypted backup, checked against its authentication tag
+    /// without writing any plaintext. A legacy file has no tag to check, so for it the answer is always false.
+    /// </summary>
+    public static async Task<bool> PasswordOpensAsync(string inputPath, string password, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(password))
+            return false;
+
+        await using var input = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, useAsync: true);
+
+        var header = new byte[HeaderSize];
+        var headerBytes = await input.ReadAtLeastAsync(header, HeaderSize, throwOnEndOfStream: false, cancellationToken);
+        if (headerBytes != HeaderSize || !header.AsSpan(0, 4).SequenceEqual(Magic) || header[4] != FormatVersion)
+            return false;
+
+        var iterations = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(5, 4));
+        var ciphertextLength = input.Length - HeaderSize - TagSize;
+        if (iterations is < 10_000 or > 10_000_000 || ciphertextLength <= 0 || ciphertextLength % 16 != 0)
+            return false;
+
+        var (encryptionKey, macKey) = DeriveKeys(password, header.AsSpan(9, SaltSize).ToArray(), iterations);
+        try
+        {
+            await AuthenticateV2Async(input, header, macKey, ciphertextLength, cancellationToken);
+            return true;
+        }
+        catch (BackupPasswordException)
+        {
+            return false;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(encryptionKey);
+            CryptographicOperations.ZeroMemory(macKey);
+        }
+    }
+
+    /// <summary>Checks a v2 file's tag over its header and ciphertext; throws when it does not match.</summary>
+    private static async Task AuthenticateV2Async(FileStream input, byte[] header, byte[] macKey, long ciphertextLength,
+        CancellationToken cancellationToken)
+    {
+        using var hmac = IncrementalHash.CreateHMAC(HashAlgorithmName.SHA256, macKey);
+        hmac.AppendData(header);
+        input.Position = HeaderSize;
+        await CopyRangeAsync(input, ciphertextLength, chunk => { hmac.AppendData(chunk.Span); return ValueTask.CompletedTask; }, cancellationToken);
+
+        var expectedTag = new byte[TagSize];
+        await input.ReadExactlyAsync(expectedTag, cancellationToken);
+        if (!CryptographicOperations.FixedTimeEquals(hmac.GetHashAndReset(), expectedTag))
+            throw new BackupPasswordException(WrongPasswordMessage);
     }
 
     private static async Task DecryptLegacyAsync(FileStream input, Func<FileStream> createOutput, string password,

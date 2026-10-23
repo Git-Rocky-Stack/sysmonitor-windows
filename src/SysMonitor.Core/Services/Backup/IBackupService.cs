@@ -44,7 +44,7 @@ public interface IBackupService : IDisposable
 public enum BackupType
 {
     Full,           // Complete backup of all selected items
-    Incremental,    // Only files changed since last backup
+    Incremental,    // Only files changed since the previous backup of the same name, full or incremental
     Differential,   // All files changed since last full backup
     SystemImage,    // Full system/partition image
     Mirror          // Exact mirror (deletes files not in source)
@@ -218,7 +218,8 @@ public class BackupArchive
     public bool IsVerified { get; set; }
     public string? Description { get; set; }
     public List<string> SourcePaths { get; set; } = [];
-    public string? ParentBackupId { get; set; } // For incremental backups
+    /// <summary>The backup an incremental builds on; restoring it reads the whole chain back to its full backup.</summary>
+    public string? ParentBackupId { get; set; }
     public BackupManifest? Manifest { get; set; }
 
     private static string FormatSize(long bytes)
@@ -251,6 +252,26 @@ public class BackupManifest
     /// Backups written before this existed have none, and such a restore has to be confirmed by destination.
     /// </summary>
     public List<string> SourceRoots { get; set; } = [];
+
+    /// <summary>
+    /// The backup this one builds on, for an incremental; null for a backup that stands on its own.
+    /// </summary>
+    public string? ParentBackupId { get; set; }
+
+    /// <summary>
+    /// Every file the sources held when this backup was taken, whether this backup copied it or an earlier one
+    /// in its chain did. The next incremental compares against it, and restoring rebuilds exactly this set, so a
+    /// file deleted since the last backup does not come back. Null in backups written before it existed.
+    /// </summary>
+    public List<BackupCatalogEntry>? Catalog { get; set; }
+}
+
+/// <summary>One file as the sources held it when a backup was taken.</summary>
+public record BackupCatalogEntry
+{
+    public string OriginalPath { get; init; } = "";
+    public long SizeBytes { get; init; }
+    public DateTime ModifiedDate { get; init; }
 }
 
 /// <summary>What a restore would write, worked out before anything is written.</summary>
@@ -267,6 +288,9 @@ public class RestorePlan
 
     /// <summary>Whether the archive recorded where it came from; older ones did not.</summary>
     public bool HasRecordedSourceRoots { get; init; }
+
+    /// <summary>Why nothing can be restored at all - an incremental whose chain is broken, say; null otherwise.</summary>
+    public string? Problem { get; init; }
 
     public long TotalBytes => Files.Sum(f => f.Entry.SizeBytes);
 }

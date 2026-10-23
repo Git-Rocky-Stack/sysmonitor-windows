@@ -280,7 +280,7 @@
                                 <FontIcon Glyph="&#xE8B2;" FontSize="32"/>
                                 <StackPanel>
                                     <TextBlock Text="INCREMENTAL BACKUP"/>
-                                    <TextBlock Text="Only backup files changed since last backup" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
+                                    <TextBlock Text="Only files changed since the last backup" FontSize="12" FontFamily="{StaticResource ConsoleBodyFontFamily}" Foreground="{ThemeResource SilverMuteBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Button>

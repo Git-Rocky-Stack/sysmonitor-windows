@@ -678,9 +678,9 @@ public partial class BackupViewModel : ObservableObject, IDisposable
 
             if (plan.Files.Count == 0)
             {
-                ShowStatus(plan.Refused.Count > 0
+                ShowStatus(plan.Problem ?? (plan.Refused.Count > 0
                     ? $"Nothing was restored: every entry in this backup ({plan.Refused.Count}) asked to be written somewhere it does not belong."
-                    : "This backup has nothing to restore.", false);
+                    : "This backup has nothing to restore."), false);
                 return;
             }
 
