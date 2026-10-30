@@ -66,7 +66,6 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        Title = "SysMonitor - Windows System Monitor & Optimizer";
 
         // Set window icon
         SetWindowIcon();

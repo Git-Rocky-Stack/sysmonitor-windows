@@ -173,6 +173,10 @@ follow the first eight sections.
   `STX-1-ULTIMATE-<version>-Portable-x64.zip`. Files that were not part of this app - an
   Android bundle, its phone screenshots and recordings, old release notes, a Firebase Studio
   workspace - are removed from the repository.
+- The window's own title - the taskbar, Alt+Tab and the title bar - is the product's name too;
+  the constructor set it back to "SysMonitor - Windows System Monitor & Optimizer" after the
+  XAML had named it (`src/SysMonitor.App/MainWindow.xaml.cs`,
+  `tests/SysMonitor.Tests/Architecture/WindowTitleTests.cs`).
 
 ### Changed - the look is complete
 
