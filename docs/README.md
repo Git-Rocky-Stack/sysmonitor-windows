@@ -1,6 +1,6 @@
 # STX-1 ULTIMATE System Monitor documentation
 
-Documentation for STX-1 ULTIMATE System Monitor v3.0.1, a Windows desktop system monitoring
+Documentation for STX-1 ULTIMATE System Monitor v3.1.0, a Windows desktop system monitoring
 and maintenance application.
 
 The public page built from these files is served at

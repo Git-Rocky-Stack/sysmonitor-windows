@@ -11,9 +11,11 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-10-30
+
 The Command Console look is complete, and an end-to-end audit of the app's safety, lifetime,
-accessibility and release path is resolved. This is planned as 3.1.0; RELEASE_CHECKLIST.md is
-the cut. The entries for the redesign's earlier phases follow the first five sections.
+accessibility and release path is resolved. The entries for the redesign's earlier phases
+follow the first eight sections.
 
 ### Fixed - nothing is destroyed that cannot be proven broken
 

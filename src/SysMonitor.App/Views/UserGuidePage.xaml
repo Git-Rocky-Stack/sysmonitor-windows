@@ -685,19 +685,19 @@
                         </StackPanel>
                     </instruments:Plate>
 
-                    <!-- Changelog Card - since v3.0.1 -->
+                    <!-- Changelog Card - v3.1.0 -->
                     <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="16">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{ThemeResource StateExecBrush}"/>
-                                <TextBlock Text="Changes since v3.0.1" FontSize="16" FontWeight="Bold"
+                                <TextBlock Text="Release Notes - v3.1.0" FontSize="16" FontWeight="Bold"
                                            Foreground="{ThemeResource PlatinumBrush}"/>
                                 <instruments:Chip State="Hold" Content="LATEST" VerticalAlignment="Center"/>
                             </StackPanel>
 
                             <TextBlock TextWrapping="Wrap" FontSize="12" Margin="16,0,0,0"
                                        Foreground="{ThemeResource SilverBrush}">
-                                What this build does differently from v3.0.1. The full list, with the file each change
+                                What v3.1.0 does differently from v3.0.1. The full list, with the file each change
                                 lives in, is in CHANGELOG.md in the repository.
                             </TextBlock>
 
@@ -749,6 +749,10 @@
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
                                         <Run> Backups keep every folder you add, even two with the same name, and never leave an unencrypted copy behind</Run>
+                                    </TextBlock>
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> Backups copy files other programs have open, reading one held exclusively from a shadow copy after Windows asks, and can repeat daily, weekly or monthly</Run>
                                     </TextBlock>
                                     <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>

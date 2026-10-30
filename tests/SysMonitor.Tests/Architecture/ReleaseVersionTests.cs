@@ -162,6 +162,34 @@ public class ReleaseVersionTests
     }
 
     /// <summary>
+    /// The download page publishes a real checksum for every file it offers.
+    /// <para>
+    /// A version is cut before its files exist, so the page's checksums and sizes are written in after the
+    /// build. Until then they read <c>RECORD-FROM-BUILD</c>, and this test keeps the release commit red: a
+    /// page merged in that state tells a reader to verify a download against a value no file has.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void TheDownloadPagePublishesARealChecksumForEveryFileItOffers()
+    {
+        const string page = "docs/index.html";
+        var html = Read(page);
+
+        var sums = Regex.Matches(html,
+                @"<dl class=""sum"">\s*<dt>(?<file>[^<]+)</dt>\s*<dd>(?<sum>[^<]*)</dd>\s*</dl>")
+            .Select(match => (File: match.Groups["file"].Value, Sum: match.Groups["sum"].Value))
+            .ToList();
+
+        sums.Should().HaveCount(2, "the page offers the installer and the portable zip, and each needs a checksum");
+        foreach (var (file, sum) in sums)
+            sum.Should().MatchRegex("^[0-9A-Fa-f]{64}$",
+                $"{file} needs the SHA-256 recorded from the built file (RELEASE_CHECKLIST.md 3), not a stand-in");
+
+        html.Should().NotContain("RECORD-FROM-BUILD",
+            "every value the build produces - checksums and download sizes - is written in before the page ships");
+    }
+
+    /// <summary>
     /// The changelog's newest release is the one being built. A version bumped in the csproj with the
     /// changes still sitting under [Unreleased] ships a build whose release notes do not exist.
     /// </summary>

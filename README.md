@@ -3,7 +3,7 @@
 **Strategic. Excellence. Engineered.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.0.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%202004%2B-lightgrey.svg)](#requirements)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4.svg)](https://dotnet.microsoft.com/)
 
@@ -25,8 +25,8 @@ feature was removed rather than reworded. See [CHANGELOG.md](CHANGELOG.md).
 
 ## What's new
 
-Changes since v3.0.1, planned as 3.1.0. Each one is described in full, with the file it
-lives in, in [CHANGELOG.md](CHANGELOG.md) under Unreleased.
+What changed in 3.1.0. Each one is described in full, with the file it lives in, in
+[CHANGELOG.md](CHANGELOG.md) under 3.1.0.
 
 **The Command Console look.** STX-1 ULTIMATE now looks like System-X, its sister app, so the two read
 as one family. Every page opens on a bolted view header, and every section of a page is a
