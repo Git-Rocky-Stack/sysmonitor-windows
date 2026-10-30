@@ -17,7 +17,7 @@ it moves the public download page to 3.1.0 files that do not exist yet.
    fails while `docs/index.html` reads `RECORD-FROM-BUILD` where the two SHA-256s and download sizes go. That is the
    gate: the branch goes green only once the built files' real values are written in. Never "fix" it with a
    stand-in.
-3. **Everything else is green**: Architecture suite 185 passed, 1 failed (the gate above); tokens and docs current.
+3. **Everything else is green**: Architecture suite 186 passed, 1 failed (the gate above); tokens and docs current.
 
 ---
 
@@ -32,7 +32,7 @@ All 10 generated pages are current.
 
 $ dotnet test tests/SysMonitor.Tests -p:EnableWindowsTargeting=true -p:Platform=x64 \
       --filter "FullyQualifiedName~SysMonitor.Tests.Architecture"
-Failed!  - Failed: 1, Passed: 185
+Failed!  - Failed: 1, Passed: 186
   (TheDownloadPagePublishesARealChecksumForEveryFileItOffers - the release gate, section 0.2)
 ```
 
@@ -67,6 +67,17 @@ assignment is removed; `WindowTitleTests` holds it. Internal identifiers that st
 `%LocalAppData%\SysMonitor` folder, the toast AppId, the Run value, the Task Scheduler folder) are deliberate:
 renaming them would orphan existing installs' settings, logs and tasks.
 
+### 2.3 Cut-off controls and blank choice boxes
+
+Read off the CI screenshots at the 1100-wide minimum window. Drive Wiper's 13A status line stopped mid-word
+beside its three caps, and Browser Privacy's filter row ran off its panel, cutting the High Risk filter to
+"High" and pushing SELECT SAFE ONLY out of reach. Status lines now wrap, and the filters sit two by two. Drive
+Wiper's Wipe Method and Scheduled Clean's Schedule Type were blank because `SelectedValuePath` and
+`DisplayMemberPath` resolve by name at run time, which fails silently on a plain class. They bind `SelectedItem`
+with an `x:DataType` template now, as does Game Mode's profile box; `SelectionBindingTests` keeps the string
+paths out. **CI compiles this XAML; the Linux session cannot.** Check the four pages (Drive Wiper, Browser
+Privacy, Scheduled Clean, Game Mode) in the next UI smoke run's screenshots.
+
 ---
 
 ## 3. Left, and why
@@ -81,9 +92,6 @@ In order. Each step is in [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
 | 4 | Merge, tag `v3.1.0`, create the GitHub release with both files | GitHub | 4 |
 | 5 | Store: MSIX, submission, **screenshots recaptured on real hardware** (CI's VM has no sensors, so its pages read 0 and N/A) | Partner Center | 5 |
 | 6 | Install from the page and the Store on a clean machine; watch Issues for a week | - | 6 |
-
-Seen in the CI screenshots and not changed here: at the 1100-wide minimum window, Drive Wiper's 13A heading is cut
-off ("Add files or folders to securely del") beside its three caps, and its Wipe Method box shows empty until opened.
 
 ---
 

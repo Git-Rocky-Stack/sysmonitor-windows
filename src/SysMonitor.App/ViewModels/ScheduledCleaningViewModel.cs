@@ -52,6 +52,22 @@ public partial class ScheduledCleaningViewModel : ObservableObject
         new ScheduleOption(CleaningSchedule.OnIdle, "When Idle", "Run when system is idle for 10+ minutes")
     };
 
+    /// <summary>
+    /// The option the Schedule Type box shows, bound to its SelectedItem. Matching on SelectedValuePath="Schedule"
+    /// looked the property up by name at run time, which a plain class does not answer, so the box sat empty.
+    /// </summary>
+    public ScheduleOption? SelectedScheduleOption
+    {
+        get => ScheduleOptions.FirstOrDefault(option => option.Schedule == SelectedSchedule);
+        set
+        {
+            if (value is not null)
+                SelectedSchedule = value.Schedule;
+        }
+    }
+
+    partial void OnSelectedScheduleChanged(CleaningSchedule value) => OnPropertyChanged(nameof(SelectedScheduleOption));
+
     public ObservableCollection<DayOfWeek> DaysOfWeek { get; } = new(Enum.GetValues<DayOfWeek>());
 
     public ObservableCollection<int> DaysOfMonth { get; } = new(Enumerable.Range(1, 28));

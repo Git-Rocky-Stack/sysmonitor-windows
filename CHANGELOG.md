@@ -190,6 +190,16 @@ follow the first eight sections.
   icon cap has an accessible name; faceplate kickers are headings; meaningful text is at least
   11; the window has a minimum size; the PDF Editor's advertised shortcuts work.
 - Excellent and Good share Go's lamp, so the thresholds legend names them on one swatch.
+- **At the window's minimum width nothing is cut off the controls panels.** Browser Privacy's
+  filters ran off the panel in one row, cutting High Risk (Passwords) to "High" and pushing
+  SELECT SAFE ONLY out of reach; they are two by two, the cap in a column of its own. Drive
+  Wiper's and Browser Privacy's status lines wrap instead of stopping mid-word
+  (`src/SysMonitor.App/Views/BrowserPrivacyPage.xaml`, `DriveWiperPage.xaml`).
+- **Drive Wiper's Wipe Method and Scheduled Clean's Schedule Type show their choice.** Both sat
+  empty over the value the page used (3 passes, Weekly): `SelectedValuePath` and
+  `DisplayMemberPath` look a property up by name at run time, which a plain class does not
+  answer. They, and Game Mode's profile box, bind the item and draw it with a compiled template
+  (`tests/SysMonitor.Tests/Architecture/SelectionBindingTests.cs`).
 
 ### Release
 

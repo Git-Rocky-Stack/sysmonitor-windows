@@ -36,7 +36,8 @@
                             </Border>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Style="{StaticResource CardTitleStyle}"
+                                           TextWrapping="Wrap"/>
                                 <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
                                     <TextBlock Style="{StaticResource CardSubtitleStyle}">
                                         <Run Text="Total: "/>
@@ -60,17 +61,29 @@
                     </instruments:Plate>
 
                     <!-- Risk Filter -->
+                    <!-- Two by two: in one row the last filter and SELECT SAFE ONLY ran off the panel at the window's minimum width. -->
                     <instruments:Plate Padding="12" VerticalContentAlignment="Stretch">
-                        <StackPanel Orientation="Horizontal" Spacing="24">
-                            <TextBlock Text="Show:" VerticalAlignment="Center" Foreground="{ThemeResource SilverBrush}"/>
-                            <CheckBox Content="Safe (Cache)" IsChecked="{x:Bind ViewModel.ShowSafeItems, Mode=TwoWay}"/>
-                            <CheckBox Content="Low Risk (History)" IsChecked="{x:Bind ViewModel.ShowLowRiskItems, Mode=TwoWay}"/>
-                            <CheckBox Content="Medium Risk (Cookies)" IsChecked="{x:Bind ViewModel.ShowMediumRiskItems, Mode=TwoWay}"/>
-                            <CheckBox Content="High Risk (Passwords)" IsChecked="{x:Bind ViewModel.ShowHighRiskItems, Mode=TwoWay}"
+                        <Grid ColumnSpacing="24" RowSpacing="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.RowSpan="2" Text="Show:" VerticalAlignment="Center" Foreground="{ThemeResource SilverBrush}"/>
+                            <CheckBox Grid.Column="1" Content="Safe (Cache)" IsChecked="{x:Bind ViewModel.ShowSafeItems, Mode=TwoWay}"/>
+                            <CheckBox Grid.Column="2" Content="Low Risk (History)" IsChecked="{x:Bind ViewModel.ShowLowRiskItems, Mode=TwoWay}"/>
+                            <CheckBox Grid.Row="1" Grid.Column="1" Content="Medium Risk (Cookies)" IsChecked="{x:Bind ViewModel.ShowMediumRiskItems, Mode=TwoWay}"/>
+                            <CheckBox Grid.Row="1" Grid.Column="2" Content="High Risk (Passwords)" IsChecked="{x:Bind ViewModel.ShowHighRiskItems, Mode=TwoWay}"
                                       Foreground="{ThemeResource StateNoGoBrush}"/>
-                            <Button Content="SELECT SAFE ONLY" Command="{x:Bind ViewModel.SelectSafeItemsCommand}"
-                                    Margin="24,0,0,0"/>
-                        </StackPanel>
+                            <Button Grid.RowSpan="2" Grid.Column="3" Content="SELECT SAFE ONLY" Command="{x:Bind ViewModel.SelectSafeItemsCommand}"
+                                    VerticalAlignment="Center"/>
+                        </Grid>
                     </instruments:Plate>
                 </StackPanel>
             </instruments:Faceplate>

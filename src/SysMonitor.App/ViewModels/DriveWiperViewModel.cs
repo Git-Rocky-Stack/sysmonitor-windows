@@ -73,9 +73,25 @@ public partial class DriveWiperViewModel : ObservableObject, IDisposable
         UpdateMethodDescription();
     }
 
+    /// <summary>
+    /// The option the Wipe Method box shows, bound to its SelectedItem. Matching on SelectedValuePath="Method"
+    /// looked the property up by name at run time, which a plain class does not answer, so the box sat empty
+    /// over a 3-pass default.
+    /// </summary>
+    public WipeMethodOption? SelectedMethodOption
+    {
+        get => WipeMethods.FirstOrDefault(option => option.Method == SelectedMethod);
+        set
+        {
+            if (value is not null)
+                SelectedMethod = value.Method;
+        }
+    }
+
     partial void OnSelectedMethodChanged(WipeMethod value)
     {
         UpdateMethodDescription();
+        OnPropertyChanged(nameof(SelectedMethodOption));
     }
 
     private void UpdateMethodDescription()

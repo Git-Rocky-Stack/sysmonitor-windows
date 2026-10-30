@@ -128,9 +128,14 @@
 
                                     <ComboBox AutomationProperties.Name="Optimization presets" ItemsSource="{x:Bind ViewModel.Profiles, Mode=OneWay}"
                                               SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}"
-                                              DisplayMemberPath="Name"
                                               PlaceholderText="Select profile"
-                                              HorizontalAlignment="Stretch"/>
+                                              HorizontalAlignment="Stretch">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="models:PerformanceProfile">
+                                                <TextBlock Text="{x:Bind Name}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
 
                                     <Grid ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
