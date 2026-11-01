@@ -1,6 +1,6 @@
 # Reference: settings and data
 
-Every setting on the Settings page of STX-1 ULTIMATE System Monitor v3.1.0, with its default,
+Every setting on the Settings page of STX-1 ULTIMATE System Monitor v3.1.1, with its default,
 and every location the app writes to.
 
 Defaults are read from `src/SysMonitor.App/ViewModels/SettingsViewModel.cs:24-56`. The
@@ -94,7 +94,7 @@ swallowed (`src/SysMonitor.Core/Services/Alerts/AlertService.cs`).
 
 The Settings page reads the version from the running assembly
 (`SettingsViewModel.cs:74`), so it reports what is actually installed rather than a
-number written by hand. For this release it reads 3.1.0.0.
+number written by hand. For this release it reads 3.1.1.0.
 
 ## Where the app writes
 

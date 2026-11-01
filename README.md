@@ -3,7 +3,7 @@
 **Strategic. Excellence. Engineered.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.1-blue.svg)](CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%202004%2B-lightgrey.svg)](#requirements)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4.svg)](https://dotnet.microsoft.com/)
 
@@ -24,6 +24,9 @@ that is what happened. Where a feature could not deliver what its label promised
 feature was removed rather than reworded. See [CHANGELOG.md](CHANGELOG.md).
 
 ## What's new
+
+3.1.1 changes one line: the Drive Wiper's header no longer promises what the app cannot check
+(`src/SysMonitor.App/Views/DriveWiperPage.xaml:21`).
 
 What changed in 3.1.0. Each one is described in full, with the file it lives in, in
 [CHANGELOG.md](CHANGELOG.md) under 3.1.0.

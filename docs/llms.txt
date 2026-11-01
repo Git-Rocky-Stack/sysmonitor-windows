@@ -1,7 +1,7 @@
 # STX-1 ULTIMATE System Monitor
 
 > A free and open source Windows desktop application for system monitoring and
-> maintenance, built with WinUI 3 and .NET 8. Version 3.1.0, MIT licensed. Readings
+> maintenance, built with WinUI 3 and .NET 8. Version 3.1.1, MIT licensed. Readings
 > stay on the user's machine: no account, no telemetry, no network call home.
 
 STX-1 ULTIMATE reads Windows hardware in real time and provides maintenance tools across 34
@@ -26,8 +26,11 @@ Version 3.1.0 gives the app the Command Console look, where every section of a p
 faceplate whose stripe names it (`CPU - CORE USAGE - 02B`), draws the console as hardware
 (brushed panels, readouts behind glass, LED meters), and resolves an audit of its safety: every destructive action asks first, cleans never follow a junction, the Registry
 Cleaner no longer flags working programs, and backups keep every source, copy files in use
-through Volume Shadow Copy, and can repeat on a schedule. Release files are named
-`STX-1-ULTIMATE-Setup-3.1.0.exe` and `STX-1-ULTIMATE-3.1.0-Portable-x64.zip`.
+through Volume Shadow Copy, and can repeat on a schedule.
+
+Version 3.1.1 changes one line: the Drive Wiper's header no longer promises what the app
+cannot check. Release files are named `STX-1-ULTIMATE-Setup-3.1.1.exe` and
+`STX-1-ULTIMATE-3.1.1-Portable-x64.zip`.
 
 ## Documentation
 

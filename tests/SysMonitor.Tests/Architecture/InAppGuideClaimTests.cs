@@ -47,6 +47,9 @@ public class InAppGuideClaimTests
             "back, so no RAM is freed. This is the BOOST RAM claim under its other names - and under " +
             "\"memory\" as well as \"RAM\": the Memory page reported the same trim as freed memory, and " +
             "the guide listed Game Mode's session stats as memory freed, after both RAM wordings had gone"),
+        (Claim(@"beyond[ _-]+recover(y|ing)"),
+            "the app overwrites a file and reads the last pass back; on a solid-state drive the drive decides " +
+            "where writes land, so it cannot promise what recovery tools could find, and the page says so"),
     ];
 
     /// <summary>Every XAML page and view model the application ships: all the text a user can read in it.</summary>

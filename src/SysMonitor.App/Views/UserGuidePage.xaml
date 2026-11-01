@@ -685,6 +685,24 @@
                         </StackPanel>
                     </instruments:Plate>
 
+                    <!-- Changelog Card - v3.1.1 -->
+                    <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
+                        <StackPanel Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{ThemeResource StateExecBrush}"/>
+                                <TextBlock Text="Release Notes - v3.1.1" FontSize="16" FontWeight="Bold"
+                                           Foreground="{ThemeResource PlatinumBrush}"/>
+                                <instruments:Chip State="Hold" Content="LATEST" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <TextBlock TextWrapping="Wrap" FontSize="12" Margin="16,0,0,0"
+                                       Foreground="{ThemeResource SilverBrush}">
+                                The Drive Wiper's header no longer promises more than the app can check. It now says
+                                what the page does: overwrite files and check the last pass.
+                            </TextBlock>
+                        </StackPanel>
+                    </instruments:Plate>
+
                     <!-- Changelog Card - v3.1.0 -->
                     <instruments:Plate Padding="16" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="16">
@@ -692,7 +710,6 @@
                                 <FontIcon Glyph="&#xE81C;" FontSize="20" Foreground="{ThemeResource StateExecBrush}"/>
                                 <TextBlock Text="Release Notes - v3.1.0" FontSize="16" FontWeight="Bold"
                                            Foreground="{ThemeResource PlatinumBrush}"/>
-                                <instruments:Chip State="Hold" Content="LATEST" VerticalAlignment="Center"/>
                             </StackPanel>
 
                             <TextBlock TextWrapping="Wrap" FontSize="12" Margin="16,0,0,0"

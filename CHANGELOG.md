@@ -11,6 +11,18 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-10-31
+
+One sentence on one page. Nothing else about how the app behaves changed.
+
+### Fixed
+
+- **The Drive Wiper no longer promises what it cannot check.** Its header read "Securely Delete
+  Files Beyond Recovery". The app overwrites a file and reads the last pass back, and on a
+  solid-state drive the drive decides where writes land, as the page's own warning says. The header
+  now reads "Overwrite Files and Check the Last Pass" (`src/SysMonitor.App/Views/DriveWiperPage.xaml:21`),
+  and `InAppGuideClaimTests` bans the old wording across the shipped interface.
+
 ## [3.1.0] - 2026-10-31
 
 The Command Console look is complete and drawn as machined hardware, and an end-to-end audit

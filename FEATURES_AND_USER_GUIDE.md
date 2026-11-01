@@ -2,7 +2,7 @@
 
 **Strategic. Excellence. Engineered.**
 
-Version 3.1.0 | Windows Desktop Application | Built with WinUI 3 & .NET 8
+Version 3.1.1 | Windows Desktop Application | Built with WinUI 3 & .NET 8
 
 ---
 
@@ -934,7 +934,7 @@ payment details.
 
 The guide inside the app, in GETTING STARTED (34A), FEATURE GUIDE (34B), TIPS & BEST
 PRACTICES (34C) and ABOUT THIS BUILD (34D). ABOUT THIS BUILD shows the date the build was
-made and what changed in v3.1.0.
+made and what changed in v3.1.1 and v3.1.0.
 
 ---
 

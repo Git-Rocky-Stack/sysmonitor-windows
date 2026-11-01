@@ -18,7 +18,7 @@
 
         <!-- View Header -->
         <instruments:ViewHeader Grid.Row="0" Module="WIPE" Index="13" Title="DRIVE WIPER"
-                                Description="Securely Delete Files Beyond Recovery"/>
+                                Description="Overwrite Files and Check the Last Pass"/>
 
         <!-- Controls Section -->
         <StackPanel Grid.Row="1" Spacing="12">

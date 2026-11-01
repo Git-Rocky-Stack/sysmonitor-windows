@@ -20,7 +20,7 @@ self-contained and carries the .NET 8 and Windows App SDK runtimes inside it
 
 ## Step 1: Install it
 
-Download `STX-1-ULTIMATE-Setup-3.1.0.exe` from the
+Download `STX-1-ULTIMATE-Setup-3.1.1.exe` from the
 [releases page](https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases)
 and run it.
 
@@ -33,7 +33,7 @@ to check what you downloaded before running it, compare its SHA-256 against the 
 published on the release page:
 
 ```powershell
-Get-FileHash .\STX-1-ULTIMATE-Setup-3.1.0.exe -Algorithm SHA256
+Get-FileHash .\STX-1-ULTIMATE-Setup-3.1.1.exe -Algorithm SHA256
 ```
 
 When setup finishes, the app is installed and `LICENSE.txt` and

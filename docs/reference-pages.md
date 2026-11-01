@@ -1,6 +1,6 @@
 # Reference: pages
 
-Every entry in the navigation menu of STX-1 ULTIMATE System Monitor v3.1.0. There are 34,
+Every entry in the navigation menu of STX-1 ULTIMATE System Monitor v3.1.1. There are 34,
 verified by counting `NavigationViewItem` entries in
 `src/SysMonitor.App/MainWindow.xaml`. A 35th page, the PDF Editor, is not on the menu:
 it opens from the EDIT PDF cap on the PDF Tools page

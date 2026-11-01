@@ -2,8 +2,8 @@
 
 How a version goes from a green branch to people's machines: the GitHub release (Setup and
 portable zip), the public page, and the Microsoft Store. Work top to bottom; each step names the
-file or command it touches. The next release is **3.1.0**: the Command Console look and the audit
-fixes, listed in [CHANGELOG.md](CHANGELOG.md) under 3.1.0.
+file or command it touches. The steps below name 3.1.0 as the example; the current release is **3.1.1**, listed in
+[CHANGELOG.md](CHANGELOG.md).
 
 ## 1. Before the cut
 
