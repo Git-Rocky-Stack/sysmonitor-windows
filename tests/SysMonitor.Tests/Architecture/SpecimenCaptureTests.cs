@@ -50,5 +50,13 @@ public class SpecimenCaptureTests
             "every scroll goes through the one helper that waits for it to land");
         source.Should().MatchRegex(@"ScrolledToAsync\([^)]*\)[\s\S]*?\.ChangeView\([\s\S]*?VerticalOffset",
             "that helper scrolls, then reads the offset back until the scroller has reached it");
+
+        // Landing is not enough. The picture is PrintWindow's, which is the frame Windows last put on the screen,
+        // and that trails XAML's own frame: with the offset read back but no settle, each picture showed the
+        // scroll before it - two in a row the same, and the instruments' picture the foot of the page. A page's
+        // picture waits SettledAsync for the same reason.
+        var helper = Regex.Match(source, @"Task<bool>\s+ScrolledToAsync\([\s\S]*?\n    }\n").Value;
+        helper.Should().Contain("await SettledAsync()",
+            "the scroll is settled on the screen, as a page is, before anything is photographed");
     }
 }

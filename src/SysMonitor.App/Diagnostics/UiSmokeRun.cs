@@ -1621,10 +1621,12 @@ internal sealed class UiSmokeRun
     }
 
     /// <summary>
-    /// Scrolls to <paramref name="offset"/> - or as near as the scroller goes - and waits until it is there and
-    /// drawn. <c>ChangeView</c> returns before the scroll lands, so a picture taken a frame or two later can show
-    /// wherever the scroller was; this reads the offset back, frame by frame, for up to two seconds. False if it
-    /// never arrived, which is noted rather than failed: the picture is still taken.
+    /// Scrolls to <paramref name="offset"/> - or as near as the scroller goes - and waits until it is there and on
+    /// the screen. <c>ChangeView</c> returns before the scroll lands, so this reads the offset back, frame by frame,
+    /// for up to two seconds; and the picture is PrintWindow's, the frame Windows last presented, which trails
+    /// XAML's, so once it has landed it settles as a page does before its picture. Without that each picture showed
+    /// the scroll before it. False if it never arrived, which is noted rather than failed: the picture is still
+    /// taken.
     /// </summary>
     private static async Task<bool> ScrolledToAsync(ScrollViewer scroller, double offset)
     {
@@ -1637,7 +1639,8 @@ internal sealed class UiSmokeRun
             await RenderedAsync();
             if (Math.Abs(scroller.VerticalOffset - target) < 1)
             {
-                await RenderedAsync();
+                // Landed in XAML; now on the screen, which is what PrintWindow photographs and which trails it.
+                await SettledAsync();
                 return true;
             }
         }
