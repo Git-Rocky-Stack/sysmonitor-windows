@@ -55,7 +55,9 @@ public class SpecimenCaptureTests
         // and that trails XAML's own frame: with the offset read back but no settle, each picture showed the
         // scroll before it - two in a row the same, and the instruments' picture the foot of the page. A page's
         // picture waits SettledAsync for the same reason.
-        var helper = Regex.Match(source, @"Task<bool>\s+ScrolledToAsync\([\s\S]*?\n    }\n").Value;
+        // To the method's closing brace, whichever line ending the checkout has: CRLF on Windows.
+        var helper = Regex.Match(source, @"Task<bool>\s+ScrolledToAsync\([\s\S]*?\r?\n    }\r?\n").Value;
+        helper.Should().NotBeEmpty("this test has to find the helper before it can judge it");
         helper.Should().Contain("await SettledAsync()",
             "the scroll is settled on the screen, as a page is, before anything is photographed");
     }
