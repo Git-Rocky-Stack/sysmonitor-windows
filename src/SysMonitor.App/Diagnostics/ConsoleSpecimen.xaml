@@ -273,7 +273,7 @@
 
         <!-- Readings: LCDs in every tone and a missing one; VU meters live, settled and standing; dense rows in a
              shared well (System-X Themes.tsx, INSTRUMENTS). -->
-        <instruments:Faceplate Kicker="SPECIMEN - INSTRUMENTS - 00G" Serial="{instruments:SerialFor Module=instruments}">
+        <instruments:Faceplate x:Name="InstrumentsProbe" Kicker="SPECIMEN - INSTRUMENTS - 00G" Serial="{instruments:SerialFor Module=instruments}">
             <StackPanel Spacing="16">
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
