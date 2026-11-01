@@ -21,8 +21,12 @@
 
     <!-- ============================================================ HEX BOLT (:1557-1622) -->
 
-    <!-- A flat-topped hexagon, as System-X clips it: 25% and 75% along the top and bottom, the middle of each
-         side. The drop shadow is two copies 1 and 2 below; the socket is the same hexagon, 30% in. -->
+    <!-- A stainless socket-cap screw, drawn once on a 16 grid and scaled by its Viewbox, so a small panel's screws
+         are the same screw, smaller (a plate sets 9). In the order light meets it: the counterbore cut into the
+         panel, shading towards the bottom right; the round head lit from the top left with the drop it casts into
+         the counterbore; the chamfered rim, bright where it faces the light; the hex socket's wall, shadowed on the
+         near side and lit on the far one; the socket's floor, set towards the light so the lit far wall shows; and
+         the polished specular. The panel's own shift tints only the counterbore: stainless is stainless. -->
     <Style TargetType="instruments:HexBolt">
         <Setter Property="Width" Value="16"/>
         <Setter Property="Height" Value="16"/>
@@ -30,14 +34,21 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="instruments:HexBolt">
-                    <Grid>
-                        <Path Data="M4,2 L12,2 L16,10 L12,18 L4,18 L0,10 Z" Fill="{ThemeResource HexShadowFarBrush}"/>
-                        <Path Data="M4,1 L12,1 L16,9 L12,17 L4,17 L0,9 Z" Fill="{ThemeResource HexShadowNearBrush}"/>
-                        <Path Data="M4,0 L12,0 L16,8 L12,16 L4,16 L0,8 Z" Fill="{ThemeResource HexFaceBrush}"/>
-                        <Path Data="M4,0 L12,0 L16,8 L12,16 L4,16 L0,8 Z" Fill="{ThemeResource HexRingBrush}"/>
-                        <Path Data="M6.4,4.8 L9.6,4.8 L11.2,8 L9.6,11.2 L6.4,11.2 L4.8,8 Z"
-                              Fill="{ThemeResource HexSocketBrush}"/>
-                    </Grid>
+                    <Viewbox Stretch="Uniform">
+                        <Canvas Width="16" Height="16">
+                            <Ellipse Width="16" Height="16" Fill="{ThemeResource BoltCounterboreBrush}"/>
+                            <Ellipse Canvas.Left="2.2" Canvas.Top="2.9" Width="12" Height="12" Fill="{ThemeResource HexShadowNearBrush}"/>
+                            <Ellipse Canvas.Left="2" Canvas.Top="2" Width="12" Height="12" Fill="{ThemeResource StainlessHeadBrush}"/>
+                            <Ellipse Canvas.Left="2" Canvas.Top="2" Width="12" Height="12"
+                                     Stroke="{ThemeResource StainlessChamferBrush}" StrokeThickness="0.9"/>
+                            <Path Data="M4.4,8 L6.2,4.88 L9.8,4.88 L11.6,8 L9.8,11.12 L6.2,11.12 Z"
+                                  Fill="{ThemeResource StainlessSocketWallBrush}"/>
+                            <Path Data="M4.95,7.65 L6.3,5.31 L9,5.31 L10.35,7.65 L9,9.99 L6.3,9.99 Z"
+                                  Fill="{ThemeResource StainlessSocketBrush}"/>
+                            <Ellipse Canvas.Left="3.4" Canvas.Top="3.1" Width="5" Height="3.6"
+                                     Fill="{ThemeResource StainlessSpecularBrush}"/>
+                        </Canvas>
+                    </Viewbox>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -91,6 +102,12 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
+
+                                <!-- The brushed aluminium: two grains of horizontal brushing and the sheen they throw,
+                                     a texture over the face's own colour. -->
+                                <Border Grid.RowSpan="2" Background="{ThemeResource BrushedGrainBrush}" IsHitTestVisible="False"/>
+                                <Border Grid.RowSpan="2" Background="{ThemeResource BrushedGrainFineBrush}" IsHitTestVisible="False"/>
+                                <Border Grid.RowSpan="2" Background="{ThemeResource BrushedSheenBrush}" IsHitTestVisible="False"/>
 
                                 <!-- The key light from above left, then the inset edges: the lip along the top, the
                                      underside along the bottom, light down the left and shade down the right. -->
@@ -174,7 +191,8 @@
 
     <!-- The recess: a void-black face in a black edge, shaded in from the top and both sides, with a glint along
          the lower lip. The well sets its own theme to Dark (Well.cs), so its content wears Night Ops colours in
-         both shifts. -->
+         both shifts. Its readings sit behind cover glass: the glare across its top and the glass's lit edge, over
+         the content and taking no pointer, so a chart or a list in a well is still worked through it. -->
     <Style TargetType="instruments:Well">
         <Setter Property="IsTabStop" Value="False"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -198,6 +216,9 @@
                                               ContentTransitions="{TemplateBinding ContentTransitions}"
                                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Border Background="{ThemeResource GlassGlareBrush}" CornerRadius="1" IsHitTestVisible="False"/>
+                            <Border BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="1" CornerRadius="1"
+                                    IsHitTestVisible="False"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>
@@ -239,6 +260,11 @@
                                           ContentTransitions="{TemplateBinding ContentTransitions}"
                                           HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        <!-- The cover glass: its glare and its lit edge, over the reading, taking no pointer. -->
+                        <Border Background="{ThemeResource GlassGlareBrush}" CornerRadius="{StaticResource PlateCornerRadius}"
+                                IsHitTestVisible="False"/>
+                        <Border BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="1"
+                                CornerRadius="{StaticResource PlateCornerRadius}" IsHitTestVisible="False"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -367,6 +393,9 @@
                             <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource CapCornerRadius}"
                                     Background="{ThemeResource LampFaceBrush}" BorderBrush="{ThemeResource LampEdgeBrush}"/>
                             <Border x:Name="Glow" Margin="1" BorderThickness="2" CornerRadius="{StaticResource InsetCornerRadius}"/>
+                            <!-- The lens over the cap: gloss across its upper half, falling to shade at its foot. -->
+                            <Border x:Name="Lens" Margin="1" CornerRadius="{StaticResource InsetCornerRadius}"
+                                    Background="{ThemeResource LedLensBrush}" IsHitTestVisible="False"/>
                             <Border Height="1" Margin="1,1,1,0" VerticalAlignment="Top" Background="{ThemeResource LampLipBrush}"/>
                             <Border Height="1" Margin="1,0,1,1" VerticalAlignment="Bottom" Background="{ThemeResource LampUnderBrush}"/>
                             <Border x:Name="PART_WordGlowHost" IsHitTestVisible="False"/>
@@ -462,8 +491,90 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
+                        <!-- The bezel that holds the lens, a pixel and a half proud of it all round; the halo,
+                             drawn on its host under the lens; the lens in its state's colour; then the dome that
+                             shades it towards its rim and the hot specular where the key light strikes it. -->
+                        <Ellipse x:Name="Bezel" Margin="-1.5" Fill="{ThemeResource LedBezelBrush}"/>
                         <Border x:Name="PART_GlowHost" IsHitTestVisible="False"/>
                         <Ellipse x:Name="Light" Fill="{ThemeResource GraphiteBrush}"/>
+                        <Ellipse Fill="{ThemeResource LedDomeBrush}"/>
+                        <Ellipse Margin="1,0.8,2.6,3" Fill="{ThemeResource LedSpecularBrush}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ LED BLOOM -->
+
+    <!-- The host the bloom of a lit LED bar is drawn on (LedBloom.cs): it stretches over the track, under the lit
+         shape, and draws nothing of its own. -->
+    <Style TargetType="instruments:LedBloom">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:LedBloom">
+                    <Border x:Name="PART_GlowHost" IsHitTestVisible="False"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ ACTIVITY LED -->
+
+    <!-- The ACT light on a process meter (ActivityLed.cs): the LED's bezel and unlit lens, then the emitter - its
+         halo on a host under its light - whose opacity the light's timeline drives, and over both the dome and the
+         specular, so the lens reads lit or dark through the same glass. The state gives the emitter its colour. -->
+    <Style TargetType="instruments:ActivityLed">
+        <Setter Property="Width" Value="8"/>
+        <Setter Property="Height" Value="8"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="instruments:ActivityLed">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="ToneStates">
+                                <VisualState x:Name="Go"/>
+                                <VisualState x:Name="Hold">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Warn">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="NoGo">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedNoGoBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Exec">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource LedScopeBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Armed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Light.Fill" Value="{ThemeResource ArmedDisplayBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Ellipse Margin="-1.5" Fill="{ThemeResource LedBezelBrush}"/>
+                        <Ellipse Fill="{ThemeResource GraphiteBrush}"/>
+                        <Grid x:Name="PART_Emitter" Opacity="0">
+                            <Border x:Name="PART_GlowHost" IsHitTestVisible="False"/>
+                            <Ellipse x:Name="Light" Fill="{ThemeResource LedGoBrush}"/>
+                        </Grid>
+                        <Ellipse Fill="{ThemeResource LedDomeBrush}"/>
+                        <Ellipse Margin="1.2,1,3,3.4" Fill="{ThemeResource LedSpecularBrush}"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -534,7 +645,16 @@
                                                Foreground="{ThemeResource PhosphorBrush}" Text="{TemplateBinding Unit}"/>
                                 </StackPanel>
                             </StackPanel>
+                            <!-- The panel and its lens, front to back as the eye meets them reversed: the pixel
+                                 matrix's rows showing through the reading, the vignette towards the bezel, the
+                                 cover glass's sheen and its glare across the top of the curve, and the glass's lit
+                                 edge inside the black bezel. None takes a pointer. -->
+                            <Border Background="{ThemeResource LcdPixelGridBrush}" IsHitTestVisible="False"/>
+                            <Border Background="{ThemeResource GlassVignetteBrush}" IsHitTestVisible="False"/>
                             <Border Background="{ThemeResource LcdGlassBrush}" IsHitTestVisible="False"/>
+                            <Border Background="{ThemeResource GlassGlareBrush}" IsHitTestVisible="False"/>
+                            <Border BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="1" CornerRadius="1"
+                                    IsHitTestVisible="False"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>
@@ -621,6 +741,11 @@
                             <Grid>
                                 <Border Height="4" VerticalAlignment="Top" Background="{ThemeResource DisplayShadeTopBrush}"/>
                                 <Grid x:Name="PART_Segments" Margin="2" ColumnSpacing="2" RowSpacing="2"/>
+                                <!-- The segments are LEDs behind one lens: its gloss, its glare and its lit edge. -->
+                                <Border Background="{ThemeResource LedLensBrush}" IsHitTestVisible="False"/>
+                                <Border Background="{ThemeResource GlassGlareBrush}" IsHitTestVisible="False"/>
+                                <Border BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="1" CornerRadius="1"
+                                        IsHitTestVisible="False"/>
                             </Grid>
                         </Border>
                     </Grid>
@@ -794,8 +919,21 @@
                         <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
                                 Background="{ThemeResource PlateFaceBrush}" BorderBrush="{ThemeResource PlateEdgeBrush}">
                             <Grid>
+                                <!-- Brushed aluminium, as the faceplate is: the grains and their sheen. -->
+                                <Border Background="{ThemeResource BrushedGrainBrush}" IsHitTestVisible="False"/>
+                                <Border Background="{ThemeResource BrushedGrainFineBrush}" IsHitTestVisible="False"/>
+                                <Border Background="{ThemeResource BrushedSheenBrush}" IsHitTestVisible="False"/>
                                 <Border BorderThickness="0,1,0,0" BorderBrush="{ThemeResource PlateLipBrush}"/>
                                 <Border BorderThickness="0,0,0,1" BorderBrush="{ThemeResource PlateUnderBrush}"/>
+                                <!-- Held at its corners by the faceplate's screw, smaller, clear of the rail. Under the
+                                     content, so a plate padded to nothing lets its content cover a screw rather than
+                                     a screw cover its content. -->
+                                <Grid IsHitTestVisible="False">
+                                    <instruments:HexBolt Width="9" Height="9" Margin="5,3,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                    <instruments:HexBolt Width="9" Height="9" Margin="0,3,3,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                    <instruments:HexBolt Width="9" Height="9" Margin="5,0,0,3" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                    <instruments:HexBolt Width="9" Height="9" Margin="0,0,3,3" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                                </Grid>
                                 <ContentPresenter Padding="{TemplateBinding Padding}"
                                                   Content="{TemplateBinding Content}"
                                                   ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -829,9 +967,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="instruments:Banner">
-                    <Border x:Name="Face" Padding="{TemplateBinding Padding}" BorderThickness="1"
-                            CornerRadius="{StaticResource PlateCornerRadius}"
-                            Background="{ThemeResource Cap1Brush}" BorderBrush="{ThemeResource CapEdgeBrush}">
+                    <Grid>
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="BannerStates">
                                 <VisualState x:Name="Off"/>
@@ -876,7 +1012,16 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Grid>
+                        <Border x:Name="Face" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
+                                Background="{ThemeResource Cap1Brush}" BorderBrush="{ThemeResource CapEdgeBrush}"/>
+                        <!-- A banner is a small panel, and is screwed down like one, inside its padding. -->
+                        <Grid IsHitTestVisible="False">
+                            <instruments:HexBolt Width="8" Height="8" Margin="3,3,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <instruments:HexBolt Width="8" Height="8" Margin="0,3,3,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                            <instruments:HexBolt Width="8" Height="8" Margin="3,0,0,3" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                            <instruments:HexBolt Width="8" Height="8" Margin="0,0,3,3" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                        </Grid>
+                        <Grid Margin="{TemplateBinding Padding}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -897,7 +1042,7 @@
                                 <FontIcon FontSize="12" Glyph="&#xE711;"/>
                             </Button>
                         </Grid>
-                    </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -1013,7 +1158,8 @@
                                                TextTrimming="CharacterEllipsis" FontSize="12" LineHeight="18"
                                                LineStackingStrategy="BlockLineHeight"
                                                Foreground="{ThemeResource SilverMuteBrush}" Text="{TemplateBinding Readout}"/>
-                                    <ProgressBar x:Name="PART_Bar" Grid.Row="1" Grid.ColumnSpan="2" Maximum="100"/>
+                                    <ProgressBar x:Name="PART_Bar" Grid.Row="1" Grid.ColumnSpan="2" Maximum="100"
+                                                 Style="{StaticResource ConsoleProcessProgressBarStyle}"/>
                                 </Grid>
                                 <TextBlock x:Name="LooseReadout" Margin="0,16,0,0" HorizontalAlignment="Center" Visibility="Collapsed"
                                            TextTrimming="CharacterEllipsis" FontSize="12" LineHeight="18"

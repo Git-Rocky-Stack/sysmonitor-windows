@@ -11,6 +11,38 @@ Each entry describes a behaviour change and cites the file it lives in.
 
 ## [Unreleased]
 
+### Changed - the console is drawn as hardware
+
+Every instrument is redrawn as machined, solid-state equipment, in the shared primitives, so
+every page has it. All of it is decoration: High Contrast drops it, and `HardwareRealismTests`
+holds it in place.
+
+- **Panels are brushed aluminium.** Faceplates and plates carry two grains of horizontal
+  brushing on coprime periods (7 and 3 pixels) and the sheen they throw - a faint texture over
+  the shift's own colour, never a colour of its own (`scripts/generate-tokens.py`, `hardware`).
+- **Every panel is screwed down.** The bolt is now a stainless socket-cap screw - a round,
+  chamfered head with a hex socket, seated in a counterbore - drawn once and scaled. Faceplates
+  carry four at 16, and plates and banners, which had none, four smaller ones
+  (`Styles/Console/Instruments.xaml`, `HexBolt`, `Plate`, `Banner`). A plate's screws sit
+  under its content, so a plate padded to nothing never has a screw over its content.
+- **Every readout is behind glass.** LCDs show their pixel matrix through the reading, a
+  vignette, a glare across the top of the lens and its lit edge; wells, displays and VU meters
+  take the glare and edge.
+- **LEDs are lenses in bezels.** An LED dot has a bezel, a dome and a hot specular; a lamp a
+  gloss across its cap.
+- **Caps and the lever deflect.** A cap casts a contact shadow on the panel and shows its
+  lower bevel; pressed home, the shadow goes and its well's rim shades it. The lever's thumb
+  casts on its track and is knurled (`Styles/Console/Controls.xaml`).
+- **Every progress bar is an LED meter.** Discrete LEDs behind a lens in a dark recess, with
+  the lit length's glow drawn round it (`LedBloom`). The legacy Red/Green/Cyan/Premium meter
+  styles are now that meter in one colour.
+- **A process meter has an ACT light.** The eleven bars that report work under way - scans,
+  cleans, wipes, backups, image processing - use `ConsoleProcessProgressBarStyle`, whose ACT
+  light reads its own bar: three quick flashes when the work begins (or the bar falls back for
+  a new run), an irregular drive-light flicker while it runs, held lit when the bar is full,
+  and steady with animation effects off (`ActivityLed`, `SysMonitor.Core/Models/ActivityLight.cs`).
+  A level, such as memory in use, has no ACT light.
+
 ## [3.1.0] - 2026-10-30
 
 The Command Console look is complete, and an end-to-end audit of the app's safety, lifetime,

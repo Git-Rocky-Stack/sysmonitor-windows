@@ -227,21 +227,6 @@
             <Color x:Key="EdgeLightMidColor">#52E6E6E6</Color> <!-- rgba(230, 230, 230, .32) -->
             <SolidColorBrush x:Key="EdgeLightMidBrush" Color="#52E6E6E6"/>
 
-            <!-- Hex socket-cap bolts, lit from the top left (:677-682, Day :802-807). Decoration: gone in High
-                 Contrast. -->
-            <Color x:Key="Hex1Color">#A4A4A4</Color>
-            <SolidColorBrush x:Key="Hex1Brush" Color="#A4A4A4"/>
-            <Color x:Key="Hex2Color">#7C7C7C</Color>
-            <SolidColorBrush x:Key="Hex2Brush" Color="#7C7C7C"/>
-            <Color x:Key="Hex3Color">#525252</Color>
-            <SolidColorBrush x:Key="Hex3Brush" Color="#525252"/>
-            <Color x:Key="Hex4Color">#323232</Color>
-            <SolidColorBrush x:Key="Hex4Brush" Color="#323232"/>
-            <Color x:Key="Hex5Color">#181818</Color>
-            <SolidColorBrush x:Key="Hex5Brush" Color="#181818"/>
-            <Color x:Key="Hex6Color">#0A0A0A</Color>
-            <SolidColorBrush x:Key="Hex6Brush" Color="#0A0A0A"/>
-
             <!-- Selection, focus and the scrollbar thumb (:684-686, :710-712, Day :775, :809-810). -->
             <Color x:Key="SelectionBgColor">#59AA2024</Color> <!-- rgba(170, 32, 36, .35) -->
             <SolidColorBrush x:Key="SelectionBgBrush" Color="#59AA2024"/>
@@ -254,9 +239,9 @@
 
             <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
                  faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
-                 stripe and the light below it (:1526-1529, Day :1532-1535); a bolt's drop shadows (:1579-1580,
-                 Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
-                 follow the blurred shadow's first rows. -->
+                 stripe and the light below it (:1526-1529, Day :1532-1535); and the drop a screw's head casts
+                 into its counterbore (:1579, Day :1584), which WinUI cannot blur, drawn as a copy of the head a
+                 pixel down. -->
             <Color x:Key="FaceplateSideLightColor">#06FFFFFF</Color> <!-- rgba(255, 255, 255, .025) -->
             <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="#06FFFFFF"/>
             <Color x:Key="FaceplateSideShadeColor">#66000000</Color> <!-- rgba(0, 0, 0, .4) -->
@@ -267,8 +252,6 @@
             <SolidColorBrush x:Key="StripeSeamLightBrush" Color="#08FFFFFF"/>
             <Color x:Key="HexShadowNearColor">#B3000000</Color> <!-- rgba(0, 0, 0, .7) -->
             <SolidColorBrush x:Key="HexShadowNearBrush" Color="#B3000000"/>
-            <Color x:Key="HexShadowFarColor">#73000000</Color> <!-- rgba(0, 0, 0, .45) -->
-            <SolidColorBrush x:Key="HexShadowFarBrush" Color="#73000000"/>
 
             <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
                  is dark in both. -->
@@ -407,31 +390,6 @@
                 <GradientStop Offset="1" Color="#0F000000"/>
             </LinearGradientBrush>
 
-            <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner; the faint machined ring
-                 round it, the same in both shifts (:1565); and the socket, lit from the opposite side (::after,
-                 :1589, Day :1602). -->
-            <RadialGradientBrush x:Key="HexFaceBrush" Center="0.28,0.22" GradientOrigin="0.28,0.22"
-                                 RadiusX="1.061" RadiusY="1.061">
-                <GradientStop Offset="0" Color="#A4A4A4"/>
-                <GradientStop Offset="0.12" Color="#7C7C7C"/>
-                <GradientStop Offset="0.3" Color="#525252"/>
-                <GradientStop Offset="0.55" Color="#323232"/>
-                <GradientStop Offset="0.8" Color="#181818"/>
-                <GradientStop Offset="1" Color="#0A0A0A"/>
-            </RadialGradientBrush>
-            <RadialGradientBrush x:Key="HexRingBrush" Center="0.5,0.5" GradientOrigin="0.5,0.5"
-                                 RadiusX="0.707" RadiusY="0.707">
-                <GradientStop Offset="0.62" Color="#00FFFFFF"/>
-                <GradientStop Offset="0.68" Color="#0AFFFFFF"/>
-                <GradientStop Offset="0.75" Color="#00FFFFFF"/>
-            </RadialGradientBrush>
-            <RadialGradientBrush x:Key="HexSocketBrush" Center="0.72,0.78" GradientOrigin="0.72,0.78"
-                                 RadiusX="1.061" RadiusY="1.061">
-                <GradientStop Offset="0" Color="#242424"/>
-                <GradientStop Offset="0.4" Color="#0E0E0E"/>
-                <GradientStop Offset="1" Color="#000000"/>
-            </RadialGradientBrush>
-
             <!-- Armed cap: consequential commands only, the same in both shifts (:2093). Chrome cap: the single
                  polished call to action, inverting to black gloss on Day Shift (:2116, Day :2131). -->
             <LinearGradientBrush x:Key="ArmedCapFaceBrush" StartPoint="0,0" EndPoint="0,1">
@@ -558,6 +516,167 @@
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="FieldShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#D9000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+
+            <!-- Brushed aluminium over every panel's face: two grains of horizontal brushing on coprime periods,
+                 7 and 3, and the anisotropic sheen a brushed panel throws along its grain. A faint texture, never
+                 a colour. -->
+            <LinearGradientBrush x:Key="BrushedGrainBrush" StartPoint="0,0" EndPoint="0,7"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#0BFFFFFF"/>
+                <GradientStop Offset="0.1429" Color="#0BFFFFFF"/>
+                <GradientStop Offset="0.1429" Color="#00000000"/>
+                <GradientStop Offset="0.4286" Color="#00000000"/>
+                <GradientStop Offset="0.4286" Color="#12000000"/>
+                <GradientStop Offset="0.5714" Color="#12000000"/>
+                <GradientStop Offset="0.5714" Color="#06FFFFFF"/>
+                <GradientStop Offset="0.7143" Color="#06FFFFFF"/>
+                <GradientStop Offset="0.7143" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="BrushedGrainFineBrush" StartPoint="0,0" EndPoint="0,3"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#06FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#06FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#0A000000"/>
+                <GradientStop Offset="1" Color="#0A000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="BrushedSheenBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.16" Color="#09FFFFFF"/>
+                <GradientStop Offset="0.34" Color="#00000000"/>
+                <GradientStop Offset="0.6" Color="#05FFFFFF"/>
+                <GradientStop Offset="0.78" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#0F000000"/>
+            </LinearGradientBrush>
+
+            <!-- Stainless socket-cap screws (every panel's corners): the round head lit from the top left, its
+                 chamfered rim, the hex socket's floor and its wall, a polished specular, and the counterbore cut
+                 into the panel round it. -->
+            <RadialGradientBrush x:Key="StainlessHeadBrush" Center="0.36,0.3" GradientOrigin="0.36,0.3"
+                                 RadiusX="0.78" RadiusY="0.78">
+                <GradientStop Offset="0" Color="#F6F8FA"/>
+                <GradientStop Offset="0.3" Color="#C9CED3"/>
+                <GradientStop Offset="0.66" Color="#878D93"/>
+                <GradientStop Offset="1" Color="#4A4F54"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="StainlessChamferBrush" StartPoint="0.15,0" EndPoint="0.85,1">
+                <GradientStop Offset="0" Color="#FFFFFF"/>
+                <GradientStop Offset="0.45" Color="#9AA0A6"/>
+                <GradientStop Offset="1" Color="#2A2E32"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="StainlessSocketBrush" Center="0.6,0.62" GradientOrigin="0.6,0.62"
+                                 RadiusX="0.7" RadiusY="0.7">
+                <GradientStop Offset="0" Color="#2C3034"/>
+                <GradientStop Offset="1" Color="#08090A"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="StainlessSocketWallBrush" StartPoint="0.2,0" EndPoint="0.8,1">
+                <GradientStop Offset="0" Color="#040505"/>
+                <GradientStop Offset="0.55" Color="#2B2E31"/>
+                <GradientStop Offset="1" Color="#A7ADB3"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="StainlessSpecularBrush" Center="0.32,0.26" GradientOrigin="0.32,0.26"
+                                 RadiusX="0.34" RadiusY="0.3">
+                <GradientStop Offset="0" Color="#E6FFFFFF"/>
+                <GradientStop Offset="0.45" Color="#59FFFFFF"/>
+                <GradientStop Offset="1" Color="#00FFFFFF"/>
+            </RadialGradientBrush>
+            <RadialGradientBrush x:Key="BoltCounterboreBrush" Center="0.52,0.56" GradientOrigin="0.52,0.56"
+                                 RadiusX="0.5" RadiusY="0.5">
+                <GradientStop Offset="0" Color="#B3000000"/>
+                <GradientStop Offset="0.84" Color="#99000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </RadialGradientBrush>
+
+            <!-- Cover glass over every readout - LCDs, wells, displays, meters: a glare across the top of the
+                 curved lens, its lit edge, a vignette towards the bezel, and the LCD's pixel matrix showing
+                 through its reading. -->
+            <LinearGradientBrush x:Key="GlassGlareBrush" StartPoint="0.2,0" EndPoint="0.45,1">
+                <GradientStop Offset="0" Color="#1AFFFFFF"/>
+                <GradientStop Offset="0.4" Color="#09FFFFFF"/>
+                <GradientStop Offset="0.44" Color="#00FFFFFF"/>
+                <GradientStop Offset="1" Color="#00FFFFFF"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GlassEdgeBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#33FFFFFF"/>
+                <GradientStop Offset="0.12" Color="#0FFFFFFF"/>
+                <GradientStop Offset="0.88" Color="#05FFFFFF"/>
+                <GradientStop Offset="1" Color="#17FFFFFF"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="GlassVignetteBrush" Center="0.5,0.45" GradientOrigin="0.5,0.45"
+                                 RadiusX="0.75" RadiusY="0.9">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.6" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#6B000000"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="LcdPixelGridBrush" StartPoint="0,0" EndPoint="0,3"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#3D000000"/>
+                <GradientStop Offset="1" Color="#3D000000"/>
+            </LinearGradientBrush>
+
+            <!-- LEDs: the bezel that holds each lens, the dome that shades it, its hot specular, the gloss over a
+                 lamp or a meter's lens, and the dark gap between a meter's discrete LEDs, every 6 pixels. -->
+            <LinearGradientBrush x:Key="LedBezelBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#3C3C3C"/>
+                <GradientStop Offset="0.5" Color="#161616"/>
+                <GradientStop Offset="1" Color="#050505"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="LedDomeBrush" Center="0.5,0.42" GradientOrigin="0.5,0.42"
+                                 RadiusX="0.55" RadiusY="0.55">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.55" Color="#0D000000"/>
+                <GradientStop Offset="1" Color="#99000000"/>
+            </RadialGradientBrush>
+            <RadialGradientBrush x:Key="LedSpecularBrush" Center="0.34,0.26" GradientOrigin="0.34,0.26"
+                                 RadiusX="0.32" RadiusY="0.26">
+                <GradientStop Offset="0" Color="#EBFFFFFF"/>
+                <GradientStop Offset="0.5" Color="#61FFFFFF"/>
+                <GradientStop Offset="1" Color="#00FFFFFF"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="LedLensBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#3DFFFFFF"/>
+                <GradientStop Offset="0.46" Color="#0FFFFFFF"/>
+                <GradientStop Offset="0.5" Color="#00FFFFFF"/>
+                <GradientStop Offset="0.82" Color="#14000000"/>
+                <GradientStop Offset="1" Color="#42000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="LedSegmentGapBrush" StartPoint="0,0" EndPoint="6,0"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#EB050505"/>
+                <GradientStop Offset="1" Color="#EB050505"/>
+            </LinearGradientBrush>
+
+            <!-- Deflection: a cap's contact shadow on the panel below it, its lower bevel, the shade of its
+                 well's rim when it is pressed home, and the grip knurled across the lever's thumb. -->
+            <LinearGradientBrush x:Key="CapContactShadowBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#8C000000"/>
+                <GradientStop Offset="1" Color="#4D000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="CapUnderBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.55" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#61000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="CapPressedShadeBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#99000000"/>
+                <GradientStop Offset="0.4" Color="#24000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbGripBrush" StartPoint="0,0" EndPoint="3,0"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#24FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#24FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#80000000"/>
+                <GradientStop Offset="0.6667" Color="#80000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
                 <GradientStop Offset="1" Color="#00000000"/>
             </LinearGradientBrush>
 
@@ -784,21 +903,6 @@
             <Color x:Key="EdgeLightMidColor">#F2FFFFFF</Color> <!-- rgba(255, 255, 255, .95) -->
             <SolidColorBrush x:Key="EdgeLightMidBrush" Color="#F2FFFFFF"/>
 
-            <!-- Hex socket-cap bolts, lit from the top left (:677-682, Day :802-807). Decoration: gone in High
-                 Contrast. -->
-            <Color x:Key="Hex1Color">#FFFFFF</Color>
-            <SolidColorBrush x:Key="Hex1Brush" Color="#FFFFFF"/>
-            <Color x:Key="Hex2Color">#D8D8D4</Color>
-            <SolidColorBrush x:Key="Hex2Brush" Color="#D8D8D4"/>
-            <Color x:Key="Hex3Color">#AAAAA4</Color>
-            <SolidColorBrush x:Key="Hex3Brush" Color="#AAAAA4"/>
-            <Color x:Key="Hex4Color">#868680</Color>
-            <SolidColorBrush x:Key="Hex4Brush" Color="#868680"/>
-            <Color x:Key="Hex5Color">#5C5C58</Color>
-            <SolidColorBrush x:Key="Hex5Brush" Color="#5C5C58"/>
-            <Color x:Key="Hex6Color">#44443F</Color>
-            <SolidColorBrush x:Key="Hex6Brush" Color="#44443F"/>
-
             <!-- Selection, focus and the scrollbar thumb (:684-686, :710-712, Day :775, :809-810). -->
             <Color x:Key="SelectionBgColor">#59AA2024</Color> <!-- rgba(170, 32, 36, .35) -->
             <SolidColorBrush x:Key="SelectionBgBrush" Color="#59AA2024"/>
@@ -811,9 +915,9 @@
 
             <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
                  faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
-                 stripe and the light below it (:1526-1529, Day :1532-1535); a bolt's drop shadows (:1579-1580,
-                 Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
-                 follow the blurred shadow's first rows. -->
+                 stripe and the light below it (:1526-1529, Day :1532-1535); and the drop a screw's head casts
+                 into its counterbore (:1579, Day :1584), which WinUI cannot blur, drawn as a copy of the head a
+                 pixel down. -->
             <Color x:Key="FaceplateSideLightColor">#80FFFFFF</Color> <!-- rgba(255, 255, 255, .5) -->
             <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="#80FFFFFF"/>
             <Color x:Key="FaceplateSideShadeColor">#14000000</Color> <!-- rgba(0, 0, 0, .08) -->
@@ -824,8 +928,6 @@
             <SolidColorBrush x:Key="StripeSeamLightBrush" Color="#66FFFFFF"/>
             <Color x:Key="HexShadowNearColor">#33000000</Color> <!-- rgba(0, 0, 0, .2) -->
             <SolidColorBrush x:Key="HexShadowNearBrush" Color="#33000000"/>
-            <Color x:Key="HexShadowFarColor">#26000000</Color> <!-- rgba(0, 0, 0, .15) -->
-            <SolidColorBrush x:Key="HexShadowFarBrush" Color="#26000000"/>
 
             <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
                  is dark in both. -->
@@ -964,31 +1066,6 @@
                 <GradientStop Offset="1" Color="#73FFFFFF"/>
             </LinearGradientBrush>
 
-            <!-- Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner; the faint machined ring
-                 round it, the same in both shifts (:1565); and the socket, lit from the opposite side (::after,
-                 :1589, Day :1602). -->
-            <RadialGradientBrush x:Key="HexFaceBrush" Center="0.28,0.22" GradientOrigin="0.28,0.22"
-                                 RadiusX="1.061" RadiusY="1.061">
-                <GradientStop Offset="0" Color="#FFFFFF"/>
-                <GradientStop Offset="0.12" Color="#D8D8D4"/>
-                <GradientStop Offset="0.3" Color="#AAAAA4"/>
-                <GradientStop Offset="0.55" Color="#868680"/>
-                <GradientStop Offset="0.8" Color="#5C5C58"/>
-                <GradientStop Offset="1" Color="#44443F"/>
-            </RadialGradientBrush>
-            <RadialGradientBrush x:Key="HexRingBrush" Center="0.5,0.5" GradientOrigin="0.5,0.5"
-                                 RadiusX="0.707" RadiusY="0.707">
-                <GradientStop Offset="0.62" Color="#00FFFFFF"/>
-                <GradientStop Offset="0.68" Color="#0AFFFFFF"/>
-                <GradientStop Offset="0.75" Color="#00FFFFFF"/>
-            </RadialGradientBrush>
-            <RadialGradientBrush x:Key="HexSocketBrush" Center="0.72,0.78" GradientOrigin="0.72,0.78"
-                                 RadiusX="1.061" RadiusY="1.061">
-                <GradientStop Offset="0" Color="#8A8A84"/>
-                <GradientStop Offset="0.4" Color="#5C5C58"/>
-                <GradientStop Offset="1" Color="#3A3A36"/>
-            </RadialGradientBrush>
-
             <!-- Armed cap: consequential commands only, the same in both shifts (:2093). Chrome cap: the single
                  polished call to action, inverting to black gloss on Day Shift (:2116, Day :2131). -->
             <LinearGradientBrush x:Key="ArmedCapFaceBrush" StartPoint="0,0" EndPoint="0,1">
@@ -1115,6 +1192,167 @@
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="FieldShadeTopBrush" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#D9000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+
+            <!-- Brushed aluminium over every panel's face: two grains of horizontal brushing on coprime periods,
+                 7 and 3, and the anisotropic sheen a brushed panel throws along its grain. A faint texture, never
+                 a colour. -->
+            <LinearGradientBrush x:Key="BrushedGrainBrush" StartPoint="0,0" EndPoint="0,7"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#17FFFFFF"/>
+                <GradientStop Offset="0.1429" Color="#17FFFFFF"/>
+                <GradientStop Offset="0.1429" Color="#00000000"/>
+                <GradientStop Offset="0.4286" Color="#00000000"/>
+                <GradientStop Offset="0.4286" Color="#09000000"/>
+                <GradientStop Offset="0.5714" Color="#09000000"/>
+                <GradientStop Offset="0.5714" Color="#0CFFFFFF"/>
+                <GradientStop Offset="0.7143" Color="#0CFFFFFF"/>
+                <GradientStop Offset="0.7143" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="BrushedGrainFineBrush" StartPoint="0,0" EndPoint="0,3"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#0FFFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#0FFFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#05000000"/>
+                <GradientStop Offset="1" Color="#05000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="BrushedSheenBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.16" Color="#4DFFFFFF"/>
+                <GradientStop Offset="0.34" Color="#00000000"/>
+                <GradientStop Offset="0.6" Color="#2EFFFFFF"/>
+                <GradientStop Offset="0.78" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#0A000000"/>
+            </LinearGradientBrush>
+
+            <!-- Stainless socket-cap screws (every panel's corners): the round head lit from the top left, its
+                 chamfered rim, the hex socket's floor and its wall, a polished specular, and the counterbore cut
+                 into the panel round it. -->
+            <RadialGradientBrush x:Key="StainlessHeadBrush" Center="0.36,0.3" GradientOrigin="0.36,0.3"
+                                 RadiusX="0.78" RadiusY="0.78">
+                <GradientStop Offset="0" Color="#F6F8FA"/>
+                <GradientStop Offset="0.3" Color="#C9CED3"/>
+                <GradientStop Offset="0.66" Color="#878D93"/>
+                <GradientStop Offset="1" Color="#4A4F54"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="StainlessChamferBrush" StartPoint="0.15,0" EndPoint="0.85,1">
+                <GradientStop Offset="0" Color="#FFFFFF"/>
+                <GradientStop Offset="0.45" Color="#9AA0A6"/>
+                <GradientStop Offset="1" Color="#2A2E32"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="StainlessSocketBrush" Center="0.6,0.62" GradientOrigin="0.6,0.62"
+                                 RadiusX="0.7" RadiusY="0.7">
+                <GradientStop Offset="0" Color="#2C3034"/>
+                <GradientStop Offset="1" Color="#08090A"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="StainlessSocketWallBrush" StartPoint="0.2,0" EndPoint="0.8,1">
+                <GradientStop Offset="0" Color="#040505"/>
+                <GradientStop Offset="0.55" Color="#2B2E31"/>
+                <GradientStop Offset="1" Color="#A7ADB3"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="StainlessSpecularBrush" Center="0.32,0.26" GradientOrigin="0.32,0.26"
+                                 RadiusX="0.34" RadiusY="0.3">
+                <GradientStop Offset="0" Color="#E6FFFFFF"/>
+                <GradientStop Offset="0.45" Color="#59FFFFFF"/>
+                <GradientStop Offset="1" Color="#00FFFFFF"/>
+            </RadialGradientBrush>
+            <RadialGradientBrush x:Key="BoltCounterboreBrush" Center="0.52,0.56" GradientOrigin="0.52,0.56"
+                                 RadiusX="0.5" RadiusY="0.5">
+                <GradientStop Offset="0" Color="#61000000"/>
+                <GradientStop Offset="0.84" Color="#4D000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </RadialGradientBrush>
+
+            <!-- Cover glass over every readout - LCDs, wells, displays, meters: a glare across the top of the
+                 curved lens, its lit edge, a vignette towards the bezel, and the LCD's pixel matrix showing
+                 through its reading. -->
+            <LinearGradientBrush x:Key="GlassGlareBrush" StartPoint="0.2,0" EndPoint="0.45,1">
+                <GradientStop Offset="0" Color="#1AFFFFFF"/>
+                <GradientStop Offset="0.4" Color="#09FFFFFF"/>
+                <GradientStop Offset="0.44" Color="#00FFFFFF"/>
+                <GradientStop Offset="1" Color="#00FFFFFF"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="GlassEdgeBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#33FFFFFF"/>
+                <GradientStop Offset="0.12" Color="#0FFFFFFF"/>
+                <GradientStop Offset="0.88" Color="#05FFFFFF"/>
+                <GradientStop Offset="1" Color="#17FFFFFF"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="GlassVignetteBrush" Center="0.5,0.45" GradientOrigin="0.5,0.45"
+                                 RadiusX="0.75" RadiusY="0.9">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.6" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#6B000000"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="LcdPixelGridBrush" StartPoint="0,0" EndPoint="0,3"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#3D000000"/>
+                <GradientStop Offset="1" Color="#3D000000"/>
+            </LinearGradientBrush>
+
+            <!-- LEDs: the bezel that holds each lens, the dome that shades it, its hot specular, the gloss over a
+                 lamp or a meter's lens, and the dark gap between a meter's discrete LEDs, every 6 pixels. -->
+            <LinearGradientBrush x:Key="LedBezelBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#FBFBF9"/>
+                <GradientStop Offset="0.5" Color="#A3A39F"/>
+                <GradientStop Offset="1" Color="#5C5C58"/>
+            </LinearGradientBrush>
+            <RadialGradientBrush x:Key="LedDomeBrush" Center="0.5,0.42" GradientOrigin="0.5,0.42"
+                                 RadiusX="0.55" RadiusY="0.55">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.55" Color="#0D000000"/>
+                <GradientStop Offset="1" Color="#99000000"/>
+            </RadialGradientBrush>
+            <RadialGradientBrush x:Key="LedSpecularBrush" Center="0.34,0.26" GradientOrigin="0.34,0.26"
+                                 RadiusX="0.32" RadiusY="0.26">
+                <GradientStop Offset="0" Color="#EBFFFFFF"/>
+                <GradientStop Offset="0.5" Color="#61FFFFFF"/>
+                <GradientStop Offset="1" Color="#00FFFFFF"/>
+            </RadialGradientBrush>
+            <LinearGradientBrush x:Key="LedLensBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#3DFFFFFF"/>
+                <GradientStop Offset="0.46" Color="#0FFFFFFF"/>
+                <GradientStop Offset="0.5" Color="#00FFFFFF"/>
+                <GradientStop Offset="0.82" Color="#14000000"/>
+                <GradientStop Offset="1" Color="#42000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="LedSegmentGapBrush" StartPoint="0,0" EndPoint="6,0"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
+                <GradientStop Offset="0.6667" Color="#EB050505"/>
+                <GradientStop Offset="1" Color="#EB050505"/>
+            </LinearGradientBrush>
+
+            <!-- Deflection: a cap's contact shadow on the panel below it, its lower bevel, the shade of its
+                 well's rim when it is pressed home, and the grip knurled across the lever's thumb. -->
+            <LinearGradientBrush x:Key="CapContactShadowBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#33000000"/>
+                <GradientStop Offset="1" Color="#1A000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="CapUnderBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#00000000"/>
+                <GradientStop Offset="0.55" Color="#00000000"/>
+                <GradientStop Offset="1" Color="#24000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="CapPressedShadeBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Offset="0" Color="#38000000"/>
+                <GradientStop Offset="0.4" Color="#0F000000"/>
+                <GradientStop Offset="1" Color="#00000000"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SwitchThumbGripBrush" StartPoint="0,0" EndPoint="3,0"
+                                 MappingMode="Absolute" SpreadMethod="Repeat">
+                <GradientStop Offset="0" Color="#24FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#24FFFFFF"/>
+                <GradientStop Offset="0.3333" Color="#80000000"/>
+                <GradientStop Offset="0.6667" Color="#80000000"/>
+                <GradientStop Offset="0.6667" Color="#00000000"/>
                 <GradientStop Offset="1" Color="#00000000"/>
             </LinearGradientBrush>
 
@@ -1341,21 +1579,6 @@
             <Color x:Key="EdgeLightMidColor">Transparent</Color>
             <SolidColorBrush x:Key="EdgeLightMidBrush" Color="Transparent"/>
 
-            <!-- Hex socket-cap bolts, lit from the top left (:677-682, Day :802-807). Decoration: gone in High
-                 Contrast. -->
-            <Color x:Key="Hex1Color">Transparent</Color>
-            <SolidColorBrush x:Key="Hex1Brush" Color="Transparent"/>
-            <Color x:Key="Hex2Color">Transparent</Color>
-            <SolidColorBrush x:Key="Hex2Brush" Color="Transparent"/>
-            <Color x:Key="Hex3Color">Transparent</Color>
-            <SolidColorBrush x:Key="Hex3Brush" Color="Transparent"/>
-            <Color x:Key="Hex4Color">Transparent</Color>
-            <SolidColorBrush x:Key="Hex4Brush" Color="Transparent"/>
-            <Color x:Key="Hex5Color">Transparent</Color>
-            <SolidColorBrush x:Key="Hex5Brush" Color="Transparent"/>
-            <Color x:Key="Hex6Color">Transparent</Color>
-            <SolidColorBrush x:Key="Hex6Brush" Color="Transparent"/>
-
             <!-- Selection, focus and the scrollbar thumb (:684-686, :710-712, Day :775, :809-810). -->
             <StaticResource x:Key="SelectionBgColor" ResourceKey="SystemColorHighlightColor"/>
             <SolidColorBrush x:Key="SelectionBgBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
@@ -1368,9 +1591,9 @@
 
             <!-- Recipe shading: the edges and lines the recipes draw with, which change with the shift. A
                  faceplate's side light and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its
-                 stripe and the light below it (:1526-1529, Day :1532-1535); a bolt's drop shadows (:1579-1580,
-                 Day :1584-1585), which WinUI cannot blur, drawn as two copies 1px and 2px down whose alphas
-                 follow the blurred shadow's first rows. -->
+                 stripe and the light below it (:1526-1529, Day :1532-1535); and the drop a screw's head casts
+                 into its counterbore (:1579, Day :1584), which WinUI cannot blur, drawn as a copy of the head a
+                 pixel down. -->
             <Color x:Key="FaceplateSideLightColor">Transparent</Color>
             <SolidColorBrush x:Key="FaceplateSideLightBrush" Color="Transparent"/>
             <Color x:Key="FaceplateSideShadeColor">Transparent</Color>
@@ -1381,8 +1604,6 @@
             <SolidColorBrush x:Key="StripeSeamLightBrush" Color="Transparent"/>
             <Color x:Key="HexShadowNearColor">Transparent</Color>
             <SolidColorBrush x:Key="HexShadowNearBrush" Color="Transparent"/>
-            <Color x:Key="HexShadowFarColor">Transparent</Color>
-            <SolidColorBrush x:Key="HexShadowFarBrush" Color="Transparent"/>
 
             <!-- A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well
                  is dark in both. -->
@@ -1463,9 +1684,6 @@
             <SolidColorBrush x:Key="ChipFaceBrush" Color="{ThemeResource SystemColorButtonFaceColor}"/>
             <SolidColorBrush x:Key="StripeFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="StripeGrainBrush" Color="Transparent"/>
-            <SolidColorBrush x:Key="HexFaceBrush" Color="Transparent"/>
-            <SolidColorBrush x:Key="HexRingBrush" Color="Transparent"/>
-            <SolidColorBrush x:Key="HexSocketBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="ArmedCapFaceBrush" Color="{ThemeResource SystemColorHighlightColor}"/>
             <SolidColorBrush x:Key="ChromeCapFaceBrush" Color="{ThemeResource SystemColorButtonFaceColor}"/>
             <SolidColorBrush x:Key="DisplayFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
@@ -1491,6 +1709,28 @@
             <SolidColorBrush x:Key="SwitchThumbArmedBrush" Color="{ThemeResource SystemColorHighlightTextColor}"/>
             <SolidColorBrush x:Key="FieldFaceBrush" Color="{ThemeResource SystemColorWindowColor}"/>
             <SolidColorBrush x:Key="FieldShadeTopBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="BrushedGrainBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="BrushedGrainFineBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="BrushedSheenBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="StainlessHeadBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="StainlessChamferBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="StainlessSocketBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="StainlessSocketWallBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="StainlessSpecularBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="BoltCounterboreBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="GlassGlareBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="GlassEdgeBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="GlassVignetteBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="LcdPixelGridBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="LedBezelBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="LedDomeBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="LedSpecularBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="LedLensBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="LedSegmentGapBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="CapContactShadowBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="CapUnderBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="CapPressedShadeBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="SwitchThumbGripBrush" Color="Transparent"/>
 
             <!-- A locked control: dimmed to .42 in both working shifts, and in High Contrast not dimmed at all -
                  that shift greys the word with the user's own GrayText instead (:2016-2023, :2367-2369). -->

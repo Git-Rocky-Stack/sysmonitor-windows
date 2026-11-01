@@ -18,7 +18,7 @@
                          page's major sections are Faceplates, whose stripe carries the section's kicker.
       StatLabelStyle     .kicker (:1642); StatValueStyle and LargeStatValueStyle the telemetry face (:2569).
       CardTitleStyle     a heading (:926-935), never Archivo caps; CardSubtitleStyle a description.
-      progress bars      a dark well's track (:1451) with the LED that names the meter's job lit along it.
+      progress bars      the console's LED meter (Controls.xaml), lit in the colour that names the meter's job.
 -->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -89,10 +89,9 @@
 
     <!-- ============================================================ METERS -->
 
-    <Style x:Key="RedProgressBarStyle" TargetType="ProgressBar">
+    <!-- Each is the console's LED meter (Controls.xaml) in one colour, at the old meters' height. -->
+    <Style x:Key="RedProgressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource ConsoleMeterProgressBarStyle}">
         <Setter Property="Height" Value="8"/>
-        <Setter Property="CornerRadius" Value="{StaticResource PlateCornerRadius}"/>
-        <Setter Property="Background" Value="{ThemeResource WellFaceBrush}"/>
         <Setter Property="Foreground" Value="{ThemeResource ArmedBrush}"/>
     </Style>
 

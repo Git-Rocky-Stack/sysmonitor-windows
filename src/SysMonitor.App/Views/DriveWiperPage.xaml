@@ -172,7 +172,8 @@
                             <Run Text="{x:Bind ViewModel.TotalFiles, Mode=OneWay}"/>
                         </TextBlock>
                     </Grid>
-                    <ProgressBar Value="{x:Bind ViewModel.Progress, Mode=OneWay}" Maximum="100"
+                    <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}"
+                                 Value="{x:Bind ViewModel.Progress, Mode=OneWay}" Maximum="100"
                                  Foreground="{ThemeResource ArmedBrush}"/>
                 </StackPanel>
             </instruments:Plate>

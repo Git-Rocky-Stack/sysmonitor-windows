@@ -181,7 +181,8 @@
                 <Run Text="Last scan: "/>
                 <Run Text="{x:Bind ViewModel.LastScanTime, Mode=OneWay}"/>
             </TextBlock>
-            <ProgressBar IsIndeterminate="True" Foreground="{ThemeResource ArmedBrush}"
+            <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}"
+                         IsIndeterminate="True" Foreground="{ThemeResource ArmedBrush}"
                          Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                          VerticalAlignment="Bottom" Margin="0,8,0,0"/>
         </Grid>

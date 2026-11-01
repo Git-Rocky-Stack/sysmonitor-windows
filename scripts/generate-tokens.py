@@ -173,27 +173,18 @@ GROUPS = [
   ("EdgeLight", rgba(230, 230, 230, .18), rgba(255, 255, 255, .6), TR),
   ("EdgeLightMid", rgba(230, 230, 230, .32), rgba(255, 255, 255, .95), TR),
  ]),
- ("Hex socket-cap bolts, lit from the top left (:677-682, Day :802-807). Decoration: gone in High Contrast.", [
-  ("Hex1", hexc('a4a4a4'), hexc('ffffff'), TR),
-  ("Hex2", hexc('7c7c7c'), hexc('d8d8d4'), TR),
-  ("Hex3", hexc('525252'), hexc('aaaaa4'), TR),
-  ("Hex4", hexc('323232'), hexc('868680'), TR),
-  ("Hex5", hexc('181818'), hexc('5c5c58'), TR),
-  ("Hex6", hexc('0a0a0a'), hexc('44443f'), TR),
- ]),
  ("Selection, focus and the scrollbar thumb (:684-686, :710-712, Day :775, :809-810).", [
   ("SelectionBg", rgba(170, 32, 36, .35), rgba(170, 32, 36, .35), HL),
   ("Focus", hexc('e6e6e6'), hexc('2a2a2a'), WT),
   ("ScrollbarThumb", rgba(170, 32, 36, .58), rgba(170, 32, 36, .5), HL),
   ("ScrollbarThumbHover", rgba(232, 52, 58, .82), rgba(163, 30, 35, .8), HL),
  ]),
- ("Recipe shading: the edges and lines the recipes draw with, which change with the shift. A faceplate's side\nlight and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its stripe and the light below it\n(:1526-1529, Day :1532-1535); a bolt's drop shadows (:1579-1580, Day :1584-1585), which WinUI cannot blur, drawn\nas two copies 1px and 2px down whose alphas follow the blurred shadow's first rows.", [
+ ("Recipe shading: the edges and lines the recipes draw with, which change with the shift. A faceplate's side\nlight and shade (inset 1px, :1056-1057, Day :1068-1069); the seam under its stripe and the light below it\n(:1526-1529, Day :1532-1535); and the drop a screw's head casts into its counterbore (:1579, Day :1584), which\nWinUI cannot blur, drawn as a copy of the head a pixel down.", [
   ("FaceplateSideLight", rgba(255, 255, 255, .025), rgba(255, 255, 255, .5), TR),
   ("FaceplateSideShade", rgba(0, 0, 0, .4), rgba(0, 0, 0, .08), TR),
   ("StripeSeam", rgba(0, 0, 0, .8), rgba(0, 0, 0, .18), WT),
   ("StripeSeamLight", rgba(255, 255, 255, .03), rgba(255, 255, 255, .4), TR),
   ("HexShadowNear", rgba(0, 0, 0, .7), rgba(0, 0, 0, .2), TR),
-  ("HexShadowFar", rgba(0, 0, 0, .45), rgba(0, 0, 0, .15), TR),
  ]),
  ("A well's edge and the light catching its lower lip (:1454-1456), the same in both shifts: a well is dark in\nboth.", [
   ("WellEdge", rgba(0, 0, 0, .7), rgba(0, 0, 0, .7), WT),
@@ -279,12 +270,6 @@ def composed(theme):
         lin(c, 'StripeFaceBrush', [(0, 'Stripe1'), (0.55, 'Stripe2'), (1, 'Stripe3')])
         + lin(c, 'StripeGrainBrush', [(0, 'StripeGrainA'), (0.3333, 'StripeGrainA'), (0.3333, 'StripeGrainB'), (0.6667, 'StripeGrainB'), (0.6667, 'StripeGrainC'), (1, 'StripeGrainC')],
               '0,0', '3,0', ' MappingMode="Absolute" SpreadMethod="Repeat"'))
-    sock = [hexc('242424'), hexc('0e0e0e'), hexc('000000')] if night else [hexc('8a8a84'), hexc('5c5c58'), hexc('3a3a36')]
-    ring = rgba(255, 255, 255, .04)
-    add("Hex bolt (:1557): the head, lit from 28% 22% out to the farthest corner; the faint machined ring round it,\nthe same in both shifts (:1565); and the socket, lit from the opposite side (::after, :1589, Day :1602).",
-        rad(c, 'HexFaceBrush', '0.28,0.22', 1.061, 1.061, [(0, 'Hex1'), (0.12, 'Hex2'), (0.3, 'Hex3'), (0.55, 'Hex4'), (0.8, 'Hex5'), (1, 'Hex6')])
-        + rad(c, 'HexRingBrush', '0.5,0.5', 0.707, 0.707, [(0.62, fade(ring)), (0.68, ring), (0.75, fade(ring))])
-        + rad(c, 'HexSocketBrush', '0.72,0.78', 1.061, 1.061, [(0, sock[0]), (0.4, sock[1]), (1, sock[2])]))
     chrome = [hexc('fbfbfb'), hexc('e6e6e6'), hexc('c4c4c4')] if night else [hexc('303030'), hexc('1a1a1a'), hexc('0a0a0a')]
     add("Armed cap: consequential commands only, the same in both shifts (:2093). Chrome cap: the single polished\ncall to action, inverting to black gloss on Day Shift (:2116, Day :2131).",
         lin(c, 'ArmedCapFaceBrush', [(0, hexc('c8333a')), (0.55, 'Armed'), (1, 'ArmedDeep')])
@@ -321,14 +306,94 @@ def composed(theme):
     add("A form field (:2286): its recessed face, and the inset shade its top edge casts into it, which WinUI has no\ninset shadow for (inset 0 2px 4px, :2293). Dark in both shifts.",
         lin(c, 'FieldFaceBrush', [(0, hexc('070707')), (1, hexc('0a0a0a'))])
         + lin(c, 'FieldShadeTopBrush', [(0, recess), (1, fade(recess))]))
+    out.extend(hardware(c, night))
     return out
+
+def hardware(c, night):
+    """The hardware realism: brushed aluminium, stainless socket-cap screws, glass over every readout, LED lenses
+    and the deflection of caps. Light falling on a surface, so every one is a gradient; all of it decoration, so
+    High Contrast drops it (HardwareRealismTests)."""
+    out = []
+    def add(comment, lines):
+        out.append(('comment', comment)); out.append(('lines', lines))
+    clear = rgba(0, 0, 0, 0)
+    W_ = lambda a: rgba(255, 255, 255, a)
+    K_ = lambda a: rgba(0, 0, 0, a)
+    hard = lambda bands: [(o, col) for start, end, col in bands for o in (start, end)]
+    absolute_y = lambda period: ('0,0', f'0,{period}', ' MappingMode="Absolute" SpreadMethod="Repeat"')
+    absolute_x = lambda period: ('0,0', f'{period},0', ' MappingMode="Absolute" SpreadMethod="Repeat"')
+
+    # Brushed aluminium. Two grains of horizontal brushing, 7 and 3 pixels apart - periods with no common factor,
+    # so the lines never fall into step and read as metal rather than ruling - and an anisotropic sheen across the
+    # face, the long soft highlight a brushed panel throws along its grain. Faint by design: a texture over the
+    # shift's own face colour, never a colour of its own. Day Shift's silver catches more light along the grain.
+    hi, lo = (W_(.045), K_(.07)) if night else (W_(.09), K_(.035))
+    fine_hi, fine_lo = (W_(.025), K_(.04)) if night else (W_(.06), K_(.02))
+    y7, y7end, y_extra = absolute_y(7)
+    y3, y3end, _ = absolute_y(3)
+    sheen = [(0, clear), (0.16, W_(.035 if night else .3)), (0.34, clear), (0.6, W_(.02 if night else .18)),
+             (0.78, clear), (1, K_(.06 if night else .04))]
+    add("Brushed aluminium over every panel's face: two grains of horizontal brushing on coprime periods, 7 and 3,\nand the anisotropic sheen a brushed panel throws along its grain. A faint texture, never a colour.",
+        lin(c, 'BrushedGrainBrush', hard([(0, 0.1429, hi), (0.1429, 0.4286, clear), (0.4286, 0.5714, lo),
+                                          (0.5714, 0.7143, W_(hi[3] / 255 / 2)), (0.7143, 1, clear)]), y7, y7end, y_extra)
+        + lin(c, 'BrushedGrainFineBrush', hard([(0, 0.3333, fine_hi), (0.3333, 0.6667, clear), (0.6667, 1, fine_lo)]),
+              y3, y3end, y_extra)
+        + lin(c, 'BrushedSheenBrush', sheen, '0,0', '1,0'))
+
+    # Stainless socket-cap screws, the same steel in both shifts; only the counterbore they sit in is lighter on
+    # Day Shift's silver. The head is lit from the top left; its chamfered rim bright where it faces the light; the
+    # hex socket a dark floor inside a wall that is shadowed on the near side and lit on the far one.
+    add("Stainless socket-cap screws (every panel's corners): the round head lit from the top left, its chamfered\nrim, the hex socket's floor and its wall, a polished specular, and the counterbore cut into the panel round it.",
+        rad(c, 'StainlessHeadBrush', '0.36,0.3', 0.78, 0.78, [(0, hexc('f6f8fa')), (0.3, hexc('c9ced3')), (0.66, hexc('878d93')), (1, hexc('4a4f54'))])
+        + lin(c, 'StainlessChamferBrush', [(0, hexc('ffffff')), (0.45, hexc('9aa0a6')), (1, hexc('2a2e32'))], '0.15,0', '0.85,1')
+        + rad(c, 'StainlessSocketBrush', '0.6,0.62', 0.7, 0.7, [(0, hexc('2c3034')), (1, hexc('08090a'))])
+        + lin(c, 'StainlessSocketWallBrush', [(0, hexc('040505')), (0.55, hexc('2b2e31')), (1, hexc('a7adb3'))], '0.2,0', '0.8,1')
+        + rad(c, 'StainlessSpecularBrush', '0.32,0.26', 0.34, 0.3, [(0, W_(.9)), (0.45, W_(.35)), (1, W_(0))])
+        + rad(c, 'BoltCounterboreBrush', '0.52,0.56', 0.5, 0.5, [(0, K_(.7 if night else .38)), (0.84, K_(.6 if night else .3)), (1, K_(0))]))
+
+    # Glass over every readout, the same in both shifts: displays are dark in both, so the lens over them is too.
+    add("Cover glass over every readout - LCDs, wells, displays, meters: a glare across the top of the curved lens,\nits lit edge, a vignette towards the bezel, and the LCD's pixel matrix showing through its reading.",
+        lin(c, 'GlassGlareBrush', [(0, W_(.1)), (0.4, W_(.035)), (0.44, W_(0)), (1, W_(0))], '0.2,0', '0.45,1')
+        + lin(c, 'GlassEdgeBrush', [(0, W_(.2)), (0.12, W_(.06)), (0.88, W_(.02)), (1, W_(.09))])
+        + rad(c, 'GlassVignetteBrush', '0.5,0.45', 0.75, 0.9, [(0, K_(0)), (0.6, K_(0)), (1, K_(.42))])
+        + lin(c, 'LcdPixelGridBrush', hard([(0, 0.6667, clear), (0.6667, 1, K_(.24))]), *absolute_y(3)))
+
+    # LEDs: a lens held in a bezel. The bezel is dark plastic on Night Ops and bright chrome on Day Shift's silver;
+    # the dome, the specular and the gloss are the lens, the same in both.
+    bezel = [hexc('3c3c3c'), hexc('161616'), hexc('050505')] if night else [hexc('fbfbf9'), hexc('a3a39f'), hexc('5c5c58')]
+    gap = (5, 5, 5, 235, None)
+    x6, x6end, x_extra = absolute_x(6)
+    add("LEDs: the bezel that holds each lens, the dome that shades it, its hot specular, the gloss over a lamp or a\nmeter's lens, and the dark gap between a meter's discrete LEDs, every 6 pixels.",
+        lin(c, 'LedBezelBrush', [(0, bezel[0]), (0.5, bezel[1]), (1, bezel[2])])
+        + rad(c, 'LedDomeBrush', '0.5,0.42', 0.55, 0.55, [(0, K_(0)), (0.55, K_(.05)), (1, K_(.6))])
+        + rad(c, 'LedSpecularBrush', '0.34,0.26', 0.32, 0.26, [(0, W_(.92)), (0.5, W_(.38)), (1, W_(0))])
+        + lin(c, 'LedLensBrush', [(0, W_(.24)), (0.46, W_(.06)), (0.5, W_(0)), (0.82, K_(.08)), (1, K_(.26))])
+        + lin(c, 'LedSegmentGapBrush', hard([(0, 0.6667, clear), (0.6667, 1, gap)]), x6, x6end, x_extra))
+
+    # Deflection. A raised cap casts a contact shadow on the panel 2 below it, its lower bevel turns from the light,
+    # and pressed home it sits in the shade of its own well's rim. Day Shift's light is softer on silver.
+    add("Deflection: a cap's contact shadow on the panel below it, its lower bevel, the shade of its well's rim when\nit is pressed home, and the grip knurled across the lever's thumb.",
+        lin(c, 'CapContactShadowBrush', [(0, K_(.55 if night else .2)), (1, K_(.3 if night else .1))])
+        + lin(c, 'CapUnderBrush', [(0, K_(0)), (0.55, K_(0)), (1, K_(.38 if night else .14))])
+        + lin(c, 'CapPressedShadeBrush', [(0, K_(.6 if night else .22)), (0.4, K_(.14 if night else .06)), (1, K_(0))])
+        + lin(c, 'SwitchThumbGripBrush', hard([(0, 0.3333, W_(.14)), (0.3333, 0.6667, K_(.5)), (0.6667, 1, clear)]),
+              *absolute_x(3)))
+    return out
+
+HARDWARE_HC = [
+    'BrushedGrainBrush', 'BrushedGrainFineBrush', 'BrushedSheenBrush',
+    'StainlessHeadBrush', 'StainlessChamferBrush', 'StainlessSocketBrush', 'StainlessSocketWallBrush',
+    'StainlessSpecularBrush', 'BoltCounterboreBrush',
+    'GlassGlareBrush', 'GlassEdgeBrush', 'GlassVignetteBrush', 'LcdPixelGridBrush',
+    'LedBezelBrush', 'LedDomeBrush', 'LedSpecularBrush', 'LedLensBrush', 'LedSegmentGapBrush',
+    'CapContactShadowBrush', 'CapUnderBrush', 'CapPressedShadeBrush', 'SwitchThumbGripBrush',
+]
 
 COMPOSED_HC = {  # key -> system colour (or Transparent) for the High Contrast theme
     'FaceplateFaceBrush': W, 'FaceplateKeyLightBrush': TR, 'FaceplateCornerLightBrush': TR, 'FaceplateEdgeLightBrush': TR,
     'PlateFaceBrush': W, 'PlateArmedFaceBrush': W,
     'CapFaceBrush': BF, 'CapKeyLightBrush': TR, 'ChipFaceBrush': BF,
     'StripeFaceBrush': W, 'StripeGrainBrush': TR,
-    'HexFaceBrush': TR, 'HexRingBrush': TR, 'HexSocketBrush': TR,
     'ArmedCapFaceBrush': HL, 'ChromeCapFaceBrush': BF,
     'DisplayFaceBrush': W, 'WellFaceBrush': W, 'AnnunciatorFaceBrush': W,
     'WellShadeTopBrush': TR, 'WellShadeLeftBrush': TR, 'WellShadeRightBrush': TR, 'DisplayShadeTopBrush': TR,
@@ -341,6 +406,9 @@ COMPOSED_HC = {  # key -> system colour (or Transparent) for the High Contrast t
     'SwitchThumbBrush': WT, 'SwitchThumbArmedBrush': HLT,
     # A field is the window colour with its edge in the text colour, as WinUI's own High Contrast text box is.
     'FieldFaceBrush': W, 'FieldShadeTopBrush': TR,
+    # The hardware realism is decoration through and through - texture, screws, glass, lenses, deflection - so it
+    # goes, as the key lights and bolts always have.
+    **{key: TR for key in HARDWARE_HC},
 }
 
 # Solid pairs that are not palette tokens but recipe colours that change with the shift.

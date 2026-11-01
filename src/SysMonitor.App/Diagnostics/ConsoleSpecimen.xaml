@@ -314,6 +314,28 @@
                             <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="SETTLED, TWELVE SEGMENTS"/>
                             <instruments:VuMeter Value="50" Segments="12" IsStatic="True"/>
                         </StackPanel>
+                        <!-- The LED meters: a level, and work under way with its ACT light, with and without an
+                             extent. The bare bloom and ACT light under them are each instrument shown alone. -->
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="LEVEL METER"/>
+                            <ProgressBar Value="62" Foreground="{ThemeResource LedGoBrush}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="PROCESS, ACT LIGHT"/>
+                            <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}" Value="45"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabelTextStyle}" Text="PROCESS, NO EXTENT"/>
+                            <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}" IsIndeterminate="True"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Grid Width="60" Height="8">
+                                <instruments:LedBloom Source="{Binding ElementName=BloomSpecimen}"/>
+                                <Rectangle x:Name="BloomSpecimen" Width="36" HorizontalAlignment="Left"
+                                           Fill="{ThemeResource LedScopeBrush}"/>
+                            </Grid>
+                            <instruments:ActivityLed State="Hold"/>
+                        </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Height="120">
                         <instruments:VuMeter Value="64" IsVertical="True"/>
