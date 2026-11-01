@@ -27,9 +27,10 @@ and run it.
 The installer shows you the MIT licence, which is the whole of the terms. There is no
 separate end-user agreement. Accept it and continue through the wizard.
 
-The build is not code signed, so Windows SmartScreen will warn you that the publisher
-is unknown. If you want to check what you downloaded before running it, compare its
-SHA-256 against the checksum published on the release page:
+The installer is code signed, and Windows names the publisher as Sharif Elsalaymeh, the
+identity on the certificate. SmartScreen can still warn about a new release. If you want
+to check what you downloaded before running it, compare its SHA-256 against the checksum
+published on the release page:
 
 ```powershell
 Get-FileHash .\STX-1-ULTIMATE-Setup-3.1.0.exe -Algorithm SHA256

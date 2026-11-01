@@ -41,9 +41,23 @@ Microsoft Store builds are not affected: the package identity uses the Store-ass
 
 ## Quick Start
 
-The build scripts only sign with a certificate that is installed in the Windows certificate store
+Releases are signed through Azure Artifact Signing, where the private key stays in Azure. Otherwise
+the build scripts only sign with a certificate that is installed in the Windows certificate store
 (`CurrentUser\My` or `LocalMachine\My`), selected by thumbprint. They never read or write `.pfx` files
 or passwords, and they stop with an error if signing fails.
+
+### Release builds: Azure Artifact Signing
+
+```powershell
+winget install -e --id Microsoft.Azure.ArtifactSigningClientTools   # once
+az login                                                            # a user with the Certificate Profile Signer role
+.\Build-Release.ps1 -SignCode -UseArtifactSigning
+```
+
+The account and profile are in `signing/artifact-signing-metadata.json`, which holds no secrets. The
+certificate is issued to `CN=Sharif Elsalaymeh`, so Windows shows that name as the publisher. It lasts
+three days, and the timestamp keeps the signature valid after that. `Sign-Application.ps1` does not
+have this route yet.
 
 ### Option 1: Development Certificate (Testing Only)
 

@@ -17,6 +17,10 @@
     SHA-1 thumbprint of a code-signing certificate installed in CurrentUser\My or LocalMachine\My.
     Defaults to $env:SYSMONITOR_SIGNING_THUMBPRINT. No certificate files or passwords are used.
 
+.PARAMETER UseArtifactSigning
+    Sign through Azure Artifact Signing with signing\artifact-signing-metadata.json, as the signed-in
+    Azure CLI user. This is how releases are signed. Needs the Artifact Signing Client Tools.
+
 .PARAMETER UseSelfSignedCert
     Use a local self-signed development certificate for testing (will show SmartScreen warnings).
 
@@ -32,6 +36,10 @@
     .\Build-Release.ps1 -SignCode -UseSelfSignedCert
 
 .EXAMPLE
+    # Full release build, signed through Azure Artifact Signing:
+    .\Build-Release.ps1 -SignCode -UseArtifactSigning
+
+.EXAMPLE
     # Full release build with a certificate from the certificate store:
     .\Build-Release.ps1 -SignCode -CertificateThumbprint 0123456789ABCDEF0123456789ABCDEF01234567
 #>
@@ -39,6 +47,7 @@
 param(
     [switch]$SignCode,
     [string]$CertificateThumbprint = $env:SYSMONITOR_SIGNING_THUMBPRINT,
+    [switch]$UseArtifactSigning,
     [switch]$UseSelfSignedCert,
     [switch]$SkipInstaller
 )
@@ -105,7 +114,17 @@ if ($SignCode) {
     }
 
     try {
-        if ($UseSelfSignedCert) {
+        if ($UseArtifactSigning) {
+            $Dlib = Find-ArtifactSigningDlib
+            if (-not $Dlib) {
+                throw "Azure.CodeSigning.Dlib.dll not found. Install it: winget install -e --id Microsoft.Azure.ArtifactSigningClientTools"
+            }
+            $Metadata = Join-Path $ScriptDir "signing\artifact-signing-metadata.json"
+            $SignFile = { param($file) Invoke-ArtifactSign -SignTool $SignTool -Dlib $Dlib -Metadata $Metadata -FilePath $file }
+            $SignedWith = "Azure Artifact Signing"
+            Write-Host "      Using Azure Artifact Signing" -ForegroundColor Green
+        }
+        elseif ($UseSelfSignedCert) {
             $Certificate = Get-DevelopmentSigningCertificate
             Write-Host "      Using development certificate $($Certificate.Thumbprint)" -ForegroundColor Yellow
         }
@@ -114,11 +133,18 @@ if ($SignCode) {
             Write-Host "      Using certificate $($Certificate.Subject) ($($Certificate.Thumbprint))" -ForegroundColor Green
         }
         else {
-            throw "Specify -UseSelfSignedCert or -CertificateThumbprint (or set SYSMONITOR_SIGNING_THUMBPRINT)."
+            throw "Specify -UseArtifactSigning, -UseSelfSignedCert or -CertificateThumbprint (or set SYSMONITOR_SIGNING_THUMBPRINT)."
         }
 
+        if (-not $UseArtifactSigning) {
+            $SignFile = { param($file) Invoke-CodeSign -SignTool $SignTool -Thumbprint $Certificate.Thumbprint -TimestampServer $TimestampServer -FilePath $file }
+            $SignedWith = $Certificate.Subject
+        }
+
+        # SysMonitor.App.exe is only the host that loads SysMonitor.App.dll, where the app's code is.
         $FilesToSign = @(
             (Join-Path $PublishDir "SysMonitor.App.exe"),
+            (Join-Path $PublishDir "SysMonitor.App.dll"),
             (Join-Path $PublishDir "SysMonitor.Core.dll")
         )
 
@@ -127,7 +153,7 @@ if ($SignCode) {
                 throw "File to sign not found: $file"
             }
             Write-Host "      Signing: $(Split-Path $file -Leaf)" -ForegroundColor Gray
-            Invoke-CodeSign -SignTool $SignTool -Thumbprint $Certificate.Thumbprint -TimestampServer $TimestampServer -FilePath $file
+            & $SignFile $file
             Write-Host "        Signed!" -ForegroundColor Green
         }
     }
@@ -189,7 +215,7 @@ if (-not $SkipInstaller) {
                     exit 1
                 }
                 try {
-                    Invoke-CodeSign -SignTool $SignTool -Thumbprint $Certificate.Thumbprint -TimestampServer $TimestampServer -FilePath $installerPath
+                    & $SignFile $installerPath
                     Write-Host "      Installer signed!" -ForegroundColor Green
                 }
                 catch {
@@ -298,7 +324,7 @@ if ($SignCode) {
         Write-Host "  NOTE: Self-signed development certificate used - SmartScreen warnings expected" -ForegroundColor Yellow
     }
     else {
-        Write-Host "  Code signed with $($Certificate.Subject)" -ForegroundColor Green
+        Write-Host "  Code signed with $SignedWith" -ForegroundColor Green
     }
 }
 else {

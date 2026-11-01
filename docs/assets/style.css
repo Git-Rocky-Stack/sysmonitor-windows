@@ -179,6 +179,7 @@ figure img {
   box-shadow: var(--shadow-3);
 }
 figcaption { margin-top: 12px; font-size: 14px; color: var(--text-3); max-width: var(--prose); }
+.shots figure { margin: 0; }
 
 section { padding: 56px 0; border-top: 1px solid var(--border); }
 @media (min-width: 768px) { section { padding: 80px 0; } }

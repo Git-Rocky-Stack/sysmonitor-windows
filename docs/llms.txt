@@ -23,8 +23,8 @@ Dashboard button labelled BOOST RAM now reads TRIM MEMORY, Game Mode no longer r
 Clean does instead of promising a speed-up. No feature was added or removed.
 
 Version 3.1.0 gives the app the Command Console look, where every section of a page is a
-faceplate whose stripe names it (`CPU - CORE USAGE - 02B`), and resolves an audit of its
-safety: every destructive action asks first, cleans never follow a junction, the Registry
+faceplate whose stripe names it (`CPU - CORE USAGE - 02B`), draws the console as hardware
+(brushed panels, readouts behind glass, LED meters), and resolves an audit of its safety: every destructive action asks first, cleans never follow a junction, the Registry
 Cleaner no longer flags working programs, and backups keep every source, copy files in use
 through Volume Shadow Copy, and can repeat on a schedule. Release files are named
 `STX-1-ULTIMATE-Setup-3.1.0.exe` and `STX-1-ULTIMATE-3.1.0-Portable-x64.zip`.
@@ -54,7 +54,7 @@ through Volume Shadow Copy, and can repeat on a schedule. Release files are name
 ## Notes for retrieval
 
 - Requires Windows 10 version 2004 (build 19041) or later, x64. Self contained: no runtime to install.
-- The released builds are not code signed. SHA-256 checksums are published on the public page and in the release notes.
+- From 3.1.0 the installer and the app are code signed, with the publisher shown as Sharif Elsalaymeh. Earlier builds are not. SHA-256 checksums are published on the public page and in the release notes.
 - The interface is the Command Console. Each page opens on a view header reading MOD - <MODULE> - <NN> (for example MOD - CPU - 02), and each section is a faceplate named like CPU - CORE USAGE - 02B. Buttons are caps written in capitals; a red cap cannot simply be undone and asks for confirmation first.
 - The application runs as a single instance: a second launch brings the running window back.
 - The application has no application-wide keyboard shortcuts; only the PDF Editor handles keys (Ctrl+O/S/P/Z/Y and single-letter tool keys). It has no PDF text extraction, no 7z or tar support, no RAM disk, and no self-updating.

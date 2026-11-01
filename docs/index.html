@@ -17,7 +17,7 @@
 <meta property="og:description" content="A Windows system monitor and maintenance tool that reports honestly about what it did. Free and open source under the MIT License.">
 <meta property="og:url" content="https://git-rocky-stack.github.io/sysmonitor-windows/">
 <meta property="og:image" content="https://git-rocky-stack.github.io/sysmonitor-windows/assets/screenshot-dashboard.png">
-<meta property="og:image:alt" content="The STX-1 ULTIMATE System Monitor dashboard, showing a health score and live hardware cards on a dark background.">
+<meta property="og:image:alt" content="The STX-1 ULTIMATE System Monitor dashboard in the Day Shift theme, with live readings on brushed metal panels.">
 <meta property="og:locale" content="en_US">
 
 <meta name="twitter:card" content="summary_large_image">
@@ -62,7 +62,7 @@
       "memoryRequirements": "4 GB",
       "storageRequirements": "300 MB",
       "softwareVersion": "3.1.0",
-      "datePublished": "2026-10-30",
+      "datePublished": "2026-10-31",
       "downloadUrl": "https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases/tag/v3.1.0",
       "installUrl": "https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases/download/v3.1.0/STX-1-ULTIMATE-Setup-3.1.0.exe",
       "softwareHelp": "https://git-rocky-stack.github.io/sysmonitor-windows/",
@@ -97,7 +97,7 @@
 <main id="main">
 
 <div class="wrap hero">
-  <span class="eyebrow">Version 3.1.0, released 30 October 2026</span>
+  <span class="eyebrow">Version 3.1.0, released 31 October 2026</span>
   <h1>A system monitor that tells you the truth.</h1>
   <p class="lede">
     STX-1 ULTIMATE reads your Windows hardware in real time and gives you a set of maintenance
@@ -111,11 +111,11 @@
   <div class="cta">
     <a class="btn btn-primary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases/download/v3.1.0/STX-1-ULTIMATE-Setup-3.1.0.exe">
       <span>Download the installer</span>
-      <span class="sub">Windows x64, RECORD-FROM-BUILD</span>
+      <span class="sub">Windows x64, 58.8 MB</span>
     </a>
     <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows/releases/download/v3.1.0/STX-1-ULTIMATE-3.1.0-Portable-x64.zip">
       <span>Portable ZIP</span>
-      <span class="sub">No installation, RECORD-FROM-BUILD</span>
+      <span class="sub">No installation, 86.1 MB</span>
     </a>
     <a class="btn btn-secondary" href="https://github.com/Git-Rocky-Stack/sysmonitor-windows">
       <span>View the source</span>
@@ -129,13 +129,13 @@
   </p>
 
   <figure>
-    <img src="assets/screenshot-dashboard.png" width="1920" height="1032"
-         alt="The STX-1 ULTIMATE dashboard on a dark background. A sidebar lists the pages from Dashboard down to User&#39;s Guide. Quick Access cards show network throughput, temperature, system info, disk use, battery and processes. Below them a system health score of 100 percent sits beside three buttons: Quick Clean, Trim Memory and Export."
+    <img src="assets/screenshot-dashboard.png" width="1100" height="788"
+         alt="The STX-1 ULTIMATE dashboard in the Day Shift theme. A sidebar lists the pages from Dashboard down to User&#39;s Guide. Brushed metal panels, screwed down at the corners, show Quick Access cards for network, temperature, system info, disk, cleaner and processes."
          loading="lazy" decoding="async">
     <figcaption>
-      The dashboard in version 3.0.1. The temperature card reads N/A because the machine
-      this was captured on reports no processor thermal sensor; where one is present the
-      card shows the reading.
+      The dashboard in version 3.1.0, in the Day Shift theme. This was captured on a virtual
+      machine in the project's automated test run. The temperature card reads N/A because that
+      machine has no thermal sensor; where one is present the card shows the reading.
     </figcaption>
   </figure>
 </div>
@@ -150,20 +150,21 @@
 
     <div class="note">
       <p>
-        <strong>These builds are not code signed.</strong> Windows SmartScreen will
-        warn you that the publisher is unknown, and that warning is accurate. Verify
-        the checksum below before you run either file.
+        <strong>The installer and the app are code signed.</strong> Windows names the
+        publisher as Sharif Elsalaymeh, the identity on the certificate. SmartScreen can
+        still warn about a new release. The ZIP itself has no signature, only the app
+        inside it. Verify the checksum below before you run either file.
       </p>
     </div>
 
     <h3>SHA-256 checksums</h3>
     <dl class="sum">
       <dt>STX-1-ULTIMATE-Setup-3.1.0.exe</dt>
-      <dd>RECORD-FROM-BUILD</dd>
+      <dd>C0FF6EC40C50F8F9DF8ECE4DF636F0EC90FCF523F95C6CA056F9CDCAC65E04D6</dd>
     </dl>
     <dl class="sum">
       <dt>STX-1-ULTIMATE-3.1.0-Portable-x64.zip</dt>
-      <dd>RECORD-FROM-BUILD</dd>
+      <dd>0E1CCB093C424AF9A955EC30CA4E0580D9897DF880AB273C01E4CD0CAACAFF3B</dd>
     </dl>
 
     <p>Check what you downloaded in PowerShell:</p>
@@ -197,11 +198,37 @@
     </p>
     <ul>
       <li>Every section of a page is a faceplate whose stripe names it, such as <code>CPU - CORE USAGE - 02B</code>, so a section can be pointed at exactly. Day Shift is the light theme, Night Ops the dark, and High Contrast keeps your own colours.</li>
+      <li>The console is drawn as hardware: brushed panels screwed down at the corners, readouts behind glass, and LED meters for progress bars, with an ACT light on a bar that reports work under way. High Contrast drops the decoration.</li>
       <li>Every red button asks first and says what it will do. END TASK will not end a process Windows cannot run without.</li>
       <li>The Registry Cleaner no longer lists working programs as broken, Quick Fix backs the registry up first, and cleaning never follows a junction out of the folder being cleaned.</li>
       <li>Backups keep every folder you add, copy files other programs have open through Volume Shadow Copy, check each restored file against its checksum, and can repeat daily, weekly or monthly.</li>
       <li>The release files are now named <code>STX-1-ULTIMATE-Setup-3.1.0.exe</code> and <code>STX-1-ULTIMATE-3.1.0-Portable-x64.zip</code>. Installing over 3.0.1 upgrades the same Apps entry.</li>
+      <li>The installer and the app are code signed.</li>
     </ul>
+
+    <div class="grid cols-3 shots">
+      <figure>
+        <a href="assets/screenshot-cpu-monitor.png"><img src="assets/screenshot-cpu-monitor.png" width="1100" height="788"
+             alt="The CPU Monitor page in the Day Shift theme, with total usage in a segmented display and a card for each core with its own LED meter."
+             loading="lazy" decoding="async"></a>
+        <figcaption>CPU Monitor, Day Shift.</figcaption>
+      </figure>
+      <figure>
+        <a href="assets/screenshot-backup.png"><img src="assets/screenshot-backup.png" width="1100" height="788"
+             alt="The Backup Manager page in the Night Ops theme, with New Backup, Restore Point and Quick Backup caps, and an LED meter for each drive."
+             loading="lazy" decoding="async"></a>
+        <figcaption>Backup Manager, Night Ops.</figcaption>
+      </figure>
+      <figure>
+        <a href="assets/screenshot-instruments.png"><img src="assets/screenshot-instruments.png" width="1100" height="788"
+             alt="A panel of sample instruments in the Night Ops theme: segmented readouts, LED meters, vertical level meters and status chips, with made-up values."
+             loading="lazy" decoding="async"></a>
+        <figcaption>The instrument set, Night Ops. A test panel with sample values, not a page in the app.</figcaption>
+      </figure>
+    </div>
+    <p class="meta-line">
+      Captured on a virtual machine in the project's automated test run, with no hardware sensors.
+    </p>
 
     <h3 class="mt-48">3.0.1, a wording release</h3>
     <p class="section-intro">
@@ -299,7 +326,8 @@
   <div class="wrap">
     <h2>What it does</h2>
     <p class="section-intro">
-      Thirty-four pages, grouped the way the navigation menu groups them.
+      Thirty-four entries in the navigation menu, grouped here by what they do, plus a PDF
+      Editor opened from PDF Tools.
     </p>
 
     <h3>Monitoring</h3>
@@ -312,7 +340,7 @@
           <tr><td><strong>GPU Monitor</strong></td><td>Graphics adapter load, memory and temperature</td></tr>
           <tr><td><strong>Memory Monitor</strong></td><td>RAM in use and available, with working-set trimming</td></tr>
           <tr><td><strong>Processes</strong></td><td>Running processes with per-process processor and memory use</td></tr>
-          <tr><td><strong>Disk Analyzer</strong></td><td>Storage use per drive, and drive health where SMART is available</td></tr>
+          <tr><td><strong>Disk Analyzer</strong></td><td>Storage use per drive</td></tr>
           <tr><td><strong>Network</strong></td><td>Live throughput from the adapter that actually carries your traffic</td></tr>
           <tr><td><strong>Battery</strong></td><td>Charge, power state, and health from design capacity against full-charge capacity. Says "Not reported" when Windows does not supply those figures</td></tr>
           <tr><td><strong>Temperature</strong></td><td>Processor and graphics sensors and fan speeds, through LibreHardwareMonitor</td></tr>
@@ -328,7 +356,7 @@
       <table>
         <thead><tr><th scope="col">Page</th><th scope="col">What it does</th></tr></thead>
         <tbody>
-          <tr><td><strong>Directory Cleaner</strong></td><td>Scans thirteen categories of reclaimable files and removes the ones you select</td></tr>
+          <tr><td><strong>Directory Cleaner</strong></td><td>Scans for reclaimable files and removes the ones you select, after a confirmation. The Recycle Bin is offered but never pre-selected</td></tr>
           <tr><td><strong>Registry Cleaner</strong></td><td>Finds registry issues, with a real reg.exe export taken before any change</td></tr>
           <tr><td><strong>Startup</strong></td><td>Enables and disables startup entries through the mechanism Task Manager uses, so changes are reversible and visible to Windows</td></tr>
           <tr><td><strong>Installed Programs</strong></td><td>Inventory and uninstall, with the exit code reported in plain words</td></tr>
@@ -337,7 +365,7 @@
           <tr><td><strong>Browser Privacy</strong></td><td>Clears browsing traces, counted per browser actually found</td></tr>
           <tr><td><strong>Drive Wiper</strong></td><td>Overwrites files with the pattern set you choose, reads the last pass back to confirm it, and warns when the target is a solid-state drive</td></tr>
           <tr><td><strong>Scheduled Cleaning</strong></td><td>Daily, weekly or monthly cleans that run headlessly and report an exit code to Task Scheduler</td></tr>
-          <tr><td><strong>Backup Manager</strong></td><td>Full, incremental and differential backups, with optional AES-256 encryption that is authenticated and restorable</td></tr>
+          <tr><td><strong>Backup Manager</strong></td><td>Full and incremental backups and Windows system images, with optional AES-256 encryption that is authenticated and restorable</td></tr>
           <tr><td><strong>Driver Updater</strong></td><td>Device driver inventory, with problem and unsigned drivers flagged</td></tr>
         </tbody>
       </table>
@@ -359,6 +387,18 @@
         </tbody>
       </table>
     </div>
+
+    <h3 class="mt-48">Also in the menu</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Page</th><th scope="col">What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Settings</strong></td><td>The app's options. The <a href="reference-settings-and-data.html">settings reference</a> lists each one with its default</td></tr>
+          <tr><td><strong>Donate</strong></td><td>Support the project</td></tr>
+          <tr><td><strong>User's Guide</strong></td><td>The full guide, inside the app</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -371,8 +411,8 @@
     </p>
     <div class="grid cols-2">
       <div class="card">
-        <h3>No keyboard shortcuts</h3>
-        <p>The app registers no application-wide accelerator. The only keys it handles are Delete, Escape and Enter inside the PDF editor.</p>
+        <h3>No application-wide keyboard shortcuts</h3>
+        <p>The app registers no application-wide accelerator. Only the PDF Editor handles keys: Ctrl+O, S, P, Z and Y, and single-letter tool keys.</p>
       </div>
       <div class="card">
         <h3>No PDF text extraction or search</h3>
@@ -440,8 +480,9 @@
 
     <h3 class="mt-48">3. Reclaim some space, then save a report</h3>
     <p>
-      Quick Clean deletes temporary files from eight fixed Windows locations and tells
-      you how many it removed. It does not touch browser cache; that is Browser Privacy.
+      Quick Clean asks first, then deletes temporary files from seven fixed Windows locations
+      and tells you how many it removed. It leaves log files and the Recycle Bin, and it does
+      not touch browser cache; that is Browser Privacy.
       Export writes a plain-text diagnostic summary into your Documents folder. Open it
       before you send it to anyone, so you know what is in it. Trim Memory, labelled
       Boost RAM up to v3.0.0, trims background app working sets: Windows can page those
@@ -452,7 +493,8 @@
       <p>
         <strong>Everything the app stores lives in one folder.</strong>
         <code>%LocalAppData%\SysMonitor</code>, with logs and crash reports inside it.
-        Deleting that folder resets the application completely.
+        Deleting that folder resets everything the app keeps in files. Run at Startup and
+        any schedules leave entries outside it, so switch those off in the app first.
       </p>
     </div>
   </div>

@@ -926,7 +926,8 @@ ABOUT (32F) shows the version of the build you are running.
 
 Support the project, in HELP SUPPORT THIS PROJECT (33A), MAKE A DONATION (33B) and
 THANK YOU (33C). **DONATE WITH PAYPAL** opens PayPal's donation page in your browser, and
-the page also shows a QR code to scan with the PayPal app. The app itself handles no
+the page also shows a QR code to scan with the PayPal app
+(`src/SysMonitor.App/Views/DonationPage.xaml:83`). The app itself handles no
 payment details.
 
 ### User's Guide

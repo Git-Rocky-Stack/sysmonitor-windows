@@ -34,7 +34,7 @@ brushed faceplate whose stripe names it - `CPU - CORE USAGE - 02B` - so a sectio
 pointed at in a support thread. Buttons are machined caps; the one that does something that
 cannot simply be undone is armed red. Readings sit in dark wells, conditions light lamps,
 and text is set in Public Sans, Archivo, Departure Mono and Iosevka, which ship with the
-app. Day Shift is the light theme and Night Ops the dark; High Contrast keeps your own
+app (`src/SysMonitor.App/SysMonitor.App.csproj:83`). Day Shift is the light theme and Night Ops the dark; High Contrast keeps your own
 colours.
 
 ![Driver Updater in the Command Console look, Day Shift](App%20Screenshots/Command%20Console/driver-updater-day-shift.png)

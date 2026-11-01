@@ -716,6 +716,10 @@
                                         <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
                                         <Run> Every control has a name a screen reader can read, and section names are headings</Run>
                                     </TextBlock>
+                                    <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource PlatinumBrush}">
+                                        <Run Text="+" Foreground="{ThemeResource StateExecBrush}" FontWeight="Bold"/>
+                                        <Run> The console is drawn as hardware: brushed panels screwed down at the corners, readouts behind glass, and LED meters for progress bars, with an ACT light on a bar that reports work under way. High Contrast drops the decoration</Run>
+                                    </TextBlock>
                                 </StackPanel>
                             </StackPanel>
                             <StackPanel Spacing="8">

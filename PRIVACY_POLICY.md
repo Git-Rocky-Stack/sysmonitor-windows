@@ -48,7 +48,7 @@ The App makes no connection to the internet of its own. On your local network, a
 when you press SCAN on the Network Mapper, it:
 
 - pings the addresses on the subnet you choose, to find which devices answer, and
-- tries a short list of common ports on a device you select, to show which services it offers
+- tries a short list of common ports on a device you select, to show which services it offers (`src/SysMonitor.App/ViewModels/NetworkMapperViewModel.cs:211`)
 
 To pick the adapter that carries your traffic, the Network page asks Windows which interface
 it would route a public address through; this is a question to Windows, and sends no packet.

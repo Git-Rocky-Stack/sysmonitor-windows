@@ -82,6 +82,38 @@ function Find-SignTool {
     return $null
 }
 
+function Find-ArtifactSigningDlib {
+    <#
+    .SYNOPSIS
+        Returns the path of the x64 Azure Artifact Signing dlib installed by the client tools. Returns $null if none is found.
+    #>
+    $installed = Join-Path $env:LOCALAPPDATA 'Microsoft\MicrosoftArtifactSigningClientTools\Azure.CodeSigning.Dlib.dll'
+    if (Test-Path $installed) { return $installed }
+    return $null
+}
+
+function Invoke-ArtifactSign {
+    <#
+    .SYNOPSIS
+        Signs one file through Azure Artifact Signing, as the signed-in Azure CLI user. The private key stays in
+        Azure, and the certificate lasts three days, so the timestamp is what keeps the signature valid.
+        Throws with signtool's output if signing fails.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$SignTool,
+        [Parameter(Mandatory)][string]$Dlib,
+        [Parameter(Mandatory)][string]$Metadata,
+        [Parameter(Mandatory)][string]$FilePath,
+        [string]$TimestampServer = 'http://timestamp.acs.microsoft.com',
+        [string]$Description = 'STX-1 ULTIMATE System Monitor'
+    )
+
+    $output = & $SignTool sign /fd SHA256 /tr $TimestampServer /td SHA256 /d $Description /dlib $Dlib /dmdf $Metadata $FilePath 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "signtool failed (exit $LASTEXITCODE) for ${FilePath}: $($output -join ' ')"
+    }
+}
+
 function Invoke-CodeSign {
     <#
     .SYNOPSIS

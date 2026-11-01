@@ -3,7 +3,7 @@
 How a version goes from a green branch to people's machines: the GitHub release (Setup and
 portable zip), the public page, and the Microsoft Store. Work top to bottom; each step names the
 file or command it touches. The next release is **3.1.0**: the Command Console look and the audit
-fixes, listed in [CHANGELOG.md](CHANGELOG.md) under Unreleased.
+fixes, listed in [CHANGELOG.md](CHANGELOG.md) under 3.1.0.
 
 ## 1. Before the cut
 
@@ -31,9 +31,10 @@ One number drives everything. `ReleaseVersionTests` fails if any of these disagr
 
 ## 3. Build and sign
 
-- [ ] On Windows with the .NET 8 SDK and Inno Setup 6: `.\Build-Release.ps1 -SignCode`
-      (certificate by thumbprint in `SYSMONITOR_SIGNING_THUMBPRINT`; see `signing/`). Without a
-      code-signing certificate, build unsigned and keep the SmartScreen note in the tutorial.
+- [ ] On Windows with the .NET 8 SDK, Inno Setup 6 and the Artifact Signing Client Tools, signed
+      in with `az login`: `.\Build-Release.ps1 -SignCode -UseArtifactSigning` (see
+      `signing/CODE_SIGNING.md`). Without access to the signing account, build unsigned and say so
+      in the tutorial and on the page.
 - [ ] Outputs: `publish\installer\STX-1-ULTIMATE-Setup-3.1.0.exe` and the portable
       `STX-1-ULTIMATE-3.1.0-Portable-x64.zip`.
 - [ ] Smoke the two outputs by hand on a clean VM: UAT cases I-1 to I-5.
