@@ -57,6 +57,7 @@ jobs:
 
       # Debug is the unpackaged configuration (SysMonitor.App.csproj), the same build `dotnet run` uses.
       - name: Build
+        id: build
         run: dotnet build SysMonitor.sln -c Debug -p:Platform=x64
 
       - name: Test
@@ -78,8 +79,11 @@ jobs:
       # three runs in a row on a hosted runner; it gates like the tests now. It runs twice, with Windows' animation
       # effects off and then on: the console's blink, flicker and busy sweep only run with them on, and what stands
       # in for each only with them off, so either run alone leaves half of the instruments' code unexercised. The
-      # reports and pictures of both are uploaded either way.
+      # reports and pictures of both are uploaded either way. It runs whenever the app built, even when a test
+      # failed: the job still fails on that test, but a failing test - such as the release gate that holds a
+      # version until its checksums are recorded - must not also hide what every page looks like.
       - name: UI smoke run
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         timeout-minutes: 35
         shell: pwsh
         run: |
