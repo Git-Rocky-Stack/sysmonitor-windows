@@ -301,8 +301,9 @@
                     <instruments:Plate Padding="20" Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="12">
                             <instruments:BusyWell Title="{x:Bind ViewModel.ProcessingStatus, Mode=OneWay}"/>
-                            <ProgressBar Value="{x:Bind ViewModel.ProcessingProgress, Mode=OneWay}"
-                                         Maximum="100" Height="4"/>
+                            <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}"
+                                         Value="{x:Bind ViewModel.ProcessingProgress, Mode=OneWay}"
+                                         Maximum="100"/>
                         </StackPanel>
                     </instruments:Plate>
 

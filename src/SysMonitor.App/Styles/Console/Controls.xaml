@@ -109,6 +109,8 @@
                                         <Setter Target="KeyLight.Opacity" Value="0"/>
                                         <Setter Target="Lip.Opacity" Value="0"/>
                                         <Setter Target="Press.Y" Value="1"/>
+                                        <Setter Target="ContactShadow.Opacity" Value="0"/>
+                                        <Setter Target="PressedShade.Opacity" Value="1"/>
                                     </VisualState.Setters>
                                 </VisualState>
 
@@ -122,11 +124,18 @@
                                         <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
                                         <Setter Target="KeyLight.Opacity" Value="0"/>
                                         <Setter Target="Lip.Opacity" Value="0"/>
+                                        <Setter Target="ContactShadow.Opacity" Value="0"/>
                                         <Setter Target="Word.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
+
+                        <!-- The contact shadow the raised cap casts on the panel 2 below it. Pressed home, the
+                             cap sits on the panel and casts none. -->
+                        <Border x:Name="ContactShadow" Margin="0,2,0,-2" IsHitTestVisible="False"
+                                Background="{ThemeResource CapContactShadowBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
 
                         <Border x:Name="Face" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
@@ -140,6 +149,16 @@
 
                         <Border x:Name="Lip" Height="1" Margin="1,1,1,0" VerticalAlignment="Top"
                                 Background="{ThemeResource PlateLipBrush}" IsHitTestVisible="False"/>
+
+                        <!-- The lower bevel turning from the light, and the shade of the well's rim that falls
+                             across a cap pressed home. -->
+                        <Border x:Name="Under" Margin="1" IsHitTestVisible="False"
+                                Background="{ThemeResource CapUnderBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
+
+                        <Border x:Name="PressedShade" Margin="1" Opacity="0" IsHitTestVisible="False"
+                                Background="{ThemeResource CapPressedShadeBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
 
                         <ContentPresenter x:Name="Word" Content="{TemplateBinding Content}"
                                           ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -247,6 +266,8 @@
                                         <Setter Target="KeyLight.Opacity" Value="0"/>
                                         <Setter Target="Lip.Opacity" Value="0"/>
                                         <Setter Target="Press.Y" Value="1"/>
+                                        <Setter Target="ContactShadow.Opacity" Value="0"/>
+                                        <Setter Target="PressedShade.Opacity" Value="1"/>
                                     </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Disabled">
@@ -254,11 +275,18 @@
                                         <Setter Target="Root.Opacity" Value="{ThemeResource ConsoleDisabledOpacity}"/>
                                         <Setter Target="KeyLight.Opacity" Value="0"/>
                                         <Setter Target="Lip.Opacity" Value="0"/>
+                                        <Setter Target="ContactShadow.Opacity" Value="0"/>
                                         <Setter Target="Word.Foreground" Value="{ThemeResource ConsoleDisabledForegroundBrush}"/>
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
+
+                        <!-- The contact shadow the raised cap casts on the panel 2 below it. Pressed home, the
+                             cap sits on the panel and casts none. -->
+                        <Border x:Name="ContactShadow" Margin="0,2,0,-2" IsHitTestVisible="False"
+                                Background="{ThemeResource CapContactShadowBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
 
                         <Border x:Name="Face" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
@@ -272,6 +300,16 @@
 
                         <Border x:Name="Lip" Height="1" Margin="1,1,1,0" VerticalAlignment="Top"
                                 Background="{ThemeResource PlateLipBrush}" IsHitTestVisible="False"/>
+
+                        <!-- The lower bevel turning from the light, and the shade of the well's rim that falls
+                             across a cap pressed home. -->
+                        <Border x:Name="Under" Margin="1" IsHitTestVisible="False"
+                                Background="{ThemeResource CapUnderBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
+
+                        <Border x:Name="PressedShade" Margin="1" Opacity="0" IsHitTestVisible="False"
+                                Background="{ThemeResource CapPressedShadeBrush}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
 
                         <ContentPresenter x:Name="Word" Content="{TemplateBinding Content}"
                                           ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -591,18 +629,35 @@
                                     <Border x:Name="PART_ThumbGlowHost" Width="16" Height="16"
                                             IsHitTestVisible="False"/>
 
+                                    <!-- The thumb stands proud of the track and casts on it. -->
+                                    <Border Width="16" Height="16" Margin="0,2,0,-2" IsHitTestVisible="False"
+                                            Background="{ThemeResource CapContactShadowBrush}"
+                                            CornerRadius="{StaticResource InsetCornerRadius}"/>
+
+                                    <!-- Each thumb, unlit and armed: its lip, its lower bevel, and a grip knurled
+                                         across it for the thumb that throws it. -->
                                     <Border x:Name="SwitchKnobOff" Width="16" Height="16"
                                             Background="{ThemeResource SwitchThumbBrush}"
                                             CornerRadius="{StaticResource InsetCornerRadius}">
-                                        <Border Height="1" VerticalAlignment="Top" Margin="1,0"
-                                                Background="{ThemeResource SwitchThumbLipBrush}"/>
+                                        <Grid>
+                                            <Border Height="1" VerticalAlignment="Top" Margin="1,0"
+                                                    Background="{ThemeResource SwitchThumbLipBrush}"/>
+                                            <Border Background="{ThemeResource CapUnderBrush}"
+                                                    CornerRadius="{StaticResource InsetCornerRadius}"/>
+                                            <Border Width="7" Height="8" Background="{ThemeResource SwitchThumbGripBrush}"/>
+                                        </Grid>
                                     </Border>
 
                                     <Border x:Name="SwitchKnobOn" Width="16" Height="16" Opacity="0"
                                             Background="{ThemeResource SwitchThumbArmedBrush}"
                                             CornerRadius="{StaticResource InsetCornerRadius}">
-                                        <Border Height="1" VerticalAlignment="Top" Margin="1,0"
-                                                Background="{ThemeResource SwitchThumbArmedLipBrush}"/>
+                                        <Grid>
+                                            <Border Height="1" VerticalAlignment="Top" Margin="1,0"
+                                                    Background="{ThemeResource SwitchThumbArmedLipBrush}"/>
+                                            <Border Background="{ThemeResource CapUnderBrush}"
+                                                    CornerRadius="{StaticResource InsetCornerRadius}"/>
+                                            <Border Width="7" Height="8" Background="{ThemeResource SwitchThumbGripBrush}"/>
+                                        </Grid>
                                     </Border>
 
                                     <Grid.RenderTransform>
@@ -1217,6 +1272,242 @@
                                           Content="{TemplateBinding Description}"
                                           Foreground="{ThemeResource SystemControlDescriptionTextForegroundBrush}"
                                           AutomationProperties.AccessibilityView="Raw"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================================ LED METER (ProgressBar) -->
+
+    <!-- Every progress bar on the console is a bar of discrete LEDs behind a lens: a dark recess holding unlit
+         LEDs, the lit ones in the meter's colour - armed red unless the page names another - cut by a gap every 6
+         pixels, and the lens over the lot. The lit length throws its light into the lens (LedBloom), so a filling
+         bar glows as it fills.
+
+         WinUI's own parts and states are kept, name for name, because ProgressBar's code drives them: it sizes
+         DeterminateProgressBarIndicator against LayoutRoot less the Padding, sizes the two indeterminate
+         indicators and works out where they travel (TemplateSettings), and goes to each of the states below.
+         Padding is the track's 1px edge, so a full bar fills the recess and stops at its edge.
+
+         Two styles. ConsoleMeterProgressBarStyle is every bar - a level such as memory in use, as much as work -
+         and the implicit style below is nothing but it. ConsoleProcessProgressBarStyle is a bar that reports work
+         under way, and adds the ACT light that strikes when that work begins (ActivityLed, HardwareRealismTests).
+         A level has no ACT light: a light that flickers on a reading that is not work would be a lie. -->
+    <Style x:Key="ConsoleMeterProgressBarStyle" TargetType="ProgressBar">
+        <Setter Property="Foreground" Value="{ThemeResource ArmedBrush}"/>
+        <Setter Property="Background" Value="{ThemeResource DisplayFaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource DisplayBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="MinHeight" Value="6"/>
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid x:Name="LayoutRoot">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Determinate"/>
+                                <VisualState x:Name="Updating"/>
+
+                                <!-- No extent: the lit LEDs scan the bar, a block and its fainter wake, between the positions
+                                     ProgressBar's code works out for the bar's width. -->
+                                <VisualState x:Name="Indeterminate">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Visibility" Value="Collapsed"/>
+                                        <Setter Target="IndeterminateProgressBarIndicator.Visibility" Value="Visible"/>
+                                        <Setter Target="IndeterminateProgressBarIndicator2.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IndeterminateProgressBarIndicator"
+                                                                       Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateX)">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ContainerAnimationStartPosition}"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:1.5" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ContainerAnimationEndPosition}" KeySpline="0.4,0 0.6,1"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:2" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ContainerAnimationEndPosition}"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IndeterminateProgressBarIndicator2"
+                                                                       Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateX)">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.Container2AnimationStartPosition}"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.75" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.Container2AnimationStartPosition}"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:2" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.Container2AnimationEndPosition}" KeySpline="0.4,0 0.6,1"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <!-- An error lights the bar warn red and a pause holds it amber, whichever kind of bar it is. -->
+                                <VisualState x:Name="Error">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Paused">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="IndeterminateError">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="IndeterminatePaused">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <!-- The track: the recess, then the unlit LEDs inside the padding ProgressBar's code allows for. -->
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{StaticResource PlateCornerRadius}"/>
+                        <Border Margin="{TemplateBinding Padding}" Background="{ThemeResource VuSegmentOffBrush}"/>
+
+                        <!-- The lit LEDs, which ProgressBar's code sizes, and the light they throw round them. -->
+                        <Grid Margin="{TemplateBinding Padding}">
+                            <instruments:LedBloom Source="{Binding ElementName=DeterminateProgressBarIndicator}"/>
+                            <Rectangle x:Name="DeterminateProgressBarIndicator" HorizontalAlignment="Left"
+                                       Fill="{TemplateBinding Foreground}"/>
+                        </Grid>
+
+                        <!-- The scanning block and its wake, clipped to the track they travel along. -->
+                        <Grid Margin="{TemplateBinding Padding}"
+                              Clip="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ClipRect}">
+                            <Rectangle x:Name="IndeterminateProgressBarIndicator" HorizontalAlignment="Left"
+                                       Fill="{TemplateBinding Foreground}" Visibility="Collapsed">
+                                <Rectangle.RenderTransform>
+                                    <CompositeTransform/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle x:Name="IndeterminateProgressBarIndicator2" HorizontalAlignment="Left" Opacity="0.45"
+                                       Fill="{TemplateBinding Foreground}" Visibility="Collapsed">
+                                <Rectangle.RenderTransform>
+                                    <CompositeTransform/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </Grid>
+
+                        <!-- Cut into discrete LEDs, lit and dark alike, then the lens over them: its gloss, its glare and its edge. -->
+                        <Border Margin="{TemplateBinding Padding}" Background="{ThemeResource LedSegmentGapBrush}" IsHitTestVisible="False"/>
+                        <Border Background="{ThemeResource LedLensBrush}" CornerRadius="{StaticResource PlateCornerRadius}" IsHitTestVisible="False"/>
+                        <Border Background="{ThemeResource GlassGlareBrush}" CornerRadius="{StaticResource PlateCornerRadius}" IsHitTestVisible="False"/>
+                        <Border BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
+                                IsHitTestVisible="False"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A progress bar nobody styled is an LED meter. It adds nothing, so the meter is defined once, above. -->
+    <Style TargetType="ProgressBar" BasedOn="{StaticResource ConsoleMeterProgressBarStyle}"/>
+
+    <!-- A process meter: the LED meter with its ACT light at the left, which reads the bar it sits on, so it
+         strikes when the work begins, flickers while it runs and holds lit once the bar is full. The bar is the
+         meter's LayoutRoot, so ProgressBar's code measures the bar alone and the light costs it no length. -->
+    <Style x:Key="ConsoleProcessProgressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource ConsoleMeterProgressBarStyle}">
+        <Setter Property="MinHeight" Value="8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Determinate"/>
+                                <VisualState x:Name="Updating"/>
+
+                                <!-- No extent: the lit LEDs scan the bar, a block and its fainter wake, between the positions
+                                     ProgressBar's code works out for the bar's width. -->
+                                <VisualState x:Name="Indeterminate">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Visibility" Value="Collapsed"/>
+                                        <Setter Target="IndeterminateProgressBarIndicator.Visibility" Value="Visible"/>
+                                        <Setter Target="IndeterminateProgressBarIndicator2.Visibility" Value="Visible"/>
+                                    </VisualState.Setters>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IndeterminateProgressBarIndicator"
+                                                                       Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateX)">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ContainerAnimationStartPosition}"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:1.5" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ContainerAnimationEndPosition}" KeySpline="0.4,0 0.6,1"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:2" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ContainerAnimationEndPosition}"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IndeterminateProgressBarIndicator2"
+                                                                       Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateX)">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.Container2AnimationStartPosition}"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.75" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.Container2AnimationStartPosition}"/>
+                                            <SplineDoubleKeyFrame KeyTime="0:0:2" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.Container2AnimationEndPosition}" KeySpline="0.4,0 0.6,1"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <!-- An error lights the bar warn red and a pause holds it amber, whichever kind of bar it is. -->
+                                <VisualState x:Name="Error">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Paused">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="IndeterminateError">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedWarnBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="IndeterminatePaused">
+                                    <VisualState.Setters>
+                                        <Setter Target="DeterminateProgressBarIndicator.Fill" Value="{ThemeResource LedHoldBrush}"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <instruments:ActivityLed Meter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
+
+                        <Grid x:Name="LayoutRoot" Grid.Column="1">
+                            <!-- The track: the recess, then the unlit LEDs inside the padding ProgressBar's code allows for. -->
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{StaticResource PlateCornerRadius}"/>
+                            <Border Margin="{TemplateBinding Padding}" Background="{ThemeResource VuSegmentOffBrush}"/>
+
+                            <!-- The lit LEDs, which ProgressBar's code sizes, and the light they throw round them. -->
+                            <Grid Margin="{TemplateBinding Padding}">
+                                <instruments:LedBloom Source="{Binding ElementName=DeterminateProgressBarIndicator}"/>
+                                <Rectangle x:Name="DeterminateProgressBarIndicator" HorizontalAlignment="Left"
+                                           Fill="{TemplateBinding Foreground}"/>
+                            </Grid>
+
+                            <!-- The scanning block and its wake, clipped to the track they travel along. -->
+                            <Grid Margin="{TemplateBinding Padding}"
+                                  Clip="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.ClipRect}">
+                                <Rectangle x:Name="IndeterminateProgressBarIndicator" HorizontalAlignment="Left"
+                                           Fill="{TemplateBinding Foreground}" Visibility="Collapsed">
+                                    <Rectangle.RenderTransform>
+                                        <CompositeTransform/>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                                <Rectangle x:Name="IndeterminateProgressBarIndicator2" HorizontalAlignment="Left" Opacity="0.45"
+                                           Fill="{TemplateBinding Foreground}" Visibility="Collapsed">
+                                    <Rectangle.RenderTransform>
+                                        <CompositeTransform/>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                            </Grid>
+
+                            <!-- Cut into discrete LEDs, lit and dark alike, then the lens over them: its gloss, its glare and its edge. -->
+                            <Border Margin="{TemplateBinding Padding}" Background="{ThemeResource LedSegmentGapBrush}" IsHitTestVisible="False"/>
+                            <Border Background="{ThemeResource LedLensBrush}" CornerRadius="{StaticResource PlateCornerRadius}" IsHitTestVisible="False"/>
+                            <Border Background="{ThemeResource GlassGlareBrush}" CornerRadius="{StaticResource PlateCornerRadius}" IsHitTestVisible="False"/>
+                            <Border BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="1" CornerRadius="{StaticResource PlateCornerRadius}"
+                                    IsHitTestVisible="False"/>
+                        </Grid>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

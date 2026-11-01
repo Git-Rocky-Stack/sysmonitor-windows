@@ -148,7 +148,8 @@
                     <instruments:Plate Padding="12" Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" VerticalContentAlignment="Stretch">
                         <StackPanel Spacing="8">
                             <instruments:BusyWell Title="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"/>
-                            <ProgressBar Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}" Maximum="100"/>
+                            <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}"
+                                         Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}" Maximum="100"/>
                             <TextBlock Text="{x:Bind ViewModel.CurrentTarget, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                         </StackPanel>
                     </instruments:Plate>
