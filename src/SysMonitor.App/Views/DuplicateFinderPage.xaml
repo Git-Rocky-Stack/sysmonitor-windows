@@ -41,9 +41,9 @@
                     <!-- Progress -->
                     <StackPanel Grid.Row="1" Spacing="8"
                                 Visibility="{x:Bind ViewModel.IsScanning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <ProgressBar Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}"
-                                     Maximum="100" Height="6" CornerRadius="3"
-                                     Background="{ThemeResource Carbon700Brush}"
+                        <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}"
+                                     Value="{x:Bind ViewModel.ScanProgress, Mode=OneWay}"
+                                     Maximum="100"
                                      Foreground="{ThemeResource ArmedBrush}"/>
                         <TextBlock Text="{x:Bind ViewModel.ScanStatus, Mode=OneWay}"
                                    Style="{StaticResource CardSubtitleStyle}"/>

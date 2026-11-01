@@ -648,7 +648,8 @@
                             </StackPanel>
 
                             <StackPanel Spacing="4">
-                                <ProgressBar Value="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" Maximum="100" Height="8" CornerRadius="4"/>
+                                <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}"
+                                             Value="{x:Bind ViewModel.ProgressPercent, Mode=OneWay}" Maximum="100"/>
                                 <Grid>
                                     <TextBlock Text="{x:Bind ViewModel.ProcessedInfo, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}"/>
                                     <TextBlock Text="{x:Bind ViewModel.ProgressSpeed, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource SilverMuteBrush}" HorizontalAlignment="Right"/>

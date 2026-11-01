@@ -30,6 +30,10 @@ public sealed partial class ConsoleSpecimen : UserControl
     /// <summary>The body-text swatch on the same faceplate: Silver named on the element itself, not by a style.</summary>
     internal Border Swatch => SwatchProbe;
 
+    /// <summary>The readouts and meters - LCDs, VU meters, LED meters and the ACT light - which the smoke run
+    /// photographs on their own, so the review always has them.</summary>
+    internal Faceplate Instruments => InstrumentsProbe;
+
     /// <summary>The view header, with a lamp in its status and a cap in its actions.</summary>
     internal ViewHeader Header => HeaderProbe;
 

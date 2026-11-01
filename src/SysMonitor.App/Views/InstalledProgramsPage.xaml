@@ -170,7 +170,8 @@
         </instruments:Faceplate>
 
         <!-- Loading/Progress -->
-        <ProgressBar Grid.Row="4" IsIndeterminate="True"
+        <ProgressBar Style="{StaticResource ConsoleProcessProgressBarStyle}"
+                     Grid.Row="4" IsIndeterminate="True"
                      Foreground="{ThemeResource ArmedBrush}"
                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
     </Grid>

@@ -316,13 +316,13 @@ internal sealed class UiSmokeRun
 
             await CheckDialogsAsync(specimen, theme, shift);
 
-            // It is taller than the window: one picture per window's height of it.
+            // It is taller than the window: one picture per window's height of it, each taken once the scroll has
+            // landed, from the top of the page to its foot.
             var shots = new List<string>();
-            for (var offset = 0.0; shots.Count < 8; offset += scroller.ViewportHeight)
+            for (var offset = 0.0; shots.Count < 12; offset += scroller.ViewportHeight)
             {
-                scroller.ChangeView(null, offset, null, disableAnimation: true);
-                await RenderedAsync();
-                await RenderedAsync();
+                if (!await ScrolledToAsync(scroller, offset))
+                    Note($"The {shift} specimen did not settle at {offset:0} before its picture {shots.Count + 1}");
 
                 var shot = $"{shift}-specimen-{shots.Count + 1}.png";
                 Progress($"{shift} specimen: picture {shots.Count + 1}");
@@ -331,6 +331,27 @@ internal sealed class UiSmokeRun
 
                 if (scroller.ViewportHeight <= 0 || offset + scroller.ViewportHeight >= scroller.ExtentHeight)
                     break;
+            }
+
+            // Then the readouts and meters - LCDs, VU meters, LED meters, the ACT light - framed from the top of
+            // their faceplate, a window's height at a time, so the review always has them whatever the page's
+            // offsets happen to cut.
+            if (scroller.Content is UIElement content && scroller.ViewportHeight > 0)
+            {
+                var instruments = specimen.Instruments;
+                var top = instruments.TransformToVisual(content).TransformPoint(new Windows.Foundation.Point(0, 0)).Y - 12;
+                var bottom = top + instruments.ActualHeight + 24;
+                var at = Math.Max(0, top);
+                for (var part = 1; at < bottom && part <= 3; part++, at += scroller.ViewportHeight)
+                {
+                    if (!await ScrolledToAsync(scroller, at))
+                        Note($"The {shift} specimen did not settle on its instruments, picture {part}");
+
+                    var shot = $"{shift}-specimen-instruments-{part}.png";
+                    Progress($"{shift} specimen: the instruments, picture {part}");
+                    Capture(window, Path.Combine(Folder, shot));
+                    shots.Add(shot);
+                }
             }
 
             page.Screenshot = string.Join(", ", shots);
@@ -1597,6 +1618,34 @@ internal sealed class UiSmokeRun
         {
             element.Loaded -= OnLoaded;
         }
+    }
+
+    /// <summary>
+    /// Scrolls to <paramref name="offset"/> - or as near as the scroller goes - and waits until it is there and on
+    /// the screen. <c>ChangeView</c> returns before the scroll lands, so this reads the offset back, frame by frame,
+    /// for up to two seconds; and the picture is PrintWindow's, the frame Windows last presented, which trails
+    /// XAML's, so once it has landed it settles as a page does before its picture. Without that each picture showed
+    /// the scroll before it. False if it never arrived, which is noted rather than failed: the picture is still
+    /// taken.
+    /// </summary>
+    private static async Task<bool> ScrolledToAsync(ScrollViewer scroller, double offset)
+    {
+        var target = Math.Clamp(offset, 0, Math.Max(0, scroller.ScrollableHeight));
+        scroller.ChangeView(null, target, null, disableAnimation: true);
+
+        var waited = Stopwatch.StartNew();
+        while (waited.Elapsed < TimeSpan.FromSeconds(2))
+        {
+            await RenderedAsync();
+            if (Math.Abs(scroller.VerticalOffset - target) < 1)
+            {
+                // Landed in XAML; now on the screen, which is what PrintWindow photographs and which trails it.
+                await SettledAsync();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Completes on the next frame the compositor draws.</summary>
