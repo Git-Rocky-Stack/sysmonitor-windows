@@ -131,6 +131,29 @@ public class HardwareRealismTests
             $"{panel} is a panel, and a panel is held by a screw in each corner, however small it is");
     }
 
+    /// <summary>
+    /// The stripe's right-hand slot - a lamp, a cancel cap - keeps its whole width inside the padding that clears
+    /// the screws. WinUI measures an Auto column at whatever its content asks, so a kicker in an Auto column never
+    /// gave way: on a narrow busy panel it pushed the slot out over the corner screw, which covered CANCEL. Only the
+    /// slot is sized to its content now; the kicker and serial share what is left, and are cut at its edge.
+    /// </summary>
+    [Fact]
+    public void AFaceplatesStripeNeverPushesItsRightSlotUnderAScrew()
+    {
+        var stripe = Template(Instruments, "instruments:Faceplate").Descendants()
+            .Single(element => element.Name.LocalName == "Grid" &&
+                               element.Attribute("Padding")?.Value == "{StaticResource StripePadding}");
+        var columns = stripe.Elements().Single(element => element.Name.LocalName == "Grid.ColumnDefinitions")
+            .Elements().Select(column => column.Attribute("Width")?.Value ?? "*").ToList();
+        var slot = stripe.Elements().Single(element =>
+            element.Name.LocalName == "ContentControl" && element.Attribute("Content")?.Value == "{TemplateBinding StripeRight}");
+        var slotColumn = int.Parse(slot.Attribute("Grid.Column")?.Value ?? "0", CultureInfo.InvariantCulture);
+
+        columns[slotColumn].Should().Be("Auto", "the right-hand slot keeps the width its lamp and cap need");
+        columns.Where((_, index) => index != slotColumn).Should().OnlyContain(width => width.EndsWith('*'),
+            "any other column sized to its content can take the slot's room and push it under the corner screw");
+    }
+
     [Theory]
     [InlineData("instruments:Faceplate")]
     [InlineData("instruments:Plate")]
